@@ -1,0 +1,5 @@
+{
+  "name": "lms-multi-tenant-universitario",
+  "private": true,
+  "packageManager": "pnpm@9.15.9"
+}
