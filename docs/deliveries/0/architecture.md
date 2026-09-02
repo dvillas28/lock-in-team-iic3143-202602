@@ -79,7 +79,6 @@ AssignmentsModule
 SubmissionsModule
 GradesModule
 AnnouncementsModule
-CalendarModule
 AuditModule
 ```
 
@@ -102,9 +101,18 @@ GradeCategory
 GradeRelease
 RegradeRequest
 Announcement
-CalendarEvent
 AuditLog
 ```
+
+## Extensiones Condicionadas Del Dominio
+
+El modelo base mantiene entregas individuales. Las extensiones Nice to Have no agregan entidades ni infraestructura hasta contar con una especificacion y un plan que justifiquen su complejidad.
+
+- Un chat de seccion debe usar la membresia del curso o seccion como limite de acceso.
+- Un chat de grupo o una evaluacion grupal requiere definir `StudentGroup`, membresias, alcance por curso o seccion y autoria de la entrega. Todos esos registros deben conservar el limite del tenant, con pertenencia y autoria auditables.
+- Si se habilita, el calendario interno puede incorporar `CalendarModule` y `CalendarEvent` para proyectar fechas de evaluaciones y entregas existentes; no requiere una integracion externa en el alcance inicial.
+- Los videos usan object storage, pero formatos, cuotas, previews o transcodificacion deben definirse antes de habilitar la carga.
+- Las alertas internas pueden derivarse de eventos del dominio. El correo requiere un proveedor y una estrategia de entregabilidad separados del flujo academico.
 
 ## Procesos Asincronicos
 
@@ -113,7 +121,7 @@ Los procesos que no deben bloquear una request pueden ejecutarse con workers:
 - Procesamiento de archivos subidos.
 - Generacion de previews de documentos.
 - Calculo o recalculo de promedios.
-- Envio de notificaciones.
+- Envio de notificaciones, si se habilita la extension de alertas.
 - Indexacion de documentos para IA futura.
 
 ## Archivos
@@ -160,4 +168,3 @@ Escalamiento posterior:
 - Separacion de bases por tenant.
 - Sharding por tenant.
 - Colas dedicadas para procesamiento de documentos.
-

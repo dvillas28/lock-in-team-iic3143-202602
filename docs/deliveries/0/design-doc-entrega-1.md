@@ -21,9 +21,11 @@ Problemas observados:
 
 ## 3. Vision Del Proyecto
 
-Para universidades que necesitan administrar cursos semestrales de forma clara, escalable y segura, nuestra plataforma es un LMS multi-tenant que integra material academico, evaluaciones, entregas y libro de notas en un flujo unico.
+Para universidades que necesitan administrar cursos semestrales de forma clara, escalable y segura, nuestra plataforma es un LMS multi-tenant que integra cursos, secciones, material academico, evaluaciones, entregas y libro de notas en un flujo unico.
 
 A diferencia de plataformas LMS genericas, prioriza la experiencia academica critica y una arquitectura preparada para aislar y escalar instituciones completas.
+
+La experiencia debe estar centralizada: estudiantes y cuerpo docente deben poder resolver dentro de la plataforma los flujos principales relacionados con un curso. En particular, el estudiante debe comprender sus calificaciones y avance, mientras el cuerpo docente debe poder configurar y calcular calificaciones sin recurrir a planillas externas.
 
 ## 4. Grupo Objetivo
 
@@ -74,6 +76,7 @@ Curso -> Modulos -> Material -> Evaluaciones -> Entregas -> Correccion -> Public
 
 - Curso integrado: centraliza modulos, material, evaluaciones, entregas y notas.
 - Libro de notas: reduce dependencia de planillas externas.
+- Cuerpo docente visible: permite identificar docentes y ayudantes responsables de cada seccion.
 - Publicacion controlada: el docente decide cuando liberar notas.
 - Roles contextuales: un usuario puede tener distintos roles segun curso o universidad.
 - Multi-tenancy: permite aislar y escalar instituciones.
@@ -111,11 +114,13 @@ Este enfoque permite:
 - Crear periodos academicos.
 - Crear cursos semestrales y secciones.
 - Inscribir estudiantes, docentes y ayudantes.
+- Mostrar a cada estudiante los docentes y ayudantes responsables de su seccion.
 - Crear modulos de curso.
 - Subir y publicar material academico.
 - Crear evaluaciones/tareas con fechas, puntajes y ponderaciones.
 - Permitir entregas de estudiantes.
 - Corregir entregas y registrar comentarios.
+- Calcular calificaciones y promedios segun ponderaciones configuradas.
 - Liberar notas manualmente.
 - Visualizar libro de notas.
 - Mostrar dashboard de cursos, pendientes y anuncios.
@@ -126,6 +131,8 @@ Este enfoque permite:
 - Despliegue publico usando servicios cloud y free tiers cuando sea posible.
 - MVP acotado al core academico.
 - Integraciones externas complejas quedan fuera del alcance inicial.
+- Video, resumen mediante IA, chats, calendario y alertas son extensiones condicionadas al avance.
+- Las alertas por correo y el modelo de grupos de estudiantes quedan fuera de la base inicial.
 
 ### Requisitos No Funcionales Principales
 
@@ -172,6 +179,7 @@ El monolito modular permite avanzar rapido sin introducir la complejidad operaci
 ## 10. Riesgos
 
 - Sobrealcance funcional: mitigado al limitar el MVP al core de cursos, material, evaluaciones, entregas y notas.
+- Grupos de estudiantes: mitigado al mantener entregas individuales hasta especificar membresias, permisos y autoria grupal.
 - Complejidad multi-tenant: mitigada con un registry central y esquemas homogeneos por tenant.
 - Crecimiento de archivos: mitigado usando object storage.
 - Carga en fechas criticas: mitigada con load balancer, connection pool, cache y workers.
@@ -208,8 +216,8 @@ Ver [glosario](glossary.md).
 
 ## 14. Anexos
 
+- [Alcance del producto](scope.md)
 - [Requisitos](requirements.md)
 - [Historias de usuario](user-stories.md)
 - [Arquitectura](architecture.md)
 - [Roadmap](roadmap.md)
-

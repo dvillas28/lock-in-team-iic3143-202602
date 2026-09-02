@@ -20,6 +20,10 @@ Usuario responsable de configurar y administrar uno o mas cursos.
 
 Usuario que apoya al docente en tareas como correccion, anuncios, material o recorrecciones.
 
+## Cuerpo Docente
+
+Conjunto de docentes y ayudantes asignados a un curso o seccion, cada uno con un rol y alcance contextual.
+
 ## Estudiante
 
 Usuario inscrito en cursos, con acceso a material, evaluaciones, entregas y notas liberadas.
@@ -39,6 +43,10 @@ Grupo especifico de estudiantes dentro de un curso.
 ## Inscripcion
 
 Relacion entre un usuario y un curso o seccion.
+
+## Grupo De Estudiantes
+
+Agrupacion opcional de estudiantes dentro de un curso o seccion. No forma parte del modelo base y debe definir membresias, permisos y autoria de entregas antes de habilitar funciones grupales.
 
 ## Modulo
 
@@ -91,4 +99,3 @@ Componente que reutiliza conexiones a la base de datos para evitar saturacion y 
 ## Sharding
 
 Particionamiento de datos para escalar el sistema. En este proyecto, el sharding natural propuesto es por tenant.
-

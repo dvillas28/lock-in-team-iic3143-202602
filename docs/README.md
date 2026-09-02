@@ -17,6 +17,7 @@
 ## Entrega Inicial
 
 - [Design doc Entrega 1](deliveries/0/design-doc-entrega-1.md)
+- [Alcance del producto](deliveries/0/scope.md)
 - [Requisitos](deliveries/0/requirements.md)
 - [Historias de usuario](deliveries/0/user-stories.md)
 - [Arquitectura](deliveries/0/architecture.md)

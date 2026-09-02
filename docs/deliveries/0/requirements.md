@@ -42,6 +42,26 @@ RF19. El sistema debe registrar cambios relevantes en notas, ponderaciones y eva
 
 RF20. El sistema debe permitir almacenar y visualizar material en formato PDF dentro de la plataforma como extension inicial.
 
+RF21. El estudiante debe poder visualizar los docentes y ayudantes responsables de su seccion, mostrando al menos nombre y rol, sin exponer integrantes ajenos al curso, seccion o tenant correspondiente.
+
+RF22. El sistema debe calcular calificaciones y promedios dentro de la plataforma segun las ponderaciones configuradas, indicando cuando el resultado es parcial o la configuracion esta incompleta.
+
+## Requisitos Funcionales Opcionales
+
+RFO1. El docente debe poder cargar y publicar videos como material academico cuando la extension de video se habilite.
+
+RFO2. El estudiante debe poder solicitar un resumen mediante IA sobre material publicado cuando la extension de IA se habilite.
+
+RFO3. Los participantes autorizados deben poder comunicarse en un chat asociado a su seccion cuando la extension de chat se habilite.
+
+RFO4. Los integrantes autorizados deben poder comunicarse en un chat de grupo cuando exista un modelo de grupos de estudiantes definido para el curso o seccion.
+
+RFO5. El dashboard del estudiante debe poder mostrar un calendario interno junto a sus cursos, relacionando evaluaciones, fechas de entrega y estado de entrega.
+
+RFO6. El sistema debe poder mostrar alertas dentro de la plataforma mediante toasts o listas desplegables, relacionadas con evaluaciones, entregas u otros cambios relevantes del curso.
+
+RFO7. El sistema puede extender las alertas por correo una vez resueltos el proveedor, la entregabilidad y las preferencias de notificacion.
+
 ## Requisitos No Funcionales
 
 RNF1. Disponibilidad: la plataforma debe mantenerse operativa durante periodos criticos de evaluaciones y entregas.
@@ -81,4 +101,5 @@ SLO significa Service Level Objective: una meta medible de calidad del sistema.
 - El despliegue debe privilegiar servicios cloud con free tiers.
 - La IA queda como extension experimental posterior al core funcional.
 - Google Calendar, Outlook y quizzes en vivo quedan fuera del primer MVP.
-
+- El modelo inicial considera entregas individuales; grupos de estudiantes, chats grupales y entregas grupales requieren una especificacion posterior.
+- Las extensiones Nice to Have solo se activan despues de validar las fundaciones Must Have definidas en [alcance](scope.md).

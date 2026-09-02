@@ -2,7 +2,15 @@
 
 ## Enfoque
 
-El proyecto se organiza en iteraciones semanales. La prioridad es construir primero el core academico y luego sumar extensiones.
+El proyecto se organiza en iteraciones semanales. La prioridad es construir primero las fundaciones Must Have y el core academico, y luego sumar extensiones Nice to Have si el avance lo permite.
+
+## Hitos De Alcance
+
+- Must Have: cursos y secciones con estudiantes y cuerpo docente, evaluaciones y calificaciones gestionadas dentro de la plataforma.
+- Resultado estudiante: claridad sobre sus calificaciones, promedio parcial y avance en el curso.
+- Resultado cuerpo docente: configuracion y calculo de calificaciones sin depender de planillas externas.
+- Nice to Have: videos, resumen de material mediante IA, chats, calendario visible en el dashboard y alertas internas.
+- Evolucion posterior: alertas por correo y funciones grupales que requieran cambiar el modelo de entregas.
 
 ## Plan Tentativo 10-12 Semanas
 
@@ -28,6 +36,7 @@ El proyecto se organiza en iteraciones semanales. La prioridad es construir prim
 - Cursos semestrales.
 - Secciones.
 - Inscripciones.
+- Visibilidad del cuerpo docente por seccion.
 
 ### Semana 4
 
@@ -69,7 +78,7 @@ El proyecto se organiza en iteraciones semanales. La prioridad es construir prim
 
 - Dashboard estudiante/docente.
 - Anuncios.
-- Calendario interno o recorrecciones, segun avance.
+- Segun avance, calendario visible en el dashboard, alertas internas o recorrecciones.
 
 ### Semana 10
 
@@ -94,14 +103,13 @@ El proyecto se organiza en iteraciones semanales. La prioridad es construir prim
 
 ## Orden De Prioridad
 
-1. Multi-tenancy y usuarios.
-2. Cursos y secciones.
-3. Material.
-4. Evaluaciones.
-5. Entregas.
-6. Notas y liberacion.
-7. Dashboard.
+1. Multi-tenancy, usuarios y permisos contextuales.
+2. Cursos, secciones, inscripciones y cuerpo docente visible.
+3. Evaluaciones.
+4. Calificaciones, calculo, liberacion y libro de notas.
+5. Material.
+6. Entregas y correccion.
+7. Dashboard y anuncios.
 8. Infraestructura.
-9. Calendario/anuncios.
+9. Videos, calendario, alertas y chats, segun avance.
 10. IA experimental.
-
