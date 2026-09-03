@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AcademiX — Iniciar sesión</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<link rel="stylesheet" href="assets/tokens.css"/>
+<link rel="stylesheet" href="assets/app.css"/>
+<script src="assets/app.js"></script>
+<style>
+  body { height: 100vh; overflow: hidden; display: flex; }
+
+  /* Panel institucional: superficie de marca fija (navy) en ambos temas */
+  .left-panel {
+    width: 44%;
+    background: linear-gradient(155deg, #16293F 0%, #1E3A5F 60%, #24466F 100%);
+    color: #F1F5F9;
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 48px;
+    position: relative; overflow: hidden;
+  }
+  .left-panel::before {
+    content: '';
+    position: absolute; top: -120px; right: -80px;
+    width: 400px; height: 400px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .left-muted { color: rgba(241,245,249,0.72); }
+  .left-faint { color: rgba(241,245,249,0.5); }
+  .tenant-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px; border-radius: 999px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    font-size: 12px; font-weight: 600; color: #E8D5A8;
+  }
+
+  .right-panel {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    padding: 48px; position: relative;
+    background: var(--bg);
+  }
+  .form-card { width: 100%; max-width: 380px; }
+  .input-group { margin-bottom: 18px; }
+  .input-wrapper { position: relative; }
+  .input-eye {
+    position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+    width: 34px; height: 34px; border: none; background: none;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-3); cursor: pointer; border-radius: 6px;
+  }
+  .input-eye:hover { color: var(--text-1); }
+  .theme-corner { position: absolute; top: 24px; right: 24px; }
+</style>
+</head>
+<body>
+
+<!-- PANEL IZQUIERDO: branding del tenant -->
+<div class="left-panel">
+  <div class="relative z-10 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: rgba(255,255,255,0.12)">
+        <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+      </div>
+      <span class="font-semibold text-sm">AcademiX</span>
+    </div>
+    <a href="01-landing.html" class="text-xs flex items-center gap-1 left-faint" style="text-decoration: none;">
+      <i data-lucide="arrow-left" class="w-3 h-3"></i> Inicio
+    </a>
+  </div>
+
+  <div class="relative z-10">
+    <div class="tenant-pill mb-8">
+      <i data-lucide="building-2" class="w-3.5 h-3.5"></i>
+      uc.academix.cl
+    </div>
+    <h1 class="serif font-semibold mb-4" style="font-size: 40px; line-height: 1.15;">
+      Universidad<br/>Católica<br/>de Chile
+    </h1>
+    <p class="text-sm left-muted">
+      Plataforma académica oficial.<br/>Accede con tus credenciales institucionales.
+    </p>
+  </div>
+
+  <p class="relative z-10 text-xs left-faint">Semestre 2 · 2026</p>
+</div>
+
+<!-- PANEL DERECHO: formulario -->
+<div class="right-panel">
+  <button class="icon-btn theme-corner" onclick="toggleTheme()" aria-label="Cambiar tema">
+    <i data-lucide="moon" class="w-4 h-4 only-light"></i>
+    <i data-lucide="sun" class="w-4 h-4 only-dark"></i>
+  </button>
+
+  <div class="form-card">
+    <!-- Tabs -->
+    <div class="tab-group w-full mb-8" role="tablist">
+      <button id="tabbtn-login" class="tab-btn active flex-1" role="tab" aria-selected="true" onclick="showTab('login')">Iniciar sesión</button>
+      <button id="tabbtn-register" class="tab-btn flex-1" role="tab" aria-selected="false" onclick="showTab('register')">Activar cuenta</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="tab-login">
+      <h2 class="serif font-semibold mb-1" style="font-size: 30px;">Bienvenido</h2>
+      <p class="text-sm mb-8" style="color: var(--text-2)">Ingresa con tu correo institucional</p>
+
+      <div class="input-group">
+        <label class="field-label" for="login-email">Correo institucional</label>
+        <input id="login-email" type="email" class="field" placeholder="usuario@uc.cl" autocomplete="username"/>
+      </div>
+
+      <div class="input-group">
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="field-label" for="login-pass" style="margin: 0">Contraseña</label>
+          <a href="#" class="text-xs font-medium" style="color: var(--primary-ink); text-decoration: none;">¿Olvidaste tu contraseña?</a>
+        </div>
+        <div class="input-wrapper">
+          <input id="login-pass" type="password" class="field" placeholder="••••••••" autocomplete="current-password" style="padding-right: 42px;"/>
+          <button type="button" class="input-eye" onclick="togglePassword('login-pass', this)" aria-label="Mostrar contraseña">
+            <i data-lucide="eye" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 mb-6">
+        <input type="checkbox" id="remember" style="accent-color: var(--primary)"/>
+        <label for="remember" class="text-xs" style="color: var(--text-2)">Recordar sesión</label>
+      </div>
+
+      <a href="03-dashboard.html" class="btn btn-primary w-full" style="width: 100%; padding: 12px;">Iniciar sesión</a>
+
+      <p class="text-xs text-center mt-6" style="color: var(--text-3)">
+        ¿Primera vez en la plataforma?
+        <button class="font-medium ml-1" style="color: var(--primary-ink); background: none; border: none; cursor: pointer; font-size: 12px;" onclick="showTab('register')">Activa tu cuenta</button>
+      </p>
+    </div>
+
+    <!-- ACTIVAR CUENTA -->
+    <div id="tab-register" style="display:none">
+      <h2 class="serif font-semibold mb-1" style="font-size: 30px;">Activar cuenta</h2>
+      <p class="text-sm mb-8" style="color: var(--text-2)">Ingresa el token enviado por tu institución</p>
+
+      <div class="input-group">
+        <label class="field-label" for="reg-token">Token de invitación</label>
+        <input id="reg-token" type="text" class="field" placeholder="INV-XXXX-XXXX"/>
+      </div>
+      <div class="input-group">
+        <label class="field-label" for="reg-email">Correo institucional</label>
+        <input id="reg-email" type="email" class="field" placeholder="usuario@uc.cl" autocomplete="email"/>
+      </div>
+      <div class="flex gap-3">
+        <div class="input-group" style="flex:1">
+          <label class="field-label" for="reg-name">Nombre</label>
+          <input id="reg-name" type="text" class="field" placeholder="María" autocomplete="given-name"/>
+        </div>
+        <div class="input-group" style="flex:1">
+          <label class="field-label" for="reg-last">Apellido</label>
+          <input id="reg-last" type="text" class="field" placeholder="González" autocomplete="family-name"/>
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="field-label" for="reg-pass">Contraseña nueva</label>
+        <div class="input-wrapper">
+          <input id="reg-pass" type="password" class="field" placeholder="Mínimo 8 caracteres" autocomplete="new-password" style="padding-right: 42px;"/>
+          <button type="button" class="input-eye" onclick="togglePassword('reg-pass', this)" aria-label="Mostrar contraseña">
+            <i data-lucide="eye" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <p class="text-xs mt-1.5" style="color: var(--text-3)">Debe incluir al menos una mayúscula y un número.</p>
+      </div>
+      <button class="btn btn-primary w-full" style="width: 100%; padding: 12px; margin-top: 4px;">Activar cuenta</button>
+      <p class="text-xs text-center mt-6" style="color: var(--text-3)">
+        ¿Ya tienes cuenta?
+        <button class="font-medium ml-1" style="color: var(--primary-ink); background: none; border: none; cursor: pointer; font-size: 12px;" onclick="showTab('login')">Inicia sesión</button>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showTab(tab) {
+    document.getElementById('tab-login').style.display = tab === 'login' ? '' : 'none';
+    document.getElementById('tab-register').style.display = tab === 'register' ? '' : 'none';
+    ['login', 'register'].forEach(function (t) {
+      var btn = document.getElementById('tabbtn-' + t);
+      btn.classList.toggle('active', t === tab);
+      btn.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+    });
+  }
+  function togglePassword(id, btn) {
+    var input = document.getElementById(id);
+    var show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    btn.innerHTML = '<i data-lucide="' + (show ? 'eye-off' : 'eye') + '" class="w-4 h-4"></i>';
+    lucide.createIcons();
+  }
+</script>
+</body>
+</html>

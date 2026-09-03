@@ -1,0 +1,83 @@
+/* ── AcademiX design tokens ──────────────────────────────────────────
+   Light por defecto. Dark opcional vía <html data-theme="dark">.
+   Ningún color se hardcodea fuera de este archivo. */
+
+:root {
+  /* Marca */
+  --primary:        #1E3A5F;   /* navy institucional — fills (botones, avatar sólido) */
+  --primary-hover:  #24466F;
+  --primary-ink:    #1E3A5F;   /* navy para texto, links, íconos, estados activos */
+  --primary-soft:   rgba(30, 58, 95, 0.08);
+  --on-primary:     #FFFFFF;
+  --accent:         #A16207;   /* ámbar académico — reservado a notas y highlights */
+  --accent-soft:    rgba(161, 98, 7, 0.10);
+
+  /* Superficies */
+  --bg:             #F8FAFC;
+  --surface:        #FFFFFF;
+  --sidebar-bg:     #FFFFFF;
+  --header-bg:      rgba(248, 250, 252, 0.88);
+  --muted:          #EEF2F7;
+  --hover:          rgba(15, 23, 42, 0.04);
+  --border:         #E2E8F0;
+  --border-strong:  #CBD5E1;
+
+  /* Texto */
+  --text-1:         #0F172A;
+  --text-2:         #475569;
+  --text-3:         #64748B;
+
+  /* Semánticos */
+  --success:        #047857;  --success-soft: rgba(4, 120, 87, 0.09);
+  --warning:        #B45309;  --warning-soft: rgba(180, 83, 9, 0.10);
+  --danger:         #DC2626;  --danger-soft:  rgba(220, 38, 38, 0.08);
+
+  /* Elevación */
+  --shadow-card:    0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-lift:    0 4px 12px rgba(15, 23, 42, 0.07);
+  --shadow-float:   0 8px 24px rgba(15, 23, 42, 0.12);
+
+  /* Métricas */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --sidebar-w: 248px;
+  --header-h: 56px;
+}
+
+[data-theme="dark"] {
+  --primary:        #35598C;
+  --primary-hover:  #3F669C;
+  --primary-ink:    #9DB8DA;
+  --primary-soft:   rgba(125, 162, 204, 0.13);
+  --on-primary:     #FFFFFF;
+  --accent:         #D4A843;
+  --accent-soft:    rgba(212, 168, 67, 0.12);
+
+  --bg:             #0B1220;
+  --surface:        #111A2E;
+  --sidebar-bg:     #0E1626;
+  --header-bg:      rgba(11, 18, 32, 0.88);
+  --muted:          #1A2540;
+  --hover:          rgba(255, 255, 255, 0.05);
+  --border:         rgba(255, 255, 255, 0.08);
+  --border-strong:  rgba(255, 255, 255, 0.16);
+
+  --text-1:         #EDF2F9;
+  --text-2:         #A9B8CC;
+  --text-3:         #8496AE;
+
+  --success:        #34D399;  --success-soft: rgba(52, 211, 153, 0.12);
+  --warning:        #FBBF24;  --warning-soft: rgba(251, 191, 36, 0.12);
+  --danger:         #F87171;  --danger-soft:  rgba(248, 113, 113, 0.12);
+
+  --shadow-card:    none;
+  --shadow-lift:    0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-float:   0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* Visibilidad condicionada por tema (íconos del toggle) */
+.only-dark  { display: none; }
+.only-light { display: inline-flex; }
+[data-theme="dark"] .only-dark  { display: inline-flex; }
+[data-theme="dark"] .only-light { display: none; }

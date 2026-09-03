@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AcademiX — Índice de mockups</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<link rel="stylesheet" href="assets/tokens.css"/>
+<link rel="stylesheet" href="assets/app.css"/>
+<script src="assets/app.js"></script>
+<style>
+  .view-card { display: block; padding: 22px; text-decoration: none; height: 100%; }
+  .view-num {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+    padding: 2px 8px; border-radius: 999px;
+    background: var(--primary-soft); color: var(--primary-ink);
+  }
+</style>
+</head>
+<body>
+<div class="min-h-screen flex flex-col items-center px-8 py-16">
+
+  <div class="w-full max-w-5xl flex items-center justify-between mb-14">
+    <div class="flex items-center gap-2.5">
+      <div class="logo-icon"><i data-lucide="graduation-cap" class="w-4 h-4"></i></div>
+      <span class="logo-name">AcademiX</span>
+    </div>
+    <button class="icon-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
+      <i data-lucide="moon" class="w-4 h-4 only-light"></i>
+      <i data-lucide="sun" class="w-4 h-4 only-dark"></i>
+    </button>
+  </div>
+
+  <div class="text-center mb-14 max-w-2xl">
+    <p class="section-label mb-3" style="color: var(--accent)">LMS multi-tenant universitario</p>
+    <h1 class="serif font-semibold mb-4" style="font-size: 44px; line-height: 1.15;">Mockups de interfaz</h1>
+    <p class="text-sm" style="color: var(--text-2)">
+      Wireframes de alta fidelidad para validar el flujo académico.
+      Cada vista indica las historias de usuario que cubre.
+    </p>
+  </div>
+
+  <div class="w-full max-w-5xl flex flex-col gap-10">
+
+    <!-- PÚBLICO -->
+    <section>
+      <p class="section-label mb-4">Público</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <a href="01-landing.html" class="card card-hover view-card">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="view-num">01</span>
+            <span class="text-xs" style="color: var(--text-3)">Marketing</span>
+          </div>
+          <h2 class="serif text-2xl font-semibold mb-1">Landing</h2>
+          <p class="text-xs" style="color: var(--text-2)">Propuesta de valor, flujo académico y acceso.</p>
+        </a>
+        <a href="02-login.html" class="card card-hover view-card">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="view-num">02</span>
+            <span class="text-xs" style="color: var(--text-3)">Autenticación</span>
+          </div>
+          <h2 class="serif text-2xl font-semibold mb-1">Login / Activación</h2>
+          <p class="text-xs" style="color: var(--text-2)">Branding del tenant y acceso institucional.</p>
+        </a>
+      </div>
+    </section>
+
+    <!-- ESTUDIANTE -->
+    <section>
+      <p class="section-label mb-4">Estudiante</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <a href="03-dashboard.html" class="card card-hover view-card">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="view-num">03</span>
+            <span class="text-xs" style="color: var(--text-3)">US1–3 · US24 · US25</span>
+          </div>
+          <h2 class="serif text-2xl font-semibold mb-1">Dashboard</h2>
+          <p class="text-xs" style="color: var(--text-2)">Cursos activos, evaluaciones pendientes, calendario y anuncios.</p>
+        </a>
+        <a href="04-course-modules.html" class="card card-hover view-card">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="view-num">04</span>
+            <span class="text-xs" style="color: var(--text-3)">US9–12 · US30</span>
+          </div>
+          <h2 class="serif text-2xl font-semibold mb-1">Curso y módulos</h2>
+          <p class="text-xs" style="color: var(--text-2)">Material por semana, estados de publicación y equipo docente.</p>
+        </a>
+        <a href="05-evaluations.html" class="card card-hover view-card">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="view-num">05</span>
+            <span class="text-xs" style="color: var(--text-3)">US13–16 · US21 · US22</span>
+          </div>
+          <h2 class="serif text-2xl font-semibold mb-1">Evaluaciones</h2>
+          <p class="text-xs" style="color: var(--text-2)">Ciclo completo de estados, entrega con evidencia y recorrección.</p>
+        </a>
+        <a href="06-grades.html" class="card card-hover view-card">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="view-num">06</span>
+            <span class="text-xs" style="color: var(--text-3)">US17–US20</span>
+          </div>
+          <h2 class="serif text-2xl font-semibold mb-1">Calificaciones</h2>
+          <p class="text-xs" style="color: var(--text-2)">Libro de notas, promedio parcial y comentarios publicados.</p>
+        </a>
+        <a href="09-pdf-reader.html" class="card card-hover view-card">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="view-num">09</span>
+            <span class="text-xs" style="color: var(--text-3)">US26–US29</span>
+          </div>
+          <h2 class="serif text-2xl font-semibold mb-1">Lector de documentos</h2>
+          <p class="text-xs" style="color: var(--text-2)">PDF en plataforma y asistente IA con citas del documento.</p>
+        </a>
+      </div>
+    </section>
+
+    <!-- DOCENTE -->
+    <section>
+      <p class="section-label mb-4">Docente</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <a href="07-teacher-dashboard.html" class="card card-hover view-card">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="view-num">07</span>
+            <span class="text-xs" style="color: var(--text-3)">US4 · US15 · US21</span>
+          </div>
+          <h2 class="serif text-2xl font-semibold mb-1">Panel docente</h2>
+          <p class="text-xs" style="color: var(--text-2)">Entregas por corregir y corrección sin publicación automática.</p>
+        </a>
+        <a href="08-teacher-gradebook.html" class="card card-hover view-card">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="view-num">08</span>
+            <span class="text-xs" style="color: var(--text-3)">US17 · US18</span>
+          </div>
+          <h2 class="serif text-2xl font-semibold mb-1">Libro de notas docente</h2>
+          <p class="text-xs" style="color: var(--text-2)">Ponderaciones con validación y liberación manual de notas.</p>
+        </a>
+      </div>
+    </section>
+
+  </div>
+
+  <p class="mt-16 text-xs" style="color: var(--text-3)">
+    HTML + Tailwind CDN · EB Garamond + Inter · Íconos Lucide · Tema claro/oscuro persistente
+  </p>
+</div>
+</body>
+</html>

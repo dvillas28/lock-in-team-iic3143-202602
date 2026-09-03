@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AcademiX — Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<link rel="stylesheet" href="assets/tokens.css"/>
+<link rel="stylesheet" href="assets/app.css"/>
+<script src="assets/app.js"></script>
+<style>
+  .search-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--muted); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 7px 12px; width: 280px;
+  }
+  .search-box input {
+    background: none; border: none; outline: none;
+    color: var(--text-1); font-family: 'Inter', sans-serif; font-size: 13px; width: 100%;
+  }
+  .search-box input::placeholder { color: var(--text-3); }
+  .kbd {
+    font-size: 11px; padding: 1px 6px; border-radius: 5px;
+    background: var(--surface); color: var(--text-3); border: 1px solid var(--border);
+  }
+
+  .course-card { padding: 20px; text-decoration: none; display: block; cursor: pointer; }
+  .course-code { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--primary-ink); }
+  .course-section { font-size: 12px; color: var(--text-3); }
+  .next-activity {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 12px; padding-top: 12px; margin-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .widget { overflow: hidden; }
+  .widget-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+  }
+  .widget-title { font-size: 13px; font-weight: 600; }
+  .widget-link { font-size: 12px; font-weight: 500; color: var(--primary-ink); text-decoration: none; }
+  .widget-row { display: flex; align-items: center; gap: 10px; padding: 10px 16px; }
+  .widget-row + .widget-row { border-top: 1px solid var(--border); }
+
+  /* Mini calendario */
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .cal-dow { font-size: 11px; font-weight: 600; color: var(--text-3); text-align: center; padding: 4px 0; }
+  .cal-day {
+    position: relative; aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; border-radius: 7px; color: var(--text-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .cal-day.out { color: var(--text-3); opacity: 0.45; }
+  .cal-day.today { background: var(--primary); color: var(--on-primary); font-weight: 600; }
+  .cal-day .ev { position: absolute; bottom: 3px; width: 4px; height: 4px; border-radius: 50%; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-logo">
+        <div class="logo-icon"><i data-lucide="graduation-cap" class="w-4 h-4"></i></div>
+        <span class="logo-name">AcademiX</span>
+      </div>
+      <div class="tenant-badge"><div class="tenant-dot"></div><span>Universidad Católica</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a class="nav-item active" href="03-dashboard.html" aria-current="page"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
+      <a class="nav-item" href="04-course-modules.html"><i data-lucide="book-open" class="w-4 h-4"></i> Mis cursos <span class="nav-count">4</span></a>
+      <a class="nav-item" href="05-evaluations.html"><i data-lucide="clipboard-list" class="w-4 h-4"></i> Evaluaciones <span class="nav-count">2</span></a>
+      <a class="nav-item" href="06-grades.html"><i data-lucide="bar-chart-2" class="w-4 h-4"></i> Calificaciones</a>
+      <div class="nav-section-label">Actividad</div>
+      <a class="nav-item" href="#anuncios"><i data-lucide="bell" class="w-4 h-4"></i> Anuncios <span class="nav-count">3</span></a>
+      <a class="nav-item" href="#calendario"><i data-lucide="calendar" class="w-4 h-4"></i> Calendario</a>
+      <div class="nav-section-label">Sistema</div>
+      <a class="nav-item" href="#"><i data-lucide="settings" class="w-4 h-4"></i> Configuración</a>
+      <a class="nav-item" href="01-landing.html"><i data-lucide="log-out" class="w-4 h-4"></i> Cerrar sesión</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-row">
+        <div class="avatar">MG</div>
+        <div>
+          <p class="name">María González</p>
+          <p class="role">Estudiante · UC Chile</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="top-header">
+      <p class="text-xs" style="color: var(--text-3)">Martes 2 de septiembre, 2026</p>
+      <div class="search-box">
+        <i data-lucide="search" class="w-4 h-4" style="color: var(--text-3); flex-shrink:0"></i>
+        <input type="text" placeholder="Buscar cursos, evaluaciones…" aria-label="Buscar"/>
+        <span class="kbd">⌘K</span>
+      </div>
+      <div class="flex items-center gap-2.5">
+        <button class="icon-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
+          <i data-lucide="moon" class="w-4 h-4 only-light"></i>
+          <i data-lucide="sun" class="w-4 h-4 only-dark"></i>
+        </button>
+        <button class="icon-btn" aria-label="Notificaciones">
+          <i data-lucide="bell" class="w-4 h-4"></i>
+          <span class="notif-dot"></span>
+        </button>
+        <div class="avatar">MG</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- Greeting -->
+      <div class="mb-8">
+        <p class="text-xs mb-1" style="color: var(--text-3)">Semestre 2 · 2026</p>
+        <h1 class="serif font-semibold" style="font-size: 30px;">Bienvenida, María</h1>
+      </div>
+
+      <div class="flex gap-6 items-start">
+
+        <!-- Cursos -->
+        <div style="flex: 1; min-width: 0;">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="serif text-xl font-semibold">Mis cursos</h2>
+            <a href="04-course-modules.html" class="widget-link">Ver todos →</a>
+          </div>
+          <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+
+            <a class="card card-hover course-card" href="04-course-modules.html">
+              <div class="flex items-start justify-between mb-2">
+                <span class="course-code">IIC2233</span>
+                <span class="chip chip-danger">2 pendientes</span>
+              </div>
+              <h3 class="serif text-lg font-semibold" style="line-height: 1.3;">Programación Avanzada</h3>
+              <p class="course-section mt-0.5">Sección 2 · Prof. C. Contreras</p>
+              <div class="next-activity" style="color: var(--warning)">
+                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                Tarea 3 vence mañana, 3 sep
+              </div>
+            </a>
+
+            <a class="card card-hover course-card" href="04-course-modules.html">
+              <div class="flex items-start justify-between mb-2">
+                <span class="course-code">MAT1630</span>
+                <span class="chip chip-success">Al día</span>
+              </div>
+              <h3 class="serif text-lg font-semibold" style="line-height: 1.3;">Cálculo III</h3>
+              <p class="course-section mt-0.5">Sección 1 · Prof. R. Fuenzalida</p>
+              <div class="next-activity" style="color: var(--text-2)">
+                <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                Prueba Solemne 1 — 10 sep
+              </div>
+            </a>
+
+            <a class="card card-hover course-card" href="04-course-modules.html">
+              <div class="flex items-start justify-between mb-2">
+                <span class="course-code">FIS1514</span>
+                <span class="chip chip-warning">1 pendiente</span>
+              </div>
+              <h3 class="serif text-lg font-semibold" style="line-height: 1.3;">Física General II</h3>
+              <p class="course-section mt-0.5">Sección 4 · Prof. A. Reyes</p>
+              <div class="next-activity" style="color: var(--warning)">
+                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                Lab 4 vence el 5 sep
+              </div>
+            </a>
+
+            <!-- Estado vacío de actividad (US3) -->
+            <a class="card card-hover course-card" href="04-course-modules.html">
+              <div class="flex items-start justify-between mb-2">
+                <span class="course-code">ICS2613</span>
+                <span class="chip chip-success">Al día</span>
+              </div>
+              <h3 class="serif text-lg font-semibold" style="line-height: 1.3;">Estructuras de Datos</h3>
+              <p class="course-section mt-0.5">Sección 3 · Prof. P. Silva</p>
+              <div class="next-activity" style="color: var(--text-3)">
+                <i data-lucide="calendar-off" class="w-3.5 h-3.5"></i>
+                Sin actividad próxima
+              </div>
+            </a>
+
+          </div>
+        </div>
+
+        <!-- Rail derecho -->
+        <div style="width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px;">
+
+          <!-- Próximas evaluaciones (US2: ordenadas por vencimiento, con estado) -->
+          <div class="card widget">
+            <div class="widget-head">
+              <span class="widget-title">Próximas evaluaciones</span>
+              <a href="05-evaluations.html" class="widget-link">Ver todas</a>
+            </div>
+            <div class="widget-row">
+              <div class="status-dot" style="background: var(--danger)"></div>
+              <div style="flex:1; min-width:0">
+                <p class="text-xs font-medium truncate">Tarea 3 · Prog. Avanzada</p>
+                <p class="text-xs" style="color: var(--text-3)">Vence 3 sep</p>
+              </div>
+              <span class="chip chip-danger">Pendiente</span>
+            </div>
+            <div class="widget-row">
+              <div class="status-dot" style="background: var(--warning)"></div>
+              <div style="flex:1; min-width:0">
+                <p class="text-xs font-medium truncate">Lab 4 · Física General II</p>
+                <p class="text-xs" style="color: var(--text-3)">Vence 5 sep</p>
+              </div>
+              <span class="chip chip-warning">Pendiente</span>
+            </div>
+            <div class="widget-row">
+              <div class="status-dot" style="background: var(--border-strong)"></div>
+              <div style="flex:1; min-width:0">
+                <p class="text-xs font-medium truncate">Prueba S1 · Cálculo III</p>
+                <p class="text-xs" style="color: var(--text-3)">10 sep · 15:00</p>
+              </div>
+              <span class="chip">Por venir</span>
+            </div>
+          </div>
+
+          <!-- Mini calendario (US25) -->
+          <div class="card widget" id="calendario">
+            <div class="widget-head">
+              <span class="widget-title">Septiembre 2026</span>
+              <div class="flex items-center gap-1">
+                <button class="icon-btn" style="width: 24px; height: 24px; border: none;" aria-label="Mes anterior"><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i></button>
+                <button class="icon-btn" style="width: 24px; height: 24px; border: none;" aria-label="Mes siguiente"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></button>
+              </div>
+            </div>
+            <div class="p-3">
+              <div class="cal-grid mb-1">
+                <span class="cal-dow">L</span><span class="cal-dow">M</span><span class="cal-dow">X</span><span class="cal-dow">J</span><span class="cal-dow">V</span><span class="cal-dow">S</span><span class="cal-dow">D</span>
+              </div>
+              <div class="cal-grid">
+                <span class="cal-day out">31</span><span class="cal-day">1</span><span class="cal-day today">2</span><span class="cal-day">3<span class="ev" style="background: var(--danger)"></span></span><span class="cal-day">4</span><span class="cal-day">5<span class="ev" style="background: var(--warning)"></span></span><span class="cal-day">6</span>
+                <span class="cal-day">7</span><span class="cal-day">8</span><span class="cal-day">9</span><span class="cal-day">10<span class="ev" style="background: var(--primary-ink)"></span></span><span class="cal-day">11</span><span class="cal-day">12</span><span class="cal-day">13</span>
+                <span class="cal-day">14</span><span class="cal-day">15</span><span class="cal-day">16</span><span class="cal-day">17</span><span class="cal-day">18</span><span class="cal-day">19</span><span class="cal-day">20</span>
+                <span class="cal-day">21</span><span class="cal-day">22</span><span class="cal-day">23</span><span class="cal-day">24</span><span class="cal-day">25</span><span class="cal-day">26</span><span class="cal-day">27</span>
+                <span class="cal-day">28</span><span class="cal-day">29</span><span class="cal-day">30</span><span class="cal-day out">1</span><span class="cal-day out">2</span><span class="cal-day out">3</span><span class="cal-day out">4</span>
+              </div>
+              <div class="mt-3 pt-3 flex flex-col gap-2" style="border-top: 1px solid var(--border)">
+                <a href="05-evaluations.html" class="flex items-center gap-2 text-xs" style="text-decoration: none; color: var(--text-2)">
+                  <span class="status-dot" style="background: var(--danger)"></span>3 sep — Tarea 3 · IIC2233
+                </a>
+                <a href="05-evaluations.html" class="flex items-center gap-2 text-xs" style="text-decoration: none; color: var(--text-2)">
+                  <span class="status-dot" style="background: var(--warning)"></span>5 sep — Lab 4 · FIS1514
+                </a>
+                <a href="05-evaluations.html" class="flex items-center gap-2 text-xs" style="text-decoration: none; color: var(--text-2)">
+                  <span class="status-dot" style="background: var(--primary-ink)"></span>10 sep — Prueba S1 · MAT1630
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Anuncios (US24) -->
+          <div class="card widget" id="anuncios">
+            <div class="widget-head">
+              <span class="widget-title">Anuncios recientes</span>
+            </div>
+            <div class="widget-row">
+              <div style="flex:1; min-width:0">
+                <p class="text-xs font-medium">Cambio de horario de clase</p>
+                <p class="text-xs" style="color: var(--text-3)">Prog. Avanzada · Hace 2 h</p>
+              </div>
+            </div>
+            <div class="widget-row">
+              <div style="flex:1; min-width:0">
+                <p class="text-xs font-medium">Material Semana 6 disponible</p>
+                <p class="text-xs" style="color: var(--text-3)">Cálculo III · Ayer</p>
+              </div>
+            </div>
+            <div class="widget-row">
+              <div style="flex:1; min-width:0">
+                <p class="text-xs font-medium">Notas Tarea 2 publicadas</p>
+                <p class="text-xs" style="color: var(--text-3)">Est. de Datos · Hace 2 días</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

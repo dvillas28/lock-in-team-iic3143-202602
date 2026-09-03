@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AcademiX — Libro de notas docente</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<link rel="stylesheet" href="assets/tokens.css"/>
+<link rel="stylesheet" href="assets/app.css"/>
+<script src="assets/app.js"></script>
+<style>
+  .weight-input { max-width: 84px; text-align: center; padding: 7px 8px; }
+  .warn-banner {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; border-radius: var(--radius-md);
+    background: var(--warning-soft);
+    font-size: 13px; color: var(--text-1);
+  }
+  .release-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; }
+  .release-row + .release-row { border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR (rol docente) -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-logo">
+        <div class="logo-icon"><i data-lucide="graduation-cap" class="w-4 h-4"></i></div>
+        <span class="logo-name">AcademiX</span>
+      </div>
+      <div class="tenant-badge"><div class="tenant-dot"></div><span>Universidad Católica</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Docencia</div>
+      <a class="nav-item" href="07-teacher-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Resumen</a>
+      <a class="nav-item" href="07-teacher-dashboard.html#correccion"><i data-lucide="inbox" class="w-4 h-4"></i> Corrección <span class="nav-count">12</span></a>
+      <a class="nav-item active" href="08-teacher-gradebook.html" aria-current="page"><i data-lucide="bar-chart-2" class="w-4 h-4"></i> Libro de notas</a>
+      <a class="nav-item" href="04-course-modules.html"><i data-lucide="book-open" class="w-4 h-4"></i> Mis cursos <span class="nav-count">2</span></a>
+      <div class="nav-section-label">Actividad</div>
+      <a class="nav-item" href="#"><i data-lucide="megaphone" class="w-4 h-4"></i> Publicar anuncio</a>
+      <div class="nav-section-label">Sistema</div>
+      <a class="nav-item" href="#"><i data-lucide="settings" class="w-4 h-4"></i> Configuración</a>
+      <a class="nav-item" href="01-landing.html"><i data-lucide="log-out" class="w-4 h-4"></i> Cerrar sesión</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-row">
+        <div class="avatar">CC</div>
+        <div>
+          <p class="name">Carla Contreras</p>
+          <p class="role">Docente · UC Chile</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="top-header">
+      <div class="breadcrumb">
+        <a href="07-teacher-dashboard.html">Resumen</a>
+        <i data-lucide="chevron-right" class="w-3 h-3"></i>
+        <span class="crumb-active">Libro de notas</span>
+      </div>
+      <div class="flex items-center gap-2.5">
+        <button class="icon-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
+          <i data-lucide="moon" class="w-4 h-4 only-light"></i>
+          <i data-lucide="sun" class="w-4 h-4 only-dark"></i>
+        </button>
+        <span class="text-xs" style="color: var(--text-3)">IIC2233 · Secciones 1 y 2</span>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="flex items-center justify-between mb-8 gap-4 flex-wrap">
+        <div>
+          <p class="text-xs mb-1" style="color: var(--text-3)">IIC2233 · Programación Avanzada</p>
+          <h1 class="serif font-semibold" style="font-size: 28px;">Libro de notas</h1>
+        </div>
+        <div class="tab-group">
+          <button class="tab-btn active">Prog. Avanzada</button>
+          <button class="tab-btn">Ing. de Software</button>
+        </div>
+      </div>
+
+      <!-- Ponderaciones (US17) -->
+      <div class="card overflow-hidden mb-6">
+        <div class="flex items-center justify-between px-5 py-4" style="border-bottom: 1px solid var(--border)">
+          <h2 class="serif font-semibold" style="font-size: 18px;">Ponderaciones del curso</h2>
+          <button class="btn btn-ghost" style="padding: 7px 14px; font-size: 12px;">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Nueva evaluación
+          </button>
+        </div>
+
+        <div class="px-5 pt-4">
+          <!-- Advertencia: no suman 100% (US17) -->
+          <div class="warn-banner" role="alert">
+            <i data-lucide="alert-triangle" class="w-4 h-4 flex-shrink-0" style="color: var(--warning)"></i>
+            <span>Las ponderaciones suman <strong class="tnum">95%</strong> — deben sumar 100% para que el promedio del curso se calcule. Ajusta los valores o agrega una evaluación.</span>
+          </div>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Evaluación</th>
+              <th style="text-align:center">Ponderación</th>
+              <th style="text-align:center">Notas registradas</th>
+              <th style="text-align:center">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="row-hover">
+              <td><p class="font-medium text-sm">Tarea 1</p></td>
+              <td style="text-align:center"><input type="number" class="field weight-input tnum" value="15" min="0" max="100" aria-label="Ponderación Tarea 1"/> <span class="text-xs" style="color: var(--text-3)">%</span></td>
+              <td class="tnum" style="text-align:center; color: var(--text-2)">94 / 94</td>
+              <td style="text-align:center"><span class="chip chip-success">Publicada</span></td>
+            </tr>
+            <tr class="row-hover">
+              <td><p class="font-medium text-sm">Tarea 2</p></td>
+              <td style="text-align:center"><input type="number" class="field weight-input tnum" value="15" min="0" max="100" aria-label="Ponderación Tarea 2"/> <span class="text-xs" style="color: var(--text-3)">%</span></td>
+              <td class="tnum" style="text-align:center; color: var(--text-2)">92 / 94</td>
+              <td style="text-align:center"><span class="chip chip-success">Publicada</span></td>
+            </tr>
+            <tr class="row-hover">
+              <td><p class="font-medium text-sm">Prueba Solemne 1</p></td>
+              <td style="text-align:center"><input type="number" class="field weight-input tnum" value="25" min="0" max="100" aria-label="Ponderación Prueba Solemne 1"/> <span class="text-xs" style="color: var(--text-3)">%</span></td>
+              <td class="tnum" style="text-align:center; color: var(--text-2)">94 / 94</td>
+              <td style="text-align:center"><span class="chip chip-success">Publicada</span></td>
+            </tr>
+            <tr class="row-hover">
+              <td><p class="font-medium text-sm">Tarea 3</p></td>
+              <td style="text-align:center"><input type="number" class="field weight-input tnum" value="15" min="0" max="100" aria-label="Ponderación Tarea 3"/> <span class="text-xs" style="color: var(--text-3)">%</span></td>
+              <td class="tnum" style="text-align:center; color: var(--text-2)">28 / 32</td>
+              <td style="text-align:center"><span class="chip chip-warning">En corrección</span></td>
+            </tr>
+            <tr class="row-hover">
+              <td><p class="font-medium text-sm">Prueba Solemne 2</p></td>
+              <td style="text-align:center"><input type="number" class="field weight-input tnum" value="25" min="0" max="100" aria-label="Ponderación Prueba Solemne 2"/> <span class="text-xs" style="color: var(--text-3)">%</span></td>
+              <td class="tnum" style="text-align:center; color: var(--text-3)">—</td>
+              <td style="text-align:center"><span class="chip">Por venir</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="flex items-center justify-between px-5 py-4" style="border-top: 1px solid var(--border)">
+          <p class="text-xs" style="color: var(--text-2)">Total actual: <strong class="tnum" style="color: var(--warning)">95%</strong> de 100%</p>
+          <button class="btn btn-primary" style="padding: 9px 18px;">Guardar ponderaciones</button>
+        </div>
+      </div>
+
+      <!-- Liberación de notas (US18) -->
+      <div class="card overflow-hidden">
+        <div class="px-5 py-4" style="border-bottom: 1px solid var(--border)">
+          <h2 class="serif font-semibold" style="font-size: 18px;">Liberación de notas</h2>
+          <p class="text-xs mt-0.5" style="color: var(--text-3)">Las notas corregidas permanecen ocultas hasta que las liberes. Cada estudiante ve solo las suyas.</p>
+        </div>
+
+        <div class="release-row">
+          <div style="flex:1; min-width:0">
+            <p class="text-sm font-medium">Tarea 3 — Generadores y threads</p>
+            <p class="text-xs" style="color: var(--text-3)">28 de 32 corregidas · 4 sin corregir</p>
+          </div>
+          <span class="chip chip-warning">Corrección parcial</span>
+          <button class="btn btn-primary" style="padding: 7px 15px; font-size: 12px;" onclick="openModal()">
+            <i data-lucide="unlock" class="w-3.5 h-3.5"></i> Liberar notas
+          </button>
+        </div>
+        <div class="release-row">
+          <div style="flex:1; min-width:0">
+            <p class="text-sm font-medium">Control 3 — Iteradores</p>
+            <p class="text-xs" style="color: var(--text-3)">94 de 94 corregidas</p>
+          </div>
+          <span class="chip chip-success">Lista para liberar</span>
+          <button class="btn btn-primary" style="padding: 7px 15px; font-size: 12px;" onclick="openModal()">
+            <i data-lucide="unlock" class="w-3.5 h-3.5"></i> Liberar notas
+          </button>
+        </div>
+        <div class="release-row">
+          <div style="flex:1; min-width:0">
+            <p class="text-sm font-medium">Tarea 2 — Excepciones</p>
+            <p class="text-xs" style="color: var(--text-3)">Liberada el 26 ago por C. Contreras</p>
+          </div>
+          <span class="chip">Publicada</span>
+          <button class="btn btn-ghost" style="padding: 7px 15px; font-size: 12px;" disabled aria-disabled="true">Liberada</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmación (US18) -->
+<div class="modal-backdrop" id="release-modal" role="dialog" aria-modal="true" aria-labelledby="release-title">
+  <div class="modal">
+    <div class="flex items-center gap-3 mb-3">
+      <div style="width: 38px; height: 38px; border-radius: 10px; background: var(--primary-soft); display: flex; align-items: center; justify-content: center; color: var(--primary-ink); flex-shrink: 0;">
+        <i data-lucide="unlock" class="w-4 h-4"></i>
+      </div>
+      <h3 id="release-title" class="serif font-semibold" style="font-size: 20px;">¿Liberar notas de Control 3?</h3>
+    </div>
+    <p class="text-sm mb-2" style="color: var(--text-2); line-height: 1.6;">
+      Las 94 notas corregidas y sus comentarios quedarán visibles de inmediato. Cada estudiante verá únicamente su propia nota.
+    </p>
+    <p class="text-xs mb-6" style="color: var(--text-3)">Esta acción quedará registrada en el historial del curso.</p>
+    <div class="flex items-center justify-end gap-2.5">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="closeModal()">
+        <i data-lucide="check" class="w-4 h-4"></i> Liberar notas
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openModal() {
+    document.getElementById('release-modal').classList.add('open');
+  }
+  function closeModal() {
+    document.getElementById('release-modal').classList.remove('open');
+  }
+  document.getElementById('release-modal').addEventListener('click', function (e) {
+    if (e.target === this) closeModal();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeModal();
+  });
+</script>
+</body>
+</html>

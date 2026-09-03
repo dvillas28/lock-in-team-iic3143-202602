@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AcademiX — Plataforma académica universitaria</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<link rel="stylesheet" href="assets/tokens.css"/>
+<link rel="stylesheet" href="assets/app.css"/>
+<script src="assets/app.js"></script>
+<style>
+  .nav-glass {
+    background: var(--header-bg);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-gradient {
+    background:
+      radial-gradient(ellipse 70% 55% at 50% -10%, var(--primary-soft) 0%, transparent 70%),
+      var(--bg);
+  }
+  .feat-card { padding: 26px; }
+  .icon-box {
+    width: 42px; height: 42px; border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    background: var(--primary-soft); color: var(--primary-ink);
+    margin-bottom: 14px;
+  }
+  .flow-pill {
+    padding: 6px 14px; border-radius: 999px;
+    background: var(--surface); border: 1px solid var(--border);
+    font-size: 12px; font-weight: 500; color: var(--text-2);
+  }
+  .uni-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 7px 14px;
+    font-size: 12px; font-weight: 500; color: var(--text-2);
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav-glass fixed top-0 left-0 right-0 z-50 h-14 flex items-center px-8">
+  <div class="max-w-6xl mx-auto w-full flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="logo-icon" style="width:28px;height:28px"><i data-lucide="graduation-cap" class="w-4 h-4"></i></div>
+      <span class="font-semibold text-sm tracking-wide">AcademiX</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="index.html" class="text-xs font-medium" style="color: var(--text-2)">← Mockups</a>
+      <button class="icon-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
+        <i data-lucide="moon" class="w-4 h-4 only-light"></i>
+        <i data-lucide="sun" class="w-4 h-4 only-dark"></i>
+      </button>
+      <a href="02-login.html" class="btn btn-primary" style="padding: 8px 18px;">Iniciar sesión</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-gradient pt-36 pb-24 px-8">
+  <div class="max-w-3xl mx-auto text-center">
+    <span class="chip chip-accent mb-6" style="letter-spacing: 0.06em; text-transform: uppercase; font-size: 11px; font-weight: 600;">
+      LMS multi-tenant universitario
+    </span>
+    <h1 class="serif font-semibold mb-6" style="font-size: clamp(40px, 6vw, 68px); line-height: 1.12; letter-spacing: -0.01em;">
+      El flujo académico completo,<br/>
+      <em style="color: var(--accent); font-style: italic;">por fin integrado</em>
+    </h1>
+    <p class="max-w-lg mx-auto mb-10" style="color: var(--text-2); font-size: 16px;">
+      Material, evaluaciones, entregas y notas de todos tus cursos — en un solo lugar, sin planillas ni carpetas externas.
+    </p>
+    <div class="flex items-center justify-center gap-3 flex-wrap">
+      <a href="02-login.html" class="btn btn-primary" style="padding: 12px 26px; font-size: 14px;">
+        Comenzar ahora
+        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+      </a>
+      <a href="03-dashboard.html" class="btn btn-ghost" style="padding: 12px 22px; font-size: 14px;">Ver demo</a>
+    </div>
+
+    <div class="flex items-center justify-center gap-3 mt-14 flex-wrap">
+      <span class="text-xs mr-1" style="color: var(--text-3)">Diseñado para</span>
+      <span class="uni-badge">UC Chile</span>
+      <span class="uni-badge">U. de Chile</span>
+      <span class="uni-badge">USACH</span>
+      <span class="uni-badge">UAI</span>
+    </div>
+  </div>
+</section>
+
+<!-- FLOW -->
+<section class="pb-16 px-8">
+  <div class="max-w-5xl mx-auto flex items-center justify-center gap-2 flex-wrap">
+    <span class="flow-pill">Curso</span>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5" style="color: var(--text-3)"></i>
+    <span class="flow-pill">Módulos</span>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5" style="color: var(--text-3)"></i>
+    <span class="flow-pill">Material</span>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5" style="color: var(--text-3)"></i>
+    <span class="flow-pill">Evaluaciones</span>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5" style="color: var(--text-3)"></i>
+    <span class="flow-pill">Entregas</span>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5" style="color: var(--text-3)"></i>
+    <span class="flow-pill">Corrección</span>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5" style="color: var(--text-3)"></i>
+    <span class="flow-pill" style="background: var(--accent-soft); border-color: transparent; color: var(--accent); font-weight: 600;">Libro de notas</span>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="py-20 px-8" style="border-top: 1px solid var(--border)">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-14">
+      <p class="section-label mb-3">Por qué AcademiX</p>
+      <h2 class="serif font-semibold" style="font-size: 36px;">Todo lo que importa, integrado</h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+      <div class="card card-hover feat-card">
+        <div class="icon-box"><i data-lucide="layout-dashboard" class="w-5 h-5"></i></div>
+        <h3 class="serif text-xl font-semibold mb-1.5">Dashboard unificado</h3>
+        <p class="text-sm" style="color: var(--text-2)">Cursos, pendientes y anuncios del semestre en una sola vista.</p>
+      </div>
+
+      <div class="card card-hover feat-card">
+        <div class="icon-box"><i data-lucide="book-open" class="w-5 h-5"></i></div>
+        <h3 class="serif text-xl font-semibold mb-1.5">Material por módulos</h3>
+        <p class="text-sm" style="color: var(--text-2)">Contenido organizado por semanas, con publicación controlada por el docente.</p>
+      </div>
+
+      <div class="card card-hover feat-card">
+        <div class="icon-box"><i data-lucide="upload-cloud" class="w-5 h-5"></i></div>
+        <h3 class="serif text-xl font-semibold mb-1.5">Entregas trazables</h3>
+        <p class="text-sm" style="color: var(--text-2)">Cada envío queda registrado con fecha, autor y estado de recepción.</p>
+      </div>
+
+      <div class="card card-hover feat-card">
+        <div class="icon-box" style="background: var(--accent-soft); color: var(--accent)"><i data-lucide="bar-chart-2" class="w-5 h-5"></i></div>
+        <h3 class="serif text-xl font-semibold mb-1.5">Libro de notas</h3>
+        <p class="text-sm" style="color: var(--text-2)">Ponderaciones transparentes, promedio calculado y liberación manual.</p>
+      </div>
+
+      <div class="card card-hover feat-card">
+        <div class="icon-box"><i data-lucide="shield-check" class="w-5 h-5"></i></div>
+        <h3 class="serif text-xl font-semibold mb-1.5">Multi-tenant</h3>
+        <p class="text-sm" style="color: var(--text-2)">Cada universidad opera aislada, con sus propios usuarios y cursos.</p>
+      </div>
+
+      <div class="card card-hover feat-card">
+        <div class="icon-box"><i data-lucide="users" class="w-5 h-5"></i></div>
+        <h3 class="serif text-xl font-semibold mb-1.5">Roles contextuales</h3>
+        <p class="text-sm" style="color: var(--text-2)">Docente, ayudante o estudiante según el curso, no la cuenta.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="pb-20 px-8">
+  <div class="card max-w-xl mx-auto text-center p-10">
+    <h2 class="serif font-semibold mb-3" style="font-size: 32px;">Accede con tu institución</h2>
+    <p class="text-sm mb-7" style="color: var(--text-2)">Usa tus credenciales institucionales para entrar a tu campus.</p>
+    <a href="02-login.html" class="btn btn-primary" style="padding: 12px 26px; font-size: 14px;">
+      Ir al login
+      <i data-lucide="arrow-right" class="w-4 h-4"></i>
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="px-8 py-8" style="border-top: 1px solid var(--border)">
+  <div class="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-4">
+    <div class="flex items-center gap-2">
+      <div class="logo-icon" style="width:24px;height:24px"><i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i></div>
+      <span class="text-sm font-semibold">AcademiX</span>
+    </div>
+    <p class="text-xs" style="color: var(--text-3)">Mockup UI — IIC3143 Desarrollo de Software 2026</p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AcademiX — Panel docente</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<link rel="stylesheet" href="assets/tokens.css"/>
+<link rel="stylesheet" href="assets/app.css"/>
+<script src="assets/app.js"></script>
+<style>
+  .stat-card { padding: 18px 20px; }
+  .stat-value { font-family: 'EB Garamond', serif; font-variant-numeric: tabular-nums; font-size: 32px; font-weight: 600; line-height: 1.1; }
+
+  .queue-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 16px; cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .queue-row + .queue-row { border-top: 1px solid var(--border); }
+  .queue-row:hover { background: var(--hover); }
+  .queue-row.selected { background: var(--primary-soft); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR (rol docente) -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-logo">
+        <div class="logo-icon"><i data-lucide="graduation-cap" class="w-4 h-4"></i></div>
+        <span class="logo-name">AcademiX</span>
+      </div>
+      <div class="tenant-badge"><div class="tenant-dot"></div><span>Universidad Católica</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Docencia</div>
+      <a class="nav-item active" href="07-teacher-dashboard.html" aria-current="page"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Resumen</a>
+      <a class="nav-item" href="07-teacher-dashboard.html#correccion"><i data-lucide="inbox" class="w-4 h-4"></i> Corrección <span class="nav-count">12</span></a>
+      <a class="nav-item" href="08-teacher-gradebook.html"><i data-lucide="bar-chart-2" class="w-4 h-4"></i> Libro de notas</a>
+      <a class="nav-item" href="04-course-modules.html"><i data-lucide="book-open" class="w-4 h-4"></i> Mis cursos <span class="nav-count">2</span></a>
+      <div class="nav-section-label">Actividad</div>
+      <a class="nav-item" href="#"><i data-lucide="megaphone" class="w-4 h-4"></i> Publicar anuncio</a>
+      <div class="nav-section-label">Sistema</div>
+      <a class="nav-item" href="#"><i data-lucide="settings" class="w-4 h-4"></i> Configuración</a>
+      <a class="nav-item" href="01-landing.html"><i data-lucide="log-out" class="w-4 h-4"></i> Cerrar sesión</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-row">
+        <div class="avatar">CC</div>
+        <div>
+          <p class="name">Carla Contreras</p>
+          <p class="role">Docente · UC Chile</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="top-header">
+      <p class="text-xs" style="color: var(--text-3)">Martes 2 de septiembre, 2026</p>
+      <div class="flex items-center gap-2.5">
+        <button class="icon-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
+          <i data-lucide="moon" class="w-4 h-4 only-light"></i>
+          <i data-lucide="sun" class="w-4 h-4 only-dark"></i>
+        </button>
+        <button class="icon-btn" aria-label="Notificaciones">
+          <i data-lucide="bell" class="w-4 h-4"></i>
+          <span class="notif-dot"></span>
+        </button>
+        <div class="avatar">CC</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="mb-8">
+        <p class="text-xs mb-1" style="color: var(--text-3)">Semestre 2 · 2026 · Vista docente</p>
+        <h1 class="serif font-semibold" style="font-size: 30px;">Buenos días, Carla</h1>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-3 gap-4 mb-8">
+        <div class="card stat-card">
+          <p class="text-xs mb-2" style="color: var(--text-3)">Entregas por corregir</p>
+          <p class="stat-value" style="color: var(--warning)">12</p>
+        </div>
+        <div class="card stat-card">
+          <p class="text-xs mb-2" style="color: var(--text-3)">Evaluaciones abiertas</p>
+          <p class="stat-value">3</p>
+        </div>
+        <div class="card stat-card">
+          <p class="text-xs mb-2" style="color: var(--text-3)">Notas listas para liberar</p>
+          <p class="stat-value" style="color: var(--primary-ink)">28</p>
+        </div>
+      </div>
+
+      <!-- Mis cursos (US4: solo cursos con rol docente) -->
+      <div class="mb-8">
+        <h2 class="serif text-xl font-semibold mb-4">Mis cursos</h2>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="card card-hover p-5">
+            <div class="flex items-start justify-between mb-2">
+              <span class="text-xs font-semibold" style="color: var(--primary-ink); letter-spacing: 0.04em;">IIC2233</span>
+              <span class="chip chip-warning">8 por corregir</span>
+            </div>
+            <h3 class="serif text-lg font-semibold" style="line-height: 1.3;">Programación Avanzada</h3>
+            <p class="text-xs mt-0.5" style="color: var(--text-3)">Secciones 1 y 2 · 94 estudiantes</p>
+            <div class="flex items-center gap-2 pt-3 mt-3" style="border-top: 1px solid var(--border)">
+              <a href="#correccion" class="btn btn-primary" style="padding: 6px 13px; font-size: 12px;">Revisar entregas</a>
+              <a href="08-teacher-gradebook.html" class="btn btn-ghost" style="padding: 6px 13px; font-size: 12px;">Libro de notas</a>
+            </div>
+          </div>
+          <div class="card card-hover p-5">
+            <div class="flex items-start justify-between mb-2">
+              <span class="text-xs font-semibold" style="color: var(--primary-ink); letter-spacing: 0.04em;">IIC3143</span>
+              <span class="chip chip-warning">4 por corregir</span>
+            </div>
+            <h3 class="serif text-lg font-semibold" style="line-height: 1.3;">Ingeniería de Software</h3>
+            <p class="text-xs mt-0.5" style="color: var(--text-3)">Sección 1 · 38 estudiantes</p>
+            <div class="flex items-center gap-2 pt-3 mt-3" style="border-top: 1px solid var(--border)">
+              <a href="#correccion" class="btn btn-primary" style="padding: 6px 13px; font-size: 12px;">Revisar entregas</a>
+              <a href="08-teacher-gradebook.html" class="btn btn-ghost" style="padding: 6px 13px; font-size: 12px;">Libro de notas</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Corrección (US15, US21) -->
+      <div id="correccion">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="serif text-xl font-semibold">Cola de corrección — Tarea 3 · IIC2233</h2>
+          <span class="chip">24 de 32 corregidas</span>
+        </div>
+
+        <div class="flex gap-5 items-start">
+
+          <!-- Lista de entregas -->
+          <div class="card overflow-hidden" style="flex: 1; min-width: 0;">
+            <div class="queue-row selected" onclick="selectQueue(this)">
+              <div class="avatar" style="width:28px;height:28px;font-size:11px">MG</div>
+              <div style="flex:1; min-width:0">
+                <p class="text-sm font-medium truncate">María González</p>
+                <p class="text-xs" style="color: var(--text-3)">Entregada el 1 sep, 22:31 · A tiempo</p>
+              </div>
+              <span class="chip chip-warning">Sin corregir</span>
+            </div>
+            <div class="queue-row" onclick="selectQueue(this)">
+              <div class="avatar" style="width:28px;height:28px;font-size:11px">DP</div>
+              <div style="flex:1; min-width:0">
+                <p class="text-sm font-medium truncate">Diego Pérez</p>
+                <p class="text-xs" style="color: var(--text-3)">Entregada el 1 sep, 23:58 · A tiempo</p>
+              </div>
+              <span class="chip chip-warning">Sin corregir</span>
+            </div>
+            <div class="queue-row" onclick="selectQueue(this)">
+              <div class="avatar" style="width:28px;height:28px;font-size:11px">VL</div>
+              <div style="flex:1; min-width:0">
+                <p class="text-sm font-medium truncate">Valentina Lagos</p>
+                <p class="text-xs" style="color: var(--text-3)">Entregada el 2 sep, 08:12 · Atrasada</p>
+              </div>
+              <span class="chip chip-danger">Atrasada</span>
+            </div>
+            <div class="queue-row" onclick="selectQueue(this)">
+              <div class="avatar" style="width:28px;height:28px;font-size:11px">TS</div>
+              <div style="flex:1; min-width:0">
+                <p class="text-sm font-medium truncate">Tomás Soto</p>
+                <p class="text-xs" style="color: var(--text-3)">Corregida por J. Morales · Nota 5.9</p>
+              </div>
+              <span class="chip chip-success">Corregida</span>
+            </div>
+            <div class="queue-row" onclick="selectQueue(this)">
+              <div class="avatar" style="width:28px;height:28px;font-size:11px">AR</div>
+              <div style="flex:1; min-width:0">
+                <p class="text-sm font-medium truncate">Antonia Rojas</p>
+                <p class="text-xs" style="color: var(--text-3)">Corregida por C. Contreras · Nota 6.4</p>
+              </div>
+              <span class="chip chip-success">Corregida</span>
+            </div>
+          </div>
+
+          <!-- Panel de corrección -->
+          <div class="card p-5" style="width: 380px; flex-shrink: 0;">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="avatar">MG</div>
+              <div style="flex:1">
+                <p class="text-sm font-semibold">María González</p>
+                <p class="text-xs" style="color: var(--text-3)">Tarea 3 · Sección 2</p>
+              </div>
+              <span class="chip chip-success">A tiempo</span>
+            </div>
+
+            <div class="card p-3 flex items-center gap-3 mb-5" style="background: var(--muted); border-color: transparent;">
+              <i data-lucide="file-text" class="w-4 h-4 flex-shrink-0" style="color: var(--text-2)"></i>
+              <div style="flex:1; min-width:0">
+                <p class="text-xs font-medium truncate">tarea3_mgonzalez.pdf</p>
+                <p class="text-xs" style="color: var(--text-3)">1 sep, 22:31 · 2.4 MB</p>
+              </div>
+              <button class="icon-btn" style="width:28px;height:28px" aria-label="Abrir entrega"><i data-lucide="external-link" class="w-3.5 h-3.5"></i></button>
+            </div>
+
+            <div class="mb-4">
+              <label class="field-label" for="grade-input">Nota (1.0 – 7.0)</label>
+              <input id="grade-input" type="number" min="1" max="7" step="0.1" class="field tnum" placeholder="—" style="max-width: 120px;"/>
+            </div>
+
+            <div class="mb-5">
+              <label class="field-label" for="grade-comment">Comentario de corrección</label>
+              <textarea id="grade-comment" class="field" placeholder="Feedback para el estudiante. Se mostrará solo cuando liberes las notas."></textarea>
+            </div>
+
+            <button class="btn btn-primary" style="width: 100%; padding: 11px;">
+              <i data-lucide="save" class="w-4 h-4"></i> Guardar corrección
+            </button>
+            <p class="text-xs text-center mt-3 flex items-center justify-center gap-1.5" style="color: var(--text-3)">
+              <i data-lucide="eye-off" class="w-3.5 h-3.5"></i>
+              No se publica al estudiante hasta liberar notas
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  function selectQueue(el) {
+    document.querySelectorAll('.queue-row').forEach(function (r) { r.classList.remove('selected'); });
+    el.classList.add('selected');
+  }
+</script>
+</body>
+</html>

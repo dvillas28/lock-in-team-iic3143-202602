@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AcademiX — Calificaciones</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<link rel="stylesheet" href="assets/tokens.css"/>
+<link rel="stylesheet" href="assets/app.css"/>
+<script src="assets/app.js"></script>
+<style>
+  .avg-card {
+    padding: 26px;
+    background: var(--accent-soft);
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+  }
+  .avg-number {
+    font-family: 'EB Garamond', serif;
+    font-variant-numeric: tabular-nums;
+    font-size: 64px; font-weight: 700; line-height: 1;
+    color: var(--accent);
+  }
+  .grade-num { font-family: 'EB Garamond', serif; font-variant-numeric: tabular-nums; font-size: 19px; font-weight: 600; }
+  .comment-cell {
+    background: var(--muted);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 12px; color: var(--text-2); line-height: 1.55;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-logo">
+        <div class="logo-icon"><i data-lucide="graduation-cap" class="w-4 h-4"></i></div>
+        <span class="logo-name">AcademiX</span>
+      </div>
+      <div class="tenant-badge"><div class="tenant-dot"></div><span>Universidad Católica</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a class="nav-item" href="03-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
+      <a class="nav-item" href="04-course-modules.html"><i data-lucide="book-open" class="w-4 h-4"></i> Mis cursos <span class="nav-count">4</span></a>
+      <a class="nav-item" href="05-evaluations.html"><i data-lucide="clipboard-list" class="w-4 h-4"></i> Evaluaciones <span class="nav-count">2</span></a>
+      <a class="nav-item active" href="06-grades.html" aria-current="page"><i data-lucide="bar-chart-2" class="w-4 h-4"></i> Calificaciones</a>
+      <div class="nav-section-label">Actividad</div>
+      <a class="nav-item" href="03-dashboard.html#anuncios"><i data-lucide="bell" class="w-4 h-4"></i> Anuncios <span class="nav-count">3</span></a>
+      <a class="nav-item" href="03-dashboard.html#calendario"><i data-lucide="calendar" class="w-4 h-4"></i> Calendario</a>
+      <div class="nav-section-label">Sistema</div>
+      <a class="nav-item" href="#"><i data-lucide="settings" class="w-4 h-4"></i> Configuración</a>
+      <a class="nav-item" href="01-landing.html"><i data-lucide="log-out" class="w-4 h-4"></i> Cerrar sesión</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-row">
+        <div class="avatar">MG</div>
+        <div>
+          <p class="name">María González</p>
+          <p class="role">Estudiante · UC Chile</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="top-header">
+      <div class="breadcrumb">
+        <a href="03-dashboard.html">Dashboard</a>
+        <i data-lucide="chevron-right" class="w-3 h-3"></i>
+        <span class="crumb-active">Calificaciones</span>
+      </div>
+      <div class="flex items-center gap-2.5">
+        <button class="icon-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
+          <i data-lucide="moon" class="w-4 h-4 only-light"></i>
+          <i data-lucide="sun" class="w-4 h-4 only-dark"></i>
+        </button>
+        <span class="text-xs" style="color: var(--text-3)">Semestre 2 · 2026</span>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- Selector de curso -->
+      <div class="tab-group mb-8" style="max-width: 100%; overflow-x: auto;">
+        <button class="tab-btn active" onclick="setCourse(this)">Prog. Avanzada</button>
+        <button class="tab-btn" onclick="setCourse(this)">Cálculo III</button>
+        <button class="tab-btn" onclick="setCourse(this)">Física General II</button>
+        <button class="tab-btn" onclick="setCourse(this)">Est. de Datos</button>
+      </div>
+
+      <!-- Resumen -->
+      <div class="grid grid-cols-3 gap-5 mb-8">
+        <div class="avg-card">
+          <p class="section-label mb-2">Promedio actual</p>
+          <div class="avg-number">5.8</div>
+          <p class="text-xs mt-3 flex items-center gap-1.5" style="color: var(--text-2)">
+            <i data-lucide="info" class="w-3.5 h-3.5" style="color: var(--accent)"></i>
+            Parcial — faltan 2 notas por publicar
+          </p>
+        </div>
+        <div class="card p-5 flex flex-col justify-between">
+          <p class="text-xs" style="color: var(--text-3)">Evaluaciones del semestre</p>
+          <p class="serif tnum font-semibold" style="font-size: 34px;">6</p>
+        </div>
+        <div class="card p-5 flex flex-col justify-between">
+          <p class="text-xs" style="color: var(--text-3)">Notas publicadas</p>
+          <p class="serif tnum font-semibold" style="font-size: 34px; color: var(--success)">4 <span style="font-size: 17px; font-weight: 500; color: var(--text-3)">/ 6</span></p>
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      <div class="card overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4" style="border-bottom: 1px solid var(--border)">
+          <h2 class="serif font-semibold" style="font-size: 18px;">Detalle de evaluaciones — IIC2233</h2>
+          <button class="btn btn-ghost" style="padding: 7px 14px; font-size: 12px;">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i> Exportar
+          </button>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Evaluación</th>
+              <th style="text-align:center">Ponderación</th>
+              <th style="text-align:center">Puntaje</th>
+              <th style="text-align:center">Nota</th>
+              <th style="text-align:center">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="row-hover">
+              <td>
+                <p class="font-medium text-sm">Tarea 1</p>
+                <p class="text-xs" style="color: var(--text-3)">Entregada el 12 ago</p>
+              </td>
+              <td class="tnum" style="text-align:center; font-weight:600">15%</td>
+              <td class="tnum" style="text-align:center; color: var(--text-2)">87 / 100</td>
+              <td style="text-align:center"><span class="grade-num" style="color: var(--success)">6.5</span></td>
+              <td style="text-align:center"><span class="chip chip-success">Publicada</span></td>
+            </tr>
+            <tr class="row-hover">
+              <td>
+                <p class="font-medium text-sm">Tarea 2</p>
+                <p class="text-xs" style="color: var(--text-3)">Entregada el 26 ago</p>
+              </td>
+              <td class="tnum" style="text-align:center; font-weight:600">15%</td>
+              <td class="tnum" style="text-align:center; color: var(--text-2)">91 / 100</td>
+              <td style="text-align:center"><span class="grade-num" style="color: var(--success)">6.8</span></td>
+              <td style="text-align:center"><span class="chip chip-success">Publicada</span></td>
+            </tr>
+            <tr class="row-hover">
+              <td style="border-bottom: none; padding-bottom: 6px;">
+                <p class="font-medium text-sm">Prueba Solemne 1</p>
+                <p class="text-xs" style="color: var(--text-3)">Rendida el 15 ago</p>
+              </td>
+              <td class="tnum" style="text-align:center; font-weight:600; border-bottom: none; padding-bottom: 6px;">25%</td>
+              <td class="tnum" style="text-align:center; color: var(--text-2); border-bottom: none; padding-bottom: 6px;">68 / 100</td>
+              <td style="text-align:center; border-bottom: none; padding-bottom: 6px;"><span class="grade-num" style="color: var(--warning)">5.1</span></td>
+              <td style="text-align:center; border-bottom: none; padding-bottom: 6px;"><span class="chip chip-success">Publicada</span></td>
+            </tr>
+            <!-- Comentario publicado (US19, US21) -->
+            <tr>
+              <td colspan="5" style="padding-top: 0;">
+                <div class="comment-cell flex items-start gap-2.5">
+                  <i data-lucide="message-square" class="w-3.5 h-3.5 flex-shrink-0" style="margin-top: 2px; color: var(--text-3)"></i>
+                  <span><strong style="color: var(--text-1); font-weight: 600;">Comentario del corrector:</strong> Pregunta 3 incompleta — faltó el análisis de complejidad. El resto muy bien planteado.</span>
+                </div>
+              </td>
+            </tr>
+            <tr class="row-hover">
+              <td>
+                <p class="font-medium text-sm">Lab 1</p>
+                <p class="text-xs" style="color: var(--text-3)">Entregado el 5 ago</p>
+              </td>
+              <td class="tnum" style="text-align:center; font-weight:600">10%</td>
+              <td class="tnum" style="text-align:center; color: var(--text-2)">100 / 100</td>
+              <td style="text-align:center"><span class="grade-num" style="color: var(--accent)">7.0</span></td>
+              <td style="text-align:center"><span class="chip chip-success">Publicada</span></td>
+            </tr>
+            <tr class="row-hover">
+              <td>
+                <p class="font-medium text-sm" style="color: var(--text-2)">Tarea 3</p>
+                <p class="text-xs" style="color: var(--text-3)">Vence el 3 sep</p>
+              </td>
+              <td class="tnum" style="text-align:center; font-weight:600; color: var(--text-3)">15%</td>
+              <td class="tnum" style="text-align:center; color: var(--text-3)">—</td>
+              <td class="tnum" style="text-align:center; color: var(--text-3)">—</td>
+              <td style="text-align:center"><span class="chip chip-warning">Pendiente</span></td>
+            </tr>
+            <tr class="row-hover">
+              <td>
+                <p class="font-medium text-sm" style="color: var(--text-2)">Prueba Solemne 2</p>
+                <p class="text-xs" style="color: var(--text-3)">20 oct</p>
+              </td>
+              <td class="tnum" style="text-align:center; font-weight:600; color: var(--text-3)">20%</td>
+              <td class="tnum" style="text-align:center; color: var(--text-3)">—</td>
+              <td class="tnum" style="text-align:center; color: var(--text-3)">—</td>
+              <td style="text-align:center"><span class="chip">Por venir</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Pie: promedio parcial (US20) -->
+        <div class="flex items-center justify-between px-5 py-4" style="border-top: 1px solid var(--border); background: var(--accent-soft)">
+          <div class="flex items-center gap-2">
+            <i data-lucide="info" class="w-4 h-4 flex-shrink-0" style="color: var(--accent)"></i>
+            <p class="text-xs" style="color: var(--text-2)">Promedio ponderado con las evaluaciones publicadas — cubre el 65% de la ponderación total.</p>
+          </div>
+          <div class="flex items-baseline gap-3">
+            <p class="text-xs" style="color: var(--text-3)">Promedio actual</p>
+            <p class="serif tnum font-semibold" style="font-size: 24px; color: var(--accent)">5.8</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  function setCourse(btn) {
+    document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>
