@@ -1,4 +1,4 @@
-# LMS Multi-Tenant Universitario
+# AcademiX — LMS Multi-Tenant Universitario
 
 Proyecto grupal para el ramo de Desarrollo de Software. La propuesta es construir un LMS universitario multi-tenant orientado al flujo academico critico de cursos semestrales: material, evaluaciones, entregas, correccion, publicacion de notas y seguimiento del estudiante.
 
@@ -33,26 +33,41 @@ El MVP se concentra en:
 - Correccion y publicacion manual de notas.
 - Libro de notas del curso.
 - Dashboard estudiante/docente.
+- Lector de PDF en plataforma con asistente IA (citas por pagina, explicacion de seleccion).
 
 Fuera del MVP inicial:
 
 - Google Calendar/Outlook.
 - Quizzes en vivo.
 - Planificacion docente avanzada.
-- RAG sobre todo el material del curso.
+- RAG sobre el corpus completo del curso.
 - Analitica avanzada.
+
+## Interfaces
+
+Los mockups son wireframes de alta fidelidad en HTML estatico. Cubren el flujo completo para los roles publico, estudiante y docente, incluyendo estados de entrega, libro de notas con ponderaciones y lector PDF con asistente IA.
+
+```bash
+# Desde la raiz del repo
+python3 -m http.server 8899 -d mockups
+# → http://localhost:8899/index.html
+```
+
+Ver [mockups/README.md](mockups/README.md) para el mapa de vistas e historias de usuario validadas.
+
+El sistema de diseno esta en [DESIGN.md](DESIGN.md): tokens de color, tipografia, componentes y reglas de layout. La implementacion de referencia vive en `mockups/assets/tokens.css` (tokens) y `mockups/assets/app.css` (componentes del shell).
 
 ## Documentacion
 
 - [Indice de documentacion](docs/README.md): estructura viva del repo.
 - [Design doc Entrega 1](docs/deliveries/0/design-doc-entrega-1.md): bajada formal alineada al checklist de la primera entrega.
+- [Alcance](docs/deliveries/0/scope.md): decisiones de scope, prioridades y lo que queda fuera.
 - [Requisitos](docs/deliveries/0/requirements.md): requisitos funcionales, no funcionales, restricciones y SLOs.
-- [Historias de usuario](docs/deliveries/0/user-stories.md): historias priorizadas por modulo.
+- [Historias de usuario](docs/deliveries/0/user-stories.md): historias priorizadas por modulo con criterios de aceptacion.
 - [Arquitectura](docs/deliveries/0/architecture.md): primera version de arquitectura, tenancy e infraestructura.
 - [Roadmap](docs/deliveries/0/roadmap.md): plan de trabajo tentativo para 10-12 semanas.
 - [Glosario](docs/deliveries/0/glossary.md): terminos clave del dominio.
 - [Notas de descubrimiento](docs/deliveries/0/discovery-notes.md): decisiones y supuestos levantados durante la iteracion inicial.
-- [Plan documental](docs/deliveries/0/task_plan.md): seguimiento de esta primera bajada documental.
 
 ## Starter Del Repo
 

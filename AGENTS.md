@@ -2,7 +2,7 @@
 
 ## Project
 
-Build a university LMS multi-tenant platform focused on the critical academic
+Build **AcademiX**, a university LMS multi-tenant platform focused on the critical academic
 flow: courses, modules, material, evaluations, submissions, correction, grade
 publication, and gradebook.
 
@@ -49,10 +49,32 @@ Constitution gates:
 - Complexity must be justified in the plan.
 <!-- SPECKIT END -->
 
+## UI & Design
+
+Before writing any frontend code, read:
+
+- **[DESIGN.md](DESIGN.md)** — design system: color tokens, typography, component specs, layout rules.
+- **[mockups/README.md](mockups/README.md)** — map of high-fidelity wireframes by role and user story.
+
+The canonical style sources are:
+
+- `mockups/assets/tokens.css` — all color and metric tokens; do not hardcode values that exist here.
+- `mockups/assets/app.css` — shared shell components (sidebar, header, cards, chips, table, buttons, forms, tabs, modal). Build new views on top of these; do not duplicate styles.
+
+Design language constraints:
+
+- Typography: EB Garamond for headings (academic voice), Inter for UI. Use `tabular-nums` on grades and numeric tables.
+- Colors: navy as primary, amber reserved for grades and highlights. See `tokens.css` for exact values.
+- Icons: Lucide SVG only. No emoji as icons.
+- Accessibility: contrast ≥ 4.5:1 in both themes, `:focus-visible` for keyboard, `aria-label` on icon-only buttons, respect `prefers-reduced-motion`.
+- Theme: light-first; dark theme via `[data-theme="dark"]` on `tokens.css`. No hardcoded colors outside `tokens.css`.
+
+The product name is **AcademiX**.
+
 ## Local Skills
 
 Use repo-local skills from `.agents/skills/` when relevant:
 
 - `lms-reviewer`
 - `lms-db-design`
-- `lms-ui-ux`
+- `lms-ui-ux` — invoke before designing or reviewing any UI surface.
