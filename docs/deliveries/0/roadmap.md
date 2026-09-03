@@ -113,3 +113,20 @@ El proyecto se organiza en iteraciones semanales. La prioridad es construir prim
 8. Infraestructura.
 9. Videos, calendario, alertas y chats, segun avance.
 10. IA experimental.
+
+## Mapeo De Requisitos Por Iteracion
+
+| Semana | Foco | RF/RNF asociados | Resultado esperado |
+| --- | --- | --- | --- |
+| 1 | Vision, dominio, arquitectura y mockups | RNF3, RNF4, RNF5, RNF7 | Documentacion base, alcance, modelo de dominio y decisiones iniciales. |
+| 2 | Setup, autenticacion y tenancy | RF1, RF2, RNF3, RNF4 | Usuarios autenticados y tenant resuelto para cada request. |
+| 3 | Cursos, secciones e inscripciones | RF3, RF4, RF5, RF21 | Cursos con secciones, participantes y cuerpo docente visible. |
+| 4 | Modulos y material | RF6, RF7, RF8, RF20, RNF8 | Curso con contenido publicado u oculto y material asociado. |
+| 5 | Evaluaciones | RF9, RF10 | Evaluaciones configuradas y visibles como pendientes. |
+| 6 | Entregas | RF11 | Estudiantes pueden entregar evaluaciones y registrar recepcion. |
+| 7 | Correccion y notas | RF12, RF13, RF16 | Correccion guardada con comentarios, sin publicar automaticamente. |
+| 8 | Libro de notas y promedios | RF14, RF15, RF19, RF22, RNF5 | Notas liberadas, promedio calculado y auditoria basica. |
+| 9 | Dashboard y anuncios | RF18 | Dashboard usable para estudiantes y cuerpo docente. |
+| 10 | Despliegue y operacion base | RNF1, RNF2, RNF6, RNF8, RNF10 | Despliegue publico con observabilidad y decisiones de rendimiento justificadas. |
+| 11 | Hardening y pruebas | RNF3, RNF4, RNF5, RNF9 | Permisos revisados, flujos criticos probados y deuda critica cerrada. |
+| 12 | Demo y cierre documental | RF principales, RNF principales | Presentacion final, documentacion actualizada y validacion del caso de negocio. |

@@ -1,5 +1,47 @@
 # Historias De Usuario
 
+## Resumen De Priorizacion
+
+| US | Prioridad | Area | Resultado esperado |
+| --- | --- | --- | --- |
+| US1 | Must Have | Dashboard | El estudiante ve sus cursos activos. |
+| US2 | Must Have | Dashboard | El estudiante ve evaluaciones pendientes ordenadas. |
+| US3 | Should Have | Dashboard | El estudiante identifica la proxima actividad del curso. |
+| US4 | Should Have | Dashboard | El cuerpo docente ve cursos y entregas pendientes de correccion. |
+| US5 | Must Have | Administracion y cursos | El administrador crea cursos del tenant correcto. |
+| US6 | Must Have | Administracion y cursos | El administrador crea secciones del curso. |
+| US7 | Must Have | Administracion y cursos | El docente gestiona participantes y roles contextuales. |
+| US8 | Should Have | Administracion y cursos | El administrador gestiona usuarios de su universidad. |
+| US9 | Must Have | Contenido del curso | El docente organiza contenido por modulos. |
+| US10 | Should Have | Contenido del curso | El docente publica u oculta modulos. |
+| US11 | Must Have | Contenido del curso | El docente centraliza material academico. |
+| US12 | Should Have | Contenido del curso | El estudiante accede a material publicado autorizado. |
+| US13 | Must Have | Evaluaciones y entregas | El docente crea evaluaciones con reglas claras. |
+| US14 | Must Have | Evaluaciones y entregas | El estudiante entrega evaluaciones con evidencia registrada. |
+| US15 | Must Have | Evaluaciones y entregas | El revisor corrige sin publicar automaticamente. |
+| US16 | Should Have | Evaluaciones y entregas | El estudiante confirma estado de entrega. |
+| US17 | Must Have | Libro de notas | El docente configura ponderaciones y el sistema calcula promedios. |
+| US18 | Must Have | Libro de notas | El docente libera notas manualmente. |
+| US19 | Must Have | Libro de notas | El estudiante ve solo sus notas publicadas. |
+| US20 | Must Have | Libro de notas | El estudiante ve promedio actual y estado parcial. |
+| US21 | Should Have | Libro de notas | El revisor registra comentarios de correccion. |
+| US22 | Could Have | Libro de notas | El estudiante solicita recorreccion. |
+| US23 | Should Have | Anuncios y calendario | El cuerpo docente publica anuncios del curso. |
+| US24 | Should Have | Anuncios y calendario | El estudiante ve anuncios recientes. |
+| US25 | Could Have | Anuncios y calendario | El estudiante usa calendario interno en dashboard. |
+| US26 | Should Have | Lector de documentos e IA | El estudiante lee PDFs dentro de la plataforma. |
+| US27 | Could Have | Lector de documentos e IA | El estudiante pregunta sobre un documento. |
+| US28 | Could Have | Lector de documentos e IA | El estudiante pide explicaciones sobre texto seleccionado. |
+| US29 | Could Have | Lector de documentos e IA | La IA entrega citas o declara falta de evidencia. |
+| US30 | Must Have | Visibilidad del cuerpo docente | El estudiante identifica docentes y ayudantes de su seccion. |
+| US31 | Could Have | Extensiones Nice To Have | El docente carga videos como material. |
+| US32 | Could Have | Extensiones Nice To Have | El estudiante solicita resumen de material publicado. |
+| US33 | Could Have | Extensiones Nice To Have | Participantes usan chat de seccion con permisos. |
+| US34 | Could Have | Extensiones Nice To Have | Estudiantes usan chat de grupo si existe modelo grupal. |
+| US35 | Could Have | Extensiones Nice To Have | El estudiante recibe alertas internas. |
+| US36 | Could Have | Extensiones Nice To Have | El usuario controla alertas leidas y no leidas. |
+| US37 | Fuera del alcance inicial | Extension posterior | El usuario recibe alertas por correo si existe proveedor y preferencias. |
+
 ## Dashboard
 
 US1. Como estudiante, quiero visualizar todos mis cursos actuales en un dashboard para acceder rapidamente a mi actividad academica.

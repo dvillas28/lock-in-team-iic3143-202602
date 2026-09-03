@@ -98,4 +98,4 @@ Componente que reutiliza conexiones a la base de datos para evitar saturacion y 
 
 ## Sharding
 
-Particionamiento de datos para escalar el sistema. En este proyecto, el sharding natural propuesto es por tenant.
+Particionamiento de datos para distribuir carga y escalar el sistema. En este proyecto el sharding está implementado desde el inicio: cada tenant (universidad) es un shard con su propia base de datos PostgreSQL independiente. No es una decisión futura — es la estructura base del sistema. Si en el futuro una universidad creciera tanto que una sola instancia no la sostuviera, se aplicaría sub-sharding interno dentro de ese tenant.

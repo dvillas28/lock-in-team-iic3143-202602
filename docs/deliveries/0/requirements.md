@@ -74,7 +74,7 @@ RNF4. Seguridad: el sistema debe aplicar autenticacion y autorizacion basada en 
 
 RNF5. Auditabilidad: cambios en notas, ponderaciones, entregas y liberaciones deben quedar registrados.
 
-RNF6. Rendimiento: las vistas principales deben responder dentro de metas medibles.
+RNF6. Rendimiento: las vistas principales deben responder de forma estable en carga normal y degradar de forma controlada durante ventanas criticas.
 
 RNF7. Mantenibilidad: el backend debe organizarse como monolito modular.
 
@@ -84,15 +84,19 @@ RNF9. Recuperabilidad: debe existir estrategia de backup y restore por tenant.
 
 RNF10. Observabilidad: el sistema debe exponer logs y metricas basicas para detectar errores y carga.
 
-## SLOs Iniciales
+## Escenarios De Calidad Y Mitigacion
 
-SLO significa Service Level Objective: una meta medible de calidad del sistema.
+Estos escenarios reemplazan metas numericas prematuras. Buscan explicar accion y reaccion frente a fallas probables del producto.
 
-- El 95% de las cargas del dashboard deben completarse bajo 2 segundos.
-- La confirmacion de una entrega debe completarse bajo 3 segundos en condiciones normales.
-- La disponibilidad mensual objetivo debe ser 99.5%.
-- Los datos de notas deben mantener auditoria de cambios.
-- El sistema no debe permitir acceso cruzado entre tenants.
+| Escenario | Riesgo | Mitigacion / Reaccion |
+| --- | --- | --- |
+| Dashboard lento en carga normal | El estudiante no entiende rapido que cursos, pendientes o notas debe revisar. | Optimizar consultas, paginar o limitar bloques secundarios, agregar indices y medir endpoints antes de introducir cache. |
+| Spike de hasta 1.000 estudiantes concurrentes durante evaluaciones o entregas | Saturacion del backend, base de datos o almacenamiento de archivos. | Mantener backend stateless para escalar replicas, usar connection pool si PostgreSQL se satura, almacenar archivos fuera de la base relacional y mover procesamiento pesado a workers si bloquea requests. |
+| Falla al subir una entrega | Riesgo de perdida de evidencia academica o estado inconsistente. | Registrar estado de recepcion solo cuando archivo y metadatos queden confirmados; si falla, mostrar error recuperable y permitir reintento sin crear nota ni entrega invalida. |
+| Caida parcial de una instancia de aplicacion | Interrupcion temporal durante ventanas criticas. | Mantener despliegue reproducible, logs de error y capacidad de reinicio/redeploy; usar balanceo cuando existan multiples replicas. |
+| Intento de acceso cruzado entre tenants | Fuga de datos academicos entre universidades. | Resolver tenant en cada request, validar membresia y rol contextual, y bloquear la operacion si tenant, curso o seccion no coinciden. |
+| Cambio de nota, ponderacion o liberacion | Perdida de trazabilidad sobre registros academicos. | Registrar actor, fecha, accion, valor anterior y valor nuevo en auditoria. |
+| Restauracion por error operativo o corrupcion de datos | Perdida de datos de una universidad. | Mantener estrategia de backup y restore por tenant, para restaurar una institucion sin afectar a las demas. |
 
 ## Restricciones
 
