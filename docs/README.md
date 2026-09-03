@@ -21,6 +21,7 @@
 - [Historias de usuario](deliveries/0/user-stories.md)
 - [Arquitectura](deliveries/0/architecture.md)
 - [Roadmap](deliveries/0/roadmap.md)
+- [Checklist Entrega 1](deliveries/0/checklist.md)
 - [Glosario](deliveries/0/glossary.md)
 - [Notas de descubrimiento](deliveries/0/discovery-notes.md)
 - [Plan documental](deliveries/0/task_plan.md)
