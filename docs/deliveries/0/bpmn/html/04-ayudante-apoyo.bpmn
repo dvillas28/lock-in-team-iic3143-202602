@@ -1,0 +1,179 @@
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_04-ayudante-apoyo" targetNamespace="https://academix.example/bpmn">
+  <bpmn:process id="Process" name="Ayudante docente · ejecutar apoyo autorizado" isExecutable="false">
+    <bpmn:documentation>Precondición: acceso al curso o sección y permiso específico para la acción elegida (modelo 00)
+La selección es exclusiva por instancia; el ayudante puede iniciar otra tarea después. Los permisos pueden diferir entre cursos y secciones.
+Las notas y comentarios guardados siguen ocultos hasta la liberación del docente (03). Material y anuncios respetan su visibilidad configurada.
+RF12, RF16, RF18–RF19 · US4, US15, US21, US23 · design-doc-entrega-1.md: Ayudante</bpmn:documentation>
+    <bpmn:laneSet id="Lanes">
+      <bpmn:lane id="Lane_0" name="Ayudante docente">
+        <bpmn:flowNodeRef>s</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>u</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>g</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>r</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>m</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>a</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>merge</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_1" name="Plataforma AcademiX">
+        <bpmn:flowNodeRef>save</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>e</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="s" name="Tarea de apoyo">
+      <bpmn:outgoing>Flow_0</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="u" name="Revisar curso y trabajo pendiente">
+      <bpmn:incoming>Flow_0</bpmn:incoming>
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="g" name="¿Qué tarea realizar?" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+      <bpmn:outgoing>Flow_4</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="r" name="Corregir entrega: nota y comentarios">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_5</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="m" name="Gestionar material autorizado">
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_6</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="a" name="Crear y publicar anuncio del curso">
+      <bpmn:incoming>Flow_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_7</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="merge" name="" gatewayDirection="Converging">
+      <bpmn:incoming>Flow_5</bpmn:incoming>
+      <bpmn:incoming>Flow_6</bpmn:incoming>
+      <bpmn:incoming>Flow_7</bpmn:incoming>
+      <bpmn:outgoing>Flow_8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="save" name="Guardar cambios y auditoría académica">
+      <bpmn:incoming>Flow_8</bpmn:incoming>
+      <bpmn:outgoing>Flow_9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="e" name="Apoyo registrado">
+      <bpmn:incoming>Flow_9</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0" sourceRef="s" targetRef="u" name="" />
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="u" targetRef="g" name="" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="g" targetRef="r" name="Corrección" />
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="g" targetRef="m" name="Material" />
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="g" targetRef="a" name="Anuncio" />
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="r" targetRef="merge" name="" />
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="m" targetRef="merge" name="" />
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="a" targetRef="merge" name="" />
+    <bpmn:sequenceFlow id="Flow_8" sourceRef="merge" targetRef="save" name="" />
+    <bpmn:sequenceFlow id="Flow_9" sourceRef="save" targetRef="e" name="" />
+  </bpmn:process>
+  <bpmn:collaboration id="Collaboration">
+    <bpmn:participant id="University" name="Operación académica de una universidad (tenant)" processRef="Process" />
+  </bpmn:collaboration>
+  <bpmndi:BPMNDiagram id="Diagram">
+    <bpmndi:BPMNPlane id="Plane" bpmnElement="Collaboration">
+      <bpmndi:BPMNShape id="University_di" bpmnElement="University" isHorizontal="true">
+        <dc:Bounds x="8" y="176" width="1712" height="864" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0_di" bpmnElement="Lane_0" isHorizontal="true">
+        <dc:Bounds x="40" y="176" width="1680" height="432" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_1_di" bpmnElement="Lane_1" isHorizontal="true">
+        <dc:Bounds x="40" y="608" width="1680" height="432" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_di" bpmnElement="s">
+        <dc:Bounds x="220.0" y="396.0" width="40" height="40" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="148" y="440" width="184" height="52" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="u_di" bpmnElement="u">
+        <dc:Bounds x="364.0" y="364.0" width="200" height="104" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="g_di" bpmnElement="g">
+        <dc:Bounds x="676.0" y="388.0" width="56" height="56" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="508" y="488" width="184" height="52" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="r_di" bpmnElement="r">
+        <dc:Bounds x="940.0" y="236.0" width="200" height="104" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="m_di" bpmnElement="m">
+        <dc:Bounds x="940.0" y="364.0" width="200" height="104" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="a_di" bpmnElement="a">
+        <dc:Bounds x="940.0" y="492.0" width="200" height="104" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="merge_di" bpmnElement="merge">
+        <dc:Bounds x="1252.0" y="388.0" width="56" height="56" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="save_di" bpmnElement="save">
+        <dc:Bounds x="1340.0" y="764.0" width="200" height="104" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="e_di" bpmnElement="e">
+        <dc:Bounds x="1620.0" y="796.0" width="40" height="40" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1548" y="840" width="184" height="52" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0_di" bpmnElement="Flow_0">
+        <di:waypoint x="260.0" y="416" />
+        <di:waypoint x="364.0" y="416" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
+        <di:waypoint x="564.0" y="416" />
+        <di:waypoint x="676.0" y="416" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+        <di:waypoint x="704" y="388.0" />
+        <di:waypoint x="704" y="288" />
+        <di:waypoint x="940.0" y="288" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="756" y="240" width="144" height="24" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
+        <di:waypoint x="732.0" y="416" />
+        <di:waypoint x="940.0" y="416" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="756" y="368" width="144" height="24" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4">
+        <di:waypoint x="704" y="444.0" />
+        <di:waypoint x="704" y="544" />
+        <di:waypoint x="940.0" y="544" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="756" y="496" width="144" height="24" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5">
+        <di:waypoint x="1140.0" y="288" />
+        <di:waypoint x="1280" y="288" />
+        <di:waypoint x="1280" y="388.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6">
+        <di:waypoint x="1140.0" y="416" />
+        <di:waypoint x="1252.0" y="416" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7">
+        <di:waypoint x="1140.0" y="544" />
+        <di:waypoint x="1280" y="544" />
+        <di:waypoint x="1280" y="444.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8">
+        <di:waypoint x="1308.0" y="416" />
+        <di:waypoint x="1324" y="416" />
+        <di:waypoint x="1324" y="816" />
+        <di:waypoint x="1340.0" y="816" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9">
+        <di:waypoint x="1540.0" y="816" />
+        <di:waypoint x="1620.0" y="816" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -20,6 +20,7 @@
 - [Alcance del producto](deliveries/0/scope.md)
 - [Requisitos](deliveries/0/requirements.md)
 - [Historias de usuario](deliveries/0/user-stories.md)
+- [Usuarios y modelos de procesos BPMN](deliveries/0/bpmn/README.md)
 - [Arquitectura](deliveries/0/architecture.md)
 - [Roadmap](deliveries/0/roadmap.md)
 - [Glosario](deliveries/0/glossary.md)
