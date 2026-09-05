@@ -14,6 +14,7 @@
 \usepackage{microtype}
 \usepackage{graphicx}
 \usepackage{tabularx}
+\usepackage{longtable}
 \usepackage{array}
 \usepackage{multicol}
 \usepackage{tikz}
@@ -121,15 +122,29 @@ Aislar instituciones & Resolución de tenant por request, base de datos por tena
 
 \textbf{Suposiciones.} (a) El tenant corresponde a una universidad y el curso a un ramo semestral concreto. (b) Todo acceso ocurre con usuario autenticado. (c) El idioma principal de la interfaz es el español. (d) El MVP no reemplaza todas las funcionalidades de un LMS completo. (e) El modelo inicial considera entregas individuales. (f) Supuestos de escala que orientan la arquitectura sin exigir demostrarla en producción: hasta 5 universidades de hasta 30.000 estudiantes cada una (150.000 potenciales), con \emph{spikes} de aproximadamente 1.000 estudiantes concurrentes en ventanas de evaluación, entrega o publicación de notas.
 
-\textbf{Modelo de proceso.} CAMBIAR
+\textbf{Modelo de proceso.} Los diagramas representan tres momentos del flujo académico: la consulta de actividad del estudiante, el envío de una evaluación y la corrección con publicación de resultados. En cada proceso se distinguen las acciones de los usuarios y las tareas de la plataforma, junto con las decisiones que condicionan su avance. Se destacan dos controles: una entrega sólo se confirma después de persistir su contenido y metadatos, y una calificación permanece oculta hasta que el docente decide liberarla.
+
+\begin{center}
+\begin{tabular}{ccc}
+\includegraphics[width=0.31\textwidth]{images/bpmn-05-student-activity.png} &
+\includegraphics[width=0.31\textwidth]{images/bpmn-06-student-delivery.png} &
+\includegraphics[width=0.31\textwidth]{images/bpmn-03-teaching-correction-publication.png} \\
+\footnotesize Actividad del estudiante & \footnotesize Entrega del estudiante & \footnotesize Corrección y publicación \\
+\end{tabular}\\
+\tightcaption{Figura 1. Modelos de Proceso: consulta de cursos, material y calificaciones; validación y recepción de entregas con posibilidad de reintento; y registro de correcciones, cálculo de promedios y liberación explícita de notas.}
+\end{center}
+
 
 \section{4. Riesgos}
 
 {\small
-\begin{tabularx}{\textwidth}{|p{1.55cm}|p{2.9cm}|Y|Y|}
+\setlength{\LTpre}{0pt}
+\setlength{\LTpost}{3pt}
+\begin{longtable}{|p{1.55cm}|p{2.9cm}|*{2}{>{\raggedright\arraybackslash}p{\dimexpr(\textwidth-1.55cm-2.9cm-8\tabcolsep-5\arrayrulewidth)/2\relax}|}}
 \hline
 \textbf{Tipo} & \textbf{Riesgo} & \textbf{Impacto} & \textbf{Mitigación} \\
 \hline
+\endhead
 Desarrollo & Sobrealcance funcional & No llegar a un MVP demostrable al cierre del semestre. & Fundaciones primero; las extensiones \emph{nice to have} sólo se activan una vez validadas. \\
 \hline
 Desarrollo & Complejidad de multi-tenancy & Errores de aislamiento de datos o de permisos. & Registry central, estructura de datos idéntica en cada tenant y pruebas explícitas de acceso cruzado. \\
@@ -148,7 +163,7 @@ Negocio & Baja adopción del flujo & El equipo docente y los estudiantes vuelven
 \hline
 Negocio & IA prematura & Costo variable y distracción del core académico. & Mantener la IA posterior al core, acotada a material publicado o al documento abierto, con citas verificables. \\
 \hline
-\end{tabularx}}
+\end{longtable}}
 
 \section{5. Detalle de la solución propuesta}
 
@@ -182,10 +197,13 @@ Los RF1 (autenticación), RF6 (configuración general del curso) y RF19 (registr
 \textbf{Requisitos no funcionales como atributos de calidad.} Cada RNF se declara con la acción de diseño que lo sostiene y la evidencia con que se verificará. En lugar de metas numéricas prematuras, se fijan escenarios de calidad que describen la reacción esperada frente a fallas probables.
 
 {\small
-\begin{tabularx}{\textwidth}{|p{2.45cm}|Y|Y|}
+\setlength{\LTpre}{0pt}
+\setlength{\LTpost}{3pt}
+\begin{longtable}{|p{2.45cm}|*{2}{>{\raggedright\arraybackslash}p{\dimexpr(\textwidth-2.45cm-6\tabcolsep-4\arrayrulewidth)/2\relax}|}}
 \hline
 \textbf{Atributo (RNF)} & \textbf{Acción de diseño / mitigación} & \textbf{Evidencia verificable} \\
 \hline
+\endhead
 Aislamiento y seguridad (RNF3, RNF4) & Tenant resuelto en cada request contra un registry central; base de datos por tenant; autorización por TenantMembership y CourseMembership. & Escenario de acceso cruzado: la operación se bloquea cuando tenant, curso o sección no coinciden, con pruebas automatizadas. \\
 \hline
 Auditabilidad (RNF5) & Registrar actor, fecha, acción, valor anterior y valor nuevo en cambios de notas, ponderaciones, entregas y liberaciones. & Reconstruir el historial completo de una nota desde la auditoría. \\
@@ -204,7 +222,7 @@ Recuperabilidad y observabilidad (RNF9, RNF10) & Backup y restore por tenant; lo
 \hline
 Mantenibilidad (RNF7) & Monolito modular por dominio antes de considerar microservicios. & Módulos separados por dominio y decisiones registradas como ADR. \\
 \hline
-\end{tabularx}}
+\end{longtable}}
 
 \textbf{Tecnologías y justificación.} \st{Stack:} Next.js como cliente web que consume la API (vistas por rol, dashboard y curso), NestJS como monolito modular con límites de dominio explícitos, PostgreSQL para los datos académicos transaccionales (notas, ponderaciones y estados exigen restricciones y transacciones) y Docker para un entorno reproducible entre integrantes. \st{Proveedor:} Google Cloud Platform, por su crédito gratuito de USD 300 por tres meses, que cubre el desarrollo y la demo final: Cloud Run para frontend y backend como contenedores stateless, Cloud SQL para las bases por tenant y el registry, Cloud Storage para binarios y Cloud Load Balancing cuando se requiera. Esta elección permite a la arquitectura no estar ligada a un proveedor y en principio los componentes se pueden portar de un proveedor a otro. \st{Condicional:} balanceador o API gateway al desplegar más de una réplica, y pool de conexiones (PgBouncer) cuando la cantidad de tenants o la concurrencia presione los límites de conexiones. \st{En veremos:} Redis y workers entran juntos --- Redis es la cola de los workers --- sólo al implementar las historias que los justifiquen: procesamiento de archivos (US11, US14), recálculo de promedios al cambiar ponderaciones (US17) y despacho de notificaciones (US35, RFO6). Hasta entonces el procesamiento es sincrónico.
 
@@ -244,7 +262,7 @@ Mantenibilidad (RNF7) & Monolito modular por dominio antes de considerar microse
 \textcolor{amber}{\textbf{-- --}}~condicional, al desplegar o con carga\\
 \textcolor{slate}{\textbf{$\cdots$}}~en veremos, atado a una historia};
 \end{tikzpicture}}\\
-\tightcaption{Figura 1. Arquitectura candidata. La ruta base es cliente, frontend, backend modular, registry, base por tenant y object storage; el resto está diseñado pero no comprometido para el primer despliegue.}
+\tightcaption{Figura 2. Arquitectura candidata. La ruta base es cliente, frontend, backend modular, registry, base por tenant y object storage; el resto está diseñado pero no comprometido para el primer despliegue.}
 \end{center}
 
 \textbf{Primeras maquetas.} Las maquetas son wireframes navegables en HTML estático; cada vista declara las historias que valida y no tiene backend.
@@ -256,7 +274,7 @@ Mantenibilidad (RNF7) & Monolito modular por dominio antes de considerar microse
 \includegraphics[width=0.31\textwidth]{images/mockup-pdf-reader.png} \\
 \footnotesize Dashboard estudiante (US1--US3) & \footnotesize Libro de notas docente (US17, US18) & \footnotesize Lector PDF e IA (US26--US29) \\
 \end{tabular}\\
-\tightcaption{Figura 2. Maquetas de referencia: core del estudiante, control docente de calificaciones y extensión condicionada.}
+\tightcaption{Figura 3. Maquetas de referencia: core del estudiante, control docente de calificaciones y extensión condicionada.}
 \end{center}
 
 \textbf{Decisiones abiertas.} Se declaran para no presentar como cerrado lo que aún no está decidido:
