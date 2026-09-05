@@ -67,7 +67,7 @@ Los LMS centralizan el curso, pero el flujo académico real termina repartido en
   \item La institución necesita continuidad, seguridad y aislamiento de datos por universidad.
 \end{itemize}
 \vspace{0.1cm}
-\begin{block}{Principio rector}
+\begin{block}{Principio fundamental}
 \footnotesize Los flujos principales de un curso deben poder completarse dentro de la plataforma, sin depender de planillas, carpetas, calendarios o canales externos.
 \end{block}
 \end{frame}
@@ -136,16 +136,71 @@ Estudiante & Cursos, pendientes, cuerpo docente y notas liberadas & Usa el flujo
 \begin{columns}[T,onlytextwidth]
 \begin{column}{0.49\textwidth}
 \begin{block}{Fundaciones y extensiones}
-\footnotesize Fundaciones \emph{must have}: cursos y secciones, participantes, cuerpo docente visible, evaluaciones y calificaciones. Video, IA, chats, calendario y alertas son \emph{nice to have}: sólo después de validar las fundaciones.
+\footnotesize Fundaciones \emph{must have}: cursos y secciones, participantes, cuerpo docente visible, evaluaciones y calificaciones. Fundaciones \emph{nice to have}: Video, IA, chats, calendario y alertas: sólo después de validar las fundaciones.
 \end{block}
 \end{column}
 \begin{column}{0.49\textwidth}
-\begin{block}{Suposiciones y proceso}
-\footnotesize Tenant = universidad; curso = ramo semestral; entregas individuales; escala objetivo de 5 universidades y hasta 30.000 estudiantes cada una.
+\begin{block}{Suposiciones}
+\footnotesize Se asume un Tenant por universidad, un curso equivale a un ramo semestral. Se contemplan 5 universidades de hasta 30.000 estudiantes cada una.
 \end{block}
 \end{column}
 \end{columns}
 \end{frame}
+
+\begin{frame}{Modelos de Proceso: Corrección y publicación}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.62\textwidth}
+\includegraphics[width=\textwidth]{images/bpmn-03-teaching-correction-publication.png}
+\end{column}
+\begin{column}{0.35\textwidth}
+\small
+\textbf{Docente y ayudante autorizado.}
+\begin{itemize}
+  \item Registrar o revisar notas y comentarios.
+  \item Guardar la corrección oculta y auditar los cambios.
+  \item Calcular promedios o advertir ponderaciones inválidas.
+  \item El docente decide cuándo liberar las notas.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Modelos de Proceso: Actividad del estudiante}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.62\textwidth}
+\includegraphics[width=\textwidth]{images/bpmn-05-student-activity.png}
+\end{column}
+\begin{column}{0.35\textwidth}
+\small
+\textbf{Consulta de la actividad académica.}
+\begin{itemize}
+  \item Ver cursos, pendientes y anuncios.
+  \item Elegir un curso y consultar el equipo de la sección.
+  \item Acceder al material publicado y leer PDF.
+  \item Entregar evaluaciones o consultar calificaciones.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Modelos de Proceso: Entrega del estudiante}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.62\textwidth}
+\includegraphics[width=\textwidth]{images/bpmn-06-student-delivery.png}
+\end{column}
+\begin{column}{0.35\textwidth}
+\small
+\textbf{Envío y confirmación de recepción.}
+\begin{itemize}
+  \item Validar inscripción, fecha y reglas de envío.
+  \item Enviar el archivo o contenido si está permitido.
+  \item Persistir contenido y metadatos; reintentar si no se confirma la recepción.
+  \item Consultar el estado y la fecha de recepción.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
 
 % --- 4. Riesgos (60 s) ---
 \begin{frame}{4. Riesgos y mitigaciones}
@@ -154,7 +209,7 @@ Estudiante & Cursos, pendientes, cuerpo docente y notas liberadas & Usa el flujo
 \toprule
 \textbf{Tipo} & \textbf{Riesgo} & \textbf{Impacto} & \textbf{Mitigación} \\
 \midrule
-Desarrollo & Sobrealcance & No llegar al MVP & Fundaciones primero; extensiones sólo una vez validadas \\
+Desarrollo & Sobrealcance & No llegar al MVP & Fundaciones \emph{must have} primero; extensiones sólo una vez validadas \\
 Desarrollo & Multi-tenancy & Fuga o mezcla de datos & Registry, estructura idéntica por tenant y pruebas de acceso cruzado \\
 Desarrollo & Grupos de estudiantes & Cambiar el modelo de entregas a mitad de camino & Entregas individuales hasta especificar membresías y autoría \\
 Desarrollo & Carga en ventanas críticas & Fallas en cierres de entrega & Consultas eficientes y réplicas stateless; pool, caché y workers con justificación \\
@@ -295,7 +350,7 @@ Escalabilidad & Réplicas stateless; el tenant es el shard; réplica de lectura 
 \end{tabular}
 \vspace{0.25cm}
 
-{\footnotesize Wireframes navegables en HTML estático: cada vista declara las historias que valida y sirvió para acordar el alcance antes de programar. Notas del estudiante, panel docente y lector de PDF quedan en los anexos.}
+{\footnotesize Mockups navegables en HTML estático. Notas del estudiante, panel docente y lector de PDF quedan en los anexos.}
 \end{frame}
 
 % --- 6. Plan (50 s) ---
@@ -308,13 +363,13 @@ Escalabilidad & Réplicas stateless; el tenant es el shard; réplica de lectura 
 1--2 & Monorepo, autenticación y tenancy (RF1, RF2, RNF3, RNF4) & Visión, arquitectura, maquetas y backlog: tenant resuelto en cada request \\
 3--4 & Cursos, secciones, participantes, cuerpo docente, módulos y material (RF3--RF8, RF20, RF21) & Validación de maquetas: un curso real con material publicado \\
 5--7 & Evaluaciones, entregas, corrección y liberación (RF9--RF13, RF16) & Criterios de aceptación y revisión entre pares: ciclo completo funcionando \\
-8--9 & Libro de notas, promedios, auditoría, dashboard y anuncios (RF14, RF15, RF18, RF19, RF22) & Demo intermedia: docente y estudiante ven la misma verdad \\
+8--9 & Libro de notas, promedios, auditoría, dashboard y anuncios (RF14, RF15, RF18, RF19, RF22) & Demo intermedia: docente y estudiante ven el mismo contenido \\
 10--11 & Despliegue en GCP, observabilidad, permisos y pruebas (RNF1--RNF4, RNF6, RNF9, RNF10) & ADR de decisiones abiertas: ambiente público operativo \\
 12 & Deuda crítica y ajustes de UX & Demo final, documentación y presentación \\
 \bottomrule
 \end{tabularx}
 \vspace{0.1cm}
-{\footnotesize Ventana efectiva de 10 a 12 semanas: las iteraciones 11 y 12 son colchón de cierre y pueden comprimirse.}
+% {\footnotesize Ventana efectiva de 10 a 12 semanas: las iteraciones 11 y 12 son colchón de cierre y pueden comprimirse.}
 \end{frame}
 
 % --- Cierre (30 s) ---
@@ -344,7 +399,7 @@ AcademiX es un LMS universitario multi-tenant enfocado en integrar el flujo acad
   \item Hasta 5 universidades.
   \item Hasta 30.000 estudiantes por universidad (150.000 potenciales).
   \item Spikes de $\sim$1.000 concurrentes en ventanas de evaluación, entrega o publicación.
-  \item Orientan la arquitectura; no exigen demostrar la escala en producción.
+  \item Estos supuestos orientan a la arquitectura
 \end{itemize}
 \end{block}
 \end{column}
