@@ -42,7 +42,7 @@
 
 \title[AcademiX]{AcademiX}
 \subtitle{LMS multi-tenant universitario}
-\author[Equipo AcademiX]{Equipo AcademiX}
+\author[Equipo Lock In]{Equipo Lock In}
 \institute[IIC3143]{IIC3143 Desarrollo de Software}
 \date{Entrega 1}
 
@@ -97,7 +97,7 @@ Los LMS centralizan el curso, pero el flujo académico real termina repartido en
 \end{column}
 \end{columns}
 \vspace{0.2cm}
-{\footnotesize No competimos por paridad funcional con Canvas o Moodle, sino por integración del flujo crítico.}
+{\footnotesize Se busca una integración del flujo académico crítico, más que un posicionarse en paridad funcional con plataformas como Canvas o Moodle.}
 \end{frame}
 
 % --- 2. Interesados y usuarios (45 s) ---
@@ -141,7 +141,7 @@ Estudiante & Cursos, pendientes, cuerpo docente y notas liberadas & Usa el flujo
 \end{column}
 \begin{column}{0.49\textwidth}
 \begin{block}{Suposiciones y proceso}
-\footnotesize Tenant = universidad; curso = ramo semestral; entregas individuales; escala objetivo de 5 universidades y hasta 30.000 estudiantes cada una. Proceso iterativo semanal con backlog priorizado por riesgo.
+\footnotesize Tenant = universidad; curso = ramo semestral; entregas individuales; escala objetivo de 5 universidades y hasta 30.000 estudiantes cada una.
 \end{block}
 \end{column}
 \end{columns}
@@ -218,8 +218,8 @@ Escalabilidad & Réplicas stateless; el tenant es el shard; réplica de lectura 
 \begin{columns}[T,onlytextwidth]
 \begin{column}{0.52\textwidth}
 \begin{itemize}
-  \item \st{Base decidida:} Next.js (cliente web), NestJS (monolito modular), PostgreSQL (notas y estados transaccionales), Docker.
-  \item \st{Proveedor decidido:} GCP por su crédito de USD 300 por 3 meses --- Cloud Run, Cloud SQL, Cloud Storage. Componentes portables a otro proveedor.
+  \item \st{Stack:} Next.js (cliente web), NestJS (monolito modular), PostgreSQL (notas y estados transaccionales), Docker.
+  \item \st{Proveedor:} GCP por su crédito de USD 300 por 3 meses --- Cloud Run, Cloud SQL, Cloud Storage. Componentes portables a otro proveedor.
   \item \st{Condicional:} balanceador con más de una réplica; PgBouncer si las conexiones presionan Cloud SQL.
   \item \st{En veremos:} Redis y workers entran juntos, atados a US concretas (archivos, recálculo de promedios, notificaciones).
 \end{itemize}
@@ -233,6 +233,7 @@ Escalabilidad & Réplicas stateless; el tenant es el shard; réplica de lectura 
   \item Grupos de estudiantes: sin especificación, el modelo sigue individual.
   \item Qué extensiones \emph{nice to have} entran, según avance.
   \item Modelo y costo del asistente de IA.
+  \item Estrategia de base de datos.
 \end{itemize}
 \end{block}
 \end{column}
@@ -278,7 +279,7 @@ Escalabilidad & Réplicas stateless; el tenant es el shard; réplica de lectura 
 \textcolor{academixslate}{\textbf{$\cdots$}}~en veremos, atado a una historia};
 \end{tikzpicture}}\\
 \vspace{0.1cm}
-{\footnotesize Monolito modular primero. El aislamiento no es una promesa futura: el tenant es el shard desde el primer despliegue.}
+{\footnotesize Monolito modular primero. Los tenant comienzan aislados.  Y el tenant es el shard desde el primer despliegue.}
 \end{frame}
 
 % --- 5e. Maquetas (50 s) ---
@@ -348,7 +349,7 @@ AcademiX es un LMS universitario multi-tenant enfocado en integrar el flujo acad
 \end{block}
 \end{column}
 \begin{column}{0.52\textwidth}
-\begin{block}{Escenarios de calidad documentados}
+\begin{block}{Escenarios de calidad}
 \footnotesize
 \begin{itemize}
   \item Dashboard lento en carga normal.
@@ -395,7 +396,7 @@ RF13 US18 · RF14 US19, US20 · RF15 US17, US19, US20 · RF16 US15, US21 · RF17
 \end{column}
 \end{columns}
 \vspace{0.3cm}
-{\footnotesize Las 37 historias tienen criterios de aceptación y prioridad MoSCoW en \texttt{user-stories.md}. RF1, RF6 y RF19 son habilitadores transversales: se validan a través de las historias de los bloques que los usan.}
+{\footnotesize Las 37 historias tienen criterios de aceptación y prioridad MoSCoW. RF1, RF6 y RF19 son habilitadores transversales: se validan a través de las historias de los bloques que los usan.}
 \end{frame}
 
 \begin{frame}{Anexo: vista de notas del estudiante}

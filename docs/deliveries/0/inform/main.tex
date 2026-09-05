@@ -46,7 +46,7 @@
 
 \begin{center}
 {\LARGE\bfseries\color{navy} AcademiX: LMS multi-tenant universitario}\\
-{\large Informe de Entrega 1 --- razón, alcance, arquitectura y plan}\\
+{\large Entrega 1}\\
 IIC3143 Desarrollo de Software · Equipo AcademiX · \today
 \end{center}
 
@@ -54,9 +54,9 @@ IIC3143 Desarrollo de Software · Equipo AcademiX · \today
 
 \textbf{Introducción y contexto.} Las universidades usan plataformas LMS para centralizar cursos, material académico, evaluaciones, entregas y comunicación. En la práctica, buena parte del flujo académico termina repartida entre el LMS institucional, planillas de cálculo, correos, calendarios externos y carpetas de archivos. La consecuencia es una experiencia fragmentada para los tres actores que sostienen un curso semestral: estudiantes, cuerpo docente y administración académica.
 
-\textbf{Problema y motivación.} El problema no es la falta de funcionalidades en los LMS existentes, sino la baja integración del flujo crítico de un curso: \emph{curso $\rightarrow$ módulos $\rightarrow$ material $\rightarrow$ evaluaciones $\rightarrow$ entregas $\rightarrow$ corrección $\rightarrow$ publicación de notas $\rightarrow$ libro de notas}. Se observan cuatro síntomas: (i) el estudiante no distingue con rapidez qué estudiar, qué entregar y qué notas ya fueron publicadas; (ii) las notas y ponderaciones se gestionan fuera de la plataforma; (iii) el material queda como archivo pasivo, sin vínculo con la evaluación que lo usa; y (iv) las instituciones necesitan aislar datos y escalar por universidad. El diagnóstico proviene de la experiencia directa del equipo como usuarios de Canvas; no hubo entrevistas formales ni mediciones, y esa es una limitación declarada de esta entrega. De ahí se deriva el principio rector del producto: los flujos principales de un curso deben poder completarse dentro de la plataforma, sin depender de planillas, carpetas, calendarios o canales externos.
+\textbf{Problema y motivación.} El problema no es la falta de funcionalidades en los LMS existentes, sino la baja integración del flujo crítico de un curso: \emph{curso $\rightarrow$ módulos $\rightarrow$ material $\rightarrow$ evaluaciones $\rightarrow$ entregas $\rightarrow$ corrección $\rightarrow$ publicación de notas $\rightarrow$ libro de notas}. Se observan cuatro síntomas: (i) el estudiante no distingue con rapidez qué estudiar, qué entregar y qué notas ya fueron publicadas; (ii) las notas y ponderaciones se gestionan fuera de la plataforma; (iii) el material queda como archivo pasivo, sin vínculo con la evaluación que lo usa; y (iv) las instituciones necesitan aislar datos y escalar por universidad. Este diagnóstico surge principalmente de la experiencia del equipo utilizando Canvas. En esta etapa no se realizaron entrevistas ni mediciones formales, por lo que se trata de una observación inicial y se reconoce esa limitación. La propuesta busca, por tanto, que las tareas principales de un curso puedan realizarse de forma continua dentro de una misma plataforma, reduciendo la dependencia de planillas, carpetas, calendarios y otras herramientas externas.
 
-\textbf{Valor de negocio.} Para la institución, el valor está en reducir la dependencia de planillas externas, dejar evidencia y trazabilidad de entregas y calificaciones, mantener control sobre los datos de cada universidad y operar varias instituciones sin mezclar información. Para el cuerpo docente, en configurar y calcular calificaciones dentro de la plataforma y controlar cuándo se publican. Para el estudiante, en claridad sobre sus calificaciones y su avance en el curso. El posicionamiento buscado no es paridad funcional con Canvas o Moodle, sino integración del flujo académico crítico.
+\textbf{Valor de negocio.} Para la institución, el valor está en reducir la dependencia de planillas externas, dejar evidencia y trazabilidad de entregas y calificaciones, mantener control sobre los datos de cada universidad y operar varias instituciones sin mezclar información. Para el cuerpo docente, en configurar y calcular calificaciones dentro de la plataforma y controlar cuándo se publican. Para el estudiante, en claridad sobre sus calificaciones y su avance en el curso. Se busca una integración del flujo académico crítico, más que un posicionarse en paridad funcional con plataformas como Canvas o Moodle.
 
 \section{2. Interesados y usuarios}
 
@@ -117,11 +117,11 @@ Aislar instituciones & Resolución de tenant por request, base de datos por tena
 \hline
 \end{tabularx}}
 
-\textbf{Fundaciones y extensiones.} Cinco capacidades son precondición del resto y no se negocian: representar cursos y secciones; asociar estudiantes, docentes y ayudantes; mostrar al estudiante su cuerpo docente con nombre y rol; crear y administrar evaluaciones; y registrar, calcular, publicar y visualizar calificaciones. Esta clasificación no saca del flujo planificado al material, las entregas, la corrección ni el dashboard: ordena qué debe existir antes de habilitar extensiones. Las extensiones \emph{nice to have} (video como material, resumen de material mediante IA, chat de sección, chat de grupo, calendario en el dashboard y alertas internas) sólo se incorporan después de validar las fundaciones y si el avance permite absorber su complejidad.
+\textbf{Fundaciones y extensiones.} Se plantean cinco capacidades prioritarias o \emph{must have}: representar cursos y secciones; asociar estudiantes, docentes y ayudantes; mostrar al estudiante su cuerpo docente con nombre y rol; crear y administrar evaluaciones; y registrar, calcular, publicar y visualizar calificaciones. Además, se plantean extensiones \emph{nice to have} como: video como material, resumen de material mediante IA, chat de sección, chat de grupo, calendario en el dashboard y alertas internas. Estas extensiones sólo se incorporarán después de validar las fundaciones y si el avance permite absorber su complejidad.
 
 \textbf{Suposiciones.} (a) El tenant corresponde a una universidad y el curso a un ramo semestral concreto. (b) Todo acceso ocurre con usuario autenticado. (c) El idioma principal de la interfaz es el español. (d) El MVP no reemplaza todas las funcionalidades de un LMS completo. (e) El modelo inicial considera entregas individuales. (f) Supuestos de escala que orientan la arquitectura sin exigir demostrarla en producción: hasta 5 universidades de hasta 30.000 estudiantes cada una (150.000 potenciales), con \emph{spikes} de aproximadamente 1.000 estudiantes concurrentes en ventanas de evaluación, entrega o publicación de notas.
 
-\textbf{Modelo de proceso.} Proceso iterativo liviano, híbrido Scrum/Kanban, con iteraciones de una semana, backlog priorizado por riesgo e incremento demostrable al cierre de cada iteración. Se eligió por sobre un modelo en cascada porque el proyecto tiene incertidumbre funcional (qué parte del LMS aporta valor real) y técnica (multi-tenancy, archivos y carga en ventanas críticas) que conviene resolver temprano y por partes. Cada iteración revisa alcance para evitar sobrealcance.
+\textbf{Modelo de proceso.} CAMBIAR
 
 \section{4. Riesgos}
 
@@ -152,7 +152,7 @@ Negocio & IA prematura & Costo variable y distracción del core académico. & Ma
 
 \section{5. Detalle de la solución propuesta}
 
-\textbf{Requisitos funcionales, trazabilidad y beneficio.} El alcance se ordena por bloques; cada bloque referencia requisitos (\texttt{requirements.md}) e historias con su prioridad MoSCoW (\texttt{user-stories.md}). Los RFO son requisitos funcionales opcionales, condicionados al avance.
+\textbf{Requisitos funcionales, trazabilidad y beneficio.} El alcance se ordena por bloques; cada bloque referencia requisitos e historias con su prioridad MoSCoW. Los RFO son requisitos funcionales opcionales para las funcionalidades \emph{nice to have}, condicionados al avance.
 
 {\small
 \begin{tabularx}{\textwidth}{|p{2.5cm}|p{2.05cm}|Y|Y|}
@@ -175,11 +175,11 @@ Extensiones \emph{nice to have} & RFO1--RFO4, RFO6 (could), RFO7 (fuera) & US27-
 \hline
 \end{tabularx}}
 
-Los RF1 (autenticación), RF6 (configuración general del curso) y RF19 (registro de cambios) son habilitadores transversales sin historia propia: se validan a través de las historias de los bloques que los usan.
+Los RF1 (autenticación), RF6 (configuración general del curso) y RF19 (registro de cambios) son habilitadores transversales para otros requerimientos y por lo tanto no cuentan con historia propia. Se validan a través de las historias de los bloques que los usan.
 
 \textbf{Restricciones.} (i) Ventana efectiva estimada de 10 a 12 semanas dentro de un semestre académico. (ii) Despliegue público con costo controlado. (iii) MVP acotado al core académico. (iv) Google Calendar, Outlook y quizzes en vivo quedan fuera del primer MVP. (v) La IA queda como extensión experimental posterior al core. (vi) El modelo inicial considera entregas individuales: grupos, chats grupales y entregas grupales exigen especificación previa. (vii) Las extensiones \emph{nice to have} sólo se activan después de validar las fundaciones.
 
-\textbf{Requisitos no funcionales como atributos de calidad.} Cada RNF se declara con la acción de diseño que lo sostiene y la evidencia con que se verificará. En lugar de metas numéricas prematuras, la documentación fija escenarios de calidad que describen la reacción esperada frente a fallas probables.
+\textbf{Requisitos no funcionales como atributos de calidad.} Cada RNF se declara con la acción de diseño que lo sostiene y la evidencia con que se verificará. En lugar de metas numéricas prematuras, se fijan escenarios de calidad que describen la reacción esperada frente a fallas probables.
 
 {\small
 \begin{tabularx}{\textwidth}{|p{2.45cm}|Y|Y|}
@@ -206,7 +206,7 @@ Mantenibilidad (RNF7) & Monolito modular por dominio antes de considerar microse
 \hline
 \end{tabularx}}
 
-\textbf{Tecnologías y justificación.} \st{Base decidida:} Next.js como cliente web que consume la API (vistas por rol, dashboard y curso), NestJS como monolito modular con límites de dominio explícitos, PostgreSQL para los datos académicos transaccionales (notas, ponderaciones y estados exigen restricciones y transacciones) y Docker para un entorno reproducible entre integrantes. \st{Proveedor decidido:} Google Cloud Platform, por su crédito gratuito de USD 300 por tres meses, que cubre el desarrollo y la demo final: Cloud Run para frontend y backend como contenedores stateless, Cloud SQL para las bases por tenant y el registry, Cloud Storage para binarios y Cloud Load Balancing cuando se requiera. La elección no amarra la arquitectura: los componentes son portables a otro proveedor. \st{Condicional:} balanceador o API gateway al desplegar más de una réplica, y pool de conexiones (PgBouncer) cuando la cantidad de tenants o la concurrencia presione los límites de conexiones. \st{En veremos:} Redis y workers entran juntos --- Redis es la cola de los workers --- sólo al implementar las historias que los justifiquen: procesamiento de archivos (US11, US14), recálculo de promedios al cambiar ponderaciones (US17) y despacho de notificaciones (US35, RFO6). Hasta entonces el procesamiento es sincrónico.
+\textbf{Tecnologías y justificación.} \st{Stack:} Next.js como cliente web que consume la API (vistas por rol, dashboard y curso), NestJS como monolito modular con límites de dominio explícitos, PostgreSQL para los datos académicos transaccionales (notas, ponderaciones y estados exigen restricciones y transacciones) y Docker para un entorno reproducible entre integrantes. \st{Proveedor:} Google Cloud Platform, por su crédito gratuito de USD 300 por tres meses, que cubre el desarrollo y la demo final: Cloud Run para frontend y backend como contenedores stateless, Cloud SQL para las bases por tenant y el registry, Cloud Storage para binarios y Cloud Load Balancing cuando se requiera. Esta elección permite a la arquitectura no estar ligada a un proveedor y en principio los componentes se pueden portar de un proveedor a otro. \st{Condicional:} balanceador o API gateway al desplegar más de una réplica, y pool de conexiones (PgBouncer) cuando la cantidad de tenants o la concurrencia presione los límites de conexiones. \st{En veremos:} Redis y workers entran juntos --- Redis es la cola de los workers --- sólo al implementar las historias que los justifiquen: procesamiento de archivos (US11, US14), recálculo de promedios al cambiar ponderaciones (US17) y despacho de notificaciones (US35, RFO6). Hasta entonces el procesamiento es sincrónico.
 
 \begin{center}
 \resizebox{0.93\textwidth}{!}{%
@@ -247,7 +247,7 @@ Mantenibilidad (RNF7) & Monolito modular por dominio antes de considerar microse
 \tightcaption{Figura 1. Arquitectura candidata. La ruta base es cliente, frontend, backend modular, registry, base por tenant y object storage; el resto está diseñado pero no comprometido para el primer despliegue.}
 \end{center}
 
-\textbf{Primeras maquetas.} Las maquetas son wireframes navegables en HTML estático (\texttt{mockups/}); cada vista declara las historias que valida y no tiene backend.
+\textbf{Primeras maquetas.} Las maquetas son wireframes navegables en HTML estático; cada vista declara las historias que valida y no tiene backend.
 
 \begin{center}
 \begin{tabular}{ccc}
@@ -275,7 +275,7 @@ El roadmap enumera 12 iteraciones semanales dentro de una ventana efectiva de 10
 {\small
 \begin{tabularx}{\textwidth}{|p{1.1cm}|Y|p{3.2cm}|Y|}
 \hline
-\textbf{Sem.} & \textbf{Actividades técnicas (RF/RNF)} & \textbf{Actividades no técnicas} & \textbf{Estado esperado al cierre} \\
+\textbf{Sem.} & \textbf{Actividades técnicas (RF/RNF)} & \textbf{Actividades no técnicas} & \textbf{Que se espera completar} \\
 \hline
 1--2 & Setup del monorepo, base Next.js y NestJS, autenticación y resolución de tenant (RF1, RF2, RNF3, RNF4). & Visión, modelo de dominio, arquitectura, maquetas y backlog priorizado. & Usuario autenticado y tenant resuelto en cada request. \\
 \hline
@@ -315,6 +315,5 @@ El roadmap enumera 12 iteraciones semanales dentro de una ventana efectiva de 10
 
 \textbf{Anexo A. Trazabilidad RF $\rightarrow$ historias de usuario.} RF1: habilitador. RF2: US5, US8, US12, US30. RF3: US5. RF4: US5, US6. RF5: US7, US8. RF6: habilitador. RF7: US9, US10. RF8: US11, US12. RF9: US13, US17. RF10: US2, US16. RF11: US14. RF12: US15. RF13: US18. RF14: US19, US20. RF15: US17, US19, US20. RF16: US15, US21. RF17: US22. RF18: US1--US4, US23, US24. RF19: habilitador (soporta RNF5). RF20: US26. RF21: US30. RF22: US17, US20. RFO1: US31. RFO2: US32. RFO3: US33. RFO4: US34. RFO5: US25. RFO6: US35, US36. RFO7: US37 (fuera del alcance inicial).
 
-\textbf{Anexo B. Documentos fuente.} Este informe condensa \texttt{scope.md} (principio rector, fundaciones y extensiones), \texttt{requirements.md} (RF, RFO, RNF, escenarios de calidad y restricciones), \texttt{user-stories.md} (37 historias con criterios de aceptación y prioridad MoSCoW), \texttt{architecture.md} y \texttt{architecture-diagram.md} (proveedor, tenancy, componentes base y condicionados, replicación por tenant), \texttt{roadmap.md} (mapeo de RF y RNF por iteración), \texttt{design-doc-entrega-1.md}, \texttt{glossary.md}, \texttt{discovery-notes.md} y \texttt{checklist.md}, todos en \texttt{docs/deliveries/0/}. Las maquetas navegables y el mapa vista $\rightarrow$ historia están en \texttt{mockups/}, y el sistema de diseño en \texttt{DESIGN.md}.
 
 \end{document}
