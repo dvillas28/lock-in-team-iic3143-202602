@@ -1,5 +1,47 @@
 # Historias De Usuario
 
+## Resumen De Priorizacion
+
+| US | Prioridad | Area | Resultado esperado |
+| --- | --- | --- | --- |
+| US1 | Must Have | Dashboard | El estudiante ve sus cursos activos. |
+| US2 | Must Have | Dashboard | El estudiante ve evaluaciones pendientes ordenadas. |
+| US3 | Should Have | Dashboard | El estudiante identifica la proxima actividad del curso. |
+| US4 | Should Have | Dashboard | El cuerpo docente ve cursos y entregas pendientes de correccion. |
+| US5 | Must Have | Administracion y cursos | El administrador crea cursos del tenant correcto. |
+| US6 | Must Have | Administracion y cursos | El administrador crea secciones del curso. |
+| US7 | Must Have | Administracion y cursos | El docente gestiona participantes y roles contextuales. |
+| US8 | Should Have | Administracion y cursos | El administrador gestiona usuarios de su universidad. |
+| US9 | Must Have | Contenido del curso | El docente organiza contenido por modulos. |
+| US10 | Should Have | Contenido del curso | El docente publica u oculta modulos. |
+| US11 | Must Have | Contenido del curso | El docente centraliza material academico. |
+| US12 | Should Have | Contenido del curso | El estudiante accede a material publicado autorizado. |
+| US13 | Must Have | Evaluaciones y entregas | El docente crea evaluaciones con reglas claras. |
+| US14 | Must Have | Evaluaciones y entregas | El estudiante entrega evaluaciones con evidencia registrada. |
+| US15 | Must Have | Evaluaciones y entregas | El revisor corrige sin publicar automaticamente. |
+| US16 | Should Have | Evaluaciones y entregas | El estudiante confirma estado de entrega. |
+| US17 | Must Have | Libro de notas | El docente configura ponderaciones y el sistema calcula promedios. |
+| US18 | Must Have | Libro de notas | El docente libera notas manualmente. |
+| US19 | Must Have | Libro de notas | El estudiante ve solo sus notas publicadas. |
+| US20 | Must Have | Libro de notas | El estudiante ve promedio actual y estado parcial. |
+| US21 | Should Have | Libro de notas | El revisor registra comentarios de correccion. |
+| US22 | Could Have | Libro de notas | El estudiante solicita recorreccion. |
+| US23 | Should Have | Anuncios y calendario | El cuerpo docente publica anuncios del curso. |
+| US24 | Should Have | Anuncios y calendario | El estudiante ve anuncios recientes. |
+| US25 | Could Have | Anuncios y calendario | El estudiante usa calendario interno en dashboard. |
+| US26 | Should Have | Lector de documentos e IA | El estudiante lee PDFs dentro de la plataforma. |
+| US27 | Could Have | Lector de documentos e IA | El estudiante pregunta sobre un documento. |
+| US28 | Could Have | Lector de documentos e IA | El estudiante pide explicaciones sobre texto seleccionado. |
+| US29 | Could Have | Lector de documentos e IA | La IA entrega citas o declara falta de evidencia. |
+| US30 | Must Have | Visibilidad del cuerpo docente | El estudiante identifica docentes y ayudantes de su seccion. |
+| US31 | Could Have | Extensiones Nice To Have | El docente carga videos como material. |
+| US32 | Could Have | Extensiones Nice To Have | El estudiante solicita resumen de material publicado. |
+| US33 | Could Have | Extensiones Nice To Have | Participantes usan chat de seccion con permisos. |
+| US34 | Could Have | Extensiones Nice To Have | Estudiantes usan chat de grupo si existe modelo grupal. |
+| US35 | Could Have | Extensiones Nice To Have | El estudiante recibe alertas internas. |
+| US36 | Could Have | Extensiones Nice To Have | El usuario controla alertas leidas y no leidas. |
+| US37 | Fuera del alcance inicial | Extension posterior | El usuario recibe alertas por correo si existe proveedor y preferencias. |
+
 ## Dashboard
 
 US1. Como estudiante, quiero visualizar todos mis cursos actuales en un dashboard para acceder rapidamente a mi actividad academica.
@@ -111,6 +153,7 @@ US17. Como docente, quiero configurar ponderaciones para que el promedio del cur
 Criterios de aceptacion:
 - El docente puede definir o editar ponderaciones de evaluaciones del curso.
 - El sistema advierte si las ponderaciones no suman el total esperado.
+- El libro de notas calcula promedios dentro de la plataforma usando las ponderaciones validas e indica cuando la configuracion esta incompleta.
 
 US18. Como docente, quiero liberar notas manualmente para controlar cuando son visibles para estudiantes.
 
@@ -159,8 +202,9 @@ Criterios de aceptacion:
 US25. Como estudiante, quiero visualizar un calendario interno de evaluaciones para organizar mis pendientes.
 
 Criterios de aceptacion:
-- El calendario muestra evaluaciones de cursos donde el estudiante esta inscrito.
-- Cada evento muestra curso, titulo, fecha limite y estado de entrega cuando corresponda.
+- El calendario se muestra en el dashboard junto a los cursos, sin exigir navegar a una seccion separada para consultar la actividad proxima.
+- El calendario muestra evaluaciones y fechas de entrega de cursos donde el estudiante esta inscrito.
+- Cada evento muestra curso, titulo, fecha limite y estado de entrega cuando corresponda, con acceso al contexto de la evaluacion.
 
 ## Lector De Documentos E IA
 
@@ -188,16 +232,81 @@ Criterios de aceptacion:
 - Cada respuesta basada en documentos incluye pagina o seccion de origen cuando la fuente esta disponible.
 - Si no hay cita confiable, la respuesta indica que no puede respaldarse con el documento.
 
+## Visibilidad Del Cuerpo Docente
+
+US30. Como estudiante, quiero visualizar el docente y el cuerpo docente de mi seccion para saber quienes son los responsables del curso.
+
+Criterios de aceptacion:
+- Al ingresar a una seccion, el estudiante puede visualizar a sus docentes y ayudantes.
+- Para cada integrante se muestra al menos nombre y rol.
+- Solo se muestran integrantes asignados a la seccion correspondiente o integrantes con alcance sobre el mismo curso.
+- La consulta no expone integrantes de otros cursos, secciones o tenants.
+
+## Extensiones Nice To Have
+
+US31. Como docente, quiero cargar videos como material academico para centralizar los recursos del curso.
+
+Criterios de aceptacion:
+- El docente puede agregar un video a un modulo de un curso donde tiene permiso de gestion de material.
+- El video respeta formatos y limites de tamano definidos y conserva estado visible u oculto.
+- Solo participantes autorizados pueden acceder a videos publicados del curso correspondiente.
+
+US32. Como estudiante, quiero solicitar un resumen de material publicado para repasar sus contenidos principales.
+
+Criterios de aceptacion:
+- El resumen usa solo material publicado al que el estudiante tiene acceso.
+- La respuesta identifica el material utilizado y advierte cuando no existe evidencia suficiente.
+
+US33. Como participante de una seccion, quiero usar un chat de seccion para comunicarme con estudiantes y cuerpo docente del mismo contexto academico.
+
+Criterios de aceptacion:
+- Solo participantes activos de la seccion pueden leer o enviar mensajes.
+- Cada mensaje registra autor, seccion y fecha de envio.
+- El sistema impide acceder a conversaciones de otras secciones o tenants.
+
+US34. Como estudiante, quiero usar un chat con mi grupo de trabajo para coordinar actividades grupales.
+
+Criterios de aceptacion:
+- La historia solo puede habilitarse cuando exista un modelo de grupos y membresias definido para el curso o seccion.
+- Solo integrantes activos del grupo pueden leer o enviar mensajes.
+- La pertenencia al grupo no concede acceso a otros grupos, secciones o tenants.
+
+US35. Como estudiante, quiero recibir alertas dentro de la plataforma para identificar cambios o vencimientos relevantes.
+
+Criterios de aceptacion:
+- Las alertas se presentan como toast o lista desplegable sin bloquear el flujo principal.
+- Las alertas se originan en evaluaciones, entregas u otros cambios relevantes del curso.
+- Cada alerta identifica el curso, el motivo y el acceso a la actividad relacionada cuando corresponda.
+- El estudiante recibe solo alertas de cursos donde esta inscrito.
+- La informacion relevante permanece disponible en la lista y no se comunica unicamente mediante color o un toast transitorio.
+
+US36. Como usuario, quiero controlar el estado de mis alertas para distinguir novedades de informacion ya revisada.
+
+Criterios de aceptacion:
+- El usuario puede identificar alertas leidas y no leidas.
+- Marcar una alerta como leida no afecta el estado de otros usuarios.
+
+US37. Como usuario, quiero recibir alertas academicas por correo para conocer eventos relevantes fuera de la plataforma.
+
+Criterios de aceptacion:
+- El envio respeta preferencias de notificacion configurables.
+- Cada correo identifica el tenant y curso de origen sin revelar informacion de otros contextos.
+- Los fallos de entrega no alteran el registro academico ni bloquean el flujo principal.
+
 ## Priorizacion MVP
 
 ### Must Have
 
-- US1, US2, US5, US6, US7, US9, US11, US13, US14, US15, US17, US18, US19.
+- US1, US2, US5, US6, US7, US9, US11, US13, US14, US15, US17, US18, US19, US20, US30.
 
 ### Should Have
 
-- US3, US4, US8, US10, US12, US16, US20, US21, US23, US24, US25, US26.
+- US3, US4, US8, US10, US12, US16, US21, US23, US24, US26.
 
 ### Could Have
 
-- US22, US27, US28, US29.
+- US22, US25, US27, US28, US29, US31, US32, US33, US34, US35, US36.
+
+### Fuera Del Alcance Inicial
+
+- US37.

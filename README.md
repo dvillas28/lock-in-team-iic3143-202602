@@ -101,6 +101,3 @@ Crear PR hacia `main` y enlazar el spec trabajado. Ver
 - Archivos: object storage compatible con S3.
 - Infraestructura: load balancer, reverse proxy/API gateway, connection pool y despliegue cloud con free tiers cuando sea posible.
 
-## Modelo De Proceso
-
-Se propone un enfoque iterativo liviano, tipo Scrum/Kanban hibrido, con iteraciones de una semana. El proyecto tiene incertidumbre funcional y tecnica, por lo que conviene validar temprano el core antes de sumar funcionalidades estrella como IA.
