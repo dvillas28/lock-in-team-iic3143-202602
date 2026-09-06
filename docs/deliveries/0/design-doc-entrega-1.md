@@ -114,15 +114,25 @@ Estos supuestos se usan para orientar arquitectura y requisitos no funcionales. 
 
 ## 7. Modelo De Proceso
 
-Se propone un modelo iterativo liviano, tipo Scrum/Kanban hibrido, con iteraciones semanales.
+El flujo académico del sistema se estructura en tres procesos principales: la consulta de actividad del estudiante, el envío de una evaluación y la corrección con publicación de resultados. En cada proceso se distinguen las acciones de los usuarios y las tareas de la plataforma, junto con las decisiones que condicionan su avance. Se destacan dos controles: una entrega sólo se confirma después de persistir su contenido y metadatos, y una calificación permanece oculta hasta que el docente decide liberarla.
 
-Este enfoque permite:
+### Consulta de la actividad académica
+- Ver cursos, pendientes y anuncios.
+- Elegir un curso y consultar el equipo de la sección.
+- Acceder al material publicado y leer PDF.
+- Entregar evaluaciones o consultar calificaciones.
 
-- Priorizar riesgos tecnicos temprano.
-- Ajustar alcance segun avance real.
-- Entregar incrementos funcionales cada semana.
-- Mantener visibilidad del backlog.
-- Evitar sobrealcance.
+### Envío y confirmación de recepción
+- Validar inscripción, fecha y reglas de envío.
+- Enviar el archivo o contenido si está permitido.
+- Persistir contenido y metadatos; reintentar si no se confirma la recepción.
+- Consultar el estado y la fecha de recepción.
+
+### Corrección y publicación (Docente y ayudante autorizado)
+- Registrar o revisar notas y comentarios.
+- Guardar la corrección oculta y auditar los cambios.
+- Calcular promedios o advertir ponderaciones inválidas.
+- El docente decide cuándo liberar las notas.
 
 ## 8. Detalle De La Solucion Propuesta
 
