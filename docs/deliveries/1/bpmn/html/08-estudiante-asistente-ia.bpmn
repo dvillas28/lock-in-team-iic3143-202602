@@ -1,0 +1,176 @@
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_08-estudiante-asistente-ia" targetNamespace="https://academix.example/bpmn">
+  <bpmn:process id="Process" name="Estudiante · consultar el asistente de material" isExecutable="false">
+    <bpmn:documentation>EXTENSIÓN OPCIONAL · requiere IA habilitada y acceso al material publicado; no es parte obligatoria del MVP
+Las preguntas del lector se limitan al documento abierto; explicar una selección conserva su referencia. El resumen identifica el material utilizado.
+No se inventa respaldo: si no hay evidencia suficiente, la respuesta lo declara. La IA es una función de la plataforma, no un quinto rol humano.
+RFO2 · US27–US29, US32 · mockup-pdf-reader.png</bpmn:documentation>
+    <bpmn:laneSet id="Lanes">
+      <bpmn:lane id="Lane_0" name="Estudiante">
+        <bpmn:flowNodeRef>s</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>open</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>read</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_1" name="Plataforma y asistente IA">
+        <bpmn:flowNodeRef>search</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>g</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>yes</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>no</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>e</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="s" name="Consultar material">
+      <bpmn:outgoing>Flow_0</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="open" name="Abrir material y elegir contexto">
+      <bpmn:incoming>Flow_0</bpmn:incoming>
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="ask" name="Pedir explicación, respuesta o resumen">
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="search" name="Buscar evidencia en material autorizado">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="g" name="¿Evidencia suficiente?" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_4</bpmn:outgoing>
+      <bpmn:outgoing>Flow_5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="yes" name="Responder con citas de página o sección">
+      <bpmn:incoming>Flow_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="no" name="Indicar evidencia insuficiente">
+      <bpmn:incoming>Flow_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="read" name="Revisar respuesta y su respaldo">
+      <bpmn:incoming>Flow_6</bpmn:incoming>
+      <bpmn:incoming>Flow_7</bpmn:incoming>
+      <bpmn:outgoing>Flow_8</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="e" name="Consulta completada">
+      <bpmn:incoming>Flow_8</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0" sourceRef="s" targetRef="open" name="" />
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="open" targetRef="ask" name="" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="ask" targetRef="search" name="" />
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="search" targetRef="g" name="" />
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="g" targetRef="yes" name="Sí" />
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="g" targetRef="no" name="No" />
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="yes" targetRef="read" name="" />
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="no" targetRef="read" name="" />
+    <bpmn:sequenceFlow id="Flow_8" sourceRef="read" targetRef="e" name="" />
+  </bpmn:process>
+  <bpmn:collaboration id="Collaboration">
+    <bpmn:participant id="University" name="Operación académica de una universidad (tenant)" processRef="Process" />
+  </bpmn:collaboration>
+  <bpmndi:BPMNDiagram id="Diagram">
+    <bpmndi:BPMNPlane id="Plane" bpmnElement="Collaboration">
+      <bpmndi:BPMNShape id="University_di" bpmnElement="University" isHorizontal="true">
+        <dc:Bounds x="8" y="176" width="1712" height="600" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0_di" bpmnElement="Lane_0" isHorizontal="true">
+        <dc:Bounds x="40" y="176" width="1680" height="300" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_1_di" bpmnElement="Lane_1" isHorizontal="true">
+        <dc:Bounds x="40" y="476" width="1680" height="300" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_di" bpmnElement="s">
+        <dc:Bounds x="220.0" y="300.0" width="40" height="40" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="148" y="344" width="184" height="52" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="open_di" bpmnElement="open">
+        <dc:Bounds x="364.0" y="268.0" width="200" height="104" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ask_di" bpmnElement="ask">
+        <dc:Bounds x="604.0" y="268.0" width="200" height="104" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="search_di" bpmnElement="search">
+        <dc:Bounds x="844.0" y="568.0" width="200" height="104" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="g_di" bpmnElement="g">
+        <dc:Bounds x="1156.0" y="592.0" width="56" height="56" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1092" y="520" width="184" height="52" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="yes_di" bpmnElement="yes">
+        <dc:Bounds x="1304.0" y="496.0" width="200" height="104" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="no_di" bpmnElement="no">
+        <dc:Bounds x="1304.0" y="644.0" width="200" height="104" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="read_di" bpmnElement="read">
+        <dc:Bounds x="1504.0" y="268.0" width="200" height="104" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="e_di" bpmnElement="e">
+        <dc:Bounds x="1584.0" y="600.0" width="40" height="40" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1512" y="644" width="184" height="52" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0_di" bpmnElement="Flow_0">
+        <di:waypoint x="260.0" y="320" />
+        <di:waypoint x="364.0" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
+        <di:waypoint x="564.0" y="320" />
+        <di:waypoint x="604.0" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+        <di:waypoint x="804.0" y="320" />
+        <di:waypoint x="824" y="320" />
+        <di:waypoint x="824" y="620" />
+        <di:waypoint x="844.0" y="620" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
+        <di:waypoint x="1044.0" y="620" />
+        <di:waypoint x="1156.0" y="620" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4">
+        <di:waypoint x="1212.0" y="620" />
+        <di:waypoint x="1256" y="620" />
+        <di:waypoint x="1256" y="548" />
+        <di:waypoint x="1304.0" y="548" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1204" y="500" width="144" height="24" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5">
+        <di:waypoint x="1184" y="648.0" />
+        <di:waypoint x="1184" y="696" />
+        <di:waypoint x="1304.0" y="696" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1168" y="648" width="144" height="24" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6">
+        <di:waypoint x="1504.0" y="548" />
+        <di:waypoint x="1536" y="548" />
+        <di:waypoint x="1536" y="400" />
+        <di:waypoint x="1592" y="400" />
+        <di:waypoint x="1592" y="372" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7">
+        <di:waypoint x="1504.0" y="696" />
+        <di:waypoint x="1560" y="696" />
+        <di:waypoint x="1560" y="440" />
+        <di:waypoint x="1616" y="440" />
+        <di:waypoint x="1616" y="372" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8">
+        <di:waypoint x="1704.0" y="320" />
+        <di:waypoint x="1716" y="320" />
+        <di:waypoint x="1716" y="620" />
+        <di:waypoint x="1624.0" y="620" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

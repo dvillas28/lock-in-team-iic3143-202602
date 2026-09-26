@@ -1,0 +1,185 @@
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_06-estudiante-entrega" targetNamespace="https://academix.example/bpmn">
+  <bpmn:process id="Process" name="Estudiante · enviar una evaluación individual" isExecutable="false">
+    <bpmn:documentation>Precondición: evaluación seleccionada · una entrega se confirma solo con contenido y metadatos persistidos
+La fecha límite solo bloquea cuando la evaluación no admite atraso. En cada reintento se vuelven a comprobar las reglas y los permisos.
+Recepción = autor, fecha, archivo o contenido y estado confirmados. Un fallo muestra un error recuperable y no crea una entrega ni nota inválida.
+RF10–RF11 · US14, US16 · RNF5 · requirements.md: Falla al subir una entrega</bpmn:documentation>
+    <bpmn:laneSet id="Lanes">
+      <bpmn:lane id="Lane_0" name="Estudiante">
+        <bpmn:flowNodeRef>s</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>no</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>u</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>state</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_1" name="Plataforma AcademiX">
+        <bpmn:flowNodeRef>v</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>g</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>save</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ok</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>e</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="s" name="Enviar evaluación">
+      <bpmn:outgoing>Flow_0</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="v" name="Validar inscripción, fecha y reglas de envío">
+      <bpmn:incoming>Flow_0</bpmn:incoming>
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+      <bpmn:incoming>Flow_8</bpmn:incoming>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="g" name="¿Envío permitido?" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="no" name="Envío rechazado">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="u" name="Enviar archivo o contenido">
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_4</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="save" name="Persistir contenido y metadatos">
+      <bpmn:incoming>Flow_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_5</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ok" name="¿Recepción confirmada?" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_6</bpmn:outgoing>
+      <bpmn:outgoing>Flow_8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="state" name="Ver estado y fecha de recepción">
+      <bpmn:incoming>Flow_6</bpmn:incoming>
+      <bpmn:outgoing>Flow_7</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="e" name="Entrega recibida o atrasada">
+      <bpmn:incoming>Flow_7</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0" sourceRef="s" targetRef="v" name="" />
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="v" targetRef="g" name="" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="g" targetRef="no" name="No" />
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="g" targetRef="u" name="Sí" />
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="u" targetRef="save" name="" />
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="save" targetRef="ok" name="" />
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="ok" targetRef="state" name="Sí" />
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="state" targetRef="e" name="" />
+    <bpmn:sequenceFlow id="Flow_8" sourceRef="ok" targetRef="v" name="No: reintentar" />
+  </bpmn:process>
+  <bpmn:collaboration id="Collaboration">
+    <bpmn:participant id="University" name="Operación académica de una universidad (tenant)" processRef="Process" />
+  </bpmn:collaboration>
+  <bpmndi:BPMNDiagram id="Diagram">
+    <bpmndi:BPMNPlane id="Plane" bpmnElement="Collaboration">
+      <bpmndi:BPMNShape id="University_di" bpmnElement="University" isHorizontal="true">
+        <dc:Bounds x="8" y="176" width="1712" height="600" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0_di" bpmnElement="Lane_0" isHorizontal="true">
+        <dc:Bounds x="40" y="176" width="1680" height="300" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_1_di" bpmnElement="Lane_1" isHorizontal="true">
+        <dc:Bounds x="40" y="476" width="1680" height="300" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="s_di" bpmnElement="s">
+        <dc:Bounds x="220.0" y="300.0" width="40" height="40" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="148" y="344" width="184" height="52" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="v_di" bpmnElement="v">
+        <dc:Bounds x="364.0" y="568.0" width="200" height="104" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="g_di" bpmnElement="g">
+        <dc:Bounds x="676.0" y="592.0" width="56" height="56" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="612" y="644" width="184" height="52" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="no_di" bpmnElement="no">
+        <dc:Bounds x="684.0" y="300.0" width="40" height="40" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="612" y="232" width="184" height="52" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="u_di" bpmnElement="u">
+        <dc:Bounds x="844.0" y="268.0" width="200" height="104" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="save_di" bpmnElement="save">
+        <dc:Bounds x="1084.0" y="568.0" width="200" height="104" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ok_di" bpmnElement="ok">
+        <dc:Bounds x="1376.0" y="592.0" width="56" height="56" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1312" y="520" width="184" height="52" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="state_di" bpmnElement="state">
+        <dc:Bounds x="1504.0" y="268.0" width="200" height="104" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="e_di" bpmnElement="e">
+        <dc:Bounds x="1584.0" y="600.0" width="40" height="40" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1512" y="644" width="184" height="52" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0_di" bpmnElement="Flow_0">
+        <di:waypoint x="260.0" y="320" />
+        <di:waypoint x="312" y="320" />
+        <di:waypoint x="312" y="620" />
+        <di:waypoint x="364.0" y="620" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
+        <di:waypoint x="564.0" y="620" />
+        <di:waypoint x="676.0" y="620" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+        <di:waypoint x="704" y="592.0" />
+        <di:waypoint x="704" y="340.0" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="672" y="448" width="144" height="24" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
+        <di:waypoint x="732.0" y="620" />
+        <di:waypoint x="788" y="620" />
+        <di:waypoint x="788" y="320" />
+        <di:waypoint x="844.0" y="320" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="752" y="272" width="144" height="24" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4">
+        <di:waypoint x="1044.0" y="320" />
+        <di:waypoint x="1064" y="320" />
+        <di:waypoint x="1064" y="620" />
+        <di:waypoint x="1084.0" y="620" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5">
+        <di:waypoint x="1284.0" y="620" />
+        <di:waypoint x="1376.0" y="620" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6">
+        <di:waypoint x="1432.0" y="620" />
+        <di:waypoint x="1468" y="620" />
+        <di:waypoint x="1468" y="320" />
+        <di:waypoint x="1504.0" y="320" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1408" y="272" width="144" height="24" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7">
+        <di:waypoint x="1604" y="372.0" />
+        <di:waypoint x="1604" y="600.0" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8">
+        <di:waypoint x="1404" y="648.0" />
+        <di:waypoint x="1404" y="724" />
+        <di:waypoint x="464" y="724" />
+        <di:waypoint x="464" y="672.0" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="960" y="676" width="144" height="24" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
