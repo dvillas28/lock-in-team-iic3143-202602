@@ -2,18 +2,18 @@
 
 ## Completo en esta base documental
 
-- Scope MVP actualizado.
+- Alcance MVP actualizado.
 - Requisitos y casos de uso del MVP.
 - Arquitectura ajustada a Railway.
-- Migracion posterior a Google Cloud documentada.
-- Modelo de dominio del flujo academico minimo.
+- Migración posterior a Google Cloud documentada.
+- Modelo de dominio del flujo académico mínimo.
 - Modelo de datos registry + tenant DB.
 - Riesgos actualizados.
 - Plan de trabajo actualizado.
 - Plan de walking skeleton.
 - Trazabilidad contra pauta de Entrega 2.
 
-## Falta antes de entregar implementacion
+## Falta antes de la implementación
 
 - Spec Kit del walking skeleton.
 - Implementar frontend Hello World.
@@ -27,24 +27,24 @@
 - Crear tag y release GitHub.
 - Guardar evidencia de pipeline y despliegue.
 
-## Falta para MVP academico posterior
+## Falta para MVP académico posterior
 
 - Cursos y secciones.
-- Enrollments por seccion y rol.
+- Enrollments por sección y rol.
 - Material markdown y archivos.
 - Quizzes de alternativas.
-- Calculo automatico de nota.
+- Cálculo automático de nota.
 - Libro de notas con ponderaciones.
-- Publicacion de notas.
+- Publicación de notas.
 - Vista estudiante de notas publicadas y promedio.
 
 ## Deuda aceptada
 
 - Auth mock inicial.
 - Rutas `/uc` y `/utfsm` + header `x-tenant` antes de subdominios.
-- Sin auditoria historica.
+- Sin auditoría histórica.
 - Sin Redis/workers.
-- Sin replicas.
+- Sin réplicas.
 - Sin admin institucional separado.
 - Sin recorrecciones.
 
@@ -52,4 +52,4 @@
 
 Los documentos de Entrega 1 quedan como antecedente en `docs/deliveries/1`.
 Entrega 2 no los reemplaza por completo: los recorta y actualiza para guiar la
-implementacion inmediata.
+implementación inmediata.

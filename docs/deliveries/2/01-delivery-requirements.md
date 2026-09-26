@@ -1,6 +1,6 @@
-# Requisitos Formales Entrega 2
+# Requisitos formales Entrega 2
 
-Este documento traza la pauta de Entrega 2 contra la documentacion creada.
+Este documento traza la pauta de Entrega 2 contra la documentación creada.
 
 ## Trazabilidad
 
@@ -18,35 +18,35 @@ Total: 7.0 puntos.
 
 ## Requisitos operacionales
 
-| Requisito | Estado documental | Criterio para implementacion |
+| Requisito | Estado documental | Criterio para implementación |
 | --- | --- | --- |
 | Repositorio creado | Existente | URL remota visible en entrega o informe. |
-| Backend Hello World | Planificado | Endpoint `/health` y endpoint `/api/hello`. |
-| Frontend Hello World | Planificado | Vista inicial consume backend. |
-| Frontend conectado a backend | Planificado | UI muestra respuesta real del backend. |
-| CI backend | Planificado | Instala, valida formato/tipos/tests minimos. |
-| CI frontend | Planificado | Instala, valida build/lint/tests minimos. |
-| CI con stages definidos | Planificado | Stages separados: install, validate, test/build. |
-| CD a produccion | Planificado | Railway con GitHub autodeploy y `railway.toml`. |
-| CD manual justificado | Fallback | Solo si permisos/limites de cuenta bloquean automatizacion. |
-| Tag + release GitHub | Planificado | Release creada desde tag versionado. |
+| Backend Hello World | Por implementar en Spec Kit | Endpoint `/health` y endpoint `/api/hello`. |
+| Frontend Hello World | Por implementar en Spec Kit | Vista inicial consume backend. |
+| Frontend conectado a backend | Por implementar en Spec Kit | UI muestra respuesta real del backend. |
+| CI backend | Por implementar en Spec Kit | Instala, valida formato/tipos/tests mínimos. |
+| CI frontend | Por implementar en Spec Kit | Instala, valida build/lint/tests mínimos. |
+| CI con stages definidos | Por implementar en Spec Kit | Stages separados: install, validate, test/build. |
+| CD a producción | Por implementar en Spec Kit | Railway con GitHub autodeploy y `railway.toml`. |
+| CD manual justificado | Fallback | Solo si permisos/límites de cuenta bloquean automatización. |
+| Tag + release GitHub | Por implementar en Spec Kit | Release creada desde tag versionado. |
 
 ## Feedback Entrega 1 incorporado
 
 - El alcance se recorta para que sea implementable.
-- Railway se usa para la primera version funcional por rapidez y evidencia.
-- Google Cloud queda como migracion posterior con free tier/creditos asociados.
-- Las tecnologias condicionadas no se documentan como obligatorias.
+- Railway se usa para la primera versión funcional por rapidez y evidencia.
+- Google Cloud queda como migración posterior con free tier/créditos asociados.
+- Las tecnologías condicionadas no se documentan como obligatorias.
 - El modelo de datos baja a tablas concretas del MVP.
-- La auditoria academica queda como decision explicita fuera del MVP, no como
+- La auditoría académica queda como decisión explícita fuera del MVP, no como
   requisito silencioso.
 
-## Evidencia esperada en la entrega
+## Evidencia esperada para la implementación posterior
 
 - Links a workflows CI ejecutados.
 - Link a release/tag.
-- URL publica de frontend Railway.
+- URL pública de frontend Railway.
 - URL o captura del backend healthcheck.
 - Variables de entorno documentadas sin secretos.
 - `railway.toml` versionado para servicios desplegables.
-- Justificacion breve solo si CD queda manual.
+- Justificación breve solo si CD queda manual.

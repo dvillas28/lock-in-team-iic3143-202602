@@ -1,4 +1,4 @@
-# Plan Walking Skeleton
+# Plan de walking skeleton
 
 ## Objetivo
 
@@ -6,9 +6,9 @@ Probar que AcademiX puede desplegar frontend y backend en Railway, conectar
 ambos, ejecutar CI/CD automatizado con `railway.toml` y resolver tenancy hacia
 bases separadas.
 
-No implementa todavia el flujo LMS completo.
+No implementa todavía el flujo LMS completo.
 
-## Alcance tecnico
+## Alcance técnico
 
 Frontend:
 
@@ -30,11 +30,11 @@ Datos:
 
 - `registry_db` con tenants `uc` y `utfsm`;
 - DBs `academix_uc_db` y `academix_utfsm_db`;
-- tabla minima de prueba por tenant o migracion inicial del schema.
+- tabla mínima de prueba por tenant o migración inicial del schema.
 
 ## CI propuesto
 
-Stages minimos:
+Stages mínimos:
 
 ```txt
 install
@@ -47,44 +47,44 @@ Backend:
 
 - instalar dependencias con `pnpm`;
 - revisar tipos/lint si existen scripts;
-- test minimo de health/hello o unidad de tenant resolver;
+- test mínimo de health/hello o unidad de tenant resolver;
 - build.
 
 Frontend:
 
 - instalar dependencias con `pnpm`;
 - revisar tipos/lint si existen scripts;
-- test minimo o build;
+- test mínimo o build;
 - build.
 
 ## CD propuesto
 
-Opcion preferida:
+Opción preferida:
 
 - Railway conectado al repo;
-- deploy automatico desde `main` o tag;
+- deploy automático desde `main` o tag;
 - `railway.toml` versionado para definir build/deploy;
 - si el repo queda como monorepo, cada servicio debe usar su propio
-  `railway.toml` o ruta de configuracion equivalente;
+  `railway.toml` o ruta de configuración equivalente;
 - variables de entorno configuradas en Railway;
-- release GitHub incluye URL de produccion.
+- release GitHub incluye URL de producción.
 
-Opcion fallback:
+Opción fallback:
 
 - deploy manual Railway CLI o dashboard;
 - comando/procedimiento documentado;
 - evidencia con fecha, commit, URL y captura/log.
 
-El fallback manual solo es aceptable si free tier, limites de cuenta o permisos
-impiden CD automatico confiable.
+El fallback manual solo es aceptable si free tier, límites de cuenta o permisos
+impiden CD automático confiable.
 
-## Migracion posterior
+## Migración posterior
 
-Railway es el destino de la primera version funcional. Despues de validar el
-walking skeleton y el flujo academico minimo, el proyecto debe migrarse a Google
-Cloud usando el free tier/creditos disponibles en la cuenta asociada.
+Railway es el destino de la primera versión funcional. Después de validar el
+walking skeleton y el flujo académico mínimo, el proyecto debe migrarse a Google
+Cloud usando el free tier/créditos disponibles en la cuenta asociada.
 
-La migracion esperada es:
+La migración esperada es:
 
 - servicios Railway -> Cloud Run;
 - PostgreSQL Railway -> Cloud SQL;
@@ -101,36 +101,36 @@ Backend:
 
 Frontend:
 
-- `NEXT_PUBLIC_API_URL` o equivalente segun stack elegido.
+- `NEXT_PUBLIC_API_URL` o equivalente según stack elegido.
 
 No se deben commitear secretos.
 
-## Criterios de aceptacion
+## Criterios de aceptación
 
 - CI corre para frontend y backend.
 - Frontend desplegado muestra respuesta real del backend.
 - Backend desplegado responde `/health`.
 - Portal permite elegir UC y UTFSM.
-- `/uc` envia `x-tenant: uc` y resuelve UC.
-- `/utfsm` envia `x-tenant: utfsm` y resuelve UTFSM.
-- Request sin tenant o con tenant invalido falla de forma controlada.
+- `/uc` envía `x-tenant: uc` y resuelve UC.
+- `/utfsm` envía `x-tenant: utfsm` y resuelve UTFSM.
+- Request sin tenant o con tenant inválido falla de forma controlada.
 - Existe tag y release de GitHub para la entrega.
 
-## Evidencia a guardar
+## Evidencia a guardar durante la implementación posterior
 
 - Link a workflow CI exitoso.
 - Link a release/tag.
 - URL frontend.
-- URL backend healthcheck, si es publica.
+- URL backend healthcheck, si es pública.
 - Captura o log de Railway deploy.
 - `railway.toml` versionado.
 - Nota breve si CD fue manual.
 
-## Preparacion para Spec Kit
+## Preparación para Spec Kit
 
 El Spec Kit siguiente debe pedir solo esto:
 
-- crear monorepo minimo si falta;
+- crear monorepo mínimo si falta;
 - crear frontend y backend Hello World;
 - crear portal home con rutas `/uc` y `/utfsm`;
 - crear tenant resolver por header;

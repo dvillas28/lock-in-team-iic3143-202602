@@ -1,88 +1,88 @@
-# Choose Delivery 2 MVP Scope
+# Elegir alcance MVP para Entrega 2
 
-Date: 2026-09-26
+Fecha: 2026-09-26
 
-## Status
+## Estado
 
-Accepted.
+Aceptado.
 
-## Context
+## Contexto
 
-Entrega 1 definio AcademiX como un LMS universitario multi-tenant con alcance
-amplio: cursos, material, evaluaciones, entregas, correccion manual, libro de
-notas, auditoria, GCP como cloud objetivo y extensiones como IA, chat,
-calendario, workers, Redis y replicas.
+Entrega 1 definió AcademiX como un LMS universitario multi-tenant con alcance
+amplio: cursos, material, evaluaciones, entregas, corrección manual, libro de
+notas, auditoría, GCP como cloud objetivo y extensiones como IA, chat,
+calendario, workers, Redis y réplicas.
 
-Para Entrega 2, el equipo nominal es de 5 personas, pero la implementacion real
+Para Entrega 2, el equipo nominal es de 5 personas, pero la implementación real
 depende casi de una persona durante aproximadamente 2 meses. Mantener el alcance
 original aumenta el riesgo de no entregar un sistema demostrable.
 
-La decision que no se quiere perder es arquitectonica: AcademiX debe validar
-multi-tenancy real por universidad usando sharding. Cada institucion debe operar
+La decisión que no se quiere perder es arquitectónica: AcademiX debe validar
+multi-tenancy real por universidad usando sharding. Cada institución debe operar
 sobre una base de datos aislada, con registry central y schema compartido entre
 tenants.
 
-## Decision
+## Decisión
 
 Acotar Entrega 2 a un MVP que conserve sharding por universidad y reduzca el
-flujo funcional al minimo demostrable:
+flujo funcional al mínimo demostrable:
 
 - dos tenants demo: `uc` y `utfsm`;
 - registry DB central;
 - una PostgreSQL por universidad;
 - portal home para elegir universidad;
 - rutas por tenant `/uc` y `/utfsm`;
-- resolucion backend por header `x-tenant`;
+- resolución backend por header `x-tenant`;
 - frontend y backend desplegables en Railway;
 - CD automatizado con GitHub autodeploy y `railway.toml`;
 - experiencias docente y estudiante;
-- roles por seccion: `teacher`, `student`, `assistant`;
+- roles por sección: `teacher`, `student`, `assistant`;
 - cursos, secciones, material, quizzes autocorregidos y libro de notas;
-- publicacion manual de notas y promedio visible para estudiante.
+- publicación manual de notas y promedio visible para estudiante.
 
 Quedan fuera del MVP:
 
-- auditoria historica;
+- auditoría histórica;
 - admin institucional separado;
 - RBAC completo;
-- creacion dinamica de tenants;
+- creación dinámica de tenants;
 - subdominios reales, porque requieren dominio propio y wildcard DNS;
-- Redis, workers, replicas y load balancer propio;
-- entregas manuales, correccion manual compleja y recorrecciones;
+- Redis, workers, réplicas y load balancer propio;
+- entregas manuales, corrección manual compleja y recorrecciones;
 - chat, IA, calendario y anuncios.
 
 Railway reemplaza a GCP como plataforma inmediata para walking skeleton y
-primera version funcional. Google Cloud queda como migracion posterior usando
-free tier/creditos de la cuenta asociada.
+primera versión funcional. Google Cloud queda como migración posterior usando
+free tier/créditos de la cuenta asociada.
 
-## Consequences
+## Consecuencias
 
-Positive:
+Positivas:
 
 - El proyecto puede demostrar una arquitectura multi-tenant real sin construir
   un LMS completo.
-- El walking skeleton queda pequeno: frontend, backend, registry, dos tenant DB,
+- El walking skeleton queda pequeño: frontend, backend, registry, dos tenant DB,
   CI/CD y release.
-- La decision de sharding se prueba temprano, antes de agregar funcionalidades.
+- La decisión de sharding se prueba temprano, antes de agregar funcionalidades.
 - El equipo reduce riesgo de sobrealcance y concentra evidencia evaluable.
-- `railway.toml` deja la configuracion de deploy versionada.
+- `railway.toml` deja la configuración de deploy versionada.
 
-Negative:
+Negativas:
 
-- No hay trazabilidad historica de cambios academicos en el MVP.
+- No hay trazabilidad histórica de cambios académicos en el MVP.
 - Las rutas `/uc` y `/utfsm` son menos realistas que subdominios.
-- Railway puede imponer limites de free tier o configuracion.
+- Railway puede imponer límites de free tier o configuración.
 - Las evaluaciones quedan restringidas a quizzes de alternativas.
-- La migracion a Google Cloud queda pendiente y debe planificarse despues de
+- La migración a Google Cloud queda pendiente y debe planificarse después de
   validar Railway.
 
-Neutral:
+Neutrales:
 
-- Los documentos de Entrega 1 quedan como antecedente y vision futura.
+- Los documentos de Entrega 1 quedan como antecedente y visión futura.
 - Las funcionalidades excluidas pueden volver mediante nuevos ADRs o specs si
   el skeleton demuestra viabilidad.
 
-## Alternatives Considered
+## Alternativas consideradas
 
 ### Mantener alcance de Entrega 1
 
@@ -91,20 +91,20 @@ de entregar evidencia ejecutable en Entrega 2.
 
 ### Eliminar sharding y usar una sola DB multi-tenant
 
-Rechazado. Simplifica implementacion, pero elimina la decision arquitectonica
+Rechazado. Simplifica implementación, pero elimina la decisión arquitectónica
 principal del proyecto.
 
 ### Mantener Google Cloud como plataforma inmediata
 
-Rechazado para Entrega 2. Google Cloud sigue siendo valido como arquitectura
-objetivo y migracion posterior con free tier/creditos, pero Railway reduce
-friccion y permite obtener evidencia de despliegue antes.
+Rechazado para Entrega 2. Google Cloud sigue siendo válido como arquitectura
+objetivo y migración posterior con free tier/créditos, pero Railway reduce
+fricción y permite obtener evidencia de despliegue antes.
 
-## Follow-up
+## Seguimiento
 
 - Crear Spec Kit del walking skeleton.
 - Implementar CI para frontend y backend.
 - Desplegar en Railway con `railway.toml` o documentar CD manual si la
-  automatizacion no es viable.
+  automatización no es viable.
 - Crear tag y release de Entrega 2.
-- Planificar migracion posterior a Google Cloud.
+- Planificar migración posterior a Google Cloud.

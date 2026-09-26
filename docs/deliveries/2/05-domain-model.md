@@ -1,11 +1,11 @@
-# Modelo De Dominio
+# Modelo de dominio
 
-## Limites
+## Límites
 
 El tenant es una universidad. En el MVP se prueban dos: `uc` y `utfsm`.
 
-Cada tenant tiene datos academicos propios. El registry central solo sabe que
-tenants existen y donde esta su base de datos.
+Cada tenant tiene datos académicos propios. El registry central solo sabe que
+tenants existen y dónde está su base de datos.
 
 ## Entidades del registry
 
@@ -16,7 +16,7 @@ Universidad registrada en la plataforma.
 Responsabilidades:
 
 - identificar tenant por `slug`;
-- indicar si esta activo;
+- indicar si está activo;
 - entregar `database_url` al backend.
 
 No contiene cursos, usuarios ni notas.
@@ -27,24 +27,24 @@ No contiene cursos, usuarios ni notas.
 
 Persona dentro de una universidad.
 
-Puede ser estudiante en una seccion y ayudante en otra mediante `Enrollment`.
+Puede ser estudiante en una sección y ayudante en otra mediante `Enrollment`.
 
 ### Course
 
-Ramo de una universidad, por ejemplo "Ingenieria de Software" con sigla
+Ramo de una universidad, por ejemplo "Ingeniería de Software" con sigla
 `DDAA12`.
 
-Agrupa secciones, modulos, material, quizzes y libro de notas.
+Agrupa secciones, módulos, material, quizzes y libro de notas.
 
 ### Section
 
-Paralelo/seccion de un curso.
+Paralelo/sección de un curso.
 
 Define el contexto concreto donde participan estudiantes, docentes y ayudantes.
 
 ### Enrollment
 
-Vinculo usuario-seccion-rol.
+Vínculo usuario-sección-rol.
 
 Reemplaza RBAC complejo en el MVP. Roles permitidos:
 
@@ -54,13 +54,13 @@ Reemplaza RBAC complejo en el MVP. Roles permitidos:
 
 ### CourseModule
 
-Unidad de organizacion de contenido del curso.
+Unidad de organización de contenido del curso.
 
 Ejemplos: semana, unidad, tema o bloque docente.
 
 ### Material
 
-Contenido publicado en un modulo.
+Contenido publicado en un módulo.
 
 Puede ser:
 
@@ -69,9 +69,9 @@ Puede ser:
 
 ### Quiz
 
-Evaluacion de alternativas asociada a un curso o seccion.
+Evaluación de alternativas asociada a un curso o sección.
 
-Tiene ponderacion indirecta mediante `GradeItem`.
+Tiene ponderación indirecta mediante `GradeItem`.
 
 ### Question
 
@@ -87,18 +87,18 @@ correcta.
 
 Intento de un estudiante para un quiz.
 
-Estados minimos:
+Estados mínimos:
 
 - `in_progress`;
 - `submitted`;
 - `graded`.
 
 Incluye las respuestas elegidas como JSON anidado. Esto deja el intento como
-snapshot del envio del estudiante y evita una tabla `answers` en el MVP.
+snapshot del envío del estudiante y evita una tabla `answers` en el MVP.
 
 ### GradeItem
 
-Evaluacion ponderada dentro del libro de notas.
+Evaluación ponderada dentro del libro de notas.
 
 Para el MVP se vincula a un quiz.
 
@@ -106,7 +106,7 @@ Para el MVP se vincula a un quiz.
 
 Nota calculada para un estudiante en un `GradeItem`.
 
-Puede estar oculta o publicada. La publicacion controla visibilidad.
+Puede estar oculta o publicada. La publicación controla visibilidad.
 
 ## Relaciones principales
 
@@ -126,23 +126,23 @@ User 1 -> N Grade
 
 ## Reglas de dominio
 
-- Un usuario accede a un curso solo si tiene `Enrollment` en una seccion del
+- Un usuario accede a un curso solo si tiene `Enrollment` en una sección del
   curso.
-- Un docente administra un curso si tiene rol `teacher` en una seccion del
+- Un docente administra un curso si tiene rol `teacher` en una sección del
   curso.
-- Un estudiante responde quizzes solo si tiene rol `student` en la seccion.
+- Un estudiante responde quizzes solo si tiene rol `student` en la sección.
 - Un ayudante no publica notas en el MVP.
 - Material oculto no es visible para estudiantes.
 - Un quiz finalizado genera o actualiza una nota calculada.
 - Una nota publicada no debe cambiar silenciosamente.
 
-## Decision sobre auditoria
+## Decisión sobre auditoría
 
-La auditoria historica queda fuera del MVP.
+La auditoría histórica queda fuera del MVP.
 
 Trade-off:
 
-- se reduce complejidad de implementacion;
-- se pierde trazabilidad fina de cambios academicos;
+- se reduce complejidad de implementación;
+- se pierde trazabilidad fina de cambios académicos;
 - para compensar, el MVP debe evitar ediciones silenciosas de notas publicadas
   y documentar cualquier cambio manual.

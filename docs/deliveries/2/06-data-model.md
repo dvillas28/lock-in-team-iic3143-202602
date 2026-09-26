@@ -1,4 +1,4 @@
-# Modelo De Datos
+# Modelo de datos
 
 AcademiX usa sharding por universidad: una DB central de registry y una DB por
 tenant. Las DB `academix_uc_db` y `academix_utfsm_db` comparten exactamente el
@@ -8,23 +8,23 @@ mismo schema.
 
 ### tenants
 
-Registra universidades y permite resolver la conexion del tenant.
+Registra universidades y permite resolver la conexión del tenant.
 
 | Campo | Tipo | Regla |
 | --- | --- | --- |
 | id | uuid | PK |
-| slug | text | unico, requerido. Ej: `uc`, `utfsm` |
+| slug | text | único, requerido. Ej: `uc`, `utfsm` |
 | name | text | requerido |
 | database_url | text | requerido, secreto operacional |
 | active | boolean | requerido, default true |
 | created_at | timestamptz | requerido |
 
-Constraints e indices: `unique (slug)`, `index (active)`.
+Constraints e índices: `unique (slug)`, `index (active)`.
 
 ## Tenant DB
 
-No se agrega `tenant_id` a cada tabla: el limite del tenant es la base de datos.
-El backend debe elegir la conexion correcta antes de consultar.
+No se agrega `tenant_id` a cada tabla: el límite del tenant es la base de datos.
+El backend debe elegir la conexión correcta antes de consultar.
 
 ### users
 
@@ -38,7 +38,7 @@ Reglas: `unique (email)`. Un usuario puede tener roles distintos mediante
 
 ### courses
 
-Ramos, como "Ingenieria de Software", sigla `DDAA12`.
+Ramos, como "Ingeniería de Software", sigla `DDAA12`.
 
 Campos: `id uuid PK`, `code text`, `name text`, `term text`,
 `created_at timestamptz`.
@@ -56,7 +56,7 @@ Reglas: `unique (course_id, code)`, `capacity >= 0` cuando exista.
 
 ### enrollments
 
-Vinculo usuario-seccion-rol. Reemplaza RBAC complejo.
+Vínculo usuario-sección-rol. Reemplaza RBAC complejo.
 
 Campos: `id uuid PK`, `section_id uuid FK`, `user_id uuid FK`, `role text`,
 `active boolean`, `created_at timestamptz`.
@@ -65,7 +65,7 @@ Reglas:
 
 - `role in ('teacher', 'student', 'assistant')`.
 - `unique (section_id, user_id, role)`.
-- Indices: `(user_id, active)` y `(section_id, role, active)`.
+- Índices: `(user_id, active)` y `(section_id, role, active)`.
 
 ### course_modules
 
@@ -74,11 +74,11 @@ Organiza contenido del curso.
 Campos: `id uuid PK`, `course_id uuid FK`, `title text`, `position integer`,
 `published_at timestamptz`.
 
-Reglas: `unique (course_id, position)`. Estudiantes solo ven modulos publicados.
+Reglas: `unique (course_id, position)`. Estudiantes solo ven módulos publicados.
 
 ### materials
 
-Markdown o archivo publicado en un modulo.
+Markdown o archivo publicado en un módulo.
 
 Campos: `id uuid PK`, `module_id uuid FK`, `title text`, `kind text`,
 `markdown_body text`, `storage_key text`, `mime_type text`, `size_bytes bigint`,
@@ -113,8 +113,8 @@ Ejemplo `alternatives`:
 
 ```json
 [
-  { "id": "a", "text": "Opcion A", "is_correct": false },
-  { "id": "b", "text": "Opcion B", "is_correct": true }
+  { "id": "a", "text": "Opción A", "is_correct": false },
+  { "id": "b", "text": "Opción B", "is_correct": true }
 ]
 ```
 
@@ -152,7 +152,7 @@ Reglas:
 - `status in ('in_progress', 'submitted', 'graded')`.
 - Un intento activo por estudiante y quiz en el MVP.
 - `score_percent between 0 and 100` cuando exista.
-- `answers` guarda snapshot de respuestas y correccion al enviar.
+- `answers` guarda snapshot de respuestas y corrección al enviar.
 
 ### grade_items
 
@@ -162,7 +162,7 @@ Campos: `id uuid PK`, `course_id uuid FK`, `quiz_id uuid FK`, `title text`,
 `weight_percent numeric(5,2)`, `created_at timestamptz`.
 
 Reglas: `unique (quiz_id)`, `weight_percent >= 0`. La suma por curso se valida
-antes de publicar configuracion final.
+antes de publicar configuración final.
 
 ### grades
 
@@ -178,20 +178,20 @@ Reglas:
 - `unique (grade_item_id, student_id)`.
 - `score_percent between 0 and 100`.
 - `grade_value between 1.0 and 7.0`.
-- Indices: `(student_id, published_at)` y `(grade_item_id)`.
+- Índices: `(student_id, published_at)` y `(grade_item_id)`.
 
-## Transacciones criticas
+## Transacciones críticas
 
 - Finalizar quiz: guardar `answers`, calcular puntaje, cerrar intento y crear
-  `grade` en una transaccion.
+  `grade` en una transacción.
 - Publicar notas: actualizar `published_at` del conjunto de grades en una
-  transaccion.
+  transacción.
 - Cambiar ponderaciones: validar suma y persistir cambios juntos.
 
 ## Migraciones
 
 - Registry y tenant DB tienen migraciones separadas.
-- Cada migracion de tenant debe ejecutarse en `academix_uc_db`,
+- Cada migración de tenant debe ejecutarse en `academix_uc_db`,
   `academix_utfsm_db` y toda DB futura.
 
 ## ERD Mermaid

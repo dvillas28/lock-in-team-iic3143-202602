@@ -2,26 +2,26 @@
 
 Base documental para la segunda entrega de AcademiX.
 
-Esta version corrige el alcance de la Entrega 1: se mantiene la decision
-arquitectonica fuerte de sharding por universidad, pero se reduce el producto a
-un flujo academico implementable por un equipo pequeno durante el semestre.
+Esta versión corrige el alcance de la Entrega 1: se mantiene la decisión
+arquitectónica fuerte de sharding por universidad, pero se reduce el producto a
+un flujo académico implementable por un equipo pequeño durante el semestre.
 
 ## Orden de lectura
 
-| Orden | Documento | Proposito |
+| Orden | Documento | Propósito |
 | --- | --- | --- |
-| 01 | [delivery requirements](01-delivery-requirements.md) | Trazabilidad contra pauta y puntajes. |
-| 02 | [scope](02-scope.md) | Que entra, que queda fuera y por que. |
-| 03 | [use cases and requirements](03-use-cases-and-requirements.md) | Casos de uso, RF, RNF y reglas. |
-| 04 | [architecture](04-architecture.md) | Arquitectura actualizada y despliegue Railway. |
-| 05 | [domain model](05-domain-model.md) | Entidades y reglas del dominio. |
-| 06 | [data model](06-data-model.md) | Tablas, constraints, transacciones y ERD. |
-| 07 | [risks](07-risks.md) | Riesgos actualizados y mitigaciones. |
-| 08 | [work plan](08-work-plan.md) | Plan de desarrollo actualizado. |
-| 09 | [walking skeleton plan](09-walking-skeleton-plan.md) | CI/CD, Hello World, Railway y release. |
-| 10 | [status](10-status.md) | Que esta completo y que falta. |
+| 01 | [requisitos de entrega](01-delivery-requirements.md) | Trazabilidad contra pauta y puntajes. |
+| 02 | [alcance](02-scope.md) | Qué entra, qué queda fuera y por qué. |
+| 03 | [casos de uso y requerimientos](03-use-cases-and-requirements.md) | Casos de uso, RF, RNF y reglas. |
+| 04 | [arquitectura](04-architecture.md) | Arquitectura actualizada y despliegue Railway. |
+| 05 | [modelo de dominio](05-domain-model.md) | Entidades y reglas del dominio. |
+| 06 | [modelo de datos](06-data-model.md) | Tablas, constraints, transacciones y ERD. |
+| 07 | [riesgos](07-risks.md) | Riesgos actualizados y mitigaciones. |
+| 08 | [plan de trabajo](08-work-plan.md) | Plan de desarrollo actualizado. |
+| 09 | [plan de walking skeleton](09-walking-skeleton-plan.md) | CI/CD, Hello World, Railway y release. |
+| 10 | [estado](10-status.md) | Qué está completo y qué falta. |
 
-## Decision central
+## Decisión central
 
 AcademiX reduce el alcance funcional del LMS, pero conserva multi-tenancy real
 por universidad mediante sharding:
@@ -35,22 +35,22 @@ Frontend
 ```
 
 Cada universidad demo opera sobre una base PostgreSQL propia, con el mismo
-schema. El walking skeleton debe probar esa decision con dos tenants: `uc` y
+schema. El walking skeleton debe probar esa decisión con dos tenants: `uc` y
 `utfsm`.
 
 ## Cambio respecto a Entrega 1
 
 - Railway pasa a ser plataforma inmediata para walking skeleton y primera
-  version funcional.
-- CD sera automatizado con GitHub + `railway.toml`; fallback manual solo si la
+  versión funcional.
+- CD será automatizado con GitHub + `railway.toml`; fallback manual solo si la
   cuenta o permisos lo bloquean.
-- Google Cloud queda como migracion posterior usando free tier/creditos de la
+- Google Cloud queda como migración posterior usando free tier/créditos de la
   cuenta asociada.
-- IA, chat, calendario, auditoria historica, workers, Redis y replicas quedan
+- IA, chat, calendario, auditoría histórica, workers, Redis y réplicas quedan
   fuera del MVP.
-- Las evaluaciones dejan de ser entregas/correccion manual y pasan a ser
-  cuestionarios de alternativas con autocorreccion.
-- Los roles se simplifican a `teacher`, `student` y `assistant` por seccion.
+- Las evaluaciones dejan de ser entregas/corrección manual y pasan a ser
+  cuestionarios de alternativas con autocorrección.
+- Los roles se simplifican a `teacher`, `student` y `assistant` por sección.
 
 ## Siguiente paso
 
@@ -63,6 +63,6 @@ Crear un Spec Kit para implementar el walking skeleton:
 - rutas por tenant: `/uc` y `/utfsm`;
 - llamadas frontend-backend con header `x-tenant`;
 - registry DB y dos tenant DB demo;
-- CI basico para frontend y backend;
+- CI básico para frontend y backend;
 - CD automatizado a Railway con `railway.toml`;
 - tag y release en GitHub.
