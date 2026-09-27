@@ -2,7 +2,8 @@ import { Controller, Get } from "@nestjs/common";
 
 interface HealthResponse {
   status: "ok";
-  message: string;
+  version: string;
+  timestamp: string;
 }
 
 @Controller("health")
@@ -11,7 +12,8 @@ export class HealthController {
   getHealth(): HealthResponse {
     return {
       status: "ok",
-      message: "Hello World from AcademiX API!",
+      version: process.env.APP_VERSION ?? "0.1.0",
+      timestamp: new Date().toISOString(),
     };
   }
 }

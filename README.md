@@ -106,7 +106,7 @@ Crear PR hacia `main` y enlazar el spec trabajado. Ver
 El repositorio incluye dos aplicaciones independientes administradas con pnpm:
 
 - `frontend/`: Next.js con TypeScript, App Router y ESLint.
-- `backend/`: NestJS con TypeScript y el endpoint de verificacion `GET /`.
+- `backend/`: NestJS con TypeScript y el endpoint de salud `GET /health`.
 
 El frontend consulta al backend desde el servidor de Next. Fuera de Docker usa
 `http://localhost:3001` por defecto; Docker Compose configura `API_URL` como
@@ -132,16 +132,16 @@ Frontend: http://localhost:3000
 Backend:  http://localhost:3001
 ```
 
-El backend responde en su raiz:
+El backend expone únicamente el endpoint de salud `GET /health` para este
+bootstrap:
 
 ```json
 {
-  "message": "Hello World from AcademiX API!"
+  "status": "ok",
+  "version": "0.1.0",
+  "timestamp": "2026-09-27T18:30:00.000Z"
 }
 ```
-
-El endpoint `GET /health`, utilizado por Docker Compose para comprobar que el
-servicio está disponible, responde con `status: "ok"` y el mismo mensaje.
 
 ### Detener
 
@@ -155,6 +155,7 @@ docker compose down
 
 - `API_URL`: URL que usa el servidor de Next para consultar al backend.
 - `PORT`: puerto de escucha de NestJS; su valor por defecto es `3001`.
+- `APP_VERSION`: versión informada por `GET /health`.
 
 ### Verificaciones Locales
 

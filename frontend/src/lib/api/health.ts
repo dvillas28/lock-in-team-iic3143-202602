@@ -1,6 +1,7 @@
 export type HealthResponse = {
   status: "ok";
-  message: string;
+  version: string;
+  timestamp: string;
 };
 
 function isHealthResponse(data: unknown): data is HealthResponse {
@@ -10,7 +11,13 @@ function isHealthResponse(data: unknown): data is HealthResponse {
 
   const candidate = data as Record<string, unknown>;
 
-  return candidate.status === "ok" && typeof candidate.message === "string";
+  return (
+    Object.keys(candidate).length === 3 &&
+    candidate.status === "ok" &&
+    typeof candidate.version === "string" &&
+    typeof candidate.timestamp === "string" &&
+    !Number.isNaN(Date.parse(candidate.timestamp))
+  );
 }
 
 export async function getHealth(): Promise<HealthResponse> {

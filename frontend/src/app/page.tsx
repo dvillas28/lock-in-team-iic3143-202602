@@ -3,13 +3,13 @@ import { getHealth } from "@/lib/api/health";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  let backendMessage = "No disponible";
+  let backendStatus = "No disponible";
 
   try {
     const health = await getHealth();
-    backendMessage = health.message;
+    backendStatus = `${health.status} (v${health.version})`;
   } catch {
-    backendMessage = "No se pudo conectar con el backend";
+    backendStatus = "No se pudo conectar con el backend";
   }
 
   return (
@@ -21,7 +21,7 @@ export default async function Home() {
       <p>
         <strong>Backend:</strong>
         <br />
-        {backendMessage}
+        {backendStatus}
       </p>
     </main>
   );

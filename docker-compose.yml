@@ -3,6 +3,7 @@ services:
     build:
       context: ./backend
     environment:
+      APP_VERSION: 0.1.0
       PORT: 3001
     ports:
       - "3001:3001"
