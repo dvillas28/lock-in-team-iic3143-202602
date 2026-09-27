@@ -140,6 +140,9 @@ El backend responde en su raiz:
 }
 ```
 
+El endpoint `GET /health`, utilizado por Docker Compose para comprobar que el
+servicio está disponible, responde con `status: "ok"` y el mismo mensaje.
+
 ### Detener
 
 ```bash

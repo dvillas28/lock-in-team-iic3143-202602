@@ -3,10 +3,14 @@ import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
   title: "AcademiX",
-  description: "Bootstrap tecnico de AcademiX",
+  description: "Plataforma académica AcademiX",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+type RootLayoutProps = Readonly<{
+  children: ReactNode;
+}>;
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="es">
       <body>{children}</body>
