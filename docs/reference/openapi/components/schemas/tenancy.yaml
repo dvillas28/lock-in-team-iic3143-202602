@@ -1,0 +1,141 @@
+TenantSummary:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - slug
+    - name
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    slug:
+      type: string
+      pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+    name:
+      type: string
+
+TenantListResponse:
+  type: object
+  additionalProperties: false
+  required:
+    - items
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/TenantSummary'
+
+HelloResponse:
+  type: object
+  additionalProperties: false
+  required:
+    - message
+    - tenant
+  properties:
+    message:
+      type: string
+    tenant:
+      $ref: '#/TenantSummary'
+
+CourseMembershipSummary:
+  type: object
+  additionalProperties: false
+  required:
+    - courseId
+    - role
+  properties:
+    courseId:
+      type: string
+      format: uuid
+    role:
+      type: string
+      enum:
+        - coordinator
+
+SectionMembershipSummary:
+  type: object
+  additionalProperties: false
+  required:
+    - courseId
+    - sectionId
+    - role
+  properties:
+    courseId:
+      type: string
+      format: uuid
+    sectionId:
+      type: string
+      format: uuid
+    role:
+      type: string
+      enum:
+        - teacher
+        - assistant
+        - student
+
+CurrentUser:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - email
+    - name
+    - tenant
+    - courseMemberships
+    - sectionMemberships
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    email:
+      type: string
+      format: email
+    name:
+      type: string
+    tenant:
+      $ref: '#/TenantSummary'
+    courseMemberships:
+      type: array
+      items:
+        $ref: '#/CourseMembershipSummary'
+    sectionMemberships:
+      type: array
+      items:
+        $ref: '#/SectionMembershipSummary'
+
+UserSummary:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - email
+    - name
+    - active
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    email:
+      type: string
+      format: email
+    name:
+      type: string
+    active:
+      type: boolean
+
+UserListResponse:
+  unevaluatedProperties: false
+  allOf:
+    - $ref: './common.yaml#/PageInfo'
+    - type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/UserSummary'

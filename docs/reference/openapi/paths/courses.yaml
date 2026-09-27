@@ -1,0 +1,73 @@
+/api/v1/courses:
+  parameters:
+    - $ref: '../components/parameters.yaml#/TenantHeader'
+  get:
+    tags:
+      - Courses
+    operationId: listCourses
+    summary: Listar cursos visibles para el usuario
+    description: Retorna únicamente cursos donde existe una membership académica activa.
+    responses:
+      '200':
+        description: Cursos visibles dentro del tenant seleccionado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/courses.yaml#/CourseListResponse'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+
+/api/v1/courses/{courseId}:
+  parameters:
+    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/CourseId'
+  get:
+    tags:
+      - Courses
+    operationId: getCourse
+    summary: Consultar un curso visible
+    responses:
+      '200':
+        description: Curso solicitado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/courses.yaml#/Course'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+  patch:
+    tags:
+      - Courses
+    operationId: updateCourse
+    summary: Actualizar configuración general del curso
+    description: Requiere rol `coordinator` en el curso. Los cambios sensibles generan auditoría.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/courses.yaml#/CourseUpdate'
+    responses:
+      '200':
+        description: Curso actualizado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/courses.yaml#/Course'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+

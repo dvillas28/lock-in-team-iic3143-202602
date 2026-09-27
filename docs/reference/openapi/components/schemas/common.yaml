@@ -1,0 +1,88 @@
+ProblemFieldError:
+  type: object
+  additionalProperties: false
+  required:
+    - field
+    - message
+  properties:
+    field:
+      type: string
+    message:
+      type: string
+    code:
+      type: [string, 'null']
+
+Problem:
+  type: object
+  additionalProperties: false
+  required:
+    - type
+    - title
+    - status
+    - detail
+    - code
+    - instance
+    - traceId
+    - errors
+  properties:
+    type:
+      type: string
+      format: uri
+    title:
+      type: string
+    status:
+      type: integer
+      minimum: 400
+      maximum: 599
+    detail:
+      type: [string, 'null']
+    code:
+      type: string
+    instance:
+      type: [string, 'null']
+      format: uri-reference
+    traceId:
+      type: string
+    errors:
+      type: array
+      items:
+        $ref: '#/ProblemFieldError'
+  example:
+    type: https://academix/errors/grade-weights-locked
+    title: Las ponderaciones están bloqueadas
+    status: 409
+    detail: Existen notas publicadas afectadas por el cambio.
+    code: GRADE_WEIGHTS_LOCKED
+    instance: /api/v1/courses/8dc9f252-bf1a-4b50-85c0-a2937484c429/gradebook/weights
+    traceId: 01JQ4Y2X7B3QK5XEM0XZ4MSH8Z
+    errors: []
+
+PageInfo:
+  type: object
+  required:
+    - nextCursor
+    - hasMore
+  properties:
+    nextCursor:
+      type: [string, 'null']
+      description: Cursor opaco para la página siguiente; null si no existe.
+    hasMore:
+      type: boolean
+
+HealthResponse:
+  type: object
+  additionalProperties: false
+  required:
+    - status
+    - version
+    - timestamp
+  properties:
+    status:
+      type: string
+      enum:
+        - ok
+    version:
+      type: string
+    timestamp:
+      type: string
+      format: date-time

@@ -1,0 +1,104 @@
+/health:
+  get:
+    tags:
+      - Platform
+    operationId: getHealth
+    summary: Consultar salud del servicio
+    description: No consulta ni expone secretos o configuración interna sensible.
+    security: []
+    responses:
+      '200':
+        description: Servicio disponible.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/common.yaml#/HealthResponse'
+
+/api/hello:
+  parameters:
+    - $ref: '../components/parameters.yaml#/TenantHeader'
+  get:
+    tags:
+      - Platform
+    operationId: getTenantHello
+    summary: Probar resolución del tenant
+    security: []
+    responses:
+      '200':
+        description: Tenant resuelto correctamente.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/tenancy.yaml#/HelloResponse'
+      '400':
+        $ref: '../components/responses.yaml#/TenantBadRequest'
+      '404':
+        $ref: '../components/responses.yaml#/TenantNotFound'
+      '503':
+        $ref: '../components/responses.yaml#/TenantDatabaseUnavailable'
+
+/api/v1/tenants:
+  get:
+    tags:
+      - Tenants
+    operationId: listAccessibleTenants
+    summary: Listar tenants accesibles para la identidad actual
+    description: No requiere `x-tenant` y nunca expone configuración de conexión.
+    responses:
+      '200':
+        description: Tenants accesibles.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/tenancy.yaml#/TenantListResponse'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+
+/api/v1/me:
+  parameters:
+    - $ref: '../components/parameters.yaml#/TenantHeader'
+  get:
+    tags:
+      - Tenants
+    operationId: getCurrentUser
+    summary: Consultar identidad y memberships del tenant actual
+    responses:
+      '200':
+        description: Identidad autenticada y sus alcances actuales.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/tenancy.yaml#/CurrentUser'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+
+/api/v1/users:
+  parameters:
+    - $ref: '../components/parameters.yaml#/TenantHeader'
+  get:
+    tags:
+      - Enrollments
+    operationId: searchTenantUsers
+    summary: Buscar participantes existentes del tenant
+    description: Reservado a coordinators para seleccionar usuarios al gestionar memberships.
+    parameters:
+      - $ref: '../components/parameters.yaml#/Search'
+      - $ref: '../components/parameters.yaml#/Cursor'
+      - $ref: '../components/parameters.yaml#/Limit'
+    responses:
+      '200':
+        description: Usuarios del tenant que coinciden con la búsqueda.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/tenancy.yaml#/UserListResponse'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'

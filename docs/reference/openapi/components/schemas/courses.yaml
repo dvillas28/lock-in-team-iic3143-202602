@@ -1,0 +1,142 @@
+CourseSummary:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - code
+    - name
+    - term
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    code:
+      type: string
+    name:
+      type: string
+    term:
+      type: string
+      example: 2026-2
+
+Course:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - code
+    - name
+    - term
+    - createdAt
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    code:
+      type: string
+    name:
+      type: string
+    term:
+      type: string
+      example: 2026-2
+    createdAt:
+      type: string
+      format: date-time
+      readOnly: true
+
+CourseUpdate:
+  type: object
+  additionalProperties: false
+  minProperties: 1
+  properties:
+    code:
+      type: string
+    name:
+      type: string
+    term:
+      type: string
+
+CourseListResponse:
+  type: object
+  additionalProperties: false
+  required:
+    - items
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/CourseSummary'
+
+CourseModule:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - courseId
+    - title
+    - position
+    - publishedAt
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    courseId:
+      type: string
+      format: uuid
+      readOnly: true
+    title:
+      type: string
+    position:
+      type: integer
+    publishedAt:
+      type: [string, 'null']
+      format: date-time
+      readOnly: true
+
+ModuleCreate:
+  type: object
+  additionalProperties: false
+  required:
+    - title
+    - position
+  properties:
+    title:
+      type: string
+    position:
+      type: integer
+
+ModuleUpdate:
+  type: object
+  additionalProperties: false
+  minProperties: 1
+  properties:
+    title:
+      type: string
+
+ModuleOrderRequest:
+  type: object
+  additionalProperties: false
+  required:
+    - moduleIds
+  properties:
+    moduleIds:
+      type: array
+      minItems: 1
+      uniqueItems: true
+      description: Todos los módulos del curso, en el orden final deseado.
+      items:
+        type: string
+        format: uuid
+
+ModuleListResponse:
+  type: object
+  additionalProperties: false
+  required:
+    - items
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/CourseModule'

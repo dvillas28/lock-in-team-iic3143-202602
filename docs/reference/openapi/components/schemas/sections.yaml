@@ -1,0 +1,134 @@
+Section:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - courseId
+    - code
+    - capacity
+    - createdAt
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    courseId:
+      type: string
+      format: uuid
+      readOnly: true
+    code:
+      type: string
+    capacity:
+      type: [integer, 'null']
+      minimum: 0
+    createdAt:
+      type: string
+      format: date-time
+      readOnly: true
+
+SectionCreate:
+  type: object
+  additionalProperties: false
+  required:
+    - code
+  properties:
+    code:
+      type: string
+    capacity:
+      type: [integer, 'null']
+      minimum: 0
+
+SectionUpdate:
+  type: object
+  additionalProperties: false
+  minProperties: 1
+  properties:
+    code:
+      type: string
+    capacity:
+      type: [integer, 'null']
+      minimum: 0
+
+SectionListResponse:
+  type: object
+  additionalProperties: false
+  required:
+    - items
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/Section'
+
+EnrollmentRole:
+  type: string
+  enum:
+    - teacher
+    - assistant
+    - student
+
+Enrollment:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - sectionId
+    - user
+    - role
+    - active
+    - createdAt
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    sectionId:
+      type: string
+      format: uuid
+      readOnly: true
+    user:
+      $ref: './tenancy.yaml#/UserSummary'
+    role:
+      $ref: '#/EnrollmentRole'
+    active:
+      type: boolean
+    createdAt:
+      type: string
+      format: date-time
+      readOnly: true
+
+EnrollmentCreate:
+  type: object
+  additionalProperties: false
+  required:
+    - userId
+    - role
+  properties:
+    userId:
+      type: string
+      format: uuid
+    role:
+      $ref: '#/EnrollmentRole'
+
+EnrollmentUpdate:
+  type: object
+  additionalProperties: false
+  minProperties: 1
+  properties:
+    role:
+      $ref: '#/EnrollmentRole'
+    active:
+      type: boolean
+
+EnrollmentListResponse:
+  unevaluatedProperties: false
+  allOf:
+    - $ref: './common.yaml#/PageInfo'
+    - type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/Enrollment'

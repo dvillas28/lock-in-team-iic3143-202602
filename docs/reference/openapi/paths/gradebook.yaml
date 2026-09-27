@@ -1,0 +1,167 @@
+/api/v1/courses/{courseId}/grade-items:
+  parameters:
+    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/CourseId'
+  get:
+    tags:
+      - Gradebook
+    operationId: listCourseGradeItems
+    summary: Listar elementos del libro de notas
+    description: Disponible para coordinator y staff autorizado del curso.
+    responses:
+      '200':
+        description: Grade items y suma actual de ponderaciones.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/grades.yaml#/GradeItemListResponse'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+
+/api/v1/courses/{courseId}/gradebook/weights:
+  parameters:
+    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/CourseId'
+  put:
+    tags:
+      - Gradebook
+    operationId: updateGradebookWeights
+    summary: Reemplazar ponderaciones del curso de forma atómica
+    description: |
+      Requiere rol `coordinator`. El conjunto completo debe sumar 100%. Si existe
+      una nota publicada afectada, responde 409 con código `GRADE_WEIGHTS_LOCKED`.
+      Todo cambio exitoso genera un evento de auditoría con before y after.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/grades.yaml#/UpdateGradebookWeightsRequest'
+    responses:
+      '200':
+        description: Ponderaciones validadas y persistidas.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/grades.yaml#/GradebookWeightsResponse'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/courses/{courseId}/gradebook:
+  parameters:
+    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/CourseId'
+  get:
+    tags:
+      - Gradebook
+    operationId: getCourseGradebook
+    summary: Consultar libro de notas docente
+    description: |
+      Coordinator puede consultar el curso completo. Teacher y assistant deben
+      filtrar y quedan limitados a secciones donde tengan membership activa.
+      Assistant es de solo lectura.
+    parameters:
+      - $ref: '../components/parameters.yaml#/SectionIdFilter'
+      - $ref: '../components/parameters.yaml#/Cursor'
+      - $ref: '../components/parameters.yaml#/Limit'
+    responses:
+      '200':
+        description: Filas autorizadas del libro de notas.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/grades.yaml#/GradebookResponse'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+
+/api/v1/courses/{courseId}/gradebook/publications:
+  parameters:
+    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/CourseId'
+  post:
+    tags:
+      - Gradebook
+    operationId: publishGrades
+    summary: Publicar notas por grade items y secciones
+    description: |
+      Coordinator puede publicar en cualquier sección del curso. Teacher solo en
+      sus secciones. Assistant y student no pueden publicar. La operación es
+      atómica, no sobrescribe notas publicadas y genera auditoría histórica.
+    parameters:
+      - $ref: '../components/parameters.yaml#/IdempotencyKey'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/grades.yaml#/PublishGradesRequest'
+    responses:
+      '200':
+        description: Publicación registrada, o resultado idempotente de una ya procesada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/grades.yaml#/PublishGradesResponse'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/courses/{courseId}/my-grades:
+  parameters:
+    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/CourseId'
+  get:
+    tags:
+      - Gradebook
+    operationId: getStudentGrades
+    summary: Consultar notas publicadas del estudiante autenticado
+    description: |
+      La identidad se deriva de `sub`; no acepta `studentId`. Retorna solo notas
+      propias publicadas. El promedio parcial es
+      `sum(grade * weight) / sum(published weights)` y no se recibe del cliente.
+    responses:
+      '200':
+        description: Notas propias publicadas y promedio parcial derivado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/grades.yaml#/StudentGradesResponse'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'

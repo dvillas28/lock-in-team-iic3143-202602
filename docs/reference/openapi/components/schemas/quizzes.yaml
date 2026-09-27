@@ -1,0 +1,542 @@
+QuizStatus:
+  type: string
+  enum:
+    - draft
+    - published
+
+QuizAttemptStatus:
+  type: string
+  enum:
+    - inProgress
+    - submitted
+    - graded
+
+QuizSummary:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - courseId
+    - sectionId
+    - title
+    - instructions
+    - opensAt
+    - closesAt
+    - status
+    - publishedAt
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    courseId:
+      type: string
+      format: uuid
+      readOnly: true
+    sectionId:
+      type: [string, 'null']
+      format: uuid
+      description: Null indica alcance para todo el curso.
+    title:
+      type: string
+    instructions:
+      type: [string, 'null']
+    opensAt:
+      type: [string, 'null']
+      format: date-time
+    closesAt:
+      type: [string, 'null']
+      format: date-time
+    status:
+      $ref: '#/QuizStatus'
+    publishedAt:
+      type: [string, 'null']
+      format: date-time
+      readOnly: true
+
+AlternativeStudentView:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - text
+  properties:
+    id:
+      type: string
+    text:
+      type: string
+
+AlternativeAuthoring:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - text
+    - isCorrect
+  properties:
+    id:
+      type: string
+    text:
+      type: string
+    isCorrect:
+      type: boolean
+
+QuestionStudentView:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - prompt
+    - position
+    - points
+    - alternatives
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    prompt:
+      type: string
+    position:
+      type: integer
+    points:
+      type: number
+      exclusiveMinimum: 0
+    alternatives:
+      type: array
+      minItems: 2
+      items:
+        $ref: '#/AlternativeStudentView'
+
+QuestionAuthoringView:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - prompt
+    - position
+    - points
+    - alternatives
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    prompt:
+      type: string
+    position:
+      type: integer
+    points:
+      type: number
+      exclusiveMinimum: 0
+    alternatives:
+      type: array
+      minItems: 2
+      items:
+        $ref: '#/AlternativeAuthoring'
+
+QuizStudentView:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - courseId
+    - sectionId
+    - title
+    - instructions
+    - opensAt
+    - closesAt
+    - status
+    - publishedAt
+    - questions
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    courseId:
+      type: string
+      format: uuid
+      readOnly: true
+    sectionId:
+      type: [string, 'null']
+      format: uuid
+    title:
+      type: string
+    instructions:
+      type: [string, 'null']
+    opensAt:
+      type: [string, 'null']
+      format: date-time
+    closesAt:
+      type: [string, 'null']
+      format: date-time
+    status:
+      $ref: '#/QuizStatus'
+    publishedAt:
+      type: [string, 'null']
+      format: date-time
+      readOnly: true
+    questions:
+      type: array
+      items:
+        $ref: '#/QuestionStudentView'
+
+QuizAuthoringView:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - courseId
+    - sectionId
+    - title
+    - instructions
+    - opensAt
+    - closesAt
+    - status
+    - publishedAt
+    - createdBy
+    - questions
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    courseId:
+      type: string
+      format: uuid
+      readOnly: true
+    sectionId:
+      type: [string, 'null']
+      format: uuid
+    title:
+      type: string
+    instructions:
+      type: [string, 'null']
+    opensAt:
+      type: [string, 'null']
+      format: date-time
+    closesAt:
+      type: [string, 'null']
+      format: date-time
+    status:
+      $ref: '#/QuizStatus'
+    publishedAt:
+      type: [string, 'null']
+      format: date-time
+      readOnly: true
+    createdBy:
+      type: string
+      format: uuid
+      readOnly: true
+    questions:
+      type: array
+      items:
+        $ref: '#/QuestionAuthoringView'
+
+QuizCreate:
+  type: object
+  additionalProperties: false
+  required:
+    - title
+  properties:
+    sectionId:
+      type: [string, 'null']
+      format: uuid
+      description: Null crea un quiz de alcance de curso; requiere coordinator.
+    title:
+      type: string
+    instructions:
+      type: [string, 'null']
+    opensAt:
+      type: [string, 'null']
+      format: date-time
+    closesAt:
+      type: [string, 'null']
+      format: date-time
+
+QuizUpdate:
+  type: object
+  additionalProperties: false
+  minProperties: 1
+  properties:
+    title:
+      type: string
+    instructions:
+      type: [string, 'null']
+    opensAt:
+      type: [string, 'null']
+      format: date-time
+    closesAt:
+      type: [string, 'null']
+      format: date-time
+
+AlternativeInput:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - text
+    - isCorrect
+  properties:
+    id:
+      type: string
+    text:
+      type: string
+    isCorrect:
+      type: boolean
+
+QuestionCreate:
+  type: object
+  additionalProperties: false
+  required:
+    - prompt
+    - position
+    - points
+    - alternatives
+  properties:
+    prompt:
+      type: string
+    position:
+      type: integer
+    points:
+      type: number
+      exclusiveMinimum: 0
+    alternatives:
+      type: array
+      minItems: 2
+      items:
+        $ref: '#/AlternativeInput'
+
+QuestionUpdate:
+  type: object
+  additionalProperties: false
+  minProperties: 1
+  properties:
+    prompt:
+      type: string
+    position:
+      type: integer
+    points:
+      type: number
+      exclusiveMinimum: 0
+    alternatives:
+      type: array
+      minItems: 2
+      items:
+        $ref: '#/AlternativeInput'
+
+QuizListResponse:
+  type: object
+  additionalProperties: false
+  required:
+    - items
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/QuizSummary'
+
+QuizAttemptAnswerInput:
+  type: object
+  additionalProperties: false
+  required:
+    - questionId
+    - alternativeId
+  properties:
+    questionId:
+      type: string
+      format: uuid
+    alternativeId:
+      type: string
+
+SaveQuizAttemptAnswersRequest:
+  type: object
+  additionalProperties: false
+  required:
+    - answers
+  properties:
+    answers:
+      type: array
+      items:
+        $ref: '#/QuizAttemptAnswerInput'
+
+QuizAttemptAnswerStudentView:
+  type: object
+  additionalProperties: false
+  required:
+    - questionId
+    - alternativeId
+  properties:
+    questionId:
+      type: string
+      format: uuid
+    alternativeId:
+      type: string
+
+QuizAttemptAnswerAcademicView:
+  type: object
+  additionalProperties: false
+  required:
+    - questionId
+    - alternativeId
+    - isCorrect
+    - pointsAwarded
+  properties:
+    questionId:
+      type: string
+      format: uuid
+    alternativeId:
+      type: string
+    isCorrect:
+      type: boolean
+      readOnly: true
+    pointsAwarded:
+      type: number
+      minimum: 0
+      readOnly: true
+
+QuizAttemptStudentView:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - quizId
+    - sectionId
+    - studentId
+    - attemptNumber
+    - startedAt
+    - submittedAt
+    - status
+    - answers
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    quizId:
+      type: string
+      format: uuid
+      readOnly: true
+    sectionId:
+      type: string
+      format: uuid
+      readOnly: true
+      description: Snapshot histórico; no cambia si el estudiante cambia de sección.
+    studentId:
+      type: string
+      format: uuid
+      readOnly: true
+      description: Derivado del claim sub; nunca se recibe en el request.
+    attemptNumber:
+      type: integer
+      minimum: 1
+      readOnly: true
+    startedAt:
+      type: string
+      format: date-time
+      readOnly: true
+    submittedAt:
+      type: [string, 'null']
+      format: date-time
+      readOnly: true
+    status:
+      $ref: '#/QuizAttemptStatus'
+    answers:
+      type: array
+      items:
+        $ref: '#/QuizAttemptAnswerStudentView'
+
+QuizAttemptAcademicView:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - quizId
+    - sectionId
+    - studentId
+    - attemptNumber
+    - startedAt
+    - submittedAt
+    - status
+    - answers
+    - scorePercent
+    - grade
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    quizId:
+      type: string
+      format: uuid
+      readOnly: true
+    sectionId:
+      type: string
+      format: uuid
+      readOnly: true
+    studentId:
+      type: string
+      format: uuid
+      readOnly: true
+    attemptNumber:
+      type: integer
+      minimum: 1
+      readOnly: true
+    startedAt:
+      type: string
+      format: date-time
+      readOnly: true
+    submittedAt:
+      type: [string, 'null']
+      format: date-time
+      readOnly: true
+    status:
+      $ref: '#/QuizAttemptStatus'
+    answers:
+      type: array
+      items:
+        $ref: '#/QuizAttemptAnswerAcademicView'
+    scorePercent:
+      type: [number, 'null']
+      minimum: 0
+      maximum: 100
+      readOnly: true
+    grade:
+      oneOf:
+        - $ref: './grades.yaml#/GradeValue'
+        - type: 'null'
+      readOnly: true
+
+QuizAttemptSubmissionReceipt:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - status
+    - submittedAt
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    status:
+      $ref: '#/QuizAttemptStatus'
+    submittedAt:
+      type: string
+      format: date-time
+      readOnly: true
+  description: No expone puntaje ni nota antes de su publicación académica.
+
+QuizAttemptListResponse:
+  unevaluatedProperties: false
+  allOf:
+    - $ref: './common.yaml#/PageInfo'
+    - type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/QuizAttemptAcademicView'

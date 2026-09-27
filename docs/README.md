@@ -7,6 +7,10 @@
 - `guides/`: guias operativas del equipo y agentes.
 - `reference/`: material de referencia estable del dominio o del proyecto.
 
+## Contratos
+
+- [OpenAPI de AcademiX](reference/openapi/README.md)
+
 ## Guias
 
 - [Spec Kit](guides/speckit-flow.md)

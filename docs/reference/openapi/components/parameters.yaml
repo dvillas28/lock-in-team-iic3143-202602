@@ -1,0 +1,132 @@
+TenantHeader:
+  name: x-tenant
+  in: header
+  required: true
+  description: Slug del tenant cuya base de datos debe resolver el backend.
+  schema:
+    type: string
+    pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+  example: uc
+
+Cursor:
+  name: cursor
+  in: query
+  required: false
+  description: Cursor opaco retornado por la página anterior.
+  schema:
+    type: string
+
+Limit:
+  name: limit
+  in: query
+  required: false
+  description: Cantidad máxima de elementos a retornar.
+  schema:
+    type: integer
+    minimum: 1
+    maximum: 100
+    default: 20
+
+IdempotencyKey:
+  name: Idempotency-Key
+  in: header
+  required: true
+  description: |
+    Clave opaca elegida por el cliente para una operación sensible. Repetir la
+    misma solicitud con la misma clave y payload debe devolver el resultado de
+    la primera ejecución sin duplicar efectos. Reutilizarla con otro payload
+    produce 409 Conflict.
+  schema:
+    type: string
+    minLength: 1
+
+CourseId:
+  name: courseId
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+
+SectionId:
+  name: sectionId
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+
+EnrollmentId:
+  name: enrollmentId
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+
+ModuleId:
+  name: moduleId
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+
+MaterialId:
+  name: materialId
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+
+QuizId:
+  name: quizId
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+
+QuestionId:
+  name: questionId
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+
+AttemptId:
+  name: attemptId
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+
+SectionIdFilter:
+  name: sectionId
+  in: query
+  required: false
+  schema:
+    type: string
+    format: uuid
+
+StudentIdFilter:
+  name: studentId
+  in: query
+  required: false
+  description: Filtro docente; nunca se usa para seleccionar identidad estudiantil.
+  schema:
+    type: string
+    format: uuid
+
+Search:
+  name: search
+  in: query
+  required: true
+  description: Texto para buscar participantes existentes dentro del tenant actual.
+  schema:
+    type: string
+    minLength: 1
+

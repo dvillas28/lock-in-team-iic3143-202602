@@ -1,0 +1,113 @@
+openapi: 3.1.0
+info:
+  title: AcademiX API
+  version: 0.1.0
+  description: |
+    Contrato HTTP del MVP académico multi-tenant de AcademiX.
+
+    `x-tenant` selecciona el tenant y su base de datos, pero no autentica ni
+    autoriza al usuario. La identidad de las operaciones académicas se obtiene
+    del claim `sub` del JWT y los permisos se resuelven desde las memberships
+    persistidas por AcademiX.
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+servers:
+  - url: /
+    description: Host actual
+security:
+  - bearerAuth: []
+tags:
+  - name: Platform
+  - name: Tenants
+  - name: Courses
+  - name: Sections
+  - name: Enrollments
+  - name: Modules
+  - name: Materials
+  - name: Quizzes
+  - name: Attempts
+  - name: Gradebook
+  - name: Audit
+paths:
+  /health:
+    $ref: './paths/platform.yaml#/~1health'
+  /api/hello:
+    $ref: './paths/platform.yaml#/~1api~1hello'
+  /api/v1/tenants:
+    $ref: './paths/platform.yaml#/~1api~1v1~1tenants'
+  /api/v1/me:
+    $ref: './paths/platform.yaml#/~1api~1v1~1me'
+  /api/v1/users:
+    $ref: './paths/platform.yaml#/~1api~1v1~1users'
+  /api/v1/courses:
+    $ref: './paths/courses.yaml#/~1api~1v1~1courses'
+  /api/v1/courses/{courseId}:
+    $ref: './paths/courses.yaml#/~1api~1v1~1courses~1{courseId}'
+  /api/v1/courses/{courseId}/sections:
+    $ref: './paths/sections.yaml#/~1api~1v1~1courses~1{courseId}~1sections'
+  /api/v1/sections/{sectionId}:
+    $ref: './paths/sections.yaml#/~1api~1v1~1sections~1{sectionId}'
+  /api/v1/sections/{sectionId}/enrollments:
+    $ref: './paths/sections.yaml#/~1api~1v1~1sections~1{sectionId}~1enrollments'
+  /api/v1/sections/{sectionId}/enrollments/{enrollmentId}:
+    $ref: './paths/sections.yaml#/~1api~1v1~1sections~1{sectionId}~1enrollments~1{enrollmentId}'
+  /api/v1/courses/{courseId}/modules:
+    $ref: './paths/sections.yaml#/~1api~1v1~1courses~1{courseId}~1modules'
+  /api/v1/courses/{courseId}/modules/order:
+    $ref: './paths/sections.yaml#/~1api~1v1~1courses~1{courseId}~1modules~1order'
+  /api/v1/modules/{moduleId}:
+    $ref: './paths/sections.yaml#/~1api~1v1~1modules~1{moduleId}'
+  /api/v1/modules/{moduleId}/publish:
+    $ref: './paths/sections.yaml#/~1api~1v1~1modules~1{moduleId}~1publish'
+  /api/v1/modules/{moduleId}/unpublish:
+    $ref: './paths/sections.yaml#/~1api~1v1~1modules~1{moduleId}~1unpublish'
+  /api/v1/modules/{moduleId}/materials:
+    $ref: './paths/materials.yaml#/~1api~1v1~1modules~1{moduleId}~1materials'
+  /api/v1/modules/{moduleId}/materials/files:
+    $ref: './paths/materials.yaml#/~1api~1v1~1modules~1{moduleId}~1materials~1files'
+  /api/v1/materials/{materialId}:
+    $ref: './paths/materials.yaml#/~1api~1v1~1materials~1{materialId}'
+  /api/v1/materials/{materialId}/content:
+    $ref: './paths/materials.yaml#/~1api~1v1~1materials~1{materialId}~1content'
+  /api/v1/materials/{materialId}/publish:
+    $ref: './paths/materials.yaml#/~1api~1v1~1materials~1{materialId}~1publish'
+  /api/v1/materials/{materialId}/unpublish:
+    $ref: './paths/materials.yaml#/~1api~1v1~1materials~1{materialId}~1unpublish'
+  /api/v1/courses/{courseId}/quizzes:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1courses~1{courseId}~1quizzes'
+  /api/v1/quizzes/{quizId}:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1quizzes~1{quizId}'
+  /api/v1/quizzes/{quizId}/authoring:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1quizzes~1{quizId}~1authoring'
+  /api/v1/quizzes/{quizId}/questions:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1quizzes~1{quizId}~1questions'
+  /api/v1/quizzes/{quizId}/questions/{questionId}:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1quizzes~1{quizId}~1questions~1{questionId}'
+  /api/v1/quizzes/{quizId}/publish:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1quizzes~1{quizId}~1publish'
+  /api/v1/sections/{sectionId}/quizzes/{quizId}/attempts:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1sections~1{sectionId}~1quizzes~1{quizId}~1attempts'
+  /api/v1/quiz-attempts/{attemptId}:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1quiz-attempts~1{attemptId}'
+  /api/v1/quiz-attempts/{attemptId}/answers:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1quiz-attempts~1{attemptId}~1answers'
+  /api/v1/quiz-attempts/{attemptId}/submit:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1quiz-attempts~1{attemptId}~1submit'
+  /api/v1/quizzes/{quizId}/attempts:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1quizzes~1{quizId}~1attempts'
+  /api/v1/courses/{courseId}/grade-items:
+    $ref: './paths/gradebook.yaml#/~1api~1v1~1courses~1{courseId}~1grade-items'
+  /api/v1/courses/{courseId}/gradebook/weights:
+    $ref: './paths/gradebook.yaml#/~1api~1v1~1courses~1{courseId}~1gradebook~1weights'
+  /api/v1/courses/{courseId}/gradebook:
+    $ref: './paths/gradebook.yaml#/~1api~1v1~1courses~1{courseId}~1gradebook'
+  /api/v1/courses/{courseId}/gradebook/publications:
+    $ref: './paths/gradebook.yaml#/~1api~1v1~1courses~1{courseId}~1gradebook~1publications'
+  /api/v1/courses/{courseId}/my-grades:
+    $ref: './paths/gradebook.yaml#/~1api~1v1~1courses~1{courseId}~1my-grades'
+  /api/v1/courses/{courseId}/audit-events:
+    $ref: './paths/audit.yaml#/~1api~1v1~1courses~1{courseId}~1audit-events'
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: './components/security-schemes.yaml#/bearerAuth'
+

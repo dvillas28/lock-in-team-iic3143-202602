@@ -1,0 +1,9 @@
+bearerAuth:
+  type: http
+  scheme: bearer
+  bearerFormat: JWT
+  description: |
+    JWT de acceso. El claim `sub` identifica al usuario. Los roles y alcances se
+    resuelven desde las memberships de AcademiX; no se confía en roles enviados
+    arbitrariamente por el cliente.
+
