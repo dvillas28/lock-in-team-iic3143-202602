@@ -17,16 +17,27 @@ security:
   - bearerAuth: []
 tags:
   - name: Platform
+    description: Salud del servicio y prueba pública de resolución de tenant.
   - name: Tenants
+    description: Descubrimiento de tenants e identidad contextual autenticada.
   - name: Courses
+    description: Consulta y configuración general de cursos.
   - name: Sections
+    description: Secciones académicas de un curso.
   - name: Enrollments
+    description: Participantes y roles contextuales por sección.
   - name: Modules
+    description: Organización y publicación de módulos de contenido.
   - name: Materials
+    description: Material markdown y archivos académicos publicados.
   - name: Quizzes
+    description: Autoría, consulta y publicación de quizzes autocorregidos.
   - name: Attempts
+    description: Intentos, respuestas y envío inmutable de quizzes.
   - name: Gradebook
+    description: Ponderaciones, notas, publicación y promedios derivados.
   - name: Audit
+    description: Consulta inmutable del historial de acciones académicas sensibles.
 paths:
   /health:
     $ref: './paths/platform.yaml#/~1health'
@@ -110,4 +121,3 @@ components:
   securitySchemes:
     bearerAuth:
       $ref: './components/security-schemes.yaml#/bearerAuth'
-

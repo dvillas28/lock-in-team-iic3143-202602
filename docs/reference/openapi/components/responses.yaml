@@ -122,3 +122,10 @@ TenantDatabaseUnavailable:
         instance: /api/hello
         traceId: 01JQ4Y2X7B3QK5XEM0XZ4MSH8Z
         errors: []
+
+TooManyRequests:
+  description: Demasiadas solicitudes.
+  content:
+    application/problem+json:
+      schema:
+        $ref: './schemas/common.yaml#/Problem'

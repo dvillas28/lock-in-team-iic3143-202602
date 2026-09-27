@@ -1,5 +1,12 @@
 {
   "name": "lms-multi-tenant-universitario",
   "private": true,
-  "packageManager": "pnpm@9.15.9"
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "docs:api": "redocly preview-docs docs/reference/openapi/openapi.yaml",
+    "docs:api:lint": "redocly lint docs/reference/openapi/openapi.yaml"
+  },
+  "devDependencies": {
+    "@redocly/cli": "1.25.11"
+  }
 }

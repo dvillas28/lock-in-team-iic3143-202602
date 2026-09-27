@@ -15,6 +15,25 @@ identifica al usuario y los permisos se obtienen desde memberships persistidas.
 público, pero exige `x-tenant`. `GET /api/v1/tenants` requiere autenticación y no
 exige tenant; solo devuelve universidades accesibles para la identidad actual.
 
+## Visualización local
+
+Instala las dependencias con `pnpm install` y ejecuta:
+
+```bash
+pnpm docs:api
+```
+
+Redocly CLI levanta una previsualización web generada exclusivamente desde
+`openapi.yaml` y sus referencias en `http://127.0.0.1:8080`. Para validar el
+contrato sin iniciar el preview:
+
+```bash
+pnpm docs:api:lint
+```
+
+La configuración recomendada de Redocly vive en `redocly.yaml`. Se omite la
+regla de licencia porque el repositorio aún no declara una.
+
 ## Decisiones pendientes
 
 - Emisor, audiencia, expiración y provisioning de identidades JWT.

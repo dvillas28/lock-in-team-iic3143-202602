@@ -13,6 +13,8 @@
           application/json:
             schema:
               $ref: '../components/schemas/common.yaml#/HealthResponse'
+      '429':
+        $ref: '../components/responses.yaml#/TooManyRequests'
 
 /api/hello:
   parameters:
