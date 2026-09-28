@@ -33,7 +33,7 @@ tags:
   - name: Quizzes
     description: Autoría, consulta y publicación de quizzes autocorregidos.
   - name: Attempts
-    description: Intentos, respuestas y envío inmutable de quizzes.
+    description: Intentos, respuestas, envío y cancelación de quizzes.
   - name: Gradebook
     description: Ponderaciones, notas, publicación y promedios derivados.
   - name: Audit
@@ -103,6 +103,8 @@ paths:
     $ref: './paths/quizzes.yaml#/~1api~1v1~1quiz-attempts~1{attemptId}~1answers'
   /api/v1/quiz-attempts/{attemptId}/submit:
     $ref: './paths/quizzes.yaml#/~1api~1v1~1quiz-attempts~1{attemptId}~1submit'
+  /api/v1/quiz-attempts/{attemptId}/cancel:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1quiz-attempts~1{attemptId}~1cancel'
   /api/v1/quizzes/{quizId}/attempts:
     $ref: './paths/quizzes.yaml#/~1api~1v1~1quizzes~1{quizId}~1attempts'
   /api/v1/courses/{courseId}/grade-items:

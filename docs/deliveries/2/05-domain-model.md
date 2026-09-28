@@ -76,14 +76,21 @@ puntajes: el intento debe seguir siendo interpretable con la misma pauta.
 Intento de un estudiante para un quiz. Guarda la sección donde participaba al
 iniciarlo como snapshot inmutable, un número secuencial por estudiante y quiz,
 las respuestas elegidas y la corrección como JSON. Sus estados son
-`in_progress`, `submitted` y `graded`; el envío y la calificación automática
-ocurren en una transacción, por lo que `submitted` es transitorio.
+`in_progress`, `submitted`, `graded` y `cancelled`; el envío y la calificación
+automática ocurren en una transacción, por lo que `submitted` es transitorio.
+La cancelación explícita pasa un intento `in_progress` a `cancelled` de forma
+atómica, registra su fecha y actor en auditoría, y no produce calificación.
+Puede solicitarla el estudiante propietario con permisos vigentes o el
+coordinador del curso o docente autorizado de la sección histórica. El cierre
+del plazo del quiz no cancela por sí solo un intento ya iniciado.
 
-Puede existir un solo intento `in_progress` por estudiante y quiz. El usuario
-que puede consultar la pauta de ese quiz no puede rendirlo, aunque también
-tenga rol `student`. El límite, cuando existe, cuenta todos los intentos
-iniciados. De los intentos `graded`, el de mayor `attempt_number` determina la nota vigente. No se permiten nuevos
-intentos una vez publicada la nota de ese estudiante para el quiz.
+Puede existir un solo intento `in_progress` por estudiante y quiz. `cancelled`
+es terminal: no admite guardar respuestas ni envío posteriores y no bloquea la
+publicación. El usuario que puede consultar la pauta de ese quiz no puede
+rendirlo, aunque también tenga rol `student`. El límite, cuando existe, cuenta
+todos los intentos iniciados, incluidos los cancelados. De los intentos
+`graded`, el de mayor `attempt_number` determina la nota vigente. No se permiten
+nuevos intentos una vez publicada la nota de ese estudiante para el quiz.
 
 ### GradeItem y Grade
 
@@ -104,10 +111,10 @@ redondeo; si el denominador es cero, no hay promedio (`null`).
 
 Evento académico inmutable con actor, acción, recurso, curso, sección opcional,
 fecha y valores anterior/posterior sanitizados. Registra cambios de roles,
-material, quizzes, ponderaciones y publicación de notas, así como cambios de
-nota aún no publicada por un nuevo intento. Se escribe en la misma transacción
-que la operación académica. Nunca contiene secretos, claves de almacenamiento
-ni la pauta de respuestas.
+material, quizzes, cancelación de intentos, ponderaciones y publicación de
+notas, así como cambios de nota aún no publicada por un nuevo intento. Se
+escribe en la misma transacción que la operación académica. Nunca contiene
+secretos, claves de almacenamiento ni la pauta de respuestas.
 
 ## Relaciones principales
 
@@ -145,6 +152,7 @@ Course 1 -> N AuditEvent
   Una corrección posterior requiere un flujo explícito, con nueva decisión de
   dominio y auditoría; nunca una sobrescritura silenciosa.
 - La publicación exige que no haya intentos `in_progress` para las notas
-  seleccionadas; así no congela una nota mientras el estudiante responde.
+  seleccionadas; así no congela una nota mientras el estudiante responde. Los
+  intentos `cancelled` no bloquean, pero tampoco originan una nota publicable.
 - La publicación de notas y sus eventos de auditoría son atómicos. Las vistas
   estudiantiles muestran solo notas propias publicadas y no revelan la pauta.

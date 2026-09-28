@@ -304,6 +304,8 @@
       y ausencia de nota publicada. Solo hay un intento activo por estudiante y
       quiz; sin máximo, los intentos son ilimitados. El `sectionId` queda como
       snapshot histórico inmutable y `attemptNumber` ordena los intentos.
+      `closesAt` limita la disponibilidad del quiz, pero no cancela por sí solo
+      un intento ya iniciado. Los intentos cancelados cuentan entre los iniciados.
       Si el usuario puede consultar la pauta de ese quiz como coordinator o
       teacher, no puede rendirlo aunque también tenga rol student.
     parameters:
@@ -381,8 +383,9 @@
       en el curso correspondiente y no tener acceso actual de autoría ni a la pauta
       de respuestas del quiz. Si cualquiera de estas condiciones deja de cumplirse,
       la operación produce 403 Forbidden. El request no acepta `studentId`,
-      `isCorrect`, `pointsAwarded`, `scorePercent` ni `grade`. Después de submit el
-      intento es inmutable y la operación produce 409.
+      `isCorrect`, `pointsAwarded`, `scorePercent` ni `grade`. Si el intento ya
+      fue enviado, calificado o cancelado, no se guardan respuestas y responde
+      409 Conflict.
     requestBody:
       required: true
       content:
@@ -428,8 +431,8 @@
       calcula score y nota, y crea o actualiza el registro académico desde el último
       intento calificado por `attemptNumber` en una sola transacción. Una nota ya
       publicada bloquea nuevos envíos. Repetir la misma clave no duplica resultados;
-      un submit incompatible devuelve 409. La respuesta no revela la nota antes de
-      publicarla.
+      un submit incompatible o sobre un intento cancelado devuelve 409. La
+      respuesta no revela la nota antes de publicarla.
     parameters:
       - $ref: '../components/parameters.yaml#/IdempotencyKey'
     responses:
@@ -451,6 +454,43 @@
         $ref: '../components/responses.yaml#/Conflict'
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/quiz-attempts/{attemptId}/cancel:
+  parameters:
+    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/AttemptId'
+  post:
+    tags:
+      - Attempts
+    operationId: cancelQuizAttempt
+    summary: Cancelar un intento en progreso
+    description: |
+      El estudiante propietario puede cancelar su intento solo si mantiene una
+      membership `student` activa en el curso y no tiene acceso actual de autoría
+      ni a la pauta del quiz. Coordinator con membership activa en el curso o
+      teacher con membership activa en la sección histórica del intento también
+      pueden cancelarlo para resolver un intento abandonado. El servidor revalida
+      estos permisos al cancelar; la falta de autorización produce 403 Forbidden.
+      Solo un intento `inProgress` pasa atómicamente a `cancelled`, registra
+      `cancelledAt` y genera auditoría con el actor, sin calcular nota ni modificar
+      una nota existente. `cancelled` es terminal: deja de bloquear la publicación,
+      pero conserva `attemptNumber` y cuenta para `maxAttempts` como intento
+      iniciado. Repetir la cancelación de un intento ya cancelado devuelve 204
+      sin duplicar la auditoría. Un intento `submitted` o `graded` produce 409
+      Conflict. La cancelación no modifica ni reabre una nota ya publicada.
+    responses:
+      '204':
+        description: Intento cancelado, o cancelación ya aplicada.
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
 
 /api/v1/quizzes/{quizId}/attempts:
   parameters:

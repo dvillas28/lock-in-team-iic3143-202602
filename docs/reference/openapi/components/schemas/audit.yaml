@@ -37,6 +37,7 @@ AuditEvent:
       type: string
       examples:
         - quiz.published
+        - quizAttempt.cancelled
         - enrollment.roleChanged
         - gradeWeights.updated
         - grades.published

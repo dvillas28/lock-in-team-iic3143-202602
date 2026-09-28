@@ -41,7 +41,9 @@ regla de licencia porque el repositorio aún no declara una.
 - Los cursos demo y su primera pertenencia `coordinator` se aprovisionan
   juntos; por eso no existe `POST /api/v1/courses`.
 - `maxAttempts: null` permite intentos ilimitados; un entero positivo limita
-  los intentos iniciados. El último intento calificado determina la nota vigente
-  mientras esta no esté publicada.
+  los intentos iniciados, incluidos los cancelados. El último intento calificado
+  determina la nota vigente mientras esta no esté publicada. `closesAt` no cierra
+  intentos ya iniciados: el propietario autorizado o el staff docente autorizado
+  puede cancelar un intento `inProgress` mediante `POST /api/v1/quiz-attempts/{attemptId}/cancel`.
 - Límite máximo de tamaño para archivos. Los MIME del MVP sí están acotados a
   PDF, CSV, XLSX, TXT, JPEG y PNG.

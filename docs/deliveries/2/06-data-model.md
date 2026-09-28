@@ -173,7 +173,8 @@ de alcance.
 Campos: `id uuid PK`, `course_id uuid FK`, `quiz_id uuid FK`,
 `section_id uuid FK`, `student_id uuid FK`, `attempt_number integer`,
 `status text`, `started_at timestamptz`,
-`submitted_at timestamptz nullable`, `answers jsonb`,
+`submitted_at timestamptz nullable`, `cancelled_at timestamptz nullable`,
+`answers jsonb`,
 `score_points numeric(8,2) nullable`,
 `score_percent numeric(5,2) nullable`.
 
@@ -192,7 +193,7 @@ Ejemplo del snapshot académico de `answers`:
 
 Reglas:
 
-- `status in ('in_progress', 'submitted', 'graded')` y
+- `status in ('in_progress', 'submitted', 'graded', 'cancelled')` y
   `attempt_number > 0`.
 - FK `(quiz_id, course_id) -> quizzes(id, course_id)` y
   `(section_id, course_id) -> sections(id, course_id)`.
@@ -208,6 +209,13 @@ Reglas:
   se rechaza el inicio aunque también tenga rol `student`.
 - `score_percent between 0 and 100` cuando exista. Al pasar a `graded`,
   `submitted_at`, respuestas y puntaje son requeridos e inmutables.
+- Solo `in_progress` puede pasar a `cancelled`; se fija `cancelled_at`, se
+  conserva `attempt_number` y no se crea ni cambia una nota. `cancelled_at` es
+  null fuera de `cancelled`; en ese estado `submitted_at`, `score_points` y
+  `score_percent` permanecen null. El intento cancelado cuenta para
+  `max_attempts`, no bloquea publicación y no admite guardar ni enviar
+  respuestas. La transición registra actor y cambio en auditoría; el cierre
+  de `closes_at` no la ejecuta automáticamente.
 - `is_correct` y `points_awarded` los calcula el servidor; no se aceptan
   desde el cliente. La API estudiantil solo devuelve la selección y omite
   porcentaje y nota antes de la publicación.
@@ -298,8 +306,8 @@ Reglas:
   `course_id` mediante FK compuesta. `resource_id` es polimórfico y su
   existencia se valida en la operación de dominio.
 - Se registran al menos cambios de coordinadores y roles, publicación o
-  modificación de material y quizzes, ponderaciones, sustitución de nota
-  no publicada y publicación de notas.
+  modificación de material y quizzes, cancelación de intentos, ponderaciones,
+  sustitución de nota no publicada y publicación de notas.
 - `changes` excluye JWT, URLs de DB, `storage_key`, respuestas correctas y
   otros secretos. Evento y cambio académico se confirman en la misma
   transacción.
@@ -313,6 +321,8 @@ Reglas:
   marcar intento `graded`, crear o actualizar la nota no publicada desde ese
   último intento y registrar auditoría en una transacción. Un reenvío
   idempotente no duplica resultados.
+- Cancelar intento: validar actor y estado `in_progress`, cambiar a `cancelled`,
+  fijar `cancelled_at` y registrar auditoría en una transacción. No altera notas.
 - Publicar notas: bloquear las notas seleccionadas, verificar alcance del
   actor, intentos calificados, ausencia de intentos `in_progress` para esos
   estudiantes y quizzes, y ponderaciones del curso que sumen 100 %; actualizar `published_at` y escribir eventos en una
