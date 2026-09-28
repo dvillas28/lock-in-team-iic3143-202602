@@ -21,26 +21,29 @@ No intenta replicar un LMS completo.
 - El frontend deriva el tenant desde la ruta y envía `x-tenant` al backend.
 - Evolución futura a subdominio documentada, no implementada al inicio.
 - Dos experiencias UI: docente y estudiante.
-- Roles simples por sección: `teacher`, `student`, `assistant`.
-- Un usuario puede ser estudiante en una sección y ayudante en otra.
-- Docente coordinador administra curso, secciones, material, evaluaciones,
-  ayudantes y notas.
+- Rol `coordinator` por curso y roles `teacher`, `student`, `assistant`
+  por sección.
+- Un usuario puede acumular roles, incluso varios en una misma sección.
+- El coordinador administra el curso completo; un docente administra solo sus
+  secciones. La primera pertenencia coordinadora se aprovisiona con el curso.
 - Cursos y secciones/paralelos.
 - Material de curso con markdown renderizado.
 - Archivos básicos en object storage: PDF, CSV, XLSX, TXT, JPEG, PNG.
 - Evaluaciones como cuestionarios de alternativas.
 - Preguntas con alternativas y pauta preestablecida.
+- Intentos ilimitados por defecto o limitados por un máximo positivo definido
+  en el quiz; la nota vigente proviene del último intento calificado.
 - Cálculo automático de nota al finalizar el intento.
 - Libro de notas con ponderaciones por evaluación.
-- Publicación manual de notas por docente.
-- Estudiante ve notas publicadas y promedio.
+- Publicación manual de notas por coordinador o docente de la sección.
+- Estudiante ve notas publicadas y promedio parcial.
+- JWT para operaciones académicas y pertenencias persistidas para autorización.
+- Auditoría inmutable de cambios académicos sensibles dentro de cada tenant.
 
 ## Fuera del MVP
 
-- `AuditModule` y `AuditLog`: se pospone para no bloquear el flujo base.
-- Auditoría histórica de cambios: decisión explícita para una entrega futura.
 - Admin institucional separado: el docente coordinador cubre gestión mínima.
-- RBAC completo: roles por sección reemplazan permisos globales complejos.
+- RBAC global complejo: se usan pertenencias de curso y sección.
 - Creación dinámica de tenants desde UI: tenants demo se provisionan por config.
 - Subdominios reales: requieren dominio propio/wildcard DNS; rutas + `x-tenant`
   permiten validar tenancy primero sin comprar dominio.
@@ -67,5 +70,8 @@ La demo es aceptable si prueba que:
 - UC y UTFSM no comparten base de datos de tenant.
 - El backend resuelve tenant por request.
 - Un docente crea o gestiona datos dentro de su tenant.
-- Un estudiante ve solo material, quizzes y notas de su sección.
-- Un quiz produce una nota y esta se refleja en el libro de notas.
+- Un estudiante ve solo material y quizzes autorizados, y sus propias notas
+  publicadas; la pauta permanece oculta.
+- Un quiz produce una nota desde el último intento calificado y esta se refleja
+  en el libro de notas.
+- Las operaciones académicas usan JWT y los cambios sensibles generan auditoría.

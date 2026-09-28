@@ -38,8 +38,8 @@ Total: 7.0 puntos.
 - Google Cloud queda como migración posterior con free tier/créditos asociados.
 - Las tecnologías condicionadas no se documentan como obligatorias.
 - El modelo de datos baja a tablas concretas del MVP.
-- La auditoría académica queda como decisión explícita fuera del MVP, no como
-  requisito silencioso.
+- La auditoría académica inmutable, el coordinador de curso y JWT quedan
+  explícitos en el MVP y alineados con el contrato OpenAPI.
 
 ## Evidencia esperada para la implementación posterior
 

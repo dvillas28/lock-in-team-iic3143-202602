@@ -4,7 +4,7 @@ Fecha: 2026-09-26
 
 ## Estado
 
-Aceptado.
+Superado por [Alinear dominio académico y contrato de Entrega 2](align-delivery-2-domain-and-api.md) el 2026-09-28. Se conservan las decisiones de sharding, Railway y recorte funcional que el nuevo ADR ratifica.
 
 ## Contexto
 
