@@ -1,5 +1,7 @@
 # Modelo de dominio
 
+[Diagrama de clases UML del dominio](05-domain-model-uml.md).
+
 ## Límites
 
 El tenant es una universidad. En el MVP se prueban dos: `uc` y `utfsm`.

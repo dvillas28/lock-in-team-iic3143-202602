@@ -14,7 +14,7 @@ un flujo académico implementable por un equipo pequeño durante el semestre.
 | 02 | [alcance](02-scope.md) | Qué entra, qué queda fuera y por qué. |
 | 03 | [casos de uso y requerimientos](03-use-cases-and-requirements.md) | Casos de uso, RF, RNF y reglas. |
 | 04 | [arquitectura](04-architecture.md) | Arquitectura actualizada y despliegue Railway. |
-| 05 | [modelo de dominio](05-domain-model.md) | Entidades y reglas del dominio. |
+| 05 | [modelo de dominio](05-domain-model.md) y [diagrama UML](05-domain-model-uml.md) | Conceptos, relaciones y reglas del dominio. |
 | 06 | [modelo de datos](06-data-model.md) | Tablas, constraints, transacciones y ERD. |
 | 07 | [riesgos](07-risks.md) | Riesgos actualizados y mitigaciones. |
 | 08 | [plan de trabajo](08-work-plan.md) | Plan de desarrollo actualizado. |
