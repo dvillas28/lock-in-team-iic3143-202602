@@ -36,10 +36,12 @@ regla de licencia porque el repositorio aún no declara una.
 
 ## Decisiones pendientes
 
-- Emisor, audiencia, expiración y provisioning de identidades JWT.
-- Flujo de bootstrap de cursos y asignación del primer `coordinator`; por eso no
-  existe `POST /api/v1/courses`.
-- Cantidad máxima de intentos por quiz. El contrato impide más de un intento
-  activo, pero deja la política total al dominio futuro.
+- Emisor, audiencia, expiración y provisioning de identidades JWT; el MVP
+  académico debe resolverlos antes de habilitar sus endpoints.
+- Los cursos demo y su primera pertenencia `coordinator` se aprovisionan
+  juntos; por eso no existe `POST /api/v1/courses`.
+- `maxAttempts: null` permite intentos ilimitados; un entero positivo limita
+  los intentos iniciados. El último intento calificado determina la nota vigente
+  mientras esta no esté publicada.
 - Límite máximo de tamaño para archivos. Los MIME del MVP sí están acotados a
   PDF, CSV, XLSX, TXT, JPEG y PNG.

@@ -22,6 +22,7 @@ QuizSummary:
     - instructions
     - opensAt
     - closesAt
+    - maxAttempts
     - status
     - publishedAt
   properties:
@@ -47,6 +48,10 @@ QuizSummary:
     closesAt:
       type: [string, 'null']
       format: date-time
+    maxAttempts:
+      type: [integer, 'null']
+      minimum: 1
+      description: Null permite intentos ilimitados; un entero positivo limita los intentos iniciados.
     status:
       $ref: '#/QuizStatus'
     publishedAt:
@@ -146,6 +151,7 @@ QuizStudentView:
     - instructions
     - opensAt
     - closesAt
+    - maxAttempts
     - status
     - publishedAt
     - questions
@@ -171,6 +177,10 @@ QuizStudentView:
     closesAt:
       type: [string, 'null']
       format: date-time
+    maxAttempts:
+      type: [integer, 'null']
+      minimum: 1
+      description: Null permite intentos ilimitados; un entero positivo limita los intentos iniciados.
     status:
       $ref: '#/QuizStatus'
     publishedAt:
@@ -193,6 +203,7 @@ QuizAuthoringView:
     - instructions
     - opensAt
     - closesAt
+    - maxAttempts
     - status
     - publishedAt
     - createdBy
@@ -219,6 +230,10 @@ QuizAuthoringView:
     closesAt:
       type: [string, 'null']
       format: date-time
+    maxAttempts:
+      type: [integer, 'null']
+      minimum: 1
+      description: Null permite intentos ilimitados; un entero positivo limita los intentos iniciados.
     status:
       $ref: '#/QuizStatus'
     publishedAt:
@@ -254,6 +269,10 @@ QuizCreate:
     closesAt:
       type: [string, 'null']
       format: date-time
+    maxAttempts:
+      type: [integer, 'null']
+      minimum: 1
+      description: Omitido o null permite intentos ilimitados; un entero positivo limita los iniciados.
 
 QuizUpdate:
   type: object
@@ -270,6 +289,10 @@ QuizUpdate:
     closesAt:
       type: [string, 'null']
       format: date-time
+    maxAttempts:
+      type: [integer, 'null']
+      minimum: 1
+      description: Null permite intentos ilimitados; un entero positivo limita los intentos iniciados.
 
 AlternativeInput:
   type: object

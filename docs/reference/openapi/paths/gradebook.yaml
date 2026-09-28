@@ -35,8 +35,9 @@
     summary: Reemplazar ponderaciones del curso de forma atómica
     description: |
       Requiere rol `coordinator`. El conjunto completo debe sumar 100%. Si existe
-      una nota publicada afectada, responde 409 con código `GRADE_WEIGHTS_LOCKED`.
-      Todo cambio exitoso genera un evento de auditoría con before y after.
+      cualquier nota publicada del curso, responde 409 con código
+      `GRADE_WEIGHTS_LOCKED`. Tampoco se agregan grade items tras la primera
+      publicación. Todo cambio exitoso genera un evento de auditoría con before y after.
     requestBody:
       required: true
       content:
@@ -107,8 +108,10 @@
     summary: Publicar notas por grade items y secciones
     description: |
       Coordinator puede publicar en cualquier sección del curso. Teacher solo en
-      sus secciones. Assistant y student no pueden publicar. La operación es
-      atómica, no sobrescribe notas publicadas y genera auditoría histórica.
+      sus secciones. Assistant y student no pueden publicar. La primera
+      publicación exige ponderaciones del curso que sumen 100% y ausencia de
+      intentos activos para las notas seleccionadas. La operación es atómica,
+      no sobrescribe notas publicadas y genera auditoría histórica.
     parameters:
       - $ref: '../components/parameters.yaml#/IdempotencyKey'
     requestBody:

@@ -263,10 +263,11 @@
     operationId: publishQuiz
     summary: Publicar un quiz válido
     description: |
-      Valida fechas, puntajes, preguntas, al menos dos alternativas y exactamente
-      una alternativa correcta por pregunta. Genera auditoría. Coordinator puede
+      Valida fechas, puntajes, preguntas, al menos dos alternativas con IDs únicos
+      y exactamente una alternativa correcta por pregunta. Genera auditoría. Coordinator puede
       publicar cualquier quiz; teacher solo quizzes de sus secciones. La operación
-      asegura que exista un único GradeItem vinculado al quiz.
+      asegura que exista un único GradeItem vinculado al quiz; se rechaza
+      si ya se publicó alguna nota del curso.
     responses:
       '200':
         description: Quiz publicado e inmutable para cambios incompatibles.
@@ -299,8 +300,12 @@
     summary: Iniciar un intento como estudiante autenticado
     description: |
       `studentId` se deriva del claim `sub`. Valida membership student activa,
-      relación sección-curso, disponibilidad del quiz y política de intentos. El
-      `sectionId` queda como snapshot histórico inmutable.
+      relación sección-curso, disponibilidad del quiz, máximo de intentos si existe
+      y ausencia de nota publicada. Solo hay un intento activo por estudiante y
+      quiz; sin máximo, los intentos son ilimitados. El `sectionId` queda como
+      snapshot histórico inmutable y `attemptNumber` ordena los intentos.
+      Si el usuario puede consultar la pauta de ese quiz como coordinator o
+      teacher, no puede rendirlo aunque también tenga rol student.
     parameters:
       - $ref: '../components/parameters.yaml#/IdempotencyKey'
     responses:
@@ -410,9 +415,11 @@
     summary: Enviar y calificar un intento de forma atómica
     description: |
       Solo el estudiante dueño puede enviarlo. El servidor inmoviliza respuestas,
-      calcula score y nota, y crea o actualiza el registro académico en una sola
-      transacción. Repetir la misma clave no duplica resultados; un submit
-      incompatible devuelve 409. La respuesta no revela la nota antes de publicarla.
+      calcula score y nota, y crea o actualiza el registro académico desde el
+      último intento calificado por `attemptNumber` en una sola transacción.
+      Una nota ya publicada bloquea nuevos envíos. Repetir la misma clave no
+      duplica resultados; un submit incompatible devuelve 409. La respuesta
+      no revela la nota antes de publicarla.
     parameters:
       - $ref: '../components/parameters.yaml#/IdempotencyKey'
     responses:
