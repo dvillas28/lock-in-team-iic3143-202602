@@ -83,3 +83,5 @@ Los nombres y el orden de tareas son una síntesis de negocio de estas fuentes, 
 Se comprobó que todos los nodos fueran alcanzables desde un inicio y pudieran llegar a un fin, que los flujos mantuvieran sus extremos dentro del proceso y que las tareas estuvieran en el carril de su responsable. También se revisaron las rutas de flechas, la legibilidad de los textos y el resultado PNG de cada modelo.
 
 Los cuatro roles están respaldados por documentación explícita. No existen mocks de administrador o ayudante en la carpeta solicitada: sus modelos se derivan de las responsabilidades y criterios escritos, sin presentar pantallas inventadas como evidencia.
+
+- test: ignore
