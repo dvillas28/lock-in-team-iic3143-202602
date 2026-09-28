@@ -22,7 +22,7 @@ No existe administrador institucional separado en el MVP.
 | CU4 | Gestionar secciones y roles | Coordinador | El primer coordinador se aprovisiona con el curso; se asignan roles de sección. |
 | CU5 | Publicar material | Coordinador | Material markdown o archivo queda visible. |
 | CU6 | Consultar material | Estudiante | Accede a material publicado del curso donde tiene inscripción activa. |
-| CU7 | Crear quiz | Docente | Quiz tiene preguntas, alternativas y pauta. |
+| CU7 | Crear quiz | Coordinador/Docente de sección | Coordinador crea quizzes de curso o sección; docente solo de sus secciones. |
 | CU8 | Responder quiz | Estudiante | Intento numerado queda registrado con sección histórica y límite opcional. |
 | CU9 | Calcular nota | Sistema | Nota se calcula automáticamente al finalizar. |
 | CU10 | Configurar libro de notas | Coordinador | Evaluaciones tienen ponderación. |
