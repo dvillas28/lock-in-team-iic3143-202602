@@ -101,3 +101,68 @@ Crear PR hacia `main` y enlazar el spec trabajado. Ver
 - Archivos: object storage compatible con S3.
 - Infraestructura: load balancer, reverse proxy/API gateway, connection pool y despliegue cloud con free tiers cuando sea posible.
 
+## Base Tecnica Local
+
+El repositorio incluye dos aplicaciones independientes administradas con pnpm:
+
+- `frontend/`: Next.js con TypeScript, App Router y ESLint.
+- `backend/`: NestJS con TypeScript y el endpoint de salud `GET /health`.
+
+El frontend consulta al backend desde el servidor de Next. Fuera de Docker usa
+`http://localhost:3001` por defecto; Docker Compose configura `API_URL` como
+`http://backend:3001`, usando el nombre del servicio dentro de la red interna.
+
+### Requisitos
+
+- Docker.
+- Docker Compose.
+
+Para desarrollo sin Docker se requiere Node.js 20.9 o superior y pnpm 9.15.9.
+
+### Levantar El Proyecto
+
+```bash
+docker compose up --build
+```
+
+### Servicios
+
+```text
+Frontend: http://localhost:3000
+Backend:  http://localhost:3001
+```
+
+El backend expone únicamente el endpoint de salud `GET /health` para este
+bootstrap:
+
+```json
+{
+  "status": "ok",
+  "version": "0.1.0",
+  "timestamp": "2026-09-27T18:30:00.000Z"
+}
+```
+
+### Detener
+
+```bash
+docker compose down
+```
+
+### Variables De Entorno
+
+`.env.example` documenta las variables disponibles. No contienen secretos:
+
+- `API_URL`: URL que usa el servidor de Next para consultar al backend.
+- `PORT`: puerto de escucha de NestJS; su valor por defecto es `3001`.
+- `APP_VERSION`: versión informada por `GET /health`.
+
+### Verificaciones Locales
+
+Después de instalar las dependencias en `frontend/` y `backend/`, desde la raíz:
+
+```bash
+pnpm build
+pnpm lint
+pnpm test
+```
