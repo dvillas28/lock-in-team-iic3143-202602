@@ -4,7 +4,12 @@
   "packageManager": "pnpm@9.15.9",
   "scripts": {
     "docs:api": "redocly preview-docs docs/reference/openapi/openapi.yaml",
-    "docs:api:lint": "redocly lint docs/reference/openapi/openapi.yaml"
+    "docs:api:lint": "redocly lint docs/reference/openapi/openapi.yaml",
+    "build": "pnpm --dir frontend build && pnpm --dir backend build",
+    "lint": "pnpm --dir frontend lint && pnpm --dir backend lint",
+    "test": "pnpm --dir backend test",
+    "dev:frontend": "pnpm --dir frontend dev",
+    "dev:backend": "pnpm --dir backend start:dev"
   },
   "devDependencies": {
     "@redocly/cli": "1.25.11"
