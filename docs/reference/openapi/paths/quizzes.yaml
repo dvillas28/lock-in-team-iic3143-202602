@@ -375,9 +375,14 @@
     operationId: saveQuizAttemptAnswers
     summary: Reemplazar respuestas de un intento en progreso
     description: |
-      Solo el estudiante dueño puede guardar respuestas. El request no acepta
-      `studentId`, `isCorrect`, `pointsAwarded`, `scorePercent` ni `grade`.
-      Después de submit el intento es inmutable y la operación produce 409.
+      En cada guardado, el servidor revalida la autorización vigente; no utiliza
+      un snapshot de permisos tomado al iniciar el intento. El usuario autenticado
+      debe ser el propietario del intento, mantener una membership `student` activa
+      en el curso correspondiente y no tener acceso actual de autoría ni a la pauta
+      de respuestas del quiz. Si cualquiera de estas condiciones deja de cumplirse,
+      la operación produce 403 Forbidden. El request no acepta `studentId`,
+      `isCorrect`, `pointsAwarded`, `scorePercent` ni `grade`. Después de submit el
+      intento es inmutable y la operación produce 409.
     requestBody:
       required: true
       content:
@@ -414,12 +419,17 @@
     operationId: submitQuizAttempt
     summary: Enviar y calificar un intento de forma atómica
     description: |
-      Solo el estudiante dueño puede enviarlo. El servidor inmoviliza respuestas,
-      calcula score y nota, y crea o actualiza el registro académico desde el
-      último intento calificado por `attemptNumber` en una sola transacción.
-      Una nota ya publicada bloquea nuevos envíos. Repetir la misma clave no
-      duplica resultados; un submit incompatible devuelve 409. La respuesta
-      no revela la nota antes de publicarla.
+      En cada envío, el servidor revalida la autorización vigente; no utiliza un
+      snapshot de permisos tomado al iniciar el intento. El usuario autenticado
+      debe ser el propietario del intento, mantener una membership `student` activa
+      en el curso correspondiente y no tener acceso actual de autoría ni a la pauta
+      de respuestas del quiz. Si cualquiera de estas condiciones deja de cumplirse,
+      la operación produce 403 Forbidden. El servidor inmoviliza respuestas,
+      calcula score y nota, y crea o actualiza el registro académico desde el último
+      intento calificado por `attemptNumber` en una sola transacción. Una nota ya
+      publicada bloquea nuevos envíos. Repetir la misma clave no duplica resultados;
+      un submit incompatible devuelve 409. La respuesta no revela la nota antes de
+      publicarla.
     parameters:
       - $ref: '../components/parameters.yaml#/IdempotencyKey'
     responses:
