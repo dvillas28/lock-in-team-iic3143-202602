@@ -16,17 +16,50 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      apps: ${{ steps.apps.outputs.list }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        if: github.event_name != 'workflow_dispatch'
+        with:
+          filters: |
+            backend:
+              - "backend/**"
+              - ".github/workflows/ci.yml"
+            frontend:
+              - "frontend/**"
+              - ".github/workflows/ci.yml"
+
+      # Manual runs check every app.
+      - id: apps
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          CHANGED: ${{ steps.filter.outputs.changes }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo 'list=["backend","frontend"]' >> "$GITHUB_OUTPUT"
+          else
+            echo "list=$CHANGED" >> "$GITHUB_OUTPUT"
+          fi
+
   checks:
-    name: ${{ matrix.app }} (lint + ${{ matrix.check }})
+    name: ${{ matrix.app }} (lint + ${{ matrix.app == 'backend' && 'test' || 'build' }})
+    needs: changes
+    if: needs.changes.outputs.apps != '[]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - app: backend
-            check: test
-          - app: frontend
-            check: build
+        app: ${{ fromJSON(needs.changes.outputs.apps) }}
     defaults:
       run:
         working-directory: ${{ matrix.app }}
@@ -44,15 +77,28 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
-      - run: pnpm ${{ matrix.check }}
+      - run: pnpm ${{ matrix.app == 'backend' && 'test' || 'build' }}
 
   docker:
     name: ${{ matrix.app }} (docker build)
+    needs: changes
+    if: needs.changes.outputs.apps != '[]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        app: [backend, frontend]
+        app: ${{ fromJSON(needs.changes.outputs.apps) }}
     steps:
       - uses: actions/checkout@v5
       - run: docker build --tag academix-${{ matrix.app }}:ci ./${{ matrix.app }}
+
+  # Single required check: skipped matrix jobs never report their per-app check names.
+  result:
+    name: CI result
+    if: always()
+    needs: [changes, checks, docker]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if any job failed or was cancelled
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
