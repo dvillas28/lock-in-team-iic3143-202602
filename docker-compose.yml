@@ -1,9 +1,31 @@
 services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-academix}
+      POSTGRES_USER: ${POSTGRES_USER:-academix}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-academix_dev}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
   backend:
     build:
       context: ./backend
     environment:
       APP_VERSION: 0.1.0
+      DATABASE_URL: postgresql://${POSTGRES_USER:-academix}:${POSTGRES_PASSWORD:-academix_dev}@postgres:5432/${POSTGRES_DB:-academix}
       PORT: 3001
     ports:
       - "3001:3001"
@@ -19,6 +41,9 @@ services:
       timeout: 3s
       retries: 10
       start_period: 5s
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   frontend:
     build:
@@ -30,3 +55,6 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+
+volumes:
+  postgres_data:
