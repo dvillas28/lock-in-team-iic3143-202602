@@ -4,7 +4,11 @@ Fecha: 2026-09-26
 
 ## Estado
 
-Superado por [Alinear dominio académico y contrato de Entrega 2](align-delivery-2-domain-and-api.md) el 2026-09-28. Se conservan las decisiones de sharding, Railway y recorte funcional que el nuevo ADR ratifica.
+Superado por [Alinear dominio académico y contrato de Entrega 2](align-delivery-2-domain-and-api.md)
+el 2026-09-28 en alcance académico. La decisión de sharding y la migración
+posterior a Google Cloud fueron reemplazadas el 2026-09-29 por
+[Adoptar PostgreSQL compartida para multi-tenancy](adopt-shared-postgresql-multitenancy.md).
+Se conserva este documento como registro histórico de las alternativas evaluadas.
 
 ## Contexto
 

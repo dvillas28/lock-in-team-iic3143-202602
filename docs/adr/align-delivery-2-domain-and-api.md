@@ -4,10 +4,13 @@ Fecha: 2026-09-28
 
 ## Estado
 
-Aceptado. Supera la parte de roles, intentos, autenticación y auditoría de
-[Elegir alcance MVP para Entrega 2](choose-delivery-2-mvp-scope.md). Ratifica
-su sharding por universidad, Railway como plataforma inmediata y el recorte de
-entregas manuales, IA, chat, calendario y operación distribuida.
+Aceptado para roles, intentos, autenticación, auditoría y recorte funcional.
+Supera esas partes de
+[Elegir alcance MVP para Entrega 2](choose-delivery-2-mvp-scope.md). Su decisión
+de sharding, resolución por `x-tenant`, persistencia por universidad y migración
+posterior a Google Cloud fue reemplazada el 2026-09-29 por
+[Adoptar PostgreSQL compartida para multi-tenancy](adopt-shared-postgresql-multitenancy.md).
+Railway permanece como plataforma de despliegue vigente.
 
 ## Contexto
 
