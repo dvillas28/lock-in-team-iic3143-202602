@@ -1,57 +1,64 @@
 # Estado Entrega 2
 
-## Completo en esta base documental
+## Completo en documentación
 
-- Alcance MVP actualizado.
-- Requisitos y casos de uso del MVP.
-- Arquitectura ajustada a Railway.
-- Migración posterior a Google Cloud documentada.
-- Modelo de dominio del flujo académico mínimo.
-- Modelo de datos registry + tenant DB, con coordinador, sección histórica,
-  intentos configurables, cálculo de notas y auditoría.
-- Riesgos actualizados.
-- Plan de trabajo actualizado.
-- Plan de walking skeleton.
-- Trazabilidad contra pauta de Entrega 2.
+- Decisión de PostgreSQL compartida registrada en un ADR.
+- Institution definida como tenant lógico con `institution_id`.
+- User global e InstitutionMembership modelados conceptualmente.
+- Scope, requisitos y arquitectura alineados a paths institucionales.
+- Modelo de dominio, UML y modelo lógico institution-aware.
+- FK compuestas, unicidades e índices conceptuales documentados.
+- Riesgos y planes alineados al aislamiento lógico.
+- Railway definido como plataforma de despliegue vigente.
+- Contrato OpenAPI institucional y política 401/403/404 documentados.
 
-## Falta antes de la implementación
+## Completo en el walking skeleton
 
-- Spec Kit del walking skeleton.
-- Implementar frontend Hello World.
-- Implementar backend Hello World.
-- Conectar frontend con backend.
-- Crear registry DB y tenant DBs demo.
-- Crear portal home con rutas `/uc` y `/utfsm`.
-- Configurar CI frontend/backend.
-- Configurar CD Railway automatizado con `railway.toml` o documentar fallback
-  manual si la cuenta lo bloquea.
-- Crear tag y release GitHub.
-- Guardar evidencia de pipeline y despliegue.
+- frontend Next.js;
+- backend NestJS con `GET /health`;
+- frontend conectado al health del backend;
+- Dockerfiles de frontend y backend;
+- Docker Compose para ejecución local;
+- CI de aplicaciones e imágenes;
+- configuración Railway versionada;
+- workflow de release por tag.
 
-## Falta para MVP académico posterior
+## Falta para persistencia y multi-tenancy ejecutable
 
-- Cursos y secciones.
-- Pertenencias de coordinador y enrollments por sección con roles acumulables.
-- JWT para operaciones académicas.
-- Material markdown y archivos.
-- Quizzes de alternativas con pauta protegida y límite opcional de intentos.
-- Cálculo automático de nota desde el último intento.
-- Libro de notas con ponderaciones y bloqueo tras publicar.
-- Publicación de notas.
-- Vista estudiante de notas publicadas y promedio.
-- Auditoría inmutable de cambios sensibles.
+- Spec Kit que elija ORM o capa SQL y herramienta de migraciones;
+- conexión backend a la PostgreSQL compartida;
+- migración inicial de Institution, User e InstitutionMembership;
+- bootstrap idempotente de UC y UTFSM;
+- JWT global;
+- resolución de `institutionSlug` y autorización por membership;
+- repositorios/servicios institution-scoped;
+- constraints y FK institution-aware ejecutables;
+- tests de aislamiento entre Institutions.
 
-## Deuda aceptada
+## Falta para el MVP académico
 
-- Auth mock solo para Hello World del walking skeleton.
-- Rutas `/uc` y `/utfsm` + header `x-tenant` antes de subdominios.
-- Sin Redis/workers.
-- Sin réplicas.
-- Sin admin institucional separado.
-- Sin recorrecciones.
+- Courses y Sections;
+- CourseMemberships y Enrollments;
+- material markdown y, posteriormente, archivos;
+- quizzes con pauta protegida e intentos;
+- cálculo y publicación de Grades;
+- libro de notas y promedio;
+- AuditEvents inmutables.
 
-## Referencias conservadas
+## Fuera del MVP
 
-Los documentos de Entrega 1 quedan como antecedente en `docs/deliveries/1`.
-Entrega 2 no los reemplaza por completo: los recorta y actualiza para guiar la
-implementación inmediata.
+- administrador institucional separado;
+- jerarquía de facultades/departamentos;
+- provisioning dinámico de Institutions;
+- RLS;
+- sharding;
+- restore lógico por Institution;
+- Redis, workers y microservicios;
+- proveedor concreto de object storage;
+- IA, chat, calendario, entregas manuales y recorrecciones.
+
+## Documentación histórica
+
+Entregas 0 y 1 conservan las decisiones presentadas en su momento, incluida la
+arquitectura database-per-tenant y referencias cloud anteriores. No son la
+fuente vigente. Entrega 2 y los ADR aceptados actuales guían la implementación.

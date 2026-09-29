@@ -4,42 +4,50 @@
 
 | Riesgo | Impacto | Mitigación |
 | --- | --- | --- |
-| Sobrealcance funcional | No llegar a demo usable | Mantener fuera IA, chat, calendario y corrección manual; implementar auditoría mínima transaccional. |
-| Complejidad de sharding | Errores de conexión o migración | Registry mínimo, dos tenants demo y schema igual por tenant. |
-| Fuga entre tenants | Riesgo académico y reputacional | Ruta por tenant, `x-tenant` obligatorio, conexión por tenant y tests de aislamiento. |
-| Railway free tier insuficiente | No desplegar arquitectura completa | Ajuste mínimo documentado; mantener migración posterior a Google Cloud. |
-| Object storage no disponible | Material con archivos bloqueado | Walking skeleton puede partir con markdown; archivos entran después. |
-| Falta de tiempo real del equipo | Funciones incompletas | Priorizar walking skeleton, quizzes, notas y publicación. |
-| CI/CD subestimado | Pauta pierde evidencia | Crear pipeline temprano y versionar `railway.toml`. |
-| Auditoría incompleta | Cambios académicos no trazables | Insertar evento inmutable en la misma transacción de cada cambio sensible y sanitizar snapshots. |
-| Auth mock demasiado largo | Seguridad insuficiente | Limitarlo a Hello World; exigir JWT antes de habilitar operaciones académicas. |
+| Fuga entre Institutions | Exposición de datos académicos y daño reputacional | JWT global, Institution explícita, InstitutionMembership, autorización contextual, queries scoped, FK institution-aware y tests cruzados. |
+| Query sin scope institucional | Una operación lee o modifica filas de otra Institution | Centralizar el contexto de aplicación, exigir `institution_id` y probar cada trust boundary. |
+| Relación cruzada accidental | Section, Quiz, Grade u otra entidad referencia otra Institution | Unicidades y FK compuestas que incluyen `institution_id`. |
+| Backfill mezcla Institutions | Corrupción de datos compartidos | Filtrar por Institution, procesar por lotes, diseñar idempotencia y validar conteos antes/después. |
+| Mayor radio de impacto de la DB compartida | Una falla operacional afecta varias Institutions | Migraciones revisadas, cambios graduales, backup/PITR completo y observabilidad. |
+| Restore individual no disponible | Error localizado no puede restaurarse con un restore físico aislado | Declararlo fuera del MVP; evaluar export/import lógico solo si aparece el requisito. |
+| Slug tratado como autorización | Cliente cambia URL y obtiene acceso indebido | Resolver UUID interno y validar membership y permisos en cada request. |
+| Auth mock demasiado largo | API académica queda sin identidad confiable | Limitarlo al walking skeleton; exigir JWT antes de habilitar datos académicos. |
+| Railway indisponible o mal configurado | Frontend/backend no quedan accesibles | Healthchecks versionados, CI, imágenes Docker reproducibles y variables documentadas sin secretos. |
+| Proveedor de archivos no definido | Material binario se retrasa | Mantener markdown primero; elegir storage solo con una implementación que lo consuma. |
+| Sobrealcance funcional | No llegar a una demo usable | Mantener fuera admin, jerarquías, RLS, IA, chat, calendario, workers y microservicios. |
+| Auditoría incompleta | Cambios académicos no trazables | Evento tenant-owned e inmutable en la misma transacción, con snapshots sanitizados. |
 
-## Decisiones de riesgo aceptado
+## Riesgos aceptados
 
-- Se acepta portal home + rutas `/uc` y `/utfsm` en vez de subdominios porque
-  valida tenancy sin comprar dominio ni configurar wildcard DNS.
-- Se incluye auditoría histórica mínima del flujo académico, sin un sistema
-  general de observabilidad ni permisos globales complejos.
-- Se acepta Railway antes que Google Cloud porque la evidencia de despliegue
-  vale más para Entrega 2 que una arquitectura cloud ideal.
-- Se planifica migración posterior a Google Cloud usando free tier/créditos de
-  la cuenta asociada.
-- Se acepta una DB por tenant demo aunque aumente migraciones, porque el objetivo
-  académico es demostrar sharding real.
+- El aislamiento es lógico, no físico; exige disciplina de scope y tests.
+- Backup y PITR recuperan la PostgreSQL compartida completa.
+- RLS queda fuera del MVP; FK y constraints no reemplazan la autorización.
+- Institution se expresa mediante slug en el path por legibilidad, mientras UUID
+  permanece como identificador relacional.
+- Railway es la plataforma de despliegue; el dominio no depende de sus APIs.
+- UC y UTFSM se crearán por bootstrap idempotente cuando exista persistencia.
+- El proveedor de object storage se decide al implementar archivos.
 
 ## Señales de alerta
 
-- El frontend funciona pero no consume backend.
-- El backend usa una sola DB académica para todos los tenants.
-- El CI solo corre para una parte del monorepo.
-- El deploy requiere pasos no documentados.
-- La nota se calcula en frontend en vez de backend.
-- Las queries no validan sección/rol antes de exponer datos.
+- Una tabla académica nueva no incluye `institution_id`.
+- Una FK tenant-owned referencia solo `id` sin justificar por qué no incluye
+  Institution.
+- Una query recibe Institution desde el body en vez del contexto validado.
+- Un endpoint académico no está bajo `/institutions/{institutionSlug}`.
+- Un recurso de otra Institution produce una respuesta que confirma su existencia.
+- Un test usa una sola Institution y no prueba IDs cruzados.
+- Una migración o backfill itera datos sin scope institucional explícito.
+- Se promete restore por Institution sin un diseño de export/import lógico.
+- Se agrega un servicio, proveedor u ORM antes de que un plan lo necesite.
 
-## Riesgos removidos respecto a Entrega 1
+## Riesgos retirados del diseño vigente
 
-- IA costosa: fuera del MVP.
-- Redis/workers: fuera hasta tener procesos lentos reales.
-- Réplicas/load balancer: fuera hasta necesitar escala real.
-- Recorrecciones: fuera por complejidad de flujo.
-- Chat/calendario/anuncios: fuera por no aportar al skeleton evaluable.
+- coordinación de migraciones entre múltiples PostgreSQL;
+- agotamiento de conexiones por pools por Institution;
+- indisponibilidad de una base individual resuelta mediante registry;
+- divergencia de schema entre UC y UTFSM;
+- mantenimiento de URLs y credenciales de DB por tenant.
+
+Estas referencias pueden permanecer en entregables y ADRs históricos, pero no
+describen la arquitectura vigente.

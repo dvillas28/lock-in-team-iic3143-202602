@@ -2,82 +2,83 @@
 
 ## Enfoque
 
-Primero se demuestra que el sistema existe, despliega y respeta tenancy. Luego
-se implementa el flujo académico mínimo.
+Primero se mantiene el walking skeleton desplegable. Después se incorpora una
+sola PostgreSQL y se demuestra aislamiento entre Institutions antes de ampliar
+el flujo académico.
 
-Iteraciones sugeridas: 1 semana.
+Iteraciones sugeridas: una semana.
 
 ## Orden de implementación
 
-1. Walking skeleton.
-2. Tenancy con registry y dos DB demo.
-3. Cursos, secciones e inscripciones.
-4. JWT, pertenencias de coordinador/sección y auditoría mínima.
-5. Material markdown/archivo.
-6. Quizzes de alternativas con límite opcional de intentos.
-7. Cálculo de nota y libro de notas desde el último intento.
-8. Publicación de notas y vista estudiante.
+1. Mantener frontend/backend, CI, Docker y deployment Railway.
+2. Incorporar una PostgreSQL compartida y elegir persistencia mediante Spec Kit.
+3. Modelar Institution, User global e InstitutionMembership.
+4. Resolver Institution desde path y construir el scope de aplicación.
+5. Crear tests de aislamiento con UC y UTFSM.
+6. Implementar Courses, Sections, CourseMemberships y Enrollments.
+7. Incorporar JWT real y auditoría mínima.
+8. Implementar material, quizzes, notas y publicación.
 9. Hardening, evidencia y release.
 
 ## Plan por iteración
 
 | Iteración | Foco | Resultado |
 | --- | --- | --- |
-| 1 | Repo, frontend/backend Hello World, CI | Frontend consume backend; CI corre en PR/main. |
-| 2 | Railway y registry | Servicios desplegados con CD automático y `railway.toml`. |
-| 3 | Tenant DBs `uc`/`utfsm` | `/uc` y `/utfsm` envían `x-tenant` a la DB correcta. |
-| 4 | Cursos, secciones y roles | Coordinador por curso, roles acumulables por sección y JWT. |
-| 5 | Material | Docente publica markdown; estudiante lo ve. |
-| 6 | Archivos básicos | Metadatos y storage para tipos permitidos. |
-| 7 | Quizzes | Docente crea quiz con pauta protegida y límite opcional de intentos. |
-| 8 | Notas | Backend calcula nota del último intento y registra auditoría. |
-| 9 | Libro de notas | Docente configura ponderaciones y publica notas inmutables. |
-| 10 | Cierre | Tests críticos, release, evidencia y docs finales. |
+| 1 | Walking skeleton existente | Frontend consume health del backend; CI y Docker permanecen verdes. |
+| 2 | PostgreSQL compartida | Un servicio local y una conexión backend planificada sin múltiples DB. |
+| 3 | Identidad institucional | Institution, User e InstitutionMembership modelados e implementados. |
+| 4 | Contexto de request | Paths institucionales validan membership sin un header tenant adicional. |
+| 5 | Aislamiento | UC y UTFSM coexisten; tests bloquean IDs y relaciones cruzadas. |
+| 6 | Cursos y roles | CourseMembership y Enrollment respetan Institution. |
+| 7 | Material | Markdown primero; storage solo si se elige en un plan específico. |
+| 8 | Quizzes | Pauta protegida e intentos institution-scoped. |
+| 9 | Notas | Cálculo, ponderaciones, publicación y auditoría atómicos. |
+| 10 | Cierre | Tests críticos, release, evidencia y documentación final. |
 
 ## Entregables mínimos por fase
 
 ### Walking skeleton
 
-- frontend y backend separados o claramente distinguibles;
+- frontend y backend distinguibles;
 - endpoint de salud;
 - frontend conectado al backend;
-- CI con stages;
-- deploy Railway automatizado con `railway.toml`;
+- CI y build Docker;
+- deployment Railway mediante configuración versionada;
 - release por tag.
 
-### Tenancy
+### Multi-tenancy compartida
 
-- `registry_db.tenants` con `uc` y `utfsm`;
-- `academix_uc_db` y `academix_utfsm_db`;
-- portal home con rutas `/uc` y `/utfsm`;
-- header `x-tenant` en llamadas backend;
-- bloqueo de tenant inexistente.
+- una PostgreSQL;
+- Institutions `uc` y `utfsm` creadas por bootstrap futuro, no por migración;
+- User global e InstitutionMembership;
+- contexto `/api/v1/institutions/{institutionSlug}`;
+- rechazo de Institution inexistente o no visible con `404`;
+- entidades tenant-owned con `institution_id`;
+- constraints y FK institution-aware;
+- tests de lectura, escritura y relación cruzada.
 
 ### Flujo académico
 
-- curso con secciones;
-- pertenencias de coordinador y enrollments con roles acumulables;
+- Course con Sections;
+- CourseMemberships y Enrollments con roles acumulables;
 - JWT para operaciones académicas;
 - material publicado;
-- quiz con preguntas, pauta protegida y límite opcional de intentos;
-- intentos numerados con sección histórica;
-- nota calculada desde el último intento;
-- publicación de nota;
-- promedio estudiante;
-- eventos de auditoría inmutables.
+- Quiz con pauta protegida e intentos configurables;
+- Grade desde el último intento;
+- publicación y promedio;
+- AuditEvents inmutables y tenant-owned.
 
-## No hacer antes del Spec Kit
+## No hacer antes del Spec Kit correspondiente
 
-- No elegir dependencias nuevas fuera del plan.
-- No implementar auth real durante el walking skeleton; sí antes del flujo
-  académico.
-- No agregar Redis/workers.
-- No crear UI de administración institucional.
-- No omitir la auditoría mínima transaccional del MVP.
-- No migrar a Google Cloud antes de validar la primera versión funcional en
-  Railway.
+- No elegir ORM ni herramienta de migraciones.
+- No implementar RLS.
+- No agregar Redis, workers, Cassandra, MinIO ni emuladores cloud.
+- No implementar provisioning dinámico o UI administrativa.
+- No modelar facultades, departamentos ni campus.
+- No diseñar sharding futuro.
+- No agregar integración de archivos sin un consumidor real.
 
 ## Criterio de avance
 
-Cada iteración debe dejar evidencia ejecutable o documental. Si una función no
-se puede demostrar en la demo, se recorta antes de agregar otra.
+Cada iteración deja evidencia ejecutable o documental. Ningún flujo académico se
+considera listo sin pruebas negativas entre al menos dos Institutions.

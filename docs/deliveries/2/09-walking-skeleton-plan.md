@@ -2,141 +2,127 @@
 
 ## Objetivo
 
-Probar que AcademiX puede desplegar frontend y backend en Railway, conectar
-ambos, ejecutar CI/CD automatizado con `railway.toml` y resolver tenancy hacia
-bases separadas.
+Mantener un frontend y backend desplegables en Railway, conectados entre sí y
+validados por CI/CD. La siguiente evolución del skeleton incorpora una sola
+PostgreSQL compartida y prueba el contexto institucional sin implementar aún el
+flujo LMS completo.
 
-No implementa todavía el flujo LMS completo. La sesión mock se limita a
-Hello World: JWT, coordinadores y auditoría son requisitos del MVP académico
-posterior al skeleton, no funcionalidades postergadas fuera de ese MVP.
+JWT, memberships y auditoría son requisitos para habilitar endpoints académicos;
+no se sustituyen por una sesión mock fuera de pruebas iniciales.
 
-## Alcance técnico
+## Estado comprobable
+
+- frontend Next.js y backend NestJS separados;
+- `GET /health` implementado;
+- frontend consulta el health del backend;
+- Dockerfiles para ambas aplicaciones;
+- `frontend/railway.json` y `backend/railway.json` versionados;
+- CI con lint, test/build y Docker build;
+- workflow de release por tag.
+
+El repositorio todavía no contiene acceso a PostgreSQL, ORM, migraciones, JWT ni
+resolución de Institution.
+
+## Alcance técnico siguiente
 
 Frontend:
 
-- pantalla Hello World AcademiX;
-- portal home para elegir universidad demo;
-- rutas `/uc` y `/utfsm`;
-- llamada a backend;
-- muestra tenant resuelto y mensaje backend.
+- conservar estado de conexión al backend;
+- listar Institutions visibles cuando exista autenticación;
+- navegar usando el slug institucional;
+- no enviar `institution_id` en bodies académicos.
 
 Backend:
 
-- `GET /health`;
-- `GET /api/hello`;
-- lectura de `x-tenant` enviado por el frontend;
-- consulta a registry;
-- respuesta con tenant activo.
+- conservar `GET /health` público;
+- exponer `GET /api/v1/institutions` para la identidad global;
+- resolver `/api/v1/institutions/{institutionSlug}/...`;
+- validar InstitutionMembership antes de permisos académicos;
+- responder `404` ante Institution inexistente o no visible.
 
 Datos:
 
-- `registry_db` con tenants `uc` y `utfsm`;
-- DBs `academix_uc_db` y `academix_utfsm_db`;
-- tabla mínima de prueba por tenant o migración inicial del schema.
+- una PostgreSQL compartida;
+- Institution, User e InstitutionMembership como mínimo institucional;
+- UC y UTFSM en la misma base mediante bootstrap idempotente futuro;
+- ninguna implementación de seeds hasta elegir la capa de persistencia;
+- ninguna base, URL ni pool por Institution.
 
-## CI propuesto
+## CI
 
-Stages mínimos:
+Los checks existentes instalan con pnpm, ejecutan lint y test/build por
+aplicación y construyen ambas imágenes Docker. Al implementar persistencia se
+agregan tests de integración solo mediante el plan correspondiente.
+
+Los primeros escenarios multi-tenant deben cubrir:
+
+- User miembro de UC puede acceder a UC;
+- User no miembro recibe `404` al solicitar UTFSM;
+- un `courseId` de UC bajo el path UTFSM recibe `404`;
+- una escritura no puede crear relaciones cruzadas;
+- falta de rol sobre un recurso visible recibe `403`;
+- JWT ausente, inválido o expirado recibe `401`.
+
+## CD Railway
+
+Railway es la plataforma de despliegue vigente. Cada aplicación usa su
+Dockerfile y archivo `railway.json`. Los healthchecks son `/` para frontend y
+`/health` para backend.
+
+La PostgreSQL compartida se conectará mediante `DATABASE_URL` cuando exista la
+implementación. El repositorio no demuestra actualmente la provisión del
+servicio, por lo que no se inventan nombres, credenciales ni URLs.
+
+## Desarrollo local
+
+El Compose existente debe permitir:
 
 ```txt
-install
-validate
-test
-build
+frontend -> backend -> postgres
 ```
 
-Backend:
+Solo se agrega una PostgreSQL. No se agregan Redis, workers, múltiples bases,
+MinIO ni emuladores cloud.
 
-- instalar dependencias con `pnpm`;
-- revisar tipos/lint si existen scripts;
-- test mínimo de health/hello o unidad de tenant resolver;
-- build.
+Variables previstas sin secretos:
 
-Frontend:
-
-- instalar dependencias con `pnpm`;
-- revisar tipos/lint si existen scripts;
-- test mínimo o build;
-- build.
-
-## CD propuesto
-
-Opción preferida:
-
-- Railway conectado al repo;
-- deploy automático desde `main` o tag;
-- `railway.toml` versionado para definir build/deploy;
-- si el repo queda como monorepo, cada servicio debe usar su propio
-  `railway.toml` o ruta de configuración equivalente;
-- variables de entorno configuradas en Railway;
-- release GitHub incluye URL de producción.
-
-Opción fallback:
-
-- deploy manual Railway CLI o dashboard;
-- comando/procedimiento documentado;
-- evidencia con fecha, commit, URL y captura/log.
-
-El fallback manual solo es aceptable si free tier, límites de cuenta o permisos
-impiden CD automático confiable.
-
-## Migración posterior
-
-Railway es el destino de la primera versión funcional. Después de validar el
-walking skeleton y el flujo académico mínimo, el proyecto debe migrarse a Google
-Cloud usando el free tier/créditos disponibles en la cuenta asociada.
-
-La migración esperada es:
-
-- servicios Railway -> Cloud Run;
-- PostgreSQL Railway -> Cloud SQL;
-- object storage inicial -> Cloud Storage;
-- variables Railway -> Secret Manager o variables Cloud Run.
-
-## Variables esperadas
-
-Backend:
-
-- `REGISTRY_DATABASE_URL`;
-- `NODE_ENV`;
-- `ALLOWED_ORIGINS`;
-
-Frontend:
-
-- `NEXT_PUBLIC_API_URL` o equivalente según stack elegido.
-
-No se deben commitear secretos.
+- `DATABASE_URL`: conexión única del backend a PostgreSQL;
+- `PORT`: puerto backend;
+- `APP_VERSION`: versión del healthcheck;
+- `API_URL`: URL usada por frontend para consultar backend.
 
 ## Criterios de aceptación
 
 - CI corre para frontend y backend.
-- Frontend desplegado muestra respuesta real del backend.
-- Backend desplegado responde `/health`.
-- Portal permite elegir UC y UTFSM.
-- `/uc` envía `x-tenant: uc` y resuelve UC.
-- `/utfsm` envía `x-tenant: utfsm` y resuelve UTFSM.
-- Request sin tenant o con tenant inválido falla de forma controlada.
-- Existe tag y release de GitHub para la entrega.
+- Frontend muestra una respuesta real del backend.
+- Backend responde `/health`.
+- Railway despliega las aplicaciones con sus healthchecks.
+- El entorno local levanta frontend, backend y una PostgreSQL.
+- Cuando exista persistencia, UC y UTFSM coexisten en la misma base.
+- Cambiar el slug o un ID no permite saltarse InstitutionMembership.
+- Existe tag y release GitHub para la entrega.
 
-## Evidencia a guardar durante la implementación posterior
+## Evidencia
 
-- Link a workflow CI exitoso.
-- Link a release/tag.
-- URL frontend.
-- URL backend healthcheck, si es pública.
-- Captura o log de Railway deploy.
-- `railway.toml` versionado.
-- Nota breve si CD fue manual.
+- link a workflow CI exitoso;
+- link a release/tag;
+- URL frontend;
+- URL o captura del healthcheck backend;
+- captura o log del deployment Railway;
+- configuración Railway versionada;
+- tests de aislamiento cuando se implemente persistencia.
 
 ## Preparación para Spec Kit
 
-El Spec Kit siguiente debe pedir solo esto:
+El próximo Spec Kit de persistencia debe:
 
-- crear monorepo mínimo si falta;
-- crear frontend y backend Hello World;
-- crear portal home con rutas `/uc` y `/utfsm`;
-- crear tenant resolver por header;
-- crear migraciones registry/tenant;
-- configurar CI;
-- configurar CD Railway con `railway.toml` o fallback documentado;
-- crear release por tag.
+- seleccionar explícitamente la capa de acceso y migraciones;
+- conectar el backend a una sola PostgreSQL;
+- implementar el modelo Institution/User/InstitutionMembership;
+- definir bootstrap idempotente para UC y UTFSM;
+- implementar resolución por `institutionSlug` y scope institucional;
+- crear constraints y tests cruzados;
+- mantener Railway y Docker Compose coherentes.
+
+No debe implementar RLS, sharding, jerarquías, provisioning dinámico ni
+servicios no consumidos.
