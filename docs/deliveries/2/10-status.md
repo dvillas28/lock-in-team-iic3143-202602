@@ -7,7 +7,8 @@
 - Arquitectura ajustada a Railway.
 - Migración posterior a Google Cloud documentada.
 - Modelo de dominio del flujo académico mínimo.
-- Modelo de datos registry + tenant DB.
+- Modelo de datos registry + tenant DB, con coordinador, sección histórica,
+  intentos configurables, cálculo de notas y auditoría.
 - Riesgos actualizados.
 - Plan de trabajo actualizado.
 - Plan de walking skeleton.
@@ -30,19 +31,20 @@
 ## Falta para MVP académico posterior
 
 - Cursos y secciones.
-- Enrollments por sección y rol.
+- Pertenencias de coordinador y enrollments por sección con roles acumulables.
+- JWT para operaciones académicas.
 - Material markdown y archivos.
-- Quizzes de alternativas.
-- Cálculo automático de nota.
-- Libro de notas con ponderaciones.
+- Quizzes de alternativas con pauta protegida y límite opcional de intentos.
+- Cálculo automático de nota desde el último intento.
+- Libro de notas con ponderaciones y bloqueo tras publicar.
 - Publicación de notas.
 - Vista estudiante de notas publicadas y promedio.
+- Auditoría inmutable de cambios sensibles.
 
 ## Deuda aceptada
 
-- Auth mock inicial.
+- Auth mock solo para Hello World del walking skeleton.
 - Rutas `/uc` y `/utfsm` + header `x-tenant` antes de subdominios.
-- Sin auditoría histórica.
 - Sin Redis/workers.
 - Sin réplicas.
 - Sin admin institucional separado.

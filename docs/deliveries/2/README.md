@@ -14,7 +14,7 @@ un flujo académico implementable por un equipo pequeño durante el semestre.
 | 02 | [alcance](02-scope.md) | Qué entra, qué queda fuera y por qué. |
 | 03 | [casos de uso y requerimientos](03-use-cases-and-requirements.md) | Casos de uso, RF, RNF y reglas. |
 | 04 | [arquitectura](04-architecture.md) | Arquitectura actualizada y despliegue Railway. |
-| 05 | [modelo de dominio](05-domain-model.md) | Entidades y reglas del dominio. |
+| 05 | [modelo de dominio](05-domain-model.md) y [diagrama UML](05-domain-model-uml.md) | Conceptos, relaciones y reglas del dominio. |
 | 06 | [modelo de datos](06-data-model.md) | Tablas, constraints, transacciones y ERD. |
 | 07 | [riesgos](07-risks.md) | Riesgos actualizados y mitigaciones. |
 | 08 | [plan de trabajo](08-work-plan.md) | Plan de desarrollo actualizado. |
@@ -22,6 +22,9 @@ un flujo académico implementable por un equipo pequeño durante el semestre.
 | 10 | [estado](10-status.md) | Qué está completo y qué falta. |
 
 ## Decisión central
+
+El [ADR de alineación de dominio y API](../../adr/align-delivery-2-domain-and-api.md)
+actualiza el alcance académico del MVP.
 
 AcademiX reduce el alcance funcional del LMS, pero conserva multi-tenancy real
 por universidad mediante sharding:
@@ -46,11 +49,13 @@ schema. El walking skeleton debe probar esa decisión con dos tenants: `uc` y
   cuenta o permisos lo bloquean.
 - Google Cloud queda como migración posterior usando free tier/créditos de la
   cuenta asociada.
-- IA, chat, calendario, auditoría histórica, workers, Redis y réplicas quedan
-  fuera del MVP.
+- IA, chat, calendario, workers, Redis y réplicas quedan fuera del MVP.
+- El MVP académico incluye JWT, coordinadores de curso y auditoría inmutable;
+  la sesión mock solo se usa en el walking skeleton.
 - Las evaluaciones dejan de ser entregas/corrección manual y pasan a ser
   cuestionarios de alternativas con autocorrección.
-- Los roles se simplifican a `teacher`, `student` y `assistant` por sección.
+- Los permisos usan `coordinator` por curso y `teacher`, `student`,
+  `assistant` por sección; una persona puede acumular roles.
 
 ## Siguiente paso
 

@@ -63,7 +63,7 @@ La migración no debe cambiar el modelo de tenancy: el registry sigue resolviend
 ## Backend lógico
 
 ```txt
-Auth simple / sesión mock inicial
+Auth JWT para API académica (mock solo en walking skeleton)
 TenancyModule
   - TenantResolver
   - TenantRegistryRepository
@@ -72,9 +72,10 @@ CoursesModule
 MaterialsModule
 QuizzesModule
 GradesModule
+AuditModule
 ```
 
-Se excluyen `AuditModule`, workers, Redis, réplicas y load balancer propio.
+Se excluyen workers, Redis, réplicas y load balancer propio.
 
 ## Flujo de request
 
@@ -87,8 +88,11 @@ Se excluyen `AuditModule`, workers, Redis, réplicas y load balancer propio.
 6. Backend valida que el header exista.
 7. TenantResolver busca el slug en registry_db.
 8. TenantConnectionManager obtiene conexión/pool de la DB del tenant.
-9. Módulo de dominio ejecuta consulta en la DB del tenant.
-10. Backend responde sin mezclar datos entre tenants.
+9. Para la API académica, backend valida JWT, usuario activo y pertenencias
+   de curso o sección en esa DB.
+10. Módulo de dominio ejecuta la operación y escribe auditoría en la misma
+    transacción cuando corresponde.
+11. Backend responde sin mezclar datos entre tenants ni revelar la pauta.
 ```
 
 Subdominios reales quedan fuera de Entrega 2 porque requieren dominio propio y
@@ -131,19 +135,22 @@ Registry DB:
 
 Tenant DB:
 
-- contiene usuarios, cursos, secciones, material, quizzes y notas;
+- contiene usuarios, pertenencias de curso/sección, material, quizzes,
+  notas y eventos de auditoría;
 - no necesita columna `tenant_id` porque la base completa es el límite del
   tenant;
 - puede incluir `tenant_slug` solo en logs o seeds, no como llave funcional.
 
 ## Seguridad inicial
 
-- Sesión/auth mock para walking skeleton.
-- Validación obligatoria de tenant en cada request.
-- Validación de rol por sección antes de operaciones docentes.
-- No exponer `database_url` al frontend ni logs.
-
-Auth real queda para un Spec Kit posterior si excede el walking skeleton.
+- Sesión mock solo para `/api/hello` durante el walking skeleton.
+- La API académica del MVP exige JWT válido y resuelve `sub` contra
+  `users.id` en la DB del tenant seleccionado.
+- `x-tenant` elige DB; no autentica ni autoriza. Cada operación comprueba
+  pertenencias activas de curso y sección según su alcance.
+- Cambios académicos sensibles generan eventos inmutables en la misma
+  transacción, con snapshots sanitizados.
+- No exponer `database_url`, pauta ni storage keys al frontend o logs.
 
 ## CI/CD
 

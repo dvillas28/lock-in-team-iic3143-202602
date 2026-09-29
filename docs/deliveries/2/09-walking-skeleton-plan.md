@@ -6,7 +6,9 @@ Probar que AcademiX puede desplegar frontend y backend en Railway, conectar
 ambos, ejecutar CI/CD automatizado con `railway.toml` y resolver tenancy hacia
 bases separadas.
 
-No implementa todavía el flujo LMS completo.
+No implementa todavía el flujo LMS completo. La sesión mock se limita a
+Hello World: JWT, coordinadores y auditoría son requisitos del MVP académico
+posterior al skeleton, no funcionalidades postergadas fuera de ese MVP.
 
 ## Alcance técnico
 

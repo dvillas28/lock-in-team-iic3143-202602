@@ -6,10 +6,14 @@ QuizStatus:
 
 QuizAttemptStatus:
   type: string
+  description: |
+    Solo `inProgress` es activo. `submitted` es transitorio durante el envío;
+    `graded` y `cancelled` son terminales.
   enum:
     - inProgress
     - submitted
     - graded
+    - cancelled
 
 QuizSummary:
   type: object
@@ -22,6 +26,7 @@ QuizSummary:
     - instructions
     - opensAt
     - closesAt
+    - maxAttempts
     - status
     - publishedAt
   properties:
@@ -47,6 +52,10 @@ QuizSummary:
     closesAt:
       type: [string, 'null']
       format: date-time
+    maxAttempts:
+      type: [integer, 'null']
+      minimum: 1
+      description: Null permite intentos ilimitados; un entero positivo limita los intentos iniciados.
     status:
       $ref: '#/QuizStatus'
     publishedAt:
@@ -146,6 +155,7 @@ QuizStudentView:
     - instructions
     - opensAt
     - closesAt
+    - maxAttempts
     - status
     - publishedAt
     - questions
@@ -171,6 +181,10 @@ QuizStudentView:
     closesAt:
       type: [string, 'null']
       format: date-time
+    maxAttempts:
+      type: [integer, 'null']
+      minimum: 1
+      description: Null permite intentos ilimitados; un entero positivo limita los intentos iniciados.
     status:
       $ref: '#/QuizStatus'
     publishedAt:
@@ -193,6 +207,7 @@ QuizAuthoringView:
     - instructions
     - opensAt
     - closesAt
+    - maxAttempts
     - status
     - publishedAt
     - createdBy
@@ -219,6 +234,10 @@ QuizAuthoringView:
     closesAt:
       type: [string, 'null']
       format: date-time
+    maxAttempts:
+      type: [integer, 'null']
+      minimum: 1
+      description: Null permite intentos ilimitados; un entero positivo limita los intentos iniciados.
     status:
       $ref: '#/QuizStatus'
     publishedAt:
@@ -254,6 +273,10 @@ QuizCreate:
     closesAt:
       type: [string, 'null']
       format: date-time
+    maxAttempts:
+      type: [integer, 'null']
+      minimum: 1
+      description: Omitido o null permite intentos ilimitados; un entero positivo limita los iniciados.
 
 QuizUpdate:
   type: object
@@ -270,6 +293,10 @@ QuizUpdate:
     closesAt:
       type: [string, 'null']
       format: date-time
+    maxAttempts:
+      type: [integer, 'null']
+      minimum: 1
+      description: Null permite intentos ilimitados; un entero positivo limita los intentos iniciados.
 
 AlternativeInput:
   type: object
@@ -380,8 +407,6 @@ QuizAttemptAnswerAcademicView:
   required:
     - questionId
     - alternativeId
-    - isCorrect
-    - pointsAwarded
   properties:
     questionId:
       type: string
@@ -391,10 +416,12 @@ QuizAttemptAnswerAcademicView:
     isCorrect:
       type: boolean
       readOnly: true
+      description: Solo está presente cuando el intento fue calificado.
     pointsAwarded:
       type: number
       minimum: 0
       readOnly: true
+      description: Solo está presente cuando el intento fue calificado.
 
 QuizAttemptStudentView:
   type: object
@@ -407,6 +434,7 @@ QuizAttemptStudentView:
     - attemptNumber
     - startedAt
     - submittedAt
+    - cancelledAt
     - status
     - answers
   properties:
@@ -440,6 +468,12 @@ QuizAttemptStudentView:
       type: [string, 'null']
       format: date-time
       readOnly: true
+      description: Null si el intento no fue enviado, incluido uno cancelado.
+    cancelledAt:
+      type: [string, 'null']
+      format: date-time
+      readOnly: true
+      description: Fecha de cancelación; null si el intento no fue cancelado.
     status:
       $ref: '#/QuizAttemptStatus'
     answers:
@@ -458,6 +492,7 @@ QuizAttemptAcademicView:
     - attemptNumber
     - startedAt
     - submittedAt
+    - cancelledAt
     - status
     - answers
     - scorePercent
@@ -491,10 +526,17 @@ QuizAttemptAcademicView:
       type: [string, 'null']
       format: date-time
       readOnly: true
+      description: Null si el intento no fue enviado, incluido uno cancelado.
+    cancelledAt:
+      type: [string, 'null']
+      format: date-time
+      readOnly: true
+      description: Fecha de cancelación; null si el intento no fue cancelado.
     status:
       $ref: '#/QuizAttemptStatus'
     answers:
       type: array
+      description: La corrección solo se incluye para intentos calificados.
       items:
         $ref: '#/QuizAttemptAnswerAcademicView'
     scorePercent:
@@ -502,11 +544,13 @@ QuizAttemptAcademicView:
       minimum: 0
       maximum: 100
       readOnly: true
+      description: Null si el intento aún no fue calificado o fue cancelado.
     grade:
       oneOf:
         - $ref: './grades.yaml#/GradeValue'
         - type: 'null'
       readOnly: true
+      description: Null si el intento aún no fue calificado o fue cancelado.
 
 QuizAttemptSubmissionReceipt:
   type: object
@@ -521,7 +565,9 @@ QuizAttemptSubmissionReceipt:
       format: uuid
       readOnly: true
     status:
-      $ref: '#/QuizAttemptStatus'
+      type: string
+      const: graded
+      readOnly: true
     submittedAt:
       type: string
       format: date-time

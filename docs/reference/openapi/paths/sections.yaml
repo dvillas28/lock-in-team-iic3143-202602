@@ -147,8 +147,9 @@
     operationId: createSectionEnrollment
     summary: Crear una membership de sección
     description: |
-      Requiere rol `coordinator`. Solo puede existir un rol activo por usuario y
-      sección. La creación genera un evento de auditoría.
+      Requiere rol `coordinator`. Una persona puede tener varios roles activos
+      en la misma sección, pero no dos memberships activas del mismo rol. La
+      creación genera un evento de auditoría.
     parameters:
       - $ref: '../components/parameters.yaml#/IdempotencyKey'
     requestBody:
