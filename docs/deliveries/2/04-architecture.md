@@ -1,73 +1,78 @@
 # Arquitectura
 
-## Decisión actualizada
+## Decisión vigente
 
-Entrega 1 planteaba GCP como plataforma cloud objetivo. Entrega 2 usa Railway
-para walking skeleton y primera versión funcional porque reduce fricción
-operativa, permite evidencia rápida y calza mejor con un equipo real pequeño.
+AcademiX utiliza una PostgreSQL compartida para todas las Institutions y
+aislamiento lógico mediante `institution_id`. Railway es la plataforma de
+despliegue elegida para el proyecto. No existe una migración planificada a otro
+proveedor cloud.
 
-Google Cloud no se elimina: queda como migración posterior usando el free
-tier/créditos de la cuenta asociada cuando el producto requiera mayor control de
-red, backups administrados, réplicas o escalamiento fino.
+La decisión completa y sus trade-offs se registran en
+[Adoptar PostgreSQL compartida para multi-tenancy](../../adr/adopt-shared-postgresql-multitenancy.md).
 
 ## Vista de alto nivel
 
 ```txt
-Portal Home
-  -> /uc o /utfsm
-Frontend
-  -> Backend API
-    -> Tenant Resolver
-      -> Registry DB
-        -> Tenant DB correspondiente
+                         Railway
+
+              +-------------+-------------+
+              |                           |
+       academix-frontend           academix-backend
+                                          |
+                                          v
+                              PostgreSQL compartida
+                                          |
+                    +---------------------+---------------------+
+                    |                     |                     |
+             Institution UC       Institution UTFSM     Institution ...
 ```
 
-## Despliegue Entrega 2
+El repositorio demuestra configuraciones Railway separadas para frontend y
+backend. El walking skeleton todavía no consume PostgreSQL, por lo que la
+provisión del recurso de base y su `DATABASE_URL` pertenecen a la etapa de
+persistencia y no se inventan aquí.
 
-Plataforma inmediata: Railway.
+## Despliegue Railway
 
-Destino posterior: Google Cloud con free tier/créditos asociados a la cuenta del
-equipo. La migración no forma parte de Entrega 2, pero debe permanecer viable:
-frontend/backend stateless, PostgreSQL estándar y object storage portable.
+Componentes comprobables en el repositorio:
 
-Servicios esperados:
+- `academix-frontend`: Next.js empaquetado mediante `frontend/Dockerfile`;
+- `academix-backend`: NestJS empaquetado mediante `backend/Dockerfile`;
+- `frontend/railway.json`: build por Dockerfile y healthcheck `/`;
+- `backend/railway.json`: build por Dockerfile y healthcheck `/health`;
+- GitHub Actions valida ambas aplicaciones y sus imágenes Docker.
 
-- `academix-frontend`: UI estudiante/docente.
-- `academix-backend`: API HTTP stateless.
-- `registry_db`: PostgreSQL central.
-- `academix_uc_db`: PostgreSQL tenant UC.
-- `academix_utfsm_db`: PostgreSQL tenant UTFSM.
-- object storage compatible con Railway/plugin/proveedor simple, si el free
-  tier lo permite.
+PostgreSQL es una única persistencia compartida del MVP. El backend se conectará
+mediante una URL de conexión estándar cuando se implemente la capa de datos. No
+se documentan credenciales, IDs, URLs privadas ni una topología Railway que no
+esté versionada o comprobada.
 
-Si Railway limita cantidad de DBs o costo, el ajuste mínimo aceptable es
-mantener tres bases lógicas claramente distinguibles y documentar la diferencia
-entre demo y arquitectura objetivo.
+Railway es infraestructura de despliegue, no parte del dominio. El código de
+negocio depende de HTTP, PostgreSQL y configuración por entorno.
 
-## Migración posterior a Google Cloud
+## Desarrollo local
 
-La primera versión funcional se monta en Railway. Luego se migra a Google Cloud
-para aprovechar créditos/free tier y acercarse a la arquitectura objetivo de
-Entrega 1.
+```txt
+Docker Compose
+  +-- frontend
+  +-- backend
+  +-- postgres
+```
 
-Mapeo esperado:
-
-- frontend/backend: Railway services -> Cloud Run;
-- registry y tenant DBs: Railway PostgreSQL -> Cloud SQL PostgreSQL;
-- archivos: storage Railway/proveedor simple -> Cloud Storage;
-- variables/secretos: Railway variables -> Secret Manager o variables Cloud Run.
-
-La migración no debe cambiar el modelo de tenancy: el registry sigue resolviendo
-`slug -> database_url` y cada universidad conserva una DB separada.
+El entorno local usa los mismos contenedores de aplicación y una sola
+PostgreSQL. No necesita registry, múltiples bases, Redis, workers, MinIO ni
+emuladores cloud.
 
 ## Backend lógico
 
 ```txt
-Auth JWT para API académica (mock solo en walking skeleton)
-TenancyModule
-  - TenantResolver
-  - TenantRegistryRepository
-  - TenantConnectionManager
+PlatformModule
+Authentication
+Institution context
+  - resolver Institution desde institutionSlug
+  - validar Institution activa
+  - validar InstitutionMembership activa
+  - fijar scope institucional para la operación
 CoursesModule
 MaterialsModule
 QuizzesModule
@@ -75,103 +80,97 @@ GradesModule
 AuditModule
 ```
 
-Se excluyen workers, Redis, réplicas y load balancer propio.
+Los nombres representan responsabilidades arquitectónicas, no módulos ya
+implementados. El repositorio solo implementa actualmente `PlatformModule` y
+`GET /health`.
 
 ## Flujo de request
 
 ```txt
-1. Usuario entra al portal home.
-2. Usuario elige UC o UTFSM.
-3. Frontend navega a /uc o /utfsm.
-4. Frontend deriva el slug desde la ruta.
-5. Frontend envía requests al backend con header x-tenant.
-6. Backend valida que el header exista.
-7. TenantResolver busca el slug en registry_db.
-8. TenantConnectionManager obtiene conexión/pool de la DB del tenant.
-9. Para la API académica, backend valida JWT, usuario activo y pertenencias
-   de curso o sección en esa DB.
-10. Módulo de dominio ejecuta la operación y escribe auditoría en la misma
-    transacción cuando corresponde.
-11. Backend responde sin mezclar datos entre tenants ni revelar la pauta.
+1. El cliente autentica al User global mediante JWT.
+2. Consulta GET /api/v1/institutions para descubrir contextos visibles.
+3. Navega a /api/v1/institutions/{institutionSlug}/...
+4. El backend valida el JWT y obtiene sub.
+5. Resuelve institutionSlug a Institution.id.
+6. Si la Institution no existe o no es visible, responde 404.
+7. Valida InstitutionMembership activa para User + Institution.
+8. Evalúa CourseMembership, Enrollment y permisos de la operación.
+9. Ejecuta lógica y queries bajo institution_id.
+10. Constraints y FK institution-aware rechazan relaciones cruzadas.
+11. Cambios sensibles y AuditEvent se confirman en la misma transacción.
 ```
 
-Subdominios reales quedan fuera de Entrega 2 porque requieren dominio propio y
-wildcard DNS. La ruta por tenant mantiene la UX demostrable en dominios Railway
-gratuitos y permite migrar después a `uc.academix.cl` sin cambiar el registry.
+El slug del path solo solicita un contexto. Nunca autentica ni autoriza.
 
 ## Multi-tenancy
 
-Estrategia: sharding por universidad.
+`Institution` es la entidad raíz del dominio y tenant lógico. `User` es global;
+`InstitutionMembership` responde a qué Institutions puede acceder. Los roles
+académicos no se trasladan a esa membership:
 
-Consecuencia:
+- `CourseMembership` mantiene `coordinator` por curso;
+- `Enrollment` mantiene `teacher`, `assistant` y `student` por sección.
 
-- mejor aislamiento entre instituciones;
-- backup/restore por universidad;
-- migraciones deben ejecutarse en todas las DB de tenant;
-- mayor complejidad que single-database multi-tenant, aceptada por valor
-  arquitectónico del proyecto.
+Toda entidad tenant-owned lleva `institution_id`. La estrategia de aislamiento
+combina:
 
-## Frontend
+1. autenticación global;
+2. Institution explícita en el path;
+3. InstitutionMembership;
+4. autorización académica;
+5. scope de aplicación;
+6. `institution_id`;
+7. FK compuestas y constraints;
+8. tests de aislamiento.
 
-El frontend debe tener dos experiencias:
-
-- docente: cursos, secciones, material, quizzes, libro de notas;
-- estudiante: cursos, material publicado, quiz, notas publicadas.
-
-Para el walking skeleton basta una pantalla que:
-
-- permite elegir universidad demo en un portal home;
-- redirige a `/uc` o `/utfsm`;
-- llama al backend;
-- muestra respuesta y tenant resuelto.
+RLS queda fuera del MVP y solo puede evaluarse posteriormente como defensa en
+profundidad.
 
 ## Persistencia
 
-Registry DB:
+Existe una sola PostgreSQL y un solo schema evolutivo.
 
-- tabla `tenants`;
-- no contiene datos académicos;
-- contiene la ruta segura hacia DB de tenant.
+- `institutions` contiene UUID, slug, nombre, estado y timestamps;
+- `users` contiene identidades globales;
+- `institution_memberships` relaciona ambos;
+- tablas académicas llevan `institution_id`;
+- relaciones tenant-owned incluyen Institution en sus claves declarativas;
+- unicidades académicas se scopean por Institution;
+- índices parten por `institution_id` cuando responde al acceso real;
+- existe una sola secuencia de migraciones;
+- los backfills futuros procesan una Institution a la vez cuando corresponda.
 
-Tenant DB:
+Backup y point-in-time recovery cubren la base completa. Restore lógico por
+Institution no es una capacidad del MVP.
 
-- contiene usuarios, pertenencias de curso/sección, material, quizzes,
-  notas y eventos de auditoría;
-- no necesita columna `tenant_id` porque la base completa es el límite del
-  tenant;
-- puede incluir `tenant_slug` solo en logs o seeds, no como llave funcional.
+## Object storage
+
+El proveedor no está elegido. Cuando Material admita binarios, se usará
+almacenamiento compartido con namespace interno por Institution y acceso
+mediado por backend. No se agrega infraestructura antes de que exista una
+implementación que la consuma.
 
 ## Seguridad inicial
 
-- Sesión mock solo para `/api/hello` durante el walking skeleton.
-- La API académica del MVP exige JWT válido y resuelve `sub` contra
-  `users.id` en la DB del tenant seleccionado.
-- `x-tenant` elige DB; no autentica ni autoriza. Cada operación comprueba
-  pertenencias activas de curso y sección según su alcance.
-- Cambios académicos sensibles generan eventos inmutables en la misma
-  transacción, con snapshots sanitizados.
-- No exponer `database_url`, pauta ni storage keys al frontend o logs.
+- `GET /health` es público y no consulta contexto institucional.
+- La API académica exige JWT; `sub` identifica al User global.
+- Institution, recursos y relaciones se resuelven dentro del mismo scope.
+- Instituciones o recursos no visibles responden `404`.
+- Falta de rol sobre un recurso visible responde `403`.
+- Requests no aceptan `institution_id`, actor, puntajes ni otros campos
+  sensibles derivados por el servidor.
+- Auditoría excluye tokens, credenciales, claves internas y pautas.
 
 ## CI/CD
 
-CI mínimo:
+CI instala dependencias, ejecuta lint, test/build y construye imágenes Docker
+para frontend y backend. Railway usa las configuraciones versionadas de cada
+aplicación para build, healthcheck y restart policy. Releases se generan desde
+tags semánticos mediante GitHub Actions.
 
-- instalar dependencias;
-- validar backend;
-- validar frontend;
-- ejecutar build/test mínimo;
-- separar stages por frontend y backend.
+## Evolución
 
-CD objetivo:
-
-- deploy automático a Railway desde `main` o tag;
-- configuración versionada por servicio con `railway.toml`;
-- en monorepo, cada servicio debe apuntar a su propio `railway.toml` si Railway
-  lo requiere;
-- si no es viable por límites de cuenta/permisos, CD manual documentado con
-  comando y evidencia.
-
-Release:
-
-- tag semántico o de entrega;
-- release GitHub con links a CI, despliegue y notas.
+La arquitectura utiliza una PostgreSQL compartida con aislamiento lógico por
+Institution. Estrategias de particionamiento o sharding podrán evaluarse en el
+futuro únicamente si métricas reales de volumen, latencia o carga operacional
+lo justifican. No se diseñan routers ni shards en el MVP.

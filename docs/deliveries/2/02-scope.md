@@ -2,76 +2,72 @@
 
 ## Principio
 
-El MVP valida una arquitectura multi-tenant real y un flujo académico mínimo:
+El MVP valida aislamiento multi-tenant lógico y un flujo académico mínimo:
 
 ```txt
 Curso -> Módulos -> Material -> Quiz autocorregido -> Nota -> Publicación -> Promedio
 ```
 
-No intenta replicar un LMS completo.
+No intenta replicar un LMS completo ni anticipar infraestructura de escala.
 
 ## Entra en MVP
 
-- Multi-tenant por universidad usando sharding.
-- Dos universidades demo: `uc` y `utfsm`.
-- Registry DB central mínimo.
-- Una PostgreSQL por universidad, todas con el mismo schema.
-- Portal home común para elegir universidad.
-- Rutas por tenant: `/uc` y `/utfsm`.
-- El frontend deriva el tenant desde la ruta y envía `x-tenant` al backend.
-- Evolución futura a subdominio documentada, no implementada al inicio.
+- Una PostgreSQL compartida para todas las Institutions.
+- `Institution` como entidad raíz con UUID interno y slug único.
+- Dos Institutions demo: `uc` y `utfsm`, dentro de la misma base.
+- `User` global e `InstitutionMembership` para pertenencia institucional.
+- Contexto explícito mediante `/api/v1/institutions/{institutionSlug}/...`.
+- El path identifica la Institution solicitada, pero no concede acceso.
+- Entidades académicas con `institution_id` y relaciones institution-aware.
+- Consultas institution-scoped y tests explícitos de acceso cruzado.
+- Portal común para elegir una Institution visible.
 - Dos experiencias UI: docente y estudiante.
-- Rol `coordinator` por curso y roles `teacher`, `student`, `assistant`
-  por sección.
-- Un usuario puede acumular roles, incluso varios en una misma sección.
-- El coordinador administra el curso completo; un docente administra solo sus
-  secciones. La primera pertenencia coordinadora se aprovisiona con el curso.
-- Cursos y secciones/paralelos.
-- Material de curso con markdown renderizado.
-- Archivos básicos en object storage: PDF, CSV, XLSX, TXT, JPEG, PNG.
-- Evaluaciones como cuestionarios de alternativas.
-- Preguntas con alternativas y pauta preestablecida.
-- Intentos ilimitados por defecto o limitados por un máximo positivo definido
-  en el quiz; la nota vigente proviene del último intento calificado.
-- Cálculo automático de nota al finalizar el intento.
-- Libro de notas con ponderaciones por evaluación.
-- Publicación manual de notas por coordinador o docente de la sección.
-- Estudiante ve notas publicadas y promedio parcial.
-- JWT para operaciones académicas y pertenencias persistidas para autorización.
-- Auditoría inmutable de cambios académicos sensibles dentro de cada tenant.
+- Rol `coordinator` por curso y roles `teacher`, `student`, `assistant` por
+  sección.
+- Un User puede acumular roles, incluso varios en una misma sección.
+- Cursos, secciones, módulos y material académico.
+- Material markdown y archivos PDF, CSV, XLSX, TXT, JPEG y PNG cuando exista un
+  adaptador de almacenamiento.
+- Quizzes de alternativas con pauta protegida e intentos configurables.
+- Cálculo automático, ponderaciones, publicación manual y promedio parcial.
+- JWT para autenticación global y memberships persistidas para autorización.
+- Auditoría inmutable de cambios académicos sensibles, scoped por Institution.
+- Railway como plataforma de despliegue.
 
 ## Fuera del MVP
 
-- Admin institucional separado: el docente coordinador cubre gestión mínima.
-- RBAC global complejo: se usan pertenencias de curso y sección.
-- Creación dinámica de tenants desde UI: tenants demo se provisionan por config.
-- Subdominios reales: requieren dominio propio/wildcard DNS; rutas + `x-tenant`
-  permiten validar tenancy primero sin comprar dominio.
-- Redis, workers, réplicas y load balancer propio: no son necesarios para demo.
-- Entregas manuales de archivos como evaluación: reemplazadas por quizzes.
-- Corrección manual compleja y recorrecciones: fuera por costo funcional.
-- Chat, IA, calendario y anuncios: no aportan al flujo mínimo evaluable.
-
-## Conservado de Entrega 1
-
-- AcademiX sigue siendo un LMS universitario multi-tenant.
-- El tenant sigue representando una universidad.
-- Se mantiene monolito modular como dirección backend.
-- Se mantiene PostgreSQL por consistencia relacional.
-- Se mantiene object storage para binarios.
-- Railway es la plataforma de la primera versión funcional.
-- Google Cloud queda como migración posterior usando free tier/créditos de la
-  cuenta asociada para una versión con mayor operación.
+- Administrador institucional separado: el coordinador cubre la gestión mínima.
+- Creación dinámica de Institutions desde UI o API.
+- Jerarquías de facultad, departamento, campus u otra unidad organizacional.
+- Row-Level Security; queda como posible defensa en profundidad futura.
+- Sharding, particionamiento y routing de bases.
+- Restore lógico de una Institution individual.
+- Proveedor concreto para object storage; los binarios se incorporan cuando su
+  implementación lo requiera.
+- Branding, SSO, locale, settings arbitrarios e integraciones por Institution.
+- Redis, workers, réplicas, load balancer propio y microservicios.
+- Entregas manuales, corrección manual compleja y recorrecciones.
+- Chat, IA, calendario y anuncios.
 
 ## Criterio de éxito
 
 La demo es aceptable si prueba que:
 
-- UC y UTFSM no comparten base de datos de tenant.
-- El backend resuelve tenant por request.
-- Un docente crea o gestiona datos dentro de su tenant.
-- Un estudiante ve solo material y quizzes autorizados, y sus propias notas
-  publicadas; la pauta permanece oculta.
-- Un quiz produce una nota desde el último intento calificado y esta se refleja
-  en el libro de notas.
-- Las operaciones académicas usan JWT y los cambios sensibles generan auditoría.
+- UC y UTFSM coexisten en la misma PostgreSQL sin exponer datos cruzados;
+- una identidad global solo accede a Institutions con membership activa;
+- recursos e identificadores de otra Institution se tratan como no visibles;
+- un coordinador o docente solo actúa dentro de su alcance académico;
+- un estudiante ve únicamente material y quizzes autorizados y sus propias
+  notas publicadas;
+- un quiz produce una nota desde el último intento calificado y la refleja en el
+  libro de notas;
+- cambios sensibles generan auditoría con scope institucional;
+- frontend y backend se despliegan en Railway y se ejecutan localmente con
+  Docker Compose.
+
+## Evolución
+
+La arquitectura utiliza una PostgreSQL compartida con aislamiento lógico por
+Institution. Estrategias de particionamiento o sharding podrán evaluarse en el
+futuro únicamente si métricas reales de volumen, latencia o carga operacional
+lo justifican.
