@@ -18,7 +18,7 @@
 - backend NestJS con `GET /health`;
 - frontend conectado al health del backend;
 - Dockerfiles de frontend y backend;
-- Docker Compose para ejecución local;
+- Docker Compose con una PostgreSQL compartida para ejecución local;
 - CI de aplicaciones e imágenes;
 - configuración Railway versionada;
 - workflow de release por tag.

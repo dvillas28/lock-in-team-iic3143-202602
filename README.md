@@ -1,51 +1,50 @@
 # AcademiX — LMS Multi-Tenant Universitario
 
-Proyecto grupal para el ramo de Desarrollo de Software. La propuesta es construir un LMS universitario multi-tenant orientado al flujo academico critico de cursos semestrales: material, evaluaciones, entregas, correccion, publicacion de notas y seguimiento del estudiante.
+Proyecto grupal para el ramo de Desarrollo de Software. La propuesta es construir un LMS universitario multi-tenant orientado al flujo académico crítico de cursos semestrales: material, evaluaciones, publicación de notas y seguimiento del estudiante.
 
-El objetivo no es replicar todas las funcionalidades de Canvas o Moodle, sino proponer una plataforma mas integrada, trazable y preparada para escalar por institucion.
+El objetivo no es replicar todas las funcionalidades de Canvas o Moodle, sino proponer una plataforma integrada, trazable y preparada para crecer por institución.
 
 ## Vision
 
-Para universidades que necesitan administrar cursos semestrales de forma clara, escalable y segura, esta plataforma es un LMS multi-tenant que integra material academico, evaluaciones, entregas y libro de notas en un flujo unico.
+Para universidades que necesitan administrar cursos semestrales de forma clara, escalable y segura, AcademiX integra material académico, evaluaciones autocorregidas y libro de notas en un flujo único.
 
-A diferencia de plataformas LMS genericas, prioriza la experiencia academica critica y una arquitectura preparada para aislar y escalar instituciones completas.
+A diferencia de plataformas LMS genéricas, prioriza la experiencia académica crítica y el aislamiento lógico entre instituciones.
 
 ## Propuesta De Valor
 
 El flujo principal del producto es:
 
 ```txt
-Curso -> Modulos -> Material -> Evaluaciones -> Entregas -> Correccion -> Publicacion de notas -> Libro de clases
+Curso -> Módulos -> Material -> Quiz autocorregido -> Nota -> Publicación -> Promedio
 ```
 
-La plataforma busca reducir la fragmentacion entre LMS, hojas de calculo, correos, carpetas externas y calendarios separados.
+La plataforma busca reducir la fragmentación entre LMS, hojas de cálculo, correos y carpetas externas.
 
 ## Alcance Inicial
 
 El MVP se concentra en:
 
-- Multi-tenancy por universidad.
+- Una PostgreSQL compartida con aislamiento lógico por `Institution`.
+- Contexto HTTP explícito en `/api/v1/institutions/{institutionSlug}/...`.
 - Usuarios autenticados con roles contextuales.
 - Cursos semestrales, secciones e inscripciones.
-- Modulos y material academico.
-- Evaluaciones/tareas con ponderaciones.
-- Entregas de estudiantes.
-- Correccion y publicacion manual de notas.
+- Módulos y material académico.
+- Quizzes de alternativas autocorregidos.
+- Ponderaciones y publicación explícita de notas.
 - Libro de notas del curso.
-- Dashboard estudiante/docente.
-- Lector de PDF en plataforma con asistente IA (citas por pagina, explicacion de seleccion).
+- Experiencias de estudiante y docente.
 
 Fuera del MVP inicial:
 
 - Google Calendar/Outlook.
 - Quizzes en vivo.
-- Planificacion docente avanzada.
-- RAG sobre el corpus completo del curso.
-- Analitica avanzada.
+- Entregas y corrección manual compleja.
+- IA, chat y RAG.
+- Analítica avanzada.
 
 ## Interfaces
 
-Los mockups son wireframes de alta fidelidad en HTML estatico. Cubren el flujo completo para los roles publico, estudiante y docente, incluyendo estados de entrega, libro de notas con ponderaciones y lector PDF con asistente IA.
+Los mockups son wireframes exploratorios de alta fidelidad en HTML estático. Algunas vistas representan ideas anteriores o futuras y no amplían el alcance vigente de la Entrega 2.
 
 ```bash
 # Desde la raiz del repo
@@ -60,14 +59,13 @@ El sistema de diseno esta en [DESIGN.md](DESIGN.md): tokens de color, tipografia
 ## Documentacion
 
 - [Indice de documentacion](docs/README.md): estructura viva del repo.
-- [Design doc Entrega 1](docs/deliveries/0/design-doc-entrega-1.md): bajada formal alineada al checklist de la primera entrega.
-- [Alcance](docs/deliveries/0/scope.md): decisiones de scope, prioridades y lo que queda fuera.
-- [Requisitos](docs/deliveries/0/requirements.md): requisitos funcionales, no funcionales, restricciones y SLOs.
-- [Historias de usuario](docs/deliveries/0/user-stories.md): historias priorizadas por modulo con criterios de aceptacion.
-- [Arquitectura](docs/deliveries/0/architecture.md): primera version de arquitectura, tenancy e infraestructura.
-- [Roadmap](docs/deliveries/0/roadmap.md): plan de trabajo tentativo para 10-12 semanas.
-- [Glosario](docs/deliveries/0/glossary.md): terminos clave del dominio.
-- [Notas de descubrimiento](docs/deliveries/0/discovery-notes.md): decisiones y supuestos levantados durante la iteracion inicial.
+- [Entrega 2](docs/deliveries/2/README.md): documentación arquitectónica vigente.
+- [ADR de PostgreSQL compartida](docs/adr/adopt-shared-postgresql-multitenancy.md): decisión de multi-tenancy actual.
+- [OpenAPI](docs/reference/openapi/README.md): contrato HTTP institution-scoped.
+
+Las Entregas 0 y 1 se conservan como evidencia histórica. Sus referencias a
+database-per-tenant o infraestructura cloud anterior no describen la solución
+vigente.
 
 ## Starter Del Repo
 
@@ -92,21 +90,23 @@ git push -u origin HEAD
 Crear PR hacia `main` y enlazar el spec trabajado. Ver
 [Git Flow del equipo](docs/guides/git-flow.md).
 
-## Stack Tentativo
+## Stack Vigente
 
 - Frontend: Next.js.
 - Backend: NestJS.
-- Base de datos: PostgreSQL.
-- Cache/colas: Redis.
-- Archivos: object storage compatible con S3.
-- Infraestructura: load balancer, reverse proxy/API gateway, connection pool y despliegue cloud con free tiers cuando sea posible.
+- Base de datos: una PostgreSQL compartida para todas las Institutions.
+- Despliegue: Railway.
+- Archivos: proveedor de object storage todavía no seleccionado.
+
+Redis, workers, microservicios, RLS y sharding están fuera del MVP.
 
 ## Base Tecnica Local
 
-El repositorio incluye dos aplicaciones independientes administradas con pnpm:
+El repositorio incluye dos aplicaciones administradas con pnpm y una base local compartida:
 
 - `frontend/`: Next.js con TypeScript, App Router y ESLint.
 - `backend/`: NestJS con TypeScript y el endpoint de salud `GET /health`.
+- `postgres`: PostgreSQL compartida provista por Docker Compose.
 
 El frontend consulta al backend desde el servidor de Next. Fuera de Docker usa
 `http://localhost:3001` por defecto; Docker Compose configura `API_URL` como
@@ -130,6 +130,7 @@ docker compose up --build
 ```text
 Frontend: http://localhost:3000
 Backend:  http://localhost:3001
+PostgreSQL: localhost:5432
 ```
 
 El backend expone únicamente el endpoint de salud `GET /health` para este
@@ -156,6 +157,8 @@ docker compose down
 - `API_URL`: URL que usa el servidor de Next para consultar al backend.
 - `PORT`: puerto de escucha de NestJS; su valor por defecto es `3001`.
 - `APP_VERSION`: versión informada por `GET /health`.
+- `DATABASE_URL`: conexión única a PostgreSQL; no existe una URL por Institution.
+- `POSTGRES_DB`, `POSTGRES_USER` y `POSTGRES_PASSWORD`: bootstrap local del contenedor.
 
 ### Verificaciones Locales
 
@@ -165,4 +168,6 @@ Después de instalar las dependencias en `frontend/` y `backend/`, desde la raí
 pnpm build
 pnpm lint
 pnpm test
+pnpm docs:api:lint
+docker compose config
 ```
