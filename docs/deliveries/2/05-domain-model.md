@@ -4,121 +4,120 @@
 
 ## Límites
 
-El tenant es una universidad. En el MVP se prueban dos: `uc` y `utfsm`.
-Cada tenant tiene datos académicos propios en una DB separada. El registry
-central solo sabe qué tenants existen y dónde está su base de datos. El header
-`x-tenant` selecciona la DB; la identidad autenticada y las pertenencias
-persistidas determinan qué puede hacer el usuario dentro de ella.
+AcademiX usa una PostgreSQL compartida. `Institution` representa al tenant
+lógico y `institution_id` delimita todos los datos académicos tenant-owned. UC
+y UTFSM son dos Institutions dentro de la misma base.
 
-## Entidades del registry
+`User` es global. Una persona puede acceder a varias Institutions mediante
+`InstitutionMembership`. Los roles académicos continúan en el curso o sección
+correspondiente y nunca se deducen solo de la pertenencia institucional.
 
-### Tenant
+## Identidad y contexto institucional
 
-Universidad registrada en la plataforma. Se identifica por `slug`, indica si
-está activa y entrega al backend la ubicación secreta de su DB. No contiene
-cursos, usuarios ni notas.
+### Institution
 
-## Entidades del tenant
+Entidad raíz que representa una institución académica. Tiene UUID interno,
+slug legible globalmente único, nombre, estado y timestamps mínimos. El UUID se
+usa en las relaciones; cambiar el slug no reescribe las FK.
+
+El slug del path identifica el contexto solicitado, pero no otorga acceso.
 
 ### User
 
-Persona dentro de una universidad. El `sub` del JWT identifica su registro en
-la DB seleccionada. Puede tener varios roles, incluso en una misma sección;
-los permisos se comprueban para la operación, curso y sección concretos.
+Identidad global autenticada. El `sub` del JWT resuelve un único User, que puede
+participar en varias Institutions. Sus datos de identidad no se duplican por
+institución.
+
+### InstitutionMembership
+
+Relación entre User e Institution que indica si el User puede entrar al contexto
+institucional. No contiene roles de curso o sección. Una membership activa es
+precondición para cualquier operación académica dentro de la Institution.
+
+## Entidades académicas tenant-owned
+
+Todas las entidades de esta sección llevan `institution_id` y deben pertenecer
+a la misma Institution que sus relaciones.
 
 ### Course
 
-Ramo semestral concreto de una universidad, por ejemplo "Ingeniería de
-Software" en `2026-2`. Agrupa secciones, módulos, material, quizzes y libro de
-notas.
+Ramo semestral concreto, por ejemplo “Ingeniería de Software” en `2026-2`.
+Agrupa secciones, módulos, material, quizzes y libro de notas. Código y periodo
+son únicos dentro de la Institution, no globalmente.
 
 ### CourseMembership
 
-Pertenencia de un usuario a un curso con rol `coordinator`. El coordinador
-administra el curso completo, incluidas sus secciones, material, evaluaciones,
-ponderaciones y notas. Puede haber más de un coordinador por curso. El primer
-coordinador se asigna durante el aprovisionamiento inicial del curso; no se
-deduce de ser docente de alguna sección.
+Pertenencia de un User a un Course con rol `coordinator`. Requiere una
+InstitutionMembership activa en la misma Institution. El coordinador administra
+el curso completo; puede haber varios coordinadores. El primero se asigna
+atómicamente al aprovisionar el curso.
 
 ### Section
 
-Paralelo/sección de un curso. Define el contexto concreto de estudiantes,
-docentes y ayudantes.
+Paralelo de un Course. Hereda su contexto académico, pero conserva
+`institution_id` explícito para que PostgreSQL pueda impedir una relación
+cruzada mediante FK compuesta.
 
 ### Enrollment
 
-Vínculo usuario-sección-rol. Los roles permitidos son `teacher`, `student` y
-`assistant`. Un usuario puede tener distintos roles en distintas secciones y
-más de un rol activo en la misma sección. `teacher` habilita operaciones
-docentes de esa sección, pero no otorga coordinación del curso completo.
+Relación User-Section-rol. Los roles permitidos son `teacher`, `student` y
+`assistant`. Requiere InstitutionMembership activa y admite varios roles
+distintos para la misma persona en una sección, pero no duplica el mismo rol
+activo.
 
 ### CourseModule y Material
 
-Un módulo organiza el contenido de curso. Un material pertenece a un módulo y
-contiene markdown o la referencia a un archivo en object storage. Solo el
-contenido publicado es visible para estudiantes inscritos en el curso.
+CourseModule organiza el contenido de un Course. Material pertenece a un módulo
+y contiene markdown o metadatos de un archivo. Cuando existan binarios, usarán
+almacenamiento compartido con namespace por Institution y acceso mediado por el
+backend; el proveedor no forma parte del MVP actual.
+
+Solo el contenido publicado es visible para estudiantes autorizados.
 
 ### Quiz y Question
 
-Un quiz de alternativas tiene alcance de curso o de una sección concreta y una
-ponderación mediante `GradeItem`. Define `max_attempts`: un número positivo
-limita los intentos por estudiante y quiz; `null` permite intentos ilimitados.
-Cada pregunta tiene puntaje y alternativas con identificadores locales únicos,
-al menos dos opciones y exactamente una correcta. La pauta se entrega solo a
-vistas docentes autorizadas; la vista de estudiante omite `is_correct`.
+Un Quiz tiene alcance de Course o de una Section del mismo Course. Define un
+máximo positivo de intentos o `null` para intentos ilimitados. Question y sus
+alternativas forman la pauta, visible únicamente en vistas autorizadas.
 
-Al publicar el quiz se valida toda la pauta. Después de iniciado el primer
-intento no se pueden cambiar preguntas, alternativas, respuesta correcta ni
-puntajes: el intento debe seguir siendo interpretable con la misma pauta.
+Al publicar se valida la pauta. Después del primer intento no se modifican
+preguntas, alternativas, respuestas correctas, puntajes ni política de intentos.
 
 ### QuizAttempt
 
-Intento de un estudiante para un quiz. Guarda la sección donde participaba al
-iniciarlo como snapshot inmutable, un número secuencial por estudiante y quiz,
-las respuestas elegidas y la corrección como JSON. Sus estados son
-`in_progress`, `submitted`, `graded` y `cancelled`; el envío y la calificación
-automática ocurren en una transacción, por lo que `submitted` es transitorio.
-La cancelación explícita pasa un intento `in_progress` a `cancelled` de forma
-atómica, registra su fecha y actor en auditoría, y no produce calificación.
-Puede solicitarla el estudiante propietario con permisos vigentes o el
-coordinador del curso o docente autorizado de la sección histórica. El cierre
-del plazo del quiz no cancela por sí solo un intento ya iniciado.
+Intento de un estudiante. Conserva Institution, Course y Section históricas,
+número secuencial, respuestas y corrección. Sus estados son `in_progress`,
+`submitted`, `graded` y `cancelled`; `submitted` es transitorio durante la
+transacción de envío y calificación.
 
-Puede existir un solo intento `in_progress` por estudiante y quiz. `cancelled`
-es terminal: no admite guardar respuestas ni envío posteriores y no bloquea la
-publicación. El usuario que puede consultar la pauta de ese quiz no puede
-rendirlo, aunque también tenga rol `student`. El límite, cuando existe, cuenta
-todos los intentos iniciados, incluidos los cancelados. De los intentos
-`graded`, el de mayor `attempt_number` determina la nota vigente. No se permiten
-nuevos intentos una vez publicada la nota de ese estudiante para el quiz.
+Solo existe un intento `in_progress` por Institution, estudiante y Quiz. Un
+intento cancelado es terminal, cuenta para el máximo, no genera nota y no
+bloquea la publicación. Quien puede consultar la pauta no puede rendir ese Quiz.
+
+El último intento `graded` por número determina la nota vigente mientras no
+esté publicada. No se permiten nuevos intentos tras publicar esa nota.
 
 ### GradeItem y Grade
 
-`GradeItem` representa la evaluación ponderada del libro de notas y se
-vincula a un quiz del mismo curso. `Grade` es la nota vigente de un estudiante
-para ese ítem y su sección, derivada del último intento calificado. Conserva
-`attempt_id` para señalar exactamente el intento que la originó. La publicación
-controla la visibilidad del puntaje y la nota para el estudiante.
+GradeItem representa una evaluación ponderada del Course y se vincula a un Quiz
+de la misma Institution y Course. Grade es la nota vigente de un estudiante para
+ese ítem y conserva Section y QuizAttempt que la originaron.
 
-El porcentaje de puntaje se convierte a nota chilena: hasta 60 %, se usa
-`1 + porcentaje × 3 / 60`; sobre 60 %, se usa
-`4 + (porcentaje - 60) × 3 / 40`. Se redondea a un decimal con `HALF_UP`.
-El promedio parcial usa solo notas publicadas:
-`sum(nota × ponderación) / sum(ponderaciones publicadas)`, con el mismo
-redondeo; si el denominador es cero, no hay promedio (`null`).
+La escala chilena, redondeo `HALF_UP`, promedio parcial y bloqueo tras publicar
+se mantienen como reglas del MVP. Una corrección de una nota publicada requiere
+un flujo explícito futuro; nunca una sobrescritura silenciosa.
 
 ### AuditEvent
 
-Evento académico inmutable con actor, acción, recurso, curso, sección opcional,
-fecha y valores anterior/posterior sanitizados. Registra cambios de roles,
-material, quizzes, cancelación de intentos, ponderaciones y publicación de
-notas, así como cambios de nota aún no publicada por un nuevo intento. Se
-escribe en la misma transacción que la operación académica. Nunca contiene
-secretos, claves de almacenamiento ni la pauta de respuestas.
+Evento inmutable con Institution, actor global, acción, recurso, Course, Section
+opcional, fecha y valores anterior/posterior sanitizados. Se escribe en la misma
+transacción que el cambio y nunca incluye secretos, claves internas ni pautas.
 
 ## Relaciones principales
 
 ```txt
+User 1 -> N InstitutionMembership <- N Institution
+Institution 1 -> N Course
 Course 1 -> N CourseMembership <- N User
 Course 1 -> N Section
 Section 1 -> N Enrollment <- N User
@@ -133,26 +132,36 @@ Section 1 -> N Grade
 Course 1 -> N AuditEvent
 ```
 
-## Reglas de autorización e integridad
+Cada relación tenant-owned incluye la Institution de ambos extremos en su
+invariante de persistencia.
 
-- Toda operación académica requiere JWT válido, tenant activo y usuario activo
-  en la DB seleccionada. `x-tenant` no autentica ni autoriza.
-- Un coordinador puede actuar sobre todo su curso. Un docente solo sobre sus
-  secciones; un ayudante no publica notas. Tener varios roles no amplía el
-  alcance del rol de sección a todo el curso.
-- Un estudiante responde quizzes solo con `student` activo en la sección del
-  intento. Un quiz de sección debe pertenecer al mismo curso que esa sección;
-  uno de curso puede ser respondido desde cualquiera de sus secciones.
-- Una nota solo puede apuntar a un intento del mismo estudiante, sección y
-  quiz que el `GradeItem`. No se publica una nota sin intento calificado.
-- Las ponderaciones finales de un curso suman 100 %. Publicar la primera
-  nota exige esa suma y que todos los ítems del libro estén definidos.
-  Desde la primera nota publicada no pueden agregarse ítems ni cambiarse las ponderaciones; tampoco
-  puede cambiarse el valor de una nota publicada.
-  Una corrección posterior requiere un flujo explícito, con nueva decisión de
-  dominio y auditoría; nunca una sobrescritura silenciosa.
-- La publicación exige que no haya intentos `in_progress` para las notas
-  seleccionadas; así no congela una nota mientras el estudiante responde. Los
-  intentos `cancelled` no bloquean, pero tampoco originan una nota publicable.
-- La publicación de notas y sus eventos de auditoría son atómicos. Las vistas
-  estudiantiles muestran solo notas propias publicadas y no revelan la pauta.
+## Resolución y autorización
+
+Para `/api/v1/institutions/{institutionSlug}/...`:
+
+1. validar JWT y resolver User global;
+2. resolver Institution por slug;
+3. responder `404` si no existe o no es visible;
+4. validar InstitutionMembership activa;
+5. validar CourseMembership, Enrollment y permisos específicos;
+6. ejecutar la operación bajo `institution_id`;
+7. confirmar cambio y auditoría atómicamente cuando corresponda.
+
+Una Institution o recurso externo al scope se trata como no visible (`404`). Un
+recurso visible sobre el cual falta permiso produce `403`.
+
+## Reglas de integridad
+
+- Toda entidad académica tiene `institution_id`.
+- Las FK tenant-owned incluyen `institution_id` para impedir cruces.
+- User es global, pero CourseMembership y Enrollment solo pueden referenciarlo
+  si existe InstitutionMembership correspondiente.
+- Quiz y Section deben pertenecer al mismo Course e Institution.
+- Grade debe corresponder al mismo estudiante, Section, Quiz, GradeItem e
+  Institution que QuizAttempt.
+- Las ponderaciones finales de un Course suman 100 %. La primera publicación
+  bloquea nuevos ítems y cambios de ponderación.
+- Las vistas estudiantiles muestran solo notas propias publicadas y omiten pauta.
+- Los índices siguen accesos reales y comienzan por `institution_id` cuando el
+  scope institucional forma parte del filtro.
+- RLS queda fuera del MVP; puede evaluarse como defensa futura.

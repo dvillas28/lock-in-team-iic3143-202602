@@ -1,21 +1,18 @@
 # Modelo de dominio en UML
 
-La pauta de Entrega 2 pide representar los conceptos fundamentales mediante
-el formato de un **diagrama de clases UML**. Las clases de abajo son conceptos
-del problema, no tablas ni clases definitivas de implementación. Se divide el
-mismo modelo en dos vistas para que las multiplicidades sean legibles en una
-presentación. Las reglas se desarrollan en el
-[modelo de dominio](05-domain-model.md) y su persistencia en el
-[modelo de datos](06-data-model.md).
+La pauta de Entrega 2 pide representar los conceptos fundamentales mediante un
+diagrama de clases. Las clases siguientes son conceptos del problema, no clases
+definitivas de implementación. El modelo se divide para mantener legibilidad.
 
-## Contexto académico y contenido
+## Identidad, institución y contenido
 
 ```mermaid
 classDiagram
   direction LR
 
-  class Tenant
+  class Institution
   class User
+  class InstitutionMembership
   class Course
   class CourseMembership
   class Section
@@ -23,8 +20,9 @@ classDiagram
   class CourseModule
   class Material
 
-  Tenant "1" -- "0..*" User : registra
-  Tenant "1" -- "0..*" Course : ofrece
+  Institution "1" -- "0..*" InstitutionMembership : habilita
+  User "1" -- "0..*" InstitutionMembership : pertenece
+  Institution "1" -- "0..*" Course : ofrece
   Course "1" -- "0..*" CourseMembership : tiene
   User "1" -- "0..*" CourseMembership : coordina
   Course "1" -- "0..*" Section : contiene
@@ -34,11 +32,10 @@ classDiagram
   CourseModule "1" -- "0..*" Material : contiene
 ```
 
-`CourseMembership` expresa la coordinación de curso. `Enrollment` expresa
-los roles `teacher`, `assistant` y `student` por sección; una persona puede
-tener varios roles activos, incluso dentro de la misma sección. Las
-asociaciones con `Tenant` son conceptuales: el registry y los datos
-académicos viven en bases de datos separadas.
+`User` es global. `InstitutionMembership` habilita el acceso base, mientras
+CourseMembership y Enrollment conservan los roles académicos contextuales.
+Todas las clases académicas son tenant-owned por una Institution aunque el
+diagrama omita relaciones repetidas para evitar ruido visual.
 
 ## Evaluaciones, notas y trazabilidad
 
@@ -46,6 +43,7 @@ académicos viven en bases de datos separadas.
 classDiagram
   direction LR
 
+  class Institution
   class Course
   class Section
   class User
@@ -57,6 +55,7 @@ classDiagram
   class Grade
   class AuditEvent
 
+  Institution "1" -- "0..*" Course : delimita
   Course "1" -- "0..*" Quiz : evalua
   Section "0..1" -- "0..*" Quiz : delimita
   Quiz "1" -- "0..*" Question : contiene
@@ -77,8 +76,7 @@ classDiagram
   User "1" -- "0..*" AuditEvent : realiza
 ```
 
-Un `Quiz` puede ser para todo el curso o para una sección. Cada intento
-conserva la sección donde se inició. `Grade` representa la nota vigente,
-determinada por el último intento calificado y publicada explícitamente.
-`Alternative` es un concepto anidado en la pregunta, aunque se persista como
-JSONB. `AuditEvent` registra cambios académicos dentro del tenant.
+Quiz, Question, QuizAttempt, GradeItem, Grade y AuditEvent conservan
+`institution_id`. Las FK compuestas comprueban que las relaciones del diagrama
+pertenecen a la misma Institution. Alternative continúa como concepto anidado en
+Question aunque se persista como JSONB.

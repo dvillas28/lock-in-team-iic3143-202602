@@ -1,467 +1,448 @@
 # Modelo de datos
 
-AcademiX usa sharding por universidad: una DB central de registry y una DB por
-tenant. Las DB `academix_uc_db` y `academix_utfsm_db` comparten el mismo
-schema. Las tablas académicas no llevan `tenant_id`: la DB elegida antes de
-consultar es el límite del tenant.
+AcademiX utiliza una PostgreSQL compartida. `institutions.id` es la raíz del
+tenant lógico y `institution_id` aparece en toda tabla académica tenant-owned.
+`users` es global; `institution_memberships` relaciona identidades con las
+Institutions a las que pueden acceder.
 
-En las tablas siguientes, las FK y campos de identidad/relación son `NOT NULL`
-salvo donde se indica `nullable`. Las verificaciones de permisos usan JWT y
-pertenencias activas de la DB del tenant; `x-tenant` solo selecciona la DB.
+Este es un modelo lógico. El repositorio todavía no elige ORM, herramienta de
+migraciones ni DDL ejecutable.
 
-## Registry DB
+## Principios transversales
 
-### tenants
+- UUID es la PK interna de Institution y de los recursos del dominio.
+- `institutions.slug` es globalmente único y legible, pero no se usa como FK.
+- Toda tabla tenant-owned declara `institution_id NOT NULL`.
+- Cada tabla tenant-owned expone una clave candidata
+  `unique (institution_id, id)` para relaciones compuestas.
+- Las FK entre tablas tenant-owned incluyen `institution_id`.
+- Las FK hacia User comprueban la pareja `(institution_id, user_id)` contra
+  `institution_memberships` cuando la relación exige pertenencia institucional.
+- Las unicidades académicas incluyen Institution cuando otras Institutions
+  pueden reutilizar el mismo valor.
+- Los índices comienzan por `institution_id` cuando el acceso real está scoped
+  por Institution o respalda una FK/constraint compuesta.
+- RLS no forma parte del MVP.
+
+## Entidades globales e institucionales
+
+### institutions
+
+Raíz de cada tenant lógico.
 
 | Campo | Tipo | Regla |
 | --- | --- | --- |
-| id | uuid | PK |
-| slug | text | único, requerido. Ej: `uc`, `utfsm` |
+| id | uuid | PK, globalmente único |
+| slug | text | único global, requerido |
 | name | text | requerido |
-| database_url | text | requerido, secreto operacional |
 | active | boolean | requerido, default true |
 | created_at | timestamptz | requerido |
+| updated_at | timestamptz | requerido |
 
-`unique (slug)` permite resolver el tenant. No se expone `database_url` en la
-API, eventos ni logs.
-
-## Tenant DB
+UC y UTFSM usan los slugs `uc` y `utfsm` en la misma tabla. Su bootstrap futuro
+será idempotente y separado de las migraciones.
 
 ### users
 
-Personas de una universidad. `id` coincide con el `sub` del JWT para ese
-tenant; la identidad no se toma del body de un request académico.
+Identidades globales. El `sub` del JWT resuelve `users.id`; no se toma una
+identidad desde el body de un request académico.
 
 Campos: `id uuid PK`, `email text`, `name text`, `active boolean`,
-`created_at timestamptz`.
+`created_at timestamptz`, `updated_at timestamptz`.
 
-Reglas: `unique (email)`. La autorización requiere `active = true` y una
-pertenencia activa con el alcance apropiado.
+El modelo actual autentica por `sub`, no por email. Por eso esta revisión no
+introduce una nueva promesa de unicidad global de email; deberá alinearse con el
+proveedor de identidad cuando se diseñe autenticación.
+
+### institution_memberships
+
+Pertenencia base de un User a una Institution. No almacena roles académicos.
+
+Campos: `id uuid PK`, `institution_id uuid FK`, `user_id uuid FK`,
+`active boolean`, `created_at timestamptz`, `updated_at timestamptz`.
+
+Reglas:
+
+- `unique (institution_id, user_id)` mantiene una relación estable que puede
+  activarse o desactivarse sin duplicarla;
+- `(institution_id, id)` es único para referencias institution-aware;
+- índice `(user_id, active, institution_id)` para listar Institutions visibles;
+- toda operación académica exige membership activa;
+- cambios de estado generan AuditEvent cuando exista un contexto académico que
+  corresponda auditar.
+
+## Entidades tenant-owned
 
 ### courses
 
 Ramos semestrales concretos.
 
-Campos: `id uuid PK`, `code text`, `name text`, `term text`,
-`created_at timestamptz`.
+Campos: `id uuid PK`, `institution_id uuid FK`, `code text`, `name text`,
+`term text`, `created_at timestamptz`.
 
-Regla: `unique (code, term)`.
+Reglas:
+
+- `unique (institution_id, code, term)`;
+- `unique (institution_id, id)`;
+- índice `(institution_id, term, code)` para listados institucionales.
 
 ### course_memberships
 
-Coordinadores de curso. Se separan de los roles de sección para que un docente
-de un paralelo no administre automáticamente todo el curso.
+Coordinadores de Course.
 
-Campos: `id uuid PK`, `course_id uuid FK`, `user_id uuid FK`,
+Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`, `user_id uuid`,
 `role text`, `active boolean`, `created_at timestamptz`.
 
-Reglas: `role = 'coordinator'`; un índice único parcial en
-`(course_id, user_id, role) WHERE active` evita duplicar la misma pertenencia
-activa. Un curso puede tener varios coordinadores. El alta del curso y su
-primera pertenencia de coordinador se realizan atómicamente durante el
-aprovisionamiento inicial.
+Reglas:
+
+- `role = 'coordinator'`;
+- FK `(institution_id, course_id)` referencia Course;
+- FK `(institution_id, user_id)` referencia InstitutionMembership;
+- único parcial
+  `(institution_id, course_id, user_id, role) WHERE active`;
+- índice `(institution_id, user_id, active)` para cursos visibles;
+- crear Course y su primera membership coordinadora es atómico.
 
 ### sections
 
-Paralelos de un curso.
-
-Campos: `id uuid PK`, `course_id uuid FK`, `code text`,
+Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`, `code text`,
 `capacity integer nullable`, `created_at timestamptz`.
 
-Reglas: `unique (course_id, code)`, `capacity >= 0` cuando exista. La clave
-`(id, course_id)` también es única para FK compuestas de alcance.
+Reglas:
+
+- FK `(institution_id, course_id)` referencia Course;
+- `unique (institution_id, course_id, code)`;
+- `capacity >= 0` cuando exista;
+- `(institution_id, id, course_id)` es único para relaciones que también
+  comprueban el Course.
 
 ### enrollments
 
-Una fila por rol asignado a un usuario en una sección. Una persona puede
-tener `teacher` y `student` activos en la misma sección, además de roles
-distintos en otras secciones.
+Una fila por rol de User en Section.
 
-Campos: `id uuid PK`, `section_id uuid FK`, `user_id uuid FK`,
-`role text`, `active boolean`, `created_at timestamptz`.
+Campos: `id uuid PK`, `institution_id uuid`, `section_id uuid`,
+`user_id uuid`, `role text`, `active boolean`, `created_at timestamptz`.
 
 Reglas:
 
-- `role in ('teacher', 'student', 'assistant')`.
-- Índice único parcial `(section_id, user_id, role) WHERE active`: impide
-  duplicar un mismo rol activo, pero permite varios roles diferentes.
-- Índices de consulta `(user_id, active)` y
-  `(section_id, role, active)`.
-- Desactivar o cambiar una asignación no borra su historial: genera
-  `audit_events` con el valor anterior y el nuevo.
+- `role in ('teacher', 'student', 'assistant')`;
+- FK `(institution_id, section_id)` referencia Section;
+- FK `(institution_id, user_id)` referencia InstitutionMembership;
+- único parcial
+  `(institution_id, section_id, user_id, role) WHERE active`;
+- índices `(institution_id, user_id, active)` y
+  `(institution_id, section_id, role, active)`;
+- desactivar o cambiar un rol no elimina su evidencia histórica y genera
+  auditoría.
 
 ### course_modules
 
-Campos: `id uuid PK`, `course_id uuid FK`, `title text`,
+Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`, `title text`,
 `position integer`, `published_at timestamptz nullable`.
 
-Regla: `unique (course_id, position)`. Estudiantes ven solo módulos
-publicados de cursos donde tienen inscripción estudiantil activa.
+Reglas:
+
+- FK `(institution_id, course_id)` referencia Course;
+- `unique (institution_id, course_id, position)`;
+- estudiantes ven solo módulos publicados de cursos autorizados.
 
 ### materials
 
-Markdown o referencia a archivo en object storage.
+Markdown o metadatos de un archivo externo.
 
-Campos: `id uuid PK`, `module_id uuid FK`, `title text`, `kind text`,
-`markdown_body text nullable`, `storage_key text nullable`,
+Campos: `id uuid PK`, `institution_id uuid`, `module_id uuid`, `title text`,
+`kind text`, `markdown_body text nullable`, `storage_key text nullable`,
 `mime_type text nullable`, `size_bytes bigint nullable`,
-`published_at timestamptz nullable`, `created_by uuid FK`.
+`published_at timestamptz nullable`, `created_by uuid`.
 
 Reglas:
 
-- `kind in ('markdown', 'file')`.
-- `markdown` exige `markdown_body` y no usa campos de archivo.
-- `file` exige `storage_key`, MIME permitido y `size_bytes >= 0`.
-- MIME permitidos: PDF, CSV, XLSX, TXT, JPEG y PNG.
-- Un material es visible para estudiantes solo si él y su módulo están
-  publicados. El binario se entrega tras comprobar tenant y matrícula.
+- FK `(institution_id, module_id)` referencia CourseModule;
+- FK `(institution_id, created_by)` referencia InstitutionMembership;
+- `kind in ('markdown', 'file')`;
+- markdown exige cuerpo y excluye campos de archivo;
+- file exige metadatos, MIME permitido y `size_bytes >= 0`;
+- el futuro `storage_key` usa namespace interno por Institution, no se expone a
+  clientes ni auditoría;
+- el backend valida InstitutionMembership y matrícula antes de servir contenido.
 
 ### quizzes
 
-Evaluaciones de alternativas. `section_id = null` significa alcance de
-curso; otro valor limita el quiz a esa sección.
+Quiz de Course o de una Section del mismo Course.
 
-Campos: `id uuid PK`, `course_id uuid FK`,
+Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`,
 `section_id uuid nullable`, `title text`, `instructions text nullable`,
 `opens_at timestamptz nullable`, `closes_at timestamptz nullable`,
 `max_attempts integer nullable`, `published_at timestamptz nullable`,
-`created_by uuid FK`.
+`created_by uuid`.
 
 Reglas:
 
-- `max_attempts IS NULL OR max_attempts > 0`; su default es `null` y
-  permite intentos ilimitados. Un límite cuenta todos los intentos iniciados.
-- Si hay `section_id`, FK compuesta `(section_id, course_id)` referencia
-  `sections(id, course_id)`.
-- `opens_at < closes_at` cuando ambos existen.
-- La clave `(id, course_id)` es única para FK compuestas posteriores.
-- Coordinador crea quizzes de curso; docente puede crear los de sus secciones.
-  Publicar exige pauta válida. Después del primer intento se inmovilizan
-  preguntas, alternativas, puntajes y política de intentos.
+- FK `(institution_id, course_id)` referencia Course;
+- FK `(institution_id, section_id, course_id)` referencia Section cuando existe;
+- FK `(institution_id, created_by)` referencia InstitutionMembership;
+- `max_attempts IS NULL OR max_attempts > 0`;
+- `opens_at < closes_at` cuando ambos existen;
+- `(institution_id, id, course_id)` es único para relaciones posteriores;
+- tras el primer intento se inmovilizan pauta, puntajes y política de intentos.
 
 ### questions
 
-Campos: `id uuid PK`, `quiz_id uuid FK`, `prompt text`,
+Campos: `id uuid PK`, `institution_id uuid`, `quiz_id uuid`, `prompt text`,
 `position integer`, `points numeric(6,2)`, `alternatives jsonb`.
-
-Ejemplo de `alternatives`:
-
-```json
-[
-  { "id": "a", "text": "Opción A", "is_correct": false },
-  { "id": "b", "text": "Opción B", "is_correct": true }
-]
-```
 
 Reglas:
 
-- `unique (quiz_id, position)` y `points > 0`.
-- El JSON debe ser un arreglo con al menos dos alternativas; cada una tiene
-  `id` y `text` no vacíos, los `id` son únicos dentro de la pregunta y
-  exactamente una alternativa tiene `is_correct = true`.
-- La validación completa se ejecuta antes de publicar y al guardar cambios.
-  El backend nunca serializa `is_correct` en la vista estudiantil ni incluye
-  la pauta en auditoría o logs.
-- No se editan ni eliminan preguntas después de iniciado el primer intento.
+- FK `(institution_id, quiz_id)` referencia Quiz;
+- `unique (institution_id, quiz_id, position)` y `points > 0`;
+- alternatives contiene al menos dos opciones, IDs locales únicos y exactamente
+  una correcta;
+- pauta y campos de corrección nunca aparecen en la vista estudiantil,
+  auditoría o logs;
+- no se edita ni elimina una Question tras iniciar el primer intento.
 
 ### quiz_attempts
 
-Intentos de estudiante. `section_id` es un snapshot inmutable de la sección
-desde la que se inició el intento; `course_id` permite imponer FK compuestas
-de alcance.
+Conserva Institution, Course y Section históricas.
 
-Campos: `id uuid PK`, `course_id uuid FK`, `quiz_id uuid FK`,
-`section_id uuid FK`, `student_id uuid FK`, `attempt_number integer`,
-`status text`, `started_at timestamptz`,
-`submitted_at timestamptz nullable`, `cancelled_at timestamptz nullable`,
-`answers jsonb`,
-`score_points numeric(8,2) nullable`,
-`score_percent numeric(5,2) nullable`.
-
-Ejemplo del snapshot académico de `answers`:
-
-```json
-[
-  {
-    "question_id": "uuid",
-    "selected_alternative_id": "b",
-    "is_correct": true,
-    "points_awarded": 1
-  }
-]
-```
+Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`, `quiz_id uuid`,
+`section_id uuid`, `student_id uuid`, `attempt_number integer`, `status text`,
+`started_at timestamptz`, `submitted_at timestamptz nullable`,
+`cancelled_at timestamptz nullable`, `answers jsonb`,
+`score_points numeric(8,2) nullable`, `score_percent numeric(5,2) nullable`.
 
 Reglas:
 
-- `status in ('in_progress', 'submitted', 'graded', 'cancelled')` y
-  `attempt_number > 0`.
-- FK `(quiz_id, course_id) -> quizzes(id, course_id)` y
-  `(section_id, course_id) -> sections(id, course_id)`.
-- `unique (quiz_id, student_id, attempt_number)`; la clave
-  `(id, quiz_id, student_id, section_id)` también es única para la FK
-  compuesta de `grades`.
-- Índice único parcial `(quiz_id, student_id) WHERE status = 'in_progress'`.
-  El número siguiente se asigna en transacción con bloqueo de la serie por
-  estudiante y quiz, para evitar dos inicios concurrentes.
-- Se valida matrícula `student` activa en `section_id`, alcance del quiz,
-  ventana temporal, límite `max_attempts` y ausencia de nota ya publicada.
-  Si el usuario puede acceder a la pauta de ese quiz como coordinador o docente,
-  se rechaza el inicio aunque también tenga rol `student`.
-- `score_percent between 0 and 100` cuando exista. Al pasar a `graded`,
-  `submitted_at`, respuestas y puntaje son requeridos e inmutables.
-- Solo `in_progress` puede pasar a `cancelled`; se fija `cancelled_at`, se
-  conserva `attempt_number` y no se crea ni cambia una nota. `cancelled_at` es
-  null fuera de `cancelled`; en ese estado `submitted_at`, `score_points` y
-  `score_percent` permanecen null. El intento cancelado cuenta para
-  `max_attempts`, no bloquea publicación y no admite guardar ni enviar
-  respuestas. La transición registra actor y cambio en auditoría; el cierre
-  de `closes_at` no la ejecuta automáticamente.
-- `is_correct` y `points_awarded` los calcula el servidor; no se aceptan
-  desde el cliente. La API estudiantil solo devuelve la selección y omite
-  porcentaje y nota antes de la publicación.
+- `status in ('in_progress', 'submitted', 'graded', 'cancelled')`;
+- FK `(institution_id, quiz_id, course_id)` referencia Quiz;
+- FK `(institution_id, section_id, course_id)` referencia Section;
+- FK `(institution_id, student_id)` referencia InstitutionMembership;
+- `unique (institution_id, quiz_id, student_id, attempt_number)`;
+- `(institution_id, id, quiz_id, student_id, section_id)` es único para Grade;
+- único parcial
+  `(institution_id, quiz_id, student_id) WHERE status = 'in_progress'`;
+- iniciar valida membership, Enrollment student, scope, ventana, máximo, acceso a
+  pauta y ausencia de nota publicada;
+- `score_percent between 0 and 100` cuando exista;
+- cancelación conserva número, no crea Grade y genera AuditEvent;
+- respuestas y corrección quedan inmutables al calificar.
 
 ### grade_items
 
-Evaluaciones ponderadas. En el MVP cada ítem se vincula a un quiz.
+Evaluaciones ponderadas; cada una se vincula a un Quiz del mismo Course.
 
-Campos: `id uuid PK`, `course_id uuid FK`, `quiz_id uuid FK`,
-`title text`, `weight_percent numeric(5,2)`,
-`created_at timestamptz`.
+Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`, `quiz_id uuid`,
+`title text`, `weight_percent numeric(5,2)`, `created_at timestamptz`.
 
 Reglas:
 
-- `unique (quiz_id)`; FK compuesta `(quiz_id, course_id)` referencia
-  `quizzes(id, course_id)`; `(id, quiz_id)` es clave única para notas.
-- `weight_percent between 0 and 100`, con default 0 al crear el ítem
-  junto al quiz.
-- La operación que reemplaza el conjunto completo de ponderaciones de un
-  curso exige suma exacta de 100 % y es atómica.
-- Todos los ítems del curso deben existir y sus pesos sumar 100 % antes de
-  la primera publicación de notas. Tras publicar cualquier nota del curso se
-  bloquean altas de ítems y cambios de ponderaciones. Así el promedio publicado permanece estable.
+- FK `(institution_id, course_id)` referencia Course;
+- FK `(institution_id, quiz_id, course_id)` referencia Quiz;
+- `unique (institution_id, quiz_id)`;
+- `(institution_id, id, quiz_id)` es único para Grade;
+- `weight_percent between 0 and 100`;
+- el reemplazo de ponderaciones es atómico y debe sumar 100 % antes de publicar;
+- después de la primera Grade publicada no se agregan ítems ni cambian pesos.
 
 ### grades
 
-Nota vigente por estudiante e ítem. `section_id` conserva el contexto del
-último intento que la determinó. `quiz_id` repite la referencia del ítem para
-poder comprobar por FK que el intento y el ítem corresponden al mismo quiz.
+Nota vigente por estudiante y GradeItem.
 
-Campos: `id uuid PK`, `grade_item_id uuid FK`, `quiz_id uuid FK`,
-`student_id uuid FK`, `section_id uuid FK`, `attempt_id uuid FK`,
+Campos: `id uuid PK`, `institution_id uuid`, `grade_item_id uuid`,
+`quiz_id uuid`, `student_id uuid`, `section_id uuid`, `attempt_id uuid`,
 `score_percent numeric(5,2)`, `grade_value numeric(3,1)`,
 `published_at timestamptz nullable`, `created_at timestamptz`,
 `updated_at timestamptz`.
 
 Reglas:
 
-- `unique (grade_item_id, student_id)`: una nota vigente por estudiante e
-  ítem. El último intento `graded` según `attempt_number` la determina,
-  aunque el estudiante haya cambiado de sección.
-- FK compuesta `(grade_item_id, quiz_id) -> grade_items(id, quiz_id)` y
-  `(attempt_id, quiz_id, student_id, section_id) ->
-  quiz_attempts(id, quiz_id, student_id, section_id)`; el intento debe estar
-  `graded` (validación transaccional). El intento referenciado es obligatorio.
+- `unique (institution_id, grade_item_id, student_id)`;
+- FK `(institution_id, grade_item_id, quiz_id)` referencia GradeItem;
+- FK `(institution_id, attempt_id, quiz_id, student_id, section_id)` referencia
+  QuizAttempt;
+- FK `(institution_id, student_id)` referencia InstitutionMembership;
 - `score_percent between 0 and 100`;
-  `grade_value between 1.0 and 7.0` a un decimal.
-- Índice `(student_id, published_at)` para la vista propia; el índice de la
-  FK/único de `grade_item_id` sirve al libro de notas.
-- Mientras `published_at IS NULL`, un intento calificado más reciente
-  actualiza la nota vigente y deja un `audit_event`. Si ya fue publicada,
-  el valor, porcentaje, sección, intento y `published_at` son inmutables.
-  Se impiden nuevos intentos de ese estudiante para ese quiz.
-- Solo coordinador del curso o docente autorizado para `section_id` puede
-  publicar. La publicación no sobrescribe una nota publicada.
+- `grade_value between 1.0 and 7.0`, a un decimal;
+- índice `(institution_id, student_id, published_at)` para la vista propia;
+- el último intento graded actualiza una Grade no publicada y genera auditoría;
+- una Grade publicada es inmutable.
 
-## Cálculo del libro de notas
+### audit_events
 
-1. `score_percent = 100 * score_points / sum(question.points)`. Se almacena
-   con dos decimales y redondeo `HALF_UP`; el total de puntos debe ser mayor
-   que cero.
-2. Para `score_percent <= 60`,
-   `grade_value = 1 + score_percent * 3 / 60`. Para un porcentaje mayor,
-   `grade_value = 4 + (score_percent - 60) * 3 / 40`. Se redondea a un decimal
-   con `HALF_UP`.
-3. El promedio parcial usa solo notas con `grades.published_at IS NOT NULL`:
-   `sum(grade_value * weight_percent) / sum(weight_percent)`, redondeado a
-   un decimal con `HALF_UP`. Si la suma de ponderaciones publicadas es cero,
-   el promedio es `null`. Se informa además esa suma y si es menor que 100 %.
-4. El promedio se calcula en backend; no se almacena como columna derivada.
-   La vista estudiantil no incluye notas ni puntajes no publicados.
+Historial académico inmutable y tenant-owned.
 
-## audit_events
-
-Historial académico inmutable dentro de la DB del tenant.
-
-Campos: `id uuid PK`, `actor_user_id uuid FK`, `action text`,
-`resource_type text`, `resource_id uuid`, `course_id uuid FK`,
-`section_id uuid FK nullable`, `occurred_at timestamptz`,
-`changes jsonb` con `before` y `after` sanitizados.
+Campos: `id uuid PK`, `institution_id uuid`, `actor_user_id uuid`,
+`action text`, `resource_type text`, `resource_id uuid`, `course_id uuid`,
+`section_id uuid nullable`, `occurred_at timestamptz`, `changes jsonb`.
 
 Reglas:
 
-- Solo la capa de dominio inserta eventos; permisos de DB o un trigger
-  impiden actualización y borrado, también fuera de la API. Índice
-  `(course_id, occurred_at DESC)` para consultar el historial del curso.
-- El actor se deriva del JWT. `section_id`, si existe, pertenece a
-  `course_id` mediante FK compuesta. `resource_id` es polimórfico y su
-  existencia se valida en la operación de dominio.
-- Se registran al menos cambios de coordinadores y roles, publicación o
-  modificación de material y quizzes, cancelación de intentos, ponderaciones,
-  sustitución de nota no publicada y publicación de notas.
-- `changes` excluye JWT, URLs de DB, `storage_key`, respuestas correctas y
-  otros secretos. Evento y cambio académico se confirman en la misma
-  transacción.
+- FK `(institution_id, actor_user_id)` referencia InstitutionMembership;
+- FK `(institution_id, course_id)` referencia Course;
+- FK `(institution_id, section_id, course_id)` referencia Section cuando existe;
+- actualización y borrado están prohibidos por permisos de persistencia o un
+  mecanismo equivalente que se definirá con la implementación;
+- índice `(institution_id, course_id, occurred_at DESC)`;
+- `resource_id` es polimórfico y se valida dentro de la operación de dominio;
+- changes omite JWT, credenciales, claves de almacenamiento y pauta;
+- evento y cambio académico se confirman en la misma transacción.
+
+## Cálculo del libro de notas
+
+1. `score_percent = 100 * score_points / sum(question.points)` con dos decimales
+   y `HALF_UP`.
+2. Hasta 60 %, `grade_value = 1 + score_percent * 3 / 60`; sobre 60 %,
+   `grade_value = 4 + (score_percent - 60) * 3 / 40`, a un decimal.
+3. El promedio parcial usa solo Grades publicadas:
+   `sum(grade_value * weight_percent) / sum(weight_percent)`.
+4. Sin ponderación publicada el promedio es `null`.
+5. El backend calcula el promedio; no se almacena como columna derivada.
 
 ## Transacciones críticas
 
-- Iniciar intento: bloquear la serie `(quiz_id, student_id)`, validar
-  `max_attempts`, matrícula, acceso a pauta y publicación, asignar
-  `attempt_number`.
-- Finalizar intento: inmovilizar respuestas, calcular porcentaje y nota,
-  marcar intento `graded`, crear o actualizar la nota no publicada desde ese
-  último intento y registrar auditoría en una transacción. Un reenvío
-  idempotente no duplica resultados.
-- Cancelar intento: validar actor y estado `in_progress`, cambiar a `cancelled`,
-  fijar `cancelled_at` y registrar auditoría en una transacción. No altera notas.
-- Publicar notas: bloquear las notas seleccionadas, verificar alcance del
-  actor, intentos calificados, ausencia de intentos `in_progress` para esos
-  estudiantes y quizzes, y ponderaciones del curso que sumen 100 %; actualizar `published_at` y escribir eventos en una
-  transacción. No se sobrescriben notas publicadas.
-- Cambiar ponderaciones: bloquear el libro del curso, validar suma 100 % y
-  ausencia de notas publicadas, persistir todo y registrar auditoría en una
-  transacción.
+- Crear Course: insertar Course y primera CourseMembership coordinadora con la
+  misma `institution_id`.
+- Iniciar intento: bloquear la serie
+  `(institution_id, quiz_id, student_id)`, validar permisos y asignar número.
+- Finalizar intento: inmovilizar respuestas, calificar, actualizar Grade no
+  publicada y registrar AuditEvent en una transacción.
+- Cancelar intento: cambiar estado, fijar fecha y auditar sin alterar Grade.
+- Publicar Grades: validar scope, intentos, ponderaciones y ausencia de intentos
+  activos; publicar y auditar atómicamente.
+- Cambiar ponderaciones: bloquear el libro de la Institution y Course, validar
+  suma y ausencia de publicaciones, persistir y auditar.
 
-## Migraciones
+## Migraciones y backfills
 
-- Registry y tenant DB tienen migraciones separadas.
-- Cada migración de tenant se ejecuta en `academix_uc_db`,
-  `academix_utfsm_db` y toda DB futura.
-- El aprovisionamiento de cada curso inserta su primer `course_membership`
-  coordinador de forma atómica. El mecanismo de identidad JWT debe garantizar
-  que `sub` corresponde al `users.id` del tenant activo.
+- Existe una sola secuencia de migraciones para la PostgreSQL compartida.
+- No se coordinan schemas ni versiones entre bases por Institution.
+- La herramienta de migraciones se elegirá en un plan posterior.
+- Un backfill futuro filtra explícitamente por `institution_id`, es idempotente
+  cuando corresponde y usa lotes cuando el volumen lo requiere.
+- Un backfill nunca infiere ni mezcla la Institution mediante datos del cliente.
+
+## Backup y recuperación
+
+Backup y point-in-time recovery cubren la PostgreSQL compartida completa.
+Export/import lógico de una Institution puede evaluarse en el futuro, pero
+restore independiente no es una capacidad del MVP.
 
 ## ERD Mermaid
 
-El registry está en una DB distinta; su entidad se dibuja sin FK hacia las
-tablas académicas.
-
 ```mermaid
 erDiagram
-  TENANTS {
+  INSTITUTIONS {
     uuid id PK
     text slug UK
     text name
-    text database_url
     boolean active
   }
 
   USERS {
     uuid id PK
-    text email UK
+    text email
     text name
+    boolean active
+  }
+
+  INSTITUTION_MEMBERSHIPS {
+    uuid id PK
+    uuid institution_id FK
+    uuid user_id FK
     boolean active
   }
 
   COURSES {
     uuid id PK
+    uuid institution_id FK
     text code
-    text name
     text term
   }
 
   COURSE_MEMBERSHIPS {
     uuid id PK
+    uuid institution_id FK
     uuid course_id FK
     uuid user_id FK
     text role
-    boolean active
   }
 
   SECTIONS {
     uuid id PK
+    uuid institution_id FK
     uuid course_id FK
     text code
   }
 
   ENROLLMENTS {
     uuid id PK
+    uuid institution_id FK
     uuid section_id FK
     uuid user_id FK
     text role
-    boolean active
   }
 
   COURSE_MODULES {
     uuid id PK
+    uuid institution_id FK
     uuid course_id FK
-    text title
     integer position
-    timestamptz published_at
   }
 
   MATERIALS {
     uuid id PK
+    uuid institution_id FK
     uuid module_id FK
     text kind
-    text storage_key
-    timestamptz published_at
   }
 
   QUIZZES {
     uuid id PK
+    uuid institution_id FK
     uuid course_id FK
     uuid section_id FK
-    integer max_attempts
-    timestamptz published_at
   }
 
   QUESTIONS {
     uuid id PK
+    uuid institution_id FK
     uuid quiz_id FK
-    integer position
-    numeric points
     jsonb alternatives
   }
 
   QUIZ_ATTEMPTS {
     uuid id PK
-    uuid course_id FK
+    uuid institution_id FK
     uuid quiz_id FK
     uuid section_id FK
     uuid student_id FK
-    integer attempt_number
-    text status
-    jsonb answers
   }
 
   GRADE_ITEMS {
     uuid id PK
+    uuid institution_id FK
     uuid course_id FK
     uuid quiz_id FK
-    numeric weight_percent
   }
 
   GRADES {
     uuid id PK
+    uuid institution_id FK
     uuid grade_item_id FK
-    uuid quiz_id FK
     uuid student_id FK
-    uuid section_id FK
     uuid attempt_id FK
-    numeric grade_value
-    timestamptz published_at
   }
 
   AUDIT_EVENTS {
     uuid id PK
+    uuid institution_id FK
     uuid actor_user_id FK
     uuid course_id FK
-    uuid section_id FK
-    text action
-    timestamptz occurred_at
-    jsonb changes
   }
 
+  INSTITUTIONS ||--o{ INSTITUTION_MEMBERSHIPS : grants
+  USERS ||--o{ INSTITUTION_MEMBERSHIPS : joins
+  INSTITUTIONS ||--o{ COURSES : owns
   COURSES ||--o{ COURSE_MEMBERSHIPS : coordinates
   USERS ||--o{ COURSE_MEMBERSHIPS : holds
   COURSES ||--o{ SECTIONS : has
@@ -473,14 +454,17 @@ erDiagram
   SECTIONS |o--o{ QUIZZES : scopes
   QUIZZES ||--o{ QUESTIONS : has
   QUIZZES ||--o{ QUIZ_ATTEMPTS : receives
-  SECTIONS ||--o{ QUIZ_ATTEMPTS : context
   USERS ||--o{ QUIZ_ATTEMPTS : submits
+  SECTIONS ||--o{ QUIZ_ATTEMPTS : context
   COURSES ||--o{ GRADE_ITEMS : grades
   QUIZZES ||--o| GRADE_ITEMS : has
   GRADE_ITEMS ||--o{ GRADES : produces
   USERS ||--o{ GRADES : receives
-  SECTIONS ||--o{ GRADES : context
   QUIZ_ATTEMPTS ||--o| GRADES : determines
   COURSES ||--o{ AUDIT_EVENTS : records
   USERS ||--o{ AUDIT_EVENTS : acts
 ```
+
+El ERD evita dibujar las relaciones repetidas desde Institution hacia cada tabla
+para mantener legibilidad. Los campos `institution_id` y las FK compuestas son
+obligatorios aunque no aparezca una arista directa para cada entidad.
