@@ -20,6 +20,7 @@ un flujo académico implementable por un equipo pequeño durante el semestre.
 | 08 | [plan de trabajo](08-work-plan.md) | Plan de desarrollo actualizado. |
 | 09 | [plan de walking skeleton](09-walking-skeleton-plan.md) | CI/CD, Hello World, Railway y release. |
 | 10 | [estado](10-status.md) | Qué está completo y qué falta. |
+| 11 | [evidencia CI/CD](11-cicd-evidence/README.md) | Capturas de CI, CD Railway y release. |
 
 ## Decisión central
 
