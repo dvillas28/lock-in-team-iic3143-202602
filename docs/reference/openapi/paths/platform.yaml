@@ -16,84 +16,59 @@
       '429':
         $ref: '../components/responses.yaml#/TooManyRequests'
 
-/api/hello:
-  parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+/api/v1/institutions:
   get:
     tags:
-      - Platform
-    operationId: getTenantHello
-    summary: Probar resolución del tenant
-    security: []
+      - Institutions
+    operationId: listAccessibleInstitutions
+    summary: Listar instituciones accesibles para la identidad actual
+    description: Devuelve únicamente las instituciones con una membership activa para el User autenticado.
     responses:
       '200':
-        description: Tenant resuelto correctamente.
+        description: Instituciones accesibles.
         content:
           application/json:
             schema:
-              $ref: '../components/schemas/tenancy.yaml#/HelloResponse'
-      '400':
-        $ref: '../components/responses.yaml#/TenantBadRequest'
-      '404':
-        $ref: '../components/responses.yaml#/TenantNotFound'
-      '503':
-        $ref: '../components/responses.yaml#/TenantDatabaseUnavailable'
-
-/api/v1/tenants:
-  get:
-    tags:
-      - Tenants
-    operationId: listAccessibleTenants
-    summary: Listar tenants accesibles para la identidad actual
-    description: No requiere `x-tenant` y nunca expone configuración de conexión.
-    responses:
-      '200':
-        description: Tenants accesibles.
-        content:
-          application/json:
-            schema:
-              $ref: '../components/schemas/tenancy.yaml#/TenantListResponse'
+              $ref: '../components/schemas/tenancy.yaml#/InstitutionListResponse'
       '401':
         $ref: '../components/responses.yaml#/Unauthorized'
 
-/api/v1/me:
+/api/v1/institutions/{institutionSlug}/me:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
   get:
     tags:
-      - Tenants
+      - Institutions
     operationId: getCurrentUser
-    summary: Consultar identidad y memberships del tenant actual
+    summary: Consultar identidad y memberships del contexto institucional
     responses:
       '200':
-        description: Identidad autenticada y sus alcances actuales.
+        description: Identidad autenticada y sus alcances dentro de la Institution seleccionada.
         content:
           application/json:
             schema:
               $ref: '../components/schemas/tenancy.yaml#/CurrentUser'
-      '400':
-        $ref: '../components/responses.yaml#/BadRequest'
       '401':
         $ref: '../components/responses.yaml#/Unauthorized'
       '404':
         $ref: '../components/responses.yaml#/NotFound'
 
-/api/v1/users:
+/api/v1/institutions/{institutionSlug}/users:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
   get:
     tags:
       - Enrollments
-    operationId: searchTenantUsers
-    summary: Buscar participantes existentes del tenant
-    description: Reservado a coordinators para seleccionar usuarios al gestionar memberships.
+    operationId: searchInstitutionUsers
+    summary: Buscar participantes existentes de la institución
+    description: Reservado a coordinators para seleccionar usuarios al gestionar memberships académicas.
     parameters:
       - $ref: '../components/parameters.yaml#/Search'
       - $ref: '../components/parameters.yaml#/Cursor'
       - $ref: '../components/parameters.yaml#/Limit'
     responses:
       '200':
-        description: Usuarios del tenant que coinciden con la búsqueda.
+        description: Usuarios de la institución que coinciden con la búsqueda.
         content:
           application/json:
             schema:
@@ -104,3 +79,5 @@
         $ref: '../components/responses.yaml#/Unauthorized'
       '403':
         $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'

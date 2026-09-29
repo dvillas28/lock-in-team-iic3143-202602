@@ -8,13 +8,14 @@ AuditChanges:
     after:
       type: [object, 'null']
       additionalProperties: true
-  description: Snapshot sanitizado; nunca contiene secretos, URLs de DB ni storage keys.
+  description: Snapshot sanitizado; nunca contiene secretos, credenciales ni storage keys.
 
 AuditEvent:
   type: object
   additionalProperties: false
   required:
     - id
+    - institutionId
     - actorUserId
     - action
     - resourceType
@@ -28,6 +29,11 @@ AuditEvent:
       type: string
       format: uuid
       readOnly: true
+    institutionId:
+      type: string
+      format: uuid
+      readOnly: true
+      description: Límite institucional interno derivado del contexto de la request.
     actorUserId:
       type: string
       format: uuid

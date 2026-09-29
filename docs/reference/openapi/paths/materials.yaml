@@ -1,6 +1,6 @@
-/api/v1/modules/{moduleId}/materials:
+/api/v1/institutions/{institutionSlug}/modules/{moduleId}/materials:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/ModuleId'
   get:
     tags:
@@ -57,9 +57,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/modules/{moduleId}/materials/files:
+/api/v1/institutions/{institutionSlug}/modules/{moduleId}/materials/files:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/ModuleId'
   post:
     tags:
@@ -106,9 +106,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/materials/{materialId}:
+/api/v1/institutions/{institutionSlug}/materials/{materialId}:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/MaterialId'
   get:
     tags:
@@ -161,9 +161,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/materials/{materialId}/content:
+/api/v1/institutions/{institutionSlug}/materials/{materialId}/content:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/MaterialId'
   get:
     tags:
@@ -213,9 +213,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/materials/{materialId}/publish:
+/api/v1/institutions/{institutionSlug}/materials/{materialId}/publish:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/MaterialId'
   post:
     tags:
@@ -243,9 +243,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/materials/{materialId}/unpublish:
+/api/v1/institutions/{institutionSlug}/materials/{materialId}/unpublish:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/MaterialId'
   post:
     tags:

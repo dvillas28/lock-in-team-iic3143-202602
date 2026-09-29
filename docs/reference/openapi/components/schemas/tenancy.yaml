@@ -1,10 +1,11 @@
-TenantSummary:
+InstitutionSummary:
   type: object
   additionalProperties: false
   required:
     - id
     - slug
     - name
+    - active
   properties:
     id:
       type: string
@@ -15,8 +16,11 @@ TenantSummary:
       pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
     name:
       type: string
+    active:
+      type: boolean
+      readOnly: true
 
-TenantListResponse:
+InstitutionListResponse:
   type: object
   additionalProperties: false
   required:
@@ -24,20 +28,28 @@ TenantListResponse:
   properties:
     items:
       type: array
+      description: Institutions activas y visibles para el User autenticado.
       items:
-        $ref: '#/TenantSummary'
+        $ref: '#/InstitutionSummary'
 
-HelloResponse:
+InstitutionMembershipSummary:
   type: object
   additionalProperties: false
   required:
-    - message
-    - tenant
+    - id
+    - institution
+    - active
   properties:
-    message:
+    id:
       type: string
-    tenant:
-      $ref: '#/TenantSummary'
+      format: uuid
+      readOnly: true
+    institution:
+      $ref: '#/InstitutionSummary'
+    active:
+      type: boolean
+      readOnly: true
+  description: Pertenencia institucional; no contiene roles académicos.
 
 CourseMembershipSummary:
   type: object
@@ -82,7 +94,7 @@ CurrentUser:
     - id
     - email
     - name
-    - tenant
+    - institutionMembership
     - courseMemberships
     - sectionMemberships
   properties:
@@ -95,8 +107,8 @@ CurrentUser:
       format: email
     name:
       type: string
-    tenant:
-      $ref: '#/TenantSummary'
+    institutionMembership:
+      $ref: '#/InstitutionMembershipSummary'
     courseMemberships:
       type: array
       items:

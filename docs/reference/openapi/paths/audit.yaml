@@ -1,6 +1,6 @@
-/api/v1/courses/{courseId}/audit-events:
+/api/v1/institutions/{institutionSlug}/courses/{courseId}/audit-events:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/CourseId'
   get:
     tags:
@@ -64,4 +64,3 @@
         $ref: '../components/responses.yaml#/Forbidden'
       '404':
         $ref: '../components/responses.yaml#/NotFound'
-

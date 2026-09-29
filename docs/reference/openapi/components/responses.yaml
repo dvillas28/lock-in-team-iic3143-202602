@@ -1,26 +1,39 @@
 BadRequest:
-  description: Request o header sintácticamente inválido.
+  description: Request o parámetro sintácticamente inválido.
   content:
     application/problem+json:
       schema:
         $ref: './schemas/common.yaml#/Problem'
 
 Unauthorized:
-  description: No existe una identidad autenticada válida.
+  description: JWT ausente, inválido o expirado.
   content:
     application/problem+json:
       schema:
         $ref: './schemas/common.yaml#/Problem'
+      example:
+        type: https://academix/errors/unauthorized
+        title: Autenticación requerida
+        status: 401
+        detail: Se requiere una identidad autenticada válida.
+        code: UNAUTHORIZED
+        instance: /api/v1/institutions/uc/courses
+        traceId: 01JQ4Y2X7B3QK5XEM0XZ4MSH8Z
+        errors: []
 
 Forbidden:
-  description: La identidad está autenticada, pero no tiene permiso contextual.
+  description: |
+    La identidad puede ver la Institution y el recurso, pero no tiene el rol o
+    permiso necesario para la operación.
   content:
     application/problem+json:
       schema:
         $ref: './schemas/common.yaml#/Problem'
 
 NotFound:
-  description: Recurso inexistente o no visible dentro del scope autorizado.
+  description: |
+    Institution inexistente o no visible, recurso inexistente o recurso fuera
+    del scope institucional autorizado.
   content:
     application/problem+json:
       schema:
@@ -29,9 +42,9 @@ NotFound:
         type: https://academix/errors/resource-not-found
         title: Recurso no encontrado
         status: 404
-        detail: El recurso no existe o no es visible en el tenant y scope autorizados.
+        detail: El recurso no existe o no es visible en el contexto autorizado.
         code: RESOURCE_NOT_FOUND
-        instance: /api/v1/courses/8dc9f252-bf1a-4b50-85c0-a2937484c429
+        instance: /api/v1/institutions/uc/courses/8dc9f252-bf1a-4b50-85c0-a2937484c429
         traceId: 01JQ4Y2X7B3QK5XEM0XZ4MSH8Z
         errors: []
 
@@ -62,66 +75,6 @@ ServiceUnavailable:
     application/problem+json:
       schema:
         $ref: './schemas/common.yaml#/Problem'
-
-TenantBadRequest:
-  description: Falta `x-tenant` o su slug tiene un formato inválido.
-  content:
-    application/problem+json:
-      schema:
-        $ref: './schemas/common.yaml#/Problem'
-      examples:
-        required:
-          value:
-            type: https://academix/errors/tenant-required
-            title: Tenant requerido
-            status: 400
-            detail: El header x-tenant es obligatorio.
-            code: TENANT_REQUIRED
-            instance: /api/hello
-            traceId: 01JQ4Y2X7B3QK5XEM0XZ4MSH8Z
-            errors: []
-        invalid:
-          value:
-            type: https://academix/errors/tenant-invalid
-            title: Tenant inválido
-            status: 400
-            detail: El slug enviado en x-tenant no tiene un formato válido.
-            code: TENANT_INVALID
-            instance: /api/hello
-            traceId: 01JQ4Y2X7B3QK5XEM0XZ4MSH8Z
-            errors: []
-
-TenantNotFound:
-  description: El tenant no existe, está inactivo o no es visible.
-  content:
-    application/problem+json:
-      schema:
-        $ref: './schemas/common.yaml#/Problem'
-      example:
-        type: https://academix/errors/tenant-not-found
-        title: Tenant no encontrado
-        status: 404
-        detail: El tenant solicitado no existe o no está activo.
-        code: TENANT_NOT_FOUND
-        instance: /api/hello
-        traceId: 01JQ4Y2X7B3QK5XEM0XZ4MSH8Z
-        errors: []
-
-TenantDatabaseUnavailable:
-  description: El tenant es válido, pero su base de datos no está disponible.
-  content:
-    application/problem+json:
-      schema:
-        $ref: './schemas/common.yaml#/Problem'
-      example:
-        type: https://academix/errors/tenant-database-unavailable
-        title: Tenant temporalmente no disponible
-        status: 503
-        detail: No fue posible acceder a los datos del tenant.
-        code: TENANT_DATABASE_UNAVAILABLE
-        instance: /api/hello
-        traceId: 01JQ4Y2X7B3QK5XEM0XZ4MSH8Z
-        errors: []
 
 TooManyRequests:
   description: Demasiadas solicitudes.

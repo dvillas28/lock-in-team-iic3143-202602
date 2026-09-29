@@ -1,6 +1,6 @@
-/api/v1/courses:
+/api/v1/institutions/{institutionSlug}/courses:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
   get:
     tags:
       - Courses
@@ -9,7 +9,7 @@
     description: Retorna únicamente cursos donde existe una membership académica activa.
     responses:
       '200':
-        description: Cursos visibles dentro del tenant seleccionado.
+        description: Cursos visibles dentro de la Institution seleccionada.
         content:
           application/json:
             schema:
@@ -18,10 +18,12 @@
         $ref: '../components/responses.yaml#/BadRequest'
       '401':
         $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
 
-/api/v1/courses/{courseId}:
+/api/v1/institutions/{institutionSlug}/courses/{courseId}:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/CourseId'
   get:
     tags:
@@ -70,4 +72,3 @@
         $ref: '../components/responses.yaml#/NotFound'
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
-

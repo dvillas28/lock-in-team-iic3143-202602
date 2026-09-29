@@ -53,7 +53,7 @@ Problem:
     status: 409
     detail: Existen notas publicadas afectadas por el cambio.
     code: GRADE_WEIGHTS_LOCKED
-    instance: /api/v1/courses/8dc9f252-bf1a-4b50-85c0-a2937484c429/gradebook/weights
+    instance: /api/v1/institutions/uc/courses/8dc9f252-bf1a-4b50-85c0-a2937484c429/gradebook/weights
     traceId: 01JQ4Y2X7B3QK5XEM0XZ4MSH8Z
     errors: []
 

@@ -1,8 +1,10 @@
-TenantHeader:
-  name: x-tenant
-  in: header
+InstitutionSlug:
+  name: institutionSlug
+  in: path
   required: true
-  description: Slug del tenant cuya base de datos debe resolver el backend.
+  description: |
+    Slug de la Institution solicitada. Solo identifica contexto; el backend
+    valida que la identidad tenga una InstitutionMembership activa.
   schema:
     type: string
     pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
@@ -32,9 +34,9 @@ IdempotencyKey:
   in: header
   required: true
   description: |
-    Clave opaca elegida por el cliente para una operación sensible. Repetir la
-    misma solicitud con la misma clave y payload debe devolver el resultado de
-    la primera ejecución sin duplicar efectos. Reutilizarla con otro payload
+    Clave opaca elegida por el cliente para una operación sensible. Su scope
+    incluye la Institution del path. Repetir la misma solicitud con igual clave
+    y payload devuelve el primer resultado; reutilizarla con otro payload
     produce 409 Conflict.
   schema:
     type: string
@@ -116,7 +118,7 @@ StudentIdFilter:
   name: studentId
   in: query
   required: false
-  description: Filtro docente; nunca se usa para seleccionar identidad estudiantil.
+  description: Filtro docente; nunca selecciona la identidad estudiantil autenticada.
   schema:
     type: string
     format: uuid
@@ -125,8 +127,7 @@ Search:
   name: search
   in: query
   required: true
-  description: Texto para buscar participantes existentes dentro del tenant actual.
+  description: Texto para buscar Users accesibles dentro de la Institution actual.
   schema:
     type: string
     minLength: 1
-

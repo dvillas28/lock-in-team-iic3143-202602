@@ -1,6 +1,6 @@
-/api/v1/courses/{courseId}/quizzes:
+/api/v1/institutions/{institutionSlug}/courses/{courseId}/quizzes:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/CourseId'
   get:
     tags:
@@ -66,9 +66,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/quizzes/{quizId}:
+/api/v1/institutions/{institutionSlug}/quizzes/{quizId}:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/QuizId'
   get:
     tags:
@@ -124,9 +124,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/quizzes/{quizId}/authoring:
+/api/v1/institutions/{institutionSlug}/quizzes/{quizId}/authoring:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/QuizId'
   get:
     tags:
@@ -153,9 +153,9 @@
       '404':
         $ref: '../components/responses.yaml#/NotFound'
 
-/api/v1/quizzes/{quizId}/questions:
+/api/v1/institutions/{institutionSlug}/quizzes/{quizId}/questions:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/QuizId'
   post:
     tags:
@@ -195,9 +195,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/quizzes/{quizId}/questions/{questionId}:
+/api/v1/institutions/{institutionSlug}/quizzes/{quizId}/questions/{questionId}:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/QuizId'
     - $ref: '../components/parameters.yaml#/QuestionId'
   patch:
@@ -253,9 +253,9 @@
       '409':
         $ref: '../components/responses.yaml#/Conflict'
 
-/api/v1/quizzes/{quizId}/publish:
+/api/v1/institutions/{institutionSlug}/quizzes/{quizId}/publish:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/QuizId'
   post:
     tags:
@@ -288,9 +288,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/sections/{sectionId}/quizzes/{quizId}/attempts:
+/api/v1/institutions/{institutionSlug}/sections/{sectionId}/quizzes/{quizId}/attempts:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/SectionId'
     - $ref: '../components/parameters.yaml#/QuizId'
   post:
@@ -336,9 +336,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/quiz-attempts/{attemptId}:
+/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/AttemptId'
   get:
     tags:
@@ -367,9 +367,9 @@
       '404':
         $ref: '../components/responses.yaml#/NotFound'
 
-/api/v1/quiz-attempts/{attemptId}/answers:
+/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}/answers:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/AttemptId'
   put:
     tags:
@@ -412,9 +412,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/quiz-attempts/{attemptId}/submit:
+/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}/submit:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/AttemptId'
   post:
     tags:
@@ -455,9 +455,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/quiz-attempts/{attemptId}/cancel:
+/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}/cancel:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/AttemptId'
   post:
     tags:
@@ -492,9 +492,9 @@
       '409':
         $ref: '../components/responses.yaml#/Conflict'
 
-/api/v1/quizzes/{quizId}/attempts:
+/api/v1/institutions/{institutionSlug}/quizzes/{quizId}/attempts:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/QuizId'
   get:
     tags:

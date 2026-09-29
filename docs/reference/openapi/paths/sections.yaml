@@ -1,6 +1,6 @@
-/api/v1/courses/{courseId}/sections:
+/api/v1/institutions/{institutionSlug}/courses/{courseId}/sections:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/CourseId'
   get:
     tags:
@@ -59,9 +59,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/sections/{sectionId}:
+/api/v1/institutions/{institutionSlug}/sections/{sectionId}:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/SectionId'
   get:
     tags:
@@ -113,9 +113,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/sections/{sectionId}/enrollments:
+/api/v1/institutions/{institutionSlug}/sections/{sectionId}/enrollments:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/SectionId'
   get:
     tags:
@@ -184,9 +184,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/sections/{sectionId}/enrollments/{enrollmentId}:
+/api/v1/institutions/{institutionSlug}/sections/{sectionId}/enrollments/{enrollmentId}:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/SectionId'
     - $ref: '../components/parameters.yaml#/EnrollmentId'
   patch:
@@ -223,9 +223,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/courses/{courseId}/modules:
+/api/v1/institutions/{institutionSlug}/courses/{courseId}/modules:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/CourseId'
   get:
     tags:
@@ -284,9 +284,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/courses/{courseId}/modules/order:
+/api/v1/institutions/{institutionSlug}/courses/{courseId}/modules/order:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/CourseId'
   put:
     tags:
@@ -320,9 +320,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/modules/{moduleId}:
+/api/v1/institutions/{institutionSlug}/modules/{moduleId}:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/ModuleId'
   get:
     tags:
@@ -374,9 +374,9 @@
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
-/api/v1/modules/{moduleId}/publish:
+/api/v1/institutions/{institutionSlug}/modules/{moduleId}/publish:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/ModuleId'
   post:
     tags:
@@ -402,9 +402,9 @@
       '409':
         $ref: '../components/responses.yaml#/Conflict'
 
-/api/v1/modules/{moduleId}/unpublish:
+/api/v1/institutions/{institutionSlug}/modules/{moduleId}/unpublish:
   parameters:
-    - $ref: '../components/parameters.yaml#/TenantHeader'
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/ModuleId'
   post:
     tags:
@@ -429,4 +429,3 @@
         $ref: '../components/responses.yaml#/NotFound'
       '409':
         $ref: '../components/responses.yaml#/Conflict'
-
