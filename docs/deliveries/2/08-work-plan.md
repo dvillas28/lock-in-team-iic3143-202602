@@ -22,18 +22,23 @@ Iteraciones sugeridas: una semana.
 
 ## Plan por iteración
 
-| Iteración | Foco | Resultado |
-| --- | --- | --- |
-| 1 | Walking skeleton existente | Frontend consume health del backend; CI y Docker permanecen verdes. |
-| 2 | PostgreSQL compartida | Un servicio local y una conexión backend planificada sin múltiples DB. |
-| 3 | Identidad institucional | Institution, User e InstitutionMembership modelados e implementados. |
-| 4 | Contexto de request | Paths institucionales validan membership sin un header tenant adicional. |
-| 5 | Aislamiento | UC y UTFSM coexisten; tests bloquean IDs y relaciones cruzadas. |
-| 6 | Cursos y roles | CourseMembership y Enrollment respetan Institution. |
-| 7 | Material | Markdown primero; storage solo si se elige en un plan específico. |
-| 8 | Quizzes | Pauta protegida e intentos institution-scoped. |
-| 9 | Notas | Cálculo, ponderaciones, publicación y auditoría atómicos. |
-| 10 | Cierre | Tests críticos, release, evidencia y documentación final. |
+| Iteración | Foco | Casos de uso relacionados | Resultado |
+| --- | --- | --- | --- |
+| 1 | Walking skeleton existente | — | Frontend consume health del backend; CI y Docker permanecen verdes. |
+| 2 | PostgreSQL compartida | — | Un servicio local y una conexión backend planificada sin múltiples DB. |
+| 3 | Identidad institucional | [CU-01](03-use-cases-and-requirements.md#cu-01--elegir-institución) | Institution, User e InstitutionMembership modelados e implementados. |
+| 4 | Contexto de request | [CU-02](03-use-cases-and-requirements.md#cu-02--acceder-al-contexto-institucional) | Paths institucionales validan membership sin un header tenant adicional. |
+| 5 | Aislamiento | CU-01 a CU-16, transversal | UC y UTFSM coexisten; tests bloquean IDs y relaciones cruzadas. |
+| 6 | Cursos y roles | CU-03, CU-04 | CourseMembership y Enrollment respetan Institution. |
+| 7 | Módulos y material | CU-14, CU-05, CU-06 | Markdown primero; storage solo si se elige en un plan específico. |
+| 8 | Quizzes | CU-07, CU-08, CU-09, CU-15 | Pauta protegida e intentos institution-scoped. |
+| 9 | Notas y trazabilidad | CU-10, CU-11, CU-12, CU-13, CU-16 | Cálculo, ponderaciones, publicación y auditoría atómicos. |
+| 10 | Cierre | CU-01 a CU-16, verificación | Tests críticos, release, evidencia y documentación final. |
+
+Los identificadores remiten a las [fichas de casos de uso](03-use-cases-and-requirements.md).
+Cada ficha puede descomponerse en tareas propias de implementación, pruebas y
+corrección dentro de su iteración; las filas transversales no sustituyen esa
+planificación detallada.
 
 ## Entregables mínimos por fase
 
