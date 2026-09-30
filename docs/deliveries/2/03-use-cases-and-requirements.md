@@ -1061,15 +1061,14 @@ nota, para que no bloquee indebidamente la publicación.
 
 1. El actor abre el intento visible y solicita su cancelación.
 2. El sistema verifica el estado `in_progress` y revalida propiedad o rol académico sobre el curso y sección históricos.
-3. El sistema muestra el efecto: el intento terminará sin calificación y seguirá contando para el límite de intentos.
-4. El actor confirma la cancelación.
-5. El sistema marca el intento como `cancelled`, registra fecha y evento de auditoría, y confirma que ya no bloquea la publicación.
+3. El sistema marca el intento como `cancelled`, registra fecha y evento de auditoría, sin generar una calificación.
+4. El sistema confirma que el intento cerrado conserva su número, cuenta para el límite de intentos y ya no bloquea la publicación.
 
 ### Flujos alternativos
 
 #### FA-01 — Falta de permiso actual
 
-**Se origina en:** Paso 2 o 5 del flujo básico, cuando el actor perdió la inscripción o rol requerido, o el estudiante adquirió acceso a la pauta.
+**Se origina en:** Paso 2 o 3 del flujo básico, cuando el actor perdió la inscripción o rol requerido, o el estudiante adquirió acceso a la pauta.
 
 1. El sistema rechaza la cancelación.
 2. El sistema conserva el intento en su estado previo.
@@ -1078,7 +1077,7 @@ nota, para que no bloquee indebidamente la publicación.
 
 #### FA-02 — Intento ya cancelado
 
-**Se origina en:** Paso 2 o 5 del flujo básico, cuando la cancelación ya fue aplicada.
+**Se origina en:** Paso 2 o 3 del flujo básico, cuando la cancelación ya fue aplicada.
 
 1. El sistema confirma que el intento está cancelado.
 2. El sistema no registra un segundo evento ni modifica notas.
