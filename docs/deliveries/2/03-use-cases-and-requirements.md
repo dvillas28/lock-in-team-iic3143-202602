@@ -19,9 +19,10 @@ por sí sola permisos académicos. El sistema ejecuta las validaciones y cálcul
 no se trata como actor externo. No hay administrador institucional separado.
 
 Los casos se agrupan por acceso (CU-01 a CU-03), gestión de curso y contenido
-(CU-04 a CU-07 y CU-14), evaluación y calificaciones (CU-08 a CU-12 y CU-15) y
-trazabilidad (CU-13). Se conservan los identificadores originales, normalizados
-con dos dígitos. CU-14 y CU-15 completan metas explícitas del modelo vigente.
+(CU-04 a CU-07 y CU-14), evaluación y calificaciones (CU-08 a CU-12, CU-15 y
+CU-16) y trazabilidad (CU-13). Se conservan los identificadores originales,
+normalizados con dos dígitos. CU-14 a CU-16 completan metas explícitas del
+modelo vigente.
 
 ## Casos de uso del MVP
 
@@ -42,6 +43,42 @@ con dos dígitos. CU-14 y CU-15 completan metas explícitas del modelo vigente.
 | [CU-13](#cu-13--consultar-auditoría) | Revisar historial académico del curso. |
 | [CU-14](#cu-14--organizar-módulos-del-curso) | Ordenar y publicar módulos. |
 | [CU-15](#cu-15--cancelar-un-intento-en-progreso) | Cerrar un intento abandonado sin calificarlo. |
+| [CU-16](#cu-16--revisar-el-libro-de-notas-docente) | Consultar resultados del curso dentro del alcance autorizado. |
+
+### Vista funcional de actores y casos
+
+El siguiente diagrama usa nodos ovalados para los casos de uso y flechas para
+la relación actor–meta. Mermaid no proporciona una figura nativa de caso de uso
+UML; la aproximación conserva únicamente actores, casos y sus asociaciones.
+
+```mermaid
+flowchart LR
+  U[Usuario autenticado] --> C1([CU-01 Elegir institución])
+  U --> C2([CU-02 Acceder al contexto])
+  CO[Coordinador de curso] --> C3([CU-03 Ver cursos y secciones])
+  DO[Docente de sección] --> C3
+  AY[Ayudante de sección] --> C3
+  ES[Estudiante] --> C3
+  CO --> C4([CU-04 Gestionar secciones y roles])
+  CO --> C5([CU-05 Publicar material])
+  ES --> C6([CU-06 Consultar material])
+  CO --> C7([CU-07 Crear y publicar quiz])
+  DO --> C7
+  ES --> C8([CU-08 Responder quiz])
+  ES --> C9([CU-09 Enviar intento y obtener calificación])
+  CO --> C10([CU-10 Configurar libro de notas])
+  CO --> C11([CU-11 Publicar notas])
+  DO --> C11
+  ES --> C12([CU-12 Ver notas y promedio])
+  CO --> C13([CU-13 Consultar auditoría])
+  CO --> C14([CU-14 Organizar módulos])
+  ES --> C15([CU-15 Cancelar intento])
+  CO --> C15
+  DO --> C15
+  CO --> C16([CU-16 Revisar libro docente])
+  DO --> C16
+  AY --> C16
+```
 
 ### Reglas comunes de lectura
 
@@ -305,6 +342,15 @@ participantes de la misma institución.
 2. El sistema verifica que no se duplique un rol activo y registra el estado anterior y el nuevo.
 
 **Resultado:** La pertenencia queda actualizada sin eliminar su historial.
+
+#### FA-05 — Actualizar configuración general del curso
+
+**Se origina en:** Paso 3 del flujo básico, cuando el coordinador decide modificar datos generales del curso antes de continuar con sus secciones.
+
+1. El coordinador indica los datos del curso que deben cambiar.
+2. El sistema valida la configuración y registra el cambio sensible dentro del mismo curso e institución.
+
+**Resultado:** El curso queda actualizado sin crear otro curso ni alterar sus pertenencias.
 
 ## CU-05 — Publicar material
 
@@ -1048,6 +1094,77 @@ nota, para que no bloquee indebidamente la publicación.
 
 **Resultado:** No se cancela una calificación ni se revela un intento ajeno.
 
+## CU-16 — Revisar el libro de notas docente
+
+### Descripción
+
+El personal académico consulta calificaciones de sus estudiantes antes de
+publicarlas o para dar seguimiento al curso. **Meta:** revisar filas del libro
+de notas dentro del alcance de curso o sección permitido para cada rol.
+
+### Actores
+
+- Coordinador de curso.
+- Docente de sección.
+- Ayudante de sección.
+
+### Stakeholders
+
+- Equipo docente: necesita detectar resultados pendientes y dar seguimiento académico.
+- Estudiantes: necesitan que sus resultados sean consultados solo por personal autorizado.
+- Institución: requiere resguardar la confidencialidad de las calificaciones.
+
+### Precondiciones
+
+- Se cumplen las reglas comunes de autenticación y pertenencia institucional.
+- El actor tiene coordinación activa del curso o rol `teacher` o `assistant` activo en una de sus secciones.
+- El curso existe dentro de la institución seleccionada.
+
+### Postcondiciones
+
+- Se presentan únicamente filas del libro de notas del curso o de las secciones autorizadas; la consulta no modifica notas ni su estado de publicación.
+
+### Trigger
+
+- El miembro del equipo académico abre el libro de notas del curso.
+
+### Flujo básico
+
+1. El actor selecciona un curso y solicita consultar su libro de notas.
+2. El sistema verifica su rol y muestra al coordinador el curso completo; al docente o ayudante le exige una sección propia.
+3. El docente o ayudante selecciona una sección en que mantiene rol activo, si corresponde.
+4. El sistema muestra las filas y elementos de nota dentro de ese alcance, con sus resultados y estado de publicación.
+5. El actor revisa los resultados sin alterar el libro mediante esta consulta.
+
+### Flujos alternativos
+
+#### FA-01 — Sección ajena o rol perdido
+
+**Se origina en:** Paso 2, 3 o 4 del flujo básico, cuando el actor solicita una sección fuera de sus roles vigentes.
+
+1. El sistema rechaza la consulta fuera de alcance.
+2. El actor puede elegir una sección donde aún participa.
+
+**Resultado:** No se exponen calificaciones de otra sección.
+
+#### FA-02 — Curso o sección inexistente en el contexto
+
+**Se origina en:** Paso 2 o 4 del flujo básico, cuando el recurso no existe o pertenece a otra institución.
+
+1. El sistema informa que el recurso no está disponible.
+2. El actor regresa a sus cursos y secciones visibles.
+
+**Resultado:** No se revela la existencia de datos de otra institución.
+
+#### FA-03 — Ayudante intenta modificar o publicar
+
+**Se origina en:** Paso 5 del flujo básico, cuando un ayudante solicita una acción de escritura desde el libro consultado.
+
+1. El sistema impide la modificación y explica que el rol `assistant` es de solo lectura en el libro.
+2. El ayudante conserva la vista autorizada sin cambios.
+
+**Resultado:** No se modifican ni publican notas mediante el rol de ayudante.
+
 ## Requisitos funcionales
 
 RF1. El sistema debe autenticar una identidad global mediante JWT.
@@ -1080,9 +1197,11 @@ RF11. Un User puede tener más de un rol activo, incluso en una misma sección.
 RF12. El coordinador administra todo su curso; el docente solo las secciones
 donde tiene `teacher` activo.
 
-RF13. El coordinador debe poder crear módulos de curso y ordenarlos.
+RF13. El coordinador debe poder crear, ordenar, actualizar, publicar y ocultar
+módulos de curso.
 
-RF14. El coordinador debe poder crear material markdown o basado en archivo.
+RF14. El coordinador debe poder crear, actualizar, publicar y ocultar material
+markdown o basado en archivo.
 
 RF15. Los archivos del MVP son PDF, CSV, XLSX, TXT, JPEG y PNG. Su
 almacenamiento concreto se decide cuando se implemente esa funcionalidad.
@@ -1117,6 +1236,31 @@ permite al coordinador consultar el historial de su curso.
 RF27. La vista estudiantil del quiz omite pauta y corrección antes de publicar.
 Quien puede consultar la pauta no puede rendir ese quiz como estudiante.
 
+RF28. El estudiante propietario, el coordinador del curso o el docente de la
+sección histórica pueden cancelar un intento en progreso bajo sus permisos
+vigentes. La cancelación no genera nota, cuenta para el límite de intentos y
+queda auditada.
+
+RF29. El coordinador puede consultar el libro de notas completo del curso;
+docentes y ayudantes solo las secciones donde mantienen rol activo. El ayudante
+tiene acceso de solo lectura.
+
+## Reglas de negocio y seguridad
+
+- `institutions.id` es UUID interno; `slug` es legible y globalmente único.
+- Las relaciones internas usan UUID, no slug.
+- Un slug válido pero no visible para el User produce `404`.
+- Un recurso de otra Institution produce `404` para no revelar su existencia.
+- Una acción prohibida sobre un recurso visible produce `403`.
+- JWT ausente, inválido o expirado produce `401`.
+- Los códigos académicos son únicos dentro de su Institution cuando corresponda.
+- Los cambios sensibles se auditan en la misma transacción y con
+  `institution_id`.
+- Las reglas de intentos, pauta, ponderaciones y publicación se mantienen como
+  define el modelo de dominio.
+- RLS, jerarquías institucionales, provisioning dinámico y restore lógico por
+  Institution quedan fuera del MVP.
+
 ## Requisitos no funcionales
 
 RNF1. Aislamiento: ninguna lectura, escritura, relación o proceso debe mezclar
@@ -1148,19 +1292,3 @@ sin secretos ni datos de otra Institution.
 RNF10. Persistencia: existe una sola secuencia de migraciones. Backfills futuros
 son institution-scoped, idempotentes cuando corresponda y por lotes si su
 volumen lo exige.
-
-## Reglas de negocio y seguridad
-
-- `institutions.id` es UUID interno; `slug` es legible y globalmente único.
-- Las relaciones internas usan UUID, no slug.
-- Un slug válido pero no visible para el User produce `404`.
-- Un recurso de otra Institution produce `404` para no revelar su existencia.
-- Una acción prohibida sobre un recurso visible produce `403`.
-- JWT ausente, inválido o expirado produce `401`.
-- Los códigos académicos son únicos dentro de su Institution cuando corresponda.
-- Los cambios sensibles se auditan en la misma transacción y con
-  `institution_id`.
-- Las reglas de intentos, pauta, ponderaciones y publicación se mantienen como
-  define el modelo de dominio.
-- RLS, jerarquías institucionales, provisioning dinámico y restore lógico por
-  Institution quedan fuera del MVP.
