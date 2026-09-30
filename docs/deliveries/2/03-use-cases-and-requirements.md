@@ -1099,7 +1099,8 @@ nota, para que no bloquee indebidamente la publicación.
 
 El personal académico consulta calificaciones de sus estudiantes antes de
 publicarlas o para dar seguimiento al curso. **Meta:** revisar filas del libro
-de notas dentro del alcance de curso o sección permitido para cada rol.
+de notas y, cuando sea necesario, los intentos que originan resultados dentro
+del alcance de curso o sección permitido para cada rol.
 
 ### Actores
 
@@ -1121,7 +1122,7 @@ de notas dentro del alcance de curso o sección permitido para cada rol.
 
 ### Postcondiciones
 
-- Se presentan únicamente filas del libro de notas del curso o de las secciones autorizadas; la consulta no modifica notas ni su estado de publicación.
+- Se presentan únicamente filas del libro de notas y, si se solicitan, intentos del curso o de las secciones autorizadas; la consulta no modifica notas ni su estado de publicación.
 
 ### Trigger
 
@@ -1163,6 +1164,16 @@ de notas dentro del alcance de curso o sección permitido para cada rol.
 2. El ayudante conserva la vista autorizada sin cambios.
 
 **Resultado:** No se modifican ni publican notas mediante el rol de ayudante.
+
+#### FA-04 — Revisar intentos del quiz
+
+**Se origina en:** Paso 5 del flujo básico, cuando el actor decide consultar los intentos relacionados con un quiz del libro.
+
+1. El actor selecciona el quiz y, si es docente o ayudante, una de sus secciones activas.
+2. El sistema muestra solo los intentos de ese alcance y permite abrir una vista académica autorizada del intento.
+3. El actor revisa el resultado sin cambiar respuestas ni calificaciones.
+
+**Resultado:** La revisión queda limitada a intentos visibles y no modifica registros académicos.
 
 ## Requisitos funcionales
 
