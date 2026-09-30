@@ -503,6 +503,551 @@ alcance de curso o sección según el rol del autor.
 
 **Resultado:** No se modifica una pauta protegida ni se añade un ítem después del bloqueo del libro.
 
+## CU-08 — Responder quiz
+
+### Descripción
+
+El estudiante inicia un intento y guarda sus respuestas mientras trabaja.
+**Meta:** rendir un quiz publicado en la sección que le corresponde sin perder
+el control sobre su intento en progreso.
+
+### Actores
+
+- Estudiante.
+
+### Stakeholders
+
+- Estudiante: necesita conservar sus respuestas antes de enviarlas.
+- Equipo docente: necesita intentos asociados a la sección correcta.
+
+### Precondiciones
+
+- Se cumplen las reglas comunes de autenticación y pertenencia institucional.
+- El estudiante tiene rol `student` activo en la sección aplicable.
+- El quiz está publicado y disponible para esa sección; no hay una nota suya ya publicada para ese quiz.
+
+### Postcondiciones
+
+- Existe un intento propio `in_progress`, numerado y asociado de forma histórica a la institución y sección; sus respuestas guardadas persisten sin calcular ni revelar una nota.
+
+### Trigger
+
+- El estudiante elige iniciar un quiz disponible.
+
+### Flujo básico
+
+1. El estudiante abre los quizzes publicados aplicables a su sección y elige uno.
+2. El sistema comprueba inscripción vigente, disponibilidad, límite de intentos y ausencia de otro intento en progreso para ese estudiante y quiz.
+3. El sistema crea el siguiente intento numerado, conservando institución y sección históricas, y presenta preguntas sin pauta.
+4. El estudiante selecciona respuestas y solicita guardarlas.
+5. El sistema revalida su permiso estudiantil, reemplaza las respuestas del intento en progreso y confirma el guardado sin mostrar corrección.
+
+### Flujos alternativos
+
+#### FA-01 — Quiz fuera de disponibilidad o sin intentos restantes
+
+**Se origina en:** Paso 2 del flujo básico, cuando el quiz no está disponible o se alcanzó su máximo de intentos iniciados.
+
+1. El sistema informa que no puede iniciarse otro intento.
+2. El estudiante puede consultar los quizzes que siguen disponibles.
+
+**Resultado:** No se crea un intento adicional; los cancelados siguen contando para el límite.
+
+#### FA-02 — Intento en progreso o nota ya publicada
+
+**Se origina en:** Paso 2 del flujo básico, cuando existe otro intento activo o una nota publicada del mismo quiz.
+
+1. El sistema rechaza la creación de un intento nuevo e informa el conflicto de estado.
+2. El estudiante puede volver al intento aún activo, si existe y conserva acceso.
+
+**Resultado:** No se duplica un intento ni se reabre una nota publicada.
+
+#### FA-03 — Permiso estudiantil perdido o acceso a pauta
+
+**Se origina en:** Paso 2 o 5 del flujo básico, cuando la inscripción deja de estar activa o el usuario puede consultar la pauta como autor.
+
+1. El sistema rechaza iniciar o guardar respuestas, según el momento.
+2. El sistema no revela la pauta ni acepta cambios en las respuestas.
+
+**Resultado:** No se rinde un quiz con permisos incompatibles.
+
+#### FA-04 — Respuestas inválidas o intento cerrado
+
+**Se origina en:** Paso 5 del flujo básico, cuando las respuestas no corresponden a las preguntas o el intento ya está enviado, calificado o cancelado.
+
+1. El sistema informa el error de datos o el estado terminal del intento.
+2. El estudiante corrige respuestas solo si el intento aún está en progreso.
+
+**Resultado:** Las respuestas previas no se sustituyen por datos inválidos ni se altera un intento cerrado.
+
+## CU-09 — Enviar intento y obtener calificación automática
+
+### Descripción
+
+El estudiante finaliza un intento respondido. **Meta:** entregar sus respuestas
+para que el sistema las califique y registre la nota vigente, sin divulgarla
+antes de su publicación.
+
+### Actores
+
+- Estudiante.
+
+### Stakeholders
+
+- Estudiante: necesita confirmar que su entrega fue recibida.
+- Equipo docente: necesita una calificación reproducible y vinculada al intento correcto.
+
+### Precondiciones
+
+- Se cumplen las reglas comunes de autenticación y pertenencia institucional.
+- El estudiante es propietario de un intento `in_progress` de un quiz publicado y conserva rol `student` activo.
+- El usuario no posee acceso actual a la pauta de ese quiz; la nota correspondiente aún no está publicada.
+
+### Postcondiciones
+
+- El intento queda `graded`, con respuestas inmovilizadas; la nota vigente corresponde al último intento calificado por número y queda asociada al elemento del libro de notas sin exposición estudiantil anticipada.
+
+### Trigger
+
+- El estudiante confirma el envío de su intento.
+
+### Flujo básico
+
+1. El estudiante revisa sus respuestas guardadas y solicita enviar el intento.
+2. El sistema comprueba propiedad, inscripción vigente, ausencia de acceso a pauta y estado `in_progress`.
+3. El sistema inmoviliza las respuestas y las compara con la pauta del quiz.
+4. El sistema calcula puntaje y nota según las reglas de calificación del curso.
+5. El sistema registra el intento calificado y crea o actualiza la nota vigente si es el último intento calificado; confirma la recepción sin mostrar la nota aún no publicada.
+
+### Flujos alternativos
+
+#### FA-01 — Permiso vigente insuficiente
+
+**Se origina en:** Paso 2 del flujo básico, cuando el estudiante perdió la inscripción o adquirió acceso a la pauta.
+
+1. El sistema rechaza el envío y explica que no puede rendir con los permisos actuales.
+2. El sistema conserva el intento y las respuestas previas sin calificarlos.
+
+**Resultado:** No se genera nota por un envío no autorizado.
+
+#### FA-02 — Intento inexistente, ajeno o cerrado
+
+**Se origina en:** Paso 2 del flujo básico, cuando el intento no es visible, está cancelado o ya fue procesado con una solicitud incompatible.
+
+1. El sistema deniega el acceso a intentos ajenos o indica el conflicto de estado del propio intento.
+2. El sistema no vuelve a calificar ni duplica la nota.
+
+**Resultado:** El registro académico permanece consistente; repetir la misma solicitud identificada conserva su resultado previo.
+
+#### FA-03 — Nota ya publicada
+
+**Se origina en:** Paso 2 o 5 del flujo básico, cuando la nota se publicó antes de completar el envío.
+
+1. El sistema impide el envío o la sustitución de la nota publicada.
+2. El sistema informa que la calificación ya no admite nuevos intentos.
+
+**Resultado:** No se modifica una nota publicada.
+
+## CU-10 — Configurar libro de notas
+
+### Descripción
+
+El coordinador establece el peso de las evaluaciones del curso. **Meta:**
+dejar un libro de notas coherente para publicar resultados y calcular el
+promedio parcial.
+
+### Actores
+
+- Coordinador de curso.
+
+### Stakeholders
+
+- Equipo docente: necesita ponderaciones conocidas para interpretar notas.
+- Estudiantes: dependen de un promedio calculado con pesos correctos.
+
+### Precondiciones
+
+- Se cumplen las reglas comunes de autenticación y pertenencia institucional.
+- El actor coordina un curso existente con elementos de nota vinculados a quizzes publicados.
+- Todavía no existe una nota publicada del curso.
+
+### Postcondiciones
+
+- El conjunto completo de ponderaciones del curso queda guardado, suma 100 % y tiene un evento de auditoría; no se altera una nota ya calculada o publicada.
+
+### Trigger
+
+- El coordinador solicita configurar las ponderaciones del libro de notas.
+
+### Flujo básico
+
+1. El coordinador abre los elementos de nota del curso y su suma actual de ponderaciones.
+2. El sistema muestra los elementos asociados a quizzes del mismo curso.
+3. El coordinador asigna un peso a cada elemento y confirma el conjunto completo.
+4. El sistema verifica que los elementos correspondan al curso y que la suma sea 100 %.
+5. El sistema guarda las ponderaciones en conjunto, registra la modificación y muestra la configuración vigente.
+
+### Flujos alternativos
+
+#### FA-01 — Suma o conjunto inválido
+
+**Se origina en:** Paso 4 del flujo básico, cuando faltan elementos, se referencia uno ajeno o la suma difiere de 100 %.
+
+1. El sistema señala la inconsistencia de los pesos o elementos.
+2. El coordinador corrige el conjunto antes de volver a confirmarlo.
+
+**Resultado:** No se guarda una configuración parcial o inválida.
+
+#### FA-02 — Ponderaciones bloqueadas
+
+**Se origina en:** Paso 4 o 5 del flujo básico, cuando ya se publicó alguna nota del curso.
+
+1. El sistema informa que la primera publicación bloqueó cambios de pesos y nuevos elementos.
+2. El coordinador conserva la configuración previa.
+
+**Resultado:** Las ponderaciones publicadas no cambian silenciosamente.
+
+#### FA-03 — Curso no visible o falta de coordinación
+
+**Se origina en:** Paso 1 o 5 del flujo básico, cuando el curso no pertenece al contexto o el actor deja de ser coordinador.
+
+1. El sistema no entrega elementos ajenos ni acepta la modificación.
+2. El actor permanece en los cursos que puede consultar.
+
+**Resultado:** El libro de notas queda sin cambios.
+
+## CU-11 — Publicar notas
+
+### Descripción
+
+El coordinador o docente decide qué notas calificadas se comunican a los
+estudiantes. **Meta:** hacer visibles resultados ya calculados dentro del
+alcance académico autorizado.
+
+### Actores
+
+- Coordinador de curso.
+- Docente de sección.
+
+### Stakeholders
+
+- Estudiantes afectados: necesitan conocer resultados definitivos para esa publicación.
+- Equipo docente: necesita evitar publicaciones incompletas o contradictorias.
+- Institución: requiere historial de la publicación de registros académicos.
+
+### Precondiciones
+
+- Se cumplen las reglas comunes de autenticación y pertenencia institucional.
+- Existen notas originadas por intentos calificados en los elementos y secciones seleccionados.
+- El actor coordina el curso o enseña en las secciones que selecciona.
+
+### Postcondiciones
+
+- Las notas seleccionadas quedan publicadas y visibles para sus propietarios; no se sobrescriben notas publicadas y se registra auditoría de la operación.
+
+### Trigger
+
+- El coordinador o docente solicita publicar notas de uno o más elementos y secciones.
+
+### Flujo básico
+
+1. El actor consulta el libro de notas del curso dentro de su alcance y selecciona elementos y secciones.
+2. El sistema muestra solo las notas calificadas y secciones que el actor puede publicar.
+3. El actor revisa la selección y confirma la publicación.
+4. El sistema valida los permisos vigentes, que las ponderaciones sumen 100 % y que no haya intentos `in_progress` de los estudiantes y quizzes afectados.
+5. El sistema publica en conjunto las notas seleccionadas, conserva su valor y registra el evento de auditoría.
+6. El sistema confirma qué notas quedaron visibles para sus estudiantes.
+
+### Flujos alternativos
+
+#### FA-01 — Sección fuera del alcance docente
+
+**Se origina en:** Paso 2 o 4 del flujo básico, cuando un docente incluye una sección que no enseña o pierde el rol.
+
+1. El sistema rechaza la selección no autorizada.
+2. El actor puede seleccionar solo sus secciones vigentes.
+
+**Resultado:** No se publica ninguna nota fuera de su alcance.
+
+#### FA-02 — Ponderaciones incompletas o sin nota calificada
+
+**Se origina en:** Paso 4 del flujo básico, cuando es la primera publicación y los pesos no suman 100 %, o la selección carece de nota originada por intento `graded`.
+
+1. El sistema informa qué condición académica falta.
+2. El actor corrige la configuración mediante CU-10 o espera una entrega calificada mediante CU-09.
+
+**Resultado:** No se publican notas incompletas.
+
+#### FA-03 — Intento aún en progreso
+
+**Se origina en:** Paso 4 del flujo básico, cuando uno de los estudiantes y quizzes seleccionados conserva un intento `in_progress`.
+
+1. El sistema detiene la publicación e identifica el conflicto dentro del alcance autorizado.
+2. El actor puede resolver el intento abandonado mediante CU-15 y volver a solicitar la publicación.
+
+**Resultado:** No se cancela automáticamente el intento ni se publican las notas seleccionadas.
+
+#### FA-04 — Nota ya publicada o selección incompatible
+
+**Se origina en:** Paso 4 o 5 del flujo básico, cuando se intenta sobrescribir una nota publicada o se incluyen elementos ajenos al curso.
+
+1. El sistema informa el conflicto o la selección inválida.
+2. El actor revisa las notas y elementos vigentes.
+
+**Resultado:** Se conserva la publicación anterior sin sobrescritura.
+
+## CU-12 — Ver notas y promedio
+
+### Descripción
+
+El estudiante revisa su desempeño académico. **Meta:** conocer únicamente
+sus notas publicadas y el promedio parcial derivado de ellas.
+
+### Actores
+
+- Estudiante.
+
+### Stakeholders
+
+- Estudiante: necesita conocer su progreso publicado.
+- Equipo docente: necesita que el promedio refleje las ponderaciones del curso.
+
+### Precondiciones
+
+- Se cumplen las reglas comunes de autenticación y pertenencia institucional.
+- El estudiante tiene inscripción activa en una sección del curso.
+
+### Postcondiciones
+
+- Se presentan solo las notas publicadas del estudiante y el promedio parcial calculado con sus ponderaciones publicadas; no se modifica ningún registro.
+
+### Trigger
+
+- El estudiante abre sus calificaciones de un curso.
+
+### Flujo básico
+
+1. El estudiante selecciona un curso en el que está inscrito y abre sus calificaciones.
+2. El sistema identifica al estudiante por su sesión y recupera solo sus notas publicadas en ese curso e institución.
+3. El sistema calcula el promedio parcial como suma de nota por ponderación dividida por la suma de ponderaciones de las notas publicadas.
+4. El sistema presenta las notas y el promedio parcial, sin incluir notas aún no publicadas ni las de otras personas.
+
+### Flujos alternativos
+
+#### FA-01 — Sin notas publicadas
+
+**Se origina en:** Paso 2 del flujo básico, cuando no existen notas propias publicadas.
+
+1. El sistema informa que aún no hay calificaciones visibles.
+2. El sistema no presenta un promedio sin ponderaciones publicadas.
+
+**Resultado:** No se confunde ausencia de notas con una nota cero.
+
+#### FA-02 — Curso o inscripción no visible
+
+**Se origina en:** Paso 1 o 2 del flujo básico, cuando el curso es ajeno al contexto o la inscripción dejó de estar activa.
+
+1. El sistema rechaza la consulta y no revela notas.
+2. El estudiante vuelve a sus cursos disponibles.
+
+**Resultado:** No se exponen calificaciones fuera de su alcance.
+
+## CU-13 — Consultar auditoría
+
+### Descripción
+
+El coordinador examina cambios académicos sensibles de su curso. **Meta:**
+reconstruir quién hizo un cambio, sobre qué recurso y cuándo, sin alterar el
+historial.
+
+### Actores
+
+- Coordinador de curso.
+
+### Stakeholders
+
+- Institución: necesita trazabilidad de registros académicos.
+- Equipo docente y estudiantes afectados: tienen interés en la integridad de los cambios.
+
+### Precondiciones
+
+- Se cumplen las reglas comunes de autenticación y pertenencia institucional.
+- El actor tiene rol `coordinator` activo en el curso existente.
+
+### Postcondiciones
+
+- Se presenta el historial autorizado del curso y su institución; los eventos permanecen inmutables y no exponen secretos ni pautas.
+
+### Trigger
+
+- El coordinador abre el historial académico del curso.
+
+### Flujo básico
+
+1. El coordinador selecciona su curso y solicita eventos de auditoría.
+2. El sistema verifica su coordinación vigente y muestra eventos del curso en la institución seleccionada.
+3. El coordinador filtra, si lo necesita, por acción, recurso, actor, sección o período.
+4. El sistema presenta los eventos coincidentes con fecha, actor y cambios sanitizados, sin permitir editarlos.
+
+### Flujos alternativos
+
+#### FA-01 — Curso ajeno o permiso perdido
+
+**Se origina en:** Paso 2 o 4 del flujo básico, cuando el curso no es visible o la coordinación deja de estar activa.
+
+1. El sistema rechaza la consulta.
+2. El sistema no revela eventos de otra institución o curso.
+
+**Resultado:** El historial permanece protegido y sin modificaciones.
+
+#### FA-02 — Filtro inválido o sin resultados
+
+**Se origina en:** Paso 3 o 4 del flujo básico, cuando el filtro es inválido o no coincide con eventos.
+
+1. El sistema solicita corregir el filtro inválido o informa que no hay coincidencias.
+2. El coordinador puede ajustar los criterios de búsqueda.
+
+**Resultado:** No se crean, eliminan ni alteran eventos por la consulta.
+
+## CU-14 — Organizar módulos del curso
+
+### Descripción
+
+El coordinador estructura el contenido del curso antes de exponerlo.
+**Meta:** disponer de módulos ordenados y decidir cuáles son visibles para los
+estudiantes.
+
+### Actores
+
+- Coordinador de curso.
+
+### Stakeholders
+
+- Equipo docente: necesita una secuencia de contenido coherente.
+- Estudiantes: necesitan navegar solo por módulos publicados y en el orden previsto.
+
+### Precondiciones
+
+- Se cumplen las reglas comunes de autenticación y pertenencia institucional.
+- El actor coordina un curso existente.
+
+### Postcondiciones
+
+- El módulo queda creado en el curso, su orden queda registrado y el módulo publicado resulta visible para estudiantes del curso; la publicación queda auditada.
+
+### Trigger
+
+- El coordinador solicita organizar el contenido de un curso.
+
+### Flujo básico
+
+1. El coordinador abre los módulos del curso y solicita crear uno.
+2. El sistema muestra los módulos actuales y verifica que el actor coordine ese curso.
+3. El coordinador proporciona los datos del módulo y confirma su creación.
+4. El sistema lo registra en el curso y muestra el orden actual.
+5. El coordinador ajusta el orden completo y solicita publicar el módulo preparado.
+6. El sistema valida el orden propuesto, lo guarda y publica el módulo con auditoría.
+
+### Flujos alternativos
+
+#### FA-01 — Orden incompleto o datos inválidos
+
+**Se origina en:** Paso 3 o 6 del flujo básico, cuando faltan datos del módulo o el orden omite, duplica o incluye módulos ajenos.
+
+1. El sistema indica qué dato o posición debe corregirse.
+2. El coordinador revisa la propuesta y puede volver a confirmarla.
+
+**Resultado:** Se conserva el orden previo y no se publica una organización inválida.
+
+#### FA-02 — Curso ajeno o falta de coordinación
+
+**Se origina en:** Paso 2 o 6 del flujo básico, cuando el curso no es visible o el rol coordinador deja de estar activo.
+
+1. El sistema rechaza la modificación y no muestra módulos ajenos.
+2. El actor vuelve a sus cursos autorizados.
+
+**Resultado:** No cambia el contenido de un curso fuera de alcance.
+
+#### FA-03 — Actualizar u ocultar módulo
+
+**Se origina en:** Paso 5 del flujo básico, cuando el coordinador selecciona un módulo existente para editarlo u ocultarlo.
+
+1. El coordinador modifica sus datos o solicita retirar su publicación.
+2. El sistema comprueba el estado y actualiza el módulo o su visibilidad, registrando el cambio sensible.
+
+**Resultado:** Se conserva el módulo en su curso con los datos o estado de publicación actualizados.
+
+## CU-15 — Cancelar un intento en progreso
+
+### Descripción
+
+El estudiante o el personal docente autorizado cierra un intento que no se
+enviará. **Meta:** liberar un intento abandonado sin calificarlo ni alterar una
+nota, para que no bloquee indebidamente la publicación.
+
+### Actores
+
+- Estudiante propietario del intento.
+- Coordinador de curso.
+- Docente de la sección histórica del intento.
+
+### Stakeholders
+
+- Estudiante propietario: necesita conocer el estado final de su intento.
+- Equipo docente: necesita resolver bloqueos antes de publicar notas.
+- Institución: requiere registro de quién canceló el intento.
+
+### Precondiciones
+
+- Se cumplen las reglas comunes de autenticación y pertenencia institucional.
+- Existe un intento `in_progress` del quiz en la institución.
+- El estudiante conserva inscripción activa y no accede a la pauta, o el actor de personal conserva coordinación del curso o docencia en la sección histórica.
+
+### Postcondiciones
+
+- El intento queda `cancelled` con fecha y actor auditados; conserva su número, cuenta para el límite de intentos, no genera nota y deja de bloquear la publicación.
+
+### Trigger
+
+- El estudiante o personal autorizado solicita cancelar un intento en progreso.
+
+### Flujo básico
+
+1. El actor abre el intento visible y solicita su cancelación.
+2. El sistema verifica el estado `in_progress` y revalida propiedad o rol académico sobre el curso y sección históricos.
+3. El sistema muestra el efecto: el intento terminará sin calificación y seguirá contando para el límite de intentos.
+4. El actor confirma la cancelación.
+5. El sistema marca el intento como `cancelled`, registra fecha y evento de auditoría, y confirma que ya no bloquea la publicación.
+
+### Flujos alternativos
+
+#### FA-01 — Falta de permiso actual
+
+**Se origina en:** Paso 2 o 5 del flujo básico, cuando el actor perdió la inscripción o rol requerido, o el estudiante adquirió acceso a la pauta.
+
+1. El sistema rechaza la cancelación.
+2. El sistema conserva el intento en su estado previo.
+
+**Resultado:** Ningún actor fuera de alcance cancela intentos.
+
+#### FA-02 — Intento ya cancelado
+
+**Se origina en:** Paso 2 o 5 del flujo básico, cuando la cancelación ya fue aplicada.
+
+1. El sistema confirma que el intento está cancelado.
+2. El sistema no registra un segundo evento ni modifica notas.
+
+**Resultado:** Se mantiene el estado terminal y la auditoría única.
+
+#### FA-03 — Intento enviado, calificado o no visible
+
+**Se origina en:** Paso 2 del flujo básico, cuando el intento ya fue enviado o calificado, no existe o pertenece a otro contexto.
+
+1. El sistema rechaza la transición incompatible o informa que el intento no está disponible.
+2. El actor vuelve a los intentos que puede consultar.
+
+**Resultado:** No se cancela una calificación ni se revela un intento ajeno.
+
 ## Requisitos funcionales
 
 RF1. El sistema debe autenticar una identidad global mediante JWT.
