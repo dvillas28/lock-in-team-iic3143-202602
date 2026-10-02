@@ -258,4 +258,83 @@ Sobrealcance / storage pendiente & Retraso del MVP & Recorte funcional y markdow
 {\footnotesize Probabilidad y estado individual no cuantificados en la lista vigente. Las capturas Railway registran builds fallidos previos y un deployment posterior exitoso.}
 \end{frame}
 
+% Slide 13
+\begin{frame}{Walking skeleton: conexión real frontend--backend}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.57\textwidth}
+\includegraphics[width=\textwidth,trim=0 710 960 0,clip]{images/02-frontend-portal.png}
+\vspace{0.15cm}
+
+\small Captura versionada del frontend desplegado.\\\st{Backend:} \texttt{ok (v0.1.0)}
+\end{column}
+\begin{column}{0.39\textwidth}
+\centering
+\begin{tikzpicture}[font=\sffamily\small]
+\node[axclass,text width=4.4cm] (fe) at (0,0) {Next.js (servidor)};
+\node[axclass,text width=4.4cm] (be) at (0,-1.4) {NestJS: \texttt{GET /health}};
+\node[axclass,text width=4.4cm] (re) at (0,-3.1) {\texttt{status}, \texttt{version}\\\texttt{timestamp}};
+\draw[axflow] (fe)--node[axlabel,right]{\texttt{API\_URL}}(be);
+\draw[axflow] (be)--(re);
+\end{tikzpicture}
+\end{column}
+\end{columns}
+\vspace{0.3cm}
+\small \texttt{getHealth()} hace una petición sin caché y valida la respuesta.\\
+\st{Alcance demostrado:} integración HTTP. Persistencia y JWT aún pendientes.
+\end{frame}
+
+% Slide 14
+\begin{frame}{CI/CD: validación, despliegue y release}
+\centering
+\begin{tikzpicture}[font=\sffamily\footnotesize]
+\node[axclass,text width=1.6cm] (pr) at (0,0) {PR / push\\\texttt{main}};
+\node[axclass,text width=3.2cm] (ci) at (3.8,0) {\textbf{CI en paralelo}\\backend: lint + test\\frontend: lint + build\\dos Docker builds};
+\node[axclass,text width=2.8cm] (cd) at (8.2,0) {\textbf{Railway autodeploy}\\\texttt{main}, Wait for CI\\healthchecks};
+\draw[axflow] (pr)--(ci);\draw[axflow] (ci)--node[axlabel,above]{push a main}(cd);
+\node[axclass,text width=2.3cm] (tag) at (12,0) {\textbf{Release separado}\\tag SemVer\\commit en main};
+\end{tikzpicture}
+\vspace{0.2cm}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,trim=0 220 900 0,clip]{images/03-ci-run.png}\\
+{\footnotesize CI exitoso: cuatro jobs.}
+\end{column}
+\begin{column}{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,trim=330 30 45 215,clip]{images/09-railway-deploy-log.png}\\
+{\footnotesize Backend: build y deployment exitosos.}
+\end{column}
+\end{columns}
+\vspace{0.15cm}
+{\footnotesize CD configurado en Railway según evidencia documental. GitHub Actions no ejecuta un comando de deploy. Release \texttt{v0.1.0}: evidencia en anexo.}
+\end{frame}
+
+% Slide 15
+\begin{frame}{Estado al cierre de Elaboración}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.48\textwidth}
+\begin{block}{Listo}
+\begin{itemize}
+\item Casos de uso, arquitectura y modelos documentados.
+\item Plan y controles de riesgo actualizados.
+\item Walking skeleton, CI/CD y release con evidencia.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{block}{Siguiente fase: Construcción}
+\begin{itemize}
+\item Elegir persistencia mediante Spec Kit.
+\item Conectar PostgreSQL y probar UC/UTFSM.
+\item Implementar JWT y flujo académico.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+\vspace{0.6cm}
+\centering
+\st{La base conecta. El siguiente incremento debe demostrar aislamiento.}
+\end{frame}
+
 \end{document}
