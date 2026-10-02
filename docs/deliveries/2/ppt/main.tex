@@ -71,4 +71,112 @@ Diseño del MVP académico y evidencia de una base técnica conectada.
 \small\st{Implementado:} walking skeleton. \qquad\st{Siguiente:} persistencia y aislamiento ejecutable.
 \end{frame}
 
+% Slide 3
+\begin{frame}{Actores y metas del MVP}
+\centering
+\begin{tikzpicture}[font=\sffamily\small,
+base/.style={draw=academixnavy,thick,fill=academixbg,rounded corners=2pt,align=center,inner sep=5pt,text width=3.4cm},
+fl/.style={-{Latex[length=1.8mm]},draw=academixnavy,thick}]
+\node[base] (u) at (0,3.2) {\textbf{Usuario autenticado}};
+\node[base,text width=7.4cm] (ac) at (6.7,3.2) {CU-01--02: elegir Institution y acceder al contexto};
+\node[base] (co) at (0,2) {\textbf{Coordinador de curso}};
+\node[base,text width=7.4cm] (ge) at (6.7,2) {CU-04--05, 10, 13--14: gestionar curso, contenido, ponderaciones y auditoría};
+\node[base] (do) at (0,0.6) {\textbf{Coordinador / docente}};
+\node[base,text width=7.4cm] (ev) at (6.7,0.6) {CU-07, 11: crear quiz y publicar notas};
+\node[base] (es) at (0,-0.8) {\textbf{Estudiante}};
+\node[base,text width=7.4cm] (re) at (6.7,-0.8) {CU-06, 08--09, 12: consultar material, rendir y ver notas propias};
+\draw[fl] (u)--(ac);\draw[fl] (co)--(ge);\draw[fl] (do)--(ev);\draw[fl] (es)--(re);
+\end{tikzpicture}
+\vspace{0.2cm}
+\small CU-03: cursos propios para los cuatro roles. \quad CU-16: ayudante consulta su sección.
+\end{frame}
+
+% Slide 4
+\begin{frame}{Casos que sostienen el recorrido académico}
+\small
+\begin{tabularx}{\textwidth}{lYY}
+\toprule
+\textbf{Caso} & \textbf{Actor} & \textbf{Resultado} \\
+\midrule
+CU-01--02 & Usuario autenticado & Contexto institucional autorizado \\
+\addlinespace
+CU-07 & Coordinador / docente & Quiz válido y pauta protegida \\
+\addlinespace
+CU-09 & Estudiante & Intento calificado y nota aún oculta \\
+\addlinespace
+CU-11 & Coordinador / docente & Publicación explícita de resultados \\
+\addlinespace
+CU-12 & Estudiante & Notas propias y promedio parcial \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+\st{Un hilo conductor:} evaluar, calificar y publicar dentro del alcance autorizado.
+\vspace{0.2cm}
+
+{\footnotesize Selección para la exposición. Los 16 casos pertenecen al MVP; no existe una prioridad individual formal asignada.}
+\end{frame}
+
+% Slide 5
+\begin{frame}{Requisitos que condicionan el diseño}
+\small
+\begin{tabularx}{\textwidth}{lYY}
+\toprule
+\textbf{Requisito} & \textbf{Decisión documentada} & \textbf{Qué debe comprobarse} \\
+\midrule
+Aislamiento / seguridad & Scope institucional y permisos contextuales & Bloquear lectura, escritura y relaciones cruzadas \\
+\addlinespace
+Integridad & Transacciones y FK compuestas & Nota, respuestas y auditoría consistentes \\
+\addlinespace
+Recuperabilidad & Backup/PITR de la base completa & Recuperación compartida; restore individual fuera del MVP \\
+\addlinespace
+Mantenibilidad / portabilidad & Monolito modular, HTTP y PostgreSQL & Dominio independiente de Railway \\
+\addlinespace
+Observabilidad & Healthcheck y logs sin secretos & Detectar errores y estado del despliegue \\
+\bottomrule
+\end{tabularx}
+\vspace{0.2cm}
+{\footnotesize RNF1--7, RNF9. Son requisitos del MVP; el healthcheck ya existe. Lista completa: anexos.}
+\end{frame}
+
+% Slide 6
+\begin{frame}{Arquitectura vigente y frontera implementada}
+\centering
+\begin{tikzpicture}[font=\sffamily\small,
+base/.style={draw=academixnavy,thick,fill=academixbg,rounded corners=2pt,align=center,inner sep=6pt,text width=2.8cm},
+cond/.style={draw=academixamber,thick,dashed,fill=white,rounded corners=2pt,align=center,inner sep=6pt,text width=3.4cm},
+fl/.style={-{Latex[length=1.8mm]},draw=academixnavy,thick},
+fld/.style={-{Latex[length=1.8mm]},draw=academixamber,thick,dashed}]
+\node[base] (u) at (0,0) {\textbf{Navegador}};
+\node[base] (fe) at (4,0) {\textbf{Next.js}\\frontend};
+\node[base] (be) at (8,0) {\textbf{NestJS}\\backend};
+\node[draw=academixnavy,thick,minimum width=7.8cm,minimum height=1.95cm,label=above:{\textbf{Railway: dos servicios desplegados}}] at (6,0) {};
+\node[cond] (db) at (8,-2.55) {\textbf{Una PostgreSQL}\\UC y UTFSM\\\texttt{institution\_id}};
+\node[align=left,text width=5.9cm] at (2,-2.55) {\textcolor{academixnavy}{\textbf{Línea continua:}} integración actual\\[3pt]\textcolor{academixamber}{\textbf{Línea discontinua:}} persistencia pendiente};
+\draw[fl] (u)--(fe);\draw[fl] (fe)--node[above,font=\footnotesize]{HTTP}(be);
+\draw[fld] (be)--node[right,font=\footnotesize]{conexión futura}(db);
+\end{tikzpicture}
+\vspace{0.15cm}
+\small Docker Compose ya declara una PostgreSQL local. El backend aún no la consume.
+\end{frame}
+
+% Slide 7
+\begin{frame}{Decisiones que reducen complejidad del MVP}
+\small
+\begin{tabularx}{\textwidth}{YYY}
+\toprule
+\textbf{Decisión vigente} & \textbf{Alternativa descartada / diferida} & \textbf{Razón documentada} \\
+\midrule
+Una PostgreSQL compartida & DB o schema por Institution & Una migración, menos conexiones y routing \\
+\addlinespace
+Institution en path + membership & Registry y header \texttt{x-tenant} & Contexto explícito y User global \\
+\addlinespace
+Railway & Migración posterior a GCP & Plataforma vigente, sin migración planificada \\
+\addlinespace
+Scope + FK + tests & RLS en el MVP (diferida) & Posponer roles de DB y diseño de pooling \\
+\bottomrule
+\end{tabularx}
+\vspace{0.35cm}
+\st{Trade-off:} el aislamiento lógico exige autorización y pruebas en cada frontera.
+\end{frame}
+
 \end{document}
