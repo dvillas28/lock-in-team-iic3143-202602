@@ -1,0 +1,15 @@
+% 06-data-model.md: the grade's two composite references share quiz_id.
+\begin{tikzpicture}
+\node[axtable] (qu) at (0,2.8) {\textbf{quizzes}\\\texttt{id, course\_id}\\\texttt{section\_id} (opcional)};
+\node[axtable] (qo) at (4.7,2.8) {\textbf{questions}\\\texttt{quiz\_id, points}\\\texttt{alternatives} (JSONB)};
+\node[axtable] (at) at (0,0.4) {\textbf{quiz\_attempts}\\\texttt{quiz\_id, student\_id}\\\texttt{section\_id, attempt\_number}};
+\node[axtable] (gi) at (9.4,2.8) {\textbf{grade\_items}\\\texttt{course\_id, quiz\_id}\\\texttt{weight\_percent}};
+\node[axtable] (gr) at (4.7,0.4) {\textbf{grades}\\\texttt{grade\_item\_id, attempt\_id}\\\texttt{student\_id, published\_at}};
+\node[axtable] (au) at (9.4,0.4) {\textbf{audit\_events}\\\texttt{actor\_user\_id, course\_id}\\\texttt{changes} (JSONB)};
+\draw[axrel] (qu)--node[axlabel,above]{1 a N}(qo);
+\draw[axrel] (qu)--node[axlabel,left]{1 a N}(at);
+\draw[axrel] (qu.north) -- ++(0,0.5) -| node[axlabel,pos=0.25,above]{1 a 0..1} (gi.north);
+\draw[axrel] (at)--node[axlabel,above]{1 a 0..1}(gr);
+\draw[axrel] (gi.south) -- ++(0,-0.45) -| node[axlabel,pos=0.5,above]{1 a N} (gr.north);
+\node[align=center,font=\sffamily\small,text width=11cm] at (4.7,-1.7) {\textbf{Todas conservan \texttt{institution\_id}.}\\Nota y evento se confirman en la misma transacción.};
+\end{tikzpicture}

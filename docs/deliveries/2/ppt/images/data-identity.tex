@@ -1,0 +1,18 @@
+% 06-data-model.md: exact table names and contextual role locations.
+\begin{tikzpicture}
+\node[axtable] (us) at (0,3) {\textbf{users}\\\texttt{id} (PK)\\Identidad global};
+\node[axtable] (im) at (4.6,3) {\textbf{institution\_memberships}\\\texttt{institution\_id, user\_id}\\\texttt{active}};
+\node[axtable] (in) at (9.2,3) {\textbf{institutions}\\\texttt{id} (UUID), \texttt{slug} (UK)\\\texttt{active}};
+\node[axtable] (cm) at (0,0.7) {\textbf{course\_memberships}\\\texttt{institution\_id, course\_id}\\\texttt{user\_id, role=coordinator}};
+\node[axtable] (co) at (4.6,0.7) {\textbf{courses}\\\texttt{institution\_id, id}\\\texttt{code, term}};
+\node[axtable] (se) at (9.2,0.7) {\textbf{sections}\\\texttt{institution\_id, course\_id}\\\texttt{id, code}};
+\node[axtable,text width=5.1cm] (en) at (7,-1.6) {\textbf{enrollments}\\\texttt{institution\_id, section\_id, user\_id}\\\texttt{role: teacher / assistant / student}};
+\draw[axrel] (us)--node[axlabel,above]{1 a N}(im);
+\draw[axrel] (in)--node[axlabel,above]{1 a N}(im);
+\draw[axrel] (in.south) -- ++(0,-0.5) -| (co.north);
+\draw[axrel] (co)--node[axlabel,above]{1 a N}(se);
+\draw[axrel] (co)--node[axlabel,above]{1 a N}(cm);
+\draw[axrel] (se.south) |- (en.east);
+\draw[axrel] (im.south) -- ++(0,-0.3) -| (cm.north);
+\draw[axrel] (im.south) -- ++(0,-0.3) -- ++(-2.1,0) |- (en.west);
+\end{tikzpicture}

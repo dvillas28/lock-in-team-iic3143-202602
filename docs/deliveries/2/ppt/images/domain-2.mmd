@@ -1,0 +1,34 @@
+classDiagram
+  direction LR
+
+  class Institution
+  class Course
+  class Section
+  class User
+  class Quiz
+  class Question
+  class Alternative
+  class QuizAttempt
+  class GradeItem
+  class Grade
+  class AuditEvent
+
+  Institution "1" -- "0..*" Course : delimita
+  Course "1" -- "0..*" Quiz : evalua
+  Section "0..1" -- "0..*" Quiz : delimita
+  Quiz "1" -- "0..*" Question : contiene
+  Question "1" -- "2..*" Alternative : ofrece
+
+  Quiz "1" -- "0..*" QuizAttempt : recibe
+  User "1" -- "0..*" QuizAttempt : rinde
+  Section "1" -- "0..*" QuizAttempt : contextualiza
+
+  Quiz "1" -- "0..1" GradeItem : pondera
+  Course "1" -- "0..*" GradeItem : agrupa
+  GradeItem "1" -- "0..*" Grade : produce
+  QuizAttempt "1" -- "0..1" Grade : determina
+  User "1" -- "0..*" Grade : recibe
+  Section "1" -- "0..*" Grade : contextualiza
+
+  Course "1" -- "0..*" AuditEvent : registra
+  User "1" -- "0..*" AuditEvent : realiza

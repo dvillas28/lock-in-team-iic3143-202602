@@ -1,0 +1,17 @@
+% Projection of 05-domain-model-uml.md, evaluations and content.
+\begin{tikzpicture}
+\node[axclass] (co) at (0,1.8) {Course};
+\node[axclass] (mo) at (4,1.8) {CourseModule};
+\node[axclass] (ma) at (8,1.8) {Material};
+\node[axclass] (qu) at (0,-0.3) {Quiz};
+\node[axclass] (at) at (4,-0.3) {QuizAttempt};
+\node[axclass] (gr) at (8,-0.3) {Grade};
+\node[axclass] (gi) at (8,-2.2) {GradeItem};
+\draw[axrel] (co)--node[axlabel,above]{1 organiza 0..*}(mo);
+\draw[axrel] (mo)--node[axlabel,above]{1 contiene 0..*}(ma);
+\draw[axrel] (co)--node[axlabel,left]{1 evalúa 0..*}(qu);
+\draw[axrel] (qu)--node[axlabel,above]{1 recibe 0..*}(at);
+\draw[axrel] (at)--node[axlabel,above]{1 determina 0..1}(gr);
+\draw[axrel] (gi)--node[axlabel,right]{1 produce 0..*}(gr);
+\draw[axrel] (qu) |- node[axlabel,pos=0.75,above]{1 pondera 0..1} (gi);
+\end{tikzpicture}

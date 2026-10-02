@@ -1,0 +1,26 @@
+flowchart LR
+  U[Usuario autenticado] --> C1([CU-01 Elegir institución])
+  U --> C2([CU-02 Acceder al contexto])
+  CO[Coordinador de curso] --> C3([CU-03 Ver cursos y secciones])
+  DO[Docente de sección] --> C3
+  AY[Ayudante de sección] --> C3
+  ES[Estudiante] --> C3
+  CO --> C4([CU-04 Gestionar secciones y roles])
+  CO --> C5([CU-05 Publicar material])
+  ES --> C6([CU-06 Consultar material])
+  CO --> C7([CU-07 Crear y publicar quiz])
+  DO --> C7
+  ES --> C8([CU-08 Responder quiz])
+  ES --> C9([CU-09 Enviar intento y obtener calificación])
+  CO --> C10([CU-10 Configurar libro de notas])
+  CO --> C11([CU-11 Publicar notas])
+  DO --> C11
+  ES --> C12([CU-12 Ver notas y promedio])
+  CO --> C13([CU-13 Consultar auditoría])
+  CO --> C14([CU-14 Organizar módulos])
+  ES --> C15([CU-15 Cancelar intento])
+  CO --> C15
+  DO --> C15
+  CO --> C16([CU-16 Revisar libro docente])
+  DO --> C16
+  AY --> C16

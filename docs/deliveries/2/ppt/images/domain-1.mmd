@@ -1,0 +1,23 @@
+classDiagram
+  direction LR
+
+  class Institution
+  class User
+  class InstitutionMembership
+  class Course
+  class CourseMembership
+  class Section
+  class Enrollment
+  class CourseModule
+  class Material
+
+  Institution "1" -- "0..*" InstitutionMembership : habilita
+  User "1" -- "0..*" InstitutionMembership : pertenece
+  Institution "1" -- "0..*" Course : ofrece
+  Course "1" -- "0..*" CourseMembership : tiene
+  User "1" -- "0..*" CourseMembership : coordina
+  Course "1" -- "0..*" Section : contiene
+  Section "1" -- "0..*" Enrollment : tiene
+  User "1" -- "0..*" Enrollment : participa
+  Course "1" -- "0..*" CourseModule : organiza
+  CourseModule "1" -- "0..*" Material : contiene

@@ -41,6 +41,7 @@
 \institute[IIC3143]{IIC3143 Desarrollo de Software}
 \date{Entrega 2\\{\small Versión preparada: 2 de octubre de 2026}}
 
+\input{images/diagram-styles.tex}
 \begin{document}
 
 \begin{frame}
@@ -177,6 +178,37 @@ Scope + FK + tests & RLS en el MVP (diferida) & Posponer roles de DB y diseño d
 \end{tabularx}
 \vspace{0.35cm}
 \st{Trade-off:} el aislamiento lógico exige autorización y pruebas en cada frontera.
+\end{frame}
+
+% Slide 8
+\begin{frame}{Modelo de dominio: del contenido a la nota}
+\centering
+\input{images/domain-core.tex}
+\vspace{0.2cm}
+\begin{itemize}
+\item User es global; cada concepto académico pertenece a una Institution.
+\item El último QuizAttempt calificado determina la Grade vigente antes de publicar.
+\end{itemize}
+\end{frame}
+
+% Slide 9
+\begin{frame}{Modelo de datos: identidad, cursos y permisos}
+\centering
+\input{images/data-identity.tex}
+\vspace{0.1cm}
+\small Membership activa habilita el contexto. El rol se obtiene del curso o de la sección.
+
+{\footnotesize Modelo lógico pendiente de migraciones. Las FK a personas validan \texttt{(institution\_id, user\_id)} contra \texttt{institution\_memberships}.}
+\end{frame}
+
+% Slide 10
+\begin{frame}{Modelo de datos: calificación consistente y trazable}
+\centering
+\input{images/data-evaluation.tex}
+\vspace{0.1cm}
+\small Las FK compuestas comprueban Institution, quiz, estudiante y sección históricos.
+
+{\footnotesize Alternative es un concepto del dominio persistido en \texttt{questions.alternatives}, no una tabla independiente. ERD completo por áreas: anexos.}
 \end{frame}
 
 \end{document}

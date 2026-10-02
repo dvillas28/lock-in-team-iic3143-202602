@@ -1,0 +1,133 @@
+erDiagram
+  INSTITUTIONS {
+    uuid id PK
+    text slug UK
+    text name
+    boolean active
+  }
+
+  USERS {
+    uuid id PK
+    text email
+    text name
+    boolean active
+  }
+
+  INSTITUTION_MEMBERSHIPS {
+    uuid id PK
+    uuid institution_id FK
+    uuid user_id FK
+    boolean active
+  }
+
+  COURSES {
+    uuid id PK
+    uuid institution_id FK
+    text code
+    text term
+  }
+
+  COURSE_MEMBERSHIPS {
+    uuid id PK
+    uuid institution_id FK
+    uuid course_id FK
+    uuid user_id FK
+    text role
+  }
+
+  SECTIONS {
+    uuid id PK
+    uuid institution_id FK
+    uuid course_id FK
+    text code
+  }
+
+  ENROLLMENTS {
+    uuid id PK
+    uuid institution_id FK
+    uuid section_id FK
+    uuid user_id FK
+    text role
+  }
+
+  COURSE_MODULES {
+    uuid id PK
+    uuid institution_id FK
+    uuid course_id FK
+    integer position
+  }
+
+  MATERIALS {
+    uuid id PK
+    uuid institution_id FK
+    uuid module_id FK
+    text kind
+  }
+
+  QUIZZES {
+    uuid id PK
+    uuid institution_id FK
+    uuid course_id FK
+    uuid section_id FK
+  }
+
+  QUESTIONS {
+    uuid id PK
+    uuid institution_id FK
+    uuid quiz_id FK
+    jsonb alternatives
+  }
+
+  QUIZ_ATTEMPTS {
+    uuid id PK
+    uuid institution_id FK
+    uuid quiz_id FK
+    uuid section_id FK
+    uuid student_id FK
+  }
+
+  GRADE_ITEMS {
+    uuid id PK
+    uuid institution_id FK
+    uuid course_id FK
+    uuid quiz_id FK
+  }
+
+  GRADES {
+    uuid id PK
+    uuid institution_id FK
+    uuid grade_item_id FK
+    uuid student_id FK
+    uuid attempt_id FK
+  }
+
+  AUDIT_EVENTS {
+    uuid id PK
+    uuid institution_id FK
+    uuid actor_user_id FK
+    uuid course_id FK
+  }
+
+  INSTITUTIONS ||--o{ INSTITUTION_MEMBERSHIPS : grants
+  USERS ||--o{ INSTITUTION_MEMBERSHIPS : joins
+  INSTITUTIONS ||--o{ COURSES : owns
+  COURSES ||--o{ COURSE_MEMBERSHIPS : coordinates
+  USERS ||--o{ COURSE_MEMBERSHIPS : holds
+  COURSES ||--o{ SECTIONS : has
+  SECTIONS ||--o{ ENROLLMENTS : has
+  USERS ||--o{ ENROLLMENTS : holds
+  COURSES ||--o{ COURSE_MODULES : organizes
+  COURSE_MODULES ||--o{ MATERIALS : contains
+  COURSES ||--o{ QUIZZES : evaluates
+  SECTIONS |o--o{ QUIZZES : scopes
+  QUIZZES ||--o{ QUESTIONS : has
+  QUIZZES ||--o{ QUIZ_ATTEMPTS : receives
+  USERS ||--o{ QUIZ_ATTEMPTS : submits
+  SECTIONS ||--o{ QUIZ_ATTEMPTS : context
+  COURSES ||--o{ GRADE_ITEMS : grades
+  QUIZZES ||--o| GRADE_ITEMS : has
+  GRADE_ITEMS ||--o{ GRADES : produces
+  USERS ||--o{ GRADES : receives
+  QUIZ_ATTEMPTS ||--o| GRADES : determines
+  COURSES ||--o{ AUDIT_EVENTS : records
+  USERS ||--o{ AUDIT_EVENTS : acts
