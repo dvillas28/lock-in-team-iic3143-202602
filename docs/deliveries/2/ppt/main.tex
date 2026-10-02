@@ -1,0 +1,74 @@
+% AcademiX - Presentación Entrega 2
+% pdfLaTeX, como Entrega 1. 15 slides principales; anexos después de \appendix.
+\documentclass[aspectratio=169,10pt]{beamer}
+
+\usetheme{Boadilla}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{tikz}
+
+\usetikzlibrary{arrows.meta,positioning}
+
+\definecolor{academixnavy}{HTML}{1E3A5F}
+\definecolor{academixamber}{HTML}{A16207}
+\definecolor{academixbg}{HTML}{F8FAFC}
+\definecolor{academixline}{HTML}{CBD5E1}
+\definecolor{academixslate}{HTML}{64748B}
+
+\setbeamercolor{structure}{fg=academixnavy}
+\setbeamercolor{frametitle}{fg=academixnavy,bg=academixbg}
+\setbeamercolor{title}{fg=academixnavy}
+\setbeamercolor{block title}{fg=white,bg=academixnavy}
+\setbeamercolor{block body}{fg=black,bg=academixbg}
+\setbeamercolor{alerted text}{fg=academixamber}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize item}{\color{academixamber}$\blacktriangleright$}
+\setbeamertemplate{itemize subitem}{\color{academixnavy}$\bullet$}
+\setbeamertemplate{footline}[frame number]
+\setbeamerfont{frametitle}{size=\large}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcommand{\st}[1]{\textcolor{academixamber}{\textbf{#1}}}
+
+\title[AcademiX]{AcademiX}
+\subtitle{LMS multi-tenant universitario}
+\author[Equipo Lock In]{Equipo Lock In}
+\institute[IIC3143]{IIC3143 Desarrollo de Software}
+\date{Entrega 2\\{\small Versión preparada: 2 de octubre de 2026}}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+  \vspace{-0.5cm}
+  \centering
+  \small Curso $\rightarrow$ módulos $\rightarrow$ material $\rightarrow$ quiz $\rightarrow$ nota $\rightarrow$ publicación $\rightarrow$ promedio
+\end{frame}
+
+\begin{frame}{Qué cubrimos en esta entrega}
+\centering
+\begin{tikzpicture}[
+font=\sffamily\small,
+base/.style={draw=academixnavy,thick,fill=academixbg,rounded corners=2pt,align=center,inner sep=6pt,text width=2.2cm},
+fl/.style={-{Latex[length=1.8mm]},draw=academixnavy,thick}]
+\node[base] (cu) at (0,0) {Casos de uso};
+\node[base] (ar) at (3,0) {Arquitectura};
+\node[base] (da) at (6,0) {Dominio\\y datos};
+\node[base] (pl) at (9,0) {Planificación};
+\node[base] (ci) at (12,0) {CI/CD};
+\draw[fl] (cu)--(ar); \draw[fl] (ar)--(da); \draw[fl] (da)--(pl); \draw[fl] (pl)--(ci);
+\end{tikzpicture}
+\vspace{0.8cm}
+\begin{block}{Al cierre de Elaboración}
+Diseño del MVP académico y evidencia de una base técnica conectada.
+\end{block}
+\vspace{0.15cm}
+\small\st{Implementado:} walking skeleton. \qquad\st{Siguiente:} persistencia y aislamiento ejecutable.
+\end{frame}
+
+\end{document}
