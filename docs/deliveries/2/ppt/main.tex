@@ -211,4 +211,51 @@ Scope + FK + tests & RLS en el MVP (diferida) & Posponer roles de DB y diseño d
 {\footnotesize Alternative es un concepto del dominio persistido en \texttt{questions.alternatives}, no una tabla independiente. ERD completo por áreas: anexos.}
 \end{frame}
 
+% Slide 11
+\begin{frame}{Plan de desarrollo: aislamiento antes del flujo académico}
+\small
+\begin{tabularx}{\textwidth}{lYY}
+\toprule
+\textbf{Iteración} & \textbf{Hito} & \textbf{Estado al preparar Entrega 2} \\
+\midrule
+1 & Frontend, backend, CI, Docker y Railway & \st{Base existente}; conservarla desplegable \\
+\addlinespace
+2--5 & PostgreSQL, identidad, contexto y tests UC/UTFSM & \st{Siguiente}; conexión y aislamiento pendientes \\
+\addlinespace
+6--7 & Cursos, roles, módulos y material & Pendiente; markdown primero \\
+\addlinespace
+8--9 & Quizzes, notas, publicación y auditoría & Pendiente; JWT antes de habilitar datos \\
+\addlinespace
+10 & Hardening, release y evidencia & Pendiente; tests críticos y cierre \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+\st{Iteraciones sugeridas:} una semana. Cada incremento deja evidencia.
+\vspace{0.15cm}
+
+{\footnotesize Orden del plan vigente. No hay calendario fechado, responsables ni estimaciones por caso asignados en la fuente.}
+\end{frame}
+
+% Slide 12
+\begin{frame}{Riesgos actuales y controles previstos}
+\small
+\begin{tabularx}{\textwidth}{YYY}
+\toprule
+\textbf{Riesgo} & \textbf{Impacto} & \textbf{Mitigación documentada} \\
+\midrule
+Scope o relación cruzada & Exposición / mezcla académica & Membership, queries scoped, FK y tests \\
+\addlinespace
+Falla de DB compartida & Afecta varias Institutions & Migraciones revisadas y backup/PITR completo \\
+\addlinespace
+Auditoría incompleta & Cambios sin trazabilidad & Evento inmutable en la misma transacción \\
+\addlinespace
+Railway mal configurado & Aplicaciones inaccesibles & CI, Docker y healthchecks \\
+\addlinespace
+Sobrealcance / storage pendiente & Retraso del MVP & Recorte funcional y markdown primero \\
+\bottomrule
+\end{tabularx}
+\vspace{0.2cm}
+{\footnotesize Probabilidad y estado individual no cuantificados en la lista vigente. Las capturas Railway registran builds fallidos previos y un deployment posterior exitoso.}
+\end{frame}
+
 \end{document}
