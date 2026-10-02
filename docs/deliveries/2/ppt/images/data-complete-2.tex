@@ -10,6 +10,6 @@
 \draw[axrel] (COURSE_MODULES)--node[axlabel,above]{1 / 0..N}(MATERIALS);
 \draw[axrel] (COURSES)--node[axlabel,left]{1 / 0..N}(QUIZZES);
 \draw[axrel] (QUIZZES)--node[axlabel,above]{1 / 0..N}(QUESTIONS);
-\draw[axrel] (COURSES.north)--++(0,0.5)-|node[axlabel,pos=0.55,above]{1 / 0..N}(SECTIONS.north);
+\draw[axrel] (COURSES.north)--++(0,0.5)--(11,3.35)|-node[axlabel,pos=0.3,right]{1 / 0..N}(SECTIONS.east);
 \draw[axrel] (SECTIONS.south)--++(0,-0.45)-|node[axlabel,pos=0.6,below]{0..1 / 0..N}(QUIZZES.south);
 \end{tikzpicture}

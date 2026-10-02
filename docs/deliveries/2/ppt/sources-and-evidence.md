@@ -75,3 +75,10 @@ No hay placeholder de imagen rota en el PDF. La ausencia de una captura de Setti
 - **Autores/fecha:** la presentación E1 solo incluye Equipo Lock In. No se deducen nombres desde usuarios GitHub ni se inventa fecha de exposición.
 
 No se encontraron diferencias de roles entre los modelos vigentes y OpenAPI: coordinator de curso y teacher/assistant/student de sección. No se modificaron decisiones funcionales ni documentos fuente.
+
+## Verificación de esta preparación
+
+- PDF compilado con pdfLaTeX, sin mensajes Overfull ni warnings de referencias en la compilación final, y revisado visualmente en sus 65 páginas.
+- Capturas copiadas con igualdad de bytes respecto de las fuentes.
+- Se intentó repetir el test local de backend y arrancar el servicio para una captura adicional. Los procesos no completaron su ejecución y se interrumpieron; el runner reportó una prueba cancelada por una promesa pendiente. No se obtuvo un healthcheck local nuevo ni se afirma que el código haya sido revalidado exitosamente en esta sesión. La evidencia de CI del deck es la captura versionada, identificada como histórica.
+- CodeGraph se intentó antes de inspeccionar el flujo de código, pero el comando no está instalado en este entorno. Se recurrió a los archivos de implementación.

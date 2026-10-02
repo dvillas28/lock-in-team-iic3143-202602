@@ -1,7 +1,7 @@
 \begin{tikzpicture}
 \node[axtable,inner sep=3pt,text width=3cm] (QUIZZES) at (0,4) {\textbf{quizzes}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{course\_id} (FK)\\\texttt{section\_id} (FK)};
 \node[axtable,inner sep=3pt,text width=3cm] (GRADE_ITEMS) at (9,4) {\textbf{grade\_items}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{course\_id} (FK)\\\texttt{quiz\_id} (FK)};
-\node[axtable,inner sep=3pt,text width=3cm] (QUIZ_ATTEMPTS) at (4.5,2) {\textbf{quiz\_attempts}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{quiz\_id} (FK)\\\texttt{section\_id} (FK)\\\texttt{student\_id} (FK)};
+\node[axtable,inner sep=3pt,text width=3cm] (QUIZ_ATTEMPTS) at (4.5,1.8) {\textbf{quiz\_attempts}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{quiz\_id} (FK)\\\texttt{section\_id} (FK)\\\texttt{student\_id} (FK)};
 \node[axtable,inner sep=3pt,text width=3cm] (GRADES) at (9,0) {\textbf{grades}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{grade\_item\_id} (FK)\\\texttt{student\_id} (FK)\\\texttt{attempt\_id} (FK)};
 \node[axtable,inner sep=3pt,text width=3cm] (USERS) at (0,0) {\textbf{users}\\\texttt{id} (PK)\\\texttt{email}\\\texttt{name}\\\texttt{active}};
 \node[axtable,inner sep=3pt,text width=3cm] (SECTIONS) at (0,2) {\textbf{sections}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{course\_id} (FK)\\\texttt{code}};
