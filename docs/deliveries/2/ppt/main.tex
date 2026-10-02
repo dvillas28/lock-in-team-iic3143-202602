@@ -30,6 +30,8 @@
 \setbeamertemplate{itemize item}{\color{academixamber}$\blacktriangleright$}
 \setbeamertemplate{itemize subitem}{\color{academixnavy}$\bullet$}
 \setbeamertemplate{footline}[frame number]
+% Preserve the Entrega 1 page/total appearance across main slides and appendices.
+\renewcommand{\inserttotalframenumber}{\insertdocumentendpage}
 \setbeamerfont{frametitle}{size=\large}
 
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
@@ -63,7 +65,7 @@ fl/.style={-{Latex[length=1.8mm]},draw=academixnavy,thick}]
 \node[base] (pl) at (9,0) {Planificación};
 \node[base] (ci) at (12,0) {CI/CD};
 \draw[fl] (cu)--(ar); \draw[fl] (ar)--(da); \draw[fl] (da)--(pl); \draw[fl] (pl)--(ci);
-\end{tikzpicture}
+\end{tikzpicture}\par
 \vspace{0.8cm}
 \begin{block}{Al cierre de Elaboración}
 Diseño del MVP académico y evidencia de una base técnica conectada.
@@ -87,7 +89,7 @@ fl/.style={-{Latex[length=1.8mm]},draw=academixnavy,thick}]
 \node[base] (es) at (0,-0.8) {\textbf{Estudiante}};
 \node[base,text width=7.4cm] (re) at (6.7,-0.8) {CU-06, 08--09, 12: consultar material, rendir y ver notas propias};
 \draw[fl] (u)--(ac);\draw[fl] (co)--(ge);\draw[fl] (do)--(ev);\draw[fl] (es)--(re);
-\end{tikzpicture}
+\end{tikzpicture}\par
 \vspace{0.2cm}
 \small CU-03: cursos propios para los cuatro roles. \quad CU-16: ayudante consulta su sección.
 \end{frame}
@@ -155,7 +157,7 @@ fld/.style={-{Latex[length=1.8mm]},draw=academixamber,thick,dashed}]
 \node[align=left,text width=5.9cm] at (2,-2.55) {\textcolor{academixnavy}{\textbf{Línea continua:}} integración actual\\[3pt]\textcolor{academixamber}{\textbf{Línea discontinua:}} persistencia pendiente};
 \draw[fl] (u)--(fe);\draw[fl] (fe)--node[above,font=\footnotesize]{HTTP}(be);
 \draw[fld] (be)--node[right,font=\footnotesize]{conexión futura}(db);
-\end{tikzpicture}
+\end{tikzpicture}\par
 \vspace{0.15cm}
 \small Docker Compose ya declara una PostgreSQL local. El backend aún no la consume.
 \end{frame}
@@ -183,7 +185,7 @@ Scope + FK + tests & RLS en el MVP (diferida) & Posponer roles de DB y diseño d
 % Slide 8
 \begin{frame}{Modelo de dominio: del contenido a la nota}
 \centering
-\input{images/domain-core.tex}
+\input{images/domain-core.tex}\par
 \vspace{0.2cm}
 \begin{itemize}
 \item User es global; cada concepto académico pertenece a una Institution.
@@ -194,7 +196,7 @@ Scope + FK + tests & RLS en el MVP (diferida) & Posponer roles de DB y diseño d
 % Slide 9
 \begin{frame}{Modelo de datos: identidad, cursos y permisos}
 \centering
-\input{images/data-identity.tex}
+\input{images/data-identity.tex}\par
 \vspace{0.1cm}
 \small Membership activa habilita el contexto. El rol se obtiene del curso o de la sección.
 
@@ -204,7 +206,7 @@ Scope + FK + tests & RLS en el MVP (diferida) & Posponer roles de DB y diseño d
 % Slide 10
 \begin{frame}{Modelo de datos: calificación consistente y trazable}
 \centering
-\input{images/data-evaluation.tex}
+\input{images/data-evaluation.tex}\par
 \vspace{0.1cm}
 \small Las FK compuestas comprueban Institution, quiz, estudiante y sección históricos.
 
@@ -262,7 +264,7 @@ Sobrealcance / storage pendiente & Retraso del MVP & Recorte funcional y markdow
 \begin{frame}{Walking skeleton: conexión real frontend--backend}
 \begin{columns}[T,onlytextwidth]
 \begin{column}{0.57\textwidth}
-\includegraphics[width=\textwidth,trim=0 710 960 0,clip]{images/02-frontend-portal.png}
+\includegraphics[width=\textwidth,trim=30bp 600bp 1100bp 60bp,clip]{images/02-frontend-portal.png}
 \vspace{0.15cm}
 
 \small Captura versionada del frontend desplegado.\\\st{Backend:} \texttt{ok (v0.1.0)}
@@ -275,7 +277,7 @@ Sobrealcance / storage pendiente & Retraso del MVP & Recorte funcional y markdow
 \node[axclass,text width=4.4cm] (re) at (0,-3.1) {\texttt{status}, \texttt{version}\\\texttt{timestamp}};
 \draw[axflow] (fe)--node[axlabel,right]{\texttt{API\_URL}}(be);
 \draw[axflow] (be)--(re);
-\end{tikzpicture}
+\end{tikzpicture}\par
 \end{column}
 \end{columns}
 \vspace{0.3cm}
@@ -290,19 +292,19 @@ Sobrealcance / storage pendiente & Retraso del MVP & Recorte funcional y markdow
 \node[axclass,text width=1.6cm] (pr) at (0,0) {PR / push\\\texttt{main}};
 \node[axclass,text width=3.2cm] (ci) at (3.8,0) {\textbf{CI en paralelo}\\backend: lint + test\\frontend: lint + build\\dos Docker builds};
 \node[axclass,text width=2.8cm] (cd) at (8.2,0) {\textbf{Railway autodeploy}\\\texttt{main}, Wait for CI\\healthchecks};
-\draw[axflow] (pr)--(ci);\draw[axflow] (ci)--node[axlabel,above]{push a main}(cd);
+\draw[axflow] (pr)--(ci);\draw[axflow] (ci)--(cd);
 \node[axclass,text width=2.3cm] (tag) at (12,0) {\textbf{Release separado}\\tag SemVer\\commit en main};
-\end{tikzpicture}
-\vspace{0.2cm}
+\end{tikzpicture}\par
+\vspace{0.15cm}
 \begin{columns}[T,onlytextwidth]
 \begin{column}{0.48\textwidth}
 \centering
-\includegraphics[width=\textwidth,trim=0 220 900 0,clip]{images/03-ci-run.png}\\
+\includegraphics[width=\textwidth,height=3.4cm,keepaspectratio,trim=0bp 30bp 520bp 50bp,clip]{images/03-ci-run.png}\\
 {\footnotesize CI exitoso: cuatro jobs.}
 \end{column}
 \begin{column}{0.48\textwidth}
 \centering
-\includegraphics[width=\textwidth,trim=330 30 45 215,clip]{images/09-railway-deploy-log.png}\\
+\includegraphics[width=\textwidth,height=3.4cm,keepaspectratio,trim=312bp 259bp 40bp 48bp,clip]{images/09-railway-deploy-log.png}\\
 {\footnotesize Backend: build y deployment exitosos.}
 \end{column}
 \end{columns}
@@ -335,6 +337,746 @@ Sobrealcance / storage pendiente & Retraso del MVP & Recorte funcional y markdow
 \vspace{0.6cm}
 \centering
 \st{La base conecta. El siguiente incremento debe demostrar aislamiento.}
+\end{frame}
+
+\appendix
+
+\begin{frame}{Anexo: respaldo para preguntas}
+\centering
+\large Casos completos, requisitos, modelos y evidencia
+\vspace{0.7cm}
+
+\small Las siguientes láminas se consultan durante preguntas.\\
+Los modelos representan el diseño documentado; el walking skeleton tiene evidencia ejecutable.
+\end{frame}
+
+\begin{frame}{Anexo: casos de uso completos (1--8)}
+\small
+\begin{tabularx}{\textwidth}{Ylllll}
+\toprule
+\textbf{Meta} & \textbf{Usuario} & \textbf{Coord.} & \textbf{Docente} & \textbf{Ayudante} & \textbf{Estud.} \\
+\midrule
+CU-01 Elegir institución & Sí & -- & -- & -- & -- \\
+\addlinespace
+CU-02 Entrar al contexto & Sí & -- & -- & -- & -- \\
+\addlinespace
+CU-03 Ver cursos y secciones & -- & Sí & Sí & Sí & Sí \\
+\addlinespace
+CU-04 Secciones y roles & -- & Sí & -- & -- & -- \\
+\addlinespace
+CU-05 Publicar material & -- & Sí & -- & -- & -- \\
+\addlinespace
+CU-06 Consultar material & -- & -- & -- & -- & Sí \\
+\addlinespace
+CU-07 Publicar quiz & -- & Sí & Sí & -- & -- \\
+\addlinespace
+CU-08 Responder quiz & -- & -- & -- & -- & Sí \\
+\addlinespace
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{Anexo: casos de uso completos (9--16)}
+\small
+\begin{tabularx}{\textwidth}{Ylllll}
+\toprule
+\textbf{Meta} & \textbf{Usuario} & \textbf{Coord.} & \textbf{Docente} & \textbf{Ayudante} & \textbf{Estud.} \\
+\midrule
+CU-09 Enviar y calificar & -- & -- & -- & -- & Sí \\
+\addlinespace
+CU-10 Ponderaciones & -- & Sí & -- & -- & -- \\
+\addlinespace
+CU-11 Publicar notas & -- & Sí & Sí & -- & -- \\
+\addlinespace
+CU-12 Notas y promedio & -- & -- & -- & -- & Sí \\
+\addlinespace
+CU-13 Auditoría & -- & Sí & -- & -- & -- \\
+\addlinespace
+CU-14 Organizar módulos & -- & Sí & -- & -- & -- \\
+\addlinespace
+CU-15 Cancelar intento & -- & Sí & Sí & -- & Sí \\
+\addlinespace
+CU-16 Revisar libro docente & -- & Sí & Sí & Sí & -- \\
+\addlinespace
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{Anexo: CU-01 Elegir institución}
+\small
+\textbf{Actor:} Usuario autenticado\par
+\begin{columns}[T,onlytextwidth]\begin{column}{0.60\textwidth}
+\textbf{Flujo básico}\begin{enumerate}
+\item Solicitar las instituciones accesibles.
+\item Mostrar solo memberships activas.
+\item Elegir una institución visible.
+\item Establecer contexto de navegación, sin asignar roles.\end{enumerate}\end{column}\begin{column}{0.37\textwidth}
+\textbf{Meta}\par seleccionar un contexto institucional válido para continuar sus actividades.
+\par\vspace{0.2cm}\textbf{Alternativas}\par \begin{itemize}
+\item Sin instituciones accesibles
+\item La pertenencia deja de estar activa\end{itemize}\end{column}\end{columns}\par\vspace{0.15cm}
+{\footnotesize Precondición: identidad autenticada vigente. Ficha íntegra: 03-use-cases-and-requirements.md.}
+\end{frame}
+
+\begin{frame}{Anexo: CU-02 Entrar al contexto}
+\small
+\textbf{Actor:} Usuario autenticado\par
+\begin{columns}[T,onlytextwidth]\begin{column}{0.60\textwidth}
+\textbf{Flujo básico}\begin{enumerate}
+\item Solicitar entrar al contexto elegido.
+\item Resolver Institution y comprobar visibilidad.
+\item Validar membership y recuperar roles de curso/sección.
+\item Presentar identidad contextual y vistas permitidas.\end{enumerate}\end{column}\begin{column}{0.37\textwidth}
+\textbf{Meta}\par trabajar únicamente dentro de un contexto al que pertenece, sin confundir pertenencia institucional con autorización de curso.
+\par\vspace{0.2cm}\textbf{Alternativas}\par \begin{itemize}
+\item Institución inexistente o no visible
+\item Pertenencia inactiva\end{itemize}\end{column}\end{columns}\par\vspace{0.15cm}
+{\footnotesize Precondición transversal: JWT y InstitutionMembership activa. Ficha íntegra: 03-use-cases-and-requirements.md.}
+\end{frame}
+
+\begin{frame}{Anexo: CU-03 Ver cursos y secciones}
+\small
+\textbf{Actor:} Coordinador de curso / Docente de sección / Ayudante de sección / Estudiante\par
+\begin{columns}[T,onlytextwidth]\begin{column}{0.60\textwidth}
+\textbf{Flujo básico}\begin{enumerate}
+\item Solicitar cursos propios en la institución.
+\item Listar cursos con pertenencia académica activa.
+\item Elegir curso y pedir sus secciones.
+\item Mostrar todo al coordinador y solo secciones propias al resto.
+\item Abrir una sección visible.\end{enumerate}\end{column}\begin{column}{0.37\textwidth}
+\textbf{Meta}\par encontrar los cursos y secciones donde mantiene un rol activo, con visibilidad ajustada a su alcance.
+\par\vspace{0.2cm}\textbf{Alternativas}\par \begin{itemize}
+\item Sin cursos visibles
+\item Curso o sección fuera del alcance\end{itemize}\end{column}\end{columns}\par\vspace{0.15cm}
+{\footnotesize Precondición transversal: JWT y InstitutionMembership activa. Ficha íntegra: 03-use-cases-and-requirements.md.}
+\end{frame}
+
+\begin{frame}{Anexo: CU-04 Secciones y roles}
+\small
+\textbf{Actor:} Coordinador de curso\par
+\begin{columns}[T,onlytextwidth]\begin{column}{0.60\textwidth}
+\textbf{Flujo básico}\begin{enumerate}
+\item Consultar secciones y participantes del curso.
+\item Definir o actualizar una sección.
+\item Buscar una persona de la misma Institution.
+\item Validar curso, sección y pertenencia institucional.
+\item Asignar teacher, assistant o student.
+\item Registrar cambios sensibles con auditoría.\end{enumerate}\end{column}\begin{column}{0.37\textwidth}
+\textbf{Meta}\par disponer de secciones actualizadas y asignar roles académicos a participantes de la misma institución.
+\par\vspace{0.2cm}\textbf{Alternativas}\par \begin{itemize}
+\item Falta de rol coordinador
+\item Participante o relación fuera de la institución
+\item Rol activo duplicado o datos de sección inválidos
+\item Cambiar o desactivar una pertenencia
+\item Actualizar configuración general del curso\end{itemize}\end{column}\end{columns}\par\vspace{0.15cm}
+{\footnotesize Precondición transversal: JWT y InstitutionMembership activa. Ficha íntegra: 03-use-cases-and-requirements.md.}
+\end{frame}
+
+\begin{frame}{Anexo: CU-05 Publicar material}
+\small
+\textbf{Actor:} Coordinador de curso\par
+\begin{columns}[T,onlytextwidth]\begin{column}{0.60\textwidth}
+\textbf{Flujo básico}\begin{enumerate}
+\item Elegir módulo y material markdown o archivo.
+\item Validar alcance y metadatos.
+\item Registrar contenido aún oculto.
+\item Revisar y solicitar publicación.
+\item Publicar material con auditoría.\end{enumerate}\end{column}\begin{column}{0.37\textwidth}
+\textbf{Meta}\par poner material académico autorizado a disposición de los estudiantes del curso.
+\par\vspace{0.2cm}\textbf{Alternativas}\par \begin{itemize}
+\item Archivo o información inválida
+\item Módulo no visible o permiso insuficiente
+\item Corregir u ocultar material existente\end{itemize}\end{column}\end{columns}\par\vspace{0.15cm}
+{\footnotesize Precondición transversal: JWT y InstitutionMembership activa. Ficha íntegra: 03-use-cases-and-requirements.md.}
+\end{frame}
+
+\begin{frame}{Anexo: CU-06 Consultar material}
+\small
+\textbf{Actor:} Estudiante\par
+\begin{columns}[T,onlytextwidth]\begin{column}{0.60\textwidth}
+\textbf{Flujo básico}\begin{enumerate}
+\item Abrir un curso con inscripción student activa.
+\item Mostrar módulos y material publicados.
+\item Seleccionar un recurso.
+\item Revalidar acceso y servir contenido sin ubicación interna.\end{enumerate}\end{column}\begin{column}{0.37\textwidth}
+\textbf{Meta}\par acceder al contenido publicado que corresponde a su institución y a una sección en la que mantiene inscripción activa.
+\par\vspace{0.2cm}\textbf{Alternativas}\par \begin{itemize}
+\item Contenido no publicado o inexistente
+\item Inscripción inactiva\end{itemize}\end{column}\end{columns}\par\vspace{0.15cm}
+{\footnotesize Precondición transversal: JWT y InstitutionMembership activa. Ficha íntegra: 03-use-cases-and-requirements.md.}
+\end{frame}
+
+\begin{frame}{Anexo: CU-07 Publicar quiz}
+\small
+\textbf{Actor:} Coordinador de curso / Docente de sección\par
+\begin{columns}[T,onlytextwidth]\begin{column}{0.60\textwidth}
+\textbf{Flujo básico}\begin{enumerate}
+\item Elegir curso o sección permitida.
+\item Guardar quiz como borrador y definir intentos.
+\item Agregar preguntas, puntajes y alternativas válidas.
+\item Conservar pauta en vista de autoría.
+\item Validar al publicar y crear/confirmar GradeItem único.
+\item Publicar con auditoría.\end{enumerate}\end{column}\begin{column}{0.37\textwidth}
+\textbf{Meta}\par ofrecer a los estudiantes un quiz válido, con pauta protegida y alcance de curso o sección según el rol del autor.
+\par\vspace{0.2cm}\textbf{Alternativas}\par \begin{itemize}
+\item Alcance o rol insuficiente
+\item Pauta o configuración incompleta
+\item Quiz bloqueado o libro de notas ya publicado\end{itemize}\end{column}\end{columns}\par\vspace{0.15cm}
+{\footnotesize Precondición transversal: JWT y InstitutionMembership activa. Ficha íntegra: 03-use-cases-and-requirements.md.}
+\end{frame}
+
+\begin{frame}{Anexo: CU-08 Responder quiz}
+\small
+\textbf{Actor:} Estudiante\par
+\begin{columns}[T,onlytextwidth]\begin{column}{0.60\textwidth}
+\textbf{Flujo básico}\begin{enumerate}
+\item Elegir quiz publicado para su sección.
+\item Validar inscripción, disponibilidad, máximo y ausencia de intento activo.
+\item Crear intento numerado con contexto histórico y sin pauta.
+\item Seleccionar y guardar respuestas.
+\item Revalidar permisos y confirmar guardado sin corrección.\end{enumerate}\end{column}\begin{column}{0.37\textwidth}
+\textbf{Meta}\par rendir un quiz publicado en la sección que le corresponde sin perder el control sobre su intento en progreso.
+\par\vspace{0.2cm}\textbf{Alternativas}\par \begin{itemize}
+\item Quiz fuera de disponibilidad o sin intentos restantes
+\item Intento en progreso o nota ya publicada
+\item Permiso estudiantil perdido o acceso a pauta
+\item Respuestas inválidas o intento cerrado\end{itemize}\end{column}\end{columns}\par\vspace{0.15cm}
+{\footnotesize Precondición transversal: JWT y InstitutionMembership activa. Ficha íntegra: 03-use-cases-and-requirements.md.}
+\end{frame}
+
+\begin{frame}{Anexo: CU-09 Enviar y calificar}
+\small
+\textbf{Actor:} Estudiante\par
+\begin{columns}[T,onlytextwidth]\begin{column}{0.60\textwidth}
+\textbf{Flujo básico}\begin{enumerate}
+\item Revisar y enviar respuestas del intento propio.
+\item Validar inscripción, propiedad, estado y ausencia de acceso a pauta.
+\item Inmovilizar respuestas y comparar con pauta.
+\item Calcular puntaje y nota.
+\item Registrar graded y actualizar Grade no publicada desde el último intento.
+\item Confirmar recepción sin mostrar nota oculta.\end{enumerate}\end{column}\begin{column}{0.37\textwidth}
+\textbf{Meta}\par entregar sus respuestas para que el sistema las califique y registre la nota vigente, sin divulgarla antes de su publicación.
+\par\vspace{0.2cm}\textbf{Alternativas}\par \begin{itemize}
+\item Permiso vigente insuficiente
+\item Intento inexistente, ajeno o cerrado
+\item Nota ya publicada\end{itemize}\end{column}\end{columns}\par\vspace{0.15cm}
+{\footnotesize Precondición transversal: JWT y InstitutionMembership activa. Ficha íntegra: 03-use-cases-and-requirements.md.}
+\end{frame}
+
+\begin{frame}{Anexo: CU-10 Ponderaciones}
+\small
+\textbf{Actor:} Coordinador de curso\par
+\begin{columns}[T,onlytextwidth]\begin{column}{0.60\textwidth}
+\textbf{Flujo básico}\begin{enumerate}
+\item Abrir elementos y suma de ponderaciones.
+\item Mostrar ítems vinculados a quizzes del curso.
+\item Asignar y confirmar el conjunto de pesos.
+\item Validar alcance y suma 100 \%.
+\item Guardar todo y auditar atómicamente.\end{enumerate}\end{column}\begin{column}{0.37\textwidth}
+\textbf{Meta}\par Configurar libro de notas
+\par\vspace{0.2cm}\textbf{Alternativas}\par \begin{itemize}
+\item Suma o conjunto inválido
+\item Ponderaciones bloqueadas
+\item Curso no visible o falta de coordinación\end{itemize}\end{column}\end{columns}\par\vspace{0.15cm}
+{\footnotesize Precondición transversal: JWT y InstitutionMembership activa. Ficha íntegra: 03-use-cases-and-requirements.md.}
+\end{frame}
+
+\begin{frame}{Anexo: CU-11 Publicar notas}
+\small
+\textbf{Actor:} Coordinador de curso / Docente de sección\par
+\begin{columns}[T,onlytextwidth]\begin{column}{0.60\textwidth}
+\textbf{Flujo básico}\begin{enumerate}
+\item Consultar libro y seleccionar ítems/secciones.
+\item Mostrar únicamente notas y secciones autorizadas.
+\item Revisar y confirmar selección.
+\item Validar roles, suma 100 \% y ausencia de intentos activos afectados.
+\item Publicar en conjunto y auditar.
+\item Confirmar notas visibles para sus propietarios.\end{enumerate}\end{column}\begin{column}{0.37\textwidth}
+\textbf{Meta}\par hacer visibles resultados ya calculados dentro del alcance académico autorizado.
+\par\vspace{0.2cm}\textbf{Alternativas}\par \begin{itemize}
+\item Sección fuera del alcance docente
+\item Ponderaciones incompletas o sin nota calificada
+\item Intento aún en progreso
+\item Nota ya publicada o selección incompatible\end{itemize}\end{column}\end{columns}\par\vspace{0.15cm}
+{\footnotesize Precondición transversal: JWT y InstitutionMembership activa. Ficha íntegra: 03-use-cases-and-requirements.md.}
+\end{frame}
+
+\begin{frame}{Anexo: CU-12 Notas y promedio}
+\small
+\textbf{Actor:} Estudiante\par
+\begin{columns}[T,onlytextwidth]\begin{column}{0.60\textwidth}
+\textbf{Flujo básico}\begin{enumerate}
+\item Abrir calificaciones de un curso propio.
+\item Identificar al estudiante y recuperar solo notas propias publicadas.
+\item Calcular promedio normalizado por pesos publicados.
+\item Mostrar notas y promedio sin resultados ajenos u ocultos.\end{enumerate}\end{column}\begin{column}{0.37\textwidth}
+\textbf{Meta}\par conocer únicamente sus notas publicadas y el promedio parcial derivado de ellas.
+\par\vspace{0.2cm}\textbf{Alternativas}\par \begin{itemize}
+\item Sin notas publicadas
+\item Curso o inscripción no visible\end{itemize}\end{column}\end{columns}\par\vspace{0.15cm}
+{\footnotesize Precondición transversal: JWT y InstitutionMembership activa. Ficha íntegra: 03-use-cases-and-requirements.md.}
+\end{frame}
+
+\begin{frame}{Anexo: CU-13 Auditoría}
+\small
+\textbf{Actor:} Coordinador de curso\par
+\begin{columns}[T,onlytextwidth]\begin{column}{0.60\textwidth}
+\textbf{Flujo básico}\begin{enumerate}
+\item Seleccionar curso coordinado y pedir eventos.
+\item Validar coordinación vigente e Institution.
+\item Filtrar por acción, recurso, actor, sección o período.
+\item Presentar cambios sanitizados sin edición.\end{enumerate}\end{column}\begin{column}{0.37\textwidth}
+\textbf{Meta}\par Consultar auditoría
+\par\vspace{0.2cm}\textbf{Alternativas}\par \begin{itemize}
+\item Curso ajeno o permiso perdido
+\item Filtro inválido o sin resultados\end{itemize}\end{column}\end{columns}\par\vspace{0.15cm}
+{\footnotesize Precondición transversal: JWT y InstitutionMembership activa. Ficha íntegra: 03-use-cases-and-requirements.md.}
+\end{frame}
+
+\begin{frame}{Anexo: CU-14 Organizar módulos}
+\small
+\textbf{Actor:} Coordinador de curso\par
+\begin{columns}[T,onlytextwidth]\begin{column}{0.60\textwidth}
+\textbf{Flujo básico}\begin{enumerate}
+\item Abrir módulos y solicitar crear uno.
+\item Validar coordinación y revisar organización actual.
+\item Definir datos y registrar el módulo.
+\item Ajustar el orden completo.
+\item Validar, guardar y publicar con auditoría.\end{enumerate}\end{column}\begin{column}{0.37\textwidth}
+\textbf{Meta}\par disponer de módulos ordenados y decidir cuáles son visibles para los estudiantes.
+\par\vspace{0.2cm}\textbf{Alternativas}\par \begin{itemize}
+\item Orden incompleto o datos inválidos
+\item Curso ajeno o falta de coordinación
+\item Actualizar u ocultar módulo\end{itemize}\end{column}\end{columns}\par\vspace{0.15cm}
+{\footnotesize Precondición transversal: JWT y InstitutionMembership activa. Ficha íntegra: 03-use-cases-and-requirements.md.}
+\end{frame}
+
+\begin{frame}{Anexo: CU-15 Cancelar intento}
+\small
+\textbf{Actor:} Estudiante propietario del intento / Coordinador de curso / Docente de la sección histórica del intento\par
+\begin{columns}[T,onlytextwidth]\begin{column}{0.60\textwidth}
+\textbf{Flujo básico}\begin{enumerate}
+\item Solicitar cancelar un intento visible.
+\item Revalidar estado, propiedad o rol académico histórico.
+\item Marcar cancelled, registrar fecha y auditar.
+\item Confirmar que conserva número y cuenta para el máximo, sin nota.\end{enumerate}\end{column}\begin{column}{0.37\textwidth}
+\textbf{Meta}\par liberar un intento abandonado sin calificarlo ni alterar una nota, para que no bloquee indebidamente la publicación.
+\par\vspace{0.2cm}\textbf{Alternativas}\par \begin{itemize}
+\item Falta de permiso actual
+\item Intento ya cancelado
+\item Intento enviado, calificado o no visible\end{itemize}\end{column}\end{columns}\par\vspace{0.15cm}
+{\footnotesize Precondición transversal: JWT y InstitutionMembership activa. Ficha íntegra: 03-use-cases-and-requirements.md.}
+\end{frame}
+
+\begin{frame}{Anexo: CU-16 Revisar libro docente}
+\small
+\textbf{Actor:} Coordinador de curso / Docente de sección / Ayudante de sección\par
+\begin{columns}[T,onlytextwidth]\begin{column}{0.60\textwidth}
+\textbf{Flujo básico}\begin{enumerate}
+\item Solicitar libro de notas del curso.
+\item Validar rol: coordinador ve curso; docente/ayudante selecciona sección propia.
+\item Mostrar filas y estados del alcance permitido.
+\item Revisar sin cambiar notas ni publicación.\end{enumerate}\end{column}\begin{column}{0.37\textwidth}
+\textbf{Meta}\par revisar filas del libro de notas y, cuando sea necesario, los intentos que originan resultados dentro del alcance de curso o sección permitido para cada rol.
+\par\vspace{0.2cm}\textbf{Alternativas}\par \begin{itemize}
+\item Sección ajena o rol perdido
+\item Curso o sección inexistente en el contexto
+\item Ayudante intenta modificar o publicar
+\item Revisar intentos del quiz\end{itemize}\end{column}\end{columns}\par\vspace{0.15cm}
+{\footnotesize Precondición transversal: JWT y InstitutionMembership activa. Ficha íntegra: 03-use-cases-and-requirements.md.}
+\end{frame}
+
+\begin{frame}{Anexo: RF completos (1--6)}
+\small
+\begin{tabularx}{\textwidth}{lY}
+\toprule
+\textbf{ID} & \textbf{Requisito} \\
+\midrule
+RF1 & El sistema debe autenticar una identidad global mediante JWT. \\
+\addlinespace
+RF2 & El frontend debe listar únicamente Institutions accesibles para el User. \\
+\addlinespace
+RF3 & UC y UTFSM deben existir como Institutions con slugs únicos dentro de la misma PostgreSQL compartida cuando se implemente persistencia. \\
+\addlinespace
+RF4 & Los endpoints académicos deben declarar el contexto mediante \texttt{/api/v1/institutions/{institutionSlug}/...}. \\
+\addlinespace
+RF5 & El backend debe resolver el slug a un UUID interno y verificar una \texttt{InstitutionMembership} activa antes de evaluar roles académicos. \\
+\addlinespace
+RF6 & Indicar una Institution en la URL no debe autenticar ni autorizar. \\
+\addlinespace
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{Anexo: RF completos (7--12)}
+\small
+\begin{tabularx}{\textwidth}{lY}
+\toprule
+\textbf{ID} & \textbf{Requisito} \\
+\midrule
+RF7 & \texttt{User} debe ser global y poder relacionarse con más de una Institution. \\
+\addlinespace
+RF8 & Toda entidad académica tenant-owned debe conservar \texttt{institution\_id}. \\
+\addlinespace
+RF9 & El sistema debe impedir relaciones entre registros de Institutions distintas mediante constraints y FK institution-aware cuando corresponda. \\
+\addlinespace
+RF10 & El sistema debe asignar \texttt{coordinator} por curso y roles \texttt{teacher}, \texttt{student} o \texttt{assistant} por sección. \\
+\addlinespace
+RF11 & Un User puede tener más de un rol activo, incluso en una misma sección. \\
+\addlinespace
+RF12 & El coordinador administra todo su curso; el docente solo las secciones donde tiene \texttt{teacher} activo. \\
+\addlinespace
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{Anexo: RF completos (13--18)}
+\small
+\begin{tabularx}{\textwidth}{lY}
+\toprule
+\textbf{ID} & \textbf{Requisito} \\
+\midrule
+RF13 & El coordinador debe poder crear, ordenar, actualizar, publicar y ocultar módulos de curso. \\
+\addlinespace
+RF14 & El coordinador debe poder crear, actualizar, publicar y ocultar material markdown o basado en archivo. \\
+\addlinespace
+RF15 & Los archivos del MVP son PDF, CSV, XLSX, TXT, JPEG y PNG. Su almacenamiento concreto se decide cuando se implemente esa funcionalidad. \\
+\addlinespace
+RF16 & El estudiante ve solo material publicado de cursos donde mantiene una inscripción activa dentro de la Institution del path. \\
+\addlinespace
+RF17 & El docente autorizado debe poder crear quizzes de alternativas. \\
+\addlinespace
+RF18 & Cada pregunta debe tener alternativas y exactamente una correcta. \\
+\addlinespace
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{Anexo: RF completos (19--24)}
+\small
+\begin{tabularx}{\textwidth}{lY}
+\toprule
+\textbf{ID} & \textbf{Requisito} \\
+\midrule
+RF19 & El estudiante debe poder iniciar y finalizar intentos, con límite positivo opcional o sin límite. Solo hay un intento en progreso por estudiante y quiz. \\
+\addlinespace
+RF20 & El sistema calcula la nota al finalizar y usa el último intento calificado como nota vigente. \\
+\addlinespace
+RF21 & El coordinador debe poder configurar ponderaciones por evaluación. \\
+\addlinespace
+RF22 & El coordinador o docente autorizado debe poder publicar notas. \\
+\addlinespace
+RF23 & El estudiante ve únicamente notas propias publicadas. \\
+\addlinespace
+RF24 & El promedio parcial se calcula con notas publicadas, normalizado por la suma de sus ponderaciones. \\
+\addlinespace
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{Anexo: RF completos (25--29)}
+\small
+\begin{tabularx}{\textwidth}{lY}
+\toprule
+\textbf{ID} & \textbf{Requisito} \\
+\midrule
+RF25 & Toda operación académica debe autorizar Institution, curso, sección y rol. \\
+\addlinespace
+RF26 & El sistema registra eventos inmutables de cambios académicos sensibles y permite al coordinador consultar el historial de su curso. \\
+\addlinespace
+RF27 & La vista estudiantil del quiz omite pauta y corrección antes de publicar. Quien puede consultar la pauta no puede rendir ese quiz como estudiante. \\
+\addlinespace
+RF28 & El estudiante propietario, el coordinador del curso o el docente de la sección histórica pueden cancelar un intento en progreso bajo sus permisos vigentes. La cancelación no genera nota, cuenta para el límite de intentos y queda auditada. \\
+\addlinespace
+RF29 & El coordinador puede consultar el libro de notas completo del curso; docentes y ayudantes solo las secciones donde mantienen rol activo. El ayudante tiene acceso de solo lectura. \\
+\addlinespace
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{Anexo: RNF completos (1--5)}
+\small
+\begin{tabularx}{\textwidth}{lY}
+\toprule
+\textbf{ID} & \textbf{Requisito} \\
+\midrule
+RNF1 & Aislamiento: ninguna lectura, escritura, relación o proceso debe mezclar datos de Institutions distintas. \\
+\addlinespace
+RNF2 & Seguridad: autenticación, InstitutionMembership y permisos contextuales son obligatorios. El slug del path no constituye autorización. \\
+\addlinespace
+RNF3 & Integridad: notas, respuestas, ponderaciones y auditoría usan transacciones cuando cambian juntas. \\
+\addlinespace
+RNF4 & Integridad relacional: constraints, unicidades y FK compuestas incluyen \texttt{institution\_id} cuando expresan una relación tenant-owned. \\
+\addlinespace
+RNF5 & Recuperabilidad: backup y point-in-time recovery cubren la PostgreSQL compartida completa. Restore lógico por Institution queda fuera del MVP. \\
+\addlinespace
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{Anexo: RNF completos (6--10)}
+\small
+\begin{tabularx}{\textwidth}{lY}
+\toprule
+\textbf{ID} & \textbf{Requisito} \\
+\midrule
+RNF6 & Mantenibilidad: backend como monolito modular, sin microservicios. \\
+\addlinespace
+RNF7 & Portabilidad: Railway es la plataforma de despliegue; el dominio no usa APIs propietarias de Railway. \\
+\addlinespace
+RNF8 & Archivos: binarios viven fuera de PostgreSQL y usan namespace por Institution; el proveedor queda por decidir. \\
+\addlinespace
+RNF9 & Observabilidad mínima: healthcheck, logs de errores y estado de despliegue sin secretos ni datos de otra Institution. \\
+\addlinespace
+RNF10 & Persistencia: existe una sola secuencia de migraciones. Backfills futuros son institution-scoped, idempotentes cuando corresponda y por lotes si su volumen lo exige.  \\
+\addlinespace
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{Anexo: autorización del request}
+\small
+\begin{enumerate}
+\item JWT válido: \texttt{sub} resuelve User global.
+\item \texttt{institutionSlug} resuelve Institution activa a UUID.
+\item InstitutionMembership activa habilita el contexto.
+\item CourseMembership o Enrollment habilita la operación académica.
+\item Query con \texttt{institution\_id}; FK compuestas protegen relaciones.
+\item Cambio sensible y AuditEvent se confirman atómicamente.
+\end{enumerate}
+\vspace{0.15cm}
+\texttt{401}: JWT inválido. \quad\texttt{404}: contexto/recurso no visible. \quad\texttt{403}: acción prohibida.
+\vspace{0.15cm}
+
+\st{El slug solicita contexto; nunca concede acceso.}
+\end{frame}
+
+\begin{frame}{Anexo: responsabilidades del backend}
+\small
+\begin{tabularx}{\textwidth}{YY}
+\toprule
+\textbf{Responsabilidad} & \textbf{Estado} \\
+\midrule
+PlatformModule y GET /health & Implementados. Health público, sin contexto institucional. \\
+\addlinespace
+Authentication e Institution context & Diseño: JWT, resolver slug y validar membership. \\
+\addlinespace
+CoursesModule y MaterialsModule & Diseño: cursos, roles y contenido publicado. \\
+\addlinespace
+QuizzesModule y GradesModule & Diseño: intentos, cálculo, libro y publicación. \\
+\addlinespace
+AuditModule & Diseño: eventos inmutables, sanitizados y atómicos. \\
+\addlinespace
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{Anexo: UML completo: identidad y contenido}
+\centering\input{images/domain-identity.tex}\par\vspace{0.15cm}{\footnotesize Multiplicidades del UML vigente. Las entidades académicas conservan Institution.}
+\end{frame}
+
+\begin{frame}{Anexo: UML completo: evaluación e intentos}
+\centering\input{images/domain-assessment.tex}\par\vspace{0.15cm}{\footnotesize Multiplicidades del UML vigente. Las entidades académicas conservan Institution.}
+\end{frame}
+
+\begin{frame}{Anexo: UML completo: notas e historial}
+\centering\input{images/domain-grading.tex}\par\vspace{0.15cm}{\footnotesize Multiplicidades del UML vigente. Las entidades académicas conservan Institution.}
+\end{frame}
+
+\begin{frame}{Anexo: ERD completo: identidad y roles}
+\centering\input{images/data-complete-1.tex}\par\vspace{0.1cm}{\footnotesize Campos y relaciones del ERD fuente. Detalle de atributos y FK compuestas: 06-data-model.md.}
+\end{frame}
+
+\begin{frame}{Anexo: ERD completo: contenido y evaluaciones}
+\centering\input{images/data-complete-2.tex}\par\vspace{0.1cm}{\footnotesize Campos y relaciones del ERD fuente. Detalle de atributos y FK compuestas: 06-data-model.md.}
+\end{frame}
+
+\begin{frame}{Anexo: ERD completo: intentos y notas}
+\centering\input{images/data-complete-3.tex}\par\vspace{0.1cm}{\footnotesize Campos y relaciones del ERD fuente. Detalle de atributos y FK compuestas: 06-data-model.md.}
+\end{frame}
+
+\begin{frame}{Anexo: ERD completo: auditoría y claves transversales}
+\begin{columns}[c,onlytextwidth]\begin{column}{0.63\textwidth}\centering\input{images/data-complete-4.tex}\end{column}\begin{column}{0.34\textwidth}\small
+\textbf{En toda tabla académica}\\[3pt]
+\texttt{institution\_id NOT NULL}\\[3pt]
+\texttt{UNIQUE (institution\_id, id)}\\[3pt]
+FK compuestas y scope de aplicación.\\[6pt]
+\textbf{Modelo lógico}: sin DDL ni ORM elegido.
+\end{column}\end{columns}
+\end{frame}
+
+\begin{frame}{Anexo: intentos, nota vigente y publicación}
+\centering
+\begin{tikzpicture}[font=\sffamily\small]
+\node[axclass] (ip) at (0,0) {in\_progress};
+\node[axclass] (su) at (4,0) {submitted};
+\node[axclass] (gr) at (8,0) {graded};
+\node[axclass] (ca) at (0,-2) {cancelled};
+\draw[axflow] (ip)--node[axlabel,above]{enviar}(su);
+\draw[axflow] (su)--node[axlabel,above]{calificar}(gr);
+\draw[axflow] (ip)--node[axlabel,left]{cancelar}(ca);
+\end{tikzpicture}\par
+\vspace{0.25cm}
+\begin{itemize}
+\item submitted es transitorio en la transacción de envío/calificación.
+\item cancelled conserva número y consume intento, sin generar Grade.
+\item El último graded determina Grade mientras no esté publicada.
+\item Publicar bloquea nuevos intentos y cambios de la nota.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Anexo: cálculo de notas y promedio}
+\small
+\begin{block}{Puntaje y escala chilena}
+\[p=100\,\frac{\mathrm{score\_points}}{\sum\mathrm{question.points}}\]
+\[\mathrm{grade\_value}=\begin{cases}1+3p/60 & p\leq60\\4+3(p-60)/40 & p>60\end{cases}\]
+\end{block}
+\begin{block}{Promedio parcial}
+\[\frac{\sum_{\text{notas publicadas}}\mathrm{grade\_value}\cdot\mathrm{weight\_percent}}{\sum_{\text{notas publicadas}}\mathrm{weight\_percent}}\]
+\end{block}
+\footnotesize HALF\_UP: puntaje porcentual a dos decimales y nota a uno. Sin ponderación publicada: null. El promedio se calcula en backend, sin columna derivada.
+\end{frame}
+
+\begin{frame}{Anexo: plan completo (1--5)}
+\small
+\begin{tabularx}{\textwidth}{lYY}
+\toprule
+\textbf{Iter.} & \textbf{Foco / casos} & \textbf{Resultado} \\
+\midrule
+1 & Walking skeleton existente / — & Frontend consume health del backend; CI y Docker permanecen verdes. \\
+\addlinespace
+2 & PostgreSQL compartida / — & Un servicio local y una conexión backend planificada sin múltiples DB. \\
+\addlinespace
+3 & Identidad institucional / CU-01 & Institution, User e InstitutionMembership modelados e implementados. \\
+\addlinespace
+4 & Contexto de request / CU-02 & Paths institucionales validan membership sin un header tenant adicional. \\
+\addlinespace
+5 & Aislamiento / CU-01 a CU-16, transversal & UC y UTFSM coexisten; tests bloquean IDs y relaciones cruzadas. \\
+\addlinespace
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{Anexo: plan completo (6--10)}
+\small
+\begin{tabularx}{\textwidth}{lYY}
+\toprule
+\textbf{Iter.} & \textbf{Foco / casos} & \textbf{Resultado} \\
+\midrule
+6 & Cursos y roles / CU-03, CU-04 & CourseMembership y Enrollment respetan Institution. \\
+\addlinespace
+7 & Módulos y material / CU-14, CU-05, CU-06 & Markdown primero; storage solo si se elige en un plan específico. \\
+\addlinespace
+8 & Quizzes / CU-07, CU-08, CU-09, CU-15 & Pauta protegida e intentos institution-scoped. \\
+\addlinespace
+9 & Notas y trazabilidad / CU-10, CU-11, CU-12, CU-13, CU-16 & Cálculo, ponderaciones, publicación y auditoría atómicos. \\
+\addlinespace
+10 & Cierre / CU-01 a CU-16, verificación & Tests críticos, release, evidencia y documentación final. \\
+\addlinespace
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{Anexo: riesgos completos (1--4)}
+\small
+\begin{tabularx}{\textwidth}{YYY}
+\toprule
+\textbf{Riesgo} & \textbf{Impacto} & \textbf{Mitigación} \\
+\midrule
+Fuga entre Institutions & Exposición de datos académicos y daño reputacional & JWT global, Institution explícita, InstitutionMembership, autorización contextual, queries scoped, FK institution-aware y tests cruzados. \\
+\addlinespace
+Query sin scope institucional & Una operación lee o modifica filas de otra Institution & Centralizar el contexto de aplicación, exigir \texttt{institution\_id} y probar cada trust boundary. \\
+\addlinespace
+Relación cruzada accidental & Section, Quiz, Grade u otra entidad referencia otra Institution & Unicidades y FK compuestas que incluyen \texttt{institution\_id}. \\
+\addlinespace
+Backfill mezcla Institutions & Corrupción de datos compartidos & Filtrar por Institution, procesar por lotes, diseñar idempotencia y validar conteos antes/después. \\
+\addlinespace
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{Anexo: riesgos completos (5--8)}
+\small
+\begin{tabularx}{\textwidth}{YYY}
+\toprule
+\textbf{Riesgo} & \textbf{Impacto} & \textbf{Mitigación} \\
+\midrule
+Mayor radio de impacto de la DB compartida & Una falla operacional afecta varias Institutions & Migraciones revisadas, cambios graduales, backup/PITR completo y observabilidad. \\
+\addlinespace
+Restore individual no disponible & Error localizado no puede restaurarse con un restore físico aislado & Declararlo fuera del MVP; evaluar export/import lógico solo si aparece el requisito. \\
+\addlinespace
+Slug tratado como autorización & Cliente cambia URL y obtiene acceso indebido & Resolver UUID interno y validar membership y permisos en cada request. \\
+\addlinespace
+Auth mock demasiado largo & API académica queda sin identidad confiable & Limitarlo al walking skeleton; exigir JWT antes de habilitar datos académicos. \\
+\addlinespace
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{Anexo: riesgos completos (9--12)}
+\small
+\begin{tabularx}{\textwidth}{YYY}
+\toprule
+\textbf{Riesgo} & \textbf{Impacto} & \textbf{Mitigación} \\
+\midrule
+Railway indisponible o mal configurado & Frontend/backend no quedan accesibles & Healthchecks versionados, CI, imágenes Docker reproducibles y variables documentadas sin secretos. \\
+\addlinespace
+Proveedor de archivos no definido & Material binario se retrasa & Mantener markdown primero; elegir storage solo con una implementación que lo consuma. \\
+\addlinespace
+Sobrealcance funcional & No llegar a una demo usable & Mantener fuera admin, jerarquías, RLS, IA, chat, calendario, workers y microservicios. \\
+\addlinespace
+Auditoría incompleta & Cambios académicos no trazables & Evento tenant-owned e inmutable en la misma transacción, con snapshots sanitizados. \\
+\addlinespace
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{Anexo: CI: ejecución exitosa}
+\centering\includegraphics[width=0.97\textwidth,height=5.9cm,keepaspectratio]{images/03-ci-run.png}\par\vspace{0.1cm}{\footnotesize Cuatro jobs exitosos en una ejecución versionada; no implica que esta rama haya ejecutado CI remoto.}
+\end{frame}
+
+\begin{frame}{Anexo: CI: checks de Pull Request}
+\centering\includegraphics[width=0.97\textwidth,height=5.9cm,keepaspectratio]{images/05-ci-pr-checks.png}\par\vspace{0.1cm}{\footnotesize PR hacia dev con los cuatro checks exitosos.}
+\end{frame}
+
+\begin{frame}{Anexo: CD: servicios Railway}
+\centering\includegraphics[width=0.97\textwidth,height=5.9cm,keepaspectratio]{images/06-railway-project.png}\par\vspace{0.1cm}{\footnotesize Frontend y backend Online. La captura no muestra PostgreSQL provisionada.}
+\end{frame}
+
+\begin{frame}{Anexo: CD: historial backend}
+\centering\includegraphics[width=0.97\textwidth,height=5.9cm,keepaspectratio]{images/07-railway-backend-deploys.png}\par\vspace{0.1cm}{\footnotesize Builds fallidos por directorio raíz ausente y un deployment posterior exitoso.}
+\end{frame}
+
+\begin{frame}{Anexo: CD: historial frontend}
+\centering\includegraphics[width=0.97\textwidth,height=5.9cm,keepaspectratio]{images/08-railway-frontend-deploys.png}\par\vspace{0.1cm}{\footnotesize Historial real de fallo y deployment exitoso del frontend.}
+\end{frame}
+
+\begin{frame}{Anexo: release: workflow ejecutado}
+\centering\includegraphics[width=0.97\textwidth,height=5.9cm,keepaspectratio]{images/10-release-run.png}\par\vspace{0.1cm}{\footnotesize Tag SemVer y commit en main validados antes de crear release.}
+\end{frame}
+
+\begin{frame}{Anexo: release: v0.1.0 publicada}
+\centering\includegraphics[width=0.97\textwidth,height=5.9cm,keepaspectratio]{images/11-github-release.png}\par\vspace{0.1cm}{\footnotesize Release histórica del skeleton. No es una release de persistencia ni de esta presentación.}
+\end{frame}
+
+\begin{frame}{Anexo: OpenAPI: contrato y alcance implementado}
+\small
+\begin{tabularx}{\textwidth}{lY}
+\toprule
+\textbf{Endpoint / grupo} & \textbf{Estado} \\
+\midrule
+\texttt{GET /health} & Implementado y público. \\
+\texttt{GET /api/v1/institutions} & Contrato: JWT y memberships activas. \\
+Paths institucionales & Contrato: cursos, secciones, material, quizzes, intentos, libro y auditoría. \\
+\bottomrule
+\end{tabularx}
+\vspace{0.4cm}
+\texttt{/api/v1/institutions/\{institutionSlug\}/...}
+\vspace{0.3cm}
+
+OpenAPI 3.1, versión del contrato 0.2.0. JSON camelCase.\\
+El body no acepta institutionId como fuente del contexto.\\
+\st{El contrato académico todavía no está implementado.}
 \end{frame}
 
 \end{document}

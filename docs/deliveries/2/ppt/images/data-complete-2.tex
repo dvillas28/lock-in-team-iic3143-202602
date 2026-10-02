@@ -1,0 +1,15 @@
+\begin{tikzpicture}
+\node[axtable,inner sep=3pt,text width=3cm] (COURSES) at (0,2) {\textbf{courses}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{code}\\\texttt{term}};
+\node[axtable,inner sep=3pt,text width=3cm] (COURSE_MODULES) at (4.5,2) {\textbf{course\_modules}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{course\_id} (FK)\\\texttt{position}};
+\node[axtable,inner sep=3pt,text width=3cm] (MATERIALS) at (9,2) {\textbf{materials}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{module\_id} (FK)\\\texttt{kind}};
+\node[axtable,inner sep=3pt,text width=3cm] (QUIZZES) at (0,-1) {\textbf{quizzes}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{course\_id} (FK)\\\texttt{section\_id} (FK)};
+\node[axtable,inner sep=3pt,text width=3cm] (QUESTIONS) at (4.5,-1) {\textbf{questions}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{quiz\_id} (FK)\\\texttt{alternatives}};
+\node[axtable,inner sep=3pt,text width=3cm] (SECTIONS) at (9,-1) {\textbf{sections}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{course\_id} (FK)\\\texttt{code}};
+
+\draw[axrel] (COURSES)--node[axlabel,above]{1 / 0..N}(COURSE_MODULES);
+\draw[axrel] (COURSE_MODULES)--node[axlabel,above]{1 / 0..N}(MATERIALS);
+\draw[axrel] (COURSES)--node[axlabel,left]{1 / 0..N}(QUIZZES);
+\draw[axrel] (QUIZZES)--node[axlabel,above]{1 / 0..N}(QUESTIONS);
+\draw[axrel] (COURSES.north)--++(0,0.5)-|node[axlabel,pos=0.55,above]{1 / 0..N}(SECTIONS.north);
+\draw[axrel] (SECTIONS.south)--++(0,-0.45)-|node[axlabel,pos=0.6,below]{0..1 / 0..N}(QUIZZES.south);
+\end{tikzpicture}

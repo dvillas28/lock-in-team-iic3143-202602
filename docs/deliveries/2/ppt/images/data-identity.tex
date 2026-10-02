@@ -1,7 +1,7 @@
 % 06-data-model.md: exact table names and contextual role locations.
 \begin{tikzpicture}
 \node[axtable] (us) at (0,3) {\textbf{users}\\\texttt{id} (PK)\\Identidad global};
-\node[axtable] (im) at (4.6,3) {\textbf{institution\_memberships}\\\texttt{institution\_id, user\_id}\\\texttt{active}};
+\node[axtable,text width=3.4cm] (im) at (4.6,3) {\textbf{institution\_memberships}\\\texttt{institution\_id, user\_id}\\\texttt{active}};
 \node[axtable] (in) at (9.2,3) {\textbf{institutions}\\\texttt{id} (UUID), \texttt{slug} (UK)\\\texttt{active}};
 \node[axtable] (cm) at (0,0.7) {\textbf{course\_memberships}\\\texttt{institution\_id, course\_id}\\\texttt{user\_id, role=coordinator}};
 \node[axtable] (co) at (4.6,0.7) {\textbf{courses}\\\texttt{institution\_id, id}\\\texttt{code, term}};

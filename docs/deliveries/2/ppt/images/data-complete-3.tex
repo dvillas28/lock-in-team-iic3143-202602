@@ -1,0 +1,18 @@
+\begin{tikzpicture}
+\node[axtable,inner sep=3pt,text width=3cm] (QUIZZES) at (0,4) {\textbf{quizzes}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{course\_id} (FK)\\\texttt{section\_id} (FK)};
+\node[axtable,inner sep=3pt,text width=3cm] (GRADE_ITEMS) at (9,4) {\textbf{grade\_items}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{course\_id} (FK)\\\texttt{quiz\_id} (FK)};
+\node[axtable,inner sep=3pt,text width=3cm] (QUIZ_ATTEMPTS) at (4.5,2) {\textbf{quiz\_attempts}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{quiz\_id} (FK)\\\texttt{section\_id} (FK)\\\texttt{student\_id} (FK)};
+\node[axtable,inner sep=3pt,text width=3cm] (GRADES) at (9,0) {\textbf{grades}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{grade\_item\_id} (FK)\\\texttt{student\_id} (FK)\\\texttt{attempt\_id} (FK)};
+\node[axtable,inner sep=3pt,text width=3cm] (USERS) at (0,0) {\textbf{users}\\\texttt{id} (PK)\\\texttt{email}\\\texttt{name}\\\texttt{active}};
+\node[axtable,inner sep=3pt,text width=3cm] (SECTIONS) at (0,2) {\textbf{sections}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{course\_id} (FK)\\\texttt{code}};
+\node[axtable,inner sep=3pt,text width=3cm] (COURSES) at (4.5,4) {\textbf{courses}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{code}\\\texttt{term}};
+
+\draw[axrel] (QUIZZES)--node[axlabel,above,sloped]{1 / 0..N}(QUIZ_ATTEMPTS);
+\draw[axrel] (USERS)--node[axlabel,above,sloped]{1 / 0..N}(QUIZ_ATTEMPTS);
+\draw[axrel] (SECTIONS)--node[axlabel,above]{1 / 0..N}(QUIZ_ATTEMPTS);
+\draw[axrel] (COURSES)--node[axlabel,above]{1 / 0..N}(GRADE_ITEMS);
+\draw[axrel] (QUIZZES.north)--++(0,0.45)-|node[axlabel,pos=0.65,above]{1 / 0..1}(GRADE_ITEMS.north);
+\draw[axrel] (GRADE_ITEMS)--node[axlabel,right]{1 / 0..N}(GRADES);
+\draw[axrel] (USERS)--node[axlabel,above]{1 / 0..N}(GRADES);
+\draw[axrel] (QUIZ_ATTEMPTS)--node[axlabel,above,sloped]{1 / 0..1}(GRADES);
+\end{tikzpicture}

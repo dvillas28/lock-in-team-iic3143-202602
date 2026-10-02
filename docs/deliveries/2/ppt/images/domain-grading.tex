@@ -1,0 +1,19 @@
+% Remaining edges of second UML block, including student and historical section.
+\begin{tikzpicture}
+\node[axclass] (c) at (0,2) {Course};
+\node[axclass] (gi) at (4,2) {GradeItem};
+\node[axclass] (q) at (8,2) {Quiz};
+\node[axclass] (gr) at (4,0) {Grade};
+\node[axclass] (at) at (8,0) {QuizAttempt};
+\node[axclass] (u) at (0,-2) {User};
+\node[axclass] (s) at (8,-2) {Section};
+\node[axclass] (au) at (0,0) {AuditEvent};
+\draw[axrel] (c)--node[axlabel,above]{1 agrupa 0..*}(gi);
+\draw[axrel] (q)--node[axlabel,above]{1 pondera 0..1}(gi);
+\draw[axrel] (gi)--node[axlabel,left]{1 produce 0..*}(gr);
+\draw[axrel] (at)--node[axlabel,above]{1 determina 0..1}(gr);
+\draw[axrel] (u)--node[axlabel,above,sloped]{1 recibe 0..*}(gr);
+\draw[axrel] (s)--node[axlabel,above,sloped]{1 contextualiza 0..*}(gr);
+\draw[axrel] (c)--node[axlabel,left]{1 registra 0..*}(au);
+\draw[axrel] (u)--node[axlabel,left]{1 realiza 0..*}(au);
+\end{tikzpicture}

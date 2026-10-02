@@ -1,0 +1,22 @@
+% Exact associations of the first UML block in 05-domain-model-uml.md.
+\begin{tikzpicture}
+\node[axclass] (i) at (0,3.3) {Institution};
+\node[axclass] (im) at (0,1.2) {InstitutionMembership};
+\node[axclass] (u) at (0,-1) {User};
+\node[axclass] (c) at (5,3.3) {Course};
+\node[axclass] (cm) at (5,-1) {CourseMembership};
+\node[axclass] (s) at (10,3.3) {Section};
+\node[axclass] (en) at (10,-1) {Enrollment};
+\node[axclass] (mo) at (5,1.2) {CourseModule};
+\node[axclass] (ma) at (10,1.2) {Material};
+\draw[axrel] (i)--node[axlabel,left]{1 / 0..*}(im);
+\draw[axrel] (u)--node[axlabel,left]{1 / 0..*}(im);
+\draw[axrel] (i)--node[axlabel,above]{1 ofrece 0..*}(c);
+\draw[axrel] (c)--node[axlabel,above]{1 contiene 0..*}(s);
+\draw[axrel] (c)--node[axlabel,right]{1 / 0..*}(mo);
+\draw[axrel] (mo)--node[axlabel,above]{1 contiene 0..*}(ma);
+\draw[axrel] (u)--node[axlabel,above]{1 coordina 0..*}(cm);
+\draw[axrel] (u.south)--++(0,-0.55)-|node[axlabel,pos=0.7,below]{1 participa 0..*}(en.south);
+\draw[axrel] (s.east)--++(0.4,0)|-node[axlabel,pos=0.75,above]{1 / 0..*}(en.east);
+\draw[axrel] (c.east)--++(1,0)|-node[axlabel,pos=0.45,right]{1 / 0..*}(cm.east);
+\end{tikzpicture}

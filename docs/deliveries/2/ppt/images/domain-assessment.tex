@@ -1,0 +1,19 @@
+% First half of the second UML block. All edges preserve source cardinalities.
+\begin{tikzpicture}
+\node[axclass] (i) at (0,2) {Institution};
+\node[axclass] (c) at (4,2) {Course};
+\node[axclass] (s) at (8,2) {Section};
+\node[axclass] (q) at (4,0) {Quiz};
+\node[axclass] (qo) at (0,-2) {Question};
+\node[axclass] (al) at (0,-3.7) {Alternative};
+\node[axclass] (at) at (8,-2) {QuizAttempt};
+\node[axclass] (u) at (4,-3.7) {User};
+\draw[axrel] (i)--node[axlabel,above]{1 delimita 0..*}(c);
+\draw[axrel] (c)--node[axlabel,left]{1 evalúa 0..*}(q);
+\draw[axrel] (s)--node[axlabel,above,sloped]{0..1 delimita 0..*}(q);
+\draw[axrel] (q)--node[axlabel,above,sloped]{1 contiene 0..*}(qo);
+\draw[axrel] (qo)--node[axlabel,left]{1 ofrece 2..*}(al);
+\draw[axrel] (q)--node[axlabel,above,sloped]{1 recibe 0..*}(at);
+\draw[axrel] (s)--node[axlabel,right]{1 contextualiza 0..*}(at);
+\draw[axrel] (u)--node[axlabel,above,sloped]{1 rinde 0..*}(at);
+\end{tikzpicture}

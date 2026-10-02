@@ -1,0 +1,18 @@
+\begin{tikzpicture}
+\node[axtable,inner sep=3pt,text width=3cm] (INSTITUTIONS) at (0,4) {\textbf{institutions}\\\texttt{id} (PK)\\\texttt{slug} (UK)\\\texttt{name}\\\texttt{active}};
+\node[axtable,inner sep=3pt,text width=3cm] (USERS) at (0,0) {\textbf{users}\\\texttt{id} (PK)\\\texttt{email}\\\texttt{name}\\\texttt{active}};
+\node[axtable,inner sep=3pt,text width=3.45cm] (INSTITUTION_MEMBERSHIPS) at (0,2) {\textbf{institution\_memberships}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{user\_id} (FK)\\\texttt{active}};
+\node[axtable,inner sep=3pt,text width=3cm] (COURSES) at (4.8,4) {\textbf{courses}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{code}\\\texttt{term}};
+\node[axtable,inner sep=3pt,text width=3cm] (COURSE_MEMBERSHIPS) at (4.8,0) {\textbf{course\_memberships}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{course\_id} (FK)\\\texttt{user\_id} (FK)\\\texttt{role}};
+\node[axtable,inner sep=3pt,text width=3cm] (SECTIONS) at (9.6,4) {\textbf{sections}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{course\_id} (FK)\\\texttt{code}};
+\node[axtable,inner sep=3pt,text width=3cm] (ENROLLMENTS) at (9.6,0) {\textbf{enrollments}\\\texttt{id} (PK)\\\texttt{institution\_id} (FK)\\\texttt{section\_id} (FK)\\\texttt{user\_id} (FK)\\\texttt{role}};
+
+\draw[axrel] (INSTITUTIONS.west)--++(-0.7,0)|-node[axlabel,pos=0.25,left]{1 / 0..N}(INSTITUTION_MEMBERSHIPS.west);
+\draw[axrel] (USERS.west)--++(-0.7,0)|-node[axlabel,pos=0.25,left]{1 / 0..N}(INSTITUTION_MEMBERSHIPS.west);
+\draw[axrel] (INSTITUTIONS)--node[axlabel,above]{1 / 0..N}(COURSES);
+\draw[axrel] (COURSES)--node[axlabel,right]{1 / 0..N}(COURSE_MEMBERSHIPS);
+\draw[axrel] (USERS)--node[axlabel,above]{1 / 0..N}(COURSE_MEMBERSHIPS);
+\draw[axrel] (COURSES)--node[axlabel,above]{1 / 0..N}(SECTIONS);
+\draw[axrel] (SECTIONS)--node[axlabel,right]{1 / 0..N}(ENROLLMENTS);
+\draw[axrel] (USERS.south)--++(0,-0.4)-|node[axlabel,pos=0.6,below]{1 / 0..N}(ENROLLMENTS.south);
+\end{tikzpicture}
