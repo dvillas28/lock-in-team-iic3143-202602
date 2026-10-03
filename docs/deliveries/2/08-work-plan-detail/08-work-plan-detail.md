@@ -70,7 +70,7 @@ marcarse como cerrado.
 Los identificadores remiten a las [fichas de casos de uso](03-use-cases-and-requirements.md).
 El detalle por semana descompone cada iteración en tareas atómicas de
 implementación, pruebas y corrección, listas para cargarse como tarjetas del
-backlog.
+backlog. Cada tarjeta se gestiona según las [reglas de trabajo](reglas-de-trabajo.md).
 
 ## Priorización y esfuerzo
 
