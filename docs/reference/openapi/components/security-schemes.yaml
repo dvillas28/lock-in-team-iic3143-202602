@@ -1,0 +1,9 @@
+bearerAuth:
+  type: http
+  scheme: bearer
+  bearerFormat: JWT
+  description: |
+    JWT de acceso global. El claim `sub` identifica al User. La Institution se
+    obtiene del path y los permisos desde InstitutionMembership,
+    Enrollment persistido. No se confía en roles ni
+    identificadores institucionales enviados arbitrariamente por el cliente.

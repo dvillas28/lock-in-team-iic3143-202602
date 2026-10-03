@@ -1,0 +1,66 @@
+/api/v1/institutions/{institutionSlug}/courses/{courseId}/audit-events:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/CourseId'
+  get:
+    tags:
+      - Audit
+    operationId: listCourseAuditEvents
+    summary: Consultar historial de auditoría del curso
+    description: |
+      Requiere rol `teacher`. Los eventos son generados por operaciones de
+      dominio y son inmutables; la API no permite crearlos, modificarlos ni eliminarlos.
+      Los cambios se sanitizan para no incluir secretos ni ubicaciones internas.
+    parameters:
+      - name: action
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: resourceType
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: resourceId
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: actorUserId
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - $ref: '../components/parameters.yaml#/SectionIdFilter'
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - $ref: '../components/parameters.yaml#/Cursor'
+      - $ref: '../components/parameters.yaml#/Limit'
+    responses:
+      '200':
+        description: Eventos de auditoría filtrados y paginados.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/audit.yaml#/AuditEventListResponse'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'

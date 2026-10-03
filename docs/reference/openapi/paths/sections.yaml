@@ -1,0 +1,431 @@
+/api/v1/institutions/{institutionSlug}/courses/{courseId}/sections:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/CourseId'
+  get:
+    tags:
+      - Sections
+    operationId: listSections
+    summary: Listar secciones visibles del curso
+    description: Teachers ven todas; los demás roles solo sus secciones.
+    responses:
+      '200':
+        description: Secciones visibles.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/sections.yaml#/SectionListResponse'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+  post:
+    tags:
+      - Sections
+    operationId: createSection
+    summary: Crear una sección del curso
+    description: Requiere rol `teacher` en el curso.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/sections.yaml#/SectionCreate'
+    responses:
+      '201':
+        description: Sección creada.
+        headers:
+          Location:
+            description: URI de la sección creada.
+            schema:
+              type: string
+              format: uri-reference
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/sections.yaml#/Section'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/institutions/{institutionSlug}/sections/{sectionId}:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/SectionId'
+  get:
+    tags:
+      - Sections
+    operationId: getSection
+    summary: Consultar una sección visible
+    responses:
+      '200':
+        description: Sección solicitada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/sections.yaml#/Section'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+  patch:
+    tags:
+      - Sections
+    operationId: updateSection
+    summary: Actualizar una sección
+    description: Requiere rol `teacher` en el curso de la sección.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/sections.yaml#/SectionUpdate'
+    responses:
+      '200':
+        description: Sección actualizada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/sections.yaml#/Section'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/institutions/{institutionSlug}/sections/{sectionId}/enrollments:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/SectionId'
+  get:
+    tags:
+      - Enrollments
+    operationId: listSectionEnrollments
+    summary: Listar memberships de una sección autorizada
+    description: Teachers ven el curso completo; teachers y assistants solo sus secciones.
+    parameters:
+      - $ref: '../components/parameters.yaml#/Cursor'
+      - $ref: '../components/parameters.yaml#/Limit'
+    responses:
+      '200':
+        description: Memberships de la sección.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/sections.yaml#/EnrollmentListResponse'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+  post:
+    tags:
+      - Enrollments
+    operationId: createSectionEnrollment
+    summary: Crear una membership de sección
+    description: |
+      Requiere rol `teacher`. Una persona puede tener varios roles activos
+      en la misma sección, pero no dos memberships activas del mismo rol. La
+      creación genera un evento de auditoría.
+    parameters:
+      - $ref: '../components/parameters.yaml#/IdempotencyKey'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/sections.yaml#/EnrollmentCreate'
+    responses:
+      '201':
+        description: Membership creada.
+        headers:
+          Location:
+            description: URI de la membership creada.
+            schema:
+              type: string
+              format: uri-reference
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/sections.yaml#/Enrollment'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/institutions/{institutionSlug}/sections/{sectionId}/enrollments/{enrollmentId}:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/SectionId'
+    - $ref: '../components/parameters.yaml#/EnrollmentId'
+  patch:
+    tags:
+      - Enrollments
+    operationId: updateSectionEnrollment
+    summary: Cambiar rol o desactivar una membership
+    description: |
+      Requiere rol `teacher`. No elimina físicamente la membership. El cambio
+      de rol o estado se registra con valores anterior y nuevo en auditoría.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/sections.yaml#/EnrollmentUpdate'
+    responses:
+      '200':
+        description: Membership actualizada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/sections.yaml#/Enrollment'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/institutions/{institutionSlug}/courses/{courseId}/modules:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/CourseId'
+  get:
+    tags:
+      - Modules
+    operationId: listCourseModules
+    summary: Listar módulos visibles del curso
+    description: Estudiantes reciben solo módulos publicados; el staff autorizado puede ver borradores.
+    responses:
+      '200':
+        description: Módulos visibles en orden.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/courses.yaml#/ModuleListResponse'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+  post:
+    tags:
+      - Modules
+    operationId: createCourseModule
+    summary: Crear un módulo del curso
+    description: Requiere rol `teacher`, porque el módulo tiene alcance de curso.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/courses.yaml#/ModuleCreate'
+    responses:
+      '201':
+        description: Módulo creado.
+        headers:
+          Location:
+            description: URI del módulo creado.
+            schema:
+              type: string
+              format: uri-reference
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/courses.yaml#/CourseModule'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/institutions/{institutionSlug}/courses/{courseId}/modules/order:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/CourseId'
+  put:
+    tags:
+      - Modules
+    operationId: reorderCourseModules
+    summary: Reemplazar atómicamente el orden de módulos
+    description: Requiere rol `teacher`.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/courses.yaml#/ModuleOrderRequest'
+    responses:
+      '200':
+        description: Orden actualizado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/courses.yaml#/ModuleListResponse'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/institutions/{institutionSlug}/modules/{moduleId}:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/ModuleId'
+  get:
+    tags:
+      - Modules
+    operationId: getCourseModule
+    summary: Consultar un módulo visible
+    responses:
+      '200':
+        description: Módulo solicitado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/courses.yaml#/CourseModule'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+  patch:
+    tags:
+      - Modules
+    operationId: updateCourseModule
+    summary: Actualizar un módulo
+    description: Requiere rol `teacher`.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/courses.yaml#/ModuleUpdate'
+    responses:
+      '200':
+        description: Módulo actualizado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/courses.yaml#/CourseModule'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/institutions/{institutionSlug}/modules/{moduleId}/publish:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/ModuleId'
+  post:
+    tags:
+      - Modules
+    operationId: publishCourseModule
+    summary: Publicar un módulo
+    description: Requiere `teacher` y genera un evento de auditoría inmutable.
+    responses:
+      '200':
+        description: Módulo publicado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/courses.yaml#/CourseModule'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+
+/api/v1/institutions/{institutionSlug}/modules/{moduleId}/unpublish:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/ModuleId'
+  post:
+    tags:
+      - Modules
+    operationId: unpublishCourseModule
+    summary: Ocultar un módulo publicado
+    description: Requiere `teacher` y genera un evento de auditoría inmutable.
+    responses:
+      '200':
+        description: Módulo ocultado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/courses.yaml#/CourseModule'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'

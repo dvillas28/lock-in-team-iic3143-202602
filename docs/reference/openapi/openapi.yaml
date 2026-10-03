@@ -1,0 +1,119 @@
+openapi: 3.1.0
+info:
+  title: AcademiX API
+  version: 0.2.0
+  description: |
+    Contrato HTTP del MVP académico multi-tenant de AcademiX.
+
+    El JWT identifica un User global. Los recursos académicos se solicitan bajo
+    `/api/v1/institutions/{institutionSlug}`. El slug no concede acceso: el
+    backend valida InstitutionMembership y permisos académicos antes de ejecutar
+    una operación. Los bodies no aceptan `institutionId` como fuente de scope.
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+servers:
+  - url: /
+    description: Host actual
+security:
+  - bearerAuth: []
+tags:
+  - name: Platform
+    description: Salud del servicio.
+  - name: Institutions
+    description: Descubrimiento de Institutions e identidad contextual.
+  - name: Courses
+    description: Consulta y configuración general de cursos.
+  - name: Sections
+    description: Secciones académicas de un curso.
+  - name: Enrollments
+    description: Participantes y roles contextuales por sección.
+  - name: Modules
+    description: Organización y publicación de módulos de contenido.
+  - name: Materials
+    description: Material markdown y archivos académicos publicados.
+  - name: Quizzes
+    description: Autoría, consulta y publicación de quizzes autocorregidos.
+  - name: Attempts
+    description: Intentos, respuestas, envío y cancelación de quizzes.
+  - name: Gradebook
+    description: Ponderaciones, notas, publicación y promedios derivados.
+  - name: Audit
+    description: Consulta inmutable del historial académico sensible.
+paths:
+  /health:
+    $ref: './paths/platform.yaml#/~1health'
+  /api/v1/institutions:
+    $ref: './paths/platform.yaml#/~1api~1v1~1institutions'
+  /api/v1/institutions/{institutionSlug}/me:
+    $ref: './paths/platform.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1me'
+  /api/v1/institutions/{institutionSlug}/users:
+    $ref: './paths/platform.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1users'
+  /api/v1/institutions/{institutionSlug}/courses:
+    $ref: './paths/courses.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1courses'
+  /api/v1/institutions/{institutionSlug}/courses/{courseId}:
+    $ref: './paths/courses.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1courses~1{courseId}'
+  /api/v1/institutions/{institutionSlug}/courses/{courseId}/sections:
+    $ref: './paths/sections.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1courses~1{courseId}~1sections'
+  /api/v1/institutions/{institutionSlug}/sections/{sectionId}:
+    $ref: './paths/sections.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1sections~1{sectionId}'
+  /api/v1/institutions/{institutionSlug}/sections/{sectionId}/enrollments:
+    $ref: './paths/sections.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1sections~1{sectionId}~1enrollments'
+  /api/v1/institutions/{institutionSlug}/sections/{sectionId}/enrollments/{enrollmentId}:
+    $ref: './paths/sections.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1sections~1{sectionId}~1enrollments~1{enrollmentId}'
+  /api/v1/institutions/{institutionSlug}/courses/{courseId}/modules:
+    $ref: './paths/sections.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1courses~1{courseId}~1modules'
+  /api/v1/institutions/{institutionSlug}/courses/{courseId}/modules/order:
+    $ref: './paths/sections.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1courses~1{courseId}~1modules~1order'
+  /api/v1/institutions/{institutionSlug}/modules/{moduleId}:
+    $ref: './paths/sections.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1modules~1{moduleId}'
+  /api/v1/institutions/{institutionSlug}/modules/{moduleId}/publish:
+    $ref: './paths/sections.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1modules~1{moduleId}~1publish'
+  /api/v1/institutions/{institutionSlug}/modules/{moduleId}/unpublish:
+    $ref: './paths/sections.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1modules~1{moduleId}~1unpublish'
+  /api/v1/institutions/{institutionSlug}/modules/{moduleId}/materials:
+    $ref: './paths/materials.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1modules~1{moduleId}~1materials'
+  /api/v1/institutions/{institutionSlug}/modules/{moduleId}/materials/files:
+    $ref: './paths/materials.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1modules~1{moduleId}~1materials~1files'
+  /api/v1/institutions/{institutionSlug}/materials/{materialId}:
+    $ref: './paths/materials.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1materials~1{materialId}'
+  /api/v1/institutions/{institutionSlug}/materials/{materialId}/content:
+    $ref: './paths/materials.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1materials~1{materialId}~1content'
+  /api/v1/institutions/{institutionSlug}/materials/{materialId}/publish:
+    $ref: './paths/materials.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1materials~1{materialId}~1publish'
+  /api/v1/institutions/{institutionSlug}/materials/{materialId}/unpublish:
+    $ref: './paths/materials.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1materials~1{materialId}~1unpublish'
+  /api/v1/institutions/{institutionSlug}/courses/{courseId}/quizzes:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1courses~1{courseId}~1quizzes'
+  /api/v1/institutions/{institutionSlug}/quizzes/{quizId}:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1quizzes~1{quizId}'
+  /api/v1/institutions/{institutionSlug}/quizzes/{quizId}/authoring:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1quizzes~1{quizId}~1authoring'
+  /api/v1/institutions/{institutionSlug}/quizzes/{quizId}/publish:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1quizzes~1{quizId}~1publish'
+  /api/v1/institutions/{institutionSlug}/sections/{sectionId}/quizzes/{quizId}/attempts:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1sections~1{sectionId}~1quizzes~1{quizId}~1attempts'
+  /api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1quiz-attempts~1{attemptId}'
+  /api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}/answers:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1quiz-attempts~1{attemptId}~1answers'
+  /api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}/submit:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1quiz-attempts~1{attemptId}~1submit'
+  /api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}/cancel:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1quiz-attempts~1{attemptId}~1cancel'
+  /api/v1/institutions/{institutionSlug}/quizzes/{quizId}/attempts:
+    $ref: './paths/quizzes.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1quizzes~1{quizId}~1attempts'
+  /api/v1/institutions/{institutionSlug}/courses/{courseId}/grade-items:
+    $ref: './paths/gradebook.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1courses~1{courseId}~1grade-items'
+  /api/v1/institutions/{institutionSlug}/courses/{courseId}/gradebook/weights:
+    $ref: './paths/gradebook.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1courses~1{courseId}~1gradebook~1weights'
+  /api/v1/institutions/{institutionSlug}/courses/{courseId}/gradebook:
+    $ref: './paths/gradebook.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1courses~1{courseId}~1gradebook'
+  /api/v1/institutions/{institutionSlug}/courses/{courseId}/gradebook/publications:
+    $ref: './paths/gradebook.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1courses~1{courseId}~1gradebook~1publications'
+  /api/v1/institutions/{institutionSlug}/courses/{courseId}/my-grades:
+    $ref: './paths/gradebook.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1courses~1{courseId}~1my-grades'
+  /api/v1/institutions/{institutionSlug}/courses/{courseId}/audit-events:
+    $ref: './paths/audit.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1courses~1{courseId}~1audit-events'
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: './components/security-schemes.yaml#/bearerAuth'

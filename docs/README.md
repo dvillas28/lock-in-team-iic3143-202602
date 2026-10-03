@@ -1,29 +1,47 @@
-# Documentacion
+# Documentación
 
-## Estructura
+## Fuente vigente
 
-- `deliveries/0/`: documentos base de la entrega inicial.
-- `adr/`: decisiones de arquitectura versionadas como ADR.
-- `guides/`: guias operativas del equipo y agentes.
-- `reference/`: material de referencia estable del dominio o del proyecto.
+La [Entrega 2](deliveries/2/README.md) es la base documental actual de AcademiX.
+Define una PostgreSQL compartida, aislamiento lógico por `Institution`, User
+global con memberships y despliegue en Railway.
 
-## Guias
+- [Alcance vigente](deliveries/2/02-scope.md)
+- [Casos de uso y requerimientos](deliveries/2/03-use-cases-and-requirements.md)
+- [Arquitectura](deliveries/2/04-architecture.md)
+- [Modelo de dominio y UML](deliveries/2/05-domain-model.md)
+- [Modelo de datos](deliveries/2/06-data-model.md)
+- [Riesgos](deliveries/2/07-risks.md)
+- [Plan de walking skeleton](deliveries/2/09-walking-skeleton-plan.md)
+- [Estado de la entrega](deliveries/2/10-status.md)
+
+## Decisiones de arquitectura
+
+- [PostgreSQL compartida para multi-tenancy](adr/adopt-shared-postgresql-multitenancy.md)
+- [Alcance del MVP de la Entrega 2](adr/choose-delivery-2-mvp-scope.md)
+- [Dominio y API de la Entrega 2](adr/align-delivery-2-domain-and-api.md)
+- [Cierre de intentos de quiz abandonados](adr/close-abandoned-quiz-attempts.md)
+
+Los estados de los ADR indican cuáles fueron reemplazados parcialmente. El ADR
+de PostgreSQL compartida es la autoridad vigente para persistencia, tenancy y
+plataforma de despliegue.
+
+## Contratos
+
+- [OpenAPI de AcademiX](reference/openapi/README.md)
+
+## Guías
 
 - [Spec Kit](guides/speckit-flow.md)
 - [CodeGraph](guides/codegraph-flow.md)
 - [Git Flow](guides/git-flow.md)
 - [Skills de agentes](guides/agent-skills.md)
 
-## Entrega Inicial
+## Documentación histórica
 
-- [Design doc Entrega 1](deliveries/0/design-doc-entrega-1.md)
-- [Alcance del producto](deliveries/0/scope.md)
-- [Requisitos](deliveries/0/requirements.md)
-- [Historias de usuario](deliveries/0/user-stories.md)
-- [Usuarios y modelos de procesos BPMN](deliveries/0/bpmn/README.md)
-- [Arquitectura](deliveries/0/architecture.md)
-- [Roadmap](deliveries/0/roadmap.md)
-- [Checklist Entrega 1](deliveries/0/checklist.md)
-- [Glosario](deliveries/0/glossary.md)
-- [Notas de descubrimiento](deliveries/0/discovery-notes.md)
-- [Plan documental](deliveries/0/task_plan.md)
+Las [Entregas 0](deliveries/0/) y [1](deliveries/1/) se conservan sin reescribir
+porque registran lo presentado en esas iteraciones. Pueden contener referencias
+a database-per-tenant, registry DB, GCP u otro alcance descartado. No deben
+usarse como fuente para implementar la arquitectura actual.
+
+Los PDF y ZIP de entregas también son artefactos históricos y no se modifican.

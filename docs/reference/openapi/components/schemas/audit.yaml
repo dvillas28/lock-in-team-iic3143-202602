@@ -1,0 +1,79 @@
+AuditChanges:
+  type: object
+  additionalProperties: false
+  properties:
+    before:
+      type: [object, 'null']
+      additionalProperties: true
+    after:
+      type: [object, 'null']
+      additionalProperties: true
+  description: Snapshot sanitizado; nunca contiene secretos, credenciales ni storage keys.
+
+AuditEvent:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - institutionId
+    - actorUserId
+    - action
+    - resourceType
+    - resourceId
+    - courseId
+    - sectionId
+    - occurredAt
+    - changes
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    institutionId:
+      type: string
+      format: uuid
+      readOnly: true
+      description: Límite institucional interno derivado del contexto de la request.
+    actorUserId:
+      type: string
+      format: uuid
+      readOnly: true
+      description: Derivado de la identidad autenticada.
+    action:
+      type: string
+      examples:
+        - quiz.published
+        - quizAttempt.cancelled
+        - enrollment.roleChanged
+        - gradeWeights.updated
+        - grades.published
+    resourceType:
+      type: string
+    resourceId:
+      type: string
+      format: uuid
+    courseId:
+      type: string
+      format: uuid
+    sectionId:
+      type: [string, 'null']
+      format: uuid
+    occurredAt:
+      type: string
+      format: date-time
+      readOnly: true
+    changes:
+      $ref: '#/AuditChanges'
+
+AuditEventListResponse:
+  unevaluatedProperties: false
+  allOf:
+    - $ref: './common.yaml#/PageInfo'
+    - type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/AuditEvent'
