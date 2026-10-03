@@ -17,7 +17,7 @@ Los endpoints académicos declaran la Institution en el path:
 
 El slug solicita un contexto; no autentica ni autoriza. Antes de ejecutar una
 operación, el backend resuelve la Institution, valida una
-InstitutionMembership activa y luego aplica CourseMembership, Enrollment y los
+InstitutionMembership activa y luego aplica Enrollment y los
 permisos del recurso.
 
 `GET /health` es público. `GET /api/v1/institutions` requiere autenticación y

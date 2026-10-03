@@ -48,7 +48,7 @@
       - Courses
     operationId: updateCourse
     summary: Actualizar configuración general del curso
-    description: Requiere rol `coordinator` en el curso. Los cambios sensibles generan auditoría.
+    description: Requiere rol `teacher` en el curso. Los cambios sensibles generan auditoría.
     requestBody:
       required: true
       content:

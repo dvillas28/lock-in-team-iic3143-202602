@@ -7,7 +7,7 @@
       - Gradebook
     operationId: listCourseGradeItems
     summary: Listar elementos del libro de notas
-    description: Disponible para coordinator y staff autorizado del curso.
+    description: Disponible para teacher y staff autorizado del curso.
     responses:
       '200':
         description: Grade items y suma actual de ponderaciones.
@@ -34,7 +34,7 @@
     operationId: updateGradebookWeights
     summary: Reemplazar ponderaciones del curso de forma atómica
     description: |
-      Requiere rol `coordinator`. El conjunto completo debe sumar 100%. Si existe
+      Requiere rol `teacher`. El conjunto completo debe sumar 100%. Si existe
       cualquier nota publicada del curso, responde 409 con código
       `GRADE_WEIGHTS_LOCKED`. Tampoco se agregan grade items tras la primera
       publicación. Todo cambio exitoso genera un evento de auditoría con before y after.
@@ -74,7 +74,7 @@
     operationId: getCourseGradebook
     summary: Consultar libro de notas docente
     description: |
-      Coordinator puede consultar el curso completo. Teacher y assistant deben
+      Teacher puede consultar el curso completo. Teacher y assistant deben
       filtrar y quedan limitados a secciones donde tengan membership activa.
       Assistant es de solo lectura.
     parameters:
@@ -107,7 +107,7 @@
     operationId: publishGrades
     summary: Publicar notas por grade items y secciones
     description: |
-      Coordinator puede publicar en cualquier sección del curso. Teacher solo en
+      Teacher puede publicar en cualquier sección del curso. Teacher solo en
       sus secciones. Assistant y student no pueden publicar. La primera
       publicación exige ponderaciones del curso que sumen 100%. Toda publicación
       exige ausencia de intentos activos para los estudiantes y quizzes de las

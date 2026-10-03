@@ -26,7 +26,7 @@
       - Materials
     operationId: createMarkdownMaterial
     summary: Crear material markdown
-    description: Requiere rol `coordinator`, porque el material tiene alcance de curso.
+    description: Requiere rol `teacher`, porque el material tiene alcance de curso.
     requestBody:
       required: true
       content:
@@ -67,7 +67,7 @@
     operationId: uploadFileMaterial
     summary: Subir un archivo como material
     description: |
-      Requiere rol `coordinator`. Acepta PDF, CSV, XLSX, TXT, JPEG y PNG. El
+      Requiere rol `teacher`. Acepta PDF, CSV, XLSX, TXT, JPEG y PNG. El
       límite máximo de tamaño permanece pendiente; el binario se envía como
       multipart y nunca como Base64 en JSON.
     parameters:
@@ -134,7 +134,7 @@
       - Materials
     operationId: updateMaterial
     summary: Actualizar metadatos o contenido editable de un material
-    description: Requiere `coordinator`; no reemplaza el binario de un archivo existente.
+    description: Requiere `teacher`; no reemplaza el binario de un archivo existente.
     requestBody:
       required: true
       content:
@@ -222,7 +222,7 @@
       - Materials
     operationId: publishMaterial
     summary: Publicar material
-    description: Requiere `coordinator` y genera un evento de auditoría inmutable.
+    description: Requiere `teacher` y genera un evento de auditoría inmutable.
     responses:
       '200':
         description: Material publicado.
@@ -252,7 +252,7 @@
       - Materials
     operationId: unpublishMaterial
     summary: Ocultar material publicado
-    description: Requiere `coordinator` y genera un evento de auditoría inmutable.
+    description: Requiere `teacher` y genera un evento de auditoría inmutable.
     responses:
       '200':
         description: Material ocultado.

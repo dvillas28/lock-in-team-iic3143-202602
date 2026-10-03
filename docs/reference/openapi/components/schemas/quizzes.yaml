@@ -262,7 +262,7 @@ QuizCreate:
     sectionId:
       type: [string, 'null']
       format: uuid
-      description: Null crea un quiz de alcance de curso; requiere coordinator.
+      description: Null crea un quiz de alcance de curso dentro del alcance docente.
     title:
       type: string
     instructions:
@@ -277,6 +277,11 @@ QuizCreate:
       type: [integer, 'null']
       minimum: 1
       description: Omitido o null permite intentos ilimitados; un entero positivo limita los iniciados.
+    questions:
+      type: array
+      description: Pauta anidada editable mientras el quiz esté en draft.
+      items:
+        $ref: '#/QuestionCreate'
 
 QuizUpdate:
   type: object
@@ -297,6 +302,11 @@ QuizUpdate:
       type: [integer, 'null']
       minimum: 1
       description: Null permite intentos ilimitados; un entero positivo limita los intentos iniciados.
+    questions:
+      type: array
+      description: Reemplaza la pauta completa mientras el quiz esté en draft.
+      items:
+        $ref: '#/QuestionCreate'
 
 AlternativeInput:
   type: object
@@ -321,24 +331,6 @@ QuestionCreate:
     - position
     - points
     - alternatives
-  properties:
-    prompt:
-      type: string
-    position:
-      type: integer
-    points:
-      type: number
-      exclusiveMinimum: 0
-    alternatives:
-      type: array
-      minItems: 2
-      items:
-        $ref: '#/AlternativeInput'
-
-QuestionUpdate:
-  type: object
-  additionalProperties: false
-  minProperties: 1
   properties:
     prompt:
       type: string

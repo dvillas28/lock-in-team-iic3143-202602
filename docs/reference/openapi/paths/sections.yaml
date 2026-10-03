@@ -7,7 +7,7 @@
       - Sections
     operationId: listSections
     summary: Listar secciones visibles del curso
-    description: Coordinators ven todas; los demás roles solo sus secciones.
+    description: Teachers ven todas; los demás roles solo sus secciones.
     responses:
       '200':
         description: Secciones visibles.
@@ -26,7 +26,7 @@
       - Sections
     operationId: createSection
     summary: Crear una sección del curso
-    description: Requiere rol `coordinator` en el curso.
+    description: Requiere rol `teacher` en el curso.
     requestBody:
       required: true
       content:
@@ -86,7 +86,7 @@
       - Sections
     operationId: updateSection
     summary: Actualizar una sección
-    description: Requiere rol `coordinator` en el curso de la sección.
+    description: Requiere rol `teacher` en el curso de la sección.
     requestBody:
       required: true
       content:
@@ -122,7 +122,7 @@
       - Enrollments
     operationId: listSectionEnrollments
     summary: Listar memberships de una sección autorizada
-    description: Coordinators ven el curso completo; teachers y assistants solo sus secciones.
+    description: Teachers ven el curso completo; teachers y assistants solo sus secciones.
     parameters:
       - $ref: '../components/parameters.yaml#/Cursor'
       - $ref: '../components/parameters.yaml#/Limit'
@@ -147,7 +147,7 @@
     operationId: createSectionEnrollment
     summary: Crear una membership de sección
     description: |
-      Requiere rol `coordinator`. Una persona puede tener varios roles activos
+      Requiere rol `teacher`. Una persona puede tener varios roles activos
       en la misma sección, pero no dos memberships activas del mismo rol. La
       creación genera un evento de auditoría.
     parameters:
@@ -195,7 +195,7 @@
     operationId: updateSectionEnrollment
     summary: Cambiar rol o desactivar una membership
     description: |
-      Requiere rol `coordinator`. No elimina físicamente la membership. El cambio
+      Requiere rol `teacher`. No elimina físicamente la membership. El cambio
       de rol o estado se registra con valores anterior y nuevo en auditoría.
     requestBody:
       required: true
@@ -251,7 +251,7 @@
       - Modules
     operationId: createCourseModule
     summary: Crear un módulo del curso
-    description: Requiere rol `coordinator`, porque el módulo tiene alcance de curso.
+    description: Requiere rol `teacher`, porque el módulo tiene alcance de curso.
     requestBody:
       required: true
       content:
@@ -293,7 +293,7 @@
       - Modules
     operationId: reorderCourseModules
     summary: Reemplazar atómicamente el orden de módulos
-    description: Requiere rol `coordinator`.
+    description: Requiere rol `teacher`.
     requestBody:
       required: true
       content:
@@ -347,7 +347,7 @@
       - Modules
     operationId: updateCourseModule
     summary: Actualizar un módulo
-    description: Requiere rol `coordinator`.
+    description: Requiere rol `teacher`.
     requestBody:
       required: true
       content:
@@ -383,7 +383,7 @@
       - Modules
     operationId: publishCourseModule
     summary: Publicar un módulo
-    description: Requiere `coordinator` y genera un evento de auditoría inmutable.
+    description: Requiere `teacher` y genera un evento de auditoría inmutable.
     responses:
       '200':
         description: Módulo publicado.
@@ -411,7 +411,7 @@
       - Modules
     operationId: unpublishCourseModule
     summary: Ocultar un módulo publicado
-    description: Requiere `coordinator` y genera un evento de auditoría inmutable.
+    description: Requiere `teacher` y genera un evento de auditoría inmutable.
     responses:
       '200':
         description: Módulo ocultado.

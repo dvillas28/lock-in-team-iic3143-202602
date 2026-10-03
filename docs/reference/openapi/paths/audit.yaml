@@ -8,7 +8,7 @@
     operationId: listCourseAuditEvents
     summary: Consultar historial de auditoría del curso
     description: |
-      Requiere rol `coordinator`. Los eventos son generados por operaciones de
+      Requiere rol `teacher`. Los eventos son generados por operaciones de
       dominio y son inmutables; la API no permite crearlos, modificarlos ni eliminarlos.
       Los cambios se sanitizan para no incluir secretos ni ubicaciones internas.
     parameters:

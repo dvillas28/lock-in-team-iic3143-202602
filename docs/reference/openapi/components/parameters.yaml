@@ -90,14 +90,6 @@ QuizId:
     type: string
     format: uuid
 
-QuestionId:
-  name: questionId
-  in: path
-  required: true
-  schema:
-    type: string
-    format: uuid
-
 AttemptId:
   name: attemptId
   in: path

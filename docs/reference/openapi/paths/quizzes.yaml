@@ -8,8 +8,7 @@
     operationId: listCourseQuizzes
     summary: Listar quizzes visibles del curso
     description: |
-      Estudiantes ven quizzes publicados aplicables a su sección. Teachers y
-      assistants quedan restringidos a sus secciones; coordinators ven el curso completo.
+      Estudiantes ven quizzes publicados aplicables a su sección. Teachers y assistants quedan restringidos a sus secciones; teachers ven su alcance académico.
     parameters:
       - $ref: '../components/parameters.yaml#/SectionIdFilter'
     responses:
@@ -33,8 +32,7 @@
     operationId: createQuiz
     summary: Crear un quiz en estado draft
     description: |
-      Coordinators pueden crear quizzes de curso o sección. Teachers pueden crear
-      únicamente quizzes asociados a una sección donde tengan rol `teacher`.
+      Teachers pueden crear quizzes de curso o sección dentro de su alcance académico.
       Assistants y students no pueden crear quizzes.
     requestBody:
       required: true
@@ -95,8 +93,7 @@
     operationId: updateQuiz
     summary: Actualizar un quiz editable
     description: |
-      Solo se admite en estado draft. Coordinator puede modificar cualquier quiz
-      del curso; teacher únicamente quizzes de sus secciones. Un quiz publicado
+      Solo se admite en estado draft. Teacher puede modificar quizzes dentro de su alcance académico. Un quiz publicado
       o utilizado produce 409 Conflict.
     requestBody:
       required: true
@@ -134,8 +131,7 @@
     operationId: getQuizAuthoringView
     summary: Consultar quiz con pauta de autoría
     description: |
-      Coordinator puede consultar cualquier sección. Teacher puede consultar sus
-      secciones. Assistants y students no acceden a la vista de autoría; para
+      Teacher puede consultar la pauta dentro de su alcance académico. Assistants y students no acceden a la vista de autoría; para
       revisión de intentos existe una representación académica separada.
     responses:
       '200':
@@ -153,106 +149,6 @@
       '404':
         $ref: '../components/responses.yaml#/NotFound'
 
-/api/v1/institutions/{institutionSlug}/quizzes/{quizId}/questions:
-  parameters:
-    - $ref: '../components/parameters.yaml#/InstitutionSlug'
-    - $ref: '../components/parameters.yaml#/QuizId'
-  post:
-    tags:
-      - Quizzes
-    operationId: createQuizQuestion
-    summary: Agregar una pregunta a un quiz draft
-    description: Requiere coordinator o teacher autorizado para la sección del quiz.
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '../components/schemas/quizzes.yaml#/QuestionCreate'
-    responses:
-      '201':
-        description: Pregunta creada.
-        headers:
-          Location:
-            description: URI de la pregunta creada.
-            schema:
-              type: string
-              format: uri-reference
-        content:
-          application/json:
-            schema:
-              $ref: '../components/schemas/quizzes.yaml#/QuestionAuthoringView'
-      '400':
-        $ref: '../components/responses.yaml#/BadRequest'
-      '401':
-        $ref: '../components/responses.yaml#/Unauthorized'
-      '403':
-        $ref: '../components/responses.yaml#/Forbidden'
-      '404':
-        $ref: '../components/responses.yaml#/NotFound'
-      '409':
-        $ref: '../components/responses.yaml#/Conflict'
-      '422':
-        $ref: '../components/responses.yaml#/UnprocessableEntity'
-
-/api/v1/institutions/{institutionSlug}/quizzes/{quizId}/questions/{questionId}:
-  parameters:
-    - $ref: '../components/parameters.yaml#/InstitutionSlug'
-    - $ref: '../components/parameters.yaml#/QuizId'
-    - $ref: '../components/parameters.yaml#/QuestionId'
-  patch:
-    tags:
-      - Quizzes
-    operationId: updateQuizQuestion
-    summary: Actualizar una pregunta de un quiz draft
-    description: Requiere coordinator o teacher autorizado para la sección del quiz.
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '../components/schemas/quizzes.yaml#/QuestionUpdate'
-    responses:
-      '200':
-        description: Pregunta actualizada.
-        content:
-          application/json:
-            schema:
-              $ref: '../components/schemas/quizzes.yaml#/QuestionAuthoringView'
-      '400':
-        $ref: '../components/responses.yaml#/BadRequest'
-      '401':
-        $ref: '../components/responses.yaml#/Unauthorized'
-      '403':
-        $ref: '../components/responses.yaml#/Forbidden'
-      '404':
-        $ref: '../components/responses.yaml#/NotFound'
-      '409':
-        $ref: '../components/responses.yaml#/Conflict'
-      '422':
-        $ref: '../components/responses.yaml#/UnprocessableEntity'
-  delete:
-    tags:
-      - Quizzes
-    operationId: deleteQuizQuestion
-    summary: Eliminar una pregunta de un quiz draft
-    description: |
-      Requiere coordinator o teacher autorizado para la sección del quiz. No está
-      permitido después de publicar o utilizar el quiz.
-    responses:
-      '204':
-        description: Pregunta eliminada.
-      '400':
-        $ref: '../components/responses.yaml#/BadRequest'
-      '401':
-        $ref: '../components/responses.yaml#/Unauthorized'
-      '403':
-        $ref: '../components/responses.yaml#/Forbidden'
-      '404':
-        $ref: '../components/responses.yaml#/NotFound'
-      '409':
-        $ref: '../components/responses.yaml#/Conflict'
-
 /api/v1/institutions/{institutionSlug}/quizzes/{quizId}/publish:
   parameters:
     - $ref: '../components/parameters.yaml#/InstitutionSlug'
@@ -264,8 +160,7 @@
     summary: Publicar un quiz válido
     description: |
       Valida fechas, puntajes, preguntas, al menos dos alternativas con IDs únicos
-      y exactamente una alternativa correcta por pregunta. Genera auditoría. Coordinator puede
-      publicar cualquier quiz; teacher solo quizzes de sus secciones. La operación
+      y exactamente una alternativa correcta por pregunta. Genera auditoría. Teacher puede publicar quizzes dentro de su alcance académico. La operación
       asegura que exista un único GradeItem vinculado al quiz; se rechaza
       si ya se publicó alguna nota del curso.
     responses:
@@ -306,8 +201,7 @@
       snapshot histórico inmutable y `attemptNumber` ordena los intentos.
       `closesAt` limita la disponibilidad del quiz, pero no cancela por sí solo
       un intento ya iniciado. Los intentos cancelados cuentan entre los iniciados.
-      Si el usuario puede consultar la pauta de ese quiz como coordinator o
-      teacher, no puede rendirlo aunque también tenga rol student.
+      Si el usuario puede consultar la pauta de ese quiz como teacher, no puede rendirlo aunque también tenga rol student.
     parameters:
       - $ref: '../components/parameters.yaml#/IdempotencyKey'
     responses:
@@ -347,7 +241,7 @@
     summary: Consultar un intento autorizado
     description: |
       El estudiante solo puede consultar su intento y recibe la vista estudiantil,
-      sin pauta ni corrección. Coordinator y staff de la sección pueden recibir la
+      sin pauta ni corrección. Teacher y staff de la sección pueden recibir la
       vista académica según sus permisos.
     responses:
       '200':
@@ -467,7 +361,7 @@
     description: |
       El estudiante propietario puede cancelar su intento solo si mantiene una
       membership `student` activa en el curso y no tiene acceso actual de autoría
-      ni a la pauta del quiz. Coordinator con membership activa en el curso o
+      ni a la pauta del quiz. Teacher con membership activa en el curso o
       teacher con membership activa en la sección histórica del intento también
       pueden cancelarlo para resolver un intento abandonado. El servidor revalida
       estos permisos al cancelar; la falta de autorización produce 403 Forbidden.
@@ -502,7 +396,7 @@
     operationId: listQuizAttempts
     summary: Listar intentos para revisión académica
     description: |
-      Coordinator puede consultar todas las secciones del curso. Teacher y
+      Teacher puede consultar todas las secciones del curso. Teacher y
       assistant solo secciones donde tengan membership activa. Students no tienen acceso.
     parameters:
       - $ref: '../components/parameters.yaml#/SectionIdFilter'

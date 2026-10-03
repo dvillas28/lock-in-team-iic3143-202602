@@ -87,10 +87,6 @@ paths:
     $ref: './paths/quizzes.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1quizzes~1{quizId}'
   /api/v1/institutions/{institutionSlug}/quizzes/{quizId}/authoring:
     $ref: './paths/quizzes.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1quizzes~1{quizId}~1authoring'
-  /api/v1/institutions/{institutionSlug}/quizzes/{quizId}/questions:
-    $ref: './paths/quizzes.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1quizzes~1{quizId}~1questions'
-  /api/v1/institutions/{institutionSlug}/quizzes/{quizId}/questions/{questionId}:
-    $ref: './paths/quizzes.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1quizzes~1{quizId}~1questions~1{questionId}'
   /api/v1/institutions/{institutionSlug}/quizzes/{quizId}/publish:
     $ref: './paths/quizzes.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1quizzes~1{quizId}~1publish'
   /api/v1/institutions/{institutionSlug}/sections/{sectionId}/quizzes/{quizId}/attempts:

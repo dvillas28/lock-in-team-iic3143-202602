@@ -51,21 +51,6 @@ InstitutionMembershipSummary:
       readOnly: true
   description: Pertenencia institucional; no contiene roles académicos.
 
-CourseMembershipSummary:
-  type: object
-  additionalProperties: false
-  required:
-    - courseId
-    - role
-  properties:
-    courseId:
-      type: string
-      format: uuid
-    role:
-      type: string
-      enum:
-        - coordinator
-
 SectionMembershipSummary:
   type: object
   additionalProperties: false
@@ -95,7 +80,6 @@ CurrentUser:
     - email
     - name
     - institutionMembership
-    - courseMemberships
     - sectionMemberships
   properties:
     id:
@@ -109,10 +93,6 @@ CurrentUser:
       type: string
     institutionMembership:
       $ref: '#/InstitutionMembershipSummary'
-    courseMemberships:
-      type: array
-      items:
-        $ref: '#/CourseMembershipSummary'
     sectionMemberships:
       type: array
       items:

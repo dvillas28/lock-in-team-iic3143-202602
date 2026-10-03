@@ -61,7 +61,7 @@
       - Enrollments
     operationId: searchInstitutionUsers
     summary: Buscar participantes existentes de la institución
-    description: Reservado a coordinators para seleccionar usuarios al gestionar memberships académicas.
+    description: Reservado a teachers para seleccionar usuarios al gestionar memberships académicas.
     parameters:
       - $ref: '../components/parameters.yaml#/Search'
       - $ref: '../components/parameters.yaml#/Cursor'
