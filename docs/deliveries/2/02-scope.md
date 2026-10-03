@@ -22,10 +22,11 @@ No intenta replicar un LMS completo ni anticipar infraestructura de escala.
 - Consultas institution-scoped y tests explícitos de acceso cruzado.
 - Portal común para elegir una Institution visible.
 - Dos experiencias UI: docente y estudiante.
-- Rol `coordinator` por curso y roles `teacher`, `student`, `assistant` por
-  sección.
+- Roles por sección: `teacher`, `student` y `assistant`.
 - Un User puede acumular roles, incluso varios en una misma sección.
 - Cursos, secciones, módulos y material académico.
+- Los módulos y materiales pertenecen al curso completo; todas las secciones del
+  curso ven el mismo material publicado.
 - Material markdown y archivos PDF, CSV, XLSX, TXT, JPEG y PNG cuando exista un
   adaptador de almacenamiento.
 - Quizzes de alternativas con pauta protegida e intentos configurables.
@@ -36,16 +37,17 @@ No intenta replicar un LMS completo ni anticipar infraestructura de escala.
 
 ## Fuera del MVP
 
-- Administrador institucional separado: el coordinador cubre la gestión mínima.
+- Administrador institucional separado y RBAC completo.
 - Creación dinámica de Institutions desde UI o API.
 - Jerarquías de facultad, departamento, campus u otra unidad organizacional.
 - Row-Level Security; queda como posible defensa en profundidad futura.
 - Sharding, particionamiento y routing de bases.
 - Restore lógico de una Institution individual.
-- Proveedor concreto para object storage; los binarios se incorporan cuando su
-  implementación lo requiera.
+- Implementación completa de carga/descarga de binarios; Railway Bucket queda
+  definido como object storage objetivo, pero el MVP académico parte con
+  material markdown.
 - Branding, SSO, locale, settings arbitrarios e integraciones por Institution.
-- Redis, workers, réplicas, load balancer propio y microservicios.
+- Redis, workers, load balancer propio y microservicios.
 - Entregas manuales, corrección manual compleja y recorrecciones.
 - Chat, IA, calendario y anuncios.
 
@@ -56,7 +58,7 @@ La demo es aceptable si prueba que:
 - UC y UTFSM coexisten en la misma PostgreSQL sin exponer datos cruzados;
 - una identidad global solo accede a Institutions con membership activa;
 - recursos e identificadores de otra Institution se tratan como no visibles;
-- un coordinador o docente solo actúa dentro de su alcance académico;
+- un docente solo administra cursos y secciones donde tiene rol `teacher`;
 - un estudiante ve únicamente material y quizzes autorizados y sus propias
   notas publicadas;
 - un quiz produce una nota desde el último intento calificado y la refleja en el

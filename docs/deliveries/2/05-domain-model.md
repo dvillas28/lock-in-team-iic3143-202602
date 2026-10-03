@@ -9,8 +9,8 @@ lógico y `institution_id` delimita todos los datos académicos tenant-owned. UC
 y UTFSM son dos Institutions dentro de la misma base.
 
 `User` es global. Una persona puede acceder a varias Institutions mediante
-`InstitutionMembership`. Los roles académicos continúan en el curso o sección
-correspondiente y nunca se deducen solo de la pertenencia institucional.
+`InstitutionMembership`. Los roles académicos viven en las secciones mediante
+`Enrollment`; no existe un RBAC completo ni un coordinador separado en el MVP.
 
 ## Identidad y contexto institucional
 
@@ -45,13 +45,6 @@ Ramo semestral concreto, por ejemplo “Ingeniería de Software” en `2026-2`.
 Agrupa secciones, módulos, material, quizzes y libro de notas. Código y periodo
 son únicos dentro de la Institution, no globalmente.
 
-### CourseMembership
-
-Pertenencia de un User a un Course con rol `coordinator`. Requiere una
-InstitutionMembership activa en la misma Institution. El coordinador administra
-el curso completo; puede haber varios coordinadores. El primero se asigna
-atómicamente al aprovisionar el curso.
-
 ### Section
 
 Paralelo de un Course. Hereda su contexto académico, pero conserva
@@ -60,25 +53,43 @@ cruzada mediante FK compuesta.
 
 ### Enrollment
 
-Relación User-Section-rol. Los roles permitidos son `teacher`, `student` y
-`assistant`. Requiere InstitutionMembership activa y admite varios roles
-distintos para la misma persona en una sección, pero no duplica el mismo rol
-activo.
+Relación central User-Section-rol. Une a una persona con una sección específica
+de un curso dentro de una Institution. Desde Enrollment se responde:
+
+- a qué Institution pertenece el contexto, por `institution_id`;
+- a qué Course pertenece, transitivamente por Section;
+- en qué Section participa;
+- con qué rol académico participa.
+
+Los roles permitidos son `teacher`, `student` y `assistant`. Requiere
+InstitutionMembership activa y admite varios roles distintos para la misma
+persona en una sección, pero no duplica el mismo rol activo.
+
+`teacher` es el rol docente administrativo del MVP. Un docente con rol activo en
+una sección puede crear y administrar contenido, quizzes, notas y configuración
+del curso dentro del alcance operativo acordado. `assistant` apoya el seguimiento
+académico sin administrar la configuración central. `student` consume material,
+rinde quizzes y consulta sus notas publicadas.
 
 ### CourseModule y Material
 
 CourseModule organiza el contenido de un Course. Material pertenece a un módulo
-y contiene markdown o metadatos de un archivo. Cuando existan binarios, usarán
-almacenamiento compartido con namespace por Institution y acceso mediado por el
-backend; el proveedor no forma parte del MVP actual.
+y contiene markdown o metadatos de un archivo. En el MVP, módulos y materiales
+tienen alcance de curso: todas las secciones de ese curso ven el mismo contenido
+publicado. La Section solo determina si el usuario pertenece al Course mediante
+Enrollment.
+
+Cuando existan binarios, usarán Railway Bucket o storage S3-compatible
+equivalente, con namespace por Institution y acceso mediado por el backend.
 
 Solo el contenido publicado es visible para estudiantes autorizados.
 
-### Quiz y Question
+### Quiz
 
 Un Quiz tiene alcance de Course o de una Section del mismo Course. Define un
-máximo positivo de intentos o `null` para intentos ilimitados. Question y sus
-alternativas forman la pauta, visible únicamente en vistas autorizadas.
+máximo positivo de intentos o `null` para intentos ilimitados. Las preguntas y
+alternativas forman una pauta JSON anidada en el Quiz, visible únicamente en
+vistas autorizadas.
 
 Al publicar se valida la pauta. Después del primer intento no se modifican
 preguntas, alternativas, respuestas correctas, puntajes ni política de intentos.
@@ -99,9 +110,14 @@ esté publicada. No se permiten nuevos intentos tras publicar esa nota.
 
 ### GradeItem y Grade
 
-GradeItem representa una evaluación ponderada del Course y se vincula a un Quiz
-de la misma Institution y Course. Grade es la nota vigente de un estudiante para
-ese ítem y conserva Section y QuizAttempt que la originaron.
+GradeItem representa una evaluación ponderada del Course: por ejemplo “Quiz 1”
+con peso 20 %. Es parte de la estructura del libro de notas y existe una vez por
+evaluación.
+
+Grade representa el resultado de un estudiante en un GradeItem: por ejemplo
+“Sofía obtuvo 6.2 en Quiz 1”. Conserva Section y QuizAttempt para saber desde
+qué sección e intento salió esa nota. En otras palabras, GradeItem define qué se
+evalúa y cuánto pesa; Grade guarda la nota concreta de cada estudiante.
 
 La escala chilena, redondeo `HALF_UP`, promedio parcial y bloqueo tras publicar
 se mantienen como reglas del MVP. Una corrección de una nota publicada requiere
@@ -118,12 +134,11 @@ transacción que el cambio y nunca incluye secretos, claves internas ni pautas.
 ```txt
 User 1 -> N InstitutionMembership <- N Institution
 Institution 1 -> N Course
-Course 1 -> N CourseMembership <- N User
 Course 1 -> N Section
 Section 1 -> N Enrollment <- N User
 Course 1 -> N CourseModule -> N Material
 Course 1 -> N Quiz; Section 0..1 -> N Quiz
-Quiz 1 -> N Question
+Quiz 1 -> questions jsonb
 Quiz 1 -> N QuizAttempt <- N User
 Section 1 -> N QuizAttempt
 Quiz 1 -> 0..1 GradeItem -> N Grade
@@ -143,7 +158,7 @@ Para `/api/v1/institutions/{institutionSlug}/...`:
 2. resolver Institution por slug;
 3. responder `404` si no existe o no es visible;
 4. validar InstitutionMembership activa;
-5. validar CourseMembership, Enrollment y permisos específicos;
+5. validar Enrollment y permisos específicos;
 6. ejecutar la operación bajo `institution_id`;
 7. confirmar cambio y auditoría atómicamente cuando corresponda.
 
@@ -154,8 +169,8 @@ recurso visible sobre el cual falta permiso produce `403`.
 
 - Toda entidad académica tiene `institution_id`.
 - Las FK tenant-owned incluyen `institution_id` para impedir cruces.
-- User es global, pero CourseMembership y Enrollment solo pueden referenciarlo
-  si existe InstitutionMembership correspondiente.
+- User es global, pero Enrollment y autorías académicas solo pueden
+  referenciarlo si existe InstitutionMembership correspondiente.
 - Quiz y Section deben pertenecer al mismo Course e Institution.
 - Grade debe corresponder al mismo estudiante, Section, Quiz, GradeItem e
   Institution que QuizAttempt.

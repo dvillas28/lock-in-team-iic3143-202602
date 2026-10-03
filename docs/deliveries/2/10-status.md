@@ -5,12 +5,16 @@
 - Decisión de PostgreSQL compartida registrada en un ADR.
 - Institution definida como tenant lógico con `institution_id`.
 - User global e InstitutionMembership modelados conceptualmente.
-- Scope, requisitos y arquitectura alineados a paths institucionales.
+- Scope, requisitos y arquitectura alineados a rutas institucionales.
 - Modelo de dominio, UML y modelo lógico institution-aware.
+- Catálogo de datos con tablas, columnas, tipos, PK/FK y descripciones.
 - FK compuestas, unicidades e índices conceptuales documentados.
-- Riesgos y planes alineados al aislamiento lógico.
+- Riesgos en formato de planilla con responsables, probabilidad, impacto,
+  estado, mitigación y contingencia.
+- Plan de siete semanas con responsables, prioridades y esfuerzo grueso.
 - Railway definido como plataforma de despliegue vigente.
 - Contrato OpenAPI institucional y política 401/403/404 documentados.
+- Informe, presentación PDF y guía oral generados desde LaTeX/Markdown.
 
 ## Completo en el walking skeleton
 
@@ -35,10 +39,15 @@
 - constraints y FK institution-aware ejecutables;
 - tests de aislamiento entre Institutions.
 
+## Falta para cierre operativo de la entrega
+
+- Ensayo del relato de 10 a 15 minutos.
+- Validación final de riesgos con cada responsable.
+- Confirmación de links públicos o capturas finales antes del envío.
+
 ## Falta para el MVP académico
 
-- Courses y Sections;
-- CourseMemberships y Enrollments;
+- Courses, Sections y Enrollments;
 - material markdown y, posteriormente, archivos;
 - quizzes con pauta protegida e intentos;
 - cálculo y publicación de Grades;
@@ -54,7 +63,6 @@
 - sharding;
 - restore lógico por Institution;
 - Redis, workers y microservicios;
-- proveedor concreto de object storage;
 - IA, chat, calendario, entregas manuales y recorrecciones.
 
 ## Documentación histórica

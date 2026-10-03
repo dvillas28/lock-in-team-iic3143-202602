@@ -34,15 +34,19 @@ Total: 7.0 puntos.
 
 ## Feedback arquitectónico incorporado
 
-- El MVP utiliza una PostgreSQL compartida, no una base por Institution.
-- `Institution` y `institution_id` forman la frontera lógica de persistencia.
-- `User` es global y se relaciona mediante `InstitutionMembership`.
-- Constraints y FK institution-aware complementan el scope de aplicación.
-- Existe una sola secuencia de migraciones; los backfills futuros respetan
-  `institution_id`.
-- Railway es la plataforma de despliegue vigente, no una etapa temporal.
-- El desarrollo local utiliza Docker Compose y una sola PostgreSQL.
-- La auditoría académica, el coordinador de curso y JWT permanecen en el MVP.
+| Feedback recibido | Ajuste incorporado |
+| --- | --- |
+| Una base por tenant asoma como poco escalable y complica migraciones/backfills. | El MVP utiliza una PostgreSQL compartida, una sola secuencia de migraciones y backfills futuros scopeados por `institution_id`. |
+| Una única base puede soportar multi-tenancy con gran volumen; sharding puede evaluarse después. | `Institution` y `institution_id` forman la frontera lógica del MVP; sharding queda fuera hasta tener métricas reales. |
+| Agregar reglas de DB para impedir cruces entre datos. | El modelo define constraints, unicidades y FK institution-aware como defensa declarativa. |
+| Canvas LMS puede servir como referencia de modelado. | El dominio se ordena alrededor de cursos, secciones, matrículas, evaluaciones, calificaciones y trazabilidad, sin copiar módulos fuera del MVP. |
+| Dependencia fuerte de GCP puede dificultar pruebas locales y portabilidad. | Railway queda como plataforma inmediata; el dominio depende de HTTP, PostgreSQL y contenedores estándar, no de APIs cloud propietarias. |
+| Si se usan servicios externos, considerar docker-compose.dev.yml o emuladores. | El desarrollo local usa Docker Compose con frontend, backend y una PostgreSQL compartida; no agrega emuladores cloud hasta que exista una integración que los consuma. |
+| Evitar sobrecomplejidad temprana como Cassandra si no hay métricas que lo justifiquen. | Cassandra, RLS, sharding, Redis, workers y microservicios quedan fuera del MVP documentado. |
+
+La auditoría académica, JWT, identidad institucional y permisos por Enrollment
+permanecen en el MVP porque reducen riesgos centrales de seguridad, permisos y
+trazabilidad sin introducir RBAC completo.
 
 ## Evidencia esperada
 

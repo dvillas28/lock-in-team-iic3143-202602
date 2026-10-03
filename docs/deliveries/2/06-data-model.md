@@ -8,6 +8,11 @@ Institutions a las que pueden acceder.
 Este es un modelo lógico. El repositorio todavía no elige ORM, herramienta de
 migraciones ni DDL ejecutable.
 
+El catálogo tabular exportable se mantiene en
+[12-data-catalog.md](12-data-catalog.md). Ese anexo enumera tablas, columnas,
+tipos, PK/FK, nulabilidad y descripción para usarlo como planilla o insumo del
+informe.
+
 ## Principios transversales
 
 - UUID es la PK interna de Institution y de los recursos del dominio.
@@ -78,30 +83,16 @@ Reglas:
 Ramos semestrales concretos.
 
 Campos: `id uuid PK`, `institution_id uuid FK`, `code text`, `name text`,
-`term text`, `created_at timestamptz`.
+`term text`, `created_by uuid`, `created_at timestamptz`.
 
 Reglas:
 
 - `unique (institution_id, code, term)`;
 - `unique (institution_id, id)`;
+- FK `(institution_id, created_by)` referencia InstitutionMembership;
 - índice `(institution_id, term, code)` para listados institucionales.
-
-### course_memberships
-
-Coordinadores de Course.
-
-Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`, `user_id uuid`,
-`role text`, `active boolean`, `created_at timestamptz`.
-
-Reglas:
-
-- `role = 'coordinator'`;
-- FK `(institution_id, course_id)` referencia Course;
-- FK `(institution_id, user_id)` referencia InstitutionMembership;
-- único parcial
-  `(institution_id, course_id, user_id, role) WHERE active`;
-- índice `(institution_id, user_id, active)` para cursos visibles;
-- crear Course y su primera membership coordinadora es atómico.
+- crear Course, su primera Section y el Enrollment `teacher` del creador ocurre
+  en una sola transacción para evitar cursos sin docente responsable.
 
 ### sections
 
@@ -118,7 +109,11 @@ Reglas:
 
 ### enrollments
 
-Una fila por rol de User en Section.
+Tabla pivote académica. Una fila indica que un User pertenece a una Section de
+un Course de una Institution con un rol específico. No almacena `course_id`
+porque Section ya pertenece a Course; las consultas obtienen el Course mediante
+la FK de Section. Se conserva `institution_id` para scope, índices y FK
+institution-aware.
 
 Campos: `id uuid PK`, `institution_id uuid`, `section_id uuid`,
 `user_id uuid`, `role text`, `active boolean`, `created_at timestamptz`.
@@ -132,6 +127,9 @@ Reglas:
   `(institution_id, section_id, user_id, role) WHERE active`;
 - índices `(institution_id, user_id, active)` y
   `(institution_id, section_id, role, active)`;
+- `teacher` administra curso y sección dentro del MVP; `assistant` apoya
+  seguimiento académico sin administrar configuración; `student` consume el
+  flujo estudiantil;
 - desactivar o cambiar un rol no elimina su evidencia histórica y genera
   auditoría.
 
@@ -144,6 +142,7 @@ Reglas:
 
 - FK `(institution_id, course_id)` referencia Course;
 - `unique (institution_id, course_id, position)`;
+- no tiene `section_id`: el módulo pertenece al Course completo;
 - estudiantes ven solo módulos publicados de cursos autorizados.
 
 ### materials
@@ -159,6 +158,8 @@ Reglas:
 
 - FK `(institution_id, module_id)` referencia CourseModule;
 - FK `(institution_id, created_by)` referencia InstitutionMembership;
+- no tiene `section_id`: el material publicado es común para todas las secciones
+  del Course del módulo;
 - `kind in ('markdown', 'file')`;
 - markdown exige cuerpo y excluye campos de archivo;
 - file exige metadatos, MIME permitido y `size_bytes >= 0`;
@@ -174,7 +175,7 @@ Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`,
 `section_id uuid nullable`, `title text`, `instructions text nullable`,
 `opens_at timestamptz nullable`, `closes_at timestamptz nullable`,
 `max_attempts integer nullable`, `published_at timestamptz nullable`,
-`created_by uuid`.
+`created_by uuid`, `questions jsonb`.
 
 Reglas:
 
@@ -184,22 +185,16 @@ Reglas:
 - `max_attempts IS NULL OR max_attempts > 0`;
 - `opens_at < closes_at` cuando ambos existen;
 - `(institution_id, id, course_id)` es único para relaciones posteriores;
-- tras el primer intento se inmovilizan pauta, puntajes y política de intentos.
-
-### questions
-
-Campos: `id uuid PK`, `institution_id uuid`, `quiz_id uuid`, `prompt text`,
-`position integer`, `points numeric(6,2)`, `alternatives jsonb`.
-
-Reglas:
-
-- FK `(institution_id, quiz_id)` referencia Quiz;
-- `unique (institution_id, quiz_id, position)` y `points > 0`;
-- alternatives contiene al menos dos opciones, IDs locales únicos y exactamente
-  una correcta;
+- `questions` es un arreglo JSON con `id` local, `position`, `prompt`, `points`
+  y `alternatives`;
+- cada pregunta tiene `points > 0`;
+- cada pregunta contiene al menos dos alternativas, IDs locales únicos y
+  exactamente una correcta;
+- los IDs de pregunta y alternativa son estables dentro del Quiz y se usan en
+  `quiz_attempts.answers`;
 - pauta y campos de corrección nunca aparecen en la vista estudiantil,
   auditoría o logs;
-- no se edita ni elimina una Question tras iniciar el primer intento.
+- tras el primer intento se inmovilizan pauta, puntajes y política de intentos.
 
 ### quiz_attempts
 
@@ -229,7 +224,9 @@ Reglas:
 
 ### grade_items
 
-Evaluaciones ponderadas; cada una se vincula a un Quiz del mismo Course.
+Evaluaciones ponderadas del libro de notas. Un GradeItem define que un Quiz
+cuenta como ítem evaluado del Course, con un peso porcentual. No representa una
+nota de estudiante.
 
 Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`, `quiz_id uuid`,
 `title text`, `weight_percent numeric(5,2)`, `created_at timestamptz`.
@@ -246,7 +243,8 @@ Reglas:
 
 ### grades
 
-Nota vigente por estudiante y GradeItem.
+Nota vigente por estudiante y GradeItem. Una fila representa el resultado de un
+estudiante en un ítem evaluado, derivado desde un QuizAttempt.
 
 Campos: `id uuid PK`, `institution_id uuid`, `grade_item_id uuid`,
 `quiz_id uuid`, `student_id uuid`, `section_id uuid`, `attempt_id uuid`,
@@ -300,8 +298,8 @@ Reglas:
 
 ## Transacciones críticas
 
-- Crear Course: insertar Course y primera CourseMembership coordinadora con la
-  misma `institution_id`.
+- Crear Course: insertar Course, primera Section y Enrollment `teacher` del
+  creador con la misma `institution_id`.
 - Iniciar intento: bloquear la serie
   `(institution_id, quiz_id, student_id)`, validar permisos y asignar número.
 - Finalizar intento: inmovilizar respuestas, calificar, actualizar Grade no
@@ -359,14 +357,6 @@ erDiagram
     text term
   }
 
-  COURSE_MEMBERSHIPS {
-    uuid id PK
-    uuid institution_id FK
-    uuid course_id FK
-    uuid user_id FK
-    text role
-  }
-
   SECTIONS {
     uuid id PK
     uuid institution_id FK
@@ -401,13 +391,7 @@ erDiagram
     uuid institution_id FK
     uuid course_id FK
     uuid section_id FK
-  }
-
-  QUESTIONS {
-    uuid id PK
-    uuid institution_id FK
-    uuid quiz_id FK
-    jsonb alternatives
+    jsonb questions
   }
 
   QUIZ_ATTEMPTS {
@@ -443,8 +427,6 @@ erDiagram
   INSTITUTIONS ||--o{ INSTITUTION_MEMBERSHIPS : grants
   USERS ||--o{ INSTITUTION_MEMBERSHIPS : joins
   INSTITUTIONS ||--o{ COURSES : owns
-  COURSES ||--o{ COURSE_MEMBERSHIPS : coordinates
-  USERS ||--o{ COURSE_MEMBERSHIPS : holds
   COURSES ||--o{ SECTIONS : has
   SECTIONS ||--o{ ENROLLMENTS : has
   USERS ||--o{ ENROLLMENTS : holds
@@ -452,7 +434,6 @@ erDiagram
   COURSE_MODULES ||--o{ MATERIALS : contains
   COURSES ||--o{ QUIZZES : evaluates
   SECTIONS |o--o{ QUIZZES : scopes
-  QUIZZES ||--o{ QUESTIONS : has
   QUIZZES ||--o{ QUIZ_ATTEMPTS : receives
   USERS ||--o{ QUIZ_ATTEMPTS : submits
   SECTIONS ||--o{ QUIZ_ATTEMPTS : context

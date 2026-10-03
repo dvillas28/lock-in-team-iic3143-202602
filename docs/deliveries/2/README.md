@@ -18,6 +18,16 @@ Base documental vigente para la segunda entrega de AcademiX. Las Entregas 0 y
 | 09 | [plan de walking skeleton](09-walking-skeleton-plan.md) | CI/CD, Railway y persistencia local. |
 | 10 | [estado](10-status.md) | Qué está completo y qué falta. |
 | 11 | [evidencia CI/CD](11-cicd-evidence/README.md) | Capturas de CI, CD Railway y release. |
+| 12 | [catálogo de datos](12-data-catalog.md) | Tablas, columnas, tipos, PK/FK y planilla XLSX/CSV adjunta. |
+| 13 | [guía de presentación](ppt/speaker-guide.md) | Punteo oral slide por slide y preguntas/respuestas probables. |
+
+## Paquete formal
+
+| Entregable | Fuente | PDF |
+| --- | --- | --- |
+| Informe | [report/main.tex](report/main.tex) | [report/main.pdf](report/main.pdf) |
+| Presentación | [ppt/main.tex](ppt/main.tex) | [ppt/main.pdf](ppt/main.pdf) |
+| Guía oral | [ppt/speaker-guide.md](ppt/speaker-guide.md) | — |
 
 ## Decisión central
 
@@ -55,13 +65,15 @@ independiente de Railway y usa contenedores, HTTP y PostgreSQL estándar.
 ## Alcance académico conservado
 
 - experiencias docente y estudiante;
-- coordinador por curso y roles por sección;
+- roles por sección: docente, ayudante y estudiante;
 - cursos, secciones, módulos y material;
 - quizzes de alternativas autocorregidos;
 - libro de notas y publicación explícita;
 - JWT, memberships persistidas y auditoría inmutable;
 - sin administrador institucional, entregas manuales, IA, chat, calendario,
-  workers, Redis, réplicas ni microservicios en el MVP.
+  workers, Redis ni microservicios en el MVP;
+- réplicas de aplicación, PgBouncer, PostgreSQL HA y object storage como
+  topología objetivo de despliegue, no como complejidad de dominio.
 
 ## Siguiente paso
 
@@ -70,6 +82,7 @@ El siguiente Spec Kit debe implementar solo lo respaldado por estos documentos:
 - conectar el backend a una PostgreSQL compartida;
 - modelar Institution, User global e InstitutionMembership;
 - crear el contexto institution-scoped y tests de acceso cruzado;
+- modelar Enrollment como fuente de permisos académicos;
 - preparar bootstrap idempotente futuro para UC y UTFSM;
 - mantener CI, CD Railway y desarrollo local reproducible.
 

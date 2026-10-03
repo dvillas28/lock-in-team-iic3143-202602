@@ -14,7 +14,6 @@ classDiagram
   class User
   class InstitutionMembership
   class Course
-  class CourseMembership
   class Section
   class Enrollment
   class CourseModule
@@ -23,8 +22,6 @@ classDiagram
   Institution "1" -- "0..*" InstitutionMembership : habilita
   User "1" -- "0..*" InstitutionMembership : pertenece
   Institution "1" -- "0..*" Course : ofrece
-  Course "1" -- "0..*" CourseMembership : tiene
-  User "1" -- "0..*" CourseMembership : coordina
   Course "1" -- "0..*" Section : contiene
   Section "1" -- "0..*" Enrollment : tiene
   User "1" -- "0..*" Enrollment : participa
@@ -32,10 +29,11 @@ classDiagram
   CourseModule "1" -- "0..*" Material : contiene
 ```
 
-`User` es global. `InstitutionMembership` habilita el acceso base, mientras
-CourseMembership y Enrollment conservan los roles académicos contextuales.
-Todas las clases académicas son tenant-owned por una Institution aunque el
-diagrama omita relaciones repetidas para evitar ruido visual.
+`User` es global. `InstitutionMembership` habilita el acceso base a una
+Institution, mientras Enrollment concentra los roles académicos contextuales:
+`teacher`, `assistant` y `student`. Todas las clases académicas son
+tenant-owned por una Institution aunque el diagrama omita relaciones repetidas
+para evitar ruido visual.
 
 ## Evaluaciones, notas y trazabilidad
 
@@ -48,8 +46,6 @@ classDiagram
   class Section
   class User
   class Quiz
-  class Question
-  class Alternative
   class QuizAttempt
   class GradeItem
   class Grade
@@ -58,8 +54,7 @@ classDiagram
   Institution "1" -- "0..*" Course : delimita
   Course "1" -- "0..*" Quiz : evalua
   Section "0..1" -- "0..*" Quiz : delimita
-  Quiz "1" -- "0..*" Question : contiene
-  Question "1" -- "2..*" Alternative : ofrece
+  Quiz "1" -- "1..*" QuestionJson : contiene pauta
 
   Quiz "1" -- "0..*" QuizAttempt : recibe
   User "1" -- "0..*" QuizAttempt : rinde
@@ -76,7 +71,7 @@ classDiagram
   User "1" -- "0..*" AuditEvent : realiza
 ```
 
-Quiz, Question, QuizAttempt, GradeItem, Grade y AuditEvent conservan
-`institution_id`. Las FK compuestas comprueban que las relaciones del diagrama
-pertenecen a la misma Institution. Alternative continúa como concepto anidado en
-Question aunque se persista como JSONB.
+Quiz, QuizAttempt, GradeItem, Grade y AuditEvent conservan `institution_id`. Las
+FK compuestas comprueban que las relaciones del diagrama pertenecen a la misma
+Institution. Las preguntas y alternativas son conceptos anidados dentro del JSON
+de Quiz, no tablas independientes en el MVP.
