@@ -1,0 +1,14 @@
+﻿Tabla,Propósito,Tenant-owned
+institutions,Tenant lógico visible como universidad/institución.,No
+users,Identidad global autenticada.,No
+institution_memberships,Pertenencia de un usuario global a una Institution.,Sí
+courses,Curso semestral dentro de una Institution.,Sí
+sections,Secciones de un curso.,Sí
+enrollments,Roles por usuario en una sección.,Sí
+course_modules,Organización de contenidos por curso.,Sí
+materials,Material markdown o archivo externo.,Sí
+quizzes,Evaluaciones autocorregidas.,Sí
+quiz_attempts,Intentos de estudiantes.,Sí
+grade_items,Ítems ponderados del libro de notas.,Sí
+grades,Nota vigente por estudiante e ítem.,Sí
+audit_events,Historial académico inmutable.,Sí
