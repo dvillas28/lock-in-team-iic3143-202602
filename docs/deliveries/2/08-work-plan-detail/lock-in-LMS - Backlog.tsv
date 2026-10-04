@@ -1,0 +1,132 @@
+ID	Title	URL	Área	Tipo	Assignees	Status	Semana	CU	Priority	Estimate	Start date	Target date	Linked pull requests	Labels	Sub-issues progress
+	docs:  entrega 2 documentacion	https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/5		docs	dvillas28, Jbcleon, matiaraos, spmasabeu	Done	Semana 0 E2	NO APLICA	P0		Sep 25, 2026	Oct 2, 2026		documentation	
+	feat: bootstrap Next.js and NestJS with Docker	https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/6		feat	Jbcleon	Done	Semana 0 E2	NO APLICA	P0		Sep 27, 2026	Sep 28, 2026			
+	test ci branch	https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/7		docs	dvillas28	Done	Semana 0 E2	NO APLICA	P2		Sep 28, 2026	Sep 28, 2026			
+	feat(): ci-cd and release tags	https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/8		docs	dvillas28	Done	Semana 0 E2	NO APLICA	P0		Sep 28, 2026	Sep 28, 2026			
+	docs(e2 diagramas UML y correccion E2)	https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/9		docs	Jbcleon, matiaraos	Done	Semana 0 E2	NO APLICA	P0		Sep 28, 2026	Sep 29, 2026		documentation	
+	fix: add dev to pr worflow	https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/10		ci	dvillas28	Done	Semana 0 E2	NO APLICA	P2		Sep 28, 2026	Sep 28, 2026			
+	ci: skip jobs for apps without changes	https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/11		ci	dvillas28	Done	Semana 0 E2	NO APLICA	P2		Sep 28, 2026	Sep 28, 2026			
+	docs(e2): add ci-cd evidence	https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/12		docs	dvillas28	Done	Semana 0 E2	NO APLICA	P0		Sep 29, 2026	Sep 29, 2026			
+	docs: alinear los casos de uso con la rúbrica de Entrega 2	https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/13		docs	Jbcleon	Done	Semana 0 E2	NO APLICA	P0		Sep 29, 2026	Sep 29, 2026		documentation	
+	docs: agregar presentación de Entrega 2 de AcademiX	https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/14		docs	Jbcleon	Done	Semana 0 E2	NO APLICA	P0		Oct 2, 2026	Oct 4, 2026		documentation	
+	docs: rework work plan for E3 and E4	https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/15		docs	dvillas28	Done	Semana 0 E2	NO APLICA	P0		Oct 2, 2026	Oct 3, 2026		documentation	
+	docs(work-plan): add detailed work plan	https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/16		docs	dvillas28	In progress	Semana 0 E2	NO APLICA	P0					documentation	
+PREP-01	Construir el backlog en el tablero a partir de PR #16: una tarjeta por tarea con área, tipo, prioridad, responsable y estimación.	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/17	PREP	docs	dvillas28	Done	Semana 0 E2	NO APLICA	P0	3	Oct 3, 2026	Oct 4, 2026	https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/16	documentation	
+PREP-02	Validar los riesgos con cada responsable de área y actualizar la lista de riesgos.	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/18	PREP	docs	dvillas28, FierroD, Jbcleon, matiaraos, spmasabeu	Todo	Semana 1 E3	NO APLICA	P0	2					
+PREP-03	Plan de presentaciones E3 y E4: estructura, responsables por sección y métricas a registrar desde S1 (lead time, burnup, estimado vs. real).	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/19	PREP	docs	dvillas28, FierroD, Jbcleon, matiaraos, spmasabeu	Todo	Semana 1 E3	NO APLICA	P0	2					
+PREP-04	Spec Kit de persistencia: elegir ORM o capa SQL y herramienta de migraciones.	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/20	PREP	docs	spmasabeu	Todo	Semana 1 E3	NO APLICA	P0	4					
+PREP-05	Definir el dataset demo UC/UTFSM (usuarios, memberships, cursos y roles) para bootstrap y tests.	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/21	PREP	docs	spmasabeu	Todo	Semana 1 E3	NO APLICA	P0	3					
+PREP-06	Revisar mockups por rol y mapear vistas a casos de uso (lms-ui-ux).	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/22	PREP	docs	matiaraos	Todo	Semana 1 E3	NO APLICA	P0	3					
+PREP-07	Bot PR reviewer: definir proveedor, permisos del token y criterios a partir de lms-reviewer.	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/23	PREP	docs	FierroD	Todo	Semana 1 E3	NO APLICA	P1	3					
+INST-01	Integrar tokens.css, app.css, fuentes y Lucide en el frontend.	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/24	INST	chore	Jbcleon	Todo	Semana 1 E3	NO APLICA	P0	3					
+CI-01	Verificar que CI, build Docker y deploy Railway estén verdes y corregir fallas.	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/26	INST	ci	dvillas28	Todo	Semana 1 E3	NO APLICA	P0	2					
+CI-02	E3: versionado automático: cada push a dev crea un tag y cada push a main crea una release.	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/25	INST	ci	dvillas28	Todo	Semana 1 E3	NO APLICA	P0	3					
+CI-03	E3: análisis de vulnerabilidades de dependencias e imágenes con Trivy.	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/27	CI	ci	dvillas28	Todo	Semana 1 E3	NO APLICA	P0	2					
+CI-04	E3: análisis estático de código como check del PR.	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/28	CI	ci	dvillas28	Todo	Semana 1 E3	NO APLICA	P0	3					
+DOC-01	Revisar el contrato OpenAPI vigente entre frontend y backend (rutas institucionales y política 401/403/404).	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/29	DOC	docs	Jbcleon, matiaraos, spmasabeu	Todo	Semana 1 E3	NO APLICA	P0	3					
+DOC-02	Gestión semanal: tablero, planilla de estimaciones (estimado vs. real) y riesgos.	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/30	DOC	chore	dvillas28	Todo	Semana 1 E3	NO APLICA	P0	2					
+PREP-08	Spec Kit de autenticación: emisión y validación de JWT, cuentas demo.		PREP	docs	spmasabeu	Todo	Semana 2 E3	CU-01, CU-02	P0	3					
+PREP-09	Diseñar la matriz de escenarios de aislamiento UC/UTFSM (401, 403, 404, IDs y relaciones cruzadas).		PREP	docs	FierroD	Todo	Semana 2 E3	NO APLICA	P0	3					
+INST-02	Instalar y configurar ORM y migraciones; conexión del backend mediante DATABASE_URL.		INST	build	spmasabeu	Todo	Semana 2 E3	NO APLICA	P0	4					
+INF-01	Provisionar PostgreSQL en Railway y exponer DATABASE_URL al backend.		INF	chore	spmasabeu	Todo	Semana 2 E3	NO APLICA	P0	2					
+INF-02	Compose: healthcheck de postgres, migraciones y bootstrap al arrancar.		INF	build	spmasabeu	Todo	Semana 2 E3	NO APLICA	P0	3					
+BE-01	Migración inicial de Institution, User e InstitutionMembership con unicidades.		BE	feat	spmasabeu	Todo	Semana 2 E3	CU-01, CU-02	P0	5					
+BE-02	Bootstrap idempotente de UC, UTFSM y usuarios demo.		BE	feat	spmasabeu	Todo	Semana 2 E3	CU-01, CU-02	P0	3					
+FE-01	Cliente API tipado desde OpenAPI con manejo uniforme de 401, 403 y 404.		FE	feat	Jbcleon	Todo	Semana 2 E3	NO APLICA	P0	4					
+FE-02	Layout base y rutas por institutionSlug con estados de carga, vacío y error.		FE	feat	matiaraos	Todo	Semana 2 E3	NO APLICA	P0	5					
+CI-05	Servicio PostgreSQL en CI y ejecución de migraciones antes de los tests.		CI	ci	dvillas28	Todo	Semana 2 E3	NO APLICA	P0	3					
+CI-06	Reporte de seguridad con Semgrep publicado como artefacto del workflow.		CI	ci	dvillas28	Todo	Semana 2 E3	NO APLICA	P1	2					
+CI-07	E3: action de rollback a la release anterior en Railway, probada en la demo.		CI	ci	dvillas28	Todo	Semana 2 E3	NO APLICA	P0	4					
+DOC-03	ADR de la capa de persistencia y migraciones elegida.		DOC	docs	spmasabeu	Todo	Semana 2 E3	NO APLICA	P0	2					
+DOC-04	Gestión semanal: tablero, planilla de estimaciones (estimado vs. real) y riesgos.		DOC	chore	dvillas28	Todo	Semana 2 E3	NO APLICA	P0	2					
+PREP-10	Spec Kit de cursos, secciones, roles y auditoría mínima.		PREP	docs	spmasabeu	Todo	Semana 3 E3	CU-03, CU-04	P0	3					
+INST-03	Instalar librerías de JWT, hashing y validación de entrada en el backend.		INST	build	spmasabeu	Todo	Semana 3 E3	NO APLICA	P0	2					
+INF-03	Secreto JWT y variables en Railway y Compose, sin valores versionados.		INF	chore	spmasabeu	Todo	Semana 3 E3	NO APLICA	P0	1					
+BE-03	Autenticación JWT: login de cuentas demo, guard global y respuestas 401.		BE	feat	spmasabeu	Todo	Semana 3 E3	NO APLICA	P0	8					
+BE-04	GET /api/v1/institutions con solo memberships activas.		BE	feat	spmasabeu	Todo	Semana 3 E3	CU-01	P0	3					
+BE-05	Resolución de institutionSlug, guard de membership, scope de request y 404.		BE	feat	spmasabeu	Todo	Semana 3 E3	CU-02	P0	6					
+BE-06	Identidad contextual: roles de curso y sección del User en la Institution.		BE	feat	spmasabeu	Todo	Semana 3 E3	CU-02	P0	3					
+BE-07	Harness de tests de aislamiento UC/UTFSM con helpers para 401, 403 y 404.		BE	test	FierroD	Todo	Semana 3 E3	NO APLICA	P0	5					
+BE-08	Tests de aislamiento de CU-01 y CU-02: slug no visible, membership inactiva y JWT inválido.		BE	test	FierroD	Todo	Semana 3 E3	CU-01, CU-02	P0	3					
+FE-03	Login y manejo de sesión.		FE	feat	Jbcleon	Todo	Semana 3 E3	NO APLICA	P0	6					
+FE-04	Selector de instituciones con estado vacío y pertenencia inactiva.		FE	feat	matiaraos	Todo	Semana 3 E3	CU-01	P0	4					
+CI-08	Tests de integración y aislamiento como check obligatorio del PR.		CI	ci	dvillas28	Todo	Semana 3 E3	NO APLICA	P0	2					
+CI-09	Bot PR reviewer: workflow base que comenta cada PR; credenciales como secreto del repositorio.		CI	ci	FierroD	Todo	Semana 3 E3	NO APLICA	P1	4					
+DOC-05	OpenAPI de autenticación, instituciones y contexto.		DOC	docs	spmasabeu	Todo	Semana 3 E3	CU-01, CU-02	P0	1					
+DOC-06	Gestión semanal: tablero, planilla de estimaciones (estimado vs. real) y riesgos.		DOC	chore	dvillas28	Todo	Semana 3 E3	NO APLICA	P0	2					
+PREP-11	Spec Kit de módulos y material markdown.		PREP	docs	Jbcleon, matiaraos	Todo	Semana 4 E3	CU-05, CU-06, CU-14	P1	3					
+PREP-12	Spec Kit de quizzes, intentos y calificaciones.		PREP	docs	spmasabeu	Todo	Semana 4 E3	CU-07, CU-08, CU-09, CU-10, CU-11, CU-12, CU-15, CU-16	P0	3					
+PREP-13	E3: presentación (~20 min) y guion de demo con datos UC/UTFSM y rollback.		PREP	docs	dvillas28, FierroD, Jbcleon, matiaraos, spmasabeu	Todo	Semana 4 E3	NO APLICA	P0	4					
+PREP-14	E3: ensayo de presentación y demo, local y en Railway, con plan de respaldo.		PREP	chore	dvillas28, FierroD, Jbcleon, matiaraos, spmasabeu	Todo	Semana 4 E3	NO APLICA	P0	2					
+BE-09	Migración de Course, Section, CourseMembership y SectionMembership con FK institution-aware.		BE	feat	spmasabeu	Todo	Semana 4 E3	CU-03, CU-04	P0	6					
+BE-10	AuditEvent mínimo: tabla append-only y registro en la misma transacción.		BE	feat	spmasabeu	Todo	Semana 4 E3	NO APLICA	P0	5					
+BE-11	Listado de cursos y secciones según rol.		BE	feat	spmasabeu	Todo	Semana 4 E3	CU-03	P0	6					
+BE-12	Crear y actualizar secciones y configuración del curso, con auditoría.		BE	feat	Jbcleon, matiaraos	Todo	Semana 4 E3	CU-04	P1	6					
+BE-13	Asignar, cambiar y desactivar pertenencias de sección, con auditoría.		BE	feat	spmasabeu	Todo	Semana 4 E3	CU-04	P1	6					
+BE-14	Tests de aislamiento de cursos, secciones y pertenencias con IDs cruzados.		BE	test	FierroD	Todo	Semana 4 E3	CU-03, CU-04	P0	3					
+FE-05	Shell institucional (sidebar, header y roles contextuales).		FE	feat	Jbcleon, matiaraos	Todo	Semana 4 E3	CU-02	P0	5					
+FE-06	Vista "Mis cursos" y detalle de curso con secciones.		FE	feat	Jbcleon, matiaraos	Todo	Semana 4 E3	CU-03	P0	6					
+FE-07	Vista del coordinador para secciones y participantes.		FE	feat	Jbcleon, matiaraos	Todo	Semana 4 E3	CU-04	P1	10					
+CI-10	Ejecutar migraciones como paso previo al deploy en Railway.		CI	ci	dvillas28	Todo	Semana 4 E3	NO APLICA	P0	2					
+CI-11	Bot PR reviewer: incorporar criterios de lms-reviewer (aislamiento, roles, auditoría y tests).		CI	ci	FierroD	Todo	Semana 4 E3	NO APLICA	P1	3					
+DOC-07	OpenAPI de cursos, secciones y pertenencias.		DOC	docs	spmasabeu	Todo	Semana 4 E3	CU-03, CU-04	P0	2					
+DOC-08	E3: proceso de desarrollo (ciclo, prácticas adoptadas y abandonadas, definición de terminado, manejo de deuda y bugs) con evidencia de tablero, PRs, revisiones y ADR.		DOC	docs	dvillas28, FierroD, Jbcleon, matiaraos, spmasabeu	Todo	Semana 4 E3	NO APLICA	P0	3					
+DOC-09	E3: estrategia de testing, cobertura actual y meta; estado del código, defectos conocidos y capturas del pipeline CI/CD.		DOC	docs	dvillas28, FierroD	Todo	Semana 4 E3	NO APLICA	P0	3					
+DOC-10	E3: métricas de avance (burnup/burndown, lead time, tarjetas terminadas vs. backlog) con interpretación y proyección al MVP.		DOC	docs	dvillas28	Todo	Semana 4 E3	NO APLICA	P0	3					
+DOC-11	E3: plan actualizado (completo vs. pendiente, cambios y repriorización) y planilla de estimaciones.		DOC	docs	dvillas28	Todo	Semana 4 E3	NO APLICA	P0	2					
+DOC-12	Gestión semanal: tablero, planilla de estimaciones (estimado vs. real) y riesgos.		DOC	chore	dvillas28	Todo	Semana 4 E3	NO APLICA	P0	2					
+BE-15	Migración de Quiz, Question, Option y GradeItem con FK institution-aware.		BE	feat	spmasabeu	Todo	Semana 5 E4	CU-07	P0	4					
+BE-16	Autoría de quiz en borrador: preguntas, alternativas, puntajes y pauta separada de la vista estudiantil.		BE	feat	spmasabeu	Todo	Semana 5 E4	CU-07	P0	6					
+BE-17	Validación y publicación del quiz con elemento de nota único y auditoría.		BE	feat	spmasabeu	Todo	Semana 5 E4	CU-07	P0	4					
+BE-18	Iniciar intento con límite, numeración e intento único en progreso.		BE	feat	spmasabeu	Todo	Semana 5 E4	CU-08	P0	5					
+BE-19	Guardar respuestas del intento en progreso sin revelar corrección.		BE	feat	spmasabeu	Todo	Semana 5 E4	CU-08	P0	5					
+BE-20	Cancelar intento en progreso con auditoría.		BE	feat	spmasabeu	Todo	Semana 5 E4	CU-15	P1	4					
+BE-21	Módulos: migración, creación, orden, publicación y ocultamiento, con auditoría.		BE	feat	Jbcleon, matiaraos	Todo	Semana 5 E4	CU-14	P1	10					
+BE-22	Material markdown: crear, editar, publicar y ocultar, con auditoría.		BE	feat	Jbcleon, matiaraos	Todo	Semana 5 E4	CU-05	P1	8					
+BE-23	Consulta estudiantil de módulos y material publicados.		BE	feat	Jbcleon, matiaraos	Todo	Semana 5 E4	CU-06	P1	5					
+BE-24	Tests de aislamiento y permisos de material y quizzes (pauta no expuesta, intentos ajenos).		BE	test	FierroD	Todo	Semana 5 E4	CU-06, CU-07, CU-08	P0	4					
+FE-08	Organizador de módulos (orden y publicación).		FE	feat	Jbcleon, matiaraos	Todo	Semana 5 E4	CU-14	P1	8					
+FE-09	Editor de material markdown.		FE	feat	Jbcleon, matiaraos	Todo	Semana 5 E4	CU-05	P1	6					
+FE-10	Vista estudiantil de módulos y material.		FE	feat	Jbcleon, matiaraos	Todo	Semana 5 E4	CU-06	P1	5					
+FE-11	Editor de quiz para coordinador y docente.		FE	feat	Jbcleon, matiaraos	Todo	Semana 5 E4	CU-07	P0	10					
+FE-12	Rendir quiz sin exponer la pauta.		FE	feat	Jbcleon, matiaraos	Todo	Semana 5 E4	CU-08	P0	6					
+FE-13	Cancelar intento (estudiante y personal).		FE	feat	Jbcleon, matiaraos	Todo	Semana 5 E4	CU-15	P1	3					
+CI-12	Smoke test post-deploy (health y login demo).		CI	ci	dvillas28	Todo	Semana 5 E4	NO APLICA	P1	3					
+CI-13	Bot PR reviewer: ajustar falsos positivos con PRs reales del equipo.		CI	ci	FierroD	Todo	Semana 5 E4	NO APLICA	P1	2					
+DOC-13	OpenAPI de módulos, material, quizzes e intentos.		DOC	docs	spmasabeu	Todo	Semana 5 E4	CU-05, CU-06, CU-07, CU-08, CU-14, CU-15	P0	2					
+DOC-114	Gestión semanal: tablero, planilla de estimaciones (estimado vs. real) y riesgos.		DOC	chore	dvillas28	Todo	Semana 5 E4	NO APLICA	P0	2					
+BE-25	Envío del intento, calificación automática y nota vigente desde el último intento.		BE	feat	spmasabeu	Todo	Semana 6 E4	CU-09	P0	8					
+BE-26	Ponderaciones del libro de notas (suma 100 % y bloqueo tras la primera publicación).		BE	feat	spmasabeu	Todo	Semana 6 E4	CU-10	P0	5					
+BE-27	Publicación atómica de notas con auditoría.		BE	feat	spmasabeu	Todo	Semana 6 E4	CU-11	P0	8					
+BE-28	Notas propias publicadas y promedio parcial.		BE	feat	spmasabeu	Todo	Semana 6 E4	CU-12	P0	4					
+BE-29	Libro de notas docente y revisión de intentos por alcance.		BE	feat	Jbcleon, matiaraos	Todo	Semana 6 E4	CU-16	P1	8					
+BE-30	Consulta de auditoría con filtros.		BE	feat	FierroD	Todo	Semana 6 E4	CU-13	P1	4					
+BE-31	Tests de aislamiento y permisos de notas, publicación y libro docente (ayudante solo lectura).		BE	test	FierroD	Todo	Semana 6 E4	CU-11, CU-12, CU-13	P0	4					
+FE-14	Envío del intento y confirmación de recepción.		FE	feat	Jbcleon, matiaraos	Todo	Semana 6 E4	CU-09	P0	3					
+FE-15	Configuración de ponderaciones.		FE	feat	Jbcleon, matiaraos	Todo	Semana 6 E4	CU-10	P0	4					
+FE-16	Publicación de notas por elemento y sección.		FE	feat	Jbcleon, matiaraos	Todo	Semana 6 E4	CU-11	P0	5					
+FE-17	Vista de notas y promedio del estudiante.		FE	feat	Jbcleon, matiaraos	Todo	Semana 6 E4	CU-12	P0	4					
+FE-18	Vista del libro de notas docente.		FE	feat	Jbcleon, matiaraos	Todo	Semana 6 E4	CU-16	P1	6					
+FE-19	Vista de auditoría del curso.		FE	ci	Jbcleon, matiaraos	Todo	Semana 6 E4	CU-13	P1	4					
+CI-14	Bot PR reviewer operando sobre todos los PRs del equipo; registrar evidencia para E4.		CI	docs	FierroD	Todo	Semana 6 E4	NO APLICA	P1	2					
+DOC-15	OpenAPI de notas, publicación, libro docente y auditoría.		DOC	docs	spmasabeu	Todo	Semana 6 E4	CU-09, CU-10, CU-11, CU-12, CU-13, CU-16	P0	2					
+DOC-16	E4: arquitectura final y modelo de datos (1–2 diapositivas), con diagramas de proceso corregidos en anexos.		DOC	docs	dvillas28, spmasabeu	Todo	Semana 6 E4	NO APLICA	P0	3					
+DOC-17	E4: incorporar el feedback de E1 a E3 y consolidar el material del curso.		DOC	docs	dvillas28, FierroD, Jbcleon, matiaraos, spmasabeu	Todo	Semana 6 E4	NO APLICA	P0	3					
+DOC-18	Gestión semanal: tablero, planilla de estimaciones (estimado vs. real) y riesgos.		DOC	chore	dvillas28	Todo	Semana 6 E4	NO APLICA	P0	2					
+PREP-15	Revisión final de riesgos con los responsables de área.		PREP	docs	dvillas28, FierroD, Jbcleon, matiaraos, spmasabeu	Todo	Semana 7 E4	NO APLICA	P0	2					
+PREP-16	E4: reunión de retrospectiva final y análisis (aciertos, errores, decisiones que no se repetirían y aprendizajes con su efecto en el proyecto).		PREP	docs	dvillas28, FierroD, Jbcleon, matiaraos, spmasabeu	Todo	Semana 7 E4	NO APLICA	P0	3					
+PREP-17	E4: informe/presentación en PDF (~30 min) y guion de demo en vivo con todos los casos comprometidos en UC y UTFSM.		PREP	docs	dvillas28, FierroD, Jbcleon, matiaraos, spmasabeu	Todo	Semana 7 E4	NO APLICA	P0	4					
+PREP-18	E4: ensayo de exposición y demo en vivo, local y en Railway, con plan de respaldo.		PREP	chore	dvillas28, FierroD, Jbcleon, matiaraos, spmasabeu	Todo	Semana 7 E4	NO APLICA	P0	3					
+INF-04	Verificar backup y PITR de la PostgreSQL en Railway (RNF5).		INF	chore	spmasabeu	Todo	Semana 7 E4	NO APLICA	P1	2					
+BE-32	Hardening: revisión de aislamiento (lms-reviewer) y correcciones.		BE	fix	dvillas28, spmasabeu	Todo	Semana 7 E4	NO APLICA	P0	6					
+FE-20	Pasada de accesibilidad, tema oscuro y responsive.		FE	fix	Jbcleon, matiaraos	Todo	Semana 7 E4	NO APLICA	P0	4					
+CI-15	Release final mediante merge a main.		CI	ci	dvillas28	Todo	Semana 7 E4	NO APLICA	P0	1					
+DOC-19	Evidencia final, estado y README.		DOC	docs	dvillas28	Todo	Semana 7 E4	NO APLICA	P0	4					
+DOC-20	E4: prácticas, tests, cobertura final, calidad y estado del código, con reportes de seguridad y CI/CD.		DOC	docs	dvillas28, FierroD	Todo	Semana 7 E4	NO APLICA	P0	2					
+DOC-21	E4: plan final (completo vs. pendiente, decisiones) y estimado vs. real de la planilla.		DOC	docs	dvillas28	Todo	Semana 7 E4	NO APLICA	P0	2					
+DOC-22	Gestión semanal: tablero, planilla de estimaciones (estimado vs. real) y riesgos.		DOC	chore	dvillas28	Todo	Semana 7 E4	NO APLICA	P0	2					
+PREP-19	Decidir el proveedor de object storage (ADR).		PREP	docs	spmasabeu	Todo	Semana 7 E4	CU-05	P2	2					
+INST-04	Instalar el cliente del proveedor de storage.		INST	build	spmasabeu	Todo	Semana 7 E4	CU-05	P2	2					
+INF-05	Provisionar el bucket con namespace por Institution.		INF	chore	spmasabeu	Todo	Semana 7 E4	CU-05	P2	3					
+BE-33	Material basado en archivo (PDF, CSV, XLSX, TXT, JPEG, PNG).		BE	feat	Jbcleon, matiaraos	Todo	Semana 7 E4	CU-05	P2	10					
+FE-21	Subida y descarga de archivos.		FE	feat	Jbcleon	Todo	Semana 7 E4	CU-05	P2	4					
