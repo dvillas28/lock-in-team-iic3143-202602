@@ -1,0 +1,133 @@
+InstitutionSummary:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - slug
+    - name
+    - active
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    slug:
+      type: string
+      pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+    name:
+      type: string
+    active:
+      type: boolean
+      readOnly: true
+
+InstitutionListResponse:
+  type: object
+  additionalProperties: false
+  required:
+    - items
+  properties:
+    items:
+      type: array
+      description: Institutions activas y visibles para el User autenticado.
+      items:
+        $ref: '#/InstitutionSummary'
+
+InstitutionMembershipSummary:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - institution
+    - active
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    institution:
+      $ref: '#/InstitutionSummary'
+    active:
+      type: boolean
+      readOnly: true
+  description: Pertenencia institucional; no contiene roles académicos.
+
+SectionMembershipSummary:
+  type: object
+  additionalProperties: false
+  required:
+    - courseId
+    - sectionId
+    - role
+  properties:
+    courseId:
+      type: string
+      format: uuid
+    sectionId:
+      type: string
+      format: uuid
+    role:
+      type: string
+      enum:
+        - teacher
+        - assistant
+        - student
+
+CurrentUser:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - email
+    - name
+    - institutionMembership
+    - sectionMemberships
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    email:
+      type: string
+      format: email
+    name:
+      type: string
+    institutionMembership:
+      $ref: '#/InstitutionMembershipSummary'
+    sectionMemberships:
+      type: array
+      items:
+        $ref: '#/SectionMembershipSummary'
+
+UserSummary:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - email
+    - name
+    - active
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    email:
+      type: string
+      format: email
+    name:
+      type: string
+    active:
+      type: boolean
+
+UserListResponse:
+  unevaluatedProperties: false
+  allOf:
+    - $ref: './common.yaml#/PageInfo'
+    - type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/UserSummary'

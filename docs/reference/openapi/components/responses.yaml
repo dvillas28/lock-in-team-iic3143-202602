@@ -1,0 +1,84 @@
+BadRequest:
+  description: Request o parámetro sintácticamente inválido.
+  content:
+    application/problem+json:
+      schema:
+        $ref: './schemas/common.yaml#/Problem'
+
+Unauthorized:
+  description: JWT ausente, inválido o expirado.
+  content:
+    application/problem+json:
+      schema:
+        $ref: './schemas/common.yaml#/Problem'
+      example:
+        type: https://academix/errors/unauthorized
+        title: Autenticación requerida
+        status: 401
+        detail: Se requiere una identidad autenticada válida.
+        code: UNAUTHORIZED
+        instance: /api/v1/institutions/uc/courses
+        traceId: 01JQ4Y2X7B3QK5XEM0XZ4MSH8Z
+        errors: []
+
+Forbidden:
+  description: |
+    La identidad puede ver la Institution y el recurso, pero no tiene el rol o
+    permiso necesario para la operación.
+  content:
+    application/problem+json:
+      schema:
+        $ref: './schemas/common.yaml#/Problem'
+
+NotFound:
+  description: |
+    Institution inexistente o no visible, recurso inexistente o recurso fuera
+    del scope institucional autorizado.
+  content:
+    application/problem+json:
+      schema:
+        $ref: './schemas/common.yaml#/Problem'
+      example:
+        type: https://academix/errors/resource-not-found
+        title: Recurso no encontrado
+        status: 404
+        detail: El recurso no existe o no es visible en el contexto autorizado.
+        code: RESOURCE_NOT_FOUND
+        instance: /api/v1/institutions/uc/courses/8dc9f252-bf1a-4b50-85c0-a2937484c429
+        traceId: 01JQ4Y2X7B3QK5XEM0XZ4MSH8Z
+        errors: []
+
+Conflict:
+  description: La operación entra en conflicto con el estado actual del recurso.
+  content:
+    application/problem+json:
+      schema:
+        $ref: './schemas/common.yaml#/Problem'
+
+UnprocessableEntity:
+  description: El request es válido, pero viola una regla académica.
+  content:
+    application/problem+json:
+      schema:
+        $ref: './schemas/common.yaml#/Problem'
+
+UnsupportedMediaType:
+  description: El tipo de archivo no pertenece al conjunto permitido por el MVP.
+  content:
+    application/problem+json:
+      schema:
+        $ref: './schemas/common.yaml#/Problem'
+
+ServiceUnavailable:
+  description: Un servicio necesario para completar la operación no está disponible.
+  content:
+    application/problem+json:
+      schema:
+        $ref: './schemas/common.yaml#/Problem'
+
+TooManyRequests:
+  description: Demasiadas solicitudes.
+  content:
+    application/problem+json:
+      schema:
+        $ref: './schemas/common.yaml#/Problem'

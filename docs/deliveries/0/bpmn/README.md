@@ -36,7 +36,7 @@ Los modelos 01 y 02 describen el recorrido de preparación inicial; sus tareas a
 
 ## Fuentes y trazabilidad
 
-Se revisaron los documentos de dominio de `docs/deliveries/0/`, el contenido del informe en [`inform/main.tex`](../inform/main.tex), la presentación en [`ppt/main.tex`](../ppt/main.tex) y los **tres mocks de la carpeta solicitada**. Los PDF y ZIP son versiones de entrega; no se modificaron.
+Se revisaron los documentos de dominio de `docs/deliveries/0/`, el contenido del informe en [`report/main.tex`](../report/main.tex), la presentación en [`ppt/main.tex`](../ppt/main.tex) y los **tres mocks de la carpeta solicitada**. Los PDF y ZIP son versiones de entrega; no se modificaron.
 
 | Evidencia                                                                              | Aporte al modelado                                                                                                                   |
 | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
@@ -44,9 +44,9 @@ Se revisaron los documentos de dominio de `docs/deliveries/0/`, el contenido del
 | [Alcance](../scope.md) y [roadmap](../roadmap.md)                                      | Fundaciones prioritarias, entregas individuales y extensiones condicionadas.                                                         |
 | [Requisitos](../requirements.md) y [historias de usuario](../user-stories.md)          | Permisos, resultados, decisiones, errores de entrega y criterios de publicación.                                                     |
 | [Arquitectura, secciones Multi-Tenancy y Seguridad](../architecture.md)                | Tenant = universidad; membresía institucional y rol por curso o sección.                                                             |
-| [Dashboard estudiante](../inform/images/mockup-dashboard.png)                          | Cursos activos, próximas evaluaciones, anuncios y acceso a calificaciones. El calendario visible es una extensión opcional.          |
-| [Lector PDF](../inform/images/mockup-pdf-reader.png)                                   | Documento abierto, selección de texto, respuestas con citas y ausencia de evidencia. El lector y la IA tienen prioridades distintas. |
-| [Libro de notas docente](../inform/images/mockup-teacher-gradebook.png)                | Advertencia de ponderaciones al 95 %, estados de corrección y publicación, liberación manual y privacidad por estudiante.            |
+| [Dashboard estudiante](../report/images/mockup-dashboard.png)                          | Cursos activos, próximas evaluaciones, anuncios y acceso a calificaciones. El calendario visible es una extensión opcional.          |
+| [Lector PDF](../report/images/mockup-pdf-reader.png)                                   | Documento abierto, selección de texto, respuestas con citas y ausencia de evidencia. El lector y la IA tienen prioridades distintas. |
+| [Libro de notas docente](../report/images/mockup-teacher-gradebook.png)                | Advertencia de ponderaciones al 95 %, estados de corrección y publicación, liberación manual y privacidad por estudiante.            |
 
 | Modelo | Requisitos e historias principales                                                    |
 | ------ | ------------------------------------------------------------------------------------- |
@@ -83,3 +83,5 @@ Los nombres y el orden de tareas son una síntesis de negocio de estas fuentes, 
 Se comprobó que todos los nodos fueran alcanzables desde un inicio y pudieran llegar a un fin, que los flujos mantuvieran sus extremos dentro del proceso y que las tareas estuvieran en el carril de su responsable. También se revisaron las rutas de flechas, la legibilidad de los textos y el resultado PNG de cada modelo.
 
 Los cuatro roles están respaldados por documentación explícita. No existen mocks de administrador o ayudante en la carpeta solicitada: sus modelos se derivan de las responsabilidades y criterios escritos, sin presentar pantallas inventadas como evidencia.
+
+- test: ignore

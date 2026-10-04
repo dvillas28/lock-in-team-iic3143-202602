@@ -1,0 +1,301 @@
+GradeValue:
+  type: number
+  minimum: 1
+  maximum: 7
+  multipleOf: 0.1
+  description: |
+    Nota chilena redondeada a un decimal con HALF_UP. Para `scorePercent <= 60`,
+    `grade = 1 + scorePercent * 3 / 60`. Para `scorePercent > 60`,
+    `grade = 4 + (scorePercent - 60) * 3 / 40`.
+  example: 5.5
+
+GradeItem:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - courseId
+    - quizId
+    - title
+    - weightPercent
+    - createdAt
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    courseId:
+      type: string
+      format: uuid
+      readOnly: true
+    quizId:
+      type: string
+      format: uuid
+      readOnly: true
+    title:
+      type: string
+    weightPercent:
+      type: number
+      minimum: 0
+      maximum: 100
+    createdAt:
+      type: string
+      format: date-time
+      readOnly: true
+
+GradeItemListResponse:
+  type: object
+  additionalProperties: false
+  required:
+    - items
+    - totalWeightPercent
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/GradeItem'
+    totalWeightPercent:
+      type: number
+      minimum: 0
+
+GradeWeightInput:
+  type: object
+  additionalProperties: false
+  required:
+    - gradeItemId
+    - weightPercent
+  properties:
+    gradeItemId:
+      type: string
+      format: uuid
+    weightPercent:
+      type: number
+      minimum: 0
+      maximum: 100
+
+UpdateGradebookWeightsRequest:
+  type: object
+  additionalProperties: false
+  required:
+    - items
+  properties:
+    items:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/GradeWeightInput'
+  description: La colección completa se valida y persiste atómicamente; debe sumar 100%.
+
+GradebookWeightsResponse:
+  type: object
+  additionalProperties: false
+  required:
+    - items
+    - totalWeightPercent
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/GradeItem'
+    totalWeightPercent:
+      type: number
+      const: 100
+
+GradeTeacherView:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - gradeItemId
+    - studentId
+    - sectionId
+    - attemptId
+    - scorePercent
+    - grade
+    - publishedAt
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    gradeItemId:
+      type: string
+      format: uuid
+      readOnly: true
+    studentId:
+      type: string
+      format: uuid
+      readOnly: true
+    sectionId:
+      type: string
+      format: uuid
+      readOnly: true
+    attemptId:
+      type: string
+      format: uuid
+      readOnly: true
+    scorePercent:
+      type: number
+      minimum: 0
+      maximum: 100
+      readOnly: true
+    grade:
+      $ref: '#/GradeValue'
+    publishedAt:
+      type: [string, 'null']
+      format: date-time
+      readOnly: true
+
+GradebookStudentRow:
+  type: object
+  additionalProperties: false
+  required:
+    - student
+    - sectionId
+    - grades
+    - partialAverage
+    - publishedWeightPercent
+  properties:
+    student:
+      $ref: './tenancy.yaml#/UserSummary'
+    sectionId:
+      type: string
+      format: uuid
+    grades:
+      type: array
+      items:
+        $ref: '#/GradeTeacherView'
+    partialAverage:
+      oneOf:
+        - $ref: '#/GradeValue'
+        - type: 'null'
+      readOnly: true
+    publishedWeightPercent:
+      type: number
+      minimum: 0
+      maximum: 100
+      readOnly: true
+
+GradebookResponse:
+  unevaluatedProperties: false
+  allOf:
+    - $ref: './common.yaml#/PageInfo'
+    - type: object
+      required:
+        - courseId
+        - items
+      properties:
+        courseId:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            $ref: '#/GradebookStudentRow'
+
+PublishGradesRequest:
+  type: object
+  additionalProperties: false
+  required:
+    - gradeItemIds
+    - sectionIds
+  properties:
+    gradeItemIds:
+      type: array
+      minItems: 1
+      uniqueItems: true
+      items:
+        type: string
+        format: uuid
+    sectionIds:
+      type: array
+      minItems: 1
+      uniqueItems: true
+      items:
+        type: string
+        format: uuid
+
+PublishGradesResponse:
+  type: object
+  additionalProperties: false
+  required:
+    - publishedCount
+    - publishedAt
+  properties:
+    publishedCount:
+      type: integer
+      minimum: 0
+    publishedAt:
+      type: string
+      format: date-time
+      readOnly: true
+
+PublishedGradeStudentView:
+  type: object
+  additionalProperties: false
+  required:
+    - gradeItemId
+    - title
+    - weightPercent
+    - scorePercent
+    - grade
+    - publishedAt
+  properties:
+    gradeItemId:
+      type: string
+      format: uuid
+      readOnly: true
+    title:
+      type: string
+    weightPercent:
+      type: number
+      minimum: 0
+      maximum: 100
+    scorePercent:
+      type: number
+      minimum: 0
+      maximum: 100
+      readOnly: true
+    grade:
+      $ref: '#/GradeValue'
+    publishedAt:
+      type: string
+      format: date-time
+      readOnly: true
+
+StudentGradesResponse:
+  type: object
+  additionalProperties: false
+  required:
+    - courseId
+    - items
+    - partialAverage
+    - publishedWeightPercent
+    - isPartial
+  properties:
+    courseId:
+      type: string
+      format: uuid
+    items:
+      type: array
+      description: Contiene exclusivamente notas propias ya publicadas.
+      items:
+        $ref: '#/PublishedGradeStudentView'
+    partialAverage:
+      oneOf:
+        - $ref: '#/GradeValue'
+        - type: 'null'
+      readOnly: true
+      description: |
+        Promedio de notas publicadas normalizado por la suma de sus ponderaciones:
+        sum(grade * weight) / sum(weight). Se redondea a un decimal con HALF_UP y
+        es null cuando no hay notas publicadas.
+    publishedWeightPercent:
+      type: number
+      minimum: 0
+      maximum: 100
+      readOnly: true
+    isPartial:
+      type: boolean
+      readOnly: true
+      description: True cuando la suma de ponderaciones publicadas es menor que 100%.

@@ -1,0 +1,425 @@
+/api/v1/institutions/{institutionSlug}/courses/{courseId}/quizzes:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/CourseId'
+  get:
+    tags:
+      - Quizzes
+    operationId: listCourseQuizzes
+    summary: Listar quizzes visibles del curso
+    description: |
+      Estudiantes ven quizzes publicados aplicables a su sección. Teachers y assistants quedan restringidos a sus secciones; teachers ven su alcance académico.
+    parameters:
+      - $ref: '../components/parameters.yaml#/SectionIdFilter'
+    responses:
+      '200':
+        description: Quizzes visibles sin pautas de respuesta.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/quizzes.yaml#/QuizListResponse'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+  post:
+    tags:
+      - Quizzes
+    operationId: createQuiz
+    summary: Crear un quiz en estado draft
+    description: |
+      Teachers pueden crear quizzes de curso o sección dentro de su alcance académico.
+      Assistants y students no pueden crear quizzes.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/quizzes.yaml#/QuizCreate'
+    responses:
+      '201':
+        description: Quiz creado en estado draft.
+        headers:
+          Location:
+            description: URI del quiz creado.
+            schema:
+              type: string
+              format: uri-reference
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/quizzes.yaml#/QuizAuthoringView'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/institutions/{institutionSlug}/quizzes/{quizId}:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/QuizId'
+  get:
+    tags:
+      - Quizzes
+    operationId: getQuiz
+    summary: Consultar la vista segura de un quiz
+    description: Esta representación nunca contiene `isCorrect` ni otra pauta de respuestas.
+    responses:
+      '200':
+        description: Quiz visible sin pauta.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/quizzes.yaml#/QuizStudentView'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+  patch:
+    tags:
+      - Quizzes
+    operationId: updateQuiz
+    summary: Actualizar un quiz editable
+    description: |
+      Solo se admite en estado draft. Teacher puede modificar quizzes dentro de su alcance académico. Un quiz publicado
+      o utilizado produce 409 Conflict.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/quizzes.yaml#/QuizUpdate'
+    responses:
+      '200':
+        description: Quiz actualizado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/quizzes.yaml#/QuizAuthoringView'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/institutions/{institutionSlug}/quizzes/{quizId}/authoring:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/QuizId'
+  get:
+    tags:
+      - Quizzes
+    operationId: getQuizAuthoringView
+    summary: Consultar quiz con pauta de autoría
+    description: |
+      Teacher puede consultar la pauta dentro de su alcance académico. Assistants y students no acceden a la vista de autoría; para
+      revisión de intentos existe una representación académica separada.
+    responses:
+      '200':
+        description: Quiz y pauta autorizada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/quizzes.yaml#/QuizAuthoringView'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+
+/api/v1/institutions/{institutionSlug}/quizzes/{quizId}/publish:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/QuizId'
+  post:
+    tags:
+      - Quizzes
+    operationId: publishQuiz
+    summary: Publicar un quiz válido
+    description: |
+      Valida fechas, puntajes, preguntas, al menos dos alternativas con IDs únicos
+      y exactamente una alternativa correcta por pregunta. Genera auditoría. Teacher puede publicar quizzes dentro de su alcance académico. La operación
+      asegura que exista un único GradeItem vinculado al quiz; se rechaza
+      si ya se publicó alguna nota del curso.
+    responses:
+      '200':
+        description: Quiz publicado e inmutable para cambios incompatibles.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/quizzes.yaml#/QuizAuthoringView'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/institutions/{institutionSlug}/sections/{sectionId}/quizzes/{quizId}/attempts:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/SectionId'
+    - $ref: '../components/parameters.yaml#/QuizId'
+  post:
+    tags:
+      - Attempts
+    operationId: startQuizAttempt
+    summary: Iniciar un intento como estudiante autenticado
+    description: |
+      `studentId` se deriva del claim `sub`. Valida membership student activa,
+      relación sección-curso, disponibilidad del quiz, máximo de intentos si existe
+      y ausencia de nota publicada. Solo hay un intento activo por estudiante y
+      quiz; sin máximo, los intentos son ilimitados. El `sectionId` queda como
+      snapshot histórico inmutable y `attemptNumber` ordena los intentos.
+      `closesAt` limita la disponibilidad del quiz, pero no cancela por sí solo
+      un intento ya iniciado. Los intentos cancelados cuentan entre los iniciados.
+      Si el usuario puede consultar la pauta de ese quiz como teacher, no puede rendirlo aunque también tenga rol student.
+    parameters:
+      - $ref: '../components/parameters.yaml#/IdempotencyKey'
+    responses:
+      '201':
+        description: Intento iniciado.
+        headers:
+          Location:
+            description: URI del intento creado.
+            schema:
+              type: string
+              format: uri-reference
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/quizzes.yaml#/QuizAttemptStudentView'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/AttemptId'
+  get:
+    tags:
+      - Attempts
+    operationId: getQuizAttempt
+    summary: Consultar un intento autorizado
+    description: |
+      El estudiante solo puede consultar su intento y recibe la vista estudiantil,
+      sin pauta ni corrección. Teacher y staff de la sección pueden recibir la
+      vista académica según sus permisos.
+    responses:
+      '200':
+        description: Vista del intento apropiada para el rol autenticado.
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '../components/schemas/quizzes.yaml#/QuizAttemptStudentView'
+                - $ref: '../components/schemas/quizzes.yaml#/QuizAttemptAcademicView'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+
+/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}/answers:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/AttemptId'
+  put:
+    tags:
+      - Attempts
+    operationId: saveQuizAttemptAnswers
+    summary: Reemplazar respuestas de un intento en progreso
+    description: |
+      En cada guardado, el servidor revalida la autorización vigente; no utiliza
+      un snapshot de permisos tomado al iniciar el intento. El usuario autenticado
+      debe ser el propietario del intento, mantener una membership `student` activa
+      en el curso correspondiente y no tener acceso actual de autoría ni a la pauta
+      de respuestas del quiz. Si cualquiera de estas condiciones deja de cumplirse,
+      la operación produce 403 Forbidden. El request no acepta `studentId`,
+      `isCorrect`, `pointsAwarded`, `scorePercent` ni `grade`. Si el intento ya
+      fue enviado, calificado o cancelado, no se guardan respuestas y responde
+      409 Conflict.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/quizzes.yaml#/SaveQuizAttemptAnswersRequest'
+    responses:
+      '200':
+        description: Respuestas guardadas sin información de corrección.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/quizzes.yaml#/QuizAttemptStudentView'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}/submit:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/AttemptId'
+  post:
+    tags:
+      - Attempts
+    operationId: submitQuizAttempt
+    summary: Enviar y calificar un intento de forma atómica
+    description: |
+      En cada envío, el servidor revalida la autorización vigente; no utiliza un
+      snapshot de permisos tomado al iniciar el intento. El usuario autenticado
+      debe ser el propietario del intento, mantener una membership `student` activa
+      en el curso correspondiente y no tener acceso actual de autoría ni a la pauta
+      de respuestas del quiz. Si cualquiera de estas condiciones deja de cumplirse,
+      la operación produce 403 Forbidden. El servidor inmoviliza respuestas,
+      calcula score y nota, y crea o actualiza el registro académico desde el último
+      intento calificado por `attemptNumber` en una sola transacción. Una nota ya
+      publicada bloquea nuevos envíos. Repetir la misma clave no duplica resultados;
+      un submit incompatible o sobre un intento cancelado devuelve 409. La
+      respuesta no revela la nota antes de publicarla.
+    parameters:
+      - $ref: '../components/parameters.yaml#/IdempotencyKey'
+    responses:
+      '200':
+        description: Intento enviado, o resultado idempotente de un submit ya procesado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/quizzes.yaml#/QuizAttemptSubmissionReceipt'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}/cancel:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/AttemptId'
+  post:
+    tags:
+      - Attempts
+    operationId: cancelQuizAttempt
+    summary: Cancelar un intento en progreso
+    description: |
+      El estudiante propietario puede cancelar su intento solo si mantiene una
+      membership `student` activa en el curso y no tiene acceso actual de autoría
+      ni a la pauta del quiz. Teacher con membership activa en el curso o
+      teacher con membership activa en la sección histórica del intento también
+      pueden cancelarlo para resolver un intento abandonado. El servidor revalida
+      estos permisos al cancelar; la falta de autorización produce 403 Forbidden.
+      Solo un intento `inProgress` pasa atómicamente a `cancelled`, registra
+      `cancelledAt` y genera auditoría con el actor, sin calcular nota ni modificar
+      una nota existente. `cancelled` es terminal: deja de bloquear la publicación,
+      pero conserva `attemptNumber` y cuenta para `maxAttempts` como intento
+      iniciado. Repetir la cancelación de un intento ya cancelado devuelve 204
+      sin duplicar la auditoría. Un intento `submitted` o `graded` produce 409
+      Conflict. La cancelación no modifica ni reabre una nota ya publicada.
+    responses:
+      '204':
+        description: Intento cancelado, o cancelación ya aplicada.
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+
+/api/v1/institutions/{institutionSlug}/quizzes/{quizId}/attempts:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/QuizId'
+  get:
+    tags:
+      - Attempts
+    operationId: listQuizAttempts
+    summary: Listar intentos para revisión académica
+    description: |
+      Teacher puede consultar todas las secciones del curso. Teacher y
+      assistant solo secciones donde tengan membership activa. Students no tienen acceso.
+    parameters:
+      - $ref: '../components/parameters.yaml#/SectionIdFilter'
+      - $ref: '../components/parameters.yaml#/StudentIdFilter'
+      - name: status
+        in: query
+        required: false
+        schema:
+          $ref: '../components/schemas/quizzes.yaml#/QuizAttemptStatus'
+      - $ref: '../components/parameters.yaml#/Cursor'
+      - $ref: '../components/parameters.yaml#/Limit'
+    responses:
+      '200':
+        description: Intentos autorizados.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/quizzes.yaml#/QuizAttemptListResponse'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'

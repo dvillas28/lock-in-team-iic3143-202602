@@ -1,0 +1,272 @@
+/api/v1/institutions/{institutionSlug}/modules/{moduleId}/materials:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/ModuleId'
+  get:
+    tags:
+      - Materials
+    operationId: listModuleMaterials
+    summary: Listar materiales visibles de un módulo
+    description: Estudiantes reciben solo material publicado de módulos publicados.
+    responses:
+      '200':
+        description: Materiales visibles.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/materials.yaml#/MaterialListResponse'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+  post:
+    tags:
+      - Materials
+    operationId: createMarkdownMaterial
+    summary: Crear material markdown
+    description: Requiere rol `teacher`, porque el material tiene alcance de curso.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/materials.yaml#/MarkdownMaterialCreate'
+    responses:
+      '201':
+        description: Material markdown creado en estado no publicado.
+        headers:
+          Location:
+            description: URI del material creado.
+            schema:
+              type: string
+              format: uri-reference
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/materials.yaml#/MarkdownMaterial'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/institutions/{institutionSlug}/modules/{moduleId}/materials/files:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/ModuleId'
+  post:
+    tags:
+      - Materials
+    operationId: uploadFileMaterial
+    summary: Subir un archivo como material
+    description: |
+      Requiere rol `teacher`. Acepta PDF, CSV, XLSX, TXT, JPEG y PNG. El
+      límite máximo de tamaño permanece pendiente; el binario se envía como
+      multipart y nunca como Base64 en JSON.
+    parameters:
+      - $ref: '../components/parameters.yaml#/IdempotencyKey'
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            $ref: '../components/schemas/materials.yaml#/FileMaterialUpload'
+    responses:
+      '201':
+        description: Archivo almacenado y material creado en estado no publicado.
+        headers:
+          Location:
+            description: URI del material creado.
+            schema:
+              type: string
+              format: uri-reference
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/materials.yaml#/FileMaterial'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '415':
+        $ref: '../components/responses.yaml#/UnsupportedMediaType'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/institutions/{institutionSlug}/materials/{materialId}:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/MaterialId'
+  get:
+    tags:
+      - Materials
+    operationId: getMaterial
+    summary: Consultar material autorizado
+    description: No expone `storageKey` ni ubicación física del archivo.
+    responses:
+      '200':
+        description: Material solicitado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/materials.yaml#/Material'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+  patch:
+    tags:
+      - Materials
+    operationId: updateMaterial
+    summary: Actualizar metadatos o contenido editable de un material
+    description: Requiere `teacher`; no reemplaza el binario de un archivo existente.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/materials.yaml#/MaterialUpdate'
+    responses:
+      '200':
+        description: Material actualizado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/materials.yaml#/Material'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/institutions/{institutionSlug}/materials/{materialId}/content:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/MaterialId'
+  get:
+    tags:
+      - Materials
+    operationId: downloadMaterialContent
+    summary: Descargar el contenido binario autorizado
+    description: Solo aplica a material de tipo `file`; no revela la clave interna del storage.
+    responses:
+      '200':
+        description: Contenido del archivo con su Content-Type real permitido.
+        headers:
+          Content-Disposition:
+            description: Nombre seguro sugerido para el archivo.
+            schema:
+              type: string
+        content:
+          application/pdf:
+            schema:
+              type: string
+              format: binary
+          text/csv:
+            schema:
+              type: string
+              format: binary
+          application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+            schema:
+              type: string
+              format: binary
+          text/plain:
+            schema:
+              type: string
+              format: binary
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+          image/png:
+            schema:
+              type: string
+              format: binary
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/institutions/{institutionSlug}/materials/{materialId}/publish:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/MaterialId'
+  post:
+    tags:
+      - Materials
+    operationId: publishMaterial
+    summary: Publicar material
+    description: Requiere `teacher` y genera un evento de auditoría inmutable.
+    responses:
+      '200':
+        description: Material publicado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/materials.yaml#/Material'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+
+/api/v1/institutions/{institutionSlug}/materials/{materialId}/unpublish:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/MaterialId'
+  post:
+    tags:
+      - Materials
+    operationId: unpublishMaterial
+    summary: Ocultar material publicado
+    description: Requiere `teacher` y genera un evento de auditoría inmutable.
+    responses:
+      '200':
+        description: Material ocultado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/materials.yaml#/Material'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
