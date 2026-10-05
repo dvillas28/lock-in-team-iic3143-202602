@@ -80,6 +80,12 @@ Workflow: [`.github/workflows/release.yml`](../../../../.github/workflows/releas
 Se dispara al empujar un tag SemVer `vMAJOR.MINOR.PATCH`, valida que el commit
 esté en `main` y crea el release con notas generadas.
 
+> Desde la Entrega 3 este flujo manual fue reemplazado por versionado
+> automático: el workflow crea los tags en cada push a `dev` y `main` y ya no
+> reacciona a tags empujados a mano. Ver
+> [git-flow § Versionado](../../../guides/git-flow.md#versionado). Las capturas
+> de esta sección corresponden al flujo anterior, usado para `v0.1.0`.
+
 Ejecución exitosa del workflow Release:
 
 ![Workflow Release exitoso](img/10-release-run.png)
