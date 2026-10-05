@@ -75,6 +75,8 @@ HealthResponse:
   required:
     - status
     - version
+    - commit
+    - deployedAt
     - timestamp
   properties:
     status:
@@ -83,6 +85,14 @@ HealthResponse:
         - ok
     version:
       type: string
+      description: Release del último deploy del backend. Una release sin cambios en el backend no lo redespliega, así que puede quedar atrás de la última release publicada.
+    commit:
+      type: [string, 'null']
+      description: SHA del commit desplegado; null fuera de Railway.
+    deployedAt:
+      type: string
+      format: date-time
+      description: Inicio del proceso actual, que coincide con el último deploy o reinicio.
     timestamp:
       type: string
       format: date-time
