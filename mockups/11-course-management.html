@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AcademiX — Secciones y roles</title>
+<script src="https://cdn.tailwindcss.com">
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js">
+</script>
+<link rel="stylesheet" href="assets/tokens.css?v=3"/>
+<link rel="stylesheet" href="assets/app.css?v=4"/>
+<script src="assets/app.js?v=3">
+</script>
+</head>
+<body data-staff>
+<a href="#main-content" class="btn btn-primary skip-link">Saltar al contenido</a>
+<div class="app">
+<aside class="sidebar">
+<div class="sidebar-top">
+<div class="sidebar-logo">
+<div class="logo-icon">
+<i data-lucide="graduation-cap" aria-hidden="true" style="width:16px;height:16px">
+</i>
+</div>
+<span class="logo-name">AcademiX</span>
+</div>
+<div class="tenant-badge">
+<i data-lucide="building-2" aria-hidden="true" style="width:16px;height:16px">
+</i>
+<span>Universidad Católica · uc</span>
+</div>
+</div>
+<nav class="sidebar-nav" aria-label="Navegación principal">
+<a class="nav-item " href="index.html" >
+<i data-lucide="layers" aria-hidden="true" style="width:16px;height:16px">
+</i>Galería</a>
+<a class="nav-item " href="10-institutions.html" >
+<i data-lucide="building-2" aria-hidden="true" style="width:16px;height:16px">
+</i>Instituciones</a>
+<a class="nav-item " href="07-teacher-dashboard.html" data-staff-link>
+<i data-lucide="book-open" aria-hidden="true" style="width:16px;height:16px">
+</i>Mis cursos</a>
+<a class="nav-item active" href="11-course-management.html" aria-current="page" data-teacher-only>
+<i data-lucide="users" aria-hidden="true" style="width:16px;height:16px">
+</i>Secciones y roles</a>
+<a class="nav-item " href="12-content-editor.html" data-teacher-only>
+<i data-lucide="folder" aria-hidden="true" style="width:16px;height:16px">
+</i>Módulos y material</a>
+<a class="nav-item " href="13-quiz-editor.html" data-teacher-only>
+<i data-lucide="list-checks" aria-hidden="true" style="width:16px;height:16px">
+</i>Autoría de quizzes</a>
+<a class="nav-item " href="08-teacher-gradebook.html" data-staff-link>
+<i data-lucide="bar-chart-2" aria-hidden="true" style="width:16px;height:16px">
+</i>Libro de notas</a>
+<a class="nav-item " href="16-attempt-review.html" data-staff-link>
+<i data-lucide="clipboard-list" aria-hidden="true" style="width:16px;height:16px">
+</i>Revisar intentos</a>
+<a class="nav-item " href="15-audit.html" data-teacher-only>
+<i data-lucide="history" aria-hidden="true" style="width:16px;height:16px">
+</i>Auditoría</a>
+<a class="nav-item" href="02-login.html">
+<i data-lucide="log-out" aria-hidden="true" style="width:16px;height:16px">
+</i>Cerrar sesión</a>
+</nav>
+<div class="sidebar-bottom">
+<div class="user-row">
+<div class="avatar" data-user-initials>CC</div>
+<div>
+<p class="name" data-user-name>Carla Contreras</p>
+<p class="role" data-user-role>Docente · Secciones 1 y 2</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="main">
+<header class="top-header">
+<div class="breadcrumb">
+<a href="index.html">Mockups</a>
+<span>/</span>
+<span class="crumb-active">Secciones y roles</span>
+</div>
+<div class="actions" style="margin:0">
+<span class="hint" style="font-size:12px">Mockup · datos de ejemplo</span>
+<button class="icon-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
+<i data-lucide="moon" aria-hidden="true" style="width:16px;height:16px">
+</i>
+</button>
+</div>
+</header>
+<div class="content" id="main-content">
+<div class="page-heading">
+<div>
+<p class="section-label">CU-04 · Semestre 2026-2</p>
+<h1>Secciones y roles</h1>
+<p>IIC2233 · Programación Avanzada · Universidad Católica</p>
+</div>
+</div>
+<div id="mock-status" class="notice status-message" role="status" aria-live="polite" hidden>
+</div>
+<div class="split">
+<div class="stack">
+<section class="card panel" >
+<h2>Secciones y participantes</h2>
+<div class="table-scroll">
+<table class="data-table">
+<caption>Inscripciones de IIC2233 — institución uc</caption>
+<thead>
+<tr>
+<th scope="col">Sección</th>
+<th scope="col">Participante</th>
+<th scope="col">Rol</th>
+<th scope="col">Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr >
+<td>Sección 1</td>
+<td>Carla Contreras</td>
+<td>Docente</td>
+<td>Activa</td>
+</tr>
+<tr >
+<td>Sección 2</td>
+<td>Carla Contreras</td>
+<td>Docente</td>
+<td>Activa</td>
+</tr>
+<tr >
+<td>Sección 2</td>
+<td>Javier Morales</td>
+<td>Ayudante</td>
+<td>Activa</td>
+</tr>
+<tr >
+<td>Sección 2</td>
+<td>María González</td>
+<td>Estudiante</td>
+<td>
+<span id="enrollment-state">Activa</span> <button type="button" class="btn btn-ghost" onclick="deactivate()" >Desactivar</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section class="card panel" >
+<h2>Configuración del curso</h2>
+<form onsubmit="event.preventDefault();mockNotice('Configuración guardada. Cambio registrado en el historial del curso.')">
+<div>
+<label class="field-label" for="course-name">Nombre</label>
+<input class="field" id="course-name" name="course-name" type="text" value="Programación Avanzada" required>
+</div>
+<div class="actions">
+<button class="btn btn-ghost">Guardar configuración</button>
+</div>
+</form>
+</section>
+</div>
+<div class="stack">
+<section class="card panel" >
+<h2>Crear sección</h2>
+<form onsubmit="addSection(event)">
+<div>
+<label class="field-label" for="section-name">Nombre de sección</label>
+<input class="field" id="section-name" name="section-name" type="text" value="Sección 3" required>
+</div>
+<div class="actions">
+<button class="btn btn-ghost">Crear sección</button>
+</div>
+</form>
+</section>
+<section class="card panel" >
+<h2>Asignar rol</h2>
+<form onsubmit="assignRole(event)">
+<div class="stack">
+<div>
+<label class="field-label" for="section">Sección</label>
+<select id="section" class="field" >
+<option>Sección 2</option>
+<option>Sección 1</option>
+
+</select>
+</div>
+<div>
+<label class="field-label" for="member">Persona — pertenencia institucional activa</label>
+<select id="member" class="field" >
+<option>María González</option>
+<option>Javier Morales</option>
+<option>Camila Rojas</option>
+</select>
+</div>
+<div>
+<label class="field-label" for="enrollment-role">Rol de sección</label>
+<select id="enrollment-role" class="field" >
+<option value="student">Estudiante</option>
+<option value="assistant">Ayudante</option>
+<option value="teacher">Docente</option>
+</select>
+</div>
+</div>
+<div class="actions">
+<button class="btn btn-primary">Asignar rol</button>
+</div>
+</form>
+</section>
+</div>
+</div>
+</div>
+</main>
+</div>
+<dialog id="mock-confirm" class="modal native-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-message">
+<h2 id="confirm-title">
+</h2>
+<p id="confirm-message">
+</p>
+<div class="actions">
+<button type="button" class="btn btn-ghost" id="confirm-cancel" onclick="document.getElementById('mock-confirm').close()">Volver</button>
+<button type="button" class="btn btn-primary" id="confirm-accept">Confirmar</button>
+</div>
+</dialog>
+<script>
+function addSection(e){
+ e.preventDefault();const name=document.getElementById('section-name').value.trim();const select=document.getElementById('section');
+ if(Array.from(select.options).some(o=>o.text===name)){mockNotice('Ya existe una sección con ese nombre en el curso.');return;}
+ const option=document.createElement('option');option.textContent=name;select.append(option);
+ const row=document.createElement('tr');[name,'Sin participantes','—','Activa'].forEach(value=>{const td=document.createElement('td');td.textContent=value;row.append(td);});document.querySelector('.data-table tbody').append(row);mockNotice(name+' creada en el curso. Cambio registrado.');
+}
+function assignRole(e){
+ e.preventDefault();const person=document.getElementById('member').value;const section=document.getElementById('section').value;const role=document.getElementById('enrollment-role').selectedOptions[0].text;
+ const rows=Array.from(document.querySelector('.data-table tbody').rows);
+ if(rows.some(row=>row.cells[0].textContent===section && row.cells[1].textContent===person && row.cells[2].textContent===role && row.cells[3].textContent.trim().startsWith('Activa'))){mockNotice('Esta persona ya tiene ese rol activo en esta sección. No se duplicó la inscripción.');return;}
+ const row=document.createElement('tr');[section,person,role,'Activa'].forEach(value=>{const td=document.createElement('td');td.textContent=value;row.append(td);});document.querySelector('.data-table tbody').append(row);mockNotice('Rol asignado dentro de uc. Inscripción y cambio registrados.');
+}
+function deactivate(){mockConfirm('¿Desactivar inscripción de María?', 'María perderá el acceso estudiantil a la sección 2. La inscripción y su historial se conservan.',function(){document.getElementById('enrollment-state').textContent='Inactiva';mockNotice('Inscripción desactivada. Estado anterior y nuevo registrados en el historial.');});}
+
+</script>
+</body>
+</html>

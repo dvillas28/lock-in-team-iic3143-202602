@@ -209,7 +209,6 @@ visibilidad ajustada a su alcance.
 ### Actores
 
 - Docente.
-- Docente.
 - Ayudante de sección.
 - Estudiante.
 
@@ -773,7 +772,6 @@ alcance académico autorizado.
 ### Actores
 
 - Docente.
-- Docente.
 
 ### Stakeholders
 
@@ -1105,7 +1103,6 @@ del alcance de curso o sección permitido para cada rol.
 ### Actores
 
 - Docente.
-- Docente.
 - Ayudante de sección.
 
 ### Stakeholders
@@ -1177,131 +1174,111 @@ del alcance de curso o sección permitido para cada rol.
 
 ## Revisión de mockups por rol — Issue #22
 
-La revisión de [Issue #22](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/22)
-contrasta los diez HTML de `mockups/` (nueve pantallas y una galería), su contenido
-y sus estados de activación, evaluación publicada y confirmación de publicación.
-La fuente funcional vigente son CU-01 a CU-16 de este documento, el
-[alcance de Entrega 2](02-scope.md) y el [modelo de dominio](05-domain-model.md).
-`specs/` no contiene especificaciones funcionales. Las US de
-[Entrega 0](../0/user-stories.md), todavía citadas por los HTML y su README,
-y los BPMN de Entregas 0/1 son antecedentes históricos, no requisitos nuevos del MVP.
+El seguimiento de [Issue #22](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/22)
+incorpora las correcciones y nuevos mockups solicitados después del mapeo inicial.
+Se mantienen estos CU, el [alcance](02-scope.md) y el
+[modelo de dominio](05-domain-model.md) como fuente vigente; las US y BPMN de
+Entregas 0/1 son antecedentes históricos. `specs/` no contiene otro alcance funcional.
 
-Los roles académicos son docente (`teacher`), ayudante (`assistant`) y estudiante
-(`student`), asignados por `Enrollment` de sección. El usuario autenticado es el
-actor compartido de CU-01/CU-02, cualquiera sea su rol; «público» identifica una
-superficie previa al acceso, no otro rol académico. El ayudante solo consulta el
-libro de su sección (CU-16); no configura ni publica. Administrador institucional
-y coordinador separado están fuera del MVP. Toda vista académica requiere
-institución visible, membership activa y permiso contextual; un badge UC no
-demuestra aislamiento ni autorización. Los cambios sensibles requieren auditoría,
-pero el mensaje de un modal no representa la consulta del historial de CU-13.
+Hay **17 HTML: 16 pantallas y una galería**. Se reutilizan tokens, shell,
+formularios, tablas y tarjetas existentes. Las siete pantallas nuevas (10–16)
+agrupan metas relacionadas para evitar una pantalla artificial por CU.
+El acceso de login es previo a CU-01/CU-02 y la landing/galería no constituyen
+casos de uso académicos nuevos.
 
 ### Rol → vista → caso de uso
 
-Las rutas enlazadas son los archivos reales. «Parcial» indica evidencia visual
-de parte de la meta, sin afirmar que el flujo o sus permisos estén completos.
-Las entidades nombradas describen el dominio vigente; una entrega manual del
-mockup no se equipara a `QuizAttempt`.
+| Actor / rol | Vista / mockup | Casos de uso vigentes | Propósito y evidencia visual |
+| --- | --- | --- | --- |
+| Sin rol académico | [mockups/index.html](../../../mockups/index.html) — Galería | Sin CU operativo | Navegación a las 16 pantallas y variantes compartidas de ayudante. |
+| Público | [mockups/01-landing.html](../../../mockups/01-landing.html) — Landing | Sin CU operativo; acceso previo. | Propuesta de valor y acceso global. |
+| Compartido | [mockups/02-login.html](../../../mockups/02-login.html) — Acceso a AcademiX | Sin CU operativo; acceso previo. | Acceso de demostración previo a elegir institución (RF1); sin invitación ni branding por subdominio. |
+| Estudiante | [mockups/03-dashboard.html](../../../mockups/03-dashboard.html) — Mis cursos | CU-02 — Acceder al contexto institucional; CU-03 — Ver cursos y secciones | Identidad institucional, inscripción, acceso a curso y estado sin cursos. |
+| Estudiante | [mockups/04-course-modules.html](../../../mockups/04-course-modules.html) — Curso y módulos | CU-03 — Ver cursos y secciones; CU-06 — Consultar material | Solo módulos publicados, lectura markdown y PDF; controles por teclado. |
+| Estudiante | [mockups/05-evaluations.html](../../../mockups/05-evaluations.html) — Quizzes | CU-08 — Responder quiz; CU-09 — Enviar intento y obtener calificación automática; CU-12 — Ver notas y promedio | Listado de quizzes, inicio/reanudación y acceso a notas publicadas; envío detallado en 14. |
+| Estudiante | [mockups/06-grades.html](../../../mockups/06-grades.html) — Calificaciones | CU-12 — Ver notas y promedio | Notas propias publicadas, promedio parcial 6.1, ponderación 65 % y estado sin notas. |
+| Docente / ayudante | [mockups/07-teacher-dashboard.html](../../../mockups/07-teacher-dashboard.html) — Cursos del equipo docente | CU-02 — Acceder al contexto institucional; CU-03 — Ver cursos y secciones | Curso/secciones por rol; ayudante sección 2 sin administración. |
+| Docente / ayudante (lectura) | [mockups/08-teacher-gradebook.html](../../../mockups/08-teacher-gradebook.html) — Libro de notas docente | CU-10 — Configurar libro de notas; CU-11 — Publicar notas; CU-16 — Revisar el libro de notas docente | Pesos al 100 %, filas individuales, selección por evaluación/sección, bloqueo tras publicación; ayudante solo sección 2. |
+| Estudiante | [mockups/09-pdf-reader.html](../../../mockups/09-pdf-reader.html) — Lector de documentos | CU-06 — Consultar material | PDF de ejemplo y retorno al módulo, sin IA; archivo condicionado al almacenamiento futuro. |
+| Usuario autenticado (compartido) | [mockups/10-institutions.html](../../../mockups/10-institutions.html) — Elegir institución | CU-01 — Elegir institución; CU-02 — Acceder al contexto institucional | Instituciones accesibles, roles disponibles, lista vacía, contexto no disponible y UTFSM sin cursos. |
+| Docente | [mockups/11-course-management.html](../../../mockups/11-course-management.html) — Secciones y roles | CU-04 — Gestionar secciones y roles | Configuración de curso, creación de sección, asignación/desactivación de roles y rechazo de duplicados. |
+| Docente | [mockups/12-content-editor.html](../../../mockups/12-content-editor.html) — Módulos y material | CU-14 — Organizar módulos del curso; CU-05 — Publicar material | Crear/ordenar/publicar/ocultar módulos; borrador markdown, formatos admitidos y publicación condicionada a módulo visible. |
+| Docente | [mockups/13-quiz-editor.html](../../../mockups/13-quiz-editor.html) — Autoría de quiz | CU-07 — Crear y publicar quiz | Preguntas, alternativas únicas, una correcta, puntajes, fechas e intentos; bloqueo de pauta al publicar. |
+| Estudiante | [mockups/14-quiz-attempt.html](../../../mockups/14-quiz-attempt.html) — Responder quiz | CU-08 — Responder quiz; CU-09 — Enviar intento y obtener calificación automática; CU-15 — Cancelar un intento en progreso | Guardar/reanudar, envío sin nota anticipada, cancelación terminal y máximo; nota publicada o acceso a pauta bloquean rendición. |
+| Docente | [mockups/15-audit.html](../../../mockups/15-audit.html) — Auditoría del curso | CU-13 — Consultar auditoría | Eventos sanitizados de solo lectura, filtros por acción/actor/sección/fecha y estados sin coincidencias o permiso. |
+| Docente / ayudante (lectura) | [mockups/16-attempt-review.html](../../../mockups/16-attempt-review.html) — Revisar intentos | CU-16 — Revisar el libro de notas docente; CU-15 — Cancelar un intento en progreso | Resultados e intentos de sección; cancelación explícita por docente; ayudante no cancela ni accede a autoría. |
 
-Las metas se conectan por acceso CU-01 → CU-02 → CU-03; preparación/consulta
-de contenido CU-14 → CU-05 → CU-06; y quiz CU-07 → CU-08 → CU-09 → CU-11 → CU-12.
-CU-10 configura los pesos exigidos por CU-11; CU-15 resuelve el bloqueo por un
-intento abandonado antes de publicar. CU-16 permite revisar resultados sin
-modificarlos y CU-13 consultar el historial de cambios sensibles.
+### Cobertura y relaciones
 
-| Actor / rol | Vista / mockup | Caso(s) de uso vigente(s) | Propósito, acciones y entidades | Observaciones |
-| --- | --- | --- | --- | --- |
-| Sin rol académico (galería) | [mockups/index.html](../../../mockups/index.html) — Índice de mockups | Sin CU operativo. | Abrir las nueve pantallas agrupadas por público, estudiante y docente; no modifica entidades académicas. | Herramienta de revisión, no portal selector de instituciones de CU-01. |
-| Sin rol académico (público) | [mockups/01-landing.html](../../../mockups/01-landing.html) — Landing | Sin CU operativo. | Presentar el producto y enlazar login/demo; menciona cursos, material, evaluaciones y notas. | Marketing exploratorio; sus anuncios, entregas y corrección no amplían el MVP. |
-| Acceso compartido previo a los roles docente, ayudante y estudiante | [mockups/02-login.html](../../../mockups/02-login.html) — Login / Activación | Apoyo previo a CU-02 — Acceder al contexto institucional; no representa su flujo completo. | Ingresar correo/contraseña o token y datos de activación; muestra identidad institucional (`User`, `Institution`). | RF1 exige identidad global. No hay selector de memberships ni roles; el login enlaza siempre al dashboard estudiantil. Activación por invitación y recuperación no tienen CU definido aquí. |
-| Estudiante | [mockups/03-dashboard.html](../../../mockups/03-dashboard.html) — Dashboard | CU-03 — Ver cursos y secciones (principal); CU-02 — Acceder al contexto institucional (identidad contextual parcial). | Ver cursos, sección y docente; abrir curso/evaluaciones/notas; muestra `Course`, `Section` y contexto de inscripción. | Próximas tareas, anuncios y calendario son exploratorios; no hay selector institucional ni experiencia de ayudante. |
-| Estudiante | [mockups/04-course-modules.html](../../../mockups/04-course-modules.html) — Curso y módulos | CU-06 — Consultar material (principal); contexto de curso/sección de CU-03 — Ver cursos y secciones. | Seleccionar módulo, abrir PDF y presentar descarga de recursos; muestra `CourseModule`, `Material` y equipo docente de sección. | No ofrece crear/publicar/reordenar módulos o material: no cubre CU-05/CU-14. Presenta un módulo oculto y formatos ajenos al MVP. |
-| Estudiante | [mockups/05-evaluations.html](../../../mockups/05-evaluations.html) — Evaluaciones | CU-12 — Ver notas y promedio, parcial: nota propia publicada, sin promedio. | Seleccionar evaluación y consultar resultado publicado (`Grade`, `GradeItem`); además muestra carga de entrega, evidencia, feedback y recorrección históricos. | El flujo principal es entrega PDF/DOCX, no preguntas de alternativas: no cubre CU-08/CU-09/CU-15. |
-| Estudiante | [mockups/06-grades.html](../../../mockups/06-grades.html) — Calificaciones | CU-12 — Ver notas y promedio (principal). | Elegir curso y consultar notas publicadas, puntajes, ponderaciones y promedio parcial (`Grade`, `GradeItem`, `Course`); muestra botón Exportar. | No expone valores de notas pendientes; el promedio de ejemplo es inconsistente. Exportación y comentario manual no tienen una meta propia en los CU vigentes. |
-| Docente | [mockups/07-teacher-dashboard.html](../../../mockups/07-teacher-dashboard.html) — Panel docente | CU-03 — Ver cursos y secciones, parcial: listado de cursos/secciones docentes. | Ver cursos, secciones y contadores; abrir libro; el panel histórico permite escribir nota y comentario de una entrega manual. | La cola de corrección no es calificación automática de CU-09 ni revisión de intentos de CU-16. No representa gestión de secciones/roles de CU-04. |
-| Docente; CU-16 también requiere lectura para ayudante, aún no diferenciada en el mockup | [mockups/08-teacher-gradebook.html](../../../mockups/08-teacher-gradebook.html) — Libro de notas docente | CU-10 — Configurar libro de notas y CU-11 — Publicar notas (principales); CU-16 — Revisar el libro de notas docente (resumen parcial). | Editar pesos, ver suma/estados y cantidades de notas, guardar y confirmar liberación (`Course`, `Section`, `GradeItem`, `Grade`). | Solo hay agregados por evaluación, sin filas por estudiante ni intentos. La lectura puede ser compartida según CU-16, pero esta variante permite escritura y no limita al ayudante a su sección. |
-| Estudiante | [mockups/09-pdf-reader.html](../../../mockups/09-pdf-reader.html) — Lector de documentos | CU-06 — Consultar material (lectura de PDF). | Leer material y presentar controles de página, zoom, descarga y retorno al curso (`Material`, `CourseModule`); panel IA con preguntas/citas. | El PDF ilustra material basado en archivo, condicionado al adaptador de almacenamiento; no demuestra su implementación. La IA no tiene CU vigente y está fuera del MVP. |
+Los **16 CU tienen representación de su meta principal**; no quedan CU sin
+mockup principal en este inventario. El listado 05 conduce al flujo detallado 14;
+07/08/16 comparten variantes docentes y de ayudante mediante `?role=assistant`.
+No se duplican esas pantallas para cada rol. Los escenarios ilustran flujos,
+no equivalen a implementación de requisitos ni a pruebas de seguridad del producto.
 
-### Cobertura y vacíos
+- Acceso: 02 → 10 → 03 o 07 (CU-01/CU-02/CU-03). UC y UTFSM son contextos
+  de ejemplo accesibles; el estado UTFSM sin cursos no reutiliza datos de UC.
+- Contenido: 12 organiza/publica módulos y material (CU-14/CU-05); 04 consulta
+  markdown publicado y abre 09 para PDF (CU-06). Módulos y material son de curso,
+  compartidos por las secciones; ocultarlos retira visibilidad estudiantil.
+- Evaluación: 13 prepara quiz/pauta (CU-07); 05 → 14 inicia/reanuda, guarda y
+  envía (CU-08/CU-09). Solo el docente accede a autoría. Tener además un rol
+  estudiantil no habilita rendir cuando existe acceso a la pauta.
+- Notas: 08 configura pesos (CU-10), revisa filas individuales (CU-16) y
+  confirma evaluación, secciones y cantidad de notas (CU-11). 06 muestra solo
+  notas propias publicadas y promedio parcial normalizado (CU-12).
+- Cierre y trazabilidad: 14 permite cancelar al estudiante propietario;
+  16 permite cancelar al docente (CU-15), sin nota y consumiendo un intento.
+  Un intento en progreso detiene publicación; se cancela explícitamente, nunca
+  de forma automática. 15 consulta eventos sanitizados e inmutables (CU-13).
 
-Hay representación visual relacionada con **7 de 16 CU**, con límites:
+### Roles, correcciones y estados
 
-- CU-02 — Acceder al contexto institucional: identidad UC/rol en el shell de
-  03–09 y acceso previo en 02; faltan verificación de membership, roles acumulados
-  y estados de acceso rechazado.
-- CU-03 — Ver cursos y secciones: 03/07 y contexto de 04; faltan experiencia
-  de ayudante, selección de secciones según permisos y estado sin cursos.
-- CU-06 — Consultar material: 04/09; faltan material markdown y estados de
-  acceso denegado, y el listado contradice la ocultación del contenido.
-- CU-10 — Configurar libro de notas: 08; presenta pesos y advertencia, sin
-  representar correctamente el bloqueo posterior a publicación.
-- CU-11 — Publicar notas: 08; presenta confirmación, sin selección explícita
-  de secciones ni conflicto por intentos en progreso.
-- CU-12 — Ver notas y promedio: 06 y resultado publicado de 05; falta el
-  estado sin notas publicadas y corregir el ejemplo de promedio.
-- CU-16 — Revisar el libro de notas docente: 08 solo anticipa el resumen;
-  faltan filas individuales, revisión de intentos y variante de ayudante de solo
-  lectura por sección. No se cuenta la corrección manual de 07 como este flujo.
+Los roles vigentes son `teacher`, `assistant`, `student` por `Enrollment`;
+usuario autenticado es el actor compartido del acceso. «Público» no es un rol
+académico. No se agregan administrador institucional ni coordinador.
 
-**Sin mockup de la meta vigente (9 CU):**
+- Docente de ejemplo: Carla Contreras, secciones 1 y 2. Puede editar contenido,
+  autoría, participantes y pesos; publicar notas y cancelar intentos autorizados.
+- Ayudante de ejemplo: Javier Morales, sección 2. 07/08/16 conservan identidad,
+  navegación y filas de esa sección; sin autoría, edición, publicación,
+  auditoría ni cancelación. Ocultar controles en un HTML no implementa permisos.
+- Estudiante: María González, sección 2 de IIC2233. Accede a material publicado,
+  a su intento y a sus notas publicadas. Módulos ocultos se omiten.
 
-| Caso de uso | Actores | Evidencia que falta |
-| --- | --- | --- |
-| CU-01 — Elegir institución | Usuario autenticado (compartido) | Selector de instituciones con membership activa y lista vacía; el índice es una galería. |
-| CU-04 — Gestionar secciones y roles | Docente | Crear/actualizar secciones y asignar/desactivar `Enrollment`; mostrar el equipo en 04 no es gestionarlo. |
-| CU-05 — Publicar material | Docente | Crear/editar/ocultar/publicar material; 04/09 solo muestran consumo. |
-| CU-07 — Crear y publicar quiz | Docente | Autoría de preguntas, alternativas, pauta protegida, política de intentos y publicación. |
-| CU-08 — Responder quiz | Estudiante | Iniciar/reanudar intento y guardar respuestas sin pauta; la carga de archivo de 05 no lo sustituye. |
-| CU-09 — Enviar intento y obtener calificación automática | Estudiante | Confirmar envío de respuestas y recepción sin divulgar la nota; 05/07 describen entrega/corrección manual. |
-| CU-13 — Consultar auditoría | Docente | Historial filtrable con actor, fecha y cambios sanitizados; el modal de 08 solo anuncia registro. |
-| CU-14 — Organizar módulos del curso | Docente | Crear/editar/reordenar/publicar/ocultar módulos; el selector estudiantil de 04 no es gestión. |
-| CU-15 — Cancelar un intento en progreso | Estudiante propietario o docente autorizado | Cancelación explícita de `QuizAttempt`, efecto sobre límite y publicación; «Cancelar» en el modal de 08 cierra el diálogo, no un intento. |
+Se retiraron entregas/corrección manual, recorrección, IA, anuncios/calendario,
+exportación e invitación por token de las vistas operativas. La navegación docente
+ya no lleva al perfil estudiantil. El promedio del ejemplo se corrigió a **6.1**:
+`(6.5×15 + 6.8×15 + 5.1×25 + 7.0×10) / 65`, con 65 % publicado.
+Los controles de pesos/nuevos elementos se bloquean tras publicar y la
+confirmación identifica la selección real. Las selecciones usan controles
+nativos de teclado; los diálogos nativos gestionan foco, Escape y retorno.
+Colores, incluido el papel fijo del lector, están centralizados en tokens.
 
-**Sin CU operativo claro:** `index.html` y `01-landing.html` son soportes de
-revisión/marketing. El propósito principal de 02 (login/activación), 05
-(entrega/recorrección) y 07 (corrección manual) no tiene equivalencia completa
-en los CU actuales, aunque partes de esas vistas apoyan los casos señalados.
-También carecen de CU vigente los bloques de IA de 09, anuncios/calendario de
-03 y acciones de exportación, recuperación, invitación y notificaciones.
-No se infieren CU a partir de enlaces «Configuración» con `href="#"`.
+Las páginas muestran enlaces «Escenarios del mockup»: memberships vacías,
+acceso no disponible, sin cursos/notas, libro bloqueado, intento que bloquea
+publicación, nota publicada, límite de intentos, roles incompatibles y permiso
+de auditoría perdido. Los filtros de auditoría permiten mostrar ausencia de
+coincidencias; los formularios ilustran validaciones de fechas, alternativas,
+formatos, duplicados y suma de pesos.
 
-### Inconsistencias observadas para decisiones posteriores
+### Límites y decisiones pendientes
 
-- **Roles y visibilidad:** 04 muestra «Semana 7 — Redes / Oculto para
-  estudiantes» al perfil estudiantil; CU-06 exige omitir módulos ocultos.
-  «Mis cursos» de 07/08 lleva a 04 y cambia la identidad docente a María
-  estudiante. No hay variante de ayudante: no se pueden atribuirle los controles
-  de escritura de 08 ni la corrección manual histórica de 07/05.
-- **Alcance y vocabulario:** tareas/entregas, «En corrección», recorrección
-  con plazo y feedback manual de ayudante en 05/07 proceden del alcance anterior.
-  No representan los estados `in_progress`, `graded`, `cancelled` de los quizzes.
-  04 muestra PPTX, IPYNB y links externos, que no corresponden al material
-  markdown ni a los formatos PDF/CSV/XLSX/TXT/JPEG/PNG de CU-05/RF15.
-  Branding por subdominio de 02, anuncios/calendario e IA son exploratorios.
-- **Notas y publicación:** 08 combina pesos al 95 %, notas ya publicadas,
-  inputs editables, «Nueva evaluación» y «Guardar ponderaciones» habilitados;
-  CU-10 bloquea pesos/nuevos ítems desde la primera publicación y CU-11 exige
-  100 %. Ambas acciones de liberar abren el mismo modal de «Control 3 / 94 notas»,
-  incluso desde «Tarea 3 / 28 de 32». El mensaje no identifica la selección real.
-  En 06, `(6.5×15 + 6.8×15 + 5.1×25 + 7.0×10) / 65 ≈ 6.1`, no el 5.8 mostrado.
-- **Vistas compartidas y repetición:** 05 repite la nota publicada de 06 con
-  un detalle de entrega; 04/09 forman listado → lector. Son vistas relacionadas,
-  no duplicados que deban eliminarse. 03/07 atienden CU-03 para roles distintos;
-  02 es acceso compartido y 08 podría compartir solo lectura autorizada.
-- **Accesibilidad de interacción:** los selectores de módulos de 04,
-  evaluaciones de 05 y filas de corrección de 07 son `div` con `onclick`, sin
-  `tabindex` ni manejo de teclado. El modal de 08 declara diálogo y cierra con
-  Escape, pero su script no mueve ni confina el foco. Las reglas globales de
-  foco/movimiento reducido no cubren esas carencias; no se certifica contraste
-  ni comportamiento responsive mediante este mapeo.
-- **Ambigüedad en la fuente:** CU-03/CU-11/CU-16 repiten «Docente» en actores;
-  CU-03/CU-16 alternan alcance de curso completo y sección para el mismo nombre.
-  El modelo y RF10–RF12 solo definen `teacher`, `assistant`, `student` por sección.
-  Se mantiene esa nomenclatura y se registra la ambigüedad de alcance para
-  aclaración posterior, sin añadir un coordinador ni resolverla en los mockups.
-
-Estos hallazgos documentan cobertura y gaps; no incorporan funcionalidades,
-modifican permisos ni proponen implementar pantallas dentro de esta issue.
+- Los HTML son estáticos: no hay JWT, API, autorización real, escritura de datos,
+  auditoría persistida ni carga de archivos. Los resultados mostrados son
+  escenarios independientes; no se sincronizan entre pantallas. Solo el intento
+  estudiantil simula guardado/reanudación local en `sessionStorage` por contexto uc.
+- 09 es un extracto ilustrativo de PDF, sin binario descargable; no demuestra
+  storage. La lectura markdown de 04 cubre el material inmediato del MVP.
+- La fuente conserva una ambigüedad: CU-03/CU-16 y el contrato describen tanto
+  alcance de curso completo como sección propia para `teacher`. Se eliminan
+  entradas de actor literalmente duplicadas, pero no se inventa una nueva regla
+  de permisos. La demo docente usa secciones 1/2 donde Carla tiene docencia;
+  el ayudante usa solo sección 2. El alcance docente sobre otras secciones requiere
+  una decisión funcional antes de implementar autorización.
+- Hay estados representativos, no todas las combinaciones de flujos alternativos.
+  Esta actualización cierra los vacíos de pantallas, sin ampliar el alcance ni
+  sustituir la validación posterior de implementación.
 
 ## Requisitos funcionales
 

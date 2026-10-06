@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AcademiX — Autoría de quiz</title>
+<script src="https://cdn.tailwindcss.com">
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js">
+</script>
+<link rel="stylesheet" href="assets/tokens.css?v=3"/>
+<link rel="stylesheet" href="assets/app.css?v=4"/>
+<script src="assets/app.js?v=3">
+</script>
+</head>
+<body data-staff>
+<a href="#main-content" class="btn btn-primary skip-link">Saltar al contenido</a>
+<div class="app">
+<aside class="sidebar">
+<div class="sidebar-top">
+<div class="sidebar-logo">
+<div class="logo-icon">
+<i data-lucide="graduation-cap" aria-hidden="true" style="width:16px;height:16px">
+</i>
+</div>
+<span class="logo-name">AcademiX</span>
+</div>
+<div class="tenant-badge">
+<i data-lucide="building-2" aria-hidden="true" style="width:16px;height:16px">
+</i>
+<span>Universidad Católica · uc</span>
+</div>
+</div>
+<nav class="sidebar-nav" aria-label="Navegación principal">
+<a class="nav-item " href="index.html" >
+<i data-lucide="layers" aria-hidden="true" style="width:16px;height:16px">
+</i>Galería</a>
+<a class="nav-item " href="10-institutions.html" >
+<i data-lucide="building-2" aria-hidden="true" style="width:16px;height:16px">
+</i>Instituciones</a>
+<a class="nav-item " href="07-teacher-dashboard.html" data-staff-link>
+<i data-lucide="book-open" aria-hidden="true" style="width:16px;height:16px">
+</i>Mis cursos</a>
+<a class="nav-item " href="11-course-management.html" data-teacher-only>
+<i data-lucide="users" aria-hidden="true" style="width:16px;height:16px">
+</i>Secciones y roles</a>
+<a class="nav-item " href="12-content-editor.html" data-teacher-only>
+<i data-lucide="folder" aria-hidden="true" style="width:16px;height:16px">
+</i>Módulos y material</a>
+<a class="nav-item active" href="13-quiz-editor.html" aria-current="page" data-teacher-only>
+<i data-lucide="list-checks" aria-hidden="true" style="width:16px;height:16px">
+</i>Autoría de quizzes</a>
+<a class="nav-item " href="08-teacher-gradebook.html" data-staff-link>
+<i data-lucide="bar-chart-2" aria-hidden="true" style="width:16px;height:16px">
+</i>Libro de notas</a>
+<a class="nav-item " href="16-attempt-review.html" data-staff-link>
+<i data-lucide="clipboard-list" aria-hidden="true" style="width:16px;height:16px">
+</i>Revisar intentos</a>
+<a class="nav-item " href="15-audit.html" data-teacher-only>
+<i data-lucide="history" aria-hidden="true" style="width:16px;height:16px">
+</i>Auditoría</a>
+<a class="nav-item" href="02-login.html">
+<i data-lucide="log-out" aria-hidden="true" style="width:16px;height:16px">
+</i>Cerrar sesión</a>
+</nav>
+<div class="sidebar-bottom">
+<div class="user-row">
+<div class="avatar" data-user-initials>CC</div>
+<div>
+<p class="name" data-user-name>Carla Contreras</p>
+<p class="role" data-user-role>Docente · Secciones 1 y 2</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="main">
+<header class="top-header">
+<div class="breadcrumb">
+<a href="index.html">Mockups</a>
+<span>/</span>
+<span class="crumb-active">Autoría de quiz</span>
+</div>
+<div class="actions" style="margin:0">
+<span class="hint" style="font-size:12px">Mockup · datos de ejemplo</span>
+<button class="icon-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
+<i data-lucide="moon" aria-hidden="true" style="width:16px;height:16px">
+</i>
+</button>
+</div>
+</header>
+<div class="content" id="main-content">
+<div class="page-heading">
+<div>
+<p class="section-label">CU-07 · Semestre 2026-2</p>
+<h1>Autoría de quiz</h1>
+<p>IIC2233 · Programación Avanzada · Universidad Católica</p>
+</div>
+</div>
+<div id="mock-status" class="notice status-message" role="status" aria-live="polite" hidden>
+</div>
+<div class="split">
+<form id="quiz-form" onsubmit="publishQuiz(event)" class="stack">
+<section class="card panel" >
+<h2>Configuración del quiz</h2>
+<div class="form-grid">
+<div>
+<label class="field-label" for="quiz-title">Título</label>
+<input class="field" id="quiz-title" name="quiz-title" type="text" value="Quiz 3 — Generadores" required>
+</div>
+<div>
+<label class="field-label" for="quiz-scope">Destinatarios</label>
+<select id="quiz-scope" class="field" >
+<option>Todas las secciones del curso</option>
+<option>Sección 2 — docencia activa</option>
+</select>
+</div>
+<div>
+<label class="field-label" for="opens">Disponible desde</label>
+<input class="field" id="opens" name="opens" type="datetime-local" value="2026-10-06T09:00" required>
+</div>
+<div>
+<label class="field-label" for="closes">Disponible hasta</label>
+<input class="field" id="closes" name="closes" type="datetime-local" value="2026-10-07T23:59" required>
+</div>
+<div>
+<label class="field-label" for="max-attempts">Máximo de intentos</label>
+<input class="field" id="max-attempts" name="max-attempts" type="number" value="2" min="1" step="1">
+</div>
+<p class="hint">Deja el máximo vacío para intentos ilimitados.</p>
+</div>
+</section>
+<section class="card panel" >
+<h2>Pregunta y pauta de autoría</h2>
+<p class="notice">Solo docentes autorizados acceden a esta pauta. Quien accede a ella no puede rendir este quiz como estudiante.</p>
+<div class="stack" style="margin-top:16px">
+<div>
+<label class="field-label" for="question">Enunciado</label>
+<input class="field" id="question" name="question" type="text" value="¿Qué hace yield en un generador?" required>
+</div>
+<div>
+<label class="field-label" for="points">Puntaje</label>
+<input class="field" id="points" name="points" type="number" value="10" min="1" required>
+</div>
+<fieldset class="stack">
+<legend>Alternativas — elige exactamente una correcta</legend>
+<div class="option">
+<label><input type="radio" name="correct" value="a" aria-label="Respuesta correcta: alternativa A" required> Correcta</label>
+<input class="field" aria-label="Alternativa A" value="Pausa la ejecución y conserva el estado" required>
+</div>
+<div class="option">
+<label><input type="radio" name="correct" value="b" aria-label="Respuesta correcta: alternativa B" required> Correcta</label>
+<input class="field" aria-label="Alternativa B" value="Materializa siempre la secuencia completa" required>
+</div>
+</fieldset>
+</div>
+<div class="actions">
+<button type="button" class="btn btn-ghost" onclick="saveDraft()" >Guardar borrador</button>
+<button class="btn btn-primary" id="publish-quiz">Publicar quiz</button>
+</div>
+</section>
+</form>
+<section class="card panel" >
+<h2>Estado de autoría</h2>
+<p>
+<span class="chip" id="quiz-state">Borrador</span>
+</p>
+<p class="hint" style="margin-top:16px">Al publicar se validan preguntas, fechas y puntajes; el quiz queda vinculado a un único elemento del libro de notas.</p>
+<p class="hint">La versión publicada no admite edición incompatible. La primera nota publicada del curso bloquea nuevos elementos.</p>
+</section>
+</div>
+<div class="scenarios">
+<strong>Escenarios del mockup</strong>
+<br>
+<a class="btn btn-ghost" href="13-quiz-editor.html" >Borrador</a>
+<a class="btn btn-ghost" href="13-quiz-editor.html?state=locked" >Libro bloqueado</a>
+</div>
+</div>
+</main>
+</div>
+<dialog id="mock-confirm" class="modal native-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-message">
+<h2 id="confirm-title">
+</h2>
+<p id="confirm-message">
+</p>
+<div class="actions">
+<button type="button" class="btn btn-ghost" id="confirm-cancel" onclick="document.getElementById('mock-confirm').close()">Volver</button>
+<button type="button" class="btn btn-primary" id="confirm-accept">Confirmar</button>
+</div>
+</dialog>
+<script>
+function saveDraft(){mockNotice('Borrador guardado sin visibilidad estudiantil.');}
+function publishQuiz(e){e.preventDefault();if(document.getElementById('closes').value<=document.getElementById('opens').value){mockNotice('La fecha de cierre debe ser posterior a la apertura.');return;}const alternatives=Array.from(document.querySelectorAll('.option .field')).map(el=>el.value.trim());if(alternatives.some(value=>!value)){mockNotice('Completa el texto de ambas alternativas.');return;}if(alternatives[0]===alternatives[1]){mockNotice('Las alternativas deben ser distintas.');return;}mockConfirm('¿Publicar Quiz 3?', 'Los estudiantes autorizados podrán iniciar intentos. Se creará su elemento de nota y se registrará la publicación.',function(){document.getElementById('quiz-state').textContent='Publicado';document.querySelectorAll('#quiz-form input, #quiz-form select, #quiz-form button').forEach(el=>el.disabled=true);mockNotice('Quiz publicado. Pauta bloqueada para edición y oculta en la vista estudiantil.');});}
+if(new URLSearchParams(location.search).get('state')==='locked'){document.getElementById('quiz-state').textContent='Bloqueado';document.querySelectorAll('#quiz-form input,#quiz-form select,#quiz-form button').forEach(el=>el.disabled=true);mockNotice('El curso ya tiene notas publicadas. No se puede agregar un nuevo quiz/elemento de nota.');}
+
+</script>
+</body>
+</html>

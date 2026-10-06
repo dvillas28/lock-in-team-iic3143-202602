@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>AcademiX — Cursos del equipo docente</title>
+<title>AcademiX — Auditoría del curso</title>
 <script src="https://cdn.tailwindcss.com">
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -40,7 +40,7 @@
 <a class="nav-item " href="10-institutions.html" >
 <i data-lucide="building-2" aria-hidden="true" style="width:16px;height:16px">
 </i>Instituciones</a>
-<a class="nav-item active" href="07-teacher-dashboard.html" aria-current="page" data-staff-link>
+<a class="nav-item " href="07-teacher-dashboard.html" data-staff-link>
 <i data-lucide="book-open" aria-hidden="true" style="width:16px;height:16px">
 </i>Mis cursos</a>
 <a class="nav-item " href="11-course-management.html" data-teacher-only>
@@ -58,7 +58,7 @@
 <a class="nav-item " href="16-attempt-review.html" data-staff-link>
 <i data-lucide="clipboard-list" aria-hidden="true" style="width:16px;height:16px">
 </i>Revisar intentos</a>
-<a class="nav-item " href="15-audit.html" data-teacher-only>
+<a class="nav-item active" href="15-audit.html" aria-current="page" data-teacher-only>
 <i data-lucide="history" aria-hidden="true" style="width:16px;height:16px">
 </i>Auditoría</a>
 <a class="nav-item" href="02-login.html">
@@ -80,7 +80,7 @@
 <div class="breadcrumb">
 <a href="index.html">Mockups</a>
 <span>/</span>
-<span class="crumb-active">Cursos del equipo docente</span>
+<span class="crumb-active">Auditoría del curso</span>
 </div>
 <div class="actions" style="margin:0">
 <span class="hint" style="font-size:12px">Mockup · datos de ejemplo</span>
@@ -93,73 +93,86 @@
 <div class="content" id="main-content">
 <div class="page-heading">
 <div>
-<p class="section-label">CU-03 · CU-02 · Semestre 2026-2</p>
-<h1>Cursos del equipo docente</h1>
+<p class="section-label">CU-13 · Semestre 2026-2</p>
+<h1>Auditoría del curso</h1>
 <p>IIC2233 · Programación Avanzada · Universidad Católica</p>
 </div>
 </div>
 <div id="mock-status" class="notice status-message" role="status" aria-live="polite" hidden>
 </div>
-<div class="stack">
-<p class="notice" data-assistant-only hidden>Tu ayudantía permite seguimiento de la sección 2. Las funciones de edición y publicación están reservadas al docente.</p>
 <section class="card panel" >
-<h2>Cursos y secciones visibles</h2>
+<h2>Historial académico</h2>
+<div class="form-grid">
+<div>
+<label class="field-label" for="audit-action">Acción</label>
+<select id="audit-action" class="field" onchange="filterAudit()">
+<option value="">Todas</option>
+<option value="publicar">Publicar notas</option>
+<option value="ponderaciones">Cambiar ponderaciones</option>
+<option value="cancelar">Cancelar intento</option>
+</select>
+</div>
+<div>
+<label class="field-label" for="audit-actor">Actor</label>
+<input class="field" id="audit-actor" name="audit-actor" type="text" value="" placeholder="Buscar por nombre" oninput="filterAudit()">
+</div>
+<div>
+<label class="field-label" for="audit-section">Sección</label>
+<select id="audit-section" class="field" onchange="filterAudit()">
+<option value="">Curso completo</option>
+<option value="2">Sección 2</option>
+</select>
+</div>
+<div>
+<label class="field-label" for="audit-date">Desde</label>
+<input class="field" id="audit-date" name="audit-date" type="date" value="2026-10-06" onchange="filterAudit()">
+</div>
+</div>
 <div class="table-scroll">
 <table class="data-table">
+<caption>Eventos inmutables — IIC2233 · uc</caption>
 <thead>
 <tr>
-<th scope="col">Código</th>
-<th scope="col">Curso</th>
-<th scope="col">Tu alcance</th>
-<th scope="col">Acceso</th>
+<th scope="col">Fecha</th>
+<th scope="col">Actor</th>
+<th scope="col">Acción</th>
+<th scope="col">Recurso</th>
+<th scope="col">Cambio sanitizado</th>
 </tr>
 </thead>
 <tbody>
-<tr data-teacher-only>
-<td>IIC2233</td>
-<td>Programación Avanzada</td>
-<td>Secciones 1 y 2 — docencia activa</td>
-<td>
-<a class="btn btn-ghost" href="08-teacher-gradebook.html" data-staff-link>Libro de notas</a>
-</td>
+<tr data-action="publicar">
+<td>6 oct · 11:42</td>
+<td>Carla Contreras</td>
+<td>Publicar notas</td>
+<td>Quiz 2 · Sección 2</td>
+<td>Pendiente → Publicada</td>
 </tr>
-<tr data-assistant-only hidden>
-<td>IIC2233</td>
-<td>Programación Avanzada</td>
-<td>Sección 2 — ayudantía activa</td>
-<td>
-<a class="btn btn-ghost" href="08-teacher-gradebook.html?role=assistant" data-staff-link>Libro de notas</a>
-</td>
+<tr data-action="ponderaciones">
+<td>6 oct · 11:30</td>
+<td>Carla Contreras</td>
+<td>Cambiar ponderaciones</td>
+<td>Libro del curso</td>
+<td>Quiz 2: 10 % → 15 %</td>
+</tr>
+<tr data-action="cancelar">
+<td>6 oct · 11:20</td>
+<td>Carla Contreras</td>
+<td>Cancelar intento</td>
+<td>Quiz 3 · Sección 2</td>
+<td>En progreso → Cancelado</td>
 </tr>
 </tbody>
 </table>
 </div>
+<p id="audit-empty" class="notice" hidden>No hay eventos que coincidan con los filtros.</p>
+<p class="hint">Consulta de solo lectura. No se muestran secretos, claves internas ni pautas.</p>
 </section>
-<div class="form-grid">
-<section class="card panel" data-teacher-only>
-<h2>Preparar el curso</h2>
-<p>Organiza participantes, módulos y quizzes antes de publicar resultados.</p>
-<div class="actions">
-<a class="btn btn-ghost" href="11-course-management.html" >Secciones y roles</a>
-<a class="btn btn-ghost" href="12-content-editor.html" >Módulos y material</a>
-<a class="btn btn-ghost" href="13-quiz-editor.html" >Crear quiz</a>
-</div>
-</section>
-<section class="card panel" >
-<h2>Seguimiento académico</h2>
-<p>Consulta resultados e intentos sin alterar las calificaciones automáticas.</p>
-<div class="actions">
-<a class="btn btn-ghost" href="16-attempt-review.html" data-staff-link>Revisar intentos</a>
-</div>
-</section>
-</div>
-</div>
 <div class="scenarios">
 <strong>Escenarios del mockup</strong>
 <br>
-<a class="btn btn-ghost" href="07-teacher-dashboard.html" >Docente</a>
-<a class="btn btn-ghost" href="07-teacher-dashboard.html?role=assistant" >Ayudante</a>
-<a class="btn btn-ghost" href="07-teacher-dashboard.html?state=empty" >Sin cursos</a>
+<a class="btn btn-ghost" href="15-audit.html?state=denied" >Permiso perdido</a>
+<a class="btn btn-ghost" href="15-audit.html" >Historial autorizado</a>
 </div>
 </div>
 </main>
@@ -175,7 +188,9 @@
 </div>
 </dialog>
 <script>
-if(new URLSearchParams(location.search).get('state')==='empty'){document.querySelector('.content .stack').hidden=true;mockNotice('No tienes cursos o secciones con un rol académico activo en esta institución.');}
+function filterAudit(){let count=0;document.querySelectorAll('[data-action]').forEach(row=>{const action=document.getElementById('audit-action').value;const actor=document.getElementById('audit-actor').value.toLowerCase();const section=document.getElementById('audit-section').value;const date=document.getElementById('audit-date').value;row.hidden=(action&&row.dataset.action!==action)||!row.textContent.toLowerCase().includes(actor)||(section&&!row.textContent.includes('Sección '+section))||(date&&date>'2026-10-06');if(!row.hidden)count++;});document.getElementById('audit-empty').hidden=count>0;}
+if(new URLSearchParams(location.search).get('state')==='denied'){document.querySelector('section').hidden=true;mockNotice('No tienes permiso docente vigente para consultar el historial de este curso.');}
+
 </script>
 </body>
 </html>

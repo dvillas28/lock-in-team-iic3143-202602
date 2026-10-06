@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>AcademiX — Quizzes</title>
+<title>AcademiX — Elegir institución</title>
 <script src="https://cdn.tailwindcss.com">
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -30,28 +30,16 @@
 <div class="tenant-badge">
 <i data-lucide="building-2" aria-hidden="true" style="width:16px;height:16px">
 </i>
-<span>Universidad Católica · uc</span>
+<span>Identidad global</span>
 </div>
 </div>
 <nav class="sidebar-nav" aria-label="Navegación principal">
 <a class="nav-item " href="index.html" >
 <i data-lucide="layers" aria-hidden="true" style="width:16px;height:16px">
 </i>Galería</a>
-<a class="nav-item " href="10-institutions.html" >
+<a class="nav-item active" href="10-institutions.html" aria-current="page" >
 <i data-lucide="building-2" aria-hidden="true" style="width:16px;height:16px">
 </i>Instituciones</a>
-<a class="nav-item " href="03-dashboard.html" >
-<i data-lucide="book-open" aria-hidden="true" style="width:16px;height:16px">
-</i>Mis cursos</a>
-<a class="nav-item " href="04-course-modules.html" >
-<i data-lucide="folder" aria-hidden="true" style="width:16px;height:16px">
-</i>Material</a>
-<a class="nav-item active" href="05-evaluations.html" aria-current="page" >
-<i data-lucide="clipboard-list" aria-hidden="true" style="width:16px;height:16px">
-</i>Quizzes</a>
-<a class="nav-item " href="06-grades.html" >
-<i data-lucide="bar-chart-2" aria-hidden="true" style="width:16px;height:16px">
-</i>Calificaciones</a>
 <a class="nav-item" href="02-login.html">
 <i data-lucide="log-out" aria-hidden="true" style="width:16px;height:16px">
 </i>Cerrar sesión</a>
@@ -61,7 +49,7 @@
 <div class="avatar" data-user-initials>MG</div>
 <div>
 <p class="name" data-user-name>María González</p>
-<p class="role" data-user-role>Estudiante · Sección 2</p>
+<p class="role" data-user-role>Identidad global · Vista de ejemplo</p>
 </div>
 </div>
 </div>
@@ -71,7 +59,7 @@
 <div class="breadcrumb">
 <a href="index.html">Mockups</a>
 <span>/</span>
-<span class="crumb-active">Quizzes</span>
+<span class="crumb-active">Elegir institución</span>
 </div>
 <div class="actions" style="margin:0">
 <span class="hint" style="font-size:12px">Mockup · datos de ejemplo</span>
@@ -84,45 +72,52 @@
 <div class="content" id="main-content">
 <div class="page-heading">
 <div>
-<p class="section-label">CU-08 · CU-09 · CU-12 · Semestre 2026-2</p>
-<h1>Quizzes</h1>
-<p>IIC2233 · Programación Avanzada · Universidad Católica</p>
+<p class="section-label">CU-01 · CU-02 · Semestre 2026-2</p>
+<h1>Elegir institución</h1>
+<p>Una identidad, tus instituciones accesibles</p>
 </div>
 </div>
 <div id="mock-status" class="notice status-message" role="status" aria-live="polite" hidden>
 </div>
 <div class="split">
-<div class="stack">
+<div id="institutions" class="stack">
 <section class="card panel" >
-<h2>Quiz 3 — Generadores</h2>
-<span class="chip">Disponible</span>
-<p class="hint" style="margin-top:12px">Sección 2 · Cierra 7 oct, 23:59 · Máximo 2 intentos</p>
+<h2>Universidad Católica</h2>
+<p class="hint">Pertenencia institucional activa · uc</p>
+<p>Roles disponibles: Docente, ayudante y estudiante.</p>
 <div class="actions">
-<a class="btn btn-primary" href="14-quiz-attempt.html" >Iniciar intento</a>
+<a class="btn btn-ghost" href="07-teacher-dashboard.html" >Entrar a uc</a>
+<a class="btn btn-ghost" href="03-dashboard.html" >Vista estudiante</a>
+<a class="btn btn-ghost" href="07-teacher-dashboard.html?role=assistant" >Vista ayudante</a>
 </div>
 </section>
 <section class="card panel" >
-<h2>Quiz 3 — Generadores · Intento en curso</h2>
-<span class="chip">En progreso</span>
-<p class="hint" style="margin-top:12px">Sección 2 · Intento 1 · Respuestas guardadas</p>
+<h2>Universidad Técnica Federico Santa María</h2>
+<p class="hint">Pertenencia institucional activa · utfsm</p>
+<p>Roles disponibles: Estudiante.</p>
 <div class="actions">
-<a class="btn btn-ghost" href="14-quiz-attempt.html" >Reanudar intento</a>
-</div>
-</section>
-<section class="card panel" >
-<h2>Quiz 2 — Excepciones</h2>
-<span class="chip">Publicada</span>
-<p class="hint" style="margin-top:12px">Tu nota: 6.8 · No admite nuevos intentos</p>
-<div class="actions">
-<a class="btn btn-ghost" href="06-grades.html" >Ver calificaciones</a>
+<a class="btn btn-ghost" href="10-institutions.html?institution=utfsm" >Entrar a utfsm</a>
 </div>
 </section>
 </div>
 <section class="card panel" >
-<h2>Tus evaluaciones</h2>
-<p>Se muestran quizzes publicados de tu curso y sección. Las respuestas y la nota de un intento permanecen ocultas hasta publicación.</p>
-<div class="notice" style="margin-top:16px">Solo un intento en progreso por quiz. Los intentos cancelados cuentan para el máximo.</div>
+<h2>Tu contexto académico</h2>
+<p>Solo aparecen instituciones con pertenencia activa. Al entrar verás tus cursos según tus roles de sección.</p>
+<div id="context" class="notice" hidden>
+</div>
 </section>
+</div>
+<div id="empty" class="empty-zone panel" hidden>
+<h2>Sin instituciones accesibles</h2>
+<p>No tienes una pertenencia institucional activa. No hay datos académicos disponibles.</p>
+</div>
+<div id="denied" class="notice warning" hidden>El contexto solicitado no está disponible. Vuelve a elegir una institución accesible.</div>
+<div class="scenarios">
+<strong>Escenarios del mockup</strong>
+<br>
+<a class="btn btn-ghost" href="10-institutions.html?state=empty" >Sin memberships</a>
+<a class="btn btn-ghost" href="10-institutions.html?state=denied" >Acceso no disponible</a>
+<a class="btn btn-ghost" href="10-institutions.html" >Lista accesible</a>
 </div>
 </div>
 </main>
@@ -137,5 +132,11 @@
 <button type="button" class="btn btn-primary" id="confirm-accept">Confirmar</button>
 </div>
 </dialog>
+<script>
+const scenario = new URLSearchParams(location.search).get('state');
+if (scenario === 'empty' || scenario === 'denied') {document.getElementById('institutions').hidden=true;document.getElementById(scenario).hidden=false;}
+if (new URLSearchParams(location.search).get('institution') === 'utfsm') {document.getElementById('institutions').hidden=true;document.getElementById('context').hidden=false;document.getElementById('context').textContent='Universidad Técnica Federico Santa María · utfsm · Estudiante. Aún no tienes cursos visibles en este contexto.';}
+
+</script>
 </body>
 </html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AcademiX — Módulos y material</title>
+<script src="https://cdn.tailwindcss.com">
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js">
+</script>
+<link rel="stylesheet" href="assets/tokens.css?v=3"/>
+<link rel="stylesheet" href="assets/app.css?v=4"/>
+<script src="assets/app.js?v=3">
+</script>
+</head>
+<body data-staff>
+<a href="#main-content" class="btn btn-primary skip-link">Saltar al contenido</a>
+<div class="app">
+<aside class="sidebar">
+<div class="sidebar-top">
+<div class="sidebar-logo">
+<div class="logo-icon">
+<i data-lucide="graduation-cap" aria-hidden="true" style="width:16px;height:16px">
+</i>
+</div>
+<span class="logo-name">AcademiX</span>
+</div>
+<div class="tenant-badge">
+<i data-lucide="building-2" aria-hidden="true" style="width:16px;height:16px">
+</i>
+<span>Universidad Católica · uc</span>
+</div>
+</div>
+<nav class="sidebar-nav" aria-label="Navegación principal">
+<a class="nav-item " href="index.html" >
+<i data-lucide="layers" aria-hidden="true" style="width:16px;height:16px">
+</i>Galería</a>
+<a class="nav-item " href="10-institutions.html" >
+<i data-lucide="building-2" aria-hidden="true" style="width:16px;height:16px">
+</i>Instituciones</a>
+<a class="nav-item " href="07-teacher-dashboard.html" data-staff-link>
+<i data-lucide="book-open" aria-hidden="true" style="width:16px;height:16px">
+</i>Mis cursos</a>
+<a class="nav-item " href="11-course-management.html" data-teacher-only>
+<i data-lucide="users" aria-hidden="true" style="width:16px;height:16px">
+</i>Secciones y roles</a>
+<a class="nav-item active" href="12-content-editor.html" aria-current="page" data-teacher-only>
+<i data-lucide="folder" aria-hidden="true" style="width:16px;height:16px">
+</i>Módulos y material</a>
+<a class="nav-item " href="13-quiz-editor.html" data-teacher-only>
+<i data-lucide="list-checks" aria-hidden="true" style="width:16px;height:16px">
+</i>Autoría de quizzes</a>
+<a class="nav-item " href="08-teacher-gradebook.html" data-staff-link>
+<i data-lucide="bar-chart-2" aria-hidden="true" style="width:16px;height:16px">
+</i>Libro de notas</a>
+<a class="nav-item " href="16-attempt-review.html" data-staff-link>
+<i data-lucide="clipboard-list" aria-hidden="true" style="width:16px;height:16px">
+</i>Revisar intentos</a>
+<a class="nav-item " href="15-audit.html" data-teacher-only>
+<i data-lucide="history" aria-hidden="true" style="width:16px;height:16px">
+</i>Auditoría</a>
+<a class="nav-item" href="02-login.html">
+<i data-lucide="log-out" aria-hidden="true" style="width:16px;height:16px">
+</i>Cerrar sesión</a>
+</nav>
+<div class="sidebar-bottom">
+<div class="user-row">
+<div class="avatar" data-user-initials>CC</div>
+<div>
+<p class="name" data-user-name>Carla Contreras</p>
+<p class="role" data-user-role>Docente · Secciones 1 y 2</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="main">
+<header class="top-header">
+<div class="breadcrumb">
+<a href="index.html">Mockups</a>
+<span>/</span>
+<span class="crumb-active">Módulos y material</span>
+</div>
+<div class="actions" style="margin:0">
+<span class="hint" style="font-size:12px">Mockup · datos de ejemplo</span>
+<button class="icon-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
+<i data-lucide="moon" aria-hidden="true" style="width:16px;height:16px">
+</i>
+</button>
+</div>
+</header>
+<div class="content" id="main-content">
+<div class="page-heading">
+<div>
+<p class="section-label">CU-14 · CU-05 · Semestre 2026-2</p>
+<h1>Módulos y material</h1>
+<p>IIC2233 · Programación Avanzada · Universidad Católica</p>
+</div>
+</div>
+<div id="mock-status" class="notice status-message" role="status" aria-live="polite" hidden>
+</div>
+<div class="split">
+<div class="stack">
+<section class="card panel" >
+<h2>Orden de módulos</h2>
+<ol id="module-order">
+<li>Semana 5 — Generadores <span class="chip chip-success">Publicado</span>
+</li>
+<li id="draft-module">Semana 6 — Threads <span id="module-state" class="chip">Borrador</span>
+</li>
+</ol>
+<div class="actions">
+<button type="button" class="btn btn-ghost" onclick="moveModule()" >Mover Threads arriba</button>
+<button type="button" class="btn btn-ghost" onclick="publishModule()" >Publicar módulo</button>
+<button type="button" class="btn btn-ghost" onclick="hideModule()" >Ocultar módulo</button>
+</div>
+<p class="hint">El orden incluye todos los módulos del curso. Los ocultos no aparecen en la vista estudiantil.</p>
+</section>
+<section class="card panel" >
+<h2>Nuevo módulo</h2>
+<form onsubmit="createModule(event)">
+<div>
+<label class="field-label" for="module-title">Título del módulo</label>
+<input class="field" id="module-title" name="module-title" type="text" value="Semana 7 — Redes" required>
+</div>
+<div class="actions">
+<button class="btn btn-ghost">Crear borrador</button>
+</div>
+</form>
+</section>
+</div>
+<section class="card panel" >
+<h2>Material de Semana 6 — Threads</h2>
+<form id="material-form" onsubmit="saveMaterial(event)" oninput="saved=false">
+<div class="stack">
+<div>
+<label class="field-label" for="material-title">Título</label>
+<input class="field" id="material-title" name="material-title" type="text" value="Threads: guía de estudio" required>
+</div>
+<div>
+<label class="field-label" for="markdown">Contenido markdown</label>
+<textarea class="field" id="markdown" required># Threads en Python
+Un hilo ejecuta una tarea concurrente dentro del proceso.</textarea>
+</div>
+<div>
+<label class="field-label" for="material-file">Archivo opcional</label>
+<input class="field" id="material-file" type="file" accept=".pdf,.csv,.xlsx,.txt,.jpeg,.jpg,.png">
+<p class="hint">PDF, CSV, XLSX, TXT, JPEG o PNG. Vista de selección; no se suben archivos en el mockup.</p>
+</div>
+<p>Estado: <span id="material-state" class="chip">Borrador</span>
+</p>
+</div>
+<div class="actions">
+<button class="btn btn-ghost">Guardar borrador</button>
+<button type="button" class="btn btn-primary" onclick="publishMaterial()" >Publicar material</button>
+<button type="button" class="btn btn-ghost" onclick="hideMaterial()" >Ocultar material</button>
+</div>
+</form>
+</section>
+</div>
+</div>
+</main>
+</div>
+<dialog id="mock-confirm" class="modal native-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-message">
+<h2 id="confirm-title">
+</h2>
+<p id="confirm-message">
+</p>
+<div class="actions">
+<button type="button" class="btn btn-ghost" id="confirm-cancel" onclick="document.getElementById('mock-confirm').close()">Volver</button>
+<button type="button" class="btn btn-primary" id="confirm-accept">Confirmar</button>
+</div>
+</dialog>
+<script>
+let saved=false;
+function moveModule(){const item=document.getElementById('draft-module');document.getElementById('module-order').prepend(item);mockNotice('Orden completo guardado: Threads, Generadores. Cambio auditado.');}
+function publishModule(){document.getElementById('module-state').textContent='Publicado';mockNotice('Módulo publicado para todas las secciones del curso.');}
+function hideModule(){document.getElementById('module-state').textContent='Oculto';mockNotice('Módulo oculto; sus materiales ya no se muestran al estudiante.');}
+function createModule(e){e.preventDefault();const item=document.createElement('li');item.textContent=document.getElementById('module-title').value+' — Borrador';document.getElementById('module-order').append(item);mockNotice('Módulo creado sin publicación.');}
+function saveMaterial(e){e.preventDefault();const file=document.getElementById('material-file').files[0];if(file && !/\.(pdf|csv|xlsx|txt|jpe?g|png)$/i.test(file.name)){mockNotice('Formato no admitido. Elige PDF, CSV, XLSX, TXT, JPEG o PNG.');return;}saved=true;mockNotice('Material guardado como borrador. El archivo seleccionado no se transmite.');}
+function publishMaterial(){if(!document.getElementById('material-form').reportValidity())return;if(!saved){mockNotice('Guarda primero un borrador válido.');return;}if(document.getElementById('module-state').textContent!=='Publicado'){mockNotice('Publica el módulo antes de ofrecer su material a estudiantes.');return;}document.getElementById('material-state').textContent='Publicado';mockNotice('Material publicado para todas las secciones. Cambio auditado.');}
+function hideMaterial(){document.getElementById('material-state').textContent='Oculto';mockNotice('Material oculto sin eliminar su historial.');}
+
+</script>
+</body>
+</html>
