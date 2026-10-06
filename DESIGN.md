@@ -137,7 +137,7 @@ AcademiX global, previo a elegir institución, sin branding por subdominio.
 
 ## Iconografía
 
-Lucide (CDN `unpkg`, `data-lucide` + `lucide.createIcons()`), stroke por defecto. Tamaños: 14px (`w-3.5`) en chips y botones compactos, 16px (`w-4`) estándar, 20px (`w-5`) en file-icons e icon-boxes. **Cero emojis como íconos.** Íconos decorativos van junto a texto visible; controles de solo ícono llevan `aria-label`.
+Lucide (CDN `unpkg`, `data-lucide` + `lucide.createIcons()`), stroke por defecto. Tamaños: 14px (`w-3.5`) en chips y botones compactos, 16px (`w-4`) estándar, 18px en controles de módulos/publicación y 20px (`w-5`) en file-icons e icon-boxes. **Cero emojis como íconos.** Íconos decorativos van junto a texto visible; controles de solo ícono llevan `aria-label`.
 
 ## Mecánica de temas
 
@@ -194,6 +194,18 @@ Lucide (CDN `unpkg`, `data-lucide` + `lucide.createIcons()`), stroke por defecto
 ## Quick Start
 
 Tokens y componentes viven en [`mockups/assets/tokens.css`](./mockups/assets/tokens.css), [`mockups/assets/app.css`](./mockups/assets/app.css) y [`mockups/assets/app.js`](./mockups/assets/app.js). Vistas y mapa vista → caso de uso en [`mockups/README.md`](./mockups/README.md).
+
+## Integración en el frontend — Issue #24
+
+El frontend reutiliza copias sincronizadas de tokens y componentes dentro de
+`frontend/src/styles/`, importadas una sola vez desde el layout raíz, tokens antes
+de `app.css`. Conserva las fuentes con `next/font/google` y variables
+`--font-inter` / `--font-eb-garamond`; todas las declaraciones de fuente del CSS
+adaptado usan esas variables. `--modal-backdrop` se mantiene como alias de
+`--overlay`. Los iconos se importan de `lucide-react`, incluidos `CircleCheck`
+y `Circle` para publicación. CDN y `app.js` son mecanismos de los mockups HTML;
+las vistas React usan la integración de Issue #24. La
+[guía del frontend](docs/guides/frontend-styles.md) documenta cómo sincronizarla.
 
 ## Mockups del MVP
 
