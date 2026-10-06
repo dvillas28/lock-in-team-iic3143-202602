@@ -1,6 +1,8 @@
 # Mockups de interfaz — AcademiX
 
-Wireframes de alta fidelidad del LMS multi-tenant, en HTML estático, para validar el flujo académico antes de implementar. Cubren los roles público, estudiante y docente, y cada vista declara las historias de usuario que valida. La puerta de entrada es `index.html`.
+Wireframes exploratorios de alta fidelidad del LMS multi-tenant, en HTML estático. La galería agrupa superficies públicas, estudiantiles y docentes; «público» no es un rol académico. La puerta de entrada es `index.html`.
+
+El [mapeo vigente por rol a CU-01–CU-16 y sus gaps](../docs/deliveries/2/03-use-cases-and-requirements.md#revisión-de-mockups-por-rol--issue-22) está en la documentación de Entrega 2. Los HTML incluyen funciones históricas o futuras y no amplían el MVP; el ayudante (`assistant`) es un rol vigente sin variante visual diferenciada.
 
 No hay backend: los datos son de ejemplo y las interacciones (tabs, selección, modal, toggle de tema) existen solo para demostrar el flujo.
 
@@ -19,7 +21,7 @@ Requieren internet: Tailwind CDN, Google Fonts (EB Garamond + Inter) e íconos L
 
 El toggle claro/oscuro está arriba a la derecha de cada vista y persiste entre páginas (`localStorage`). Para forzar un tema por URL —útil en demos y capturas headless— agrega `?theme=dark` o `?theme=light`.
 
-## Vistas y historias de usuario que cubren
+## Vistas y referencias históricas a historias de usuario
 
 | # | Vista | Rol | US | Qué valida |
 |---|---|---|---|---|
@@ -34,7 +36,7 @@ El toggle claro/oscuro está arriba a la derecha de cada vista y persiste entre 
 | 08 | `08-teacher-gradebook.html` | Docente | US17, US18 | Ponderaciones con validación de suma 100% y liberación manual de notas con confirmación. |
 | 09 | `09-pdf-reader.html` | Estudiante | US26–US29 | Lector de PDF en plataforma y asistente IA con citas por página, explicación de selección y caso "sin evidencia". |
 
-Los criterios de aceptación de cada US están en [docs/deliveries/0/user-stories.md](../docs/deliveries/0/user-stories.md).
+Los criterios de aceptación de esas US están en [docs/deliveries/0/user-stories.md](../docs/deliveries/0/user-stories.md), conservado como antecedente histórico. La tabla describe las referencias originales; no afirma cobertura completa de los casos de uso vigentes.
 
 ## Cómo está armado el diseño
 
