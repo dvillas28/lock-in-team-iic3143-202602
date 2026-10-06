@@ -12,7 +12,7 @@
 </script>
 <link rel="stylesheet" href="assets/tokens.css?v=3"/>
 <link rel="stylesheet" href="assets/app.css?v=4"/>
-<script src="assets/app.js?v=3">
+<script src="assets/app.js?v=7">
 </script>
 </head>
 <body>
@@ -84,11 +84,12 @@
 <section class="card panel" >
 <h2>Universidad Católica</h2>
 <p class="hint">Pertenencia institucional activa · uc</p>
-<p>Roles disponibles: Docente, ayudante y estudiante.</p>
+<p>Elige un perfil de ejemplo para este curso:</p>
 <div class="actions">
-<a class="btn btn-ghost" href="07-teacher-dashboard.html" >Entrar a uc</a>
-<a class="btn btn-ghost" href="03-dashboard.html" >Vista estudiante</a>
-<a class="btn btn-ghost" href="07-teacher-dashboard.html?role=assistant" >Vista ayudante</a>
+<a class="btn btn-ghost" href="07-teacher-dashboard.html?role=teacher&amp;experience=admin" data-demo-profile>Docente · Admin</a>
+<a class="btn btn-ghost" href="03-dashboard.html?role=student&amp;experience=non-admin" data-demo-profile>Estudiante · No admin</a>
+<a class="btn btn-ghost" href="03-dashboard.html?role=assistant&amp;experience=non-admin" data-demo-profile>Ayudante · No admin</a>
+<a class="btn btn-ghost" href="03-dashboard.html?role=teacher&amp;experience=non-admin" data-demo-profile>Docente · No admin</a>
 </div>
 </section>
 <section class="card panel" >

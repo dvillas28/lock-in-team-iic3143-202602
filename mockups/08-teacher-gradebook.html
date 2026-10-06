@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>AcademiX — Libro de notas docente</title>
+<title>AcademiX — Libro de notas</title>
 <script src="https://cdn.tailwindcss.com">
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -12,10 +12,10 @@
 </script>
 <link rel="stylesheet" href="assets/tokens.css?v=3"/>
 <link rel="stylesheet" href="assets/app.css?v=4"/>
-<script src="assets/app.js?v=3">
+<script src="assets/app.js?v=7">
 </script>
 </head>
-<body data-staff>
+<body data-academic>
 <a href="#main-content" class="btn btn-primary skip-link">Saltar al contenido</a>
 <div class="app">
 <aside class="sidebar">
@@ -40,25 +40,25 @@
 <a class="nav-item " href="10-institutions.html" >
 <i data-lucide="building-2" aria-hidden="true" style="width:16px;height:16px">
 </i>Instituciones</a>
-<a class="nav-item " href="07-teacher-dashboard.html" data-staff-link>
+<a class="nav-item " href="07-teacher-dashboard.html">
 <i data-lucide="book-open" aria-hidden="true" style="width:16px;height:16px">
 </i>Mis cursos</a>
-<a class="nav-item " href="11-course-management.html" data-teacher-only>
+<a class="nav-item " href="11-course-management.html" data-admin-only>
 <i data-lucide="users" aria-hidden="true" style="width:16px;height:16px">
 </i>Secciones y roles</a>
-<a class="nav-item " href="12-content-editor.html" data-teacher-only>
+<a class="nav-item " href="12-content-editor.html" data-admin-only>
 <i data-lucide="folder" aria-hidden="true" style="width:16px;height:16px">
 </i>Módulos y material</a>
-<a class="nav-item " href="13-quiz-editor.html" data-teacher-only>
+<a class="nav-item " href="13-quiz-editor.html" data-admin-only>
 <i data-lucide="list-checks" aria-hidden="true" style="width:16px;height:16px">
 </i>Autoría de quizzes</a>
-<a class="nav-item active" href="08-teacher-gradebook.html" aria-current="page" data-staff-link>
+<a class="nav-item active" href="08-teacher-gradebook.html" aria-current="page">
 <i data-lucide="bar-chart-2" aria-hidden="true" style="width:16px;height:16px">
 </i>Libro de notas</a>
-<a class="nav-item " href="16-attempt-review.html" data-staff-link>
+<a class="nav-item " href="16-attempt-review.html">
 <i data-lucide="clipboard-list" aria-hidden="true" style="width:16px;height:16px">
 </i>Revisar intentos</a>
-<a class="nav-item " href="15-audit.html" data-teacher-only>
+<a class="nav-item " href="15-audit.html" data-admin-only>
 <i data-lucide="history" aria-hidden="true" style="width:16px;height:16px">
 </i>Auditoría</a>
 <a class="nav-item" href="02-login.html">
@@ -80,7 +80,7 @@
 <div class="breadcrumb">
 <a href="index.html">Mockups</a>
 <span>/</span>
-<span class="crumb-active">Libro de notas docente</span>
+<span class="crumb-active">Libro de notas</span>
 </div>
 <div class="actions" style="margin:0">
 <span class="hint" style="font-size:12px">Mockup · datos de ejemplo</span>
@@ -94,15 +94,15 @@
 <div class="page-heading">
 <div>
 <p class="section-label">CU-10 · CU-11 · CU-16 · Semestre 2026-2</p>
-<h1>Libro de notas docente</h1>
+<h1>Libro de notas</h1>
 <p>IIC2233 · Programación Avanzada · Universidad Católica</p>
 </div>
 </div>
 <div id="mock-status" class="notice status-message" role="status" aria-live="polite" hidden>
 </div>
 <div class="stack">
-<p class="notice" data-assistant-only hidden>Libro de notas de la sección 2. Ayudante: consulta de solo lectura.</p>
-<section class="card panel" data-teacher-only>
+<p class="notice" data-readonly-staff-only hidden>Consulta de solo lectura dentro de tus secciones. La administración del curso está deshabilitada para este perfil.</p>
+<section class="card panel" data-admin-only>
 <h2>Ponderaciones del curso</h2>
 <div class="table-scroll">
 <table class="data-table">
@@ -221,10 +221,10 @@
 </table>
 </div>
 <div class="actions">
-<a class="btn btn-ghost" href="16-attempt-review.html" data-staff-link>Consultar intentos</a>
+<a class="btn btn-ghost" href="16-attempt-review.html">Consultar intentos</a>
 </div>
 </section>
-<section class="card panel" data-teacher-only>
+<section class="card panel" data-admin-only>
 <h2>Publicar notas</h2>
 <div class="form-grid">
 <div>
@@ -256,7 +256,9 @@
 <a class="btn btn-ghost" href="08-teacher-gradebook.html" >Antes de publicación</a>
 <a class="btn btn-ghost" href="08-teacher-gradebook.html?state=published" >Notas publicadas</a>
 <a class="btn btn-ghost" href="08-teacher-gradebook.html?state=active" >Intento que bloquea publicación</a>
-<a class="btn btn-ghost" href="08-teacher-gradebook.html?role=assistant" >Ayudante — solo lectura</a>
+<a class="btn btn-ghost" href="08-teacher-gradebook.html?role=assistant&amp;experience=non-admin" data-demo-profile>Ayudante · No admin</a>
+<a class="btn btn-ghost" href="08-teacher-gradebook.html?role=teacher&amp;experience=non-admin" data-demo-profile>Docente · No admin</a>
+<a class="btn btn-ghost" href="08-teacher-gradebook.html?role=teacher&amp;experience=admin" data-demo-profile>Docente · Admin</a>
 </div>
 </div>
 </main>
@@ -277,9 +279,9 @@ const published=new Set();
 function total(){return Array.from(document.querySelectorAll('.weight')).reduce((s,el)=>s+Number(el.value),0);}
 function validWeights(){return Array.from(document.querySelectorAll('.weight')).every(el=>el.value!=='' && el.checkValidity()) && Math.abs(total()-100)<0.001;}
 function updateWeights(){const sum=total();document.getElementById('weight-total').textContent='Total: '+sum.toFixed(1)+' % — '+(validWeights()?'Configuración completa.':'Cada peso debe ser válido y el total debe sumar 100 %.');}
-function saveWeights(){if(locked){mockNotice('Las ponderaciones están bloqueadas desde la primera publicación.');return;}if(!validWeights()){mockNotice('Cada peso debe estar entre 0 y 100 y el total debe sumar 100 %. No se guardó la configuración.');return;}mockNotice('Conjunto completo de ponderaciones guardado. Cambio auditado.');}
+function saveWeights(){if(!mockCanAdmin())return;if(locked){mockNotice('Las ponderaciones están bloqueadas desde la primera publicación.');return;}if(!validWeights()){mockNotice('Cada peso debe estar entre 0 y 100 y el total debe sumar 100 %. No se guardó la configuración.');return;}mockNotice('Conjunto completo de ponderaciones guardado. Cambio auditado.');}
 function lockWeights(){locked=true;document.getElementById('save-weights').disabled=true;document.querySelectorAll('.weight').forEach(el=>el.disabled=true);document.getElementById('new-quiz').hidden=true;}
-function releaseGrades(){if(!validWeights()){mockNotice('No se puede publicar: hay pesos inválidos o el total no suma 100 %.');return;}if(new URLSearchParams(location.search).get('state')==='active'){mockNotice('Publicación detenida: existe un intento en progreso de un estudiante afectado. Revisa el intento; la cancelación es explícita.');return;}const quiz=document.getElementById('release-quiz');const sections=[document.getElementById('release-one').checked?'1':null,document.getElementById('release-two').checked?'2':null].filter(Boolean);const cells=Array.from(document.querySelectorAll('[data-note="'+quiz.value+'"]')).filter(el=>sections.includes(el.dataset.section)&&!published.has(quiz.value+el.dataset.section));if(!cells.length){mockNotice('No hay notas nuevas seleccionadas. No se sobrescriben notas ya publicadas.');return;}mockConfirm('¿Publicar notas de '+quiz.options[quiz.selectedIndex].text+'?',cells.length+' notas calificadas · Secciones '+sections.join(' y ')+'. Cada estudiante verá solo su nota. La publicación y el bloqueo del libro quedan registrados.',function(){cells.forEach(el=>el.textContent=el.textContent.replace('No publicada','Publicada'));sections.forEach(s=>published.add(quiz.value+s));lockWeights();mockNotice(cells.length+' notas publicadas. Ponderaciones y nuevos elementos bloqueados.');});}
+function releaseGrades(){if(!mockCanAdmin())return;if(!validWeights()){mockNotice('No se puede publicar: hay pesos inválidos o el total no suma 100 %.');return;}if(new URLSearchParams(location.search).get('state')==='active'){mockNotice('Publicación detenida: existe un intento en progreso de un estudiante afectado. Revisa el intento; la cancelación es explícita.');return;}const quiz=document.getElementById('release-quiz');const sections=[document.getElementById('release-one').checked?'1':null,document.getElementById('release-two').checked?'2':null].filter(Boolean);const cells=Array.from(document.querySelectorAll('[data-note="'+quiz.value+'"]')).filter(el=>sections.includes(el.dataset.section)&&!published.has(quiz.value+el.dataset.section));if(!cells.length){mockNotice('No hay notas nuevas seleccionadas. No se sobrescriben notas ya publicadas.');return;}mockConfirm('¿Publicar notas de '+quiz.options[quiz.selectedIndex].text+'?',cells.length+' notas calificadas · Secciones '+sections.join(' y ')+'. Cada estudiante verá solo su nota. La publicación y el bloqueo del libro quedan registrados.',function(){cells.forEach(el=>el.textContent=el.textContent.replace('No publicada','Publicada'));sections.forEach(s=>published.add(quiz.value+s));lockWeights();mockNotice(cells.length+' notas publicadas. Ponderaciones y nuevos elementos bloqueados.');});}
 updateWeights();
 if(new URLSearchParams(location.search).get('state')==='published'){document.querySelectorAll('[data-note]').forEach(el=>{el.textContent=el.textContent.replace('No publicada','Publicada');published.add(el.dataset.note+el.dataset.section);});lockWeights();mockNotice('Ya existen notas publicadas. El libro conserva sus ponderaciones y no permite nuevos elementos.');}
 

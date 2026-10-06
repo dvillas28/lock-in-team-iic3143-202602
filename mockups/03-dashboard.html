@@ -12,10 +12,10 @@
 </script>
 <link rel="stylesheet" href="assets/tokens.css?v=3"/>
 <link rel="stylesheet" href="assets/app.css?v=4"/>
-<script src="assets/app.js?v=3">
+<script src="assets/app.js?v=7">
 </script>
 </head>
-<body>
+<body data-academic>
 <a href="#main-content" class="btn btn-primary skip-link">Saltar al contenido</a>
 <div class="app">
 <aside class="sidebar">
@@ -46,10 +46,10 @@
 <a class="nav-item " href="04-course-modules.html" >
 <i data-lucide="folder" aria-hidden="true" style="width:16px;height:16px">
 </i>Material</a>
-<a class="nav-item " href="05-evaluations.html" >
+<a class="nav-item " href="05-evaluations.html"  data-student-only>
 <i data-lucide="clipboard-list" aria-hidden="true" style="width:16px;height:16px">
 </i>Quizzes</a>
-<a class="nav-item " href="06-grades.html" >
+<a class="nav-item " href="06-grades.html"  data-student-only>
 <i data-lucide="bar-chart-2" aria-hidden="true" style="width:16px;height:16px">
 </i>Calificaciones</a>
 <a class="nav-item" href="02-login.html">
@@ -95,14 +95,14 @@
 <div class="stack">
 <section class="card panel" >
 <h2>Programación Avanzada</h2>
-<p>IIC2233 · Sección 2 · Prof. Carla Contreras</p>
-<p class="hint">Material compartido por el curso · Quiz 3 disponible</p>
+<p><span data-course-scope>IIC2233 · Sección 2</span> · Prof. Carla Contreras</p>
+<p class="hint">Material compartido por el curso<span data-student-only> · Quiz 3 disponible</span></p>
 <div class="actions">
 <a class="btn btn-primary" href="04-course-modules.html" >Abrir curso</a>
-<a class="btn btn-ghost" href="05-evaluations.html" >Ver quizzes</a>
+<a class="btn btn-ghost" href="05-evaluations.html" data-student-only>Ver quizzes</a>
 </div>
 </section>
-<section class="card panel" >
+<section class="card panel" data-student-only>
 <h2>Cálculo III</h2>
 <p>MAT1630 · Sección 1 · Prof. Rodrigo Fuenzalida</p>
 <p class="hint">Sin actividad próxima.</p>
@@ -111,15 +111,24 @@
 </div>
 </section>
 </div>
-<section class="card panel" >
+<section class="card panel" data-student-only>
 <h2>Tu avance</h2>
 <p class="section-label">Promedio parcial de IIC2233</p>
 <p class="metric tnum">6.1</p>
 <p class="hint">4 notas publicadas · 65 % de la ponderación</p>
 <div class="actions">
-<a class="btn btn-ghost" href="06-grades.html" >Ver calificaciones</a>
+<a class="btn btn-ghost" href="06-grades.html"  data-student-only>Ver calificaciones</a>
 </div>
 <p class="notice" style="margin-top:20px">Contexto: Universidad Católica · Estudiante en sección 2. La pertenencia institucional y el rol se comprueban por operación.</p>
+</section>
+<section class="card panel" data-readonly-staff-only hidden>
+<h2>Seguimiento académico</h2>
+<p>Consulta resultados e intentos dentro de tus secciones. Tu perfil no administra el curso.</p>
+<div class="actions">
+<a class="btn btn-ghost" href="08-teacher-gradebook.html">Consultar libro de notas</a>
+<a class="btn btn-ghost" href="16-attempt-review.html">Consultar intentos</a>
+</div>
+<p class="notice" style="margin-top:20px">Edición, autoría, publicación y cancelación docente requieren administración del curso en esta demostración.</p>
 </section>
 </div>
 <div class="empty-zone panel" id="no-courses" hidden>
@@ -129,7 +138,9 @@
 <div class="scenarios">
 <strong>Escenarios del mockup</strong>
 <br>
-<a class="btn btn-ghost" href="03-dashboard.html" >Cursos activos</a>
+<a class="btn btn-ghost" href="03-dashboard.html?role=student&amp;experience=non-admin" data-demo-profile>Estudiante · No admin</a>
+<a class="btn btn-ghost" href="03-dashboard.html?role=assistant&amp;experience=non-admin" data-demo-profile>Ayudante · No admin</a>
+<a class="btn btn-ghost" href="03-dashboard.html?role=teacher&amp;experience=non-admin" data-demo-profile>Docente · No admin</a>
 <a class="btn btn-ghost" href="03-dashboard.html?state=empty" >Sin cursos</a>
 </div>
 </div>

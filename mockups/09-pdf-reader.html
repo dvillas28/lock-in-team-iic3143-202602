@@ -10,7 +10,7 @@
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <link rel="stylesheet" href="assets/tokens.css?v=3"/>
 <link rel="stylesheet" href="assets/app.css?v=4"/>
-<script src="assets/app.js?v=3"></script>
+<script src="assets/app.js?v=7"></script>
 <style>
   .viewer { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--muted); }
   .viewer-toolbar {
@@ -35,7 +35,7 @@
 
 </style>
 </head>
-<body>
+<body data-academic>
 <a class="btn btn-primary skip-link" href="#main-content">Saltar al contenido</a>
 <div class="app">
 
@@ -52,18 +52,18 @@
       <div class="nav-section-label">Principal</div>
       <a class="nav-item" href="03-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
       <a class="nav-item active" href="04-course-modules.html" aria-current="page"><i data-lucide="book-open" class="w-4 h-4"></i> Mis cursos <span class="nav-count">2</span></a>
-      <a class="nav-item" href="05-evaluations.html"><i data-lucide="clipboard-list" class="w-4 h-4"></i> Quizzes</a>
-      <a class="nav-item" href="06-grades.html"><i data-lucide="bar-chart-2" class="w-4 h-4"></i> Calificaciones</a>
+      <a class="nav-item" href="05-evaluations.html" data-student-only><i data-lucide="clipboard-list" class="w-4 h-4"></i> Quizzes</a>
+      <a class="nav-item" href="06-grades.html" data-student-only><i data-lucide="bar-chart-2" class="w-4 h-4"></i> Calificaciones</a>
       <div class="nav-section-label">Contexto</div>
       <a class="nav-item" href="10-institutions.html">Cambiar institución</a>
       <a class="nav-item" href="02-login.html"><i data-lucide="log-out" class="w-4 h-4"></i> Cerrar sesión</a>
     </nav>
     <div class="sidebar-bottom">
       <div class="user-row">
-        <div class="avatar">MG</div>
+        <div class="avatar" data-user-initials>MG</div>
         <div>
-          <p class="name">María González</p>
-          <p class="role">Estudiante · UC Chile</p>
+          <p class="name" data-user-name>María González</p>
+          <p class="role" data-user-role>Estudiante · UC Chile</p>
         </div>
       </div>
     </div>

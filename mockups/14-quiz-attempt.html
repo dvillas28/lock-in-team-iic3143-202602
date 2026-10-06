@@ -12,10 +12,10 @@
 </script>
 <link rel="stylesheet" href="assets/tokens.css?v=3"/>
 <link rel="stylesheet" href="assets/app.css?v=4"/>
-<script src="assets/app.js?v=3">
+<script src="assets/app.js?v=7">
 </script>
 </head>
-<body>
+<body data-academic>
 <a href="#main-content" class="btn btn-primary skip-link">Saltar al contenido</a>
 <div class="app">
 <aside class="sidebar">
@@ -46,10 +46,10 @@
 <a class="nav-item " href="04-course-modules.html" >
 <i data-lucide="folder" aria-hidden="true" style="width:16px;height:16px">
 </i>Material</a>
-<a class="nav-item " href="05-evaluations.html" >
+<a class="nav-item " href="05-evaluations.html"  data-student-only>
 <i data-lucide="clipboard-list" aria-hidden="true" style="width:16px;height:16px">
 </i>Quizzes</a>
-<a class="nav-item " href="06-grades.html" >
+<a class="nav-item " href="06-grades.html"  data-student-only>
 <i data-lucide="bar-chart-2" aria-hidden="true" style="width:16px;height:16px">
 </i>Calificaciones</a>
 <a class="nav-item" href="02-login.html">
@@ -122,7 +122,7 @@
 </div>
 <div class="actions">
 <button type="button" class="btn btn-ghost" onclick="restartAttempt()" id="restart" hidden>Iniciar siguiente intento</button>
-<a class="btn btn-ghost" href="05-evaluations.html" >Volver a quizzes</a>
+<a class="btn btn-ghost" href="05-evaluations.html"  data-student-only>Volver a quizzes</a>
 </div>
 </section>
 </div>
@@ -136,10 +136,10 @@
 <div class="scenarios">
 <strong>Escenarios del mockup</strong>
 <br>
-<a class="btn btn-ghost" href="14-quiz-attempt.html?state=published" >Nota publicada</a>
-<a class="btn btn-ghost" href="14-quiz-attempt.html?state=limit" >Sin intentos restantes</a>
-<a class="btn btn-ghost" href="14-quiz-attempt.html?state=author" >Roles incompatibles</a>
-<a class="btn btn-ghost" href="14-quiz-attempt.html?state=denied" >Sin acceso</a>
+<a class="btn btn-ghost" href="14-quiz-attempt.html?state=published"  data-student-only>Nota publicada</a>
+<a class="btn btn-ghost" href="14-quiz-attempt.html?state=limit"  data-student-only>Sin intentos restantes</a>
+<a class="btn btn-ghost" href="14-quiz-attempt.html?state=author"  data-student-only>Roles incompatibles</a>
+<a class="btn btn-ghost" href="14-quiz-attempt.html?state=denied"  data-student-only>Sin acceso</a>
 </div>
 </div>
 </main>

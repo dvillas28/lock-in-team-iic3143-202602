@@ -12,10 +12,10 @@
 </script>
 <link rel="stylesheet" href="assets/tokens.css?v=3"/>
 <link rel="stylesheet" href="assets/app.css?v=4"/>
-<script src="assets/app.js?v=3">
+<script src="assets/app.js?v=7">
 </script>
 </head>
-<body data-staff>
+<body data-academic data-admin-page>
 <a href="#main-content" class="btn btn-primary skip-link">Saltar al contenido</a>
 <div class="app">
 <aside class="sidebar">
@@ -40,25 +40,25 @@
 <a class="nav-item " href="10-institutions.html" >
 <i data-lucide="building-2" aria-hidden="true" style="width:16px;height:16px">
 </i>Instituciones</a>
-<a class="nav-item " href="07-teacher-dashboard.html" data-staff-link>
+<a class="nav-item " href="07-teacher-dashboard.html">
 <i data-lucide="book-open" aria-hidden="true" style="width:16px;height:16px">
 </i>Mis cursos</a>
-<a class="nav-item active" href="11-course-management.html" aria-current="page" data-teacher-only>
+<a class="nav-item active" href="11-course-management.html" aria-current="page" data-admin-only>
 <i data-lucide="users" aria-hidden="true" style="width:16px;height:16px">
 </i>Secciones y roles</a>
-<a class="nav-item " href="12-content-editor.html" data-teacher-only>
+<a class="nav-item " href="12-content-editor.html" data-admin-only>
 <i data-lucide="folder" aria-hidden="true" style="width:16px;height:16px">
 </i>Módulos y material</a>
-<a class="nav-item " href="13-quiz-editor.html" data-teacher-only>
+<a class="nav-item " href="13-quiz-editor.html" data-admin-only>
 <i data-lucide="list-checks" aria-hidden="true" style="width:16px;height:16px">
 </i>Autoría de quizzes</a>
-<a class="nav-item " href="08-teacher-gradebook.html" data-staff-link>
+<a class="nav-item " href="08-teacher-gradebook.html">
 <i data-lucide="bar-chart-2" aria-hidden="true" style="width:16px;height:16px">
 </i>Libro de notas</a>
-<a class="nav-item " href="16-attempt-review.html" data-staff-link>
+<a class="nav-item " href="16-attempt-review.html">
 <i data-lucide="clipboard-list" aria-hidden="true" style="width:16px;height:16px">
 </i>Revisar intentos</a>
-<a class="nav-item " href="15-audit.html" data-teacher-only>
+<a class="nav-item " href="15-audit.html" data-admin-only>
 <i data-lucide="history" aria-hidden="true" style="width:16px;height:16px">
 </i>Auditoría</a>
 <a class="nav-item" href="02-login.html">
@@ -228,7 +228,7 @@ function addSection(e){
  const option=document.createElement('option');option.textContent=name;select.append(option);
  const row=document.createElement('tr');[name,'Sin participantes','—','Activa'].forEach(value=>{const td=document.createElement('td');td.textContent=value;row.append(td);});document.querySelector('.data-table tbody').append(row);mockNotice(name+' creada en el curso. Cambio registrado.');
 }
-function assignRole(e){
+function assignRole(e){if(!mockCanAdmin()){e.preventDefault();return;}
  e.preventDefault();const person=document.getElementById('member').value;const section=document.getElementById('section').value;const role=document.getElementById('enrollment-role').selectedOptions[0].text;
  const rows=Array.from(document.querySelector('.data-table tbody').rows);
  if(rows.some(row=>row.cells[0].textContent===section && row.cells[1].textContent===person && row.cells[2].textContent===role && row.cells[3].textContent.trim().startsWith('Activa'))){mockNotice('Esta persona ya tiene ese rol activo en esta sección. No se duplicó la inscripción.');return;}

@@ -94,7 +94,7 @@ AcademiX global, previo a elegir institución, sin branding por subdominio.
 - **Paneles secundarios:** módulos 264px, rail derecho del dashboard 300px.
 - **Login:** formulario centrado de 480px máximo sobre el shell global.
 - **Landing:** contenido centrado `max-w-6xl` (1152px).
-- **Índice:** galería por rol dentro del shell compartido, con tarjetas adaptables.
+- **Índice:** galería de experiencias admin/no admin dentro del shell compartido, con tarjetas adaptables.
 - **App shell:** `.app` flex a `100vh`, scroll solo en `.content` y paneles.
 
 ## Componentes (clases de `app.css`)
@@ -202,4 +202,11 @@ cubren CU-01–CU-16. Las vistas académicas reutilizan `app.css`; las clases
 `.panel`, `.split`, `.stack`, `.form-grid`, `.notice` y `.actions` componen sus
 layouts sin duplicar el shell. Bajo 760px, el sidebar se convierte en navegación
 superior y los formularios/paneles se apilan. Las tablas conservan scroll horizontal.
-Solo la variante docente incluye edición; ayudante comparte las vistas de consulta.
+La navegación se organiza por **Admin / No admin**, independientemente del rol
+académico. No admin tiene inicio compartido para estudiante, ayudante y docente
+sin administración; las consultas adicionales se adaptan al rol. Admin muestra
+configuración, autoría y publicación del curso. La identidad indica rol y
+administración por separado; navegar conserva el perfil de demostración.
+Las consultas de libro/intentos se reutilizan sin escritura para docente no admin
+y ayudante. Véase la [decisión de UI](docs/adr/ui-admin-non-admin-experiences.md)
+para la matriz visual y la dependencia pendiente de permisos en dominio/API.

@@ -21,7 +21,10 @@ No intenta replicar un LMS completo ni anticipar infraestructura de escala.
 - Entidades académicas con `institution_id` y relaciones institution-aware.
 - Consultas institution-scoped y tests explícitos de acceso cruzado.
 - Portal común para elegir una Institution visible.
-- Dos experiencias UI: docente y estudiante.
+- Dos experiencias UI: admin y no admin. El docente puede tener o no
+  administración; estudiante y ayudante comparten la experiencia no admin.
+  Esta separación está representada en los mockups; la alineación de permisos
+  de dominio/API permanece como [dependencia de implementación](../../adr/ui-admin-non-admin-experiences.md).
 - Roles por sección: `teacher`, `student` y `assistant`.
 - Un User puede acumular roles, incluso varios en una misma sección.
 - Cursos, secciones, módulos y material académico.

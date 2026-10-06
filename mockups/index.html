@@ -12,7 +12,7 @@
 </script>
 <link rel="stylesheet" href="assets/tokens.css?v=3"/>
 <link rel="stylesheet" href="assets/app.css?v=4"/>
-<script src="assets/app.js?v=3">
+<script src="assets/app.js?v=7">
 </script>
 </head>
 <body>
@@ -74,7 +74,7 @@
 <div>
 <p class="section-label">CU-01 a CU-16 · Semestre 2026-2</p>
 <h1>Mockups de interfaz</h1>
-<p>Una identidad, tus instituciones accesibles</p>
+<p>Dos experiencias académicas: Admin y No admin. El rol docente no concede administración por sí solo.</p>
 </div>
 </div>
 <div id="mock-status" class="notice status-message" role="status" aria-live="polite" hidden>
@@ -82,18 +82,19 @@
 <div class="stack">
 <section class="stack">
 <h2 class="serif" style="font-size:24px">Acceso compartido</h2>
+<p>Portal global previo a las dos experiencias académicas.</p>
 <div class="form-grid">
-<a class="card card-hover panel" style="text-decoration:none" href="01-landing.html">
+<a class="card card-hover panel" style="text-decoration:none" href="01-landing.html" data-demo-profile>
 <p class="section-label">01 · Acceso previo</p>
 <h3 class="serif" style="font-size:21px;margin:8px 0">Landing</h3>
 <p class="hint">Propuesta de valor y acceso global.</p>
 </a>
-<a class="card card-hover panel" style="text-decoration:none" href="02-login.html">
+<a class="card card-hover panel" style="text-decoration:none" href="02-login.html" data-demo-profile>
 <p class="section-label">02 · Acceso previo</p>
 <h3 class="serif" style="font-size:21px;margin:8px 0">Acceso a AcademiX</h3>
 <p class="hint">Acceso de demostración previo a elegir institución (RF1); sin invitación ni branding por subdominio.</p>
 </a>
-<a class="card card-hover panel" style="text-decoration:none" href="10-institutions.html">
+<a class="card card-hover panel" style="text-decoration:none" href="10-institutions.html" data-demo-profile>
 <p class="section-label">10 · CU-01 / CU-02</p>
 <h3 class="serif" style="font-size:21px;margin:8px 0">Elegir institución</h3>
 <p class="hint">Instituciones accesibles, roles disponibles, lista vacía, contexto no disponible y UTFSM sin cursos.</p>
@@ -101,102 +102,100 @@
 </div>
 </section>
 <section class="stack">
-<h2 class="serif" style="font-size:24px">Estudiante</h2>
+<h2 class="serif" style="font-size:24px">No admin</h2>
+<p>Una experiencia común para estudiante, ayudante y docente sin administración. Las consultas se adaptan al rol y a sus secciones.</p>
+<div class="actions">
+<a class="btn btn-ghost" href="03-dashboard.html?role=student&amp;experience=non-admin" data-demo-profile>Estudiante · No admin</a>
+<a class="btn btn-ghost" href="03-dashboard.html?role=assistant&amp;experience=non-admin" data-demo-profile>Ayudante · No admin</a>
+<a class="btn btn-ghost" href="03-dashboard.html?role=teacher&amp;experience=non-admin" data-demo-profile>Docente · No admin</a>
+</div>
 <div class="form-grid">
-<a class="card card-hover panel" style="text-decoration:none" href="03-dashboard.html">
+<a class="card card-hover panel" style="text-decoration:none" href="03-dashboard.html?role=student&amp;experience=non-admin" data-demo-profile>
 <p class="section-label">03 · CU-02 / CU-03</p>
 <h3 class="serif" style="font-size:21px;margin:8px 0">Mis cursos</h3>
-<p class="hint">Identidad institucional, inscripción, acceso a curso y estado sin cursos.</p>
+<p class="hint">Inicio compartido sin administración; avance propio para estudiante y seguimiento por sección para docente/ayudante.</p>
 </a>
-<a class="card card-hover panel" style="text-decoration:none" href="04-course-modules.html">
+<a class="card card-hover panel" style="text-decoration:none" href="04-course-modules.html?role=student&amp;experience=non-admin" data-demo-profile>
 <p class="section-label">04 · CU-03 / CU-06</p>
 <h3 class="serif" style="font-size:21px;margin:8px 0">Curso y módulos</h3>
 <p class="hint">Solo módulos publicados, lectura markdown y PDF; controles por teclado.</p>
 </a>
-<a class="card card-hover panel" style="text-decoration:none" href="05-evaluations.html">
+<a class="card card-hover panel" style="text-decoration:none" href="05-evaluations.html?role=student&amp;experience=non-admin" data-demo-profile>
 <p class="section-label">05 · CU-08 / CU-09 / CU-12</p>
 <h3 class="serif" style="font-size:21px;margin:8px 0">Quizzes</h3>
 <p class="hint">Listado de quizzes, inicio/reanudación y acceso a notas publicadas; envío detallado en 14.</p>
 </a>
-<a class="card card-hover panel" style="text-decoration:none" href="06-grades.html">
+<a class="card card-hover panel" style="text-decoration:none" href="06-grades.html?role=student&amp;experience=non-admin" data-demo-profile>
 <p class="section-label">06 · CU-12</p>
 <h3 class="serif" style="font-size:21px;margin:8px 0">Calificaciones</h3>
 <p class="hint">Notas propias publicadas, promedio parcial 6.1, ponderación 65 % y estado sin notas.</p>
 </a>
-<a class="card card-hover panel" style="text-decoration:none" href="09-pdf-reader.html">
+<a class="card card-hover panel" style="text-decoration:none" href="09-pdf-reader.html?role=student&amp;experience=non-admin" data-demo-profile>
 <p class="section-label">09 · CU-06</p>
 <h3 class="serif" style="font-size:21px;margin:8px 0">Lector de documentos</h3>
 <p class="hint">PDF de ejemplo y retorno al módulo, sin IA; archivo condicionado al almacenamiento futuro.</p>
 </a>
-<a class="card card-hover panel" style="text-decoration:none" href="14-quiz-attempt.html">
+<a class="card card-hover panel" style="text-decoration:none" href="14-quiz-attempt.html?role=student&amp;experience=non-admin" data-demo-profile>
 <p class="section-label">14 · CU-08 / CU-09 / CU-15</p>
 <h3 class="serif" style="font-size:21px;margin:8px 0">Responder quiz</h3>
 <p class="hint">Guardar/reanudar, envío sin nota anticipada, cancelación terminal y máximo; nota publicada o acceso a pauta bloquean rendición.</p>
 </a>
+<a class="card card-hover panel" style="text-decoration:none" href="08-teacher-gradebook.html?role=teacher&amp;experience=non-admin" data-demo-profile>
+<p class="section-label">08 · CU-10 / CU-11 / CU-16</p>
+<h3 class="serif" style="font-size:21px;margin:8px 0">Libro de notas</h3>
+<p class="hint">Admin configura/publica; docente no admin y ayudante consultan sus secciones sin escritura.</p>
+</a>
+<a class="card card-hover panel" style="text-decoration:none" href="16-attempt-review.html?role=teacher&amp;experience=non-admin" data-demo-profile>
+<p class="section-label">16 · CU-16 / CU-15</p>
+<h3 class="serif" style="font-size:21px;margin:8px 0">Revisar intentos</h3>
+<p class="hint">Admin cancela intentos explícitamente; docente no admin y ayudante solo consultan sus secciones.</p>
+</a>
 </div>
 </section>
 <section class="stack">
-<h2 class="serif" style="font-size:24px">Docente</h2>
+<h2 class="serif" style="font-size:24px">Admin</h2>
+<p>Docente con administración del curso: configuración, autoría y publicación dentro de su alcance.</p>
 <div class="form-grid">
-<a class="card card-hover panel" style="text-decoration:none" href="07-teacher-dashboard.html">
+<a class="card card-hover panel" style="text-decoration:none" href="07-teacher-dashboard.html?role=teacher&amp;experience=admin" data-demo-profile>
 <p class="section-label">07 · CU-02 / CU-03</p>
-<h3 class="serif" style="font-size:21px;margin:8px 0">Cursos del equipo docente</h3>
-<p class="hint">Curso/secciones por rol; ayudante sección 2 sin administración.</p>
+<h3 class="serif" style="font-size:21px;margin:8px 0">Administrar mis cursos</h3>
+<p class="hint">Inicio admin: preparar participantes, contenido y quizzes del curso.</p>
 </a>
-<a class="card card-hover panel" style="text-decoration:none" href="08-teacher-gradebook.html">
+<a class="card card-hover panel" style="text-decoration:none" href="08-teacher-gradebook.html?role=teacher&amp;experience=admin" data-demo-profile>
 <p class="section-label">08 · CU-10 / CU-11 / CU-16</p>
-<h3 class="serif" style="font-size:21px;margin:8px 0">Libro de notas docente</h3>
-<p class="hint">Pesos al 100 %, filas individuales, selección por evaluación/sección, bloqueo tras publicación; ayudante solo sección 2.</p>
+<h3 class="serif" style="font-size:21px;margin:8px 0">Libro de notas</h3>
+<p class="hint">Admin configura/publica; docente no admin y ayudante consultan sus secciones sin escritura.</p>
 </a>
-<a class="card card-hover panel" style="text-decoration:none" href="11-course-management.html">
+<a class="card card-hover panel" style="text-decoration:none" href="11-course-management.html?role=teacher&amp;experience=admin" data-demo-profile>
 <p class="section-label">11 · CU-04</p>
 <h3 class="serif" style="font-size:21px;margin:8px 0">Secciones y roles</h3>
 <p class="hint">Configuración de curso, creación de sección, asignación/desactivación de roles y rechazo de duplicados.</p>
 </a>
-<a class="card card-hover panel" style="text-decoration:none" href="12-content-editor.html">
+<a class="card card-hover panel" style="text-decoration:none" href="12-content-editor.html?role=teacher&amp;experience=admin" data-demo-profile>
 <p class="section-label">12 · CU-14 / CU-05</p>
 <h3 class="serif" style="font-size:21px;margin:8px 0">Módulos y material</h3>
 <p class="hint">Crear/ordenar/publicar/ocultar módulos; borrador markdown, formatos admitidos y publicación condicionada a módulo visible.</p>
 </a>
-<a class="card card-hover panel" style="text-decoration:none" href="13-quiz-editor.html">
+<a class="card card-hover panel" style="text-decoration:none" href="13-quiz-editor.html?role=teacher&amp;experience=admin" data-demo-profile>
 <p class="section-label">13 · CU-07</p>
 <h3 class="serif" style="font-size:21px;margin:8px 0">Autoría de quiz</h3>
 <p class="hint">Preguntas, alternativas únicas, una correcta, puntajes, fechas e intentos; bloqueo de pauta al publicar.</p>
 </a>
-<a class="card card-hover panel" style="text-decoration:none" href="15-audit.html">
+<a class="card card-hover panel" style="text-decoration:none" href="15-audit.html?role=teacher&amp;experience=admin" data-demo-profile>
 <p class="section-label">15 · CU-13</p>
 <h3 class="serif" style="font-size:21px;margin:8px 0">Auditoría del curso</h3>
 <p class="hint">Eventos sanitizados de solo lectura, filtros por acción/actor/sección/fecha y estados sin coincidencias o permiso.</p>
 </a>
-<a class="card card-hover panel" style="text-decoration:none" href="16-attempt-review.html">
+<a class="card card-hover panel" style="text-decoration:none" href="16-attempt-review.html?role=teacher&amp;experience=admin" data-demo-profile>
 <p class="section-label">16 · CU-16 / CU-15</p>
 <h3 class="serif" style="font-size:21px;margin:8px 0">Revisar intentos</h3>
-<p class="hint">Resultados e intentos de sección; cancelación explícita por docente; ayudante no cancela ni accede a autoría.</p>
+<p class="hint">Admin cancela intentos explícitamente; docente no admin y ayudante solo consultan sus secciones.</p>
 </a>
-</div>
-</section>
-<section class="card panel">
-<h2>Ayudante — vistas compartidas de solo lectura</h2>
-<p>Las mismas vistas conservan identidad de ayudante y alcance de sección 2.</p>
-<div class="actions">
-<a class="btn btn-ghost" href="07-teacher-dashboard.html?role=assistant" >Mis cursos</a>
-<a class="btn btn-ghost" href="08-teacher-gradebook.html?role=assistant" >Libro de notas</a>
-<a class="btn btn-ghost" href="16-attempt-review.html?role=assistant" >Intentos</a>
 </div>
 </section>
 </div>
 </div>
 </main>
 </div>
-<dialog id="mock-confirm" class="modal native-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-message">
-<h2 id="confirm-title">
-</h2>
-<p id="confirm-message">
-</p>
-<div class="actions">
-<button type="button" class="btn btn-ghost" id="confirm-cancel" onclick="document.getElementById('mock-confirm').close()">Volver</button>
-<button type="button" class="btn btn-primary" id="confirm-accept">Confirmar</button>
-</div>
-</dialog>
 </body>
 </html>
