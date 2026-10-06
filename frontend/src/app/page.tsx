@@ -1,3 +1,5 @@
+import { GraduationCap } from "lucide-react";
+
 import { getHealth } from "@/lib/api/health";
 
 export const dynamic = "force-dynamic";
@@ -13,8 +15,13 @@ export default async function Home() {
   }
 
   return (
-    <main>
-      <h1>AcademiX</h1>
+    <main className="content">
+      <div className="sidebar-logo">
+        <span className="logo-icon">
+          <GraduationCap size={16} aria-hidden="true" />
+        </span>
+        <h1 className="serif">AcademiX</h1>
+      </div>
 
       <p>Frontend funcionando correctamente.</p>
 
