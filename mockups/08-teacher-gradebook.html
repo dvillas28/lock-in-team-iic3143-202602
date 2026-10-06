@@ -11,8 +11,8 @@
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js">
 </script>
 <link rel="stylesheet" href="assets/tokens.css?v=3"/>
-<link rel="stylesheet" href="assets/app.css?v=4"/>
-<script src="assets/app.js?v=7">
+<link rel="stylesheet" href="assets/app.css?v=5"/>
+<script src="assets/app.js?v=8">
 </script>
 </head>
 <body data-academic>
@@ -43,13 +43,13 @@
 <a class="nav-item " href="07-teacher-dashboard.html">
 <i data-lucide="book-open" aria-hidden="true" style="width:16px;height:16px">
 </i>Mis cursos</a>
-<a class="nav-item " href="11-course-management.html" data-admin-only>
+<a class="nav-item " href="11-course-management.html" data-teacher-only>
 <i data-lucide="users" aria-hidden="true" style="width:16px;height:16px">
 </i>Secciones y roles</a>
-<a class="nav-item " href="12-content-editor.html" data-admin-only>
+<a class="nav-item " href="12-content-editor.html" data-teacher-only>
 <i data-lucide="folder" aria-hidden="true" style="width:16px;height:16px">
 </i>Módulos y material</a>
-<a class="nav-item " href="13-quiz-editor.html" data-admin-only>
+<a class="nav-item " href="13-quiz-editor.html" data-teacher-only>
 <i data-lucide="list-checks" aria-hidden="true" style="width:16px;height:16px">
 </i>Autoría de quizzes</a>
 <a class="nav-item active" href="08-teacher-gradebook.html" aria-current="page">
@@ -58,7 +58,7 @@
 <a class="nav-item " href="16-attempt-review.html">
 <i data-lucide="clipboard-list" aria-hidden="true" style="width:16px;height:16px">
 </i>Revisar intentos</a>
-<a class="nav-item " href="15-audit.html" data-admin-only>
+<a class="nav-item " href="15-audit.html" data-teacher-only>
 <i data-lucide="history" aria-hidden="true" style="width:16px;height:16px">
 </i>Auditoría</a>
 <a class="nav-item" href="02-login.html">
@@ -98,12 +98,14 @@
 <p>IIC2233 · Programación Avanzada · Universidad Católica</p>
 </div>
 </div>
+<p class="notice status-message" data-scope-notice></p>
 <div id="mock-status" class="notice status-message" role="status" aria-live="polite" hidden>
 </div>
 <div class="stack">
 <p class="notice" data-readonly-staff-only hidden>Consulta de solo lectura dentro de tus secciones. La administración del curso está deshabilitada para este perfil.</p>
-<section class="card panel" data-admin-only>
+<section class="card panel" data-teacher-only>
 <h2>Ponderaciones del curso</h2>
+<p class="hint">Política común del curso: el admin configura los pesos; el docente publica resultados dentro de su sección.</p>
 <div class="table-scroll">
 <table class="data-table">
 <thead>
@@ -116,32 +118,32 @@
 <tr >
 <td>Quiz 1</td>
 <td>
-<input class="field tnum weight" type="number" min="0" max="100" step="0.1" value="15" aria-label="Ponderación Quiz 1" oninput="updateWeights()"> %</td>
+<input class="field tnum weight" data-admin-edit type="number" min="0" max="100" step="0.1" value="15" aria-label="Ponderación Quiz 1" oninput="updateWeights()"> %</td>
 </tr>
 <tr >
 <td>Quiz 2</td>
 <td>
-<input class="field tnum weight" type="number" min="0" max="100" step="0.1" value="15" aria-label="Ponderación Quiz 2" oninput="updateWeights()"> %</td>
+<input class="field tnum weight" data-admin-edit type="number" min="0" max="100" step="0.1" value="15" aria-label="Ponderación Quiz 2" oninput="updateWeights()"> %</td>
 </tr>
 <tr >
 <td>Quiz diagnóstico</td>
 <td>
-<input class="field tnum weight" type="number" min="0" max="100" step="0.1" value="25" aria-label="Ponderación Quiz diagnóstico" oninput="updateWeights()"> %</td>
+<input class="field tnum weight" data-admin-edit type="number" min="0" max="100" step="0.1" value="25" aria-label="Ponderación Quiz diagnóstico" oninput="updateWeights()"> %</td>
 </tr>
 <tr >
 <td>Quiz introductorio</td>
 <td>
-<input class="field tnum weight" type="number" min="0" max="100" step="0.1" value="10" aria-label="Ponderación Quiz introductorio" oninput="updateWeights()"> %</td>
+<input class="field tnum weight" data-admin-edit type="number" min="0" max="100" step="0.1" value="10" aria-label="Ponderación Quiz introductorio" oninput="updateWeights()"> %</td>
 </tr>
 <tr >
 <td>Quiz 3</td>
 <td>
-<input class="field tnum weight" type="number" min="0" max="100" step="0.1" value="15" aria-label="Ponderación Quiz 3" oninput="updateWeights()"> %</td>
+<input class="field tnum weight" data-admin-edit type="number" min="0" max="100" step="0.1" value="15" aria-label="Ponderación Quiz 3" oninput="updateWeights()"> %</td>
 </tr>
 <tr >
 <td>Quiz final</td>
 <td>
-<input class="field tnum weight" type="number" min="0" max="100" step="0.1" value="20" aria-label="Ponderación Quiz final" oninput="updateWeights()"> %</td>
+<input class="field tnum weight" data-admin-edit type="number" min="0" max="100" step="0.1" value="20" aria-label="Ponderación Quiz final" oninput="updateWeights()"> %</td>
 </tr>
 </tbody>
 </table>
@@ -149,7 +151,7 @@
 <p id="weight-total" class="notice" role="status">
 </p>
 <div class="actions">
-<button type="button" class="btn btn-ghost" id="save-weights" onclick="saveWeights()" >Guardar ponderaciones</button>
+<button type="button" class="btn btn-ghost" id="save-weights" data-admin-only onclick="saveWeights()" >Guardar ponderaciones</button>
 <a class="btn btn-ghost" href="13-quiz-editor.html" id="new-quiz">Crear quiz vinculado</a>
 </div>
 </section>
@@ -224,7 +226,7 @@
 <a class="btn btn-ghost" href="16-attempt-review.html">Consultar intentos</a>
 </div>
 </section>
-<section class="card panel" data-admin-only>
+<section class="card panel" data-teacher-only>
 <h2>Publicar notas</h2>
 <div class="form-grid">
 <div>
@@ -237,8 +239,8 @@
 </select>
 </div>
 <fieldset>
-<legend>Secciones que impartes</legend>
-<label class="option">
+<legend>Secciones dentro de tu alcance</legend>
+<label class="option" data-section-one>
 <input type="checkbox" id="release-one" checked>Sección 1</label>
 <label class="option">
 <input type="checkbox" id="release-two" checked>Sección 2</label>
@@ -281,7 +283,7 @@ function validWeights(){return Array.from(document.querySelectorAll('.weight')).
 function updateWeights(){const sum=total();document.getElementById('weight-total').textContent='Total: '+sum.toFixed(1)+' % — '+(validWeights()?'Configuración completa.':'Cada peso debe ser válido y el total debe sumar 100 %.');}
 function saveWeights(){if(!mockCanAdmin())return;if(locked){mockNotice('Las ponderaciones están bloqueadas desde la primera publicación.');return;}if(!validWeights()){mockNotice('Cada peso debe estar entre 0 y 100 y el total debe sumar 100 %. No se guardó la configuración.');return;}mockNotice('Conjunto completo de ponderaciones guardado. Cambio auditado.');}
 function lockWeights(){locked=true;document.getElementById('save-weights').disabled=true;document.querySelectorAll('.weight').forEach(el=>el.disabled=true);document.getElementById('new-quiz').hidden=true;}
-function releaseGrades(){if(!mockCanAdmin())return;if(!validWeights()){mockNotice('No se puede publicar: hay pesos inválidos o el total no suma 100 %.');return;}if(new URLSearchParams(location.search).get('state')==='active'){mockNotice('Publicación detenida: existe un intento en progreso de un estudiante afectado. Revisa el intento; la cancelación es explícita.');return;}const quiz=document.getElementById('release-quiz');const sections=[document.getElementById('release-one').checked?'1':null,document.getElementById('release-two').checked?'2':null].filter(Boolean);const cells=Array.from(document.querySelectorAll('[data-note="'+quiz.value+'"]')).filter(el=>sections.includes(el.dataset.section)&&!published.has(quiz.value+el.dataset.section));if(!cells.length){mockNotice('No hay notas nuevas seleccionadas. No se sobrescriben notas ya publicadas.');return;}mockConfirm('¿Publicar notas de '+quiz.options[quiz.selectedIndex].text+'?',cells.length+' notas calificadas · Secciones '+sections.join(' y ')+'. Cada estudiante verá solo su nota. La publicación y el bloqueo del libro quedan registrados.',function(){cells.forEach(el=>el.textContent=el.textContent.replace('No publicada','Publicada'));sections.forEach(s=>published.add(quiz.value+s));lockWeights();mockNotice(cells.length+' notas publicadas. Ponderaciones y nuevos elementos bloqueados.');});}
+function releaseGrades(){if(!mockCanTeach())return;if(!validWeights()){mockNotice('No se puede publicar: hay pesos inválidos o el total no suma 100 %.');return;}if(new URLSearchParams(location.search).get('state')==='active'){mockNotice('Publicación detenida: existe un intento en progreso de un estudiante afectado. Revisa el intento; la cancelación es explícita.');return;}const quiz=document.getElementById('release-quiz');const sections=[document.getElementById('release-one')?.checked?'1':null,document.getElementById('release-two').checked?'2':null].filter(Boolean);if(sections.some(s=>!mockCanManageSection(s)))return;const cells=Array.from(document.querySelectorAll('[data-note="'+quiz.value+'"]')).filter(el=>sections.includes(el.dataset.section)&&!published.has(quiz.value+el.dataset.section));if(!cells.length){mockNotice('No hay notas nuevas seleccionadas. No se sobrescriben notas ya publicadas.');return;}mockConfirm('¿Publicar notas de '+quiz.options[quiz.selectedIndex].text+'?',cells.length+' notas calificadas · Secciones '+sections.join(' y ')+'. Cada estudiante verá solo su nota. La publicación y el bloqueo del libro quedan registrados.',function(){cells.forEach(el=>el.textContent=el.textContent.replace('No publicada','Publicada'));sections.forEach(s=>published.add(quiz.value+s));lockWeights();mockNotice(cells.length+' notas publicadas. Ponderaciones y nuevos elementos bloqueados.');});}
 updateWeights();
 if(new URLSearchParams(location.search).get('state')==='published'){document.querySelectorAll('[data-note]').forEach(el=>{el.textContent=el.textContent.replace('No publicada','Publicada');published.add(el.dataset.note+el.dataset.section);});lockWeights();mockNotice('Ya existen notas publicadas. El libro conserva sus ponderaciones y no permite nuevos elementos.');}
 

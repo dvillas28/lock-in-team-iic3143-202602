@@ -11,11 +11,11 @@
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js">
 </script>
 <link rel="stylesheet" href="assets/tokens.css?v=3"/>
-<link rel="stylesheet" href="assets/app.css?v=4"/>
-<script src="assets/app.js?v=7">
+<link rel="stylesheet" href="assets/app.css?v=5"/>
+<script src="assets/app.js?v=8">
 </script>
 </head>
-<body data-academic data-admin-page>
+<body data-academic data-teacher-page>
 <a href="#main-content" class="btn btn-primary skip-link">Saltar al contenido</a>
 <div class="app">
 <aside class="sidebar">
@@ -43,13 +43,13 @@
 <a class="nav-item " href="07-teacher-dashboard.html">
 <i data-lucide="book-open" aria-hidden="true" style="width:16px;height:16px">
 </i>Mis cursos</a>
-<a class="nav-item " href="11-course-management.html" data-admin-only>
+<a class="nav-item " href="11-course-management.html" data-teacher-only>
 <i data-lucide="users" aria-hidden="true" style="width:16px;height:16px">
 </i>Secciones y roles</a>
-<a class="nav-item active" href="12-content-editor.html" aria-current="page" data-admin-only>
+<a class="nav-item active" href="12-content-editor.html" aria-current="page" data-teacher-only>
 <i data-lucide="folder" aria-hidden="true" style="width:16px;height:16px">
 </i>Módulos y material</a>
-<a class="nav-item " href="13-quiz-editor.html" data-admin-only>
+<a class="nav-item " href="13-quiz-editor.html" data-teacher-only>
 <i data-lucide="list-checks" aria-hidden="true" style="width:16px;height:16px">
 </i>Autoría de quizzes</a>
 <a class="nav-item " href="08-teacher-gradebook.html">
@@ -58,7 +58,7 @@
 <a class="nav-item " href="16-attempt-review.html">
 <i data-lucide="clipboard-list" aria-hidden="true" style="width:16px;height:16px">
 </i>Revisar intentos</a>
-<a class="nav-item " href="15-audit.html" data-admin-only>
+<a class="nav-item " href="15-audit.html" data-teacher-only>
 <i data-lucide="history" aria-hidden="true" style="width:16px;height:16px">
 </i>Auditoría</a>
 <a class="nav-item" href="02-login.html">
@@ -100,87 +100,105 @@
 </div>
 <div id="mock-status" class="notice status-message" role="status" aria-live="polite" hidden>
 </div>
-<div class="split">
+<p class="notice status-message">Contenido compartido por el curso: los cambios de módulos e ítems se aplican a todas las secciones. La gestión de participantes, intentos y notas respeta tu alcance de sección.</p>
+<div class="split module-editor">
 <div class="stack">
-<section class="card panel" >
-<h2>Orden de módulos</h2>
-<ol id="module-order">
-<li>Semana 5 — Generadores <span class="chip chip-success">Publicado</span>
-</li>
-<li id="draft-module">Semana 6 — Threads <span id="module-state" class="chip">Borrador</span>
-</li>
-</ol>
-<div class="actions">
-<button type="button" class="btn btn-ghost" onclick="moveModule()" >Mover Threads arriba</button>
-<button type="button" class="btn btn-ghost" onclick="publishModule()" >Publicar módulo</button>
-<button type="button" class="btn btn-ghost" onclick="hideModule()" >Ocultar módulo</button>
+<div class="actions" style="margin-top:0">
+<button class="btn btn-ghost" type="button" onclick="collapseModules()">Colapsar módulos</button>
+<span class="hint">Check verde: publicado · círculo: sin publicar</span>
 </div>
-<p class="hint">El orden incluye todos los módulos del curso. Los ocultos no aparecen en la vista estudiantil.</p>
-</section>
-<section class="card panel" >
+<div id="module-order" class="stack" aria-label="Módulos del curso"></div>
+<section class="card panel">
 <h2>Nuevo módulo</h2>
 <form onsubmit="createModule(event)">
-<div>
 <label class="field-label" for="module-title">Título del módulo</label>
-<input class="field" id="module-title" name="module-title" type="text" value="Semana 7 — Redes" required>
-</div>
-<div class="actions">
-<button class="btn btn-ghost">Crear borrador</button>
-</div>
+<input class="field" id="module-title" value="Semana 7 — Redes" required>
+<div class="actions"><button class="btn btn-ghost">Crear módulo sin publicar</button></div>
 </form>
 </section>
 </div>
-<section class="card panel" >
-<h2>Material de Semana 6 — Threads</h2>
-<form id="material-form" onsubmit="saveMaterial(event)" oninput="saved=false">
-<div class="stack">
-<div>
-<label class="field-label" for="material-title">Título</label>
-<input class="field" id="material-title" name="material-title" type="text" value="Threads: guía de estudio" required>
+<section class="card panel">
+<h2>Editar ítem del módulo</h2>
+<p id="editing-status" class="hint">Semana 6 — Threads · Guía de estudio</p>
+<form id="material-form" onsubmit="saveMaterial(event)" oninput="dirty=true">
+<div class="stack" style="margin-top:16px">
+<div><label class="field-label" for="material-module">Módulo</label><select id="material-module" class="field" onchange="newMaterial(this.value)"></select></div>
+<div><label class="field-label" for="material-title">Título</label><input class="field" id="material-title" value="Threads: guía de estudio" required></div>
+<div><label class="field-label" for="markdown">Contenido markdown</label><textarea class="field" id="markdown"># Threads en Python
+Un hilo ejecuta una tarea concurrente dentro del proceso.</textarea></div>
+<div><label class="field-label" for="material-file">Archivo opcional</label><input class="field" id="material-file" type="file" accept=".pdf,.csv,.xlsx,.txt,.jpeg,.jpg,.png"><p class="hint" id="file-info">PDF, CSV, XLSX, TXT, JPEG o PNG. No se suben archivos en el mockup.</p></div>
 </div>
-<div>
-<label class="field-label" for="markdown">Contenido markdown</label>
-<textarea class="field" id="markdown" required># Threads en Python
-Un hilo ejecuta una tarea concurrente dentro del proceso.</textarea>
-</div>
-<div>
-<label class="field-label" for="material-file">Archivo opcional</label>
-<input class="field" id="material-file" type="file" accept=".pdf,.csv,.xlsx,.txt,.jpeg,.jpg,.png">
-<p class="hint">PDF, CSV, XLSX, TXT, JPEG o PNG. Vista de selección; no se suben archivos en el mockup.</p>
-</div>
-<p>Estado: <span id="material-state" class="chip">Borrador</span>
-</p>
-</div>
-<div class="actions">
-<button class="btn btn-ghost">Guardar borrador</button>
-<button type="button" class="btn btn-primary" onclick="publishMaterial()" >Publicar material</button>
-<button type="button" class="btn btn-ghost" onclick="hideMaterial()" >Ocultar material</button>
-</div>
+<div class="actions"><button class="btn btn-primary">Guardar ítem</button></div>
+<p class="hint" style="margin-top:16px">El check de cada fila controla su publicación. Un ítem publicado dentro de un módulo sin publicar conserva el check verde, pero no es visible para estudiantes.</p>
 </form>
 </section>
 </div>
+<div class="scenarios">
+<strong>Perfiles del mockup</strong>
+<div class="actions">
+<a class="btn btn-ghost" href="12-content-editor.html?role=teacher&amp;experience=admin" data-demo-profile>Docente · Admin</a>
+<a class="btn btn-ghost" href="12-content-editor.html?role=teacher&amp;experience=non-admin" data-demo-profile>Docente · No admin</a>
+</div>
+</div>
+
 </div>
 </main>
 </div>
-<dialog id="mock-confirm" class="modal native-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-message">
-<h2 id="confirm-title">
-</h2>
-<p id="confirm-message">
-</p>
-<div class="actions">
-<button type="button" class="btn btn-ghost" id="confirm-cancel" onclick="document.getElementById('mock-confirm').close()">Volver</button>
-<button type="button" class="btn btn-primary" id="confirm-accept">Confirmar</button>
-</div>
-</dialog>
 <script>
-let saved=false;
-function moveModule(){if(!mockCanAdmin())return;const item=document.getElementById('draft-module');document.getElementById('module-order').prepend(item);mockNotice('Orden completo guardado: Threads, Generadores. Cambio auditado.');}
-function publishModule(){if(!mockCanAdmin())return;document.getElementById('module-state').textContent='Publicado';mockNotice('Módulo publicado para todas las secciones del curso.');}
-function hideModule(){if(!mockCanAdmin())return;document.getElementById('module-state').textContent='Oculto';mockNotice('Módulo oculto; sus materiales ya no se muestran al estudiante.');}
-function createModule(e){if(!mockCanAdmin()){e.preventDefault();return;}e.preventDefault();const item=document.createElement('li');item.textContent=document.getElementById('module-title').value+' — Borrador';document.getElementById('module-order').append(item);mockNotice('Módulo creado sin publicación.');}
-function saveMaterial(e){if(!mockCanAdmin()){e.preventDefault();return;}e.preventDefault();const file=document.getElementById('material-file').files[0];if(file && !/\.(pdf|csv|xlsx|txt|jpe?g|png)$/i.test(file.name)){mockNotice('Formato no admitido. Elige PDF, CSV, XLSX, TXT, JPEG o PNG.');return;}saved=true;mockNotice('Material guardado como borrador. El archivo seleccionado no se transmite.');}
-function publishMaterial(){if(!mockCanAdmin())return;if(!document.getElementById('material-form').reportValidity())return;if(!saved){mockNotice('Guarda primero un borrador válido.');return;}if(document.getElementById('module-state').textContent!=='Publicado'){mockNotice('Publica el módulo antes de ofrecer su material a estudiantes.');return;}document.getElementById('material-state').textContent='Publicado';mockNotice('Material publicado para todas las secciones. Cambio auditado.');}
-function hideMaterial(){if(!mockCanAdmin())return;document.getElementById('material-state').textContent='Oculto';mockNotice('Material oculto sin eliminar su historial.');}
+let nextModule=7, nextItem=1, dirty=false, editingItem='threads-guide';
+const modules=[
+ {id:'generadores',title:'Semana 5 — Generadores',published:true,expanded:true,items:[
+  {id:'generadores-pdf',title:'Semana 5 — Generadores.pdf',published:true,markdown:'',file:'Semana 5 — Generadores.pdf'},
+  {id:'generadores-guide',title:'Guía de generadores',published:true,markdown:'# Generadores\nUna función con yield conserva su estado.',file:''}]},
+ {id:'threads',title:'Semana 6 — Threads',published:false,expanded:true,items:[
+  {id:'threads-guide',title:'Threads: guía de estudio',published:false,markdown:'# Threads en Python\nUn hilo ejecuta una tarea concurrente dentro del proceso.',file:''}]}
+];
+function element(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text)el.textContent=text;return el;}
+function svgIcon(name){const el=element('i');el.dataset.lucide=name;el.setAttribute('aria-hidden','true');return el;}
+function actionButton(label,icon,action,cls='icon-btn'){const el=element('button',cls);el.type='button';el.setAttribute('aria-label',label);el.title=label;el.append(svgIcon(icon));el.onclick=action;return el;}
+function publishButton(module,item){const target=item||module;const kind=item?'ítem':'módulo';const button=actionButton((target.published?'Ocultar ':'Publicar ')+kind+' '+target.title,target.published?'circle-check':'circle',()=>togglePublication(module.id,item?.id),'icon-btn publish-toggle'+(target.published?' is-published':''));button.setAttribute('aria-pressed',String(target.published));button.dataset.publishId=target.id;return button;}
+function publicationLabel(target){return element('span','publication-label'+(target.published?' is-published':''),target.published?'Publicado':'Sin publicar');}
+function renderModules(focusId){
+ const list=document.getElementById('module-order');list.replaceChildren();
+ modules.forEach((module,index)=>{
+  const card=element('section','card module-card');const header=element('div','module-header');
+  const heading=element('h2');const expand=element('button','module-collapse');expand.type='button';expand.setAttribute('aria-expanded',String(module.expanded));expand.setAttribute('aria-controls','items-'+module.id);expand.append(svgIcon(module.expanded?'chevron-down':'chevron-right'),element('span','serif',module.title));expand.onclick=()=>{module.expanded=!module.expanded;renderModules('collapse-'+module.id);};expand.dataset.controlId='collapse-'+module.id;heading.append(expand);
+  const tools=element('div','module-tools');tools.append(publicationLabel(module),publishButton(module));
+  const add=actionButton('Agregar ítem a '+module.title,'plus',()=>newMaterial(module.id));tools.append(add);
+  const up=actionButton('Mover '+module.title+' arriba','arrow-up',()=>moveModule(module.id,-1));up.disabled=index===0;up.dataset.controlId='up-'+module.id;
+  const down=actionButton('Mover '+module.title+' abajo','arrow-down',()=>moveModule(module.id,1));down.disabled=index===modules.length-1;down.dataset.controlId='down-'+module.id;tools.append(up,down);header.append(heading,tools);card.append(header);
+  const body=element('div');body.id='items-'+module.id;body.hidden=!module.expanded;
+  if(!module.items.length)body.append(element('p','module-empty hint','Sin ítems. Agrega material para este módulo.'));
+  module.items.forEach(item=>{
+   const row=element('div','module-resource');const info=element('div','module-resource-info');
+   const edit=element('button','module-edit-title',item.title);edit.type='button';edit.onclick=()=>editMaterial(module.id,item.id);info.append(edit,element('p','hint',item.file?'Archivo · '+item.file:'Material markdown'));
+   if(item.published&&!module.published)info.append(element('p','hint','No visible: el módulo está sin publicar.'));
+   const tools=element('div','module-tools');tools.append(publicationLabel(item),publishButton(module,item));row.append(svgIcon(item.file?'file-text':'file-code'),info,tools);body.append(row);
+  });card.append(body);list.append(card);
+ });
+ const selected=document.getElementById('material-module').value;const select=document.getElementById('material-module');select.replaceChildren();modules.forEach(module=>{const option=element('option','',module.title);option.value=module.id;select.append(option);});select.value=modules.some(m=>m.id===selected)?selected:'threads';
+ if(window.lucide)lucide.createIcons();
+ if(focusId){const focus=Array.from(list.querySelectorAll('button')).find(el=>el.dataset.publishId===focusId||el.dataset.controlId===focusId);if(focus&&!focus.disabled)focus.focus();else{const id=focusId.replace(/^(up-|down-)/,'');Array.from(list.querySelectorAll('[data-publish-id]')).find(el=>el.dataset.publishId===id)?.focus();}}
+}
+function togglePublication(moduleId,itemId){
+ if(!mockCanTeach())return;const module=modules.find(m=>m.id===moduleId);const target=itemId?module.items.find(item=>item.id===itemId):module;
+ if(itemId&&dirty&&itemId===editingItem){mockNotice('Guarda los cambios del ítem antes de cambiar su publicación.');return;}
+ target.published=!target.published;renderModules(target.id);
+ mockNotice((itemId?'Ítem':'Módulo')+' '+target.title+': '+(target.published?'publicado':'sin publicar')+'. '+(itemId&&target.published&&!module.published?'No será visible hasta publicar el módulo.':(!itemId&&!target.published?'Sus ítems conservan su estado, pero quedan ocultos para estudiantes.':'Visibilidad actualizada para el curso.')));
+}
+function createModule(e){e.preventDefault();if(!mockCanTeach())return;const title=document.getElementById('module-title').value.trim();if(!title){mockNotice('Escribe un título de módulo.');return;}if(modules.some(m=>m.title===title)){mockNotice('Ya existe un módulo con ese título.');return;}modules.push({id:'module-'+nextModule++,title,published:false,expanded:true,items:[]});renderModules();mockNotice('Módulo creado sin publicar.');}
+function moveModule(id,direction){if(!mockCanTeach())return;const from=modules.findIndex(m=>m.id===id),to=from+direction;if(to<0||to>=modules.length)return;const module=modules.splice(from,1)[0];modules.splice(to,0,module);renderModules((direction<0?'up-':'down-')+id);mockNotice('Orden completo guardado.');}
+function collapseModules(){modules.forEach(module=>module.expanded=false);renderModules();}
+function newMaterial(moduleId){if(!mockCanTeach())return;editingItem=null;dirty=false;document.getElementById('material-module').value=moduleId;document.getElementById('material-title').value='';document.getElementById('markdown').value='';document.getElementById('material-file').value='';document.getElementById('file-info').textContent='PDF, CSV, XLSX, TXT, JPEG o PNG. No se suben archivos en el mockup.';document.getElementById('editing-status').textContent='Nuevo ítem · '+modules.find(m=>m.id===moduleId).title;document.getElementById('material-title').focus();}
+function editMaterial(moduleId,itemId){if(!mockCanTeach())return;const module=modules.find(m=>m.id===moduleId),item=module.items.find(i=>i.id===itemId);editingItem=itemId;dirty=false;document.getElementById('material-module').value=moduleId;document.getElementById('material-title').value=item.title;document.getElementById('markdown').value=item.markdown;document.getElementById('material-file').value='';document.getElementById('file-info').textContent=item.file?'Archivo de ejemplo existente: '+item.file:'PDF, CSV, XLSX, TXT, JPEG o PNG. No se suben archivos en el mockup.';document.getElementById('editing-status').textContent=module.title+' · '+item.title;document.getElementById('material-title').focus();}
+function saveMaterial(e){
+ e.preventDefault();if(!mockCanTeach())return;const module=modules.find(m=>m.id===document.getElementById('material-module').value);const existing=module.items.find(i=>i.id===editingItem);const file=document.getElementById('material-file').files[0];
+ if(file&&!/\.(pdf|csv|xlsx|txt|jpe?g|png)$/i.test(file.name)){mockNotice('Formato no admitido.');return;}
+ const title=document.getElementById('material-title').value.trim(),markdown=document.getElementById('markdown').value.trim(),fileName=file?.name||existing?.file||'';
+ if(!title||(!markdown&&!fileName)){mockNotice('Escribe un título y contenido markdown o selecciona un archivo admitido.');return;}
+ const item=existing||{id:'item-'+nextItem++,published:false};Object.assign(item,{title,markdown,file:fileName});if(!existing)module.items.push(item);editingItem=item.id;dirty=false;module.expanded=true;renderModules();document.getElementById('editing-status').textContent=module.title+' · '+item.title;mockNotice('Ítem guardado '+(item.published?'con su publicación vigente.':'sin publicar. Usa el círculo de su fila para publicarlo.'));
+}
+renderModules();
 
 </script>
 </body>

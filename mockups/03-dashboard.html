@@ -11,8 +11,8 @@
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js">
 </script>
 <link rel="stylesheet" href="assets/tokens.css?v=3"/>
-<link rel="stylesheet" href="assets/app.css?v=4"/>
-<script src="assets/app.js?v=7">
+<link rel="stylesheet" href="assets/app.css?v=5"/>
+<script src="assets/app.js?v=8">
 </script>
 </head>
 <body data-academic>
@@ -121,14 +121,23 @@
 </div>
 <p class="notice" style="margin-top:20px">Contexto: Universidad Católica · Estudiante en sección 2. La pertenencia institucional y el rol se comprueban por operación.</p>
 </section>
-<section class="card panel" data-readonly-staff-only hidden>
+<section class="card panel" data-staff-query-only hidden>
 <h2>Seguimiento académico</h2>
-<p>Consulta resultados e intentos dentro de tus secciones. Tu perfil no administra el curso.</p>
+<p>Consulta la actividad de tu sección. Si eres docente, puedes gestionarla y editar el contenido compartido del curso.</p>
 <div class="actions">
 <a class="btn btn-ghost" href="08-teacher-gradebook.html">Consultar libro de notas</a>
 <a class="btn btn-ghost" href="16-attempt-review.html">Consultar intentos</a>
 </div>
-<p class="notice" style="margin-top:20px">Edición, autoría, publicación y cancelación docente requieren administración del curso en esta demostración.</p>
+<p class="notice" style="margin-top:20px">El docente no admin gestiona su sección. El admin puede gestionar las diferentes secciones; el ayudante conserva solo lectura.</p>
+</section>
+<section class="card panel" data-teacher-only>
+<h2>Gestionar mi curso y sección</h2>
+<p>El contenido es común al curso; participantes, intentos y notas se gestionan dentro de tu sección.</p>
+<div class="actions">
+<a class="btn btn-ghost" href="12-content-editor.html">Módulos y material</a>
+<a class="btn btn-ghost" href="13-quiz-editor.html">Crear quiz</a>
+<a class="btn btn-ghost" href="11-course-management.html">Mi sección y participantes</a>
+</div>
 </section>
 </div>
 <div class="empty-zone panel" id="no-courses" hidden>

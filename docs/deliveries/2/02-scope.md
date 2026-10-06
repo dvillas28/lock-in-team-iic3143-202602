@@ -23,6 +23,8 @@ No intenta replicar un LMS completo ni anticipar infraestructura de escala.
 - Portal común para elegir una Institution visible.
 - Dos experiencias UI: admin y no admin. El docente puede tener o no
   administración; estudiante y ayudante comparten la experiencia no admin.
+  En la propuesta de UI, el docente no admin gestiona su sección y el admin
+  todas las secciones; ambos editan contenido compartido del curso.
   Esta separación está representada en los mockups; la alineación de permisos
   de dominio/API permanece como [dependencia de implementación](../../adr/ui-admin-non-admin-experiences.md).
 - Roles por sección: `teacher`, `student` y `assistant`.

@@ -1193,27 +1193,27 @@ casos de uso académicos nuevos.
 | Compartido | [Galería](../../../mockups/index.html) | Sin CU operativo | Dos experiencias académicas y cuatro perfiles de demostración. |
 | Público | [Landing](../../../mockups/01-landing.html) | Acceso previo | Propuesta de valor y acceso global. |
 | Compartido | [Acceso a AcademiX](../../../mockups/02-login.html) | Acceso previo | Acceso de demostración previo a elegir institución (RF1); sin invitación ni branding por subdominio. |
-| No admin · estudiante, ayudante o docente | [Mis cursos](../../../mockups/03-dashboard.html) | CU-02 — Acceder al contexto institucional; CU-03 — Ver cursos y secciones | Inicio compartido sin administración; avance propio para estudiante y seguimiento por sección para docente/ayudante. |
+| No admin · estudiante, ayudante o docente | [Mis cursos](../../../mockups/03-dashboard.html) | CU-02 — Acceder al contexto institucional; CU-03 — Ver cursos y secciones | Inicio no admin compartido; docente gestiona su sección y contenido, ayudante consulta y estudiante rinde. |
 | No admin · consulta | [Curso y módulos](../../../mockups/04-course-modules.html) | CU-03 — Ver cursos y secciones; CU-06 — Consultar material | Solo módulos publicados, lectura markdown y PDF; controles por teclado. |
 | Estudiante | [Quizzes](../../../mockups/05-evaluations.html) | CU-08 — Responder quiz; CU-09 — Enviar intento y obtener calificación automática; CU-12 — Ver notas y promedio | Listado de quizzes, inicio/reanudación y acceso a notas publicadas; envío detallado en 14. |
 | Estudiante | [Calificaciones](../../../mockups/06-grades.html) | CU-12 — Ver notas y promedio | Notas propias publicadas, promedio parcial 6.1, ponderación 65 % y estado sin notas. |
-| Admin · docente | [Administrar mis cursos](../../../mockups/07-teacher-dashboard.html) | CU-02 — Acceder al contexto institucional; CU-03 — Ver cursos y secciones | Inicio admin: preparar participantes, contenido y quizzes del curso. |
-| Admin / No admin · docente o ayudante | [Libro de notas](../../../mockups/08-teacher-gradebook.html) | CU-10 — Configurar libro de notas; CU-11 — Publicar notas; CU-16 — Revisar el libro de notas docente | Admin configura/publica; docente no admin y ayudante consultan sus secciones sin escritura. |
+| Admin · docente | [Administrar mis cursos](../../../mockups/07-teacher-dashboard.html) | CU-02 — Acceder al contexto institucional; CU-03 — Ver cursos y secciones | Inicio admin con gestión académica de todas las secciones del curso. |
+| Docente admin/no admin; ayudante (consulta) | [Libro de notas](../../../mockups/08-teacher-gradebook.html) | CU-10 — Configurar libro de notas; CU-11 — Publicar notas; CU-16 — Revisar el libro de notas docente | Admin configura pesos comunes; ambos docentes publican dentro de su alcance. Ayudante solo consulta sección 2. |
 | Estudiante | [Lector de documentos](../../../mockups/09-pdf-reader.html) | CU-06 — Consultar material | PDF de ejemplo y retorno al módulo, sin IA; archivo condicionado al almacenamiento futuro. |
 | Usuario autenticado (compartido) | [Elegir institución](../../../mockups/10-institutions.html) | CU-01 — Elegir institución; CU-02 — Acceder al contexto institucional | Instituciones accesibles, roles disponibles, lista vacía, contexto no disponible y UTFSM sin cursos. |
-| Admin · docente | [Secciones y roles](../../../mockups/11-course-management.html) | CU-04 — Gestionar secciones y roles | Configuración de curso, creación de sección, asignación/desactivación de roles y rechazo de duplicados. |
-| Admin · docente | [Módulos y material](../../../mockups/12-content-editor.html) | CU-14 — Organizar módulos del curso; CU-05 — Publicar material | Crear/ordenar/publicar/ocultar módulos; borrador markdown, formatos admitidos y publicación condicionada a módulo visible. |
-| Admin · docente | [Autoría de quiz](../../../mockups/13-quiz-editor.html) | CU-07 — Crear y publicar quiz | Preguntas, alternativas únicas, una correcta, puntajes, fechas e intentos; bloqueo de pauta al publicar. |
+| Docente admin/no admin | [Secciones y roles](../../../mockups/11-course-management.html) | CU-04 — Gestionar secciones y roles | Admin gestiona todas las secciones y crea nuevas; docente no admin asigna/desactiva participantes solo en su sección. |
+| Docente admin/no admin | [Módulos y material](../../../mockups/12-content-editor.html) | CU-14 — Organizar módulos del curso; CU-05 — Publicar material | Contenido compartido: creación y orden de módulos, edición de ítems y check verde de publicación independiente por fila. |
+| Docente admin/no admin | [Autoría de quiz](../../../mockups/13-quiz-editor.html) | CU-07 — Crear y publicar quiz | Ambos docentes crean quizzes y acceden a pauta; no admin dirige el quiz a su sección y admin puede seleccionar todas. |
 | Estudiante | [Responder quiz](../../../mockups/14-quiz-attempt.html) | CU-08 — Responder quiz; CU-09 — Enviar intento y obtener calificación automática; CU-15 — Cancelar un intento en progreso | Guardar/reanudar, envío sin nota anticipada, cancelación terminal y máximo; nota publicada o acceso a pauta bloquean rendición. |
-| Admin · docente | [Auditoría del curso](../../../mockups/15-audit.html) | CU-13 — Consultar auditoría | Eventos sanitizados de solo lectura, filtros por acción/actor/sección/fecha y estados sin coincidencias o permiso. |
-| Admin / No admin · docente o ayudante | [Revisar intentos](../../../mockups/16-attempt-review.html) | CU-16 — Revisar el libro de notas docente; CU-15 — Cancelar un intento en progreso | Admin cancela intentos explícitamente; docente no admin y ayudante solo consultan sus secciones. |
+| Docente admin/no admin | [Auditoría del curso](../../../mockups/15-audit.html) | CU-13 — Consultar auditoría | Auditoría sanitizada: admin consulta todas las secciones; docente no admin consulta la propia. |
+| Docente admin/no admin; ayudante (consulta) | [Revisar intentos](../../../mockups/16-attempt-review.html) | CU-16 — Revisar el libro de notas docente; CU-15 — Cancelar un intento en progreso | Ambos docentes consultan/cancelan intentos dentro de su alcance; ayudante solo consulta su sección. |
 
 ### Cobertura y relaciones
 
 Los **16 CU tienen representación de su meta principal**; no quedan CU sin
 mockup principal en este inventario. El listado 05 conduce al flujo detallado 14;
 03 es el inicio no admin compartido; 07 es el inicio admin. Libro/intentos
-(08/16) comparten consultas de docente no admin y ayudante. Las variantes
+(08/16) permiten gestión docente por alcance y consulta del ayudante sin escritura. Las variantes
 usan `role` y `experience`, sin una tercera experiencia por rol. Los escenarios ilustran flujos,
 no equivalen a implementación de requisitos ni a pruebas de seguridad del producto.
 
@@ -1221,15 +1221,15 @@ no equivalen a implementación de requisitos ni a pruebas de seguridad del produ
   de ejemplo accesibles; el estado UTFSM sin cursos no reutiliza datos de UC.
 - Contenido: 12 organiza/publica módulos y material (CU-14/CU-05); 04 consulta
   markdown publicado y abre 09 para PDF (CU-06). Módulos y material son de curso,
-  compartidos por las secciones; ocultarlos retira visibilidad estudiantil.
+  compartidos por las secciones y editables por ambos docentes. Cada módulo e ítem tiene un check verde de publicación independiente; la visibilidad efectiva exige ambos publicados.
 - Evaluación: 13 prepara quiz/pauta (CU-07); 05 → 14 inicia/reanuda, guarda y
-  envía (CU-08/CU-09). Solo el docente con administración accede a autoría en la propuesta de UI. Tener además un rol
+  envía (CU-08/CU-09). Ambos docentes acceden a autoría/pauta: no admin dirige el quiz a su sección; admin puede seleccionar todas. Tener además un rol
   estudiantil no habilita rendir cuando existe acceso a la pauta.
-- Notas: 08 configura pesos (CU-10), revisa filas individuales (CU-16) y
+- Notas: el admin configura pesos comunes en 08 (CU-10); ambos docentes revisan filas dentro de su alcance (CU-16) y
   confirma evaluación, secciones y cantidad de notas (CU-11). 06 muestra solo
   notas propias publicadas y promedio parcial normalizado (CU-12).
 - Cierre y trazabilidad: 14 permite cancelar al estudiante propietario;
-  16 permite cancelar al docente admin (CU-15 en la propuesta de UI), sin nota y consumiendo un intento.
+  16 permite cancelar a ambos docentes dentro de su alcance (CU-15 en la propuesta de UI), sin nota y consumiendo un intento.
   Un intento en progreso detiene publicación; se cancela explícitamente, nunca
   de forma automática. 15 consulta eventos sanitizados e inmutables (CU-13).
 
@@ -1241,21 +1241,17 @@ el curso**, no nuevos roles institucionales. El usuario autenticado conserva el
 acceso compartido. La galería agrupa ambas experiencias y las instituciones
 ofrecen cuatro perfiles de ejemplo:
 
-- Docente admin: Carla Contreras, secciones 1/2, inicio 07. Tiene configuración,
-  autoría, publicación, cancelación docente y auditoría en la propuesta visual.
-- Docente no admin: la misma Carla y secciones, inicio 03 compartido. Consulta
-  material, libro e intentos; no tiene edición, pauta, publicación ni cancelación.
-- Ayudante no admin: Javier Morales, sección 2, mismo inicio 03 y consultas
-  del libro/intentos de su sección sin escritura.
-- Estudiante no admin: María González, sección 2, mismo inicio 03 con su avance,
-  quizzes y notas propias publicadas. No ve registros de otros estudiantes.
+- Docente admin: Carla Contreras, perteneciente a sección 2, inicio 07. Gestiona todas las secciones del curso, crea secciones y configura políticas comunes.
+- Docente no admin: la misma Carla, inicio 03 compartido. Gestiona participantes, quizzes, intentos y publicación de notas solo en sección 2. También edita/publica módulos y materiales compartidos por el curso.
+- Ayudante no admin: Javier Morales, sección 2, mismo inicio 03 y consultas del libro/intentos de su sección sin escritura.
+- Estudiante no admin: María González, sección 2, mismo inicio 03 con su avance, quizzes y notas propias publicadas. No ve registros de otros estudiantes.
 
 La navegación conserva `role` y `experience=admin|non-admin`. Los enlaces de
 escenarios seleccionan perfiles de demostración, sin otorgar privilegios reales.
-Estudiante/ayudante siguen no admin ante un parámetro admin. El acceso directo
-a configuración/autoría con perfil no admin muestra una vista sin acceso.
-Los enlaces antiguos de ayudante a 07 conducen al inicio compartido 03.
-Módulos ocultos siguen omitiéndose de la consulta de material publicado.
+Estudiante/ayudante siguen no admin ante un parámetro admin. Las rutas de gestión
+docente deniegan acceso a estudiante/ayudante; el docente no admin conserva las
+acciones de su sección. Los enlaces antiguos de ayudante a 07 conducen al inicio
+compartido 03. Módulos e ítems ocultos se omiten de la consulta estudiantil.
 
 La [decisión de UI y matriz de acciones](../../adr/ui-admin-non-admin-experiences.md)
 registra el acuerdo y la dependencia funcional. El modelo/API vigente aún liga
@@ -1290,15 +1286,11 @@ formatos, duplicados y suma de pesos.
   estudiantil simula guardado/reanudación local en `sessionStorage` por contexto uc.
 - 09 es un extracto ilustrativo de PDF, sin binario descargable; no demuestra
   storage. La lectura markdown de 04 cubre el material inmediato del MVP.
-- La fuente conserva una ambigüedad: CU-03/CU-16 y el contrato describen tanto
-  alcance de curso completo como sección propia para `teacher`. Se eliminan
-  entradas de actor literalmente duplicadas, pero no se inventa una nueva regla
-  de permisos. La demo docente usa secciones 1/2 donde Carla tiene docencia;
-  el ayudante usa solo sección 2. El alcance docente sobre otras secciones requiere
-  una decisión funcional antes de implementar autorización.
+- CU-03/CU-16 y el contrato conservan una ambigüedad entre curso completo y sección propia para `teacher`. La regla acordada para UI la resuelve: admin gestiona todas las secciones; no admin gestiona su sección. Carla pertenece a sección 2, al igual que el ayudante. Representar la capacidad admin y alinear precondiciones/contratos permanece pendiente de implementación según la ADR; esta PR de mockups no modifica el backend.
 - Hay estados representativos, no todas las combinaciones de flujos alternativos.
   Esta actualización cierra los vacíos de pantallas, sin ampliar el alcance ni
   sustituir la validación posterior de implementación.
+
 
 ## Requisitos funcionales
 

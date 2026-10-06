@@ -202,11 +202,17 @@ cubren CU-01–CU-16. Las vistas académicas reutilizan `app.css`; las clases
 `.panel`, `.split`, `.stack`, `.form-grid`, `.notice` y `.actions` componen sus
 layouts sin duplicar el shell. Bajo 760px, el sidebar se convierte en navegación
 superior y los formularios/paneles se apilan. Las tablas conservan scroll horizontal.
-La navegación se organiza por **Admin / No admin**, independientemente del rol
-académico. No admin tiene inicio compartido para estudiante, ayudante y docente
-sin administración; las consultas adicionales se adaptan al rol. Admin muestra
-configuración, autoría y publicación del curso. La identidad indica rol y
-administración por separado; navegar conserva el perfil de demostración.
-Las consultas de libro/intentos se reutilizan sin escritura para docente no admin
-y ayudante. Véase la [decisión de UI](docs/adr/ui-admin-non-admin-experiences.md)
+La navegación se organiza por **Admin / No admin**, separadamente del rol académico.
+El docente no admin gestiona su sección; admin gestiona todas las secciones y la
+configuración común. Ambos docentes editan módulos y material compartido del curso.
+El ayudante consulta su sección; el estudiante rinde y consulta resultados propios.
+La identidad muestra rol y alcance; navegar conserva el perfil de demostración.
+
+Cada módulo e ítem usa `.publish-toggle`: Lucide `circle-check` con `--success`
+para publicado, `circle` para sin publicar, texto de estado y `aria-pressed`.
+El `aria-label` indica la acción y el recurso; activar conserva foco. Los estados
+son independientes: ocultar el módulo mantiene los checks de sus ítems, pero
+solo la combinación módulo publicado + ítem publicado da visibilidad estudiantil.
+Los componentes `.module-header`, `.module-tools` y `.module-resource` reutilizan
+los tokens y se apilan en móvil. Véase la [decisión de UI](docs/adr/ui-admin-non-admin-experiences.md)
 para la matriz visual y la dependencia pendiente de permisos en dominio/API.

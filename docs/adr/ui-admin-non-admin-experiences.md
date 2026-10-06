@@ -4,71 +4,83 @@ Fecha: 2026-10-06
 
 ## Estado
 
-Aceptado para los mockups de Issue #22 por instrucción del usuario.
-La representación de privilegios en dominio, persistencia y API queda pendiente;
-esta decisión define la UI propuesta, no cambia autorización implementada.
+Aceptado para los mockups de Issue #22. Esta versión incorpora la aclaración del
+usuario: **docente no admin no significa docente de solo lectura**. Ambos docentes
+gestionan contenido y actividad académica; admin amplía el alcance a diferentes
+secciones. Dominio/persistencia/API aún deben representar y validar ese privilegio.
 
-## Contexto
+## Decisión de UI/UX
 
-El alcance describe dos experiencias docente/estudiante y tres roles de sección:
-`teacher`, `assistant`, `student`. El modelo actual hace de `teacher` un rol
-administrativo. La simplificación solicitada distingue dos experiencias
-**admin/no admin**, permite un docente sin administración y agrupa estudiante y
-ayudante en la experiencia no admin. Agrupar pantallas por rol impedía mostrar
-esa independencia.
+- El rol académico y el alcance administrativo son dimensiones distintas.
+  Admin es una capacidad del curso, sin agregar un administrador institucional,
+  coordinador ni valor nuevo al enum académico.
+- Hay dos inicios: admin (07) y no admin (03). El inicio no admin es compartido
+  por estudiante, ayudante y docente. Sus acciones se adaptan al rol.
+- Carla es docente de sección 2. Como no admin gestiona esa sección; como admin
+  puede gestionar todas las secciones del curso. Cambiar el ejemplo no cambia
+  su identidad ni concede permisos reales.
+- **Módulos y materiales permanecen compartidos por curso**, confirmado por el
+  usuario. Ambos docentes pueden crearlos, editar, ordenar y publicar; el cambio
+  afecta a las secciones que comparten el contenido. No se duplican por sección.
+- Participantes, destinatarios de quizzes, intentos, publicación de notas y
+  consulta de eventos de sección respetan el alcance: sección 2 para docente
+  no admin; diferentes secciones para admin. El ayudante conserva consulta de
+  sección 2, sin escritura ni pauta.
+- Crear secciones, configurar metadatos globales y modificar ponderaciones
+  comunes del curso son acciones de administración global. El docente no admin
+  consulta los pesos y publica notas de su sección usando esa política común.
+- Los parámetros `role=teacher|assistant|student` y
+  `experience=admin|non-admin` seleccionan perfiles de demostración. Los enlaces
+  conservan el perfil. Ayudante/estudiante siguen no admin si la URL pide admin.
 
-## Decisión para UI/UX
+## Matriz propuesta para los mockups
 
-- El rol académico y la administración del curso son dimensiones distintas.
-  Admin representa una capacidad sobre el curso, sin agregar administrador
-  institucional, coordinador ni otro valor al enum académico.
-- Hay dos inicios/navegaciones académicas: admin (07) y no admin (03).
-  Login, institución y galería son acceso compartido.
-- El docente puede usar cualquiera de las dos experiencias. Carla conserva
-  identidad y secciones 1/2 en ambas. Estudiante y ayudante usan no admin.
-- No admin comparte estructura y material publicado. Las consultas adicionales
-  respetan el rol: estudiante ve sus quizzes/notas; docente y ayudante consultan
-  resultados e intentos de sus secciones. El ayudante de ejemplo solo ve sección 2.
-- Las consultas no admin reutilizan libro/intentos sin controles de escritura.
-  Una página extra de ayudante no constituye una tercera experiencia.
-- El prototipo usa `role=teacher|assistant|student` y
-  `experience=admin|non-admin` como perfiles de ejemplo. Los enlaces preservan
-  el perfil; elegir otro escenario no asigna privilegios reales. Un parámetro
-  admin con estudiante/ayudante conserva la experiencia no admin.
-
-## Matriz de acciones propuesta en el prototipo
-
-| Acción | Docente admin | Docente no admin | Ayudante no admin | Estudiante no admin |
+| Acción | Docente admin | Docente no admin | Ayudante | Estudiante |
 | --- | --- | --- | --- | --- |
-| Cursos y material publicado | Sí, dentro de su alcance | Sí, secciones 1/2 | Sí, sección 2 | Sí, inscripción propia |
-| Configurar curso, secciones y roles | Sí | No | No | No |
-| Editar/publicar módulos, material y quizzes; acceder a pauta | Sí | No | No | No |
-| Consultar libro e intentos de estudiantes | Sí, secciones 1/2 | Solo lectura, secciones 1/2 | Solo lectura, sección 2 | No |
-| Ponderar/publicar notas y cancelar como personal docente | Sí | No | No | No |
-| Consultar auditoría | Sí | No | No | No |
-| Rendir/cancelar intento propio y ver notas propias publicadas | No en este perfil docente | No en este perfil docente | No en este perfil ayudante | Sí, si no accede a pauta |
+| Gestionar módulos y material compartido | Sí | Sí | No; consulta publicados | Consulta publicados |
+| Gestionar participantes/roles de sección | Todas las secciones | Solo sección 2 | No | No |
+| Crear secciones y configurar el curso | Sí | No | No | No |
+| Crear/publicar quiz y consultar pauta | Todas o sección elegida | Destinatarios de sección 2 | No | No |
+| Configurar ponderaciones comunes | Sí | Consulta | No | No |
+| Consultar resultados/intentos de estudiantes | Todas las secciones | Solo sección 2 | Solo sección 2, lectura | No |
+| Publicar notas/cancelar como docente | Dentro de todo su alcance | Solo sección 2 | No | No |
+| Consultar eventos académicos de sección | Todas | Solo sección 2 | No | No |
+| Rendir/cancelar intento propio y ver notas propias | No en perfil docente | No en perfil docente | No en perfil ayudante | Sí, sin acceso incompatible a pauta |
 
-Esta matriz mantiene el flujo estudiantil separado de seguimiento académico.
-Tener simultáneamente otro Enrollment estudiantil no elimina la regla de acceso
-incompatible a pauta; las combinaciones completas de roles no se implementan en
-esta demo.
+El rol docente sigue habilitando autoría incluso sin admin; acceso a pauta
+mantiene la incompatibilidad con rendir ese quiz como estudiante. Combinaciones
+completas de múltiples Enrollments no se implementan en estos perfiles estáticos.
+
+## Publicación por módulo e ítem
+
+El editor 12 coloca un botón de publicación en **cada cabecera de módulo y cada
+fila de material**, inspirado en el check de la referencia Canvas suministrada.
+Usa Lucide `circle-check` verde y texto «Publicado»; sin publicar usa `circle` y
+texto «Sin publicar». `aria-label`, `aria-pressed`, foco visible y avisos de estado
+permiten operarlo por teclado sin depender del color.
+
+La publicación del módulo y de cada ítem es independiente. Un ítem puede
+conservar su check verde bajo un módulo sin publicar, pero su visibilidad
+estudiantil requiere ambas publicaciones. Ocultar un módulo no borra el estado
+de sus ítems ni su historial. Los ítems nuevos se guardan sin publicar y reciben
+su propio control; reordenar y colapsar no altera publicación. No se importan
+otras funciones de Canvas a este MVP. El estado es local a la página de ejemplo.
 
 ## Dependencia de implementación
 
-Antes de implementar esta separación se debe alinear CU/RF, modelo y contrato:
+Esta rama cambia UI y documentación, sin modificar esquemas, OpenAPI o código de
+producto. Antes de implementar:
 
-1. Definir cómo se representa, concede y revoca administración del curso y su
-   alcance, sin inferirla únicamente de `teacher` ni de parámetros de URL.
-2. Reconciliar CU-04/05/06/07/10/11/13/14/15 y RF12/RF28 con la matriz acordada;
-   hoy describen permisos ligados al rol docente y consulta de material estudiantil. Aclarar también el alcance
-   docente por curso/sección pendiente en CU-03/CU-16.
-3. Aplicar las capacidades en API, con membership institucional y roles/alcance
-   vigentes, conservación de historia y auditoría de concesión/revocación.
-4. Probar docente con/sin administración, ayudante/estudiante sin escritura,
-   acceso directo, revocación y aislamiento entre instituciones/secciones.
+1. Representar y auditar concesión/revocación del alcance admin del curso.
+   No inferirlo solo de `teacher` ni de parámetros de URL.
+2. Resolver la ambigüedad curso/sección de CU-03/CU-16 y alinear los permisos de
+   CU-04/07/10/11/13/15 y RF12/RF28/RF29 con la matriz acordada. Conservar el
+   contenido compartido de CU-05/06/14 y el bloqueo de pauta/notas publicadas.
+3. Validar membership institucional, curso, rol y sección histórica en API;
+   aplicar filtros y escritura dentro de la transacción con auditoría.
+4. Probar docente no admin con escritura propia y rechazo de otra sección,
+   admin con alcance múltiple, ayudante sin escritura, revocación y aislamiento.
 
-Esta rama no modifica modelos de datos, OpenAPI, backend ni frontend de producto.
-Ocultar controles y bloquear visualmente una ruta en HTML no constituye seguridad.
-El documento [de casos de uso](../deliveries/2/03-use-cases-and-requirements.md#revisión-de-mockups-por-rol--issue-22)
-y el [inventario](../../mockups/README.md) registran qué metas cubren las pantallas
-sin presentar esta dependencia como resuelta.
+Los controles HTML son una demostración y no implementan seguridad. El
+[mapeo de CU](../deliveries/2/03-use-cases-and-requirements.md#revisión-de-mockups-por-rol--issue-22)
+y el [inventario](../../mockups/README.md) registran la cobertura y estas limitaciones.

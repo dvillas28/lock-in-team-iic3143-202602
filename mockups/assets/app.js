@@ -61,6 +61,22 @@ function mockCanAdmin() {
   if (!mockAcademicContext.admin) mockNotice('Tu perfil no tiene administración del curso.');
   return mockAcademicContext.admin;
 }
+function mockCanTeach() {
+  if (mockAcademicContext.role !== 'teacher') {
+    mockNotice('Esta acción requiere un rol docente vigente.');
+    return false;
+  }
+  return true;
+}
+function mockCanManageSection(section) {
+  if (!mockCanTeach()) return false;
+  var own = section === '2' || section === 'Sección 2';
+  if (!mockAcademicContext.admin && !own) {
+    mockNotice('Solo puedes gestionar tu sección 2.');
+    return false;
+  }
+  return true;
+}
 function mockProfileUrl(file) {
   var url = new URL(file, location.href);
   url.searchParams.set('role', mockAcademicContext.role);
@@ -82,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return;
   }
   document.body.dataset.experience = ctx.experience;
-  var profile = ctx.role === 'teacher' ? ['Carla Contreras', 'CC', 'Docente', 'Secciones 1 y 2'] :
+  var profile = ctx.role === 'teacher' ? ['Carla Contreras', 'CC', 'Docente', ctx.admin ? 'Todas las secciones' : 'Sección 2'] :
     ctx.role === 'assistant' ? ['Javier Morales', 'JM', 'Ayudante', 'Sección 2'] :
     ['María González', 'MG', 'Estudiante', 'Sección 2'];
   document.querySelectorAll('.sidebar-bottom [data-user-name]').forEach(function (el) { el.textContent = profile[0]; });
@@ -105,15 +121,31 @@ document.addEventListener('DOMContentLoaded', function () {
       if (el.matches('button,input,select,textarea')) el.disabled = true;
     }
   });
+  document.querySelectorAll('[data-teacher-only]').forEach(function (el) {
+    if (ctx.role !== 'teacher') {
+      el.hidden = true;
+      el.querySelectorAll('input,button,select,textarea').forEach(function (control) { control.disabled = true; });
+      if (el.matches('button,input,select,textarea')) el.disabled = true;
+    }
+  });
+  document.querySelectorAll('[data-admin-edit]').forEach(function (el) { if (!ctx.admin) el.disabled = true; });
+  // Hidden options must also be removed so a keyboard cannot select them.
+  document.querySelectorAll('option[data-admin-only]').forEach(function (el) { if (!ctx.admin) el.remove(); });
+  document.querySelectorAll('[data-scope-notice]').forEach(function (el) {
+    el.textContent = ctx.role === 'teacher' ?
+      (ctx.admin ? 'Gestión académica: todas las secciones del curso.' : 'Gestión académica: solo tu sección 2. El contenido del curso permanece compartido.') :
+      'Consulta de solo lectura: sección 2.';
+  });
   document.querySelectorAll('[data-student-only]').forEach(function (el) { el.hidden = staff; });
-  document.querySelectorAll('[data-readonly-staff-only]').forEach(function (el) { el.hidden = !staff || ctx.admin; });
-  if (ctx.role === 'assistant') {
+  document.querySelectorAll('[data-readonly-staff-only]').forEach(function (el) { el.hidden = ctx.role !== 'assistant'; });
+  document.querySelectorAll('[data-staff-query-only]').forEach(function (el) { el.hidden = !staff || ctx.admin; });
+  if (!ctx.admin) {
     document.querySelectorAll('[data-section-one]').forEach(function (el) { el.remove(); });
   }
   // Two navigation templates, with academic queries appropriate to each role.
   var items = [['index.html', 'Galería', 'layers'], ['10-institutions.html', 'Instituciones', 'building-2'],
     [home, 'Mis cursos', 'book-open']];
-  if (ctx.admin) items.push(['11-course-management.html', 'Secciones y roles', 'users'],
+  if (ctx.role === 'teacher') items.push(['11-course-management.html', ctx.admin ? 'Secciones y roles' : 'Mi sección', 'users'],
     ['12-content-editor.html', 'Módulos y material', 'folder'],
     ['13-quiz-editor.html', 'Autoría de quizzes', 'list-checks']);
   else items.push(['04-course-modules.html', 'Material', 'folder']);
@@ -121,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function () {
     ['16-attempt-review.html', 'Intentos', 'clipboard-list']);
   else items.push(['05-evaluations.html', 'Quizzes', 'clipboard-list'],
     ['06-grades.html', 'Mis calificaciones', 'bar-chart-2']);
-  if (ctx.admin) items.push(['15-audit.html', 'Auditoría', 'history']);
+  if (ctx.role === 'teacher') items.push(['15-audit.html', 'Auditoría', 'history']);
   items.push(['02-login.html', 'Cerrar sesión', 'log-out']);
   var nav = document.querySelector('.sidebar-nav');
   nav.replaceChildren();
@@ -148,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function () {
     url.searchParams.set('experience', ctx.experience);
     a.href = url.href;
   });
-  var restricted = (document.body.hasAttribute('data-admin-page') && !ctx.admin) ||
+  var restricted = (document.body.hasAttribute('data-teacher-page') && ctx.role !== 'teacher') ||
     (['08-teacher-gradebook.html', '16-attempt-review.html'].includes(ctx.file) && !staff) ||
     (['05-evaluations.html', '06-grades.html', '14-quiz-attempt.html'].includes(ctx.file) && staff);
   if (restricted) {
@@ -173,6 +205,7 @@ document.addEventListener('DOMContentLoaded', function () {
     content.append(panel);
     document.title = 'AcademiX — Acceso no disponible';
   }
+  if (ctx.file === '15-audit.html' && typeof filterAudit === 'function') filterAudit();
   if (window.lucide) lucide.createIcons();
 });
 document.addEventListener('DOMContentLoaded', function () {

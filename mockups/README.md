@@ -30,43 +30,37 @@ estados y acciones son de demostración y no implementan backend ni permisos.
 | --- | --- | --- | --- |
 | [Landing](01-landing.html) | Público | Acceso previo | Propuesta de valor y acceso global. |
 | [Acceso a AcademiX](02-login.html) | Compartido | Acceso previo | Acceso de demostración previo a elegir institución (RF1); sin invitación ni branding por subdominio. |
-| [Mis cursos](03-dashboard.html) | No admin · estudiante, ayudante o docente | CU-02, CU-03 | Inicio compartido sin administración; avance propio para estudiante y seguimiento por sección para docente/ayudante. |
+| [Mis cursos](03-dashboard.html) | No admin · estudiante, ayudante o docente | CU-02, CU-03 | Inicio no admin compartido; docente gestiona su sección y contenido, ayudante consulta y estudiante rinde. |
 | [Curso y módulos](04-course-modules.html) | No admin · consulta | CU-03, CU-06 | Solo módulos publicados, lectura markdown y PDF; controles por teclado. |
 | [Quizzes](05-evaluations.html) | Estudiante | CU-08, CU-09, CU-12 | Listado de quizzes, inicio/reanudación y acceso a notas publicadas; envío detallado en 14. |
 | [Calificaciones](06-grades.html) | Estudiante | CU-12 | Notas propias publicadas, promedio parcial 6.1, ponderación 65 % y estado sin notas. |
-| [Administrar mis cursos](07-teacher-dashboard.html) | Admin · docente | CU-02, CU-03 | Inicio admin: preparar participantes, contenido y quizzes del curso. |
-| [Libro de notas](08-teacher-gradebook.html) | Admin / No admin · docente o ayudante | CU-10, CU-11, CU-16 | Admin configura/publica; docente no admin y ayudante consultan sus secciones sin escritura. |
+| [Administrar mis cursos](07-teacher-dashboard.html) | Admin · docente | CU-02, CU-03 | Inicio admin con gestión académica de todas las secciones del curso. |
+| [Libro de notas](08-teacher-gradebook.html) | Docente admin/no admin; ayudante (consulta) | CU-10, CU-11, CU-16 | Admin configura pesos comunes; ambos docentes publican dentro de su alcance. Ayudante solo consulta sección 2. |
 | [Lector de documentos](09-pdf-reader.html) | Estudiante | CU-06 | PDF de ejemplo y retorno al módulo, sin IA; archivo condicionado al almacenamiento futuro. |
 | [Elegir institución](10-institutions.html) | Usuario autenticado (compartido) | CU-01, CU-02 | Instituciones accesibles, roles disponibles, lista vacía, contexto no disponible y UTFSM sin cursos. |
-| [Secciones y roles](11-course-management.html) | Admin · docente | CU-04 | Configuración de curso, creación de sección, asignación/desactivación de roles y rechazo de duplicados. |
-| [Módulos y material](12-content-editor.html) | Admin · docente | CU-14, CU-05 | Crear/ordenar/publicar/ocultar módulos; borrador markdown, formatos admitidos y publicación condicionada a módulo visible. |
-| [Autoría de quiz](13-quiz-editor.html) | Admin · docente | CU-07 | Preguntas, alternativas únicas, una correcta, puntajes, fechas e intentos; bloqueo de pauta al publicar. |
+| [Secciones y roles](11-course-management.html) | Docente admin/no admin | CU-04 | Admin gestiona todas las secciones y crea nuevas; docente no admin asigna/desactiva participantes solo en su sección. |
+| [Módulos y material](12-content-editor.html) | Docente admin/no admin | CU-14, CU-05 | Contenido compartido: creación y orden de módulos, edición de ítems y check verde de publicación independiente por fila. |
+| [Autoría de quiz](13-quiz-editor.html) | Docente admin/no admin | CU-07 | Ambos docentes crean quizzes y acceden a pauta; no admin dirige el quiz a su sección y admin puede seleccionar todas. |
 | [Responder quiz](14-quiz-attempt.html) | Estudiante | CU-08, CU-09, CU-15 | Guardar/reanudar, envío sin nota anticipada, cancelación terminal y máximo; nota publicada o acceso a pauta bloquean rendición. |
-| [Auditoría del curso](15-audit.html) | Admin · docente | CU-13 | Eventos sanitizados de solo lectura, filtros por acción/actor/sección/fecha y estados sin coincidencias o permiso. |
-| [Revisar intentos](16-attempt-review.html) | Admin / No admin · docente o ayudante | CU-16, CU-15 | Admin cancela intentos explícitamente; docente no admin y ayudante solo consultan sus secciones. |
+| [Auditoría del curso](15-audit.html) | Docente admin/no admin | CU-13 | Auditoría sanitizada: admin consulta todas las secciones; docente no admin consulta la propia. |
+| [Revisar intentos](16-attempt-review.html) | Docente admin/no admin; ayudante (consulta) | CU-16, CU-15 | Ambos docentes consultan/cancelan intentos dentro de su alcance; ayudante solo consulta su sección. |
 
 ### Dos experiencias, cuatro perfiles de demostración
 
-- **Admin:** [docente con administración](07-teacher-dashboard.html?role=teacher&experience=admin).
-- **No admin:** [estudiante](03-dashboard.html?role=student&experience=non-admin),
-  [ayudante](03-dashboard.html?role=assistant&experience=non-admin) y
-  [docente sin administración](03-dashboard.html?role=teacher&experience=non-admin)
-  comparten inicio y navegación base. El estudiante ve sus quizzes/notas;
-  docente y ayudante conservan consultas académicas de sus secciones.
-- [Libro de notas](08-teacher-gradebook.html?role=teacher&experience=non-admin)
-  e [intentos](16-attempt-review.html?role=teacher&experience=non-admin) reutilizan
-  las mismas pantallas sin escritura para el docente no admin. El ayudante usa
-  las mismas consultas con `role=assistant&experience=non-admin`, solo sección 2.
+- **Admin:** [docente con administración](07-teacher-dashboard.html?role=teacher&experience=admin), con gestión académica de todas las secciones del curso.
+- **No admin:** [estudiante](03-dashboard.html?role=student&experience=non-admin), [ayudante](03-dashboard.html?role=assistant&experience=non-admin) y [docente sin administración](03-dashboard.html?role=teacher&experience=non-admin) comparten inicio y navegación adaptada al rol. El docente gestiona participantes, quizzes, intentos y publicación de notas de su sección; el ayudante consulta su sección y el estudiante ve sus propios resultados.
+- Ambos docentes editan [módulos y material compartido](12-content-editor.html?role=teacher&experience=non-admin). Cada módulo e ítem tiene su propio control: check verde para publicado y círculo para sin publicar. Un ítem solo es visible al estudiante cuando él y su módulo están publicados; ocultar el módulo conserva los estados de sus ítems.
+- [Libro de notas](08-teacher-gradebook.html?role=teacher&experience=non-admin) e [intentos](16-attempt-review.html?role=teacher&experience=non-admin) permiten escritura docente dentro de su alcance. El ayudante usa las mismas consultas con `role=assistant&experience=non-admin`, solo sección 2 y sin escritura. La creación de secciones, configuración del curso y ponderaciones comunes quedan para admin.
 
 `role` describe el perfil académico; `experience=admin|non-admin` describe la
-experiencia de ejemplo. Carla conserva identidad y secciones al cambiar de
-administración. La navegación mantiene ambos parámetros entre páginas. Ayudante
-y estudiante permanecen no admin aunque la URL solicite admin. Los enlaces
-«Escenarios del mockup» cambian explícitamente el perfil de demostración; no son
-controles para conceder permisos. El acceso directo a autoría/configuración con
-perfil no admin muestra una vista sin acceso. Indicar solo `role=teacher` tampoco
-activa administración. Los archivos admin abiertos sin parámetros representan
-su perfil admin predeterminado de demostración; la galería usa enlaces explícitos.
+experiencia de ejemplo. Carla pertenece a la sección 2; como admin puede gestionar
+todas las secciones del curso. La navegación mantiene ambos parámetros entre
+páginas. Ayudante y estudiante permanecen no admin aunque la URL solicite admin.
+Los enlaces «Escenarios del mockup» cambian el perfil de demostración y no
+conceden permisos. Las rutas docentes deniegan acceso a estudiante/ayudante.
+Indicar solo `role=teacher` permite gestionar su sección y contenido compartido,
+sin activar administración. Los archivos docentes abiertos sin parámetros
+representan su perfil admin predeterminado; la galería usa enlaces explícitos.
 
 La [decisión de UI y dependencia de permisos](../docs/adr/ui-admin-non-admin-experiences.md)
 aclara que **admin es una capacidad del curso, no un nuevo rol institucional**.
@@ -82,17 +76,17 @@ El PDF de 09 es ilustrativo y no contiene un binario descargable.
 
 ## Validación de esta revisión
 
-Se verificaron los 17 HTML: enlaces y anclas locales, IDs únicos, sintaxis del
-JavaScript y referencias a tokens. Se probaron publicación de material/quiz/notas,
-guardado y cancelación de intentos, filtros de auditoría y consulta del ayudante. La revisión de experiencias agrega docente no admin,
-navegación común sin administración, conservación del perfil en material y notas,
-rechazo visual de rutas de escritura y perfiles que intentan solicitar admin sin
-un rol admitido. Los cambios de perfil también se comprobaron con teclado.
-La revisión visual incluyó ambos temas y ancho móvil de 375 px; las tablas
-conservan desplazamiento horizontal dentro de su contenedor. Los pares de texto
-y fondo de tokens comprobados superan 4.5:1 (mínimos 4.83 claro y 5.03 oscuro).
-Estas comprobaciones corresponden al prototipo, no a una auditoría completa de
-accesibilidad ni a pruebas de autorización de una aplicación implementada.
+Se comprobaron los 17 HTML: enlaces y anclas locales, IDs únicos, sintaxis del
+JavaScript y referencias a tokens. Las 55 verificaciones de lógica en una simulación del DOM
+cubren alcance docente por sección, controles independientes de publicación,
+creación/edición de contenido y rechazo de acciones de estudiante/ayudante.
+Las revisiones anteriores incluyeron navegación con teclado, diálogos,
+ambos temas y ancho móvil de 375 px; los últimos ajustes requieren repetir la
+comprobación visual en navegador, bloqueada por el límite de uso de herramientas.
+El texto verde de publicación supera 4.5:1 sobre sus fondos (mínimos 4.88 en
+claro y 7.90 en oscuro). Los pares de texto/fondo de tokens revisados anteriormente
+también superan 4.5:1 (mínimos 4.83 claro y 5.03 oscuro). Estas comprobaciones no equivalen a una
+auditoría completa de accesibilidad ni a pruebas de autorización de backend.
 
 ## Cómo está armado el diseño
 

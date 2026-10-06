@@ -11,8 +11,8 @@
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js">
 </script>
 <link rel="stylesheet" href="assets/tokens.css?v=3"/>
-<link rel="stylesheet" href="assets/app.css?v=4"/>
-<script src="assets/app.js?v=7">
+<link rel="stylesheet" href="assets/app.css?v=5"/>
+<script src="assets/app.js?v=8">
 </script>
 </head>
 <body data-academic>
@@ -43,13 +43,13 @@
 <a class="nav-item " href="07-teacher-dashboard.html">
 <i data-lucide="book-open" aria-hidden="true" style="width:16px;height:16px">
 </i>Mis cursos</a>
-<a class="nav-item " href="11-course-management.html" data-admin-only>
+<a class="nav-item " href="11-course-management.html" data-teacher-only>
 <i data-lucide="users" aria-hidden="true" style="width:16px;height:16px">
 </i>Secciones y roles</a>
-<a class="nav-item " href="12-content-editor.html" data-admin-only>
+<a class="nav-item " href="12-content-editor.html" data-teacher-only>
 <i data-lucide="folder" aria-hidden="true" style="width:16px;height:16px">
 </i>Módulos y material</a>
-<a class="nav-item " href="13-quiz-editor.html" data-admin-only>
+<a class="nav-item " href="13-quiz-editor.html" data-teacher-only>
 <i data-lucide="list-checks" aria-hidden="true" style="width:16px;height:16px">
 </i>Autoría de quizzes</a>
 <a class="nav-item " href="08-teacher-gradebook.html">
@@ -58,7 +58,7 @@
 <a class="nav-item active" href="16-attempt-review.html" aria-current="page">
 <i data-lucide="clipboard-list" aria-hidden="true" style="width:16px;height:16px">
 </i>Revisar intentos</a>
-<a class="nav-item " href="15-audit.html" data-admin-only>
+<a class="nav-item " href="15-audit.html" data-teacher-only>
 <i data-lucide="history" aria-hidden="true" style="width:16px;height:16px">
 </i>Auditoría</a>
 <a class="nav-item" href="02-login.html">
@@ -98,6 +98,7 @@
 <p>IIC2233 · Programación Avanzada · Universidad Católica</p>
 </div>
 </div>
+<p class="notice status-message" data-scope-notice></p>
 <div id="mock-status" class="notice status-message" role="status" aria-live="polite" hidden>
 </div>
 <div class="stack">
@@ -132,7 +133,7 @@
 <span id="review-state">En progreso</span>
 </td>
 <td>
-<button type="button" class="btn btn-ghost" onclick="cancelReview()" id="cancel-review" data-admin-only>Cancelar intento</button>
+<button type="button" class="btn btn-ghost" onclick="cancelReview()" id="cancel-review" data-teacher-only>Cancelar intento</button>
 </td>
 </tr>
 <tr >
@@ -151,7 +152,7 @@
 <p>Sección 2 · Intento 2 · Calificado</p>
 <p style="margin-top:12px">Respuesta registrada: «Pausa la ejecución y conserva el estado».</p>
 <p>Puntaje obtenido: <strong class="tnum">10 / 10</strong> · Nota registrada: <strong class="tnum">7.0</strong> · No publicada.</p>
-<p class="hint" style="margin-top:16px">Consulta del resultado; no modifica respuestas ni calificación. La pauta se consulta en la vista de autoría del docente admin.</p>
+<p class="hint" style="margin-top:16px">Consulta del resultado; no modifica respuestas ni calificación. La pauta se consulta en la vista de autoría del docente autorizado.</p>
 </section>
 </div>
 <div class="scenarios">
@@ -175,7 +176,7 @@
 </div>
 </dialog>
 <script>
-function cancelReview(){if(!mockCanAdmin())return;mockConfirm('¿Cancelar intento de María?', 'Quiz 3 · Intento 1 · Sección histórica 2. No genera nota, consume un intento y deja de bloquear publicación.',function(){document.getElementById('review-state').textContent='Cancelado';document.getElementById('cancel-review').disabled=true;mockNotice('Cancelación registrada con fecha, actor y auditoría.');});}
+function cancelReview(){if(!mockCanManageSection('2'))return;mockConfirm('¿Cancelar intento de María?', 'Quiz 3 · Intento 1 · Sección histórica 2. No genera nota, consume un intento y deja de bloquear publicación.',function(){document.getElementById('review-state').textContent='Cancelado';document.getElementById('cancel-review').disabled=true;mockNotice('Cancelación registrada con fecha, actor y auditoría.');});}
 
 </script>
 </body>
