@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>AcademiX — Acceso a AcademiX</title>
+<title>AcademiX — Elegir institución</title>
 <script src="https://cdn.tailwindcss.com">
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -37,7 +37,7 @@
 <a class="nav-item " href="index.html" >
 <i data-lucide="layers" aria-hidden="true" style="width:16px;height:16px">
 </i>Galería</a>
-<a class="nav-item " href="10-institutions.html" >
+<a class="nav-item active" href="10-institutions.html" aria-current="page" >
 <i data-lucide="building-2" aria-hidden="true" style="width:16px;height:16px">
 </i>Instituciones</a>
 <a class="nav-item" href="02-login.html">
@@ -59,7 +59,7 @@
 <div class="breadcrumb">
 <a href="index.html">Mockups</a>
 <span>/</span>
-<span class="crumb-active">Acceso a AcademiX</span>
+<span class="crumb-active">Elegir institución</span>
 </div>
 <div class="actions" style="margin:0">
 <span class="hint" style="font-size:12px">Mockup · datos de ejemplo</span>
@@ -72,34 +72,53 @@
 <div class="content" id="main-content">
 <div class="page-heading">
 <div>
-<p class="section-label">RF1 · Acceso previo a CU-01/CU-02 · Semestre 2026-2</p>
-<h1>Acceso a AcademiX</h1>
+<p class="section-label">CU-01 · CU-02 · Semestre 2026-2</p>
+<h1>Elegir institución</h1>
 <p>Una identidad, tus instituciones accesibles</p>
 </div>
 </div>
 <div id="mock-status" class="notice status-message" role="status" aria-live="polite" hidden>
 </div>
-<div style="max-width:480px;margin:0 auto">
+<div class="split">
+<div id="institutions" class="stack">
 <section class="card panel" >
-<h2>Iniciar sesión</h2>
-<form onsubmit="event.preventDefault();location.href='10-institutions.html'">
-<div class="stack">
-<div>
-<label class="field-label" for="login-email">Correo</label>
-<input class="field" id="login-email" name="login-email" type="email" value="" autocomplete="username" placeholder="usuario@uc.cl" required>
-</div>
-<div>
-<label class="field-label" for="login-pass">Contraseña</label>
-<input class="field" id="login-pass" name="login-pass" type="password" value="" autocomplete="current-password" required>
-</div>
-</div>
+<h2>Universidad Católica</h2>
+<p class="hint">Pertenencia institucional activa · uc</p>
+<p>Elige un perfil de ejemplo para este curso:</p>
 <div class="actions">
-<button class="btn btn-primary">Continuar</button>
+<a class="btn btn-ghost" href="07-teacher-dashboard.html?role=teacher&amp;experience=admin" data-demo-profile>Docente · Admin</a>
+<a class="btn btn-ghost" href="03-dashboard.html?role=student&amp;experience=non-admin" data-demo-profile>Estudiante · No admin</a>
+<a class="btn btn-ghost" href="03-dashboard.html?role=assistant&amp;experience=non-admin" data-demo-profile>Ayudante · No admin</a>
+<a class="btn btn-ghost" href="03-dashboard.html?role=teacher&amp;experience=non-admin" data-demo-profile>Docente · No admin</a>
 </div>
-</form>
-<p class="hint" style="margin-top:20px">Tu cuenta puede pertenecer a más de una institución. Después del acceso eliges una institución visible.</p>
-<p class="hint" style="margin-top:12px">Demostración estática: usa datos de prueba; las credenciales no se envían ni se guardan.</p>
 </section>
+<section class="card panel" >
+<h2>Universidad Técnica Federico Santa María</h2>
+<p class="hint">Pertenencia institucional activa · utfsm</p>
+<p>Roles disponibles: Estudiante.</p>
+<div class="actions">
+<a class="btn btn-ghost" href="10-institutions.html?institution=utfsm" >Entrar a utfsm</a>
+</div>
+</section>
+</div>
+<section class="card panel" >
+<h2>Tu contexto académico</h2>
+<p>Solo aparecen instituciones con pertenencia activa. Al entrar verás tus cursos según tus roles de sección.</p>
+<div id="context" class="notice" hidden>
+</div>
+</section>
+</div>
+<div id="empty" class="empty-zone panel" hidden>
+<h2>Sin instituciones accesibles</h2>
+<p>No tienes una pertenencia institucional activa. No hay datos académicos disponibles.</p>
+</div>
+<div id="denied" class="notice warning" hidden>El contexto solicitado no está disponible. Vuelve a elegir una institución accesible.</div>
+<div class="scenarios">
+<strong>Escenarios del mockup</strong>
+<br>
+<a class="btn btn-ghost" href="10-institutions.html?state=empty" >Sin memberships</a>
+<a class="btn btn-ghost" href="10-institutions.html?state=denied" >Acceso no disponible</a>
+<a class="btn btn-ghost" href="10-institutions.html" >Lista accesible</a>
 </div>
 </div>
 </main>
@@ -114,5 +133,11 @@
 <button type="button" class="btn btn-primary" id="confirm-accept">Confirmar</button>
 </div>
 </dialog>
+<script>
+const scenario = new URLSearchParams(location.search).get('state');
+if (scenario === 'empty' || scenario === 'denied') {document.getElementById('institutions').hidden=true;document.getElementById(scenario).hidden=false;}
+if (new URLSearchParams(location.search).get('institution') === 'utfsm') {document.getElementById('institutions').hidden=true;document.getElementById('context').hidden=false;document.getElementById('context').textContent='Universidad Técnica Federico Santa María · utfsm · Estudiante. Aún no tienes cursos visibles en este contexto.';}
+
+</script>
 </body>
 </html>
