@@ -64,3 +64,24 @@ de arriba:
 
 Ejemplo: con `v0.2.0` publicado, un `fix` en `dev` crea `v0.2.1-dev.1`; un
 `feat` posterior crea `v0.3.0-dev.1`; el merge a `main` publica `v0.3.0`.
+
+## Trivy en CI
+
+El job `<app> (docker build + trivy)` revisa dependencias, secretos y
+Dockerfile de la app, y luego la imagen construida. Falla solo con
+vulnerabilidades HIGH o CRITICAL que ya tienen version corregida; las demas
+quedan visibles en la pestana Security del repo.
+
+Si un PR falla por Trivy:
+
+1. Leer en el log del job el paquete, el CVE y la version corregida.
+2. Actualizar la dependencia directa, o forzar la transitiva con
+   `pnpm.overrides` en el `package.json` de la app.
+3. Si no se puede corregir ahora, agregar el CVE a `.trivyignore` en la raiz
+   con un comentario que diga por que y hasta cuando.
+
+Para reproducirlo local (requiere Docker):
+
+```bash
+.github/scripts/trivy.sh fs --ignore-unfixed --severity HIGH,CRITICAL frontend
+```
