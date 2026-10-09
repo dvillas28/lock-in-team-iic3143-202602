@@ -27,6 +27,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3001
 
+# The app runs with plain node; the bundled package managers only add vulnerable dependencies.
+RUN rm -rf /usr/local/lib/node_modules /opt/yarn-* \
+  /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg
+
 COPY --from=production-dependencies /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
