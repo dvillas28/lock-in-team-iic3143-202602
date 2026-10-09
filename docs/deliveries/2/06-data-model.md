@@ -5,7 +5,7 @@ tenant lógico y `institution_id` aparece en toda tabla académica tenant-owned.
 `users` es global; `institution_memberships` relaciona identidades con las
 Institutions a las que pueden acceder.
 
-Este es un modelo lógico. El repositorio todavía no elige ORM, herramienta de
+Este es un modelo lógico con tipos PostgreSQL y límites de cadenas acordados. El repositorio todavía no elige ORM, herramienta de
 migraciones ni DDL ejecutable.
 
 El catálogo tabular exportable se mantiene en
@@ -38,11 +38,11 @@ Raíz de cada tenant lógico.
 | Campo | Tipo | Regla |
 | --- | --- | --- |
 | id | uuid | PK, globalmente único |
-| slug | text | único global, requerido |
-| name | text | requerido |
+| slug | varchar(63) | único global, requerido |
+| name | varchar(200) | requerido |
 | active | boolean | requerido, default true |
-| created_at | timestamptz | requerido |
-| updated_at | timestamptz | requerido |
+| created_at | timestamptz(6) | requerido |
+| updated_at | timestamptz(6) | requerido |
 
 UC y UTFSM usan los slugs `uc` y `utfsm` en la misma tabla. Su bootstrap futuro
 será idempotente y separado de las migraciones.
@@ -52,19 +52,28 @@ será idempotente y separado de las migraciones.
 Identidades globales. El `sub` del JWT resuelve `users.id`; no se toma una
 identidad desde el body de un request académico.
 
-Campos: `id uuid PK`, `email text`, `name text`, `active boolean`,
-`created_at timestamptz`, `updated_at timestamptz`.
+Campos: `id uuid PK`, `email varchar(254)`, `password_hash varchar(255)`,
+`name varchar(200)`, `active boolean`,
+`created_at timestamptz(6)`, `updated_at timestamptz(6)`.
 
 El modelo actual autentica por `sub`, no por email. Por eso esta revisión no
 introduce una nueva promesa de unicidad global de email; deberá alinearse con el
 proveedor de identidad cuando se diseñe autenticación.
+
+`password_hash` es obligatorio para la autenticación local propuesta. Almacena
+el hash Argon2id codificado completo, con algoritmo, parámetros y salt, con un
+máximo de 255 caracteres. La contraseña ingresada admite entre 8 y 30 caracteres;
+esa longitud se valida antes del hashing y no describe la longitud del hash.
+El hash no se trunca ni se incluye en respuestas de API, logs o auditoría.
+Referencia: [OWASP Password Storage](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html).
+El flujo de autenticación y su implementación permanecen pendientes.
 
 ### institution_memberships
 
 Pertenencia base de un User a una Institution. No almacena roles académicos.
 
 Campos: `id uuid PK`, `institution_id uuid FK`, `user_id uuid FK`,
-`active boolean`, `created_at timestamptz`, `updated_at timestamptz`.
+`active boolean`, `created_at timestamptz(6)`, `updated_at timestamptz(6)`.
 
 Reglas:
 
@@ -82,8 +91,8 @@ Reglas:
 
 Ramos semestrales concretos.
 
-Campos: `id uuid PK`, `institution_id uuid FK`, `code text`, `name text`,
-`term text`, `created_by uuid`, `created_at timestamptz`.
+Campos: `id uuid PK`, `institution_id uuid FK`, `code varchar(32)`, `name varchar(200)`,
+`term varchar(16)`, `created_by uuid`, `created_at timestamptz(6)`.
 
 Reglas:
 
@@ -96,8 +105,8 @@ Reglas:
 
 ### sections
 
-Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`, `code text`,
-`capacity integer nullable`, `created_at timestamptz`.
+Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`, `code varchar(32)`,
+`capacity integer nullable`, `created_at timestamptz(6)`.
 
 Reglas:
 
@@ -116,7 +125,7 @@ la FK de Section. Se conserva `institution_id` para scope, índices y FK
 institution-aware.
 
 Campos: `id uuid PK`, `institution_id uuid`, `section_id uuid`,
-`user_id uuid`, `role text`, `active boolean`, `created_at timestamptz`.
+`user_id uuid`, `role varchar(16)`, `active boolean`, `created_at timestamptz(6)`.
 
 Reglas:
 
@@ -135,8 +144,8 @@ Reglas:
 
 ### course_modules
 
-Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`, `title text`,
-`position integer`, `published_at timestamptz nullable`.
+Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`, `title varchar(200)`,
+`position integer`, `published_at timestamptz(6) nullable`.
 
 Reglas:
 
@@ -149,10 +158,10 @@ Reglas:
 
 Markdown o metadatos de un archivo externo.
 
-Campos: `id uuid PK`, `institution_id uuid`, `module_id uuid`, `title text`,
-`kind text`, `markdown_body text nullable`, `storage_key text nullable`,
-`mime_type text nullable`, `size_bytes bigint nullable`,
-`published_at timestamptz nullable`, `created_by uuid`.
+Campos: `id uuid PK`, `institution_id uuid`, `module_id uuid`, `title varchar(200)`,
+`kind varchar(16)`, `markdown_body text nullable`, `storage_key varchar(1024) nullable`,
+`mime_type varchar(255) nullable`, `size_bytes bigint nullable`,
+`published_at timestamptz(6) nullable`, `created_by uuid`.
 
 Reglas:
 
@@ -172,9 +181,9 @@ Reglas:
 Quiz de Course o de una Section del mismo Course.
 
 Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`,
-`section_id uuid nullable`, `title text`, `instructions text nullable`,
-`opens_at timestamptz nullable`, `closes_at timestamptz nullable`,
-`max_attempts integer nullable`, `published_at timestamptz nullable`,
+`section_id uuid nullable`, `title varchar(200)`, `instructions varchar(10000) nullable`,
+`opens_at timestamptz(6) nullable`, `closes_at timestamptz(6) nullable`,
+`max_attempts integer nullable`, `published_at timestamptz(6) nullable`,
 `created_by uuid`, `questions jsonb`.
 
 Reglas:
@@ -201,9 +210,9 @@ Reglas:
 Conserva Institution, Course y Section históricas.
 
 Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`, `quiz_id uuid`,
-`section_id uuid`, `student_id uuid`, `attempt_number integer`, `status text`,
-`started_at timestamptz`, `submitted_at timestamptz nullable`,
-`cancelled_at timestamptz nullable`, `answers jsonb`,
+`section_id uuid`, `student_id uuid`, `attempt_number integer`, `status varchar(16)`,
+`started_at timestamptz(6)`, `submitted_at timestamptz(6) nullable`,
+`cancelled_at timestamptz(6) nullable`, `answers jsonb`,
 `score_points numeric(8,2) nullable`, `score_percent numeric(5,2) nullable`.
 
 Reglas:
@@ -229,7 +238,7 @@ cuenta como ítem evaluado del Course, con un peso porcentual. No representa una
 nota de estudiante.
 
 Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`, `quiz_id uuid`,
-`title text`, `weight_percent numeric(5,2)`, `created_at timestamptz`.
+`title varchar(200)`, `weight_percent numeric(5,2)`, `created_at timestamptz(6)`.
 
 Reglas:
 
@@ -249,8 +258,8 @@ estudiante en un ítem evaluado, derivado desde un QuizAttempt.
 Campos: `id uuid PK`, `institution_id uuid`, `grade_item_id uuid`,
 `quiz_id uuid`, `student_id uuid`, `section_id uuid`, `attempt_id uuid`,
 `score_percent numeric(5,2)`, `grade_value numeric(3,1)`,
-`published_at timestamptz nullable`, `created_at timestamptz`,
-`updated_at timestamptz`.
+`published_at timestamptz(6) nullable`, `created_at timestamptz(6)`,
+`updated_at timestamptz(6)`.
 
 Reglas:
 
@@ -270,8 +279,8 @@ Reglas:
 Historial académico inmutable y tenant-owned.
 
 Campos: `id uuid PK`, `institution_id uuid`, `actor_user_id uuid`,
-`action text`, `resource_type text`, `resource_id uuid`, `course_id uuid`,
-`section_id uuid nullable`, `occurred_at timestamptz`, `changes jsonb`.
+`action varchar(64)`, `resource_type varchar(32)`, `resource_id uuid`, `course_id uuid`,
+`section_id uuid nullable`, `occurred_at timestamptz(6)`, `changes jsonb`.
 
 Reglas:
 
@@ -329,123 +338,196 @@ restore independiente no es una capacidad del MVP.
 
 ```mermaid
 erDiagram
+  direction LR
   INSTITUTIONS {
-    uuid id PK
-    text slug UK
-    text name
-    boolean active
+    uuid id PK "NOT NULL"
+    varchar(63) slug "NOT NULL"
+    varchar(200) name "NOT NULL"
+    boolean active "NOT NULL"
+    timestamptz(6) created_at "NOT NULL"
+    timestamptz(6) updated_at "NOT NULL"
   }
 
   USERS {
-    uuid id PK
-    text email
-    text name
-    boolean active
+    uuid id PK "NOT NULL"
+    varchar(254) email "NOT NULL"
+    varchar(255) password_hash "NOT NULL"
+    varchar(200) name "NOT NULL"
+    boolean active "NOT NULL"
+    timestamptz(6) created_at "NOT NULL"
+    timestamptz(6) updated_at "NOT NULL"
   }
 
   INSTITUTION_MEMBERSHIPS {
-    uuid id PK
-    uuid institution_id FK
-    uuid user_id FK
-    boolean active
+    uuid id PK "NOT NULL"
+    uuid institution_id FK "NOT NULL"
+    uuid user_id FK "NOT NULL"
+    boolean active "NOT NULL"
+    timestamptz(6) created_at "NOT NULL"
+    timestamptz(6) updated_at "NOT NULL"
   }
 
   COURSES {
-    uuid id PK
-    uuid institution_id FK
-    text code
-    text term
+    uuid id PK "NOT NULL"
+    uuid institution_id FK "NOT NULL"
+    varchar(32) code "NOT NULL"
+    varchar(200) name "NOT NULL"
+    varchar(16) term "NOT NULL"
+    uuid created_by FK "NOT NULL"
+    timestamptz(6) created_at "NOT NULL"
   }
 
   SECTIONS {
-    uuid id PK
-    uuid institution_id FK
-    uuid course_id FK
-    text code
+    uuid id PK "NOT NULL"
+    uuid institution_id FK "NOT NULL"
+    uuid course_id FK "NOT NULL"
+    varchar(32) code "NOT NULL"
+    integer capacity "NULL"
+    timestamptz(6) created_at "NOT NULL"
   }
 
   ENROLLMENTS {
-    uuid id PK
-    uuid institution_id FK
-    uuid section_id FK
-    uuid user_id FK
-    text role
+    uuid id PK "NOT NULL"
+    uuid institution_id FK "NOT NULL"
+    uuid section_id FK "NOT NULL"
+    uuid user_id FK "NOT NULL"
+    varchar(16) role "NOT NULL"
+    boolean active "NOT NULL"
+    timestamptz(6) created_at "NOT NULL"
   }
 
   COURSE_MODULES {
-    uuid id PK
-    uuid institution_id FK
-    uuid course_id FK
-    integer position
+    uuid id PK "NOT NULL"
+    uuid institution_id FK "NOT NULL"
+    uuid course_id FK "NOT NULL"
+    varchar(200) title "NOT NULL"
+    integer position "NOT NULL"
+    timestamptz(6) published_at "NULL"
   }
 
   MATERIALS {
-    uuid id PK
-    uuid institution_id FK
-    uuid module_id FK
-    text kind
+    uuid id PK "NOT NULL"
+    uuid institution_id FK "NOT NULL"
+    uuid module_id FK "NOT NULL"
+    varchar(200) title "NOT NULL"
+    varchar(16) kind "NOT NULL"
+    text markdown_body "NULL"
+    varchar(1024) storage_key "NULL"
+    varchar(255) mime_type "NULL"
+    bigint size_bytes "NULL"
+    timestamptz(6) published_at "NULL"
+    uuid created_by FK "NOT NULL"
   }
 
   QUIZZES {
-    uuid id PK
-    uuid institution_id FK
-    uuid course_id FK
-    uuid section_id FK
-    jsonb questions
+    uuid id PK "NOT NULL"
+    uuid institution_id FK "NOT NULL"
+    uuid course_id FK "NOT NULL"
+    uuid section_id FK "NULL"
+    varchar(200) title "NOT NULL"
+    varchar(10000) instructions "NULL"
+    timestamptz(6) opens_at "NULL"
+    timestamptz(6) closes_at "NULL"
+    integer max_attempts "NULL"
+    timestamptz(6) published_at "NULL"
+    uuid created_by FK "NOT NULL"
+    jsonb questions "NOT NULL"
   }
 
   QUIZ_ATTEMPTS {
-    uuid id PK
-    uuid institution_id FK
-    uuid quiz_id FK
-    uuid section_id FK
-    uuid student_id FK
+    uuid id PK "NOT NULL"
+    uuid institution_id FK "NOT NULL"
+    uuid course_id FK "NOT NULL"
+    uuid quiz_id FK "NOT NULL"
+    uuid section_id FK "NOT NULL"
+    uuid student_id FK "NOT NULL"
+    integer attempt_number "NOT NULL"
+    varchar(16) status "NOT NULL"
+    timestamptz(6) started_at "NOT NULL"
+    timestamptz(6) submitted_at "NULL"
+    timestamptz(6) cancelled_at "NULL"
+    jsonb answers "NOT NULL"
+    numeric(8,2) score_points "NULL"
+    numeric(5,2) score_percent "NULL"
   }
 
   GRADE_ITEMS {
-    uuid id PK
-    uuid institution_id FK
-    uuid course_id FK
-    uuid quiz_id FK
+    uuid id PK "NOT NULL"
+    uuid institution_id FK "NOT NULL"
+    uuid course_id FK "NOT NULL"
+    uuid quiz_id FK "NOT NULL"
+    varchar(200) title "NOT NULL"
+    numeric(5,2) weight_percent "NOT NULL"
+    timestamptz(6) created_at "NOT NULL"
   }
 
   GRADES {
-    uuid id PK
-    uuid institution_id FK
-    uuid grade_item_id FK
-    uuid student_id FK
-    uuid attempt_id FK
+    uuid id PK "NOT NULL"
+    uuid institution_id FK "NOT NULL"
+    uuid grade_item_id FK "NOT NULL"
+    uuid quiz_id FK "NOT NULL"
+    uuid student_id FK "NOT NULL"
+    uuid section_id FK "NOT NULL"
+    uuid attempt_id FK "NOT NULL"
+    numeric(5,2) score_percent "NOT NULL"
+    numeric(3,1) grade_value "NOT NULL"
+    timestamptz(6) published_at "NULL"
+    timestamptz(6) created_at "NOT NULL"
+    timestamptz(6) updated_at "NOT NULL"
   }
 
   AUDIT_EVENTS {
-    uuid id PK
-    uuid institution_id FK
-    uuid actor_user_id FK
-    uuid course_id FK
+    uuid id PK "NOT NULL"
+    uuid institution_id FK "NOT NULL"
+    uuid actor_user_id FK "NOT NULL"
+    varchar(64) action "NOT NULL"
+    varchar(32) resource_type "NOT NULL"
+    uuid resource_id "NOT NULL; referencia polimorfica sin FK"
+    uuid course_id FK "NOT NULL"
+    uuid section_id FK "NULL"
+    timestamptz(6) occurred_at "NOT NULL"
+    jsonb changes "NOT NULL"
   }
 
-  INSTITUTIONS ||--o{ INSTITUTION_MEMBERSHIPS : grants
-  USERS ||--o{ INSTITUTION_MEMBERSHIPS : joins
-  INSTITUTIONS ||--o{ COURSES : owns
-  COURSES ||--o{ SECTIONS : has
-  SECTIONS ||--o{ ENROLLMENTS : has
-  USERS ||--o{ ENROLLMENTS : holds
-  COURSES ||--o{ COURSE_MODULES : organizes
-  COURSE_MODULES ||--o{ MATERIALS : contains
-  COURSES ||--o{ QUIZZES : evaluates
-  SECTIONS |o--o{ QUIZZES : scopes
-  QUIZZES ||--o{ QUIZ_ATTEMPTS : receives
-  USERS ||--o{ QUIZ_ATTEMPTS : submits
-  SECTIONS ||--o{ QUIZ_ATTEMPTS : context
-  COURSES ||--o{ GRADE_ITEMS : grades
-  QUIZZES ||--o| GRADE_ITEMS : has
-  GRADE_ITEMS ||--o{ GRADES : produces
-  USERS ||--o{ GRADES : receives
-  QUIZ_ATTEMPTS ||--o| GRADES : determines
-  COURSES ||--o{ AUDIT_EVENTS : records
-  USERS ||--o{ AUDIT_EVENTS : acts
+  INSTITUTIONS ||--o{ INSTITUTION_MEMBERSHIPS : "institution_id"
+  INSTITUTIONS ||--o{ COURSES : "institution_id"
+  INSTITUTIONS ||--o{ SECTIONS : "institution_id"
+  INSTITUTIONS ||--o{ ENROLLMENTS : "institution_id"
+  INSTITUTIONS ||--o{ COURSE_MODULES : "institution_id"
+  INSTITUTIONS ||--o{ MATERIALS : "institution_id"
+  INSTITUTIONS ||--o{ QUIZZES : "institution_id"
+  INSTITUTIONS ||--o{ QUIZ_ATTEMPTS : "institution_id"
+  INSTITUTIONS ||--o{ GRADE_ITEMS : "institution_id"
+  INSTITUTIONS ||--o{ GRADES : "institution_id"
+  INSTITUTIONS ||--o{ AUDIT_EVENTS : "institution_id"
+  USERS ||--o{ INSTITUTION_MEMBERSHIPS : "user_id"
+  INSTITUTION_MEMBERSHIPS ||--o{ COURSES : "institution_id+created_by"
+  INSTITUTION_MEMBERSHIPS ||--o{ ENROLLMENTS : "institution_id+user_id"
+  INSTITUTION_MEMBERSHIPS ||--o{ MATERIALS : "institution_id+created_by"
+  INSTITUTION_MEMBERSHIPS ||--o{ QUIZZES : "institution_id+created_by"
+  INSTITUTION_MEMBERSHIPS ||--o{ QUIZ_ATTEMPTS : "institution_id+student_id"
+  INSTITUTION_MEMBERSHIPS ||--o{ GRADES : "institution_id+student_id"
+  INSTITUTION_MEMBERSHIPS ||--o{ AUDIT_EVENTS : "institution_id+actor_user_id"
+  COURSES ||--o{ SECTIONS : "institution_id+course_id"
+  COURSES ||--o{ COURSE_MODULES : "institution_id+course_id"
+  COURSES ||--o{ QUIZZES : "institution_id+course_id"
+  COURSES ||--o{ GRADE_ITEMS : "institution_id+course_id"
+  COURSES ||--o{ AUDIT_EVENTS : "institution_id+course_id"
+  SECTIONS ||--o{ ENROLLMENTS : "institution_id+section_id"
+  COURSE_MODULES ||--o{ MATERIALS : "institution_id+module_id"
+  SECTIONS |o--o{ QUIZZES : "institution_id+section_id+course_id"
+  SECTIONS ||--o{ QUIZ_ATTEMPTS : "institution_id+section_id+course_id"
+  SECTIONS |o--o{ AUDIT_EVENTS : "institution_id+section_id+course_id"
+  QUIZZES ||--o{ QUIZ_ATTEMPTS : "institution_id+quiz_id+course_id"
+  QUIZZES ||--o| GRADE_ITEMS : "institution_id+quiz_id+course_id"
+  GRADE_ITEMS ||--o{ GRADES : "institution_id+grade_item_id+quiz_id"
+  QUIZ_ATTEMPTS ||--o| GRADES : "institution_id+attempt_id+quiz_id+student_id+section_id"
 ```
 
-El ERD evita dibujar las relaciones repetidas desde Institution hacia cada tabla
-para mantener legibilidad. Los campos `institution_id` y las FK compuestas son
-obligatorios aunque no aparezca una arista directa para cada entidad.
+El ERD incluye las 13 tablas, 111 columnas y todas las FK. Solo se marcan PK y FK;
+las unicidades simples y compuestas, CHECK e índices parciales se detallan en el
+catálogo. Los contratos JSON y decisiones pendientes están en
+[12-data-catalog.md](12-data-catalog.md). No existe todavía DDL ejecutable.
+
+Versiones independientes: [Mermaid](data-catalog/academix-er.mmd),
+[SVG](data-catalog/academix-er.svg) y [PDF](data-catalog/academix-er.pdf).
