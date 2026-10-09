@@ -20,7 +20,7 @@ export default async function Home() {
         <span className="logo-icon">
           <GraduationCap size={16} aria-hidden="true" />
         </span>
-        <h1 className="serif">AcademiX</h1>
+        <h1 className="serif">AcademiXXXXXXX</h1>
       </div>
 
       <p>Frontend funcionando correctamente.</p>
