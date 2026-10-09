@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AcademiX — Responder quiz</title>
+<script src="https://cdn.tailwindcss.com">
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js">
+</script>
+<link rel="stylesheet" href="assets/tokens.css?v=3"/>
+<link rel="stylesheet" href="assets/app.css?v=5"/>
+<script src="assets/app.js?v=8">
+</script>
+</head>
+<body data-academic>
+<a href="#main-content" class="btn btn-primary skip-link">Saltar al contenido</a>
+<div class="app">
+<aside class="sidebar">
+<div class="sidebar-top">
+<div class="sidebar-logo">
+<div class="logo-icon">
+<i data-lucide="graduation-cap" aria-hidden="true" style="width:16px;height:16px">
+</i>
+</div>
+<span class="logo-name">AcademiX</span>
+</div>
+<div class="tenant-badge">
+<i data-lucide="building-2" aria-hidden="true" style="width:16px;height:16px">
+</i>
+<span>Universidad Católica · uc</span>
+</div>
+</div>
+<nav class="sidebar-nav" aria-label="Navegación principal">
+<a class="nav-item " href="index.html" >
+<i data-lucide="layers" aria-hidden="true" style="width:16px;height:16px">
+</i>Galería</a>
+<a class="nav-item " href="10-institutions.html" >
+<i data-lucide="building-2" aria-hidden="true" style="width:16px;height:16px">
+</i>Instituciones</a>
+<a class="nav-item " href="03-dashboard.html" >
+<i data-lucide="book-open" aria-hidden="true" style="width:16px;height:16px">
+</i>Mis cursos</a>
+<a class="nav-item " href="04-course-modules.html" >
+<i data-lucide="folder" aria-hidden="true" style="width:16px;height:16px">
+</i>Material</a>
+<a class="nav-item " href="05-evaluations.html"  data-student-only>
+<i data-lucide="clipboard-list" aria-hidden="true" style="width:16px;height:16px">
+</i>Quizzes</a>
+<a class="nav-item " href="06-grades.html"  data-student-only>
+<i data-lucide="bar-chart-2" aria-hidden="true" style="width:16px;height:16px">
+</i>Calificaciones</a>
+<a class="nav-item" href="02-login.html">
+<i data-lucide="log-out" aria-hidden="true" style="width:16px;height:16px">
+</i>Cerrar sesión</a>
+</nav>
+<div class="sidebar-bottom">
+<div class="user-row">
+<div class="avatar" data-user-initials>MG</div>
+<div>
+<p class="name" data-user-name>María González</p>
+<p class="role" data-user-role>Estudiante · Sección 2</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="main">
+<header class="top-header">
+<div class="breadcrumb">
+<a href="index.html">Mockups</a>
+<span>/</span>
+<span class="crumb-active">Responder quiz</span>
+</div>
+<div class="actions" style="margin:0">
+<span class="hint" style="font-size:12px">Mockup · datos de ejemplo</span>
+<button class="icon-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
+<i data-lucide="moon" aria-hidden="true" style="width:16px;height:16px">
+</i>
+</button>
+</div>
+</header>
+<div class="content" id="main-content">
+<div class="page-heading">
+<div>
+<p class="section-label">CU-08 · CU-09 · CU-15 · Semestre 2026-2</p>
+<h1>Responder quiz</h1>
+<p>IIC2233 · Programación Avanzada · Universidad Católica</p>
+</div>
+</div>
+<div id="mock-status" class="notice status-message" role="status" aria-live="polite" hidden>
+</div>
+<div class="split">
+<div class="stack">
+<div class="notice">Quiz 3 — Generadores · Sección 2 · Máximo 2 intentos</div>
+<section class="card panel" >
+<h2>Tu intento</h2>
+<p id="attempt-summary">
+</p>
+<p id="attempt-status" class="chip">
+</p>
+<form id="answers" class="stack" onsubmit="saveAnswers(event)" style="margin-top:20px">
+<fieldset class="stack">
+<legend>1. ¿Qué hace yield en un generador?</legend>
+<label class="option">
+<input type="radio" name="answer" value="a">
+<span>Pausa la ejecución y conserva el estado.</span>
+</label>
+<label class="option">
+<input type="radio" name="answer" value="b">
+<span>Materializa siempre la secuencia completa.</span>
+</label>
+</fieldset>
+<div class="actions">
+<button class="btn btn-ghost">Guardar respuestas</button>
+<button type="button" class="btn btn-primary" onclick="sendAttempt()" >Enviar intento</button>
+<button type="button" class="btn btn-ghost" onclick="cancelAttempt()" >Cancelar intento</button>
+</div>
+</form>
+<div id="terminal" class="notice" hidden>
+</div>
+<div class="actions">
+<button type="button" class="btn btn-ghost" onclick="restartAttempt()" id="restart" hidden>Iniciar siguiente intento</button>
+<a class="btn btn-ghost" href="05-evaluations.html"  data-student-only>Volver a quizzes</a>
+</div>
+</section>
+</div>
+<section class="card panel" >
+<h2>Antes de enviar</h2>
+<p>El guardado conserva tus respuestas sin revelar corrección ni nota.</p>
+<p style="margin-top:16px">Al enviar, las respuestas quedan inmovilizadas. La calificación será visible cuando el docente publique la nota.</p>
+<p style="margin-top:16px">Cancelar cierra el intento sin nota y consume uno de los intentos permitidos.</p>
+</section>
+</div>
+<div class="scenarios">
+<strong>Escenarios del mockup</strong>
+<br>
+<a class="btn btn-ghost" href="14-quiz-attempt.html?state=published"  data-student-only>Nota publicada</a>
+<a class="btn btn-ghost" href="14-quiz-attempt.html?state=limit"  data-student-only>Sin intentos restantes</a>
+<a class="btn btn-ghost" href="14-quiz-attempt.html?state=author"  data-student-only>Roles incompatibles</a>
+<a class="btn btn-ghost" href="14-quiz-attempt.html?state=denied"  data-student-only>Sin acceso</a>
+</div>
+</div>
+</main>
+</div>
+<dialog id="mock-confirm" class="modal native-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-message">
+<h2 id="confirm-title">
+</h2>
+<p id="confirm-message">
+</p>
+<div class="actions">
+<button type="button" class="btn btn-ghost" id="confirm-cancel" onclick="document.getElementById('mock-confirm').close()">Volver</button>
+<button type="button" class="btn btn-primary" id="confirm-accept">Confirmar</button>
+</div>
+</dialog>
+<script>
+const key='academix-mock-uc-quiz3-attempt';
+let attempt={number:1,state:'in_progress',answer:null};
+try{attempt=JSON.parse(sessionStorage.getItem(key))||attempt;}catch(e){}
+const scenario=new URLSearchParams(location.search).get('state');
+function persist(){try{sessionStorage.setItem(key,JSON.stringify(attempt));}catch(e){}}
+function renderAttempt(){document.getElementById('attempt-summary').textContent='Intento '+attempt.number+' de 2 · Sección histórica 2';document.getElementById('attempt-status').textContent={in_progress:'En progreso',graded:'Enviado y calificado',cancelled:'Cancelado'}[attempt.state];document.getElementById('answers').hidden=attempt.state!=='in_progress';document.getElementById('terminal').hidden=attempt.state==='in_progress';document.getElementById('terminal').textContent=attempt.state==='graded'?'Envío recibido. Nota y corrección aún no publicadas.':'Intento cancelado sin nota; cuenta para el máximo y deja de bloquear la publicación.';document.getElementById('restart').hidden=attempt.state==='in_progress'||attempt.number>=2; if(attempt.answer){document.querySelector('input[value="'+attempt.answer+'"]').checked=true;}}
+function saveAnswers(e){if(e)e.preventDefault();if(attempt.state!=='in_progress')return;attempt.answer=document.querySelector('input[name="answer"]:checked')?.value||null;persist();mockNotice('Respuestas guardadas. Puedes reanudar este intento; no se muestra corrección.');}
+function sendAttempt(){saveAnswers();mockConfirm('¿Enviar intento '+attempt.number+'?', 'Has respondido '+(attempt.answer?'1 de 1':'0 de 1')+' preguntas. El envío cerrará tus respuestas; la nota permanecerá oculta hasta publicación.',function(){attempt.state='graded';persist();renderAttempt();mockNotice('Recepción confirmada. Se conservó el resultado del envío sin duplicarlo.');});}
+function cancelAttempt(){mockConfirm('¿Cancelar intento '+attempt.number+'?', 'No genera nota. Cuenta para el máximo de 2 intentos y no se puede reabrir.',function(){attempt.state='cancelled';persist();renderAttempt();mockNotice('Intento cancelado. Fecha y actor registrados en auditoría.');});}
+function restartAttempt(){if(attempt.number>=2||attempt.state==='in_progress')return;attempt={number:attempt.number+1,state:'in_progress',answer:null};document.querySelectorAll('[name="answer"]').forEach(el=>el.checked=false);persist();renderAttempt();}
+renderAttempt();
+if(['published','limit','author','denied'].includes(scenario)){document.getElementById('answers').hidden=true;document.getElementById('restart').hidden=true;mockNotice({published:'Ya existe una nota publicada. No puedes iniciar ni enviar nuevos intentos.',limit:'Alcanzaste el máximo de intentos. Los cancelados también cuentan.',author:'Tu acceso docente a la pauta impide rendir este quiz, aunque tengas rol estudiante.',denied:'El quiz no está disponible en tu contexto actual. No se muestran preguntas.'}[scenario]);if(scenario==='denied')document.getElementById('terminal').hidden=true;}
+
+</script>
+</body>
+</html>

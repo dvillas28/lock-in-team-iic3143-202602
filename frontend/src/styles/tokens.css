@@ -49,6 +49,8 @@
   --shadow-float:   0 8px 24px rgba(15, 23, 42, 0.12);
 
   --overlay: rgba(15, 23, 42, 0.45);
+  /* Nombre conservado por la integración del frontend de Issue #24. */
+  --modal-backdrop: var(--overlay);
 
   /* Métricas */
   --radius-sm: 8px;

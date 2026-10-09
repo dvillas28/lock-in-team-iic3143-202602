@@ -9,13 +9,13 @@ html, body { height: 100%; }
 body {
   background: var(--bg);
   color: var(--text-1);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
-.serif { font-family: 'EB Garamond', serif; }
+.serif { font-family: var(--font-eb-garamond), serif; }
 .tnum  { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; }
 
 a { color: inherit; }
@@ -148,7 +148,7 @@ a { color: inherit; }
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   padding: 9px 16px; border-radius: var(--radius-sm);
-  font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+  font-family: var(--font-inter), sans-serif; font-size: 13px; font-weight: 600;
   border: 1px solid transparent; cursor: pointer; text-decoration: none;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
@@ -185,7 +185,7 @@ a { color: inherit; }
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   color: var(--text-1);
-  font-family: 'Inter', sans-serif; font-size: 14px;
+  font-family: var(--font-inter), sans-serif; font-size: 14px;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .field::placeholder { color: var(--text-3); }
@@ -204,7 +204,7 @@ textarea.field { resize: vertical; min-height: 88px; line-height: 1.55; }
 .tab-btn {
   padding: 6px 12px; border: none; border-radius: 7px;
   background: none; cursor: pointer;
-  font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+  font-family: var(--font-inter), sans-serif; font-size: 13px; font-weight: 500;
   color: var(--text-2); white-space: nowrap;
   transition: background 0.15s ease, color 0.15s ease;
 }
@@ -235,7 +235,7 @@ textarea.field { resize: vertical; min-height: 88px; line-height: 1.55; }
 /* ── Modal ── */
 .modal-backdrop {
   position: fixed; inset: 0; z-index: 100;
-  background: var(--overlay);
+  background: var(--modal-backdrop);
   display: none; align-items: center; justify-content: center; padding: 24px;
 }
 .modal-backdrop.open { display: flex; }
@@ -257,13 +257,13 @@ button:disabled { cursor: not-allowed; opacity: .65; transform: none; }
 .skip-link { position: fixed; top: -80px; left: 16px; z-index: 200; }
 .skip-link:focus { top: 12px; }
 .page-heading { display: flex; align-items: start; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
-.page-heading h1 { font-family: 'EB Garamond', serif; font-size: 30px; font-weight: 600; }
+.page-heading h1 { font-family: var(--font-eb-garamond), serif; font-size: 30px; font-weight: 600; }
 .page-heading p, .hint { color: var(--text-2); }
 .stack { min-width: 0; display: flex; flex-direction: column; gap: 20px; }
 .split { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 340px); gap: 24px; align-items: start; }
 .panel { padding: 24px; }
-.panel h2 { font-family: 'EB Garamond', serif; font-size: 21px; font-weight: 600; margin-bottom: 16px; }
-.panel h3 { font-family: 'EB Garamond', serif; font-size: 18px; font-weight: 600; }
+.panel h2 { font-family: var(--font-eb-garamond), serif; font-size: 21px; font-weight: 600; margin-bottom: 16px; }
+.panel h3 { font-family: var(--font-eb-garamond), serif; font-size: 18px; font-weight: 600; }
 .actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 20px; }
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .full { grid-column: 1 / -1; }
@@ -277,11 +277,11 @@ button:disabled { cursor: not-allowed; opacity: .65; transform: none; }
 .option input { accent-color: var(--primary); }
 .native-dialog { margin: auto; color: var(--text-1); }
 .native-dialog::backdrop { background: var(--overlay); }
-.native-dialog h2 { font-family: 'EB Garamond', serif; font-size: 24px; margin-bottom: 12px; }
+.native-dialog h2 { font-family: var(--font-eb-garamond), serif; font-size: 24px; margin-bottom: 12px; }
 .scenarios { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-2); }
 .scenarios a { display: inline-block; margin: 8px 12px 0 0; }
 .status-message { margin-bottom: 20px; }
-.metric { font-family: 'EB Garamond', serif; font-size: 40px; color: var(--accent); }
+.metric { font-family: var(--font-eb-garamond), serif; font-size: 40px; color: var(--accent); }
 .text-link { color: var(--primary-ink); }
 @media (max-width: 1000px) { .split { min-width: 0; grid-template-columns: 1fr; } }
 @media (max-width: 760px) {

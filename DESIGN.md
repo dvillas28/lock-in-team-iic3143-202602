@@ -4,9 +4,9 @@
 
 **Theme:** light-first, dark opcional
 
-**Fuente de verdad:** `mockups/assets/tokens.css` (colores y métricas), `mockups/assets/app.css` (componentes), `mockups/assets/app.js` (mecánica de tema). Este documento describe exactamente lo implementado en las 10 vistas de `mockups/`; si difiere del código, manda el código y este archivo debe actualizarse.
+**Fuente de verdad:** `mockups/assets/tokens.css` (colores y métricas), `mockups/assets/app.css` (componentes), `mockups/assets/app.js` (mecánica de tema). Este documento describe exactamente lo implementado en las 17 vistas (16 pantallas y una galería) de `mockups/`; si difiere del código, manda el código y este archivo debe actualizarse.
 
-AcademiX se lee como una herramienta académica seria y calmada. El lienzo es un gris azulado casi blanco (`#F8FAFC`) con tarjetas blancas separadas por bordes hairline — la jerarquía la construyen el espaciado y la tipografía, no el color. EB Garamond da voz académica solo a los títulos; Inter hace todo el trabajo de interfaz con cifras tabulares en notas y tablas. El navy institucional (`#1E3A5F`) es el único color de acción; el ámbar (`#A16207`) queda reservado para calificaciones y highlights. El tema oscuro no invierte: usa tokens dedicados desaturados. La firma visual es la cifra de nota en serif con `tabular-nums` sobre un panel ámbar suave.
+AcademiX se lee como una herramienta académica seria y calmada. El lienzo es un gris azulado casi blanco (`#F8FAFC`) con tarjetas blancas separadas por bordes hairline — la jerarquía la construyen el espaciado y la tipografía, no el color. EB Garamond da voz académica solo a los títulos; Inter hace todo el trabajo de interfaz con cifras tabulares en notas y tablas. El navy institucional (`#1E3A5F`) es el único color de acción; el ámbar (`#925805`) queda reservado para calificaciones y highlights. El tema oscuro no invierte: usa tokens dedicados desaturados. La firma visual es la cifra de nota en serif con `tabular-nums` sobre un panel ámbar suave.
 
 ## Tokens — Colores
 
@@ -19,8 +19,8 @@ Todos los colores de las vistas referencian estas variables. Tema claro en `:roo
 | Primario tinta (texto, links, íconos, estados activos) | `#1E3A5F` | `#9DB8DA` | `--primary-ink` |
 | Primario suave (fondos activos, focus ring) | `rgba(30,58,95,0.08)` | `rgba(125,162,204,0.13)` | `--primary-soft` |
 | Texto sobre primario | `#FFFFFF` | `#FFFFFF` | `--on-primary` |
-| Acento ámbar (solo notas y highlights) | `#A16207` | `#D4A843` | `--accent` |
-| Acento suave | `rgba(161,98,7,0.10)` | `rgba(212,168,67,0.12)` | `--accent-soft` |
+| Acento ámbar (solo notas y highlights) | `#925805` | `#D4A843` | `--accent` |
+| Acento suave | `rgba(146,88,5,0.10)` | `rgba(212,168,67,0.12)` | `--accent-soft` |
 | Lienzo de página | `#F8FAFC` | `#0B1220` | `--bg` |
 | Superficie (cards, paneles) | `#FFFFFF` | `#111A2E` | `--surface` |
 | Sidebar | `#FFFFFF` | `#0E1626` | `--sidebar-bg` |
@@ -31,15 +31,18 @@ Todos los colores de las vistas referencian estas variables. Tema claro en `:roo
 | Borde fuerte (inputs, botones ghost) | `#CBD5E1` | `rgba(255,255,255,0.16)` | `--border-strong` |
 | Texto principal | `#0F172A` | `#EDF2F9` | `--text-1` |
 | Texto secundario | `#475569` | `#A9B8CC` | `--text-2` |
-| Texto terciario (metadatos) | `#64748B` | `#8496AE` | `--text-3` |
+| Texto terciario (metadatos) | `#56657B` | `#8496AE` | `--text-3` |
 | Éxito | `#047857` / soft `rgba(4,120,87,0.09)` | `#34D399` / soft `rgba(52,211,153,0.12)` | `--success`, `--success-soft` |
-| Advertencia | `#B45309` / soft `rgba(180,83,9,0.10)` | `#FBBF24` / soft `rgba(251,191,36,0.12)` | `--warning`, `--warning-soft` |
-| Peligro | `#DC2626` / soft `rgba(220,38,38,0.08)` | `#F87171` / soft `rgba(248,113,113,0.12)` | `--danger`, `--danger-soft` |
+| Advertencia | `#92400E` / soft `rgba(146,64,14,0.10)` | `#FBBF24` / soft `rgba(251,191,36,0.12)` | `--warning`, `--warning-soft` |
+| Peligro | `#B91C1C` / soft `rgba(220,38,38,0.08)` | `#F87171` / soft `rgba(248,113,113,0.12)` | `--danger`, `--danger-soft` |
 
-### Excepciones deliberadas (superficies fijas en ambos temas)
+### Papel fijo del lector PDF
 
-- **Panel de marca del login** (`02-login.html`): gradiente navy `linear-gradient(155deg, #16293F 0%, #1E3A5F 60%, #24466F 100%)`, texto `#F1F5F9` con alphas `0.72`/`0.5`, pill del tenant en `#E8D5A8`. Es superficie institucional, idéntica en claro y oscuro. Única excepción a la regla "sin gradientes".
-- **Hoja de papel del lector PDF** (`09-pdf-reader.html`): papel `#FFFFFF` con tinta `#1F2937`, título `#111827`, metadatos `#9CA3AF`, skeletons `#E5E7EB`/`#D1D5DB`, bloque de código `#F3F4F6`, highlight de selección `rgba(161,98,7,0.22)`, sombra `0 2px 16px rgba(15,23,42,0.18)`. El papel no cambia con el tema.
+La hoja del lector usa tokens `--paper`, `--paper-ink`, `--paper-title`,
+`--paper-muted`, `--paper-code`, `--paper-skeleton`, `--paper-skeleton-strong`,
+`--paper-highlight` y `--paper-shadow`, definidos en `tokens.css` y constantes
+entre temas. No hay colores literales en las vistas. El login usa identidad
+AcademiX global, previo a elegir institución, sin branding por subdominio.
 
 ## Tokens — Tipografía
 
@@ -88,16 +91,17 @@ Todos los colores de las vistas referencian estas variables. Tema claro en `:roo
 ### Layout (medidas implementadas)
 
 - **Sidebar:** 248px (`--sidebar-w`); **header:** 56px (`--header-h`) translúcido con `backdrop-filter: blur(10px)`.
-- **Paneles secundarios:** módulos 264px, detalle de evaluación 400px, asistente IA 360px, rail derecho del dashboard 300px.
-- **Login:** panel de marca 44% del ancho.
-- **Landing/índice:** contenido centrado `max-w-5xl`/`max-w-6xl` (1024–1152px).
+- **Paneles secundarios:** módulos 264px, rail derecho del dashboard 300px.
+- **Login:** formulario centrado de 480px máximo sobre el shell global.
+- **Landing:** contenido centrado `max-w-6xl` (1152px).
+- **Índice:** galería de experiencias admin/no admin dentro del shell compartido, con tarjetas adaptables.
 - **App shell:** `.app` flex a `100vh`, scroll solo en `.content` y paneles.
 
 ## Componentes (clases de `app.css`)
 
 ### Botones
 
-- **`.btn.btn-primary`** — fondo `--primary`, texto `--on-primary`, 13px/600, radio 8px, padding 9px 16px; hover: `--primary-hover` + `translateY(-1px)`. **Uno por vista.**
+- **`.btn.btn-primary`** — fondo `--primary`, texto `--on-primary`, 13px/600, radio 8px, padding 9px 16px; hover: `--primary-hover` + `translateY(-1px)`. **Una acción principal por formulario o sección; confirmar en el diálogo.**
 - **`.btn.btn-ghost`** — superficie con borde `--border-strong`, texto `--text-2`; hover: texto `--text-1`, borde `--text-3`.
 - **`.btn.btn-danger`** — `--danger-soft` + texto `--danger`. Solo acciones destructivas.
 - **`.icon-btn`** — 34×34px, borde hairline, radio 8px; **siempre con `aria-label`**; `.notif-dot` 7px para badge de notificación.
@@ -119,7 +123,7 @@ Todos los colores de las vistas referencian estas variables. Tema claro en `:roo
 - **`.data-table`** — th 12px uppercase `--text-3`, td 13px, separadores hairline, `.row-hover` con `--hover`; sub-fila de comentario en `--muted`.
 - **`.avatar`** — 32px círculo, `--primary-soft` + `--primary-ink` (sólido navy solo en logo).
 - **`.empty-zone` / `.upload-zone`** — dashed `--border-strong`, radio 12px; upload hover → borde `--primary-ink`.
-- **`.modal-backdrop`** — `rgba(15,23,42,0.45)`; `.modal` 440px máx, radio 12px, sombra float. Cierre por botón, click en backdrop y tecla Escape.
+- **`.modal-backdrop`** — `rgba(15,23,42,0.45)`; `.modal` 440px máx, radio 12px, sombra float. Las confirmaciones usan `<dialog>` nativo con `showModal()`: foco inicial en Volver, confinamiento de foco, Escape y retorno al control que abrió el diálogo. El fondo usa `--overlay`.
 
 ### Formularios
 
@@ -133,7 +137,7 @@ Todos los colores de las vistas referencian estas variables. Tema claro en `:roo
 
 ## Iconografía
 
-Lucide (CDN `unpkg`, `data-lucide` + `lucide.createIcons()`), stroke por defecto. Tamaños: 14px (`w-3.5`) en chips y botones compactos, 16px (`w-4`) estándar, 20px (`w-5`) en file-icons e icon-boxes. **Cero emojis como íconos.** Íconos decorativos van junto a texto visible; controles de solo ícono llevan `aria-label`.
+Lucide (CDN `unpkg`, `data-lucide` + `lucide.createIcons()`), stroke por defecto. Tamaños: 14px (`w-3.5`) en chips y botones compactos, 16px (`w-4`) estándar, 18px en controles de módulos/publicación y 20px (`w-5`) en file-icons e icon-boxes. **Cero emojis como íconos.** Íconos decorativos van junto a texto visible; controles de solo ícono llevan `aria-label`.
 
 ## Mecánica de temas
 
@@ -150,7 +154,7 @@ Lucide (CDN `unpkg`, `data-lucide` + `lucide.createIcons()`), stroke por defecto
 | 1 | Superficie | `#FFFFFF` | `#111A2E` | cards, tablas, modal |
 | 2 | Atenuado | `#EEF2F7` | `#1A2540` | chips neutros, tiles, search, tab-group |
 | — | Header | translúcido 0.88 + blur | translúcido 0.88 + blur | barra superior sticky |
-| — | Fijas | panel login navy · papel PDF blanco | idénticas | marca institucional y documento |
+| — | Fijas | papel PDF blanco | idénticas | marca institucional y documento |
 
 ## Do's y Don'ts
 
@@ -167,9 +171,9 @@ Lucide (CDN `unpkg`, `data-lucide` + `lucide.createIcons()`), stroke por defecto
 
 ### Don't
 
-- No hardcodees hex/rgba en vistas — las dos únicas excepciones documentadas son el panel de marca del login y el papel del PDF.
+- No hardcodees hex/rgba en vistas; incluso el papel fijo del PDF usa tokens.
 - No uses emojis como íconos ni mezcles sets de íconos.
-- No agregues gradientes decorativos (única excepción: panel institucional del login).
+- No agregues gradientes decorativos.
 - No inviertas colores para el tema oscuro: usa los tokens dedicados de `[data-theme="dark"]`.
 - No animes entrada de contenido ni uses transiciones sobre 200ms.
 - No pongas texto bajo 12px ni deshabilites el ring de foco.
@@ -189,4 +193,38 @@ Lucide (CDN `unpkg`, `data-lucide` + `lucide.createIcons()`), stroke por defecto
 
 ## Quick Start
 
-Tokens y componentes viven en [`mockups/assets/tokens.css`](./mockups/assets/tokens.css), [`mockups/assets/app.css`](./mockups/assets/app.css) y [`mockups/assets/app.js`](./mockups/assets/app.js). Vistas y mapa vista → historia de usuario en [`mockups/README.md`](./mockups/README.md).
+Tokens y componentes viven en [`mockups/assets/tokens.css`](./mockups/assets/tokens.css), [`mockups/assets/app.css`](./mockups/assets/app.css) y [`mockups/assets/app.js`](./mockups/assets/app.js). Vistas y mapa vista → caso de uso en [`mockups/README.md`](./mockups/README.md).
+
+## Integración en el frontend — Issue #24
+
+El frontend reutiliza copias sincronizadas de tokens y componentes dentro de
+`frontend/src/styles/`, importadas una sola vez desde el layout raíz, tokens antes
+de `app.css`. Conserva las fuentes con `next/font/google` y variables
+`--font-inter` / `--font-eb-garamond`; todas las declaraciones de fuente del CSS
+adaptado usan esas variables. `--modal-backdrop` se mantiene como alias de
+`--overlay`. Los iconos se importan de `lucide-react`, incluidos `CircleCheck`
+y `Circle` para publicación. CDN y `app.js` son mecanismos de los mockups HTML;
+las vistas React usan la integración de Issue #24. La
+[guía del frontend](docs/guides/frontend-styles.md) documenta cómo sincronizarla.
+
+## Mockups del MVP
+
+La [galería](mockups/index.html) y el [inventario por CU](mockups/README.md)
+cubren CU-01–CU-16. Las vistas académicas reutilizan `app.css`; las clases
+`.panel`, `.split`, `.stack`, `.form-grid`, `.notice` y `.actions` componen sus
+layouts sin duplicar el shell. Bajo 760px, el sidebar se convierte en navegación
+superior y los formularios/paneles se apilan. Las tablas conservan scroll horizontal.
+La navegación se organiza por **Admin / No admin**, separadamente del rol académico.
+El docente no admin gestiona su sección; admin gestiona todas las secciones y la
+configuración común. Ambos docentes editan módulos y material compartido del curso.
+El ayudante consulta su sección; el estudiante rinde y consulta resultados propios.
+La identidad muestra rol y alcance; navegar conserva el perfil de demostración.
+
+Cada módulo e ítem usa `.publish-toggle`: Lucide `circle-check` con `--success`
+para publicado, `circle` para sin publicar, texto de estado y `aria-pressed`.
+El `aria-label` indica la acción y el recurso; activar conserva foco. Los estados
+son independientes: ocultar el módulo mantiene los checks de sus ítems, pero
+solo la combinación módulo publicado + ítem publicado da visibilidad estudiantil.
+Los componentes `.module-header`, `.module-tools` y `.module-resource` reutilizan
+los tokens y se apilan en móvil. Véase la [decisión de UI](docs/adr/ui-admin-non-admin-experiences.md)
+para la matriz visual y la dependencia pendiente de permisos en dominio/API.

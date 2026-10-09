@@ -8,9 +8,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<link rel="stylesheet" href="assets/tokens.css"/>
-<link rel="stylesheet" href="assets/app.css"/>
-<script src="assets/app.js"></script>
+<link rel="stylesheet" href="assets/tokens.css?v=3"/>
+<link rel="stylesheet" href="assets/app.css?v=5"/>
+<script src="assets/app.js?v=8"></script>
 <style>
   .viewer { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--muted); }
   .viewer-toolbar {
@@ -24,50 +24,19 @@
   /* Hoja del PDF: papel blanco fijo en ambos temas */
   .pdf-sheet {
     width: 640px; max-width: 100%;
-    background: #FFFFFF; color: #1F2937;
+    background: var(--paper); color: var(--paper-ink);
     border-radius: 4px;
-    box-shadow: 0 2px 16px rgba(15, 23, 42, 0.18);
+    box-shadow: var(--paper-shadow);
     padding: 56px 60px; height: fit-content;
   }
-  .skeleton { height: 9px; border-radius: 4px; background: #E5E7EB; margin-bottom: 10px; }
-  .pdf-highlight { background: rgba(161, 98, 7, 0.22); border-radius: 2px; padding: 0 2px; }
+  .skeleton { height: 9px; border-radius: 4px; background: var(--paper-skeleton); margin-bottom: 10px; }
+  .pdf-highlight { background: var(--paper-highlight); border-radius: 2px; padding: 0 2px; }
 
-  /* Panel IA */
-  .ai-panel {
-    width: 360px; min-width: 360px;
-    border-left: 1px solid var(--border);
-    background: var(--sidebar-bg);
-    display: flex; flex-direction: column; overflow: hidden;
-  }
-  .ai-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
-  .msg-user {
-    align-self: flex-end; max-width: 85%;
-    background: var(--primary); color: var(--on-primary);
-    border-radius: 12px 12px 4px 12px; padding: 10px 13px;
-    font-size: 13px; line-height: 1.5;
-  }
-  .msg-ai {
-    align-self: flex-start; max-width: 92%;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 12px 12px 12px 4px; padding: 12px 14px;
-    font-size: 13px; line-height: 1.6; color: var(--text-2);
-  }
-  .cite-chip {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 1px 8px; border-radius: 999px;
-    background: var(--accent-soft); color: var(--accent);
-    font-size: 11.5px; font-weight: 600; cursor: pointer;
-  }
-  .selection-quote {
-    border-left: 3px solid var(--accent);
-    background: var(--accent-soft);
-    border-radius: 0 8px 8px 0;
-    padding: 8px 12px; margin-bottom: 8px;
-    font-size: 12px; font-style: italic; color: var(--text-2);
-  }
+
 </style>
 </head>
-<body>
+<body data-academic>
+<a class="btn btn-primary skip-link" href="#main-content">Saltar al contenido</a>
 <div class="app">
 
   <!-- SIDEBAR -->
@@ -82,22 +51,19 @@
     <nav class="sidebar-nav">
       <div class="nav-section-label">Principal</div>
       <a class="nav-item" href="03-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
-      <a class="nav-item active" href="04-course-modules.html"><i data-lucide="book-open" class="w-4 h-4"></i> Mis cursos <span class="nav-count">4</span></a>
-      <a class="nav-item" href="05-evaluations.html"><i data-lucide="clipboard-list" class="w-4 h-4"></i> Evaluaciones <span class="nav-count">2</span></a>
-      <a class="nav-item" href="06-grades.html"><i data-lucide="bar-chart-2" class="w-4 h-4"></i> Calificaciones</a>
-      <div class="nav-section-label">Actividad</div>
-      <a class="nav-item" href="03-dashboard.html#anuncios"><i data-lucide="bell" class="w-4 h-4"></i> Anuncios <span class="nav-count">3</span></a>
-      <a class="nav-item" href="03-dashboard.html#calendario"><i data-lucide="calendar" class="w-4 h-4"></i> Calendario</a>
-      <div class="nav-section-label">Sistema</div>
-      <a class="nav-item" href="#"><i data-lucide="settings" class="w-4 h-4"></i> Configuración</a>
-      <a class="nav-item" href="01-landing.html"><i data-lucide="log-out" class="w-4 h-4"></i> Cerrar sesión</a>
+      <a class="nav-item active" href="04-course-modules.html" aria-current="page"><i data-lucide="book-open" class="w-4 h-4"></i> Mis cursos <span class="nav-count">2</span></a>
+      <a class="nav-item" href="05-evaluations.html" data-student-only><i data-lucide="clipboard-list" class="w-4 h-4"></i> Quizzes</a>
+      <a class="nav-item" href="06-grades.html" data-student-only><i data-lucide="bar-chart-2" class="w-4 h-4"></i> Calificaciones</a>
+      <div class="nav-section-label">Contexto</div>
+      <a class="nav-item" href="10-institutions.html">Cambiar institución</a>
+      <a class="nav-item" href="02-login.html"><i data-lucide="log-out" class="w-4 h-4"></i> Cerrar sesión</a>
     </nav>
     <div class="sidebar-bottom">
       <div class="user-row">
-        <div class="avatar">MG</div>
+        <div class="avatar" data-user-initials>MG</div>
         <div>
-          <p class="name">María González</p>
-          <p class="role">Estudiante · UC Chile</p>
+          <p class="name" data-user-name>María González</p>
+          <p class="role" data-user-role>Estudiante · UC Chile</p>
         </div>
       </div>
     </div>
@@ -128,27 +94,27 @@
 
     <div style="flex: 1; display: flex; overflow: hidden;">
 
-      <!-- VISOR (US26) -->
+
       <div class="viewer">
         <div class="viewer-toolbar">
           <div class="flex items-center gap-1.5">
-            <button class="icon-btn" style="width: 28px; height: 28px; border: none;" aria-label="Página anterior"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
-            <span class="text-xs tnum" style="color: var(--text-2)">Página <strong>8</strong> de 24</span>
-            <button class="icon-btn" style="width: 28px; height: 28px; border: none;" aria-label="Página siguiente"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+            <button class="icon-btn" style="width: 28px; height: 28px; border: none;" aria-label="Página anterior" onclick="changePage(-1)"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+            <span class="text-xs tnum" style="color: var(--text-2)">Página <strong id="pdf-page">8</strong> de 24</span>
+            <button class="icon-btn" style="width: 28px; height: 28px; border: none;" aria-label="Página siguiente" onclick="changePage(1)"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
           </div>
           <p class="text-xs font-medium truncate" style="color: var(--text-2); flex: 1; text-align: center;">Semana 5 — Generadores.pdf</p>
           <div class="flex items-center gap-1.5">
-            <button class="icon-btn" style="width: 28px; height: 28px; border: none;" aria-label="Alejar"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
-            <span class="text-xs tnum" style="color: var(--text-2)">100%</span>
-            <button class="icon-btn" style="width: 28px; height: 28px; border: none;" aria-label="Acercar"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
-            <button class="icon-btn" style="width: 28px; height: 28px; border: none;" aria-label="Descargar documento"><i data-lucide="download" class="w-4 h-4"></i></button>
+            <button class="icon-btn" style="width: 28px; height: 28px; border: none;" aria-label="Alejar" onclick="zoomPdf(-10)"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
+            <span class="text-xs tnum" style="color: var(--text-2)" id="pdf-zoom">100%</span>
+            <button class="icon-btn" style="width: 28px; height: 28px; border: none;" aria-label="Acercar" onclick="zoomPdf(10)"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
+            <button class="icon-btn" style="width: 28px; height: 28px; border: none;" aria-label="Descargar documento" disabled title="Archivo de ejemplo; no contiene un PDF binario"><i data-lucide="download" class="w-4 h-4"></i></button>
           </div>
         </div>
 
-        <div class="viewer-body">
-          <div class="pdf-sheet">
-            <p style="font-size: 11px; color: #9CA3AF; margin-bottom: 24px;">IIC2233 · Programación Avanzada · Semana 5</p>
-            <h2 style="font-family: 'EB Garamond', serif; font-size: 26px; font-weight: 600; color: #111827; margin-bottom: 18px;">3. Generadores en Python</h2>
+        <div class="viewer-body" id="main-content">
+          <div class="pdf-sheet" id="pdf-sheet">
+            <p id="pdf-meta" style="font-size: 12px; color: var(--paper-muted); margin-bottom: 24px;">IIC2233 · Programación Avanzada · Semana 5</p>
+            <h2 style="font-family: 'EB Garamond', serif; font-size: 26px; font-weight: 600; color: var(--paper-title); margin-bottom: 18px;">3. Generadores en Python</h2>
             <div class="skeleton" style="width: 100%"></div>
             <div class="skeleton" style="width: 96%"></div>
             <div class="skeleton" style="width: 99%"></div>
@@ -160,10 +126,10 @@
             <div class="skeleton" style="width: 94%"></div>
             <div class="skeleton" style="width: 98%"></div>
             <div class="skeleton" style="width: 71%; margin-bottom: 22px;"></div>
-            <div style="background: #F3F4F6; border-radius: 6px; padding: 14px 16px; margin-bottom: 22px;">
-              <div class="skeleton" style="width: 55%; background: #D1D5DB;"></div>
-              <div class="skeleton" style="width: 70%; background: #D1D5DB;"></div>
-              <div class="skeleton" style="width: 48%; background: #D1D5DB; margin-bottom: 0;"></div>
+            <div style="background: var(--paper-code); border-radius: 6px; padding: 14px 16px; margin-bottom: 22px;">
+              <div class="skeleton" style="width: 55%; background: var(--paper-skeleton-strong);"></div>
+              <div class="skeleton" style="width: 70%; background: var(--paper-skeleton-strong);"></div>
+              <div class="skeleton" style="width: 48%; background: var(--paper-skeleton-strong); margin-bottom: 0;"></div>
             </div>
             <div class="skeleton" style="width: 100%"></div>
             <div class="skeleton" style="width: 97%"></div>
@@ -172,68 +138,12 @@
         </div>
       </div>
 
-      <!-- ASISTENTE IA (US27–US29) -->
-      <div class="ai-panel">
-        <div class="px-4 py-3.5 flex items-center gap-2.5" style="border-bottom: 1px solid var(--border)">
-          <div style="width: 30px; height: 30px; border-radius: 8px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; color: var(--accent); flex-shrink: 0;">
-            <i data-lucide="sparkles" class="w-4 h-4"></i>
-          </div>
-          <div style="flex: 1;">
-            <p class="text-sm font-semibold">Asistente del documento</p>
-            <p class="text-xs" style="color: var(--text-3)">Responde solo con el contenido del PDF</p>
-          </div>
-        </div>
-
-        <div class="ai-messages">
-
-          <!-- Pregunta libre (US27) + cita (US29) -->
-          <div class="msg-user">¿Cuál es la diferencia entre un generador y una lista?</div>
-          <div class="msg-ai">
-            Según el documento, una lista almacena todos sus elementos en memoria al crearse, mientras que un generador produce cada valor bajo demanda mediante <em>lazy evaluation</em>, sin materializar la secuencia completa.
-            <div class="mt-2 flex items-center gap-1.5">
-              <span class="cite-chip"><i data-lucide="quote" style="width: 10px; height: 10px;"></i> p. 8</span>
-              <span class="cite-chip"><i data-lucide="quote" style="width: 10px; height: 10px;"></i> p. 11</span>
-            </div>
-          </div>
-
-          <!-- Explicación de selección (US28) -->
-          <div class="msg-user" style="max-width: 92%;">
-            <p style="font-size: 11.5px; opacity: 0.75; margin-bottom: 4px;">Texto seleccionado · p. 8</p>
-            Explícame esta parte
-          </div>
-          <div class="msg-ai">
-            <div class="selection-quote">"un generador utiliza la sentencia yield para pausar su ejecución…"</div>
-            Significa que la función no corre de principio a fin: al llegar a <code style="font-size: 12px;">yield</code> entrega un valor y queda "congelada". Cuando pides el siguiente valor, retoma exactamente donde quedó, con sus variables intactas.
-            <div class="mt-2">
-              <span class="cite-chip"><i data-lucide="quote" style="width: 10px; height: 10px;"></i> p. 8, sección 3</span>
-            </div>
-          </div>
-
-          <!-- Sin evidencia (US29) -->
-          <div class="msg-user">¿El documento cubre async/await?</div>
-          <div class="msg-ai">
-            <div class="flex items-center gap-2 mb-1.5" style="color: var(--text-3)">
-              <i data-lucide="search-x" class="w-3.5 h-3.5 flex-shrink-0"></i>
-              <span class="text-xs font-semibold" style="letter-spacing: 0.03em;">SIN EVIDENCIA EN EL DOCUMENTO</span>
-            </div>
-            No encontré contenido sobre <code style="font-size: 12px;">async/await</code> en este PDF, así que no puedo respaldar una respuesta. El documento se centra en generadores y expresiones generadoras.
-          </div>
-
-        </div>
-
-        <div class="p-3.5" style="border-top: 1px solid var(--border)">
-          <div class="flex items-center gap-2">
-            <input type="text" class="field" placeholder="Pregunta sobre este documento…" aria-label="Pregunta sobre el documento" style="font-size: 13px; padding: 9px 12px;"/>
-            <button class="btn btn-primary" style="padding: 9px 12px;" aria-label="Enviar pregunta">
-              <i data-lucide="send" class="w-4 h-4"></i>
-            </button>
-          </div>
-          <p class="text-xs mt-2 text-center" style="color: var(--text-3)">Las respuestas citan página o sección cuando hay evidencia.</p>
-        </div>
-      </div>
-
     </div>
   </div>
 </div>
-</body>
+<script>
+let pdfPage=8,pdfZoom=100;
+function changePage(delta){pdfPage=Math.min(24,Math.max(1,pdfPage+delta));document.getElementById('pdf-page').textContent=pdfPage;document.getElementById('pdf-meta').textContent='IIC2233 · Página '+pdfPage+' · Extracto ilustrativo del documento';}
+function zoomPdf(delta){pdfZoom=Math.min(150,Math.max(70,pdfZoom+delta));document.getElementById('pdf-zoom').textContent=pdfZoom+'%';document.getElementById('pdf-sheet').style.fontSize=pdfZoom/100*14+'px';document.getElementById('pdf-sheet').style.width=640*pdfZoom/100+'px';}
+</script></body>
 </html>
