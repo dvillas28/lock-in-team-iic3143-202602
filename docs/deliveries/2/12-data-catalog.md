@@ -42,7 +42,7 @@ y decisiones pendientes se conservan en este documento, fuera del XLSX.
 | institutions | created_at | timestamptz(6) | Sí | — | Fecha de creación. |
 | institutions | updated_at | timestamptz(6) | Sí | — | Fecha de última actualización. |
 | users | id | uuid | Sí | PK | Identidad global resuelta desde JWT `sub`. |
-| users | email | text | Sí | — | Correo de referencia; unicidad se define con proveedor de identidad. Correo de referencia; límite, normalización y unicidad pendientes del proveedor de identidad. |
+| users | email | varchar(254) | Sí | — | Correo de referencia, máximo 254 caracteres; normalización y unicidad pendientes del contrato de autenticación. |
 | users | password_hash | varchar(255) | Sí | — | Hash Argon2id codificado completo para autenticación local; incluye algoritmo y parámetros y salt. Máximo 255 caracteres. La contraseña ingresada admite 8 a 30 caracteres y se valida antes de generar el hash; nunca se almacena ni se expone el secreto original. |
 | users | name | varchar(200) | Sí | — | Nombre visible. |
 | users | active | boolean | Sí | — | Estado global del usuario. |
@@ -71,7 +71,7 @@ y decisiones pendientes se conservan en este documento, fuera del XLSX.
 | enrollments | institution_id | uuid | Sí | FK | Tenant lógico. |
 | enrollments | section_id | uuid | Sí | FK | Sección asociada. |
 | enrollments | user_id | uuid | Sí | FK | Usuario con rol en la sección. |
-| enrollments | role | text | Sí | — | `teacher`, `assistant` o `student`. Dominio cerrado mediante CHECK: teacher, student, assistant. |
+| enrollments | role | varchar(16) | Sí | — | Rol académico: teacher, assistant o student; máximo 16 caracteres y valores restringidos por CHECK. |
 | enrollments | active | boolean | Sí | — | Estado del rol. |
 | enrollments | created_at | timestamptz(6) | Sí | — | Fecha de creación. |
 | course_modules | id | uuid | Sí | PK | Identificador del módulo. |
@@ -84,10 +84,10 @@ y decisiones pendientes se conservan en este documento, fuera del XLSX.
 | materials | institution_id | uuid | Sí | FK | Tenant lógico. |
 | materials | module_id | uuid | Sí | FK | Módulo contenedor. |
 | materials | title | varchar(200) | Sí | — | Título del recurso. |
-| materials | kind | text | Sí | — | `markdown` o `file`. Dominio cerrado mediante CHECK: markdown, file. |
-| materials | markdown_body | text | No | — | Contenido textual cuando `kind = markdown`. Contenido textual de extensión variable; conservar text para Markdown o instrucciones. |
-| materials | storage_key | text | No | — | Clave interna para archivo externo futuro. Clave de extensión variable; proveedor y máximo pendientes. |
-| materials | mime_type | text | No | — | MIME del archivo futuro. Identificador MIME; lista permitida pendiente; no imponer tamaño arbitrario. |
+| materials | kind | varchar(16) | Sí | — | Tipo de material: markdown o file; máximo 16 caracteres y valores restringidos por CHECK. |
+| materials | markdown_body | text | No | — | Contenido Markdown de extensión variable; único campo text del modelo. |
+| materials | storage_key | varchar(1024) | No | — | Clave interna del archivo externo, máximo 1024 caracteres; namespace por institución y validación en bytes según el proveedor futuro. |
+| materials | mime_type | varchar(255) | No | — | Tipo MIME del archivo, máximo 255 caracteres; lista de tipos permitidos pendiente. |
 | materials | size_bytes | bigint | No | — | Tamaño del archivo futuro. Tamaño entero en bytes de 64 bits; evita el límite de integer; máximo de archivo pendiente. |
 | materials | published_at | timestamptz(6) | No | — | Fecha de publicación. |
 | materials | created_by | uuid | Sí | FK | Usuario autor validado por membership institucional. |
@@ -96,10 +96,10 @@ y decisiones pendientes se conservan en este documento, fuera del XLSX.
 | quizzes | course_id | uuid | Sí | FK | Curso evaluado. |
 | quizzes | section_id | uuid | No | FK | Sección específica si el quiz no es de todo el curso. |
 | quizzes | title | varchar(200) | Sí | — | Título del quiz. |
-| quizzes | instructions | text | No | — | Instrucciones visibles. Contenido textual de extensión variable; conservar text para Markdown o instrucciones. |
+| quizzes | instructions | varchar(10000) | No | — | Instrucciones visibles, máximo 10000 caracteres para texto extenso de la evaluación. |
 | quizzes | opens_at | timestamptz(6) | No | — | Inicio de ventana. |
 | quizzes | closes_at | timestamptz(6) | No | — | Cierre de ventana. |
-| quizzes | max_attempts | integer | No | — | Máximo de intentos por estudiante. Contenido textual de extensión variable; conservar text para Markdown o instrucciones. |
+| quizzes | max_attempts | integer | No | — | Máximo de intentos por estudiante; integer positivo y NULL para intentos ilimitados. |
 | quizzes | published_at | timestamptz(6) | No | — | Fecha de publicación. |
 | quizzes | created_by | uuid | Sí | FK | Usuario creador validado por membership institucional. |
 | quizzes | questions | jsonb | Sí | — | Preguntas, puntajes y alternativas anidadas de la pauta. Documento estructurado; campos internos en Contratos JSON; no implica FK internas. |
@@ -110,7 +110,7 @@ y decisiones pendientes se conservan en este documento, fuera del XLSX.
 | quiz_attempts | section_id | uuid | Sí | FK | Sección histórica del estudiante. |
 | quiz_attempts | student_id | uuid | Sí | FK | Estudiante que responde. |
 | quiz_attempts | attempt_number | integer | Sí | — | Número correlativo por quiz y estudiante. Secuencia entera; CHECK > 0 pendiente de cierre. |
-| quiz_attempts | status | text | Sí | — | `in_progress`, `submitted`, `graded` o `cancelled`. Dominio cerrado mediante CHECK: in_progress, submitted, graded, cancelled. |
+| quiz_attempts | status | varchar(16) | Sí | — | Estado del intento: in_progress, submitted, graded o cancelled; máximo 16 caracteres y valores restringidos por CHECK. |
 | quiz_attempts | started_at | timestamptz(6) | Sí | — | Inicio del intento. |
 | quiz_attempts | submitted_at | timestamptz(6) | No | — | Envío del intento. |
 | quiz_attempts | cancelled_at | timestamptz(6) | No | — | Cancelación del intento. |
@@ -139,8 +139,8 @@ y decisiones pendientes se conservan en este documento, fuera del XLSX.
 | audit_events | id | uuid | Sí | PK | Identificador del evento. |
 | audit_events | institution_id | uuid | Sí | FK | Tenant lógico. |
 | audit_events | actor_user_id | uuid | Sí | FK | Usuario que ejecuta la acción. |
-| audit_events | action | text | Sí | — | Acción registrada. Vocabulario de acciones pendiente; longitud variable. |
-| audit_events | resource_type | text | Sí | — | Tipo de recurso afectado. Vocabulario de recursos pendiente; longitud variable. |
+| audit_events | action | varchar(64) | Sí | — | Acción auditada, máximo 64 caracteres; vocabulario de acciones pendiente. |
+| audit_events | resource_type | varchar(32) | Sí | — | Tipo de recurso auditado, máximo 32 caracteres; vocabulario de recursos pendiente. |
 | audit_events | resource_id | uuid | Sí | — | ID del recurso afectado. |
 | audit_events | course_id | uuid | Sí | FK | Curso asociado al evento. |
 | audit_events | section_id | uuid | No | FK | Sección asociada si corresponde. |
@@ -237,12 +237,12 @@ y decisiones pendientes se conservan en este documento, fuera del XLSX.
 
 | Área | Decisión |
 | --- | --- |
-| Identidad | Definir cómo JWT sub resuelve users.id; longitud, normalización y unicidad de email. |
+| Identidad | Definir cómo JWT sub resuelve users.id; normalización y unicidad de email (máximo 254 caracteres acordado). |
 | Cadenas | Definir formato de slug/códigos/term, normalización y prohibición de valores vacíos. |
 | Defaults | Generación de UUID, defaults de active salvo institutions.active=true, fechas y mantenimiento de updated_at. |
 | Referencias | Definir ON DELETE/ON UPDATE sin pérdida de registros académicos o evidencia histórica. |
 | Enteros | Definir base de position y CHECK de attempt_number > 0; semántica de capacity=0. |
-| Material | Excluir markdown_body en archivos, lista MIME, máximo de bytes y proveedor/límite de storage_key. |
+| Material | Excluir markdown_body en archivos, lista MIME, máximo de bytes y proveedor; validar el límite en bytes de storage_key además del máximo de 1024 caracteres. |
 | Intentos | Coherencia de status/fechas/puntajes; puntaje no negativo ni superior al total del quiz. |
 | JSON | Cerrar estructura de answers/changes, tipos de IDs locales y precisión de points compatible con numeric(8,2). |
 | Auditoría | Resolver eventos institucionales sin curso: audit_events.course_id es NOT NULL actualmente. |

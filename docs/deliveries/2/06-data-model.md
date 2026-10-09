@@ -52,7 +52,7 @@ será idempotente y separado de las migraciones.
 Identidades globales. El `sub` del JWT resuelve `users.id`; no se toma una
 identidad desde el body de un request académico.
 
-Campos: `id uuid PK`, `email text`, `password_hash varchar(255)`,
+Campos: `id uuid PK`, `email varchar(254)`, `password_hash varchar(255)`,
 `name varchar(200)`, `active boolean`,
 `created_at timestamptz(6)`, `updated_at timestamptz(6)`.
 
@@ -125,7 +125,7 @@ la FK de Section. Se conserva `institution_id` para scope, índices y FK
 institution-aware.
 
 Campos: `id uuid PK`, `institution_id uuid`, `section_id uuid`,
-`user_id uuid`, `role text`, `active boolean`, `created_at timestamptz(6)`.
+`user_id uuid`, `role varchar(16)`, `active boolean`, `created_at timestamptz(6)`.
 
 Reglas:
 
@@ -159,8 +159,8 @@ Reglas:
 Markdown o metadatos de un archivo externo.
 
 Campos: `id uuid PK`, `institution_id uuid`, `module_id uuid`, `title varchar(200)`,
-`kind text`, `markdown_body text nullable`, `storage_key text nullable`,
-`mime_type text nullable`, `size_bytes bigint nullable`,
+`kind varchar(16)`, `markdown_body text nullable`, `storage_key varchar(1024) nullable`,
+`mime_type varchar(255) nullable`, `size_bytes bigint nullable`,
 `published_at timestamptz(6) nullable`, `created_by uuid`.
 
 Reglas:
@@ -181,7 +181,7 @@ Reglas:
 Quiz de Course o de una Section del mismo Course.
 
 Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`,
-`section_id uuid nullable`, `title varchar(200)`, `instructions text nullable`,
+`section_id uuid nullable`, `title varchar(200)`, `instructions varchar(10000) nullable`,
 `opens_at timestamptz(6) nullable`, `closes_at timestamptz(6) nullable`,
 `max_attempts integer nullable`, `published_at timestamptz(6) nullable`,
 `created_by uuid`, `questions jsonb`.
@@ -210,7 +210,7 @@ Reglas:
 Conserva Institution, Course y Section históricas.
 
 Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`, `quiz_id uuid`,
-`section_id uuid`, `student_id uuid`, `attempt_number integer`, `status text`,
+`section_id uuid`, `student_id uuid`, `attempt_number integer`, `status varchar(16)`,
 `started_at timestamptz(6)`, `submitted_at timestamptz(6) nullable`,
 `cancelled_at timestamptz(6) nullable`, `answers jsonb`,
 `score_points numeric(8,2) nullable`, `score_percent numeric(5,2) nullable`.
@@ -279,7 +279,7 @@ Reglas:
 Historial académico inmutable y tenant-owned.
 
 Campos: `id uuid PK`, `institution_id uuid`, `actor_user_id uuid`,
-`action text`, `resource_type text`, `resource_id uuid`, `course_id uuid`,
+`action varchar(64)`, `resource_type varchar(32)`, `resource_id uuid`, `course_id uuid`,
 `section_id uuid nullable`, `occurred_at timestamptz(6)`, `changes jsonb`.
 
 Reglas:
@@ -350,7 +350,7 @@ erDiagram
 
   USERS {
     uuid id PK "NOT NULL"
-    text email "NOT NULL"
+    varchar(254) email "NOT NULL"
     varchar(255) password_hash "NOT NULL"
     varchar(200) name "NOT NULL"
     boolean active "NOT NULL"
@@ -391,7 +391,7 @@ erDiagram
     uuid institution_id FK "NOT NULL"
     uuid section_id FK "NOT NULL"
     uuid user_id FK "NOT NULL"
-    text role "NOT NULL"
+    varchar(16) role "NOT NULL"
     boolean active "NOT NULL"
     timestamptz(6) created_at "NOT NULL"
   }
@@ -410,10 +410,10 @@ erDiagram
     uuid institution_id FK "NOT NULL"
     uuid module_id FK "NOT NULL"
     varchar(200) title "NOT NULL"
-    text kind "NOT NULL"
+    varchar(16) kind "NOT NULL"
     text markdown_body "NULL"
-    text storage_key "NULL"
-    text mime_type "NULL"
+    varchar(1024) storage_key "NULL"
+    varchar(255) mime_type "NULL"
     bigint size_bytes "NULL"
     timestamptz(6) published_at "NULL"
     uuid created_by FK "NOT NULL"
@@ -425,7 +425,7 @@ erDiagram
     uuid course_id FK "NOT NULL"
     uuid section_id FK "NULL"
     varchar(200) title "NOT NULL"
-    text instructions "NULL"
+    varchar(10000) instructions "NULL"
     timestamptz(6) opens_at "NULL"
     timestamptz(6) closes_at "NULL"
     integer max_attempts "NULL"
@@ -442,7 +442,7 @@ erDiagram
     uuid section_id FK "NOT NULL"
     uuid student_id FK "NOT NULL"
     integer attempt_number "NOT NULL"
-    text status "NOT NULL"
+    varchar(16) status "NOT NULL"
     timestamptz(6) started_at "NOT NULL"
     timestamptz(6) submitted_at "NULL"
     timestamptz(6) cancelled_at "NULL"
@@ -480,8 +480,8 @@ erDiagram
     uuid id PK "NOT NULL"
     uuid institution_id FK "NOT NULL"
     uuid actor_user_id FK "NOT NULL"
-    text action "NOT NULL"
-    text resource_type "NOT NULL"
+    varchar(64) action "NOT NULL"
+    varchar(32) resource_type "NOT NULL"
     uuid resource_id "NOT NULL; referencia polimorfica sin FK"
     uuid course_id FK "NOT NULL"
     uuid section_id FK "NULL"
