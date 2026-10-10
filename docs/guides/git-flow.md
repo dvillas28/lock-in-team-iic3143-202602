@@ -85,3 +85,18 @@ Para reproducirlo local (requiere Docker):
 ```bash
 .github/scripts/trivy.sh fs --ignore-unfixed --severity HIGH,CRITICAL frontend
 ```
+
+## SonarQube en CI
+
+El job `SonarQube (quality gate)` analiza el codigo propio (`backend/src`,
+`frontend/src`) en SonarQube Cloud. El quality gate "Sonar way" evalua solo el
+codigo nuevo del PR: la deuda existente no bloquea, pero el PR no puede
+agregar bugs, vulnerabilidades, hotspots sin revisar ni duplicacion excesiva.
+La configuracion esta en `sonar-project.properties`.
+
+Si un PR falla por SonarQube:
+
+1. Abrir el link al dashboard que deja el job o el comentario del bot en el PR.
+2. Corregir los issues marcados en el codigo nuevo.
+3. Si es un falso positivo o un hotspot seguro, marcarlo en SonarQube
+   ("Accept" o "Safe") con un comentario que diga por que.
