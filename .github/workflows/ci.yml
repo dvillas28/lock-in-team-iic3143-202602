@@ -141,11 +141,29 @@ jobs:
           sarif_file: trivy-image-${{ matrix.app }}.sarif
           category: trivy-image-${{ matrix.app }}
 
+  # Static analysis of our own code; the quality gate only judges the code changed by the PR.
+  sonarqube:
+    name: SonarQube (quality gate)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Full history so SonarQube can attribute issues to new code.
+          fetch-depth: 0
+
+      # The gate blocks PRs only; on main the analysis feeds the dashboard and must not block the deploy.
+      - uses: SonarSource/sonarqube-scan-action@v8
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.qualitygate.wait=${{ github.event_name == 'pull_request' }}
+
   # Single required check: skipped matrix jobs never report their per-app check names.
   result:
     name: CI result
     if: always()
-    needs: [changes, checks, docker]
+    needs: [changes, checks, docker, sonarqube]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any job failed or was cancelled
