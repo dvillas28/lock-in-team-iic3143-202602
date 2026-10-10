@@ -48,12 +48,14 @@ jobs:
         run: gh release create "$TAG" --target "$GITHUB_SHA" --title "$TAG" --generate-notes
 
       # Railway waits for this workflow before deploying, so that deploy picks up the new value.
-      # A release without backend changes is not redeployed; /health keeps the last deployed version.
-      - name: Set backend APP_VERSION in Railway
+      # A service without changes in the release is not redeployed and keeps showing its last deployed version.
+      - name: Set APP_VERSION in Railway
         if: github.ref_name == 'main' && steps.next.outputs.tag != ''
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
           TAG: ${{ steps.next.outputs.tag }}
-        run: >-
-          npx --yes @railway/cli@5.63.1 variable set "APP_VERSION=${TAG#v}"
-          --service backend --environment production --skip-deploys
+        run: |
+          for service in backend frontend; do
+            npx --yes @railway/cli@5.63.1 variable set "APP_VERSION=${TAG#v}" \
+              --service "$service" --environment production --skip-deploys
+          done
