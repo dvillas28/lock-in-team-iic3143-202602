@@ -151,12 +151,13 @@ jobs:
           # Full history so SonarQube can attribute issues to new code.
           fetch-depth: 0
 
+      # The gate blocks PRs only; on main the analysis feeds the dashboard and must not block the deploy.
       - uses: SonarSource/sonarqube-scan-action@v8
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.qualitygate.wait=true
+            -Dsonar.qualitygate.wait=${{ github.event_name == 'pull_request' }}
 
   # Single required check: skipped matrix jobs never report their per-app check names.
   result:

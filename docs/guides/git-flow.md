@@ -94,6 +94,10 @@ codigo nuevo del PR: la deuda existente no bloquea, pero el PR no puede
 agregar bugs, vulnerabilidades, hotspots sin revisar ni duplicacion excesiva.
 La configuracion esta en `sonar-project.properties`.
 
+El gate solo bloquea en los PRs. En `main` el analisis corre igual y alimenta
+el dashboard, pero no espera el gate: un problema de calidad que ya paso
+revision no debe bloquear el deploy a produccion.
+
 Si un PR falla por SonarQube:
 
 1. Abrir el link al dashboard que deja el job o el comentario del bot en el PR.
