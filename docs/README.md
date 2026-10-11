@@ -36,6 +36,7 @@ plataforma de despliegue.
 - [CodeGraph](guides/codegraph-flow.md)
 - [Git Flow](guides/git-flow.md)
 - [Skills de agentes](guides/agent-skills.md)
+- [Tablero y métricas de avance](guides/board-metrics.md)
 
 ## Documentación histórica
 
