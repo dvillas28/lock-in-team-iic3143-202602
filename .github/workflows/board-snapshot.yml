@@ -1,0 +1,56 @@
+name: Board snapshot
+
+on:
+  # 02:00 UTC is 23:00 in Chile (UTC-3), so the snapshot closes the local day.
+  # Scheduled workflows only run from the default branch.
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: board-snapshot
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    name: Save board snapshot to the metrics branch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # `metrics` holds only data, so it is an orphan branch outside the PR flow.
+      - name: Check out the metrics branch
+        run: |
+          if git ls-remote --exit-code --heads origin metrics >/dev/null; then
+            git fetch --depth=1 origin metrics:metrics
+            git worktree add metrics-branch metrics
+          else
+            git worktree add --orphan -b metrics metrics-branch
+          fi
+
+      - name: Export the board
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_READ_TOKEN }}
+        run: |
+          date=$(TZ=America/Santiago date +%F)
+          mkdir -p metrics-branch/snapshots
+          .github/scripts/board-snapshot.sh > "metrics-branch/snapshots/$date.csv"
+          echo "Snapshot: snapshots/$date.csv ($(($(wc -l < "metrics-branch/snapshots/$date.csv") - 1)) cards)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Refresh the metrics report
+        run: |
+          node scripts/board-metrics.mjs metrics-branch/snapshots --csv metrics-branch/derived > metrics-branch/README.md
+          cat metrics-branch/README.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit and push
+        working-directory: metrics-branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "chore(metrics): board snapshot $(TZ=America/Santiago date +%F)"
+          git push origin metrics

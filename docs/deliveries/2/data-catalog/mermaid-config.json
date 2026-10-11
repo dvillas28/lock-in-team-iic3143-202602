@@ -1,0 +1,12 @@
+{
+  "theme": "neutral",
+  "er": {
+    "layoutDirection": "LR",
+    "minEntityWidth": 260,
+    "entityPadding": 15,
+    "fontSize": 15
+  },
+  "themeVariables": {
+    "fontFamily": "Arial, sans-serif"
+  }
+}
