@@ -9,7 +9,7 @@ test("GET /health response reports a healthy API", () => {
   const response = controller.getHealth();
 
   assert.equal(response.status, "ok");
-  assert.equal(response.version, "0.1.0");
+  assert.equal(response.version, "dev");
   assert.equal(response.commit, null);
   assert.equal(new Date(response.deployedAt).toISOString(), response.deployedAt);
   assert.equal(new Date(response.timestamp).toISOString(), response.timestamp);
