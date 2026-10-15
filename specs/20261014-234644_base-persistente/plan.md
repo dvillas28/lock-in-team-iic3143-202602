@@ -121,4 +121,3 @@ la imagen y crear credenciales válidas; el bootstrap no añade un servicio.
   sin parámetros que usa exclusivamente 200/503.
 - Sin implementación, migraciones ejecutadas, provisión Railway ni pruebas de
   integración todavía; su evidencia es requisito de cierre, no de este diseño.
-

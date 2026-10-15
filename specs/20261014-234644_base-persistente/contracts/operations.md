@@ -92,4 +92,3 @@ Comparar identidades/cantidades/constraints y probar readiness antes de cutover.
 No restaurar encima de la fuente ni usar down como estrategia de recuperación.
 Verificar snapshots/PITR/retención del entorno real; registrar RPO/RTO medidos y
 brechas, no declarar capacidad habilitada solo porque Railway la documenta.
-

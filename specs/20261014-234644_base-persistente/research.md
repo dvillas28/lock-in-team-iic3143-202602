@@ -91,4 +91,3 @@ Fuentes: [pg_dump](https://www.postgresql.org/docs/17/app-pgdump.html),
 - AuditEvent necesita curso; bootstrap deja log operativo, no auditoría ficticia.
 - Datos demo no implican docente/estudiante: Enrollment corresponde a cursos-roles.
 - El plan usa cinco usuarios/seis memberships; detalle en el contrato demo.
-

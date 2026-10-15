@@ -108,4 +108,3 @@ Ensayar dump/restore completo a DB vacía separada según
 Verificar snapshots/PITR reales y registrar retención y tiempos medidos.
 Restauración/cutover no reemplaza el requisito de compatibilidad con app anterior.
 No declarar feature completada hasta pasar matriz local, CI y evidencia Railway.
-

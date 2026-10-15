@@ -87,4 +87,3 @@ destructiva. Solo entornos de test descartables pueden recrearse íntegramente.
 Cambios siguientes son aditivos y preservan lectura de la versión anterior.
 Actualizaciones futuras de registros deben fijar updated_at explícitamente;
 no agregar triggers de auditoría o de timestamps que hoy no se usan.
-

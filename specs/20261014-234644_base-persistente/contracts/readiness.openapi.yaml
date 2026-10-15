@@ -45,4 +45,3 @@ paths:
                   status:
                     type: string
                     enum: [unavailable]
-

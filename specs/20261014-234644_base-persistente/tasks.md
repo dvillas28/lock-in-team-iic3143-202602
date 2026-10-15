@@ -113,4 +113,3 @@ T001–T002 → T003–T004 → US1 (T005–T016) → US2 (T017–T024)
 3. Integrar CI, documentación y validaciones locales antes de Railway.
 4. Cerrar solo con evidencia de ambos entornos y recuperación; fuera de alcance:
    login, permisos académicos, AuditEvent de curso, ORM, RLS y storage.
-

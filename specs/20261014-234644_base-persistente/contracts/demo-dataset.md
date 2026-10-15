@@ -68,4 +68,3 @@ No imprimir contraseñas, hashes, emails o SQL con parámetros, incluso en error
 - Verificar PHC mediante argon2.verify sin registrar hash ni credencial.
 - Usuario inactivo y membership inactiva siguen persistidos; no inventar
   pruebas HTTP 401/403/404 antes de implementar autenticación.
-

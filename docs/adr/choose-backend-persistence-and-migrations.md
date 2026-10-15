@@ -46,4 +46,3 @@ Una dependencia menor no elimina la obligación de verificar sus actualizaciones
 No se cambia el [ADR multi-tenant](adopt-shared-postgresql-multitenancy.md).
 [Investigación y fuentes](../../specs/20261014-234644_base-persistente/research.md)
 justifican versiones, transacciones y operación.
-
