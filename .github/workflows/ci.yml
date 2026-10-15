@@ -16,6 +16,24 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  documentation:
+    name: Documentation length
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Check authored documents in this change
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          python3 .github/scripts/check-doc-length.py --self-test
+          if [ -n "$BASE_SHA" ] && [ "$BASE_SHA" != "0000000000000000000000000000000000000000" ]; then
+            python3 .github/scripts/check-doc-length.py --base "$BASE_SHA"
+          else
+            python3 .github/scripts/check-doc-length.py --base HEAD~1
+          fi
+
   changes:
     name: Detect changes
     runs-on: ubuntu-latest
@@ -163,7 +181,7 @@ jobs:
   result:
     name: CI result
     if: always()
-    needs: [changes, checks, docker, sonarqube]
+    needs: [documentation, changes, checks, docker, sonarqube]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any job failed or was cancelled

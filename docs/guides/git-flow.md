@@ -36,7 +36,7 @@ docs/update-roadmap
 
 ```bash
 git switch -c feat/course-sections
-export SPECIFY_FEATURE_DIRECTORY=specs/<timestamp>-<short-name>
+export SPECIFY_FEATURE_DIRECTORY=specs/<timestamp>_<descripcion-mision>
 pnpm install
 git status
 git push -u origin HEAD
