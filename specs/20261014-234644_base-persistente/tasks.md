@@ -5,7 +5,7 @@
 **Input**: [spec](spec.md), [plan](plan.md), [research](research.md), [modelo](data-model.md),
 [operación](contracts/operations.md), [demo](contracts/demo-dataset.md),
 [readiness](contracts/readiness.openapi.yaml) y [quickstart](quickstart.md).
-**Estado**: T001–T024 implementadas y verificadas localmente; T025–T030 pendientes.
+**Estado**: T001–T025 implementadas; pruebas verificadas localmente; T026–T030 pendientes.
 **Evidencia**: [validación local](../../docs/backend/base-persistente-validation.md); spec completo aún abierto.
 **Poda acordada**: demo manual sin bandera; sin introspección de constraints en runtime.
 **Tests**: requeridos por spec/constitución; escribir pruebas antes del comportamiento.
@@ -75,7 +75,7 @@ una base operada conserva cambios. No añadir JWT, roles ni tests HTTP académic
 
 ## Phase 5: Integration and delivery
 
-- [ ] T025 [P] Agregar PostgreSQL 17 y ejecución test:integration con URL exclusiva de test en `.github/workflows/ci.yml`; conservar lint/tests, Docker, Trivy, SonarQube y CI result; conectar cobertura backend real sin bajar el umbral, incluyendo el nuevo job si se crea uno (FR-005/006).
+- [X] T025 [P] Agregar PostgreSQL 17 y ejecución test:coverage (unitarias + integración) con URL exclusiva de test en `.github/workflows/ci.yml`; conservar lint/tests, Docker, Trivy, SonarQube y CI result; conectar cobertura backend real sin bajar el umbral, incluyendo el nuevo job si se crea uno (FR-005/006).
 - [ ] T026 [P] Escribir `docs/guides/backend-persistence.md` (<150 líneas) con arranque, comandos compilados, env, seed opt-in, TLS, rollback de app y recuperación; enlazarlo desde `README.md` respetando límite documental (FR-003/006/007).
 - [ ] T027 Ejecutar quickstart local, lint/test/test:integration, build Docker, lint OpenAPI y longitud documental; reconciliar instrucciones con comandos reales en `specs/20261014-234644_base-persistente/quickstart.md` y registrar evidencia en `docs/backend/base-persistente-validation.md` (FR-006, SC-001/002/003 local).
 - [ ] T028 Verificar checks remotos del cambio y compatibilidad de la versión anterior con esquema aditivo; registrar ejecución/commit y resultado sin afirmar éxito de checks pendientes en `docs/backend/base-persistente-validation.md` (FR-003/006).

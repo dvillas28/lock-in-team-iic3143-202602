@@ -2,7 +2,7 @@
 
 Fecha: 2026-10-15. Alcance: T001–T024 de
 [base-persistente](../../specs/20261014-234644_base-persistente/tasks.md).
-No cierra el spec. T025–T030 permanecen pendientes.
+No cierra el spec. T026–T030 permanecen pendientes; T025 implementada en esta actualización.
 
 ## Versión y cambios comprobados
 
@@ -100,10 +100,29 @@ inexistente; no se ensayó un PostgreSQL público con cadena CA válida.
 El último análisis remoto anterior a esta poda falló por cobertura nueva 65,6%
 frente a 80% en Sonar. Sus logs importaron cobertura frontend, sin reporte backend;
 la ejecución local de tests no sustituye ese reporte ni el resultado remoto nuevo.
-T025 sigue pendiente: PostgreSQL 17/integración en CI y cobertura backend conectada.
+La corrida 38793330514 (35b4337) volvió a fallar por cobertura 69,3% <80%.
+T025 incorpora PostgreSQL 17 aislado, unitarias/integración y LCOV backend en CI.
 No se modifica el umbral ni se excluye código productivo para aprobarlo.
 
 Faltan T026–T030: guía operativa, cierre formal de checks/compatibilidad anterior,
 instalación/reinicio Railway y dump/restore aislado, snapshots/PITR/retención,
 RPO/RTO medidos. No se despliega ni modifica infraestructura remota en esta pasada.
 No se declara satisfecho SC-003 Railway ni recuperación del spec completo.
+
+## T025: integración y cobertura en CI
+
+- test:coverage compila una vez y ejecuta las 14 pruebas secuencialmente.
+- c8 12.0.0 es dependencia de desarrollo; captura procesos hijos y source maps.
+  No cambia código productivo ni dependencias de la imagen final.
+- PostgreSQL 17 local nuevo: 14/14 OK (~38,2 s); líneas 98,4%, ramas 91,66%.
+- LCOV contiene los siete TypeScript originales, incluidos main, migrate y seed.
+- Job backend-coverage usa servicio PostgreSQL 17 descartable y DB academix_test;
+  transporte local del runner sin credenciales productivas. URL enmascarada.
+- Sonar espera ese job y descarga solo lcov.info. Se conserva el reporte frontend;
+  CI result depende también de integración. No se baja el umbral ni se excluye código.
+- Lint, audit y sintaxis/dependencias del workflow verificados localmente.
+- Stack actualizado sobre upstream/dev; conflicto de workflow resuelto conservando
+  cobertura frontend y backend. Lint/build completos y 20 tests frontend OK.
+  Build inicial tras rebase pidió restaurar dependencias frontend del lockfile;
+  install --frozen-lockfile y la repetición pasaron sin cambiar ese lockfile.
+- Resultado remoto del nuevo commit: pendiente de ejecución; ver T028.

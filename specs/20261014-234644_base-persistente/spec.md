@@ -3,7 +3,7 @@
 **Feature Branch**: `feat/base-persistente` (propuesta)
 **Feature Directory**: `specs/20261014-234644_base-persistente`
 **Created**: 2026-10-14
-**Status**: US1/US2 implementadas; cierre de integración/operación pendiente (T025–T030).
+**Status**: US1/US2 implementadas; CI implementada; cierre operativo pendiente (T026–T030).
 **Input**: Backend MVP de Entrega 2: Base persistente y datos demo.
 
 ## User Scenarios & Testing *(mandatory)*

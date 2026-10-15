@@ -1,6 +1,6 @@
 # Contract: Operación de persistencia
 
-Estado: comandos US1/US2 implementados; CI, Railway y recuperación pendientes (T025–T030).
+Estado: comandos US1/US2 implementados; CI implementada; Railway y recuperación pendientes (T026–T030).
 Operador autorizado mediante acceso al entorno/CLI; ninguna ruta pública da DDL,
 seed o modificación de instituciones/usuarios/memberships.
 

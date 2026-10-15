@@ -1,7 +1,7 @@
 # Implementation Plan: Base persistente y datos demo
 
 **Branch**: `feat/base-persistente` | **Date**: 2026-10-15 | **Spec**: [spec.md](spec.md)
-**Status**: US1/US2 implementadas; T025–T030 pendientes. [Evidencia local](../../docs/backend/base-persistente-validation.md).
+**Status**: US1/US2 y T025 implementadas; T026–T030 pendientes. [Evidencia local](../../docs/backend/base-persistente-validation.md).
 
 ## Summary
 
@@ -19,7 +19,7 @@ esa base, comprobable con fixtures sin depender de autenticación todavía.
 | Dependencias nuevas | pg 8.23.1, node-pg-migrate 9.0.0, argon2 0.45.1; @types/pg en desarrollo |
 | Persistencia | PostgreSQL 17, schema public; una URL; Pool HTTP y Client por CLI |
 | Migraciones | SQL versionado, runner compilado, historia pgmigrations |
-| Pruebas | node:test y assert existentes; integración real contra PostgreSQL 17 |
+| Pruebas | node:test/assert; integración PostgreSQL 17 y c8 12.0.0 solo en desarrollo |
 | Plataforma | Docker Compose y Railway con la imagen Node 24 Alpine existente |
 | Tipo de proyecto | Monolito modular NestJS + frontend Next.js existente |
 | Objetivos | Arranque sin DB falla en ≤30 s; /ready responde en ≤5 s incluso con fallo |
@@ -59,11 +59,11 @@ Evaluación inicial y posterior al diseño: PASS para esta misión.
 - [contracts/readiness.openapi.yaml](contracts/readiness.openapi.yaml): nuevo contrato /ready.
 - [quickstart.md](quickstart.md): validación después de implementar.
 - [ADR](../../docs/adr/choose-backend-persistence-and-migrations.md): decisión duradera.
-- [tasks.md](tasks.md): T001–T024 implementadas; integración y cierre pendientes.
+- [tasks.md](tasks.md): T001–T024 implementadas; CI implementada; cierre operativo pendiente.
 
 ### Source Code (repository root)
 
-Estructura de US1/US2; la modificación de CI corresponde a T025 pendiente.
+Estructura de US1/US2; CI de integración y cobertura implementada en T025.
 
 ```text
 backend/
@@ -99,8 +99,9 @@ Integración usa una DB exclusiva de test, sin requerir DB para los tests actual
 2. US2: CLI seed manual, dataset estable, rollback e idempotencia concurrente.
 3. Integración: Compose, pre-deploy Railway, recuperación y evidencias.
 4. Mantener /health y su contrato/consumidores; /ready no retorna metadatos.
-5. T025 agregará PostgreSQL 17 y test:integration a CI junto a checks existentes;
-   datos/contraseñas se generan dentro del test, sin secretos productivos.
+5. CI ejecuta test:coverage con PostgreSQL 17 efímero y TEST_DATABASE_URL exclusiva;
+   c8 12.0.0 solo en desarrollo incluye procesos hijos y remapea a TypeScript.
+   Sonar descarga LCOV por artifact; conserva cobertura frontend y umbral de 80%.
 6. Validar imagen final: migrador, SQL y Argon2id funcionan sin npm/pnpm.
 
 | Requisitos | Validación exigida |
@@ -125,4 +126,4 @@ la imagen y crear credenciales válidas; el seed no añade un servicio.
 - Contrato OpenAPI válido; warning esperado por no declarar 4xx en una sonda
   sin parámetros que usa exclusivamente 200/503.
 - El diseño inicial no ejecutó implementación ni provisión. US1/US2 ahora cuentan
-  con evidencia local; Railway, CI y recuperación siguen pendientes en T025–T030.
+  con evidencia local; Railway y recuperación siguen pendientes en T026–T030.

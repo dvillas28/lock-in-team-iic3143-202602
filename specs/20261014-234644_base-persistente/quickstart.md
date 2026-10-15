@@ -1,6 +1,6 @@
 # Quickstart: validar base persistente
 
-Implementados US1/US2 (T001–T024). CI y cierre remoto/recuperación siguen pendientes.
+Implementados US1/US2 (T001–T024). CI implementada en T025; cierre remoto/recuperación pendiente.
 [Contratos](contracts/operations.md) · [Evidencia local](../../docs/backend/base-persistente-validation.md).
 Nunca validar con una base de desarrollo operada o producción.
 
@@ -77,7 +77,9 @@ No hay fallback a `DATABASE_URL`. Configuración ausente/insegura falla antes de
 limpiar. La suite compila y ejecuta secuencialmente `test/integration/*.test.mjs`.
 Genera credenciales aleatorias y compara datos sin imprimirlos.
 No ejecutar otro build del backend mientras corre la suite: ambos usan `dist`.
-CI todavía no ejecuta integración: se agrega en T025.
+CI ejecuta unitarias e integración con PostgreSQL 17 descartable. Para reproducir
+el reporte LCOV con source maps y procesos hijos: `pnpm --dir backend test:coverage`.
+Requiere la misma TEST_DATABASE_URL exclusiva; incluye los siete archivos productivos.
 
 ```bash
 pnpm lint
@@ -127,7 +129,7 @@ No se admite deshabilitar validación de certificados ni opciones URL arbitraria
 La URL fija sslmode explícitamente; PGSSLMODE no la sustituye. no-verify y
 NODE_TLS_REJECT_UNAUTHORIZED=0 se rechazan incluso en el entorno efectivo del proceso.
 
-T025–T030 permanecen pendientes: CI, guía operativa, cierre de checks,
+T026–T030 permanecen pendientes: guía operativa, cierre de checks,
 compatibilidad con app anterior, evidencia Railway y recuperación completa.
 Seguir [operación](contracts/operations.md#recuperación) para dump/restore aislado,
 snapshots/PITR/retención y RPO/RTO reales cuando se autorice el cierre operativo.
