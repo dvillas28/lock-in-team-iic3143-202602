@@ -38,7 +38,7 @@ Como equipo, dispongo de UC y UTFSM con identidades y pertenencias estables.
 - Probar colisiones de identidad, relaciones institucionales inválidas, entrada inválida, operación repetida y fallo antes de confirmar: sin exposición ni cambios parciales.
 - Verificar concurrencia de migraciones/seed y conservación de identidades y memberships, incluidas pertenencias previamente revocadas.
 - Rechazar configuraciones que desactiven validación TLS, incluidas variables de entorno. Las pruebas deben observar la política efectiva del cliente.
-- Con conexión válida, flag/contraseñas inválidos no intentan conectar; repetir sobre demo existente conserva todos los registros. Los fallos de pruebas tampoco imprimen datos sensibles.
+- Con conexión válida, contraseñas inválidas no intentan conectar; repetir sobre demo existente conserva todos los registros. Los fallos de pruebas tampoco imprimen datos sensibles.
 
 ## Requirements *(mandatory)*
 
@@ -46,7 +46,7 @@ Como equipo, dispongo de UC y UTFSM con identidades y pertenencias estables.
 
 - **FR-001**: Persistir Institution, User global e InstitutionMembership; una identidad puede pertenecer a varias instituciones sin duplicarse.
 - **FR-002**: Mantener slug globalmente único y una pertenencia estable por institución/persona; la membership no otorga roles académicos.
-- **FR-003**: Separar migraciones de esquema/datos obligatorios del seed demo opcional; fallos no dejan estados parciales y su repetición no duplica cambios.
+- **FR-003**: Separar migraciones de esquema/datos obligatorios del seed demo opcional y manual; fallos no dejan estados parciales y su repetición no duplica cambios.
 - **FR-004**: Preparar memberships activas/inactivas y usuario multiinstitución; recibir credenciales desde el entorno, sin valores versionados.
 - **FR-005**: Rechazar relaciones institucionales inválidas y configuraciones que desactiven validación de certificados TLS; conservar datos existentes ante fallos de preparación.
 - **FR-006**: Documentar instalación local/desplegada, recuperación del conjunto compartido y compatibilidad de cambios con la versión anterior.

@@ -5,8 +5,8 @@
     summary: Confirmar disponibilidad de la persistencia
     description: >
       Público, sin datos institucionales ni credenciales. Responde en un máximo
-      de cinco segundos. Comprueba una conexión con la estructura mínima
-      requerida; no ejecuta migraciones ni seed.
+      de cinco segundos. Comprueba tablas y columnas requeridas sin leer filas; no inspecciona
+      tipos, defaults, índices ni constraints ni ejecuta migraciones o seed.
     security: []
     responses:
       '200':

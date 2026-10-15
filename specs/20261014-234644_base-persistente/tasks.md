@@ -7,6 +7,7 @@
 [readiness](contracts/readiness.openapi.yaml) y [quickstart](quickstart.md).
 **Estado**: T001–T024 implementadas y verificadas localmente; T025–T030 pendientes.
 **Evidencia**: [validación local](../../docs/backend/base-persistente-validation.md); spec completo aún abierto.
+**Poda acordada**: demo manual sin bandera; sin introspección de constraints en runtime.
 **Tests**: requeridos por spec/constitución; escribir pruebas antes del comportamiento.
 **Responsables**: mantener asignaciones del backlog; no reasignar por estas tareas.
 
@@ -36,10 +37,10 @@ reiniciar y comprobar IDs/relaciones; arrancar sin DB falla sin escuchar HTTP.
 ### Implementation
 
 - [X] T007 [US1] Crear `backend/migrations/20261015000100_institutional-foundation.sql` con Institution/User/Membership según modelo, NOT NULL, límites/checks, timestamps, unicidades/FK RESTRICT e índice acordado; no agregar email único, tablas académicas o down destructivo (FR-001/002/005).
-- [X] T008 [US1] Implementar `backend/src/platform/database/migrate.ts`: runner v9, public/pgmigrations, up transaccional con orden/bloqueo, SQL localizado desde archivo compilado, timeouts y salida/log sanitizados del contrato; exponer db:migrate en `backend/package.json` (FR-003/006/007).
-- [X] T009 [US1] Implementar `backend/src/platform/database/database.service.ts` y `backend/src/platform/database/database.module.ts`: compartir mediante DatabaseService un único Pool máximo 5, conexión/cola y consulta 2 s, validación de URL/TLS/esquema mínimo con política TLS explícita, errores sanitizados y cierre; sin migraciones en hooks HTTP (FR-001/005/006).
-- [X] T010 [US1] Integrar DatabaseModule y controladores en `backend/src/app.module.ts` sin módulo intermedio; en `backend/src/main.ts` habilitar shutdown y fallo acotado antes de listen, sin imprimir conexión ni secretos (FR-005/006).
-- [X] T011 [US1] Implementar `backend/src/platform/health/readiness.controller.ts` y registrarlo en `backend/src/app.module.ts`: /ready público valida conexión/estructura y devuelve solo status ok/unavailable; conservar `backend/src/platform/health/health.controller.ts` (FR-005/006).
+- [X] T008 [US1] Implementar `backend/src/commands/migrate.ts`: runner v9, public/pgmigrations, up transaccional con orden/bloqueo, SQL localizado desde archivo compilado, timeouts y salida/log sanitizados del contrato; exponer db:migrate en `backend/package.json` (FR-003/006/007).
+- [X] T009 [US1] Implementar `backend/src/database/database.service.ts`: compartir mediante DatabaseService un único Pool máximo 5, conexión/cola y consulta 2 s, validación de URL/TLS y tablas/columnas mínimas con política TLS explícita, errores sanitizados y cierre; sin migraciones en hooks HTTP (FR-001/005/006).
+- [X] T010 [US1] Registrar DatabaseService y HealthController en `backend/src/app.module.ts` sin módulo intermedio; en `backend/src/main.ts` habilitar shutdown y fallo acotado antes de listen, sin imprimir conexión ni secretos (FR-005/006).
+- [X] T011 [US1] Concentrar /health y /ready en `backend/src/health/health.controller.ts`, registrado en `backend/src/app.module.ts`: /ready valida tablas/columnas con consulta sin filas y devuelve solo status ok/unavailable; conservar /health (FR-005/006).
 - [X] T012 [US1] Actualizar `backend/Dockerfile`: incluir SQL en /app/migrations y dependencias productivas; mantener usuario no privilegiado y ejecución con node sin npm/pnpm; verificar CLI de migración desde imagen (FR-003/006).
 - [X] T013 [US1] Ajustar `docker-compose.yml` para esperar PostgreSQL healthy, ejecutar migración antes de exec HTTP y sondear /ready antes de iniciar frontend; preservar volumen y no ejecutar seed todavía (FR-003/006).
 - [X] T014 [US1] Configurar preDeployCommand de migración compilada y healthcheckPath /ready en `backend/railway.json`, conservando builder/PORT/timeouts; no ejecutar seed en cada deploy (FR-003/006).
@@ -57,15 +58,15 @@ IDs, cantidades, hashes, estados y timestamps sin imprimir sus valores sensibles
 
 ### Verification
 
-- [X] T017 [P] [US2] Escribir `backend/test/integration/seed.test.mjs`: opt-in ausente/false, flag inválido, cinco contraseñas obligatorias y límites Unicode con URL válida/cero conexiones y repetición sobre demo existente, manifiesto 2/5/6, hash/verify, repetición/concurrencia, colisión UUID/email, rollback intermedio y preservación de nombre/hash/estado/timestamps; comprobar salida, logs y assertions fallidas sanitizados (FR-003/004/005/007, SC-001/002).
+- [X] T017 [P] [US2] Escribir `backend/test/integration/seed.test.mjs`: carga solo manual, cinco contraseñas obligatorias y límites Unicode con URL válida/cero conexiones y repetición sobre demo existente, manifiesto 2/5/6, hash/verify, repetición/concurrencia, colisión UUID/email, rollback intermedio y preservación de nombre/hash/estado/timestamps; comprobar salida, logs y assertions fallidas sanitizados (FR-003/004/005/007, SC-001/002).
 
 ### Implementation
 
-- [X] T018 [P] [US2] Definir en `backend/src/platform/database/seed.ts` el dataset con slugs, nombres, cinco UUID/email .example y seis memberships exactamente como contrato demo; sin contraseñas, roles académicos ni filas futuras (FR-001/004).
-- [X] T019 [US2] Implementar frontera CLI en `backend/src/platform/database/seed.ts`: omitir sin conectar si demo no habilitada, validar cinco secretos antes de escribir, exit 0/1 y categorías/resúmenes sanitizados; nunca exponer ruta pública (FR-004/007).
-- [X] T020 [US2] Completar transacción de `backend/src/platform/database/seed.ts`: advisory xact lock, resolver slug/UUID/pareja, validar colisiones, insertar solo faltantes y producir PHC Argon2id solo para usuario nuevo; rollback/cierre del Client y timeouts según contratos, sin UPDATE de existentes (FR-001/002/003/004/005, SC-001/002).
-- [X] T021 [US2] Agregar db:seed en `backend/package.json` y variables DEMO_* vacías con DEMO_SEED_ENABLED=false en `.env.example`; documentar parámetros de Argon2id del research sin introducir autenticación (FR-004/007).
-- [X] T022 [US2] Extender `docker-compose.yml` a migración → seed opt-in → exec HTTP y pasar variables demo explícitamente; ausencia de demo es no-op y fallo de preparación impide iniciar HTTP (FR-003/004/006).
+- [X] T018 [P] [US2] Definir en `backend/src/seeds/demo.ts` el dataset con slugs, nombres, cinco UUID/email .example y seis memberships exactamente como contrato demo; sin contraseñas, roles académicos ni filas futuras (FR-001/004).
+- [X] T019 [US2] Implementar frontera CLI en `backend/src/seeds/demo.ts`: ejecutar solo manualmente, validar cinco secretos antes de conectar/escribir, exit 0/1 y categorías/resúmenes sanitizados; nunca exponer ruta pública (FR-004/007).
+- [X] T020 [US2] Completar transacción de `backend/src/seeds/demo.ts`: advisory xact lock, resolver slug/UUID/pareja, validar colisiones, insertar solo faltantes y producir PHC Argon2id solo para usuario nuevo; rollback/cierre del Client y timeouts según contratos, sin UPDATE de existentes (FR-001/002/003/004/005, SC-001/002).
+- [X] T021 [US2] Agregar db:seed en `backend/package.json` y variables DEMO_* vacías en `.env.example`; documentar parámetros de Argon2id del research sin introducir autenticación (FR-004/007).
+- [X] T022 [US2] Mantener `docker-compose.yml` con migración → exec HTTP y pasar variables demo para db:seed manual; el arranque nunca carga demo (FR-003/004/006).
 - [X] T023 [US2] Verificar imagen de `backend/Dockerfile` contra DB de test: ejecutar ambos CLI y hash/verify Argon2id en Alpine sin gestores de paquetes; dejar comandos reproducibles en `specs/20261014-234644_base-persistente/quickstart.md` y resultados sanitizados en `docs/backend/base-persistente-validation.md` (FR-004/006).
 - [X] T024 [US2] Ejecutar T017 y demo local repetida/concurrente, incluyendo revocación previa y cambio de variables de contraseña; registrar resultado sin valores secretos en `docs/backend/base-persistente-validation.md` (FR-003/004/005/007, SC-001/002).
 
@@ -74,7 +75,7 @@ una base operada conserva cambios. No añadir JWT, roles ni tests HTTP académic
 
 ## Phase 5: Integration and delivery
 
-- [ ] T025 [P] Agregar PostgreSQL 17 y ejecución test:integration con URL exclusiva de test en `.github/workflows/ci.yml`; conservar lint/tests, Docker, Trivy, SonarQube y CI result, incluyendo el nuevo job si se crea uno (FR-005/006).
+- [ ] T025 [P] Agregar PostgreSQL 17 y ejecución test:integration con URL exclusiva de test en `.github/workflows/ci.yml`; conservar lint/tests, Docker, Trivy, SonarQube y CI result; conectar cobertura backend real sin bajar el umbral, incluyendo el nuevo job si se crea uno (FR-005/006).
 - [ ] T026 [P] Escribir `docs/guides/backend-persistence.md` (<150 líneas) con arranque, comandos compilados, env, seed opt-in, TLS, rollback de app y recuperación; enlazarlo desde `README.md` respetando límite documental (FR-003/006/007).
 - [ ] T027 Ejecutar quickstart local, lint/test/test:integration, build Docker, lint OpenAPI y longitud documental; reconciliar instrucciones con comandos reales en `specs/20261014-234644_base-persistente/quickstart.md` y registrar evidencia en `docs/backend/base-persistente-validation.md` (FR-006, SC-001/002/003 local).
 - [ ] T028 Verificar checks remotos del cambio y compatibilidad de la versión anterior con esquema aditivo; registrar ejecución/commit y resultado sin afirmar éxito de checks pendientes en `docs/backend/base-persistente-validation.md` (FR-003/006).
@@ -91,7 +92,7 @@ T001–T002 → T003–T004 → US1 (T005–T016) → US2 (T017–T024)
 - Las pruebas de cada historia se escriben antes de su implementación.
 - T007/T008 preceden al arranque con esquema; T009 precede a wiring/readiness.
 - T010/T011 completan juntos el wiring; T012 precede a Compose y smoke de imagen.
-- T019 requiere T017/T018; T020 precede a exponer seed en scripts/Compose.
+- T019 requiere T017/T018; T020 precede a exponer el comando seed manual.
 - Orden secuencial salvo [P]; [P] permite editar archivos distintos, no ejecutar
   tests simultáneamente sobre la misma DB. Compartir migración bajo un solo dueño.
 - T029/T030 requieren entorno real y operador autorizado; si falta acceso o backup,

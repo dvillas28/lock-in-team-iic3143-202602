@@ -42,10 +42,10 @@ No reclamar permiso institucional ni curso por tener una identidad demo.
 
 ## Algoritmo observable
 
-1. Si demo=false/ausente, terminar como omitido sin tocar DB.
-2. Validar variables, longitudes y formato del manifiesto antes de cualquier cambio.
+1. El operador ejecuta db:seed; arrancar HTTP o migrar no carga demo.
+2. Validar las cinco contraseñas antes de conectar; el manifiesto se verifica en tests.
 3. Abrir cliente y transacción; tomar advisory xact lock con clave fija de seed.
-4. Verificar esquema; resolver instituciones y validar identidad de usuarios.
+4. Resolver instituciones y validar identidad de usuarios; SQL exige el esquema.
 5. Para usuarios faltantes, producir PHC Argon2id con sal aleatoria por usuario.
 6. Insertar instituciones, usuarios y memberships faltantes dentro de la transacción.
 7. Ante cualquier error: rollback total, resumen sanitizado y salida 1.
@@ -64,8 +64,8 @@ No imprimir contraseñas, hashes, emails o SQL con parámetros, incluso en error
   conserva el cambio manual, incluso si ahora el fixture dice activa.
 - Preinsertar colisión de UUID/email: salida 1 y ninguna inserción parcial.
 - Forzar fallo intermedio mediante fixture/test, sin flag productivo de inyección.
-- Contraseña ausente o inválida con demo=true falla antes de escribir.
-- Con URL válida, observar cero intentos de conexión para flag/contraseñas inválidos;
+- Contraseña ausente o inválida al ejecutar db:seed falla antes de escribir.
+- Con URL válida, observar cero intentos de conexión para contraseñas inválidas;
   repetir esos negativos sobre demo existente y comparar snapshots sin cambios.
 - Ninguna assertion fallida puede incluir hashes o la salida sensible original.
 - Verificar PHC mediante argon2.verify sin registrar hash ni credencial.

@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import healthControllerModule from "../dist/platform/health/health.controller.js";
+import healthControllerModule from "../dist/health/health.controller.js";
 
 const { HealthController } = healthControllerModule;
 
 test("GET /health response reports a healthy API", () => {
-  const controller = new HealthController();
+  const controller = new HealthController(undefined);
   const response = controller.getHealth();
 
   assert.equal(response.status, "ok");
@@ -26,7 +26,7 @@ test("GET /health reports the deployed commit and a stable deploy time", () => {
   process.env.RAILWAY_GIT_COMMIT_SHA = "a9bb898";
 
   try {
-    const controller = new HealthController();
+    const controller = new HealthController(undefined);
     const first = controller.getHealth();
     const second = controller.getHealth();
 

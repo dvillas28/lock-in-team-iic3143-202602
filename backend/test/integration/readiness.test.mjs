@@ -3,8 +3,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import { test } from "node:test";
 import pg from "pg";
 import { database, migrated, cli, sanitized, testUrl } from "./helpers.mjs";
-import service from "../../dist/platform/database/database.service.js";
-import schema from "../../dist/platform/database/schema.js";
+import service from "../../dist/database/database.service.js";
 
 async function failedStartup(extra) {
   const app = cli("main", {...extra,PORT:"13981"});
@@ -50,6 +49,7 @@ test("HTTP readiness, health, schema/DB loss, recovery and graceful shutdown", a
     await migrated(pool);
     app = cli("main", {PORT:"13982"});
     await waitReady(13982, app);
+    assert.deepEqual((await Promise.all(["institutions","users","institution_memberships"].map(table => pool.query(`SELECT count(*)::int AS n FROM ${table}`)))).map(result=>result.rows[0].n),[0,0,0],"HTTP startup loaded demo data");
     assert.deepEqual(await (await fetch("http://localhost:13982/ready")).json(), {status:"ok"});
     const health = await (await fetch("http://localhost:13982/health")).json();
     assert.deepEqual(Object.keys(health).sort(), ["commit","deployedAt","status","timestamp","version"]);
@@ -104,22 +104,29 @@ test("HTTP readiness, health, schema/DB loss, recovery and graceful shutdown", a
 test("shared pool bounds saturation/query time and closes connections", async () => {
   const admin = await database();
   await migrated(admin);
-  const pool = service.createPool({DATABASE_URL:testUrl()});
+  const previous = process.env.DATABASE_URL;
+  process.env.DATABASE_URL = testUrl();
+  let databaseService;
+  try { databaseService = new service.DatabaseService(); }
+  finally {
+    if (previous === undefined) delete process.env.DATABASE_URL; else process.env.DATABASE_URL = previous;
+  }
+  const pool = databaseService.pool;
   const clients = [];
   try {
     for(let i=0;i<5;i++) clients.push(await pool.connect());
     const start = performance.now();
-    await assert.rejects(schema.assertSchema(pool));
+    await assert.rejects(databaseService.check());
     assert.ok(performance.now()-start < 5000);
     assert.equal(pool.totalCount,5);
     for(const client of clients.splice(0)) client.release();
     const startQuery = performance.now();
     await assert.rejects(pool.query("SELECT pg_sleep(10)"));
     assert.ok(performance.now()-startQuery < 5000);
-    await schema.assertSchema(pool);
+    await databaseService.check();
   } finally {
     for(const client of clients) client.release();
-    await pool.end(); await admin.end();
+    await databaseService.onApplicationShutdown(); await admin.end();
   }
   assert.equal(pool.totalCount,0);
 });

@@ -11,8 +11,8 @@ Conservar `.env` existente; copiar `.env.example` únicamente si falta.
 Compose carga `.env`; pnpm/Node en el host requieren variables exportadas.
 `DATABASE_URL` debe apuntar a la base de desarrollo para operar el backend local.
 
-Seed viene deshabilitado. Para una demo, definir `DEMO_SEED_ENABLED=true`
-y las cinco `DEMO_*_PASSWORD` de `.env.example` en el entorno privado.
+El arranque no carga demo. Para ejecutar db:seed, definir las cinco
+`DEMO_*_PASSWORD` de `.env.example` en el entorno privado.
 Cada contraseña requiere 8–30 caracteres Unicode; sin valores predeterminados.
 Argon2id usa memoria 19456 KiB, tiempo 2, paralelismo 1 y sal aleatoria de 16 bytes.
 Solo se generan hashes para usuarios faltantes; repetir no rota credenciales.
@@ -26,10 +26,10 @@ curl --fail http://localhost:3001/health
 curl --fail http://localhost:3001/ready
 ```
 
-Compose ejecuta migración → seed opt-in → HTTP. Un fallo impide escuchar.
+Compose ejecuta migración → HTTP. Un fallo de migración impide escuchar.
 `docker compose up --build -d frontend` inicia frontend después del backend healthy.
-Con demo omitida, una base vacía queda con tres tablas de dominio sin filas demo.
-Con demo habilitada, una base vacía produce 2 instituciones, 5 usuarios y 6 memberships.
+Sin ejecutar db:seed, una base vacía queda con tres tablas de dominio sin filas.
+Ejecutar db:seed manualmente produce 2 instituciones, 5 usuarios y 6 memberships.
 El volumen `postgres_data` conserva datos. No borrar volúmenes para esta prueba.
 
 ## CLI e idempotencia
@@ -44,9 +44,9 @@ pnpm --dir backend db:seed
 Equivalentes dentro de la imagen final, sin gestor de paquetes:
 
 ```bash
-docker compose exec backend node dist/platform/database/migrate.js
-docker compose exec backend node dist/platform/database/seed.js
-docker compose exec backend node dist/platform/database/seed.js
+docker compose exec backend node dist/commands/migrate.js
+docker compose exec backend node dist/seeds/demo.js
+docker compose exec backend node dist/seeds/demo.js
 docker compose restart backend
 curl --fail http://localhost:3001/ready
 ```
@@ -100,7 +100,7 @@ Construyen la imagen final real y comprueban ubicación independiente del cwd:
 ```bash
 docker compose build backend
 docker compose up --wait -d backend
-docker compose exec -w /tmp backend node /app/dist/platform/database/migrate.js
+docker compose exec -w /tmp backend node /app/dist/commands/migrate.js
 docker compose exec backend sh -c 'test "$(id -u)" != 0 && ! command -v npm && ! command -v pnpm && test -f /app/migrations/20261015000100_institutional-foundation.sql'
 docker compose exec backend node -e 'const a=require("argon2"); const p=require("node:crypto").randomBytes(12).toString("hex"); (async()=>{const h=await a.hash(p,{type:a.argon2id,memoryCost:19456,timeCost:2,parallelism:1}); require("node:assert/strict").ok(await a.verify(h,p)); console.log("Argon2id OK")})().catch(()=>process.exitCode=1)'
 docker compose restart postgres

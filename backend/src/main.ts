@@ -1,10 +1,10 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
-import { reportError } from "./platform/database/config";
+import { reportError } from "./database/config";
 
 async function bootstrap() {
   const deadline = setTimeout(() => {
-    reportError("startup", new Error());
+    reportError("startup", new Error("Startup deadline exceeded"));
     process.exit(1);
   }, 25000);
   let app;

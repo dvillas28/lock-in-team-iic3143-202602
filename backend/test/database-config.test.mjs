@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import pg from "pg";
-import config from "../dist/platform/database/config.js";
+import config from "../dist/database/config.js";
 import { sanitized, testUrl } from "./integration/helpers.mjs";
 
 test("TLS policy is explicit in pg and rejects unsafe environment overrides", () => {

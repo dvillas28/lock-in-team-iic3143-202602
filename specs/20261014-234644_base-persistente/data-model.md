@@ -31,7 +31,8 @@ No implementar cambios de slug/estado mediante HTTP en esta misión.
 | created_at | timestamptz(6) | NOT NULL, default now() |
 | updated_at | timestamptz(6) | NOT NULL, default now() |
 
-Validación CLI: email demo válido, nombres no vacíos y límites del modelo.
+El manifiesto versionado se verifica en pruebas; SQL impone límites y checks.
+La CLI valida las contraseñas recibidas del entorno antes de conectar.
 Contraseña de entrada: 8–30 caracteres Unicode; nunca persistirla.
 El hash usa sal aleatoria; comprobar el valor codificado sin truncarlo.
 No agregar username, proveedor externo ni índices de login especulativos.

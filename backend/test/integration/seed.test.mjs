@@ -6,16 +6,11 @@ import { test } from "node:test";
 import argon2 from "argon2";
 import { database, migrated, cli, snapshot, secrets, sanitized, testUrl } from "./helpers.mjs";
 
-const run = env => cli("platform/database/seed",env).result;
-const demo = () => ({DEMO_SEED_ENABLED:"true", ...secrets()});
+const run = env => cli("seeds/demo",env).result;
+const demo = secrets;
 const same = (a,b) => assert.ok(JSON.stringify(a)===JSON.stringify(b), "persisted rows changed");
 
 async function rejectInvalidInputs(DATABASE_URL) {
-  for(const flag of ["TRUE","0","yes",""]) {
-    const result=await run({...demo(),DEMO_SEED_ENABLED:flag,DATABASE_URL});
-    sanitized(result.output);
-    assert.equal(result.code,1); assert.ok(/config/.test(result.output),"configuration error missing");
-  }
   for(const key of Object.keys(secrets())) {
     for(const password of [undefined, "", "x".repeat(7),"x".repeat(31),"😀".repeat(7),"😀".repeat(31)]) {
       const result=await run({...demo(),[key]:password,DATABASE_URL});
@@ -25,20 +20,15 @@ async function rejectInvalidInputs(DATABASE_URL) {
   }
 }
 
-test("seed is opt-in and validates flag/all passwords before connecting", async () => {
+test("manual seed validates all passwords before connecting", async () => {
   let connections=0;
   const server=createServer(socket=>{connections++;socket.destroy();});
   server.listen(0,"127.0.0.1");
   await once(server,"listening");
   const DATABASE_URL=`postgres://127.0.0.1:${server.address().port}/seed_validation_test`;
   try {
-    for(const flag of [undefined,"false"]) {
-      const result=await run({DEMO_SEED_ENABLED:flag,DATABASE_URL});
-      sanitized(result.output);
-      assert.equal(result.code,0); assert.ok(/skipped/.test(result.output),"seed was not skipped");
-    }
     await rejectInvalidInputs(DATABASE_URL);
-    assert.equal(connections,0,"invalid or skipped seed connected to DB");
+    assert.equal(connections,0,"invalid seed connected to DB");
   } finally { await new Promise(resolve=>server.close(resolve)); }
 });
 

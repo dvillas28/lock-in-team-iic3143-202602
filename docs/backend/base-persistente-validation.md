@@ -4,144 +4,106 @@ Fecha: 2026-10-15. Alcance: T001–T024 de
 [base-persistente](../../specs/20261014-234644_base-persistente/tasks.md).
 No cierra el spec. T025–T030 permanecen pendientes.
 
-## Entorno y aislamiento
+## Versión y cambios comprobados
 
-- Host: Node 24.14.0, pnpm 9.15.9; Docker disponible.
-- Integración: PostgreSQL 17.10 (`postgres:17-alpine`), contenedor nuevo
-  `academix-persistence-test`, puerto efímero local y credenciales aleatorias.
-- `TEST_DATABASE_URL` exclusiva, nombre terminado en `_test`, sin fallback.
-- Harness rechaza URL ausente, malformada, protocolo ajeno, DB sin sufijo y
-  opciones de conexión que puedan alterar el destino/search_path.
-- Fixtures limpian únicamente `public` del destino validado. Prueba de pérdida
-  de DB usa conexión administrativa a `/postgres` del mismo servidor aislado,
-  sin modificar datos/esquema de esa base administrativa.
-- Compose usa proyecto separado `academix-persistence-validation`, sin publicar
-  puertos del host y con volumen nuevo `academix_persistence_validation_pg`.
-- No se vaciaron bases de desarrollo/producción ni se borraron volúmenes.
-  Secretos de pruebas solo en memoria/archivos temporales privados, no versionados.
-  Al terminar se detuvieron los contenedores creados, se conservaron los volúmenes
-  y se eliminaron los archivos temporales de credenciales.
+Poda sobre `1175a21`: siete archivos TypeScript productivos, sin platform,
+DatabaseModule, schema.ts ni controlador separado de readiness.
+Un DatabaseService registrado en AppModule mantiene el Pool; un controlador
+expone /health y /ready. Comandos de migración y seed en carpetas propias.
+El seed está en src/seeds/demo.ts, sin bandera ni ejecución al arrancar.
+Validaciones del manifiesto constante salen del runtime; contraseñas, TLS,
+colisiones, transacción, lock y preservación de datos se mantienen.
 
-## Validación inicial: comandos y resultados (antes del renombrado a seed)
+Arranque/readiness resuelven tablas y columnas requeridas sin leer filas.
+No comprueban drift manual de tipos/defaults/índices/constraints: esas garantías
+se definen en SQL y se verifican con integración. Contratos/ADR actualizados.
 
-| Check ejecutado | Resultado |
+## Entorno y aislamiento de esta pasada
+
+- Node 24, pnpm 9.15.9; Docker disponible.
+- PostgreSQL 17 Alpine nuevo, credenciales aleatorias y puerto local efímero.
+- TEST_DATABASE_URL exclusiva terminada en _test, sin fallback a DATABASE_URL.
+- Harness rechaza destino ausente/malformado, protocolo ajeno, sufijo incorrecto
+  y opciones que pueden cambiar destino/search_path antes de limpiar.
+- Fixtures recrean public solo en esa DB descartable. La prueba de caída usa
+  /postgres del mismo servidor como conexión administrativa, sin alterar sus datos.
+- Compose usa proyecto separado y volumen nuevo; no se vacían bases existentes.
+- Secretos solo en memoria/archivo temporal privado; no se imprimen ni versionan.
+- Builds de backend y suites se ejecutan secuencialmente para no invalidar dist.
+
+## Checks de esta pasada
+
+| Check | Resultado |
 | --- | --- |
-| `pnpm --dir backend install --frozen-lockfile` | Dependencias fijadas; imagen confirma lockfile |
-| `pnpm lint` | Frontend y backend OK |
-| `pnpm test` / `pnpm --dir backend test` | 2 tests existentes OK, sin DB |
-| `pnpm --dir backend test:integration` | 10 tests OK, secuenciales, PostgreSQL 17 real |
-| `pnpm build` | Frontend y backend OK |
-| `pnpm --dir backend audit --audit-level=high` | Sin vulnerabilidades conocidas |
-| `docker compose config --quiet` | OK |
-| `docker build -t academix-persistence-validation backend` | Imagen Alpine final construida |
-| CLI dentro de la imagen final | Migración y seed OK con `node` |
-| `pnpm docs:api:lint` | Válido; warning esperado de 4xx en `/ready` |
-| Lint contrato readiness independiente | Válido; warnings documentales esperados |
-| `python3 .github/scripts/check-doc-length.py` | Documentos modificados dentro del límite |
-| `git diff --check` | OK |
+| pnpm lint | Frontend y backend OK |
+| pnpm --dir backend test | 5/5, sin DB |
+| pnpm --dir backend test:integration | 9/9, PostgreSQL 17 real; ~25,3 s |
+| pnpm build | Frontend y backend OK |
+| pnpm --dir backend audit --audit-level=high | Sin vulnerabilidades conocidas |
+| docker compose config --quiet | OK |
+| docker build -t academix-pr63-prune:local backend | Alpine final construida |
+| CLI/Argon2id en imagen final | Migración, demo concurrente y verify de los cinco usuarios OK |
+| pnpm docs:api:lint y contrato readiness independiente | Válidos; un warning 4xx cada uno |
+| Longitud documental y enlaces locales modificados | OK |
+| Spec Kit con SPECIFY_FEATURE_DIRECTORY explícita | Directorio correcto y artefactos disponibles |
+| git diff --check | OK |
 
-Comandos reproducibles y requisitos en [quickstart](../../specs/20261014-234644_base-persistente/quickstart.md).
-Next advierte sobre múltiples lockfiles existentes; build termina correctamente.
-Una corrida con builds host simultáneos invalidó `dist`; se descartó y se repitió
-la suite secuencialmente: 10/10 OK (~22,5 s), sin builds host competidores.
+OpenAPI conserva exclusivamente 200/503 en /ready; no se inventa un 4xx para
+silenciar lint. Next advierte múltiples lockfiles; pnpm emite DEP0169 sobre
+url.parse durante instalación/audit. Ambos terminan correctamente.
 
-## US1: persistencia y disponibilidad
+## Qué comprueban las pruebas
 
-- Migración inicial aplicada dos veces: una entrada de historia, tres tablas
-  de dominio; sin unicidad global de email. Un usuario tiene dos memberships.
-- Slug/pareja duplicados, FK inexistentes, borrados/updates restringidos,
-  NOT NULL, longitudes y checks rechazan operaciones sin alterar snapshots.
-- FK/clave compuesta tenant-aware e índice user/active/institution presentes.
-- Lote pendiente con DDL válido seguido de SQL fallido: sin DDL parcial ni nueva
-  historia. Lock del migrador ocupado: segunda ejecución falla sin deshabilitarlo.
-- Arranque rechaza URL/TLS inseguros, DB ausente o esquema incompleto antes de
-  escuchar HTTP y en menos de 30 s. No ejecuta migración desde hooks HTTP.
-- `/ready`: cuerpos exactos `{status: ok}` y `{status: unavailable}`, 200/503.
-  Columna perdida o DB que rechaza conexiones produce 503 en menos de 5 s;
-  recuperación vuelve a 200. Una columna aditiva no invalida el esquema mínimo.
-- Pool compartido: máximo 5; saturar conexiones/cola falla dentro de 5 s;
-  consulta `pg_sleep(10)` queda acotada por timeout de 2 s.
-- SIGTERM cierra conexiones HTTP; Pool finaliza sin conexiones pendientes.
-- `/health` conserva sus cinco campos y sigue 200 durante la caída de DB.
-  `/seed` y `/db/seed` responden 404.
-
-## US2: seed demo
-
-- Ausente/false: salida 0 omitida incluso con URL inválida; sin conexión.
-- Flag ajeno, cualquiera de las cinco contraseñas ausente o longitud 7/31:
-  salida 1/config antes de conectar. Se aceptan límites Unicode 8 y 30.
-- Desde vacío: exactamente 2 instituciones, 5 usuarios, 6 memberships;
-  un usuario inactivo, una membership inactiva y un usuario multiinstitución.
-- Argon2id PHC: memoria 19456 KiB, tiempo 2, paralelismo 1, sal aleatoria 16 bytes.
-  Hash/verify comprobado para los cinco usuarios, también dentro de Alpine.
-- Repetición y dos procesos concurrentes conservan snapshots completos.
-  Triggers de test confirman que repetir no intenta insertar filas ya existentes.
-  Cambiar contraseñas de entrada no rota hashes ni reactiva memberships.
-- Nombre/estado institucional y de usuario editados, email normalizado compatible,
-  IDs y timestamps conservados. Solo se repone una membership faltante.
-- UUID con otro email o email normalizado de otro UUID: error/conflict y rollback.
-- Trigger de test fuerza error tras inserciones iniciales: rollback completo;
-  sin flag productivo de inyección. Reintento posterior funciona.
-- Advisory lock de seed retenido: timeout limpio (~10 s), cero inserciones;
-  liberar y reintentar crea el dataset sin duplicados.
-- Logs finales de CLI/contenedor sin credenciales, hashes, emails ni SQL con valores.
-  Harness sanitiza también errores inesperados de PostgreSQL antes de reportarlos.
+- Migración repetida: tres tablas de dominio y una historia; sin email único.
+- Catálogo: las 19 columnas con tipos, NOT NULL y defaults del modelo.
+- Unicidades, checks, longitudes, FK RESTRICT, clave compuesta tenant-aware,
+  índice user/active/institution e identidad multiinstitución.
+- Lote pendiente fallido revierte DDL/historia; lock concurrente rechaza otro runner.
+- Arranque inválido no escucha y falla antes de 30 s; no carga datos demo.
+- /ready 200/503 con cuerpos exactos, pérdida de columna/DB y recuperación.
+  Saturación del Pool y consulta lenta fallan antes de 5 s; máximo 5 conexiones.
+- /health conserva sus cinco campos y funciona con DB caída; SIGTERM cierra Pool.
+- Cinco contraseñas obligatorias, límites Unicode 8–30 y cero conexiones con
+  entradas inválidas, también al repetir sobre datos existentes.
+- Dataset exacto 2/5/6, usuario inactivo, membership revocada y multiinstitución.
+- Argon2id: 19456 KiB, tiempo 2, paralelismo 1, sal 16 bytes; verify de cinco hashes.
+- Repetición/concurrencia conserva IDs, nombres, hashes, estados y timestamps;
+  solo repone faltantes, sin intentar insertar instituciones/memberships existentes.
+- Colisiones UUID/email normalizado y fallo inducido revierten todo; reintento OK.
+- Advisory lock ocupado: timeout limpio (~10 s), cero inserts y reintento OK.
+- Logs/assertions no exponen secretos, emails, hashes ni SQL con valores.
+- No hay endpoints de seed/bootstrap; migraciones y HTTP no importan el seed.
 
 ## Imagen y Compose
 
-- Runner conserva SQL en `/app/migrations`, dependencias productivas y usuario
-  no privilegiado. No dispone de npm/pnpm/npx/corepack/yarn.
-- Migrador ejecutado desde `/tmp` con ruta absoluta al JS: OK.
-- Seed omitido ejecutado sin DATABASE_URL dentro de imagen: salida 0.
-  Otra DB vacía aislada: migración + seed false + HTTP ready con 0/0/0.
-- Compose ejecutó migración → seed → HTTP hasta healthy.
-  Dos seed concurrentes en el contenedor: misma identidad/dataset 2/5/6.
-- Comparación en memoria de snapshots completos antes/después de repetir seed
-  y reiniciar PostgreSQL/backend con el volumen nuevo: igualdad exacta.
-- Nombres editados y memberships revocadas sobreviven seed y ambos reinicios.
-- PostgreSQL detenido de verdad: readiness 503 en menos de 5 s; health 200.
-  Arranque de PostgreSQL y reinicio del backend recuperan readiness 200.
-- Frontend depende declarativamente del backend healthy; no se modificó su código.
+- SQL y dependencias productivas presentes; usuario no privilegiado, sin npm/pnpm.
+- Ruta nueva del migrador ejecutada desde /tmp con node: OK.
+- Compose inicia migración → HTTP con 0/0/0, aunque haya contraseñas demo configuradas.
+- Seed manual concurrente crea 2/5/6; hash/verify y sal comprobados en Alpine.
+- Repetir conserva instituciones editadas y memberships revocadas.
+- La primera prueba de reinicio usó tmpfs, que descarta datos al detener PostgreSQL;
+  se descartó como evidencia de durabilidad y se repitió con volumen nuevo persistente.
+- Con ese volumen: snapshot completo idéntico tras reiniciar PostgreSQL y backend,
+  incluidas instituciones editadas, hashes, fechas y todas las memberships revocadas.
+- Se eliminaron únicamente contenedores/redes nuevos. El volumen de validación
+  academix-prune-durable-cbcf0a4c_postgres_data se conserva; no se borran volúmenes.
 
-## Límites y cierre pendiente
+## Evidencia histórica y límites
 
-T025–T030 no se ejecutaron ni se marcaron completas. Falta integrar PostgreSQL
-con CI, guía operativa y cierre formal de checks/compatibilidad con app anterior.
-No hubo despliegues ni cambios de recursos remotos, commits, push o merges.
-Faltan instalación vacía y reinicio durable en Railway, checks remotos,
-dump/restore aislado, snapshots/PITR/retención y medición real de RPO/RTO.
-TLS se verifica aquí mediante rechazo de configuración insegura/CA inexistente;
-no se ensayó un endpoint PostgreSQL público con una cadena CA válida.
+Los commits `a22e204` y `1175a21` documentaron verificaciones anteriores, con
+nombres y contratos previos. No acreditan automáticamente la poda actual.
+La pasada anterior detuvo PostgreSQL realmente: /ready 503 en 2,026 s y /health
+200; recuperación 200. Esta pasada prueba además pérdida de conexión mediante SQL.
+TLS se comprueba con política efectiva del driver/rechazo de configuración y CA
+inexistente; no se ensayó un PostgreSQL público con cadena CA válida.
+
+El último análisis remoto anterior a esta poda falló por cobertura nueva 65,6%
+frente a 80% en Sonar. Sus logs importaron cobertura frontend, sin reporte backend;
+la ejecución local de tests no sustituye ese reporte ni el resultado remoto nuevo.
+T025 sigue pendiente: PostgreSQL 17/integración en CI y cobertura backend conectada.
+No se modifica el umbral ni se excluye código productivo para aprobarlo.
+
+Faltan T026–T030: guía operativa, cierre formal de checks/compatibilidad anterior,
+instalación/reinicio Railway y dump/restore aislado, snapshots/PITR/retención,
+RPO/RTO medidos. No se despliega ni modifica infraestructura remota en esta pasada.
 No se declara satisfecho SC-003 Railway ni recuperación del spec completo.
-
-## Correcciones posteriores a la auditoría
-
-- La política TLS queda fijada explícitamente en la URL entregada a pg.
-  Se rechazan PGSSLMODE=no-verify y NODE_TLS_REJECT_UNAUTHORIZED=0 tanto del
-  entorno recibido como del proceso; otros modos ambientales no sustituyen la URL.
-- Pruebas sin DB comprueban las opciones efectivas del driver y que una assertion
-  fallida de sanitización no adjunta su entrada sensible al error.
-- Negativos de flag/las cinco contraseñas usan URL válida: un listener observa
-  cero conexiones. Incluyen ausencia, vacío y longitudes ASCII/Unicode 7/31.
-  Se repiten sobre demo existente y conservan el snapshot completo.
-- Assertions de hashes/salida usan booleanos y mensajes constantes; errores de
-  parseo/verificación tampoco incluyen la entrada original.
-- Nueva corrida local: lint, 4 tests sin DB, 10 de integración con PostgreSQL 17
-  aislado, build frontend/backend, OpenAPI y checks documentales satisfactorios.
-- Imagen reconstruida: ambos CLI con node, migración desde /tmp, Argon2id verify
-  de los cinco usuarios, repetición y rechazo del override TLS inseguro correctos.
-- T025–T030 siguen pendientes; estos resultados no acreditan operación remota,
-  compatibilidad con app anterior ni recuperación. Warnings previos sin cambios.
-
-## Simplificación posterior
-
-- Un seed explícito (db:seed, DEMO_SEED_ENABLED) contiene ejecución y dataset;
-  reemplaza los nombres anteriores db:bootstrap/DEMO_BOOTSTRAP_ENABLED sin alias.
-- Se eliminan demo-data.ts, PlatformModule, assertReady y el export público de Pool.
-  AppModule registra controladores; readiness usa directamente pool.query mediante assertSchema.
-- Seed usa un Client, reutiliza RETURNING tras inserts y delega la sal aleatoria a Argon2.
-  Su prueba verifica 16 bytes de sal; se conservan transacción, lock y rollback.
-- El guard de TEST_DATABASE_URL pasa a la suite sin DB: 5/5 tests sin DB y 9/9
-  de integración (~26,2 s) OK. Lint, build, OpenAPI y checks documentales OK.
-- Nueva imagen/Compose aislado: seed concurrente, sal de 16 bytes y reinicio durable OK;
-  PostgreSQL detenido: readiness 503 exacto en 2,026 s y health 200; recuperación 200.

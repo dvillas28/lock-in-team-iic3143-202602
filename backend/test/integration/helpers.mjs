@@ -48,7 +48,7 @@ export async function reset(pool) {
 }
 export async function migrated(pool) {
   await reset(pool);
-  const result = await cli("platform/database/migrate").result;
+  const result = await cli("commands/migrate").result;
   assert.equal(result.code, 0, "migration failed");
 }
 export async function snapshot(pool) {

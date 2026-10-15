@@ -68,13 +68,12 @@ Estructura de US1/US2; la modificación de CI corresponde a T025 pendiente.
 ```text
 backend/
   migrations/<timestamp>_institutional-foundation.sql
-  src/platform/database/
-    database.module.ts
-    database.service.ts
-    migrate.ts
-    seed.ts
-  src/platform/health/readiness.controller.ts
-  src/app.module.ts                         # DatabaseModule y controladores
+  src/database/config.ts                   # URL/TLS y errores sanitizados
+  src/database/database.service.ts         # único Pool y lifecycle
+  src/health/health.controller.ts          # /health y /ready
+  src/commands/migrate.ts
+  src/seeds/demo.ts                         # dataset y carga manual
+  src/app.module.ts                        # servicio y controlador
   src/main.ts                              # shutdown y error de arranque
   test/database-config.test.mjs
   test/integration/persistence.test.mjs
@@ -85,16 +84,19 @@ docker-compose.yml / .env.example / .github/workflows/ci.yml
 docs/reference/openapi/openapi.yaml / paths/platform.yaml
 ```
 
-**Structure Decision**: DatabaseModule exporta DatabaseService sobre un único Pool HTTP compartido.
-SQL permanece junto a su operación; no agregar interfaces/repositorios genéricos.
-Seed usa un Client para una transacción y contiene su dataset; migración y seed
-son operaciones separadas. AppModule registra directamente los controladores.
+**Structure Decision**: AppModule registra un único DatabaseService y HealthController.
+Sin módulo de wiring, carpeta platform ni modelos/repositorios anticipados.
+La migración SQL define el esquema; integración verifica tipos, defaults y constraints.
+Arranque y /ready solo resuelven las tablas/columnas requeridas con una consulta
+sin filas; no detectan cambios manuales de tipos, defaults, índices o constraints.
+Seed manual en seeds/demo.ts, sin framework, bandera ni ejecución al arrancar.
+Un Client y transacción; auxiliares locales para institución, usuario y membership.
 Integración usa una DB exclusiva de test, sin requerir DB para los tests actuales.
 
 ## Execution and Verification
 
 1. US1: migración inicial, conexión Nest y readiness; persistencia local/imagen.
-2. US2: CLI seed opt-in, dataset estable, rollback e idempotencia concurrente.
+2. US2: CLI seed manual, dataset estable, rollback e idempotencia concurrente.
 3. Integración: Compose, pre-deploy Railway, recuperación y evidencias.
 4. Mantener /health y su contrato/consumidores; /ready no retorna metadatos.
 5. T025 agregará PostgreSQL 17 y test:integration a CI junto a checks existentes;

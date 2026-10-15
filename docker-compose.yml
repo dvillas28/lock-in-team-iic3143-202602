@@ -21,13 +21,12 @@ services:
       start_period: 5s
 
   backend:
-    command: ["sh", "-c", "node dist/platform/database/migrate.js && node dist/platform/database/seed.js && exec node dist/main.js"]
+    command: ["sh", "-c", "node dist/commands/migrate.js && exec node dist/main.js"]
     build:
       context: ./backend
     environment:
       APP_VERSION: 0.1.0
       DATABASE_URL: postgresql://${POSTGRES_USER:-academix}:${POSTGRES_PASSWORD:-academix_dev}@postgres:5432/${POSTGRES_DB:-academix}
-      DEMO_SEED_ENABLED: ${DEMO_SEED_ENABLED:-false}
       DEMO_UC_PASSWORD: ${DEMO_UC_PASSWORD:-}
       DEMO_UTFSM_PASSWORD: ${DEMO_UTFSM_PASSWORD:-}
       DEMO_MULTI_PASSWORD: ${DEMO_MULTI_PASSWORD:-}

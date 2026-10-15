@@ -40,13 +40,14 @@ Fuentes: [node-argon2](https://github.com/ranisalt/node-argon2),
 
 ## Seed y claves demo
 
-**Decisión**: CLI opt-in de operador, UUID de usuarios versionados, institutions
+**Decisión**: Seed manual de operador en src/seeds/demo.ts, UUID de usuarios versionados, institutions
 resueltas por slug, memberships por pareja institución/persona.
 **Razón**: email no tiene unicidad global acordada; no usarlo como clave de upsert.
 Un Client con transacción y advisory lock coordina los seed concurrentes. Verificar
 colisiones antes de insertar y no modificar filas existentes ni reactivar estados.
-**Alternativas**: seeds en migraciones mezclan estructura/datos; upsert con UPDATE
-podría reemplazar credenciales o revocaciones. No usar roles académicos todavía.
+**Alternativas**: una data migration sirve para datos obligatorios de una sola aplicación;
+la demo es opcional y debe poder reponer faltantes al repetir. No añadir otro
+historial/migrador ni framework de seeds. Un upsert con UPDATE sobrescribiría datos.
 
 Fuentes: [constraints PostgreSQL 17](https://www.postgresql.org/docs/17/ddl-constraints.html),
 [locks transaccionales](https://www.postgresql.org/docs/17/explicit-locking.html),
@@ -55,11 +56,11 @@ Fuentes: [constraints PostgreSQL 17](https://www.postgresql.org/docs/17/ddl-cons
 ## Arranque, readiness y empaquetado
 
 **Decisión**: conservar GET /health como liveness; agregar GET /ready con 200/503.
-Al arrancar, validar conexión y columnas/constraints de la base mínima antes de
+Al arrancar, validar conexión y tablas/columnas de la base mínima antes de
 escuchar; no migrar desde un hook de Nest.
 Fijar sslmode explícito en la URL entregada a pg evita heredar la política TLS
 de PGSSLMODE; rechazar no-verify y NODE_TLS_REJECT_UNAUTHORIZED=0.
-Compose secuencia migración → seed opt-in → proceso HTTP.
+Compose secuencia migración → proceso HTTP; demo solo por comando explícito.
 Railway ejecuta migración en pre-deploy; seed se ejecuta por operador.
 **Razón**: preparar estructura no depende de iniciar tráfico y fallos de DB no
 se confunden con un proceso vivo. No cambiar consumidores frontend de /health.

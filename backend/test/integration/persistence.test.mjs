@@ -5,13 +5,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { database, migrated, cli, snapshot, testUrl } from "./helpers.mjs";
-import migration from "../../dist/platform/database/migrate.js";
+import migration from "../../dist/commands/migrate.js";
 
 test("migration repeat, constraints, tenant identity and restricted deletion", async () => {
   const pool = await database();
   try {
     await migrated(pool);
-    const repeat = await cli("platform/database/migrate").result;
+    const repeat = await cli("commands/migrate").result;
     assert.equal(repeat.code, 0);
     let summary;
     try { summary = JSON.parse(repeat.output); }
@@ -19,6 +19,28 @@ test("migration repeat, constraints, tenant identity and restricted deletion", a
     assert.equal(summary.created, 0);
     assert.equal(summary.existing, 1);
     assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount, 1);
+    const schema = await pool.query(`SELECT c.relname AS table_name,a.attname AS column_name,
+      format_type(a.atttypid,a.atttypmod) AS type,a.attnotnull AS required,
+      pg_get_expr(d.adbin,d.adrelid) AS default_value
+      FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+      JOIN pg_attribute a ON a.attrelid=c.oid AND a.attnum>0 AND NOT a.attisdropped
+      LEFT JOIN pg_attrdef d ON d.adrelid=c.oid AND d.adnum=a.attnum
+      WHERE n.nspname='public' AND c.relname IN ('institutions','users','institution_memberships')`);
+    const expected = {
+      institutions: {id:"uuid",slug:"character varying(63)",name:"character varying(200)",active:"boolean",created_at:"timestamp(6) with time zone",updated_at:"timestamp(6) with time zone"},
+      users: {id:"uuid",email:"character varying(254)",password_hash:"character varying(255)",name:"character varying(200)",active:"boolean",created_at:"timestamp(6) with time zone",updated_at:"timestamp(6) with time zone"},
+      institution_memberships: {id:"uuid",institution_id:"uuid",user_id:"uuid",active:"boolean",created_at:"timestamp(6) with time zone",updated_at:"timestamp(6) with time zone"},
+    };
+    assert.equal(schema.rowCount,19);
+    for (const [table,columns] of Object.entries(expected)) {
+      for (const [column,type] of Object.entries(columns)) {
+        const actual=schema.rows.find(row=>row.table_name===table && row.column_name===column);
+        assert.equal(actual?.type,type,`${table}.${column} type`);
+        assert.equal(actual.required,true,`${table}.${column} NOT NULL`);
+        const defaultValue=column==="active"?"true":["created_at","updated_at"].includes(column)?"now()":null;
+        assert.equal(actual.default_value,defaultValue,`${table}.${column} default`);
+      }
+    }
     const ids = Array.from({length: 6}, randomUUID);
     await pool.query("INSERT INTO institutions(id,slug,name) VALUES($1,'uc','UC'),($2,'utfsm','UTFSM')", ids.slice(0,2));
     await pool.query("INSERT INTO users(id,email,name,password_hash) VALUES($1,'same@example.test','A','$argon2id$v=19$m=19456,t=2,p=1$fixture$fixture'),($2,'same@example.test','B','$argon2id$v=19$m=19456,t=2,p=1$fixture$fixture')", ids.slice(2,4));
@@ -36,6 +58,7 @@ test("migration repeat, constraints, tenant identity and restricted deletion", a
       ["UPDATE institutions SET name=$1 WHERE id=$2", ["x".repeat(201),ids[0]]],
       ["UPDATE users SET email=$1 WHERE id=$2", ["x".repeat(255),ids[2]]],
       ["UPDATE users SET name='' WHERE id=$1", [ids[2]]],
+      ["UPDATE users SET email='   ' WHERE id=$1", [ids[2]]],
       ["UPDATE users SET password_hash='plaintext' WHERE id=$1", [ids[2]]],
       ["UPDATE users SET active=NULL WHERE id=$1", [ids[2]]],
       ["UPDATE institution_memberships SET institution_id=NULL WHERE id=$1", [ids[4]]],
@@ -77,7 +100,7 @@ test("failed pending batch rolls back DDL/history and migrator refuses competing
     const client = await pool.connect();
     try {
       await client.query("SELECT pg_advisory_lock(7241865325823964)");
-      const result = await cli("platform/database/migrate").result;
+      const result = await cli("commands/migrate").result;
       assert.equal(result.code, 1);
     } finally { await client.query("SELECT pg_advisory_unlock_all()"); client.release(); }
   } finally { await pool.end(); await rm(dir,{recursive:true,force:true}); }

@@ -8,8 +8,8 @@ seed o modificación de instituciones/usuarios/memberships.
 
 | Propósito | Desarrollo, desde raíz | Imagen final, en /app |
 | --- | --- | --- |
-| Migrar | pnpm --dir backend db:migrate | node dist/platform/database/migrate.js |
-| Demo | pnpm --dir backend db:seed | node dist/platform/database/seed.js |
+| Migrar | pnpm --dir backend db:migrate | node dist/commands/migrate.js |
+| Demo | pnpm --dir backend db:seed | node dist/seeds/demo.js |
 | Integración | pnpm --dir backend test:integration | CI, fuera del runner productivo |
 
 Los scripts db:* ejecutan programas compilados; ejecutar pnpm --dir backend build
@@ -22,8 +22,7 @@ No ofrecer comando down productivo ni crear migrador alternativo.
 | Variable | Contrato |
 | --- | --- |
 | DATABASE_URL | Obligatoria para app/migración/seed; URL PostgreSQL válida |
-| DEMO_SEED_ENABLED | Ausente/false: seed omitido; true: habilitado; otro valor: error |
-| DEMO_UC_PASSWORD | Obligatoria solo con demo habilitada |
+| DEMO_UC_PASSWORD | Obligatoria al ejecutar db:seed |
 | DEMO_UTFSM_PASSWORD | Igual |
 | DEMO_MULTI_PASSWORD | Igual |
 | DEMO_REVOKED_PASSWORD | Igual |
@@ -31,7 +30,8 @@ No ofrecer comando down productivo ni crear migrador alternativo.
 | TEST_DATABASE_URL | Obligatoria únicamente para integración; DB dedicada terminada en _test |
 
 No hay default de contraseña demo. Conservar secretos en .env no versionado o
-variables del entorno Railway. .env.example contiene claves vacías y demo false.
+variables del entorno Railway. .env.example contiene claves vacías.
+Ejecutar db:seed es el opt-in; sin comando no hay conexiones ni escrituras demo.
 Validar las cinco contraseñas, incluso al repetir; longitudes 8–30 antes de
 conectar/escribir. No recibirlas por flags, URLs impresas o archivos versionados.
 
@@ -56,7 +56,7 @@ Una migración fallida revierte DDL e historia del lote pendiente.
 
 Ver [dataset y algoritmo](demo-dataset.md).
 Requiere migración aplicada; nunca crea tablas ni llama al migrador.
-Dataset y ejecución en seed.ts, sin demo-data.ts ni comando seed alternativo.
+Dataset y ejecución en src/seeds/demo.ts; sin framework ni bandera de habilitación.
 Transacción sobre un solo Client, advisory lock fijo exclusivo de demo,
 lock_timeout 10 s, statement_timeout 15 s y liberación/cierre siempre.
 La exclusión coordina otras ejecuciones seed; constraints protegen clientes
@@ -64,7 +64,7 @@ que no participan del lock. Una colisión detectada revierte todos los inserts.
 
 ## Salida y errores
 
-- Exit 0: migración aplicada/sin pendientes, demo creada/sin cambios u omitida.
+- Exit 0: migración aplicada/sin pendientes, demo creada/sin cambios.
 - Exit 1: entrada inválida, conexión, esquema, lock, colisión o escritura fallida.
 - Resumen estructurado: operation, outcome, cantidades creadas/existentes y duración.
 - Error sanitizado: operation y categoría estable config/connection/schema/lock/conflict.
@@ -74,16 +74,18 @@ que no participan del lock. Una colisión detectada revierte todos los inserts.
 
 ## Arranque e integración
 
-Nest valida DB y estructura mínima antes de escuchar: tablas/columnas y claves
-de la migración inicial disponibles, permitiendo migraciones aditivas posteriores.
+Nest comprueba tablas/columnas requeridas con una sola consulta sin filas antes
+de escuchar y en /ready; permite columnas aditivas. Tipos, defaults, constraints
+e índices se verifican en integración, no mediante introspección en cada sonda.
+No detecta alteraciones manuales de esas reglas; el esquema se opera con migraciones.
 Error de arranque: cerrar Pool y salir no cero en ≤30 s, sin escuchar HTTP.
 Registrar error sanitizado y escuchar errores asíncronos del Pool.
 En SIGTERM/SIGINT, cerrar Pool mediante lifecycle hooks y enableShutdownHooks.
 
-Compose ejecuta migración → seed → exec HTTP; el seed false es no-op.
-Si algún comando falla, HTTP no inicia. Compose espera postgres healthy y sondea
-/ready del backend antes de iniciar frontend; las variables demo pasan explícitas.
-Railway: pre-deploy=node dist/platform/database/migrate.js; CMD inicia solo HTTP.
+Compose ejecuta migración → exec HTTP; si falla migrar, HTTP no inicia.
+Espera postgres healthy y sondea /ready antes de iniciar frontend.
+Las variables demo pasan explícitas para ejecutar el seed manualmente después.
+Railway: pre-deploy=node dist/commands/migrate.js; CMD inicia solo HTTP.
 Cambiar healthcheckPath de Railway a /ready y conservar PORT/timeout existentes.
 Seed Railway es acción explícita de operador con la misma imagen/entorno;
 no se ejecuta en cada deploy ni se supone que pnpm está instalado.
