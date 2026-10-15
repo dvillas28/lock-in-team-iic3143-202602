@@ -35,8 +35,8 @@ Como equipo, dispongo de UC y UTFSM con identidades y pertenencias estables.
 
 ### Edge Cases
 
-- Probar identificador ajeno, pertenencia revocada, entrada inválida, operación repetida y fallo antes de confirmar: sin exposición ni cambios parciales.
-- Verificar concurrencia al asignar identidad, orden, intento, nota o publicación.
+- Probar colisiones de identidad, relaciones institucionales inválidas, entrada inválida, operación repetida y fallo antes de confirmar: sin exposición ni cambios parciales.
+- Verificar concurrencia de migraciones/bootstrap y conservación de identidades y memberships, incluidas pertenencias previamente revocadas.
 
 ## Requirements *(mandatory)*
 
@@ -65,7 +65,8 @@ Como equipo, dispongo de UC y UTFSM con identidades y pertenencias estables.
 ## Assumptions
 
 - No incluye login ni recursos académicos. Herramientas y procedimientos de persistencia se deciden en el plan.
-- Pruebas con dos instituciones incluyen permisos, integridad, sanitización y revocación; no se cierra con pruebas negativas pendientes.
+- Pruebas con dos instituciones cubren integridad, sanitización, acceso exclusivo del operador al bootstrap y conservación de estados revocados; no se cierra con pruebas negativas pendientes.
+- JWT, autorización HTTP por institución/rol y operaciones sobre intentos/notas se validan en las specs posteriores, fuera de esta misión.
 
 ## Sources & Traceability
 

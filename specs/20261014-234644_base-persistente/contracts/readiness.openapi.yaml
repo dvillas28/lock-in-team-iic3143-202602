@@ -1,0 +1,47 @@
+openapi: 3.0.3
+info:
+  title: AcademiX persistence readiness
+  version: 1.0.0
+  description: Contrato nuevo de esta misión; no reemplaza GET /health.
+servers:
+  - url: /
+    description: Origen del backend; la URL absoluta depende del entorno.
+tags:
+  - name: Platform
+    description: Estado operativo público sin datos académicos.
+paths:
+  /ready:
+    get:
+      tags: [Platform]
+      operationId: getReadiness
+      summary: Confirmar disponibilidad de la persistencia
+      description: >
+        Público, sin datos institucionales ni credenciales. Responde en un máximo
+        de cinco segundos. Comprueba una conexión con la estructura mínima
+        requerida; no ejecuta migraciones ni bootstrap.
+      security: []
+      responses:
+        '200':
+          description: Proceso inicializado y persistencia mínima disponible.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    enum: [ok]
+        '503':
+          description: Persistencia inaccesible o estructura mínima ausente.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    enum: [unavailable]
