@@ -15,8 +15,8 @@ importers:
         specifier: ^1.52.0
         version: 1.52.0(@types/react@19.3.0)(react@19.3.0)
       next:
-        specifier: 16.3.6
-        version: 16.3.6(@babel/core@7.29.7)(@types/node@24.19.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        specifier: 16.3.8
+        version: 16.3.8(@babel/core@7.29.7)(@types/node@24.19.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       openapi-fetch:
         specifier: 0.17.0
         version: 0.17.0
@@ -40,8 +40,8 @@ importers:
         specifier: 9.39.5
         version: 9.39.5
       eslint-config-next:
-        specifier: 16.3.6
-        version: 16.3.6(@typescript-eslint/parser@8.70.1(eslint@9.39.5)(typescript@5.9.3))(eslint@9.39.5)(typescript@5.9.3)
+        specifier: 16.3.8
+        version: 16.3.8(@typescript-eslint/parser@8.70.1(eslint@9.39.5)(typescript@5.9.3))(eslint@9.39.5)(typescript@5.9.3)
       openapi-typescript:
         specifier: 7.13.0
         version: 7.13.0(typescript@5.9.3)
