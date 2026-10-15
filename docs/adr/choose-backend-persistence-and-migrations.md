@@ -4,7 +4,7 @@ Fecha: 2026-10-15.
 
 ## Estado
 
-Aceptado para planificación de base-persistente; implementación pendiente.
+Aceptado e implementado para US1/US2 de base-persistente; cierre operativo pendiente.
 
 ## Contexto
 
@@ -24,6 +24,7 @@ La imagen productiva elimina gestores de paquetes y conserva dist/node_modules.
 - argon2 0.45.1 para PHC Argon2id requerido por el modelo; no implementar formato
   de contraseña propio ni anticipar autenticación.
 - Mantener /health y agregar /ready para disponibilidad de persistencia.
+- Fijar TLS desde la URL y rechazar overrides inseguros del entorno; assertions sin secretos.
 - Evolución aditiva y rollback de aplicación; no down destructivo sobre datos.
 
 No agregar ORM, repositorio genérico, servicios adicionales ni tablas futuras.

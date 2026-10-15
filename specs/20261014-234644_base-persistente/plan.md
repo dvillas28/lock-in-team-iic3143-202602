@@ -1,7 +1,7 @@
 # Implementation Plan: Base persistente y datos demo
 
 **Branch**: `feat/base-persistente` | **Date**: 2026-10-15 | **Spec**: [spec.md](spec.md)
-**Status**: Diseño listo para generar tareas; implementación y evidencia pendientes.
+**Status**: US1/US2 implementadas; T025–T030 pendientes. [Evidencia local](../../docs/backend/base-persistente-validation.md).
 
 ## Summary
 
@@ -26,10 +26,12 @@ esa base, comprobable con fixtures sin depender de autenticación todavía.
 | Alcance medible | 3 tablas de dominio; demo vacía: 2 instituciones, 5 usuarios, 6 memberships |
 | Límites | Sin login, endpoints académicos, RLS, storage ni tablas futuras |
 
-Fijar versiones exactas y lockfile al implementar; no instalar paquetes en esta fase.
+Versiones y lockfile fijados para US1/US2; no se agregan proveedores ni ORM.
 Un Pool con máximo 5 conexiones, conexión/cola 2 s, consultas 2 s y cierre en shutdown.
 Readiness usa presupuesto menor: conexión/cola 2 s y consulta 2 s, total ≤5 s.
 No usar credenciales o identidades recibidas desde HTTP para ejecutar bootstrap.
+La URL fija la política TLS efectiva; rechazar overrides que desactiven validación.
+Probar entradas inválidas con URL válida y cero conexiones; assertions sin valores sensibles.
 
 ## Constitution Check
 
@@ -57,11 +59,11 @@ Evaluación inicial y posterior al diseño: PASS para esta misión.
 - [contracts/readiness.openapi.yaml](contracts/readiness.openapi.yaml): nuevo contrato /ready.
 - [quickstart.md](quickstart.md): validación después de implementar.
 - [ADR](../../docs/adr/choose-backend-persistence-and-migrations.md): decisión duradera.
-- tasks.md se genera después mediante speckit-tasks; no pertenece a esta fase.
+- [tasks.md](tasks.md): T001–T024 implementadas; integración y cierre pendientes.
 
 ### Source Code (repository root)
 
-Rutas propuestas; solo existen las aplicaciones y archivos base indicados.
+Estructura de US1/US2; la modificación de CI corresponde a T025 pendiente.
 
 ```text
 backend/
@@ -76,6 +78,7 @@ backend/
   src/app.module.ts                         # importar DatabaseModule
   src/platform/platform.module.ts          # registrar readiness
   src/main.ts                              # shutdown y error de arranque
+  test/database-config.test.mjs
   test/integration/persistence.test.mjs
   test/integration/bootstrap.test.mjs
   test/integration/readiness.test.mjs
@@ -94,7 +97,7 @@ Integración usa una DB exclusiva de test, sin requerir DB para los tests actual
 2. US2: CLI bootstrap opt-in, dataset estable, rollback e idempotencia concurrente.
 3. Integración: Compose, pre-deploy Railway, recuperación y evidencias.
 4. Mantener /health y su contrato/consumidores; /ready no retorna metadatos.
-5. CI usa servicio PostgreSQL 17 y test:integration además de checks existentes;
+5. T025 agregará PostgreSQL 17 y test:integration a CI junto a checks existentes;
    datos/contraseñas se generan dentro del test, sin secretos productivos.
 6. Validar imagen final: migrador, SQL y Argon2id funcionan sin npm/pnpm.
 
@@ -114,10 +117,10 @@ Sin violaciones. /ready distingue disponibilidad de persistencia sin modificar
 el contrato de /health. El migrador runtime y Argon2id son necesarios para operar
 la imagen y crear credenciales válidas; el bootstrap no añade un servicio.
 
-## Planning Validation
+## Validation
 
 - Documentos <150 líneas, enlaces locales y resolución Spec Kit verificados.
 - Contrato OpenAPI válido; warning esperado por no declarar 4xx en una sonda
   sin parámetros que usa exclusivamente 200/503.
-- Sin implementación, migraciones ejecutadas, provisión Railway ni pruebas de
-  integración todavía; su evidencia es requisito de cierre, no de este diseño.
+- El diseño inicial no ejecutó implementación ni provisión. US1/US2 ahora cuentan
+  con evidencia local; Railway, CI y recuperación siguen pendientes en T025–T030.

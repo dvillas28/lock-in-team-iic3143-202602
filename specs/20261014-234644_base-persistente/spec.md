@@ -3,7 +3,7 @@
 **Feature Branch**: `feat/base-persistente` (propuesta)
 **Feature Directory**: `specs/20261014-234644_base-persistente`
 **Created**: 2026-10-14
-**Status**: Draft
+**Status**: US1/US2 implementadas; cierre de integración/operación pendiente (T025–T030).
 **Input**: Backend MVP de Entrega 2: Base persistente y datos demo.
 
 ## User Scenarios & Testing *(mandatory)*
@@ -37,6 +37,8 @@ Como equipo, dispongo de UC y UTFSM con identidades y pertenencias estables.
 
 - Probar colisiones de identidad, relaciones institucionales inválidas, entrada inválida, operación repetida y fallo antes de confirmar: sin exposición ni cambios parciales.
 - Verificar concurrencia de migraciones/bootstrap y conservación de identidades y memberships, incluidas pertenencias previamente revocadas.
+- Rechazar configuraciones que desactiven validación TLS, incluidas variables de entorno. Las pruebas deben observar la política efectiva del cliente.
+- Con conexión válida, flag/contraseñas inválidos no intentan conectar; repetir sobre demo existente conserva todos los registros. Los fallos de pruebas tampoco imprimen datos sensibles.
 
 ## Requirements *(mandatory)*
 
@@ -46,9 +48,9 @@ Como equipo, dispongo de UC y UTFSM con identidades y pertenencias estables.
 - **FR-002**: Mantener slug globalmente único y una pertenencia estable por institución/persona; la membership no otorga roles académicos.
 - **FR-003**: Separar evolución de estructura y bootstrap demo; fallos no dejan estados parciales y su repetición no duplica cambios.
 - **FR-004**: Preparar memberships activas/inactivas y usuario multiinstitución; recibir credenciales desde el entorno, sin valores versionados.
-- **FR-005**: Rechazar relaciones institucionales inválidas y conservar datos existentes ante fallos de preparación.
+- **FR-005**: Rechazar relaciones institucionales inválidas y configuraciones que desactiven validación de certificados TLS; conservar datos existentes ante fallos de preparación.
 - **FR-006**: Documentar instalación local/desplegada, recuperación del conjunto compartido y compatibilidad de cambios con la versión anterior.
-- **FR-007**: Restringir bootstrap al operador; no agregar alta pública de instituciones, usuarios o privilegios; registrar ejecución sin secretos.
+- **FR-007**: Restringir bootstrap al operador; no agregar alta pública de instituciones, usuarios o privilegios; registrar ejecución y fallos de pruebas sin secretos, emails, hashes ni SQL con valores.
 
 ### Key Entities
 

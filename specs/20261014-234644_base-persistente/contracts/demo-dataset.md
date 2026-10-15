@@ -65,6 +65,9 @@ No imprimir contraseñas, hashes, emails o SQL con parámetros, incluso en error
 - Preinsertar colisión de UUID/email: salida 1 y ninguna inserción parcial.
 - Forzar fallo intermedio mediante fixture/test, sin flag productivo de inyección.
 - Contraseña ausente o inválida con demo=true falla antes de escribir.
+- Con URL válida, observar cero intentos de conexión para flag/contraseñas inválidos;
+  repetir esos negativos sobre demo existente y comparar snapshots sin cambios.
+- Ninguna assertion fallida puede incluir hashes o la salida sensible original.
 - Verificar PHC mediante argon2.verify sin registrar hash ni credencial.
 - Usuario inactivo y membership inactiva siguen persistidos; no inventar
   pruebas HTTP 401/403/404 antes de implementar autenticación.

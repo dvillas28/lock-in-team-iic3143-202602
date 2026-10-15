@@ -57,6 +57,8 @@ Fuentes: [constraints PostgreSQL 17](https://www.postgresql.org/docs/17/ddl-cons
 **Decisión**: conservar GET /health como liveness; agregar GET /ready con 200/503.
 Al arrancar, validar conexión y columnas/constraints de la base mínima antes de
 escuchar; no migrar desde un hook de Nest.
+Fijar sslmode explícito en la URL entregada a pg evita heredar la política TLS
+de PGSSLMODE; rechazar no-verify y NODE_TLS_REJECT_UNAUTHORIZED=0.
 Compose secuencia migración → bootstrap opt-in → proceso HTTP.
 Railway ejecuta migración en pre-deploy; bootstrap se ejecuta por operador.
 **Razón**: preparar estructura no depende de iniciar tráfico y fallos de DB no

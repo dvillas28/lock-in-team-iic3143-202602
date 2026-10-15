@@ -6,7 +6,8 @@
     "watchPatterns": ["/backend/**"]
   },
   "deploy": {
-    "healthcheckPath": "/health",
+    "preDeployCommand": "node dist/platform/database/migrate.js",
+    "healthcheckPath": "/ready",
     "healthcheckTimeout": 100,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10

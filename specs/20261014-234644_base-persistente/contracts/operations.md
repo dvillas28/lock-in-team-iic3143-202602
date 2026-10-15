@@ -1,6 +1,6 @@
 # Contract: Operación de persistencia
 
-Estado: contrato a implementar, no comandos ya disponibles.
+Estado: comandos US1/US2 implementados; CI, Railway y recuperación pendientes (T025–T030).
 Operador autorizado mediante acceso al entorno/CLI; ninguna ruta pública da DDL,
 bootstrap o modificación de instituciones/usuarios/memberships.
 
@@ -37,6 +37,9 @@ conectar/escribir. No recibirlas por flags, URLs impresas o archivos versionados
 
 Producción usa conexión privada PostgreSQL. Si se usa transporte público, exigir
 TLS con CA válida; nunca resolver certificados inválidos desactivando validación.
+La URL fija sslmode: sin valor, solo hosts privados usan disable; TLS usa verify-full.
+PGSSLMODE no altera esa política; no-verify y NODE_TLS_REJECT_UNAUTHORIZED=0
+se rechazan tanto en el entorno recibido como en el proceso efectivo.
 Parsear configuración sin imprimir DATABASE_URL, password_hash o entrada secreta.
 
 ## Migración
@@ -65,6 +68,8 @@ que no participan del lock. Una colisión detectada revierte todos los inserts.
 - Resumen estructurado: operation, outcome, cantidades creadas/existentes y duración.
 - Error sanitizado: operation y categoría estable config/connection/schema/lock/conflict.
 - Nunca SQL con valores, entorno, emails, credenciales, hash o cadena de conexión.
+- Las assertions usan mensajes constantes y condiciones booleanas sobre datos sensibles;
+  un fallo no adjunta el hash ni la salida original como actual/expected.
 
 ## Arranque e integración
 

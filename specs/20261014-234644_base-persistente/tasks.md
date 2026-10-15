@@ -5,19 +5,20 @@
 **Input**: [spec](spec.md), [plan](plan.md), [research](research.md), [modelo](data-model.md),
 [operación](contracts/operations.md), [demo](contracts/demo-dataset.md),
 [readiness](contracts/readiness.openapi.yaml) y [quickstart](quickstart.md).
-**Estado**: 30 tareas pendientes; generar tareas no ejecuta implementación.
+**Estado**: T001–T024 implementadas y verificadas localmente; T025–T030 pendientes.
+**Evidencia**: [validación local](../../docs/backend/base-persistente-validation.md); spec completo aún abierto.
 **Tests**: requeridos por spec/constitución; escribir pruebas antes del comportamiento.
 **Responsables**: mantener asignaciones del backlog; no reasignar por estas tareas.
 
 ## Phase 1: Setup
 
-- [ ] T001 Instalar pg@8.23.1, node-pg-migrate@9.0.0 y argon2@0.45.1 como dependencias productivas y @types/pg exacto en desarrollo, con pnpm; actualizar `backend/package.json` y `backend/pnpm-lock.yaml` sin agregar ORM (FR-001/003/004).
-- [ ] T002 Documentar DATABASE_URL y TEST_DATABASE_URL separadas en `.env.example`, sin credenciales demo predeterminadas ni URLs Railway reales; conservar las variables del skeleton (FR-006/007).
+- [X] T001 Instalar pg@8.23.1, node-pg-migrate@9.0.0 y argon2@0.45.1 como dependencias productivas y @types/pg exacto en desarrollo, con pnpm; actualizar `backend/package.json` y `backend/pnpm-lock.yaml` sin agregar ORM (FR-001/003/004).
+- [X] T002 Documentar DATABASE_URL y TEST_DATABASE_URL separadas en `.env.example`, sin credenciales demo predeterminadas ni URLs Railway reales; conservar las variables del skeleton (FR-006/007).
 
 ## Phase 2: Foundation
 
-- [ ] T003 Crear harness `backend/test/integration/helpers.mjs`: exigir TEST_DATABASE_URL terminada en _test, sin fallback a DATABASE_URL, secretos aleatorios y limpieza solo del destino validado; probar rechazo previo a conectar en `backend/test/integration/config.test.mjs` (FR-005/007).
-- [ ] T004 Agregar test:integration en `backend/package.json`: compilar y ejecutar `test/integration/*.test.mjs` secuencialmente con node:test; conservar tests actuales sin dependencia de DB y verificar el guard de T003 (FR-005/006).
+- [X] T003 Crear harness `backend/test/integration/helpers.mjs`: exigir TEST_DATABASE_URL terminada en _test, sin fallback a DATABASE_URL, secretos aleatorios y limpieza solo del destino validado; probar rechazo previo a conectar en `backend/test/integration/config.test.mjs` (FR-005/007).
+- [X] T004 Agregar test:integration en `backend/package.json`: compilar y ejecutar `test/integration/*.test.mjs` secuencialmente con node:test; conservar tests actuales sin dependencia de DB y verificar el guard de T003 (FR-005/006).
 
 **Checkpoint**: herramientas instaladas y harness aislado; sin tocar DB de desarrollo/productiva.
 
@@ -29,21 +30,21 @@ reiniciar y comprobar IDs/relaciones; arrancar sin DB falla sin escuchar HTTP.
 
 ### Verification
 
-- [ ] T005 [P] [US1] Escribir `backend/test/integration/persistence.test.mjs`: migración repetida, tres tablas/constraints, slug y membership duplicados, FK inexistente, borrado restringido, identidad multiinstitución, rollback de DDL/historia y lock concurrente; fixture de migración fallida solo en test (FR-001/002/003/005, SC-002).
-- [ ] T006 [P] [US1] Escribir `backend/test/integration/readiness.test.mjs`: contrato 200/503 sin secretos, rechazo de URL/TLS inválidos, pérdida de DB/esquema, conexión/cola saturada, arranque fallido ≤30 s, respuesta ≤5 s y cierre sin conexiones pendientes; preservar respuesta de /health (FR-005/006).
+- [X] T005 [P] [US1] Escribir `backend/test/integration/persistence.test.mjs`: migración repetida, tres tablas/constraints, slug y membership duplicados, FK inexistente, borrado restringido, identidad multiinstitución, rollback de DDL/historia y lock concurrente; fixture de migración fallida solo en test (FR-001/002/003/005, SC-002).
+- [X] T006 [P] [US1] Escribir `backend/test/integration/readiness.test.mjs` y `backend/test/database-config.test.mjs`: contrato 200/503 sin secretos, rechazo de URL/TLS inválidos y overrides inseguros del entorno, pérdida de DB/esquema, conexión/cola saturada, arranque fallido ≤30 s, respuesta ≤5 s y cierre sin conexiones pendientes; preservar respuesta de /health (FR-005/006).
 
 ### Implementation
 
-- [ ] T007 [US1] Crear `backend/migrations/20261015000100_institutional-foundation.sql` con Institution/User/Membership según modelo, NOT NULL, límites/checks, timestamps, unicidades/FK RESTRICT e índice acordado; no agregar email único, tablas académicas o down destructivo (FR-001/002/005).
-- [ ] T008 [US1] Implementar `backend/src/platform/database/migrate.ts`: runner v9, public/pgmigrations, up transaccional con orden/bloqueo, SQL localizado desde archivo compilado, timeouts y salida/log sanitizados del contrato; exponer db:migrate en `backend/package.json` (FR-003/006/007).
-- [ ] T009 [US1] Implementar `backend/src/platform/database/database.service.ts` y `backend/src/platform/database/database.module.ts`: exportar un único Pool máximo 5, conexión/cola y consulta 2 s, validación de URL/TLS/esquema mínimo, errores sanitizados y cierre; sin migraciones en hooks HTTP (FR-001/005/006).
-- [ ] T010 [US1] Integrar DatabaseModule en `backend/src/app.module.ts` y `backend/src/platform/platform.module.ts` reutilizando el proveedor; en `backend/src/main.ts` habilitar shutdown y fallo acotado antes de listen, sin imprimir conexión ni secretos (FR-005/006).
-- [ ] T011 [US1] Implementar `backend/src/platform/health/readiness.controller.ts` y registrarlo en `backend/src/platform/platform.module.ts`: /ready público valida conexión/estructura y devuelve solo status ok/unavailable; conservar `backend/src/platform/health/health.controller.ts` (FR-005/006).
-- [ ] T012 [US1] Actualizar `backend/Dockerfile`: incluir SQL en /app/migrations y dependencias productivas; mantener usuario no privilegiado y ejecución con node sin npm/pnpm; verificar CLI de migración desde imagen (FR-003/006).
-- [ ] T013 [US1] Ajustar `docker-compose.yml` para esperar PostgreSQL healthy, ejecutar migración antes de exec HTTP y sondear /ready antes de iniciar frontend; preservar volumen y no ejecutar bootstrap todavía (FR-003/006).
-- [ ] T014 [US1] Configurar preDeployCommand de migración compilada y healthcheckPath /ready en `backend/railway.json`, conservando builder/PORT/timeouts; no ejecutar bootstrap en cada deploy (FR-003/006).
-- [ ] T015 [US1] Integrar /ready desde el contrato en `docs/reference/openapi/openapi.yaml` y `docs/reference/openapi/paths/platform.yaml`, manteniendo /health y contratos académicos existentes (FR-006/007).
-- [ ] T016 [US1] Ejecutar pruebas T005/T006, migración y reinicio con volumen desde Compose; registrar resultados reales en `docs/backend/base-persistente-validation.md` sin hashes/secretos y comprobar rechazo de acceso público a bootstrap (FR-001/005/006/007, SC-002/003 local).
+- [X] T007 [US1] Crear `backend/migrations/20261015000100_institutional-foundation.sql` con Institution/User/Membership según modelo, NOT NULL, límites/checks, timestamps, unicidades/FK RESTRICT e índice acordado; no agregar email único, tablas académicas o down destructivo (FR-001/002/005).
+- [X] T008 [US1] Implementar `backend/src/platform/database/migrate.ts`: runner v9, public/pgmigrations, up transaccional con orden/bloqueo, SQL localizado desde archivo compilado, timeouts y salida/log sanitizados del contrato; exponer db:migrate en `backend/package.json` (FR-003/006/007).
+- [X] T009 [US1] Implementar `backend/src/platform/database/database.service.ts` y `backend/src/platform/database/database.module.ts`: exportar un único Pool máximo 5, conexión/cola y consulta 2 s, validación de URL/TLS/esquema mínimo con política TLS explícita, errores sanitizados y cierre; sin migraciones en hooks HTTP (FR-001/005/006).
+- [X] T010 [US1] Integrar DatabaseModule en `backend/src/app.module.ts` y `backend/src/platform/platform.module.ts` reutilizando el proveedor; en `backend/src/main.ts` habilitar shutdown y fallo acotado antes de listen, sin imprimir conexión ni secretos (FR-005/006).
+- [X] T011 [US1] Implementar `backend/src/platform/health/readiness.controller.ts` y registrarlo en `backend/src/platform/platform.module.ts`: /ready público valida conexión/estructura y devuelve solo status ok/unavailable; conservar `backend/src/platform/health/health.controller.ts` (FR-005/006).
+- [X] T012 [US1] Actualizar `backend/Dockerfile`: incluir SQL en /app/migrations y dependencias productivas; mantener usuario no privilegiado y ejecución con node sin npm/pnpm; verificar CLI de migración desde imagen (FR-003/006).
+- [X] T013 [US1] Ajustar `docker-compose.yml` para esperar PostgreSQL healthy, ejecutar migración antes de exec HTTP y sondear /ready antes de iniciar frontend; preservar volumen y no ejecutar bootstrap todavía (FR-003/006).
+- [X] T014 [US1] Configurar preDeployCommand de migración compilada y healthcheckPath /ready en `backend/railway.json`, conservando builder/PORT/timeouts; no ejecutar bootstrap en cada deploy (FR-003/006).
+- [X] T015 [US1] Integrar /ready desde el contrato en `docs/reference/openapi/openapi.yaml` y `docs/reference/openapi/paths/platform.yaml`, manteniendo /health y contratos académicos existentes (FR-006/007).
+- [X] T016 [US1] Ejecutar pruebas T005/T006, migración y reinicio con volumen desde Compose; registrar resultados reales en `docs/backend/base-persistente-validation.md` sin hashes/secretos y comprobar rechazo de acceso público a bootstrap (FR-001/005/006/007, SC-002/003 local).
 
 **Checkpoint MVP**: US1 usable sin demo; tablas vacías válidas y /ready disponible.
 Evidencia Railway de SC-003 queda pendiente hasta T029; no declarar cierre total.
@@ -56,17 +57,17 @@ IDs, cantidades, hashes, estados y timestamps sin imprimir sus valores sensibles
 
 ### Verification
 
-- [ ] T017 [P] [US2] Escribir `backend/test/integration/bootstrap.test.mjs`: opt-in ausente/false, flag inválido, cinco contraseñas obligatorias y límites Unicode, manifiesto 2/5/6, hash/verify, repetición/concurrencia, colisión UUID/email, rollback intermedio y preservación de nombre/hash/estado/timestamps; comprobar salida y logs sanitizados (FR-003/004/005/007, SC-001/002).
+- [X] T017 [P] [US2] Escribir `backend/test/integration/bootstrap.test.mjs`: opt-in ausente/false, flag inválido, cinco contraseñas obligatorias y límites Unicode con URL válida/cero conexiones y repetición sobre demo existente, manifiesto 2/5/6, hash/verify, repetición/concurrencia, colisión UUID/email, rollback intermedio y preservación de nombre/hash/estado/timestamps; comprobar salida, logs y assertions fallidas sanitizados (FR-003/004/005/007, SC-001/002).
 
 ### Implementation
 
-- [ ] T018 [P] [US2] Crear `backend/src/platform/database/demo-data.ts` con slugs, nombres, cinco UUID/email .example y seis memberships exactamente como contrato demo; sin contraseñas, roles académicos ni filas futuras (FR-001/004).
-- [ ] T019 [US2] Implementar frontera CLI en `backend/src/platform/database/bootstrap.ts`: omitir sin conectar si demo no habilitada, validar cinco secretos antes de escribir, exit 0/1 y categorías/resúmenes sanitizados; nunca exponer ruta pública (FR-004/007).
-- [ ] T020 [US2] Completar transacción de `backend/src/platform/database/bootstrap.ts`: advisory xact lock, resolver slug/UUID/pareja, validar colisiones, insertar solo faltantes y producir PHC Argon2id solo para usuario nuevo; rollback/release/cierre y timeouts según contratos, sin UPDATE de existentes (FR-001/002/003/004/005, SC-001/002).
-- [ ] T021 [US2] Agregar db:bootstrap en `backend/package.json` y variables DEMO_* vacías con DEMO_BOOTSTRAP_ENABLED=false en `.env.example`; documentar parámetros de Argon2id del research sin introducir autenticación (FR-004/007).
-- [ ] T022 [US2] Extender `docker-compose.yml` a migración → bootstrap opt-in → exec HTTP y pasar variables demo explícitamente; ausencia de demo es no-op y fallo de preparación impide iniciar HTTP (FR-003/004/006).
-- [ ] T023 [US2] Verificar imagen de `backend/Dockerfile` contra DB de test: ejecutar ambos CLI y hash/verify Argon2id en Alpine sin gestores de paquetes; dejar comandos reproducibles en `specs/20261014-234644_base-persistente/quickstart.md` y resultados sanitizados en `docs/backend/base-persistente-validation.md` (FR-004/006).
-- [ ] T024 [US2] Ejecutar T017 y demo local repetida/concurrente, incluyendo revocación previa y cambio de variables de contraseña; registrar resultado sin valores secretos en `docs/backend/base-persistente-validation.md` (FR-003/004/005/007, SC-001/002).
+- [X] T018 [P] [US2] Crear `backend/src/platform/database/demo-data.ts` con slugs, nombres, cinco UUID/email .example y seis memberships exactamente como contrato demo; sin contraseñas, roles académicos ni filas futuras (FR-001/004).
+- [X] T019 [US2] Implementar frontera CLI en `backend/src/platform/database/bootstrap.ts`: omitir sin conectar si demo no habilitada, validar cinco secretos antes de escribir, exit 0/1 y categorías/resúmenes sanitizados; nunca exponer ruta pública (FR-004/007).
+- [X] T020 [US2] Completar transacción de `backend/src/platform/database/bootstrap.ts`: advisory xact lock, resolver slug/UUID/pareja, validar colisiones, insertar solo faltantes y producir PHC Argon2id solo para usuario nuevo; rollback/release/cierre y timeouts según contratos, sin UPDATE de existentes (FR-001/002/003/004/005, SC-001/002).
+- [X] T021 [US2] Agregar db:bootstrap en `backend/package.json` y variables DEMO_* vacías con DEMO_BOOTSTRAP_ENABLED=false en `.env.example`; documentar parámetros de Argon2id del research sin introducir autenticación (FR-004/007).
+- [X] T022 [US2] Extender `docker-compose.yml` a migración → bootstrap opt-in → exec HTTP y pasar variables demo explícitamente; ausencia de demo es no-op y fallo de preparación impide iniciar HTTP (FR-003/004/006).
+- [X] T023 [US2] Verificar imagen de `backend/Dockerfile` contra DB de test: ejecutar ambos CLI y hash/verify Argon2id en Alpine sin gestores de paquetes; dejar comandos reproducibles en `specs/20261014-234644_base-persistente/quickstart.md` y resultados sanitizados en `docs/backend/base-persistente-validation.md` (FR-004/006).
+- [X] T024 [US2] Ejecutar T017 y demo local repetida/concurrente, incluyendo revocación previa y cambio de variables de contraseña; registrar resultado sin valores secretos en `docs/backend/base-persistente-validation.md` (FR-003/004/005/007, SC-001/002).
 
 **Checkpoint**: base vacía produce 2 instituciones, 5 users y 6 memberships;
 una base operada conserva cambios. No añadir JWT, roles ni tests HTTP académicos.

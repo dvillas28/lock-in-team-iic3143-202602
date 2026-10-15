@@ -1,110 +1,133 @@
 # Quickstart: validar base persistente
 
-Estado: guía para después de implementar. Los comandos db:* y test:integration,
-el contrato /ready y las variables demo se crearán durante implementación.
-No ejecutar migraciones/bootstrap contra producción para validar esta guía.
+Implementados US1/US2 (T001–T024). CI y cierre remoto/recuperación siguen pendientes.
+[Contratos](contracts/operations.md) · [Evidencia local](../../docs/backend/base-persistente-validation.md).
+Nunca validar con una base de desarrollo operada o producción.
 
-## Preparar desarrollo
+## Preparación local
 
-Requisitos: Node 24, pnpm 9.15.9, Docker Compose y puerto 5432 disponible.
-Conservar .env existente; si falta, copiar .env.example. Para demo local habilitada,
-definir DEMO_BOOTSTRAP_ENABLED=true y las cinco contraseñas indicadas en
-[operación](contracts/operations.md); sin valores predeterminados versionados.
+Requisitos: Node 24, pnpm 9.15.9, Docker Compose y puertos 5432/3001 disponibles.
+Conservar `.env` existente; copiar `.env.example` únicamente si falta.
+Compose carga `.env`; pnpm/Node en el host requieren variables exportadas.
+`DATABASE_URL` debe apuntar a la base de desarrollo para operar el backend local.
 
-Desde la raíz:
+Bootstrap viene deshabilitado. Para una demo, definir `DEMO_BOOTSTRAP_ENABLED=true`
+y las cinco `DEMO_*_PASSWORD` de `.env.example` en el entorno privado.
+Cada contraseña requiere 8–30 caracteres Unicode; sin valores predeterminados.
+Argon2id usa memoria 19456 KiB, tiempo 2, paralelismo 1 y sal aleatoria de 16 bytes.
+Solo se generan hashes para usuarios faltantes; repetir no rota credenciales.
 
 ```bash
 pnpm --dir backend install --frozen-lockfile
 pnpm --dir backend build
 docker compose config --quiet
-docker compose up --build -d
+docker compose up --build --wait backend
 curl --fail http://localhost:3001/health
 curl --fail http://localhost:3001/ready
 ```
 
-Esperado: migración antes de HTTP, readiness 200, /health conserva su respuesta.
-Demo opt-in crea exactamente el manifiesto en una base previamente vacía.
-Si se omite demo, quedan tablas sin usuarios/instituciones demo y la app lista.
+Compose ejecuta migración → bootstrap opt-in → HTTP. Un fallo impide escuchar.
+`docker compose up --build -d frontend` inicia frontend después del backend healthy.
+Con demo omitida, una base vacía queda con tres tablas de dominio sin filas demo.
+Con demo habilitada, una base vacía produce 2 instituciones, 5 usuarios y 6 memberships.
+El volumen `postgres_data` conserva datos. No borrar volúmenes para esta prueba.
 
-## Idempotencia y durabilidad
+## CLI e idempotencia
+
+Después de compilar y exportar `DATABASE_URL`, desde la raíz:
 
 ```bash
+pnpm --dir backend db:migrate
+pnpm --dir backend db:bootstrap
+```
+
+Equivalentes dentro de la imagen final, sin gestor de paquetes:
+
+```bash
+docker compose exec backend node dist/platform/database/migrate.js
 docker compose exec backend node dist/platform/database/bootstrap.js
 docker compose exec backend node dist/platform/database/bootstrap.js
 docker compose restart backend
 curl --fail http://localhost:3001/ready
 ```
 
-Ambas ejecuciones terminan sin duplicados; comparar IDs, hashes, timestamps y
-estados en test, sin imprimir secretos. Reinicio conserva volumen y registros.
-No usar docker compose down -v: elimina persistencia y no demuestra durabilidad.
+El bootstrap conserva IDs, nombres editados, hashes, estados y timestamps.
+Resuelve instituciones por slug, usuarios por UUID y memberships por pareja.
+Colisiones de identidad fallan con rollback completo; no reutiliza otro usuario.
+No existe ruta HTTP de bootstrap, migración o escritura de estas tablas.
 
-## Pruebas automatizadas
+## Integración con PostgreSQL 17
 
-Usar únicamente DB descartable academix_test. Crear esa DB dentro del PostgreSQL
-local; TEST_DATABASE_URL usa host/credenciales del entorno y nombre academix_test.
-El harness rechaza un destino cuyo nombre no termine en _test y nunca usa
-DATABASE_URL como fallback. No apuntar tests al dataset de desarrollo/productivo.
+Usar una DB exclusiva y descartable terminada en `_test`, nunca la de desarrollo.
+El harness borra y reconstruye `public` exclusivamente en ese destino validado.
+Las pruebas de indisponibilidad necesitan permiso de operador para modificar
+`ALLOW_CONNECTIONS` de esa DB y terminar sus conexiones; usan `/postgres` del
+mismo servidor solo como conexión administrativa, sin modificar su esquema/datos.
 
-Compose carga .env; los comandos pnpm del host no lo cargan automáticamente.
-Antes de las pruebas, exportar TEST_DATABASE_URL al entorno del host. En el
-comando read siguiente, pegar la URL local de academix_test y pulsar Enter:
-la entrada es silenciosa, no se imprime ni se guarda como comando del historial.
+Crear el destino local solo si no existe; introducir su URL sin eco ni historial:
 
 ```bash
 docker compose exec postgres sh -c 'createdb -U "$POSTGRES_USER" academix_test'
-pnpm --dir backend lint
-pnpm --dir backend test
 read -rs TEST_DATABASE_URL
 export TEST_DATABASE_URL
 pnpm --dir backend test:integration
-python3 .github/scripts/check-doc-length.py
 ```
 
-Crear DB solo si aún no existe; limpiar fixtures solo dentro del destino de test.
-node:test mantiene test actuales sin DB; test:integration compila y ejecuta
-test/integration/*.test.mjs secuencialmente, con contraseña aleatoria por fixture.
-CI configura PostgreSQL 17 como servicio, URL de test exclusiva y ejecuta el mismo
-comando; conservar checks Docker, Trivy y SonarQube.
+No hay fallback a `DATABASE_URL`. Configuración ausente/insegura falla antes de
+limpiar. La suite compila y ejecuta secuencialmente `test/integration/*.test.mjs`.
+Genera credenciales aleatorias y compara datos sin imprimirlos.
+No ejecutar otro build del backend mientras corre la suite: ambos usan `dist`.
+CI todavía no ejecuta integración: se agrega en T025.
 
-## Matriz mínima de validación
+```bash
+pnpm lint
+pnpm test
+pnpm build
+pnpm docs:api:lint
+pnpm exec redocly lint specs/20261014-234644_base-persistente/contracts/readiness.openapi.yaml
+python3 .github/scripts/check-doc-length.py
+git diff --check
+```
 
-| Escenario | Evidencia esperada |
-| --- | --- |
-| Migración dos veces | Tres tablas, constraints presentes e historia sin duplicados |
-| DDL fallido | No queda esquema parcial ni marca de migración aplicada |
-| FK y unicidad inválidas | Rechazo y estado previo intacto |
-| Un usuario, UC y UTFSM | Una identidad con dos memberships distintas |
-| Bootstrap repetido/concurrente | IDs, hashes y estados estables; sin duplicados |
-| Credencial/colisión/fallo intermedio | Salida no cero, sin escrituras parciales ni secretos |
-| Revocación seguida de bootstrap | Membership permanece inactiva |
-| DB inaccesible al arrancar | Salida no cero ≤30 s; no escucha HTTP |
-| DB falla con HTTP iniciado | /ready 503 ≤5 s; /health sigue su contrato |
-| Esquema ausente | No listo; /ready 503 si se pierde durante operación |
-| Imagen final | Ejecuta migrador y hash/verify con node, sin npm/pnpm |
+`/ready` usa solo 200/503; el warning OpenAPI por ausencia de 4xx es esperado.
+Prueba del guard sin DB: `node --test backend/test/integration/config.test.mjs`.
 
-## Imagen y Railway
+## Imagen Alpine y durabilidad
 
-Construir la imagen real y ejecutar las mismas CLI usando un entorno DB de
-prueba accesible al contenedor. Comprobar /app/migrations y dependencias runtime;
-un test solo en el host no verifica el empaquetado Alpine.
+Ejecutar estos pasos solo con Compose conectado a una DB local de validación.
+Construyen la imagen final real y comprueban ubicación independiente del cwd:
 
-En Railway, verificar proyecto/entorno/servicio antes de configurar: una
-PostgreSQL compartida, DATABASE_URL por referencia privada, pre-deploy de migración
-y healthcheck /ready. Bootstrap solo por acción explícita del operador.
-Demostrar primero instalación desde una DB vacía aislada en el entorno Railway
-de validación; comprobar migración, bootstrap y manifiesto 2/5/6. Después reiniciar
-conservando IDs/relaciones y registrar ambas evidencias de SC-003 por separado.
-Usar un destino de validación descartable, sin vaciar la DB existente.
-No inventar IDs, nombres de servicio ni URLs. Esta fase no provisiona servicios.
+```bash
+docker compose build backend
+docker compose up --wait -d backend
+docker compose exec -w /tmp backend node /app/dist/platform/database/migrate.js
+docker compose exec backend sh -c 'test "$(id -u)" != 0 && ! command -v npm && ! command -v pnpm && test -f /app/migrations/20261015000100_institutional-foundation.sql'
+docker compose exec backend node -e 'const a=require("argon2"); const p=require("node:crypto").randomBytes(12).toString("hex"); (async()=>{const h=await a.hash(p,{type:a.argon2id,memoryCost:19456,timeCost:2,parallelism:1}); require("node:assert/strict").ok(await a.verify(h,p)); console.log("Argon2id OK")})().catch(()=>process.exitCode=1)'
+docker compose restart postgres
+docker compose up --wait -d postgres
+docker compose restart backend
+docker compose up --wait -d backend
+curl --fail http://localhost:3001/ready
+```
 
-Registrar en la entrega posterior la release, resultado de migración, readiness
-y reinicio durable sin incluir secretos. Sin esa evidencia SC-003 sigue pendiente.
+En una base demo vacía, ejecutar bootstrap dos veces y concurrentemente; verificar
+2/5/6 con consultas de conteo. Comparar snapshots ordenados por ID en memoria,
+incluyendo hashes/estados/fechas, sin imprimirlos; la suite automatiza esas comparaciones.
+La evidencia registra también esa comparación tras reiniciar ambos contenedores.
+Nunca usar `down -v`, truncar una base existente ni versionar dumps/archivos secretos.
 
-## Recuperación y cierre
+## Railway y cierre posterior
 
-Ensayar dump/restore completo a DB vacía separada según
-[contrato operativo](contracts/operations.md#recuperación).
-Verificar snapshots/PITR reales y registrar retención y tiempos medidos.
-Restauración/cutover no reemplaza el requisito de compatibilidad con app anterior.
-No declarar feature completada hasta pasar matriz local, CI y evidencia Railway.
+`backend/railway.json` configura migración compilada en pre-deploy y `/ready`.
+El CMD solo inicia HTTP. Bootstrap Railway es acción explícita del operador
+sobre la misma imagen/entorno; no se ejecuta automáticamente en cada deploy.
+Una conexión pública exige `sslmode=verify-full`, con CA válida; conexiones locales
+privadas y `*.railway.internal` pueden usar transporte privado sin TLS.
+No se admite deshabilitar validación de certificados ni opciones URL arbitrarias.
+La URL fija sslmode explícitamente; PGSSLMODE no la sustituye. no-verify y
+NODE_TLS_REJECT_UNAUTHORIZED=0 se rechazan incluso en el entorno efectivo del proceso.
+
+T025–T030 permanecen pendientes: CI, guía operativa, cierre de checks,
+compatibilidad con app anterior, evidencia Railway y recuperación completa.
+Seguir [operación](contracts/operations.md#recuperación) para dump/restore aislado,
+snapshots/PITR/retención y RPO/RTO reales cuando se autorice el cierre operativo.
