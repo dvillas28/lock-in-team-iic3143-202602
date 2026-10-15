@@ -1,8 +1,8 @@
 # Implementation Plan: [FEATURE]
 
-**Branch**: `[YYYYMMDD-HHMMSS-feature-name]` | **Date**: [DATE] | **Spec**: [link]
+**Branch**: `feat/[short-name]` | **Date**: [DATE] | **Spec**: [link]
 
-**Input**: Feature specification from `/specs/[YYYYMMDD-HHMMSS-feature-name]/spec.md`
+**Input**: Feature specification from `/specs/[YYYYMMDD-HHMMSS_descripcion-mision]/spec.md`
 
 **Note**: This template is filled in by the `/speckit-plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
 
@@ -41,9 +41,11 @@
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 - Tenant isolation is explicit for all affected reads, writes, and background work.
-- Role permissions are defined for student, teacher, admin, and institution admin flows.
-- Grade, submission, and publication changes have an auditable state/history decision.
+- Role permissions cover student, assistant, teacher and explicit course administration capability; no institutional admin is implied.
+- Attempts, grades, role changes and publication have an auditable state/history decision.
 - User stories remain independently implementable and testable.
+- Authored documents target <150 lines; justify 150–200, split above 200.
+- CU/RF/RNF coverage and dependent permission clarifications are resolved.
 - Complexity beyond the simplest deployable shape is justified below.
 
 ## Project Structure
@@ -51,7 +53,7 @@
 ### Documentation (this feature)
 
 ```text
-specs/[YYYYMMDD-HHMMSS-feature]/
+specs/[YYYYMMDD-HHMMSS_descripcion-mision]/
 ├── plan.md              # This file (/speckit-plan command output)
 ├── research.md          # Phase 0 output (/speckit-plan command)
 ├── data-model.md        # Phase 1 output (/speckit-plan command)
