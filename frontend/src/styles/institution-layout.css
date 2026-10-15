@@ -1,0 +1,6 @@
+/* Route-specific composition; shared shell and colors remain in app.css/tokens.css. */
+.institution-brand { text-decoration: none; }
+.institution-context { min-width: 0; overflow-wrap: anywhere; }
+.institution-context.breadcrumb { flex-wrap: wrap; }
+.institution-context.breadcrumb svg { flex-shrink: 0; }
+.state-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }

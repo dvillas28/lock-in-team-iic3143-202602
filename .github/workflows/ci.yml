@@ -183,13 +183,13 @@ jobs:
       # Generate LCOV in this job so the scanner can read it from the same checkout.
       # Run from the repository root to keep source paths relative to Sonar's base.
       - name: Run frontend tests with coverage
+        env:
+          TSX_TSCONFIG_PATH: frontend/tsconfig.json
         run: |
           mkdir -p frontend/coverage
-          node --test --experimental-test-coverage \
-            --test-reporter=spec \
-            --test-reporter-destination=stdout \
-            --test-reporter=lcov \
-            --test-reporter-destination=frontend/coverage/lcov.info \
+          frontend/node_modules/.bin/c8 --reporter=text --reporter=lcov \
+            --reports-dir=frontend/coverage \
+            node --import ./frontend/node_modules/tsx/dist/loader.mjs --test \
             frontend/test/*.test.ts
           test -s frontend/coverage/lcov.info
 
