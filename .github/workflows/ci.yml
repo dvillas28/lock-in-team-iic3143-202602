@@ -169,6 +169,30 @@ jobs:
           # Full history so SonarQube can attribute issues to new code.
           fetch-depth: 0
 
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        run: pnpm --dir frontend install --frozen-lockfile
+
+      # Generate LCOV in this job so the scanner can read it from the same checkout.
+      # Run from the repository root to keep source paths relative to Sonar's base.
+      - name: Run frontend tests with coverage
+        run: |
+          mkdir -p frontend/coverage
+          node --test --experimental-test-coverage \
+            --test-reporter=spec \
+            --test-reporter-destination=stdout \
+            --test-reporter=lcov \
+            --test-reporter-destination=frontend/coverage/lcov.info \
+            frontend/test/*.test.ts
+          test -s frontend/coverage/lcov.info
+
       # The gate blocks PRs only; on main the analysis feeds the dashboard and must not block the deploy.
       - uses: SonarSource/sonarqube-scan-action@v8
         env:
