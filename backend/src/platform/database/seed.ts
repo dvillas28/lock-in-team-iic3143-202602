@@ -1,12 +1,20 @@
-import { randomUUID, randomBytes } from "node:crypto";
-import { Pool } from "pg";
+import { randomUUID } from "node:crypto";
+import { Client } from "pg";
 import { hash, argon2id } from "argon2";
 import { connectionConfig, OperationError, reportError } from "./config";
 import { assertSchema } from "./schema";
-import { demoInstitutions, demoUsers } from "./demo-data";
+
+const demoInstitutions = [{slug: "uc", name: "UC"}, {slug: "utfsm", name: "UTFSM"}] as const;
+const demoUsers = [
+  {id: "10000000-0000-4000-8000-000000000001", name: "demo-uc", email: "demo-uc@academix.example", active: true, secret: "DEMO_UC_PASSWORD", memberships: [{slug: "uc", active: true}]},
+  {id: "10000000-0000-4000-8000-000000000002", name: "demo-utfsm", email: "demo-utfsm@academix.example", active: true, secret: "DEMO_UTFSM_PASSWORD", memberships: [{slug: "utfsm", active: true}]},
+  {id: "10000000-0000-4000-8000-000000000003", name: "demo-multi", email: "demo-multi@academix.example", active: true, secret: "DEMO_MULTI_PASSWORD", memberships: [{slug: "uc", active: true}, {slug: "utfsm", active: true}]},
+  {id: "10000000-0000-4000-8000-000000000004", name: "demo-revocado", email: "demo-revocado@academix.example", active: true, secret: "DEMO_REVOKED_PASSWORD", memberships: [{slug: "uc", active: false}]},
+  {id: "10000000-0000-4000-8000-000000000005", name: "demo-inactivo", email: "demo-inactivo@academix.example", active: false, secret: "DEMO_INACTIVE_PASSWORD", memberships: [{slug: "uc", active: true}]},
+] as const;
 
 function validate(env: NodeJS.ProcessEnv) {
-  const flag = env.DEMO_BOOTSTRAP_ENABLED;
+  const flag = env.DEMO_SEED_ENABLED;
   if (flag === undefined || flag === "false") return false;
   if (flag !== "true") throw new OperationError("config");
   for (const user of demoUsers) {
@@ -24,18 +32,17 @@ function validate(env: NodeJS.ProcessEnv) {
   return true;
 }
 
-export async function bootstrap(env: NodeJS.ProcessEnv = process.env) {
+export async function seed(env: NodeJS.ProcessEnv = process.env) {
   const started = Date.now();
   const created = {institutions: 0, users: 0, memberships: 0};
   const existing = {institutions: 0, users: 0, memberships: 0};
-  const summary = (outcome: string) => ({operation: "bootstrap", outcome, created, existing, durationMs: Date.now()-started});
+  const summary = (outcome: string) => ({operation: "seed", outcome, created, existing, durationMs: Date.now()-started});
   if (!validate(env)) return summary("skipped");
-  const pool = new Pool({...connectionConfig(env), max: 1, connectionTimeoutMillis: 5000,
+  const client = new Client({...connectionConfig(env), connectionTimeoutMillis: 5000,
     options: "-c lock_timeout=10000 -c statement_timeout=15000 -c search_path=public"});
-  pool.on("error", error => reportError("bootstrap", error));
+  client.on("error", () => { /* The active operation reports a sanitized failure. */ });
   try {
-    const client = await pool.connect();
-    let failed = false;
+    await client.connect();
     try {
       await client.query("BEGIN");
       await client.query("SELECT pg_advisory_xact_lock(202610150002)");
@@ -47,7 +54,7 @@ export async function bootstrap(env: NodeJS.ProcessEnv = process.env) {
         else {
           const inserted = await client.query("INSERT INTO public.institutions(id,slug,name) VALUES($1,$2,$3) ON CONFLICT(slug) DO NOTHING RETURNING id", [randomUUID(), institution.slug, institution.name]);
           if (inserted.rowCount) created.institutions++; else existing.institutions++;
-          rows = await client.query("SELECT id FROM public.institutions WHERE slug=$1", [institution.slug]);
+          rows = inserted.rowCount ? inserted : await client.query("SELECT id FROM public.institutions WHERE slug=$1", [institution.slug]);
         }
         if (rows.rowCount !== 1) throw new OperationError("conflict");
         institutionIds.set(institution.slug, rows.rows[0].id);
@@ -56,7 +63,7 @@ export async function bootstrap(env: NodeJS.ProcessEnv = process.env) {
         const result = await client.query("SELECT id,lower(btrim(email)) AS email FROM public.users WHERE id=$1 OR lower(btrim(email))=$2", [user.id, user.email]);
         if (result.rows.some(row => row.id !== user.id || row.email !== user.email)) throw new OperationError("conflict");
         if (!result.rowCount) {
-          const encoded = await hash(env[user.secret]!, {type: argon2id, memoryCost: 19456, timeCost: 2, parallelism: 1, salt: randomBytes(16)});
+          const encoded = await hash(env[user.secret]!, {type: argon2id, memoryCost: 19456, timeCost: 2, parallelism: 1});
           await client.query("INSERT INTO public.users(id,email,password_hash,name,active) VALUES($1,$2,$3,$4,$5)", [user.id, user.email, encoded, user.name, user.active]);
           created.users++;
         } else existing.users++;
@@ -66,7 +73,7 @@ export async function bootstrap(env: NodeJS.ProcessEnv = process.env) {
           else {
             const inserted = await client.query("INSERT INTO public.institution_memberships(id,institution_id,user_id,active) VALUES($1,$2,$3,$4) ON CONFLICT(institution_id,user_id) DO NOTHING RETURNING id", [randomUUID(), institutionIds.get(membership.slug), user.id, membership.active]);
             if (inserted.rowCount) created.memberships++; else existing.memberships++;
-            resolved = await client.query("SELECT id FROM public.institution_memberships WHERE institution_id=$1 AND user_id=$2", [institutionIds.get(membership.slug), user.id]);
+            resolved = inserted.rowCount ? inserted : await client.query("SELECT id FROM public.institution_memberships WHERE institution_id=$1 AND user_id=$2", [institutionIds.get(membership.slug), user.id]);
           }
           if (resolved.rowCount !== 1) throw new OperationError("conflict");
         }
@@ -74,14 +81,13 @@ export async function bootstrap(env: NodeJS.ProcessEnv = process.env) {
       await client.query("COMMIT");
       return summary("ok");
     } catch (error) {
-      failed = true;
       await client.query("ROLLBACK").catch(() => {});
       throw error;
-    } finally { client.release(failed); }
-  } finally { await pool.end(); }
+    }
+  } finally { await client.end(); }
 }
 
 if (require.main === module) {
-  bootstrap().then(result => console.log(JSON.stringify(result)))
-    .catch(error => { reportError("bootstrap",error); process.exitCode=1; });
+  seed().then(result => console.log(JSON.stringify(result)))
+    .catch(error => { reportError("seed",error); process.exitCode=1; });
 }

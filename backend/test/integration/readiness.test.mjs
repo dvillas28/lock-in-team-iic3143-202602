@@ -4,6 +4,7 @@ import { test } from "node:test";
 import pg from "pg";
 import { database, migrated, cli, sanitized, testUrl } from "./helpers.mjs";
 import service from "../../dist/platform/database/database.service.js";
+import schema from "../../dist/platform/database/schema.js";
 
 async function failedStartup(extra) {
   const app = cli("main", {...extra,PORT:"13981"});
@@ -52,7 +53,7 @@ test("HTTP readiness, health, schema/DB loss, recovery and graceful shutdown", a
     assert.deepEqual(await (await fetch("http://localhost:13982/ready")).json(), {status:"ok"});
     const health = await (await fetch("http://localhost:13982/health")).json();
     assert.deepEqual(Object.keys(health).sort(), ["commit","deployedAt","status","timestamp","version"]);
-    for (const path of ["/bootstrap","/db/bootstrap"]) assert.equal((await fetch(`http://localhost:13982${path}`)).status,404);
+    for (const path of ["/seed","/db/seed","/bootstrap","/db/bootstrap"]) assert.equal((await fetch(`http://localhost:13982${path}`)).status,404);
     await pool.query("ALTER TABLE users ADD COLUMN future_field text");
     await waitReady(13982,app);
     await pool.query("ALTER TABLE users RENAME COLUMN email TO missing_email");
@@ -108,14 +109,14 @@ test("shared pool bounds saturation/query time and closes connections", async ()
   try {
     for(let i=0;i<5;i++) clients.push(await pool.connect());
     const start = performance.now();
-    await assert.rejects(service.assertReady(pool));
+    await assert.rejects(schema.assertSchema(pool));
     assert.ok(performance.now()-start < 5000);
     assert.equal(pool.totalCount,5);
     for(const client of clients.splice(0)) client.release();
     const startQuery = performance.now();
     await assert.rejects(pool.query("SELECT pg_sleep(10)"));
     assert.ok(performance.now()-startQuery < 5000);
-    await service.assertReady(pool);
+    await schema.assertSchema(pool);
   } finally {
     for(const client of clients) client.release();
     await pool.end(); await admin.end();

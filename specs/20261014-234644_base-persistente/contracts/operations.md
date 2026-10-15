@@ -2,14 +2,14 @@
 
 Estado: comandos US1/US2 implementados; CI, Railway y recuperación pendientes (T025–T030).
 Operador autorizado mediante acceso al entorno/CLI; ninguna ruta pública da DDL,
-bootstrap o modificación de instituciones/usuarios/memberships.
+seed o modificación de instituciones/usuarios/memberships.
 
 ## Comandos
 
 | Propósito | Desarrollo, desde raíz | Imagen final, en /app |
 | --- | --- | --- |
 | Migrar | pnpm --dir backend db:migrate | node dist/platform/database/migrate.js |
-| Demo | pnpm --dir backend db:bootstrap | node dist/platform/database/bootstrap.js |
+| Demo | pnpm --dir backend db:seed | node dist/platform/database/seed.js |
 | Integración | pnpm --dir backend test:integration | CI, fuera del runner productivo |
 
 Los scripts db:* ejecutan programas compilados; ejecutar pnpm --dir backend build
@@ -21,8 +21,8 @@ No ofrecer comando down productivo ni crear migrador alternativo.
 
 | Variable | Contrato |
 | --- | --- |
-| DATABASE_URL | Obligatoria para app/migración/bootstrap; URL PostgreSQL válida |
-| DEMO_BOOTSTRAP_ENABLED | Ausente/false: bootstrap omitido; true: habilitado; otro valor: error |
+| DATABASE_URL | Obligatoria para app/migración/seed; URL PostgreSQL válida |
+| DEMO_SEED_ENABLED | Ausente/false: seed omitido; true: habilitado; otro valor: error |
 | DEMO_UC_PASSWORD | Obligatoria solo con demo habilitada |
 | DEMO_UTFSM_PASSWORD | Igual |
 | DEMO_MULTI_PASSWORD | Igual |
@@ -52,13 +52,14 @@ Configurar conexión 5 s, lock_timeout 10 s y statement_timeout 30 s por conexi�
 de migración: evitar esperas ilimitadas; todo error devuelve salida no cero.
 Una migración fallida revierte DDL e historia del lote pendiente.
 
-## Bootstrap
+## Seed
 
 Ver [dataset y algoritmo](demo-dataset.md).
 Requiere migración aplicada; nunca crea tablas ni llama al migrador.
-Transacción sobre un solo cliente, advisory lock fijo exclusivo de demo,
+Dataset y ejecución en seed.ts, sin demo-data.ts ni comando seed alternativo.
+Transacción sobre un solo Client, advisory lock fijo exclusivo de demo,
 lock_timeout 10 s, statement_timeout 15 s y liberación/cierre siempre.
-La exclusión coordina otras ejecuciones bootstrap; constraints protegen clientes
+La exclusión coordina otras ejecuciones seed; constraints protegen clientes
 que no participan del lock. Una colisión detectada revierte todos los inserts.
 
 ## Salida y errores
@@ -79,12 +80,12 @@ Error de arranque: cerrar Pool y salir no cero en ≤30 s, sin escuchar HTTP.
 Registrar error sanitizado y escuchar errores asíncronos del Pool.
 En SIGTERM/SIGINT, cerrar Pool mediante lifecycle hooks y enableShutdownHooks.
 
-Compose ejecuta migración → bootstrap → exec HTTP; el bootstrap false es no-op.
+Compose ejecuta migración → seed → exec HTTP; el seed false es no-op.
 Si algún comando falla, HTTP no inicia. Compose espera postgres healthy y sondea
 /ready del backend antes de iniciar frontend; las variables demo pasan explícitas.
 Railway: pre-deploy=node dist/platform/database/migrate.js; CMD inicia solo HTTP.
 Cambiar healthcheckPath de Railway a /ready y conservar PORT/timeout existentes.
-Bootstrap Railway es acción explícita de operador con la misma imagen/entorno;
+Seed Railway es acción explícita de operador con la misma imagen/entorno;
 no se ejecuta en cada deploy ni se supone que pnpm está instalado.
 
 ## Recuperación

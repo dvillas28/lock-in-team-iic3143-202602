@@ -26,7 +26,7 @@ Como operador, preparo una instalación que conserva identidades y pertenencias 
 Como equipo, dispongo de UC y UTFSM con identidades y pertenencias estables.
 
 **Why this priority**: Cierra una capacidad necesaria del flujo MVP.
-**Independent Test**: Ejecutar bootstrap dos veces y comparar cantidades e identificadores.
+**Independent Test**: Ejecutar seed dos veces y comparar cantidades e identificadores.
 
 **Acceptance Scenarios**:
 
@@ -36,7 +36,7 @@ Como equipo, dispongo de UC y UTFSM con identidades y pertenencias estables.
 ### Edge Cases
 
 - Probar colisiones de identidad, relaciones institucionales inválidas, entrada inválida, operación repetida y fallo antes de confirmar: sin exposición ni cambios parciales.
-- Verificar concurrencia de migraciones/bootstrap y conservación de identidades y memberships, incluidas pertenencias previamente revocadas.
+- Verificar concurrencia de migraciones/seed y conservación de identidades y memberships, incluidas pertenencias previamente revocadas.
 - Rechazar configuraciones que desactiven validación TLS, incluidas variables de entorno. Las pruebas deben observar la política efectiva del cliente.
 - Con conexión válida, flag/contraseñas inválidos no intentan conectar; repetir sobre demo existente conserva todos los registros. Los fallos de pruebas tampoco imprimen datos sensibles.
 
@@ -46,11 +46,11 @@ Como equipo, dispongo de UC y UTFSM con identidades y pertenencias estables.
 
 - **FR-001**: Persistir Institution, User global e InstitutionMembership; una identidad puede pertenecer a varias instituciones sin duplicarse.
 - **FR-002**: Mantener slug globalmente único y una pertenencia estable por institución/persona; la membership no otorga roles académicos.
-- **FR-003**: Separar evolución de estructura y bootstrap demo; fallos no dejan estados parciales y su repetición no duplica cambios.
+- **FR-003**: Separar migraciones de esquema/datos obligatorios del seed demo opcional; fallos no dejan estados parciales y su repetición no duplica cambios.
 - **FR-004**: Preparar memberships activas/inactivas y usuario multiinstitución; recibir credenciales desde el entorno, sin valores versionados.
 - **FR-005**: Rechazar relaciones institucionales inválidas y configuraciones que desactiven validación de certificados TLS; conservar datos existentes ante fallos de preparación.
 - **FR-006**: Documentar instalación local/desplegada, recuperación del conjunto compartido y compatibilidad de cambios con la versión anterior.
-- **FR-007**: Restringir bootstrap al operador; no agregar alta pública de instituciones, usuarios o privilegios; registrar ejecución y fallos de pruebas sin secretos, emails, hashes ni SQL con valores.
+- **FR-007**: Restringir seed al operador; no agregar alta pública de instituciones, usuarios o privilegios; registrar ejecución y fallos de pruebas sin secretos, emails, hashes ni SQL con valores.
 
 ### Key Entities
 
@@ -67,7 +67,7 @@ Como equipo, dispongo de UC y UTFSM con identidades y pertenencias estables.
 ## Assumptions
 
 - No incluye login ni recursos académicos. Herramientas y procedimientos de persistencia se deciden en el plan.
-- Pruebas con dos instituciones cubren integridad, sanitización, acceso exclusivo del operador al bootstrap y conservación de estados revocados; no se cierra con pruebas negativas pendientes.
+- Pruebas con dos instituciones cubren integridad, sanitización, acceso exclusivo del operador al seed y conservación de estados revocados; no se cierra con pruebas negativas pendientes.
 - JWT, autorización HTTP por institución/rol y operaciones sobre intentos/notas se validan en las specs posteriores, fuera de esta misión.
 
 ## Sources & Traceability

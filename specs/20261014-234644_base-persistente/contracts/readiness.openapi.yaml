@@ -18,7 +18,7 @@ paths:
       description: >
         Público, sin datos institucionales ni credenciales. Responde en un máximo
         de cinco segundos. Comprueba una conexión con la estructura mínima
-        requerida; no ejecuta migraciones ni bootstrap.
+        requerida; no ejecuta migraciones ni seed.
       security: []
       responses:
         '200':

@@ -32,7 +32,7 @@ export function connectionConfig(env: NodeJS.ProcessEnv = process.env): PoolConf
   } catch { throw new OperationError("config"); }
 }
 
-export function category(error: unknown): OperationError["category"] {
+function category(error: unknown): OperationError["category"] {
   if (error instanceof OperationError) return error.category;
   const code = (error as {code?: string})?.code;
   if (code === "55P03") return "lock";

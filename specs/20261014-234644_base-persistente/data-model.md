@@ -61,7 +61,7 @@ en autorización al implementar identidad/cursos.
 
 User 1 → N InstitutionMembership ← N Institution.
 Una membership no contiene roles; no crear Course, Enrollment o AuditEvent.
-Nunca usar institution_id recibido de cliente para bootstrap: el operador usa
+Nunca usar institution_id recibido de cliente para seed: el operador usa
 slugs del manifiesto y resuelve UUID desde la base.
 
 Esta misión prueba unicidad y FK sobre sus tres tablas; las FK cruzadas de
@@ -70,13 +70,13 @@ entidades académicas todavía no existen y se prueban con sus propias specs.
 ## Estados e historia
 
 Institution/User/Membership nacen activos salvo fixture de prueba explícito.
-El bootstrap inserta faltantes y conserva campos, hashes, estados y timestamps
+El seed inserta faltantes y conserva campos, hashes, estados y timestamps
 existentes. No reactiva, actualiza ni elimina filas.
 Desactivación efectiva de acceso se implementará en identidad; cambios sensibles
 académicos se auditarán desde cursos-roles, sin relajar AuditEvent.course_id.
 
 Un conflicto de UUID/identidad o email demo ya usado por otro UUID falla sin
-reutilizar un usuario arbitrario. Esto protege bootstrap; no agrega unicidad
+reutilizar un usuario arbitrario. Esto protege seed; no agrega unicidad
 global de email a la tabla.
 
 ## Evolución de esquema

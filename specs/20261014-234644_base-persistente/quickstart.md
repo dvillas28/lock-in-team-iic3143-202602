@@ -11,7 +11,7 @@ Conservar `.env` existente; copiar `.env.example` únicamente si falta.
 Compose carga `.env`; pnpm/Node en el host requieren variables exportadas.
 `DATABASE_URL` debe apuntar a la base de desarrollo para operar el backend local.
 
-Bootstrap viene deshabilitado. Para una demo, definir `DEMO_BOOTSTRAP_ENABLED=true`
+Seed viene deshabilitado. Para una demo, definir `DEMO_SEED_ENABLED=true`
 y las cinco `DEMO_*_PASSWORD` de `.env.example` en el entorno privado.
 Cada contraseña requiere 8–30 caracteres Unicode; sin valores predeterminados.
 Argon2id usa memoria 19456 KiB, tiempo 2, paralelismo 1 y sal aleatoria de 16 bytes.
@@ -26,7 +26,7 @@ curl --fail http://localhost:3001/health
 curl --fail http://localhost:3001/ready
 ```
 
-Compose ejecuta migración → bootstrap opt-in → HTTP. Un fallo impide escuchar.
+Compose ejecuta migración → seed opt-in → HTTP. Un fallo impide escuchar.
 `docker compose up --build -d frontend` inicia frontend después del backend healthy.
 Con demo omitida, una base vacía queda con tres tablas de dominio sin filas demo.
 Con demo habilitada, una base vacía produce 2 instituciones, 5 usuarios y 6 memberships.
@@ -38,23 +38,23 @@ Después de compilar y exportar `DATABASE_URL`, desde la raíz:
 
 ```bash
 pnpm --dir backend db:migrate
-pnpm --dir backend db:bootstrap
+pnpm --dir backend db:seed
 ```
 
 Equivalentes dentro de la imagen final, sin gestor de paquetes:
 
 ```bash
 docker compose exec backend node dist/platform/database/migrate.js
-docker compose exec backend node dist/platform/database/bootstrap.js
-docker compose exec backend node dist/platform/database/bootstrap.js
+docker compose exec backend node dist/platform/database/seed.js
+docker compose exec backend node dist/platform/database/seed.js
 docker compose restart backend
 curl --fail http://localhost:3001/ready
 ```
 
-El bootstrap conserva IDs, nombres editados, hashes, estados y timestamps.
+El seed conserva IDs, nombres editados, hashes, estados y timestamps.
 Resuelve instituciones por slug, usuarios por UUID y memberships por pareja.
 Colisiones de identidad fallan con rollback completo; no reutiliza otro usuario.
-No existe ruta HTTP de bootstrap, migración o escritura de estas tablas.
+No existe ruta HTTP de seed, migración o escritura de estas tablas.
 
 ## Integración con PostgreSQL 17
 
@@ -90,7 +90,7 @@ git diff --check
 ```
 
 `/ready` usa solo 200/503; el warning OpenAPI por ausencia de 4xx es esperado.
-Prueba del guard sin DB: `node --test backend/test/integration/config.test.mjs`.
+Pruebas de configuración/guard sin DB: `pnpm --dir backend test`.
 
 ## Imagen Alpine y durabilidad
 
@@ -110,7 +110,7 @@ docker compose up --wait -d backend
 curl --fail http://localhost:3001/ready
 ```
 
-En una base demo vacía, ejecutar bootstrap dos veces y concurrentemente; verificar
+En una base demo vacía, ejecutar seed dos veces y concurrentemente; verificar
 2/5/6 con consultas de conteo. Comparar snapshots ordenados por ID en memoria,
 incluyendo hashes/estados/fechas, sin imprimirlos; la suite automatiza esas comparaciones.
 La evidencia registra también esa comparación tras reiniciar ambos contenedores.
@@ -119,7 +119,7 @@ Nunca usar `down -v`, truncar una base existente ni versionar dumps/archivos sec
 ## Railway y cierre posterior
 
 `backend/railway.json` configura migración compilada en pre-deploy y `/ready`.
-El CMD solo inicia HTTP. Bootstrap Railway es acción explícita del operador
+El CMD solo inicia HTTP. Seed Railway es acción explícita del operador
 sobre la misma imagen/entorno; no se ejecuta automáticamente en cada deploy.
 Una conexión pública exige `sslmode=verify-full`, con CA válida; conexiones locales
 privadas y `*.railway.internal` pueden usar transporte privado sin TLS.

@@ -6,13 +6,13 @@ import { test } from "node:test";
 import argon2 from "argon2";
 import { database, migrated, cli, snapshot, secrets, sanitized, testUrl } from "./helpers.mjs";
 
-const run = env => cli("platform/database/bootstrap",env).result;
-const demo = () => ({DEMO_BOOTSTRAP_ENABLED:"true", ...secrets()});
+const run = env => cli("platform/database/seed",env).result;
+const demo = () => ({DEMO_SEED_ENABLED:"true", ...secrets()});
 const same = (a,b) => assert.ok(JSON.stringify(a)===JSON.stringify(b), "persisted rows changed");
 
 async function rejectInvalidInputs(DATABASE_URL) {
   for(const flag of ["TRUE","0","yes",""]) {
-    const result=await run({...demo(),DEMO_BOOTSTRAP_ENABLED:flag,DATABASE_URL});
+    const result=await run({...demo(),DEMO_SEED_ENABLED:flag,DATABASE_URL});
     sanitized(result.output);
     assert.equal(result.code,1); assert.ok(/config/.test(result.output),"configuration error missing");
   }
@@ -25,24 +25,24 @@ async function rejectInvalidInputs(DATABASE_URL) {
   }
 }
 
-test("bootstrap is opt-in and validates flag/all passwords before connecting", async () => {
+test("seed is opt-in and validates flag/all passwords before connecting", async () => {
   let connections=0;
   const server=createServer(socket=>{connections++;socket.destroy();});
   server.listen(0,"127.0.0.1");
   await once(server,"listening");
-  const DATABASE_URL=`postgres://127.0.0.1:${server.address().port}/bootstrap_validation_test`;
+  const DATABASE_URL=`postgres://127.0.0.1:${server.address().port}/seed_validation_test`;
   try {
     for(const flag of [undefined,"false"]) {
-      const result=await run({DEMO_BOOTSTRAP_ENABLED:flag,DATABASE_URL});
+      const result=await run({DEMO_SEED_ENABLED:flag,DATABASE_URL});
       sanitized(result.output);
-      assert.equal(result.code,0); assert.ok(/skipped/.test(result.output),"bootstrap was not skipped");
+      assert.equal(result.code,0); assert.ok(/skipped/.test(result.output),"seed was not skipped");
     }
     await rejectInvalidInputs(DATABASE_URL);
-    assert.equal(connections,0,"invalid or skipped bootstrap connected to DB");
+    assert.equal(connections,0,"invalid or skipped seed connected to DB");
   } finally { await new Promise(resolve=>server.close(resolve)); }
 });
 
-test("bootstrap exact dataset/hash verification, repeat/concurrency and preservation", async () => {
+test("seed exact dataset/hash verification, repeat/concurrency and preservation", async () => {
   const pool=await database();
   const env=demo();
   env.DEMO_MULTI_PASSWORD="😀".repeat(8);
@@ -61,6 +61,7 @@ test("bootstrap exact dataset/hash verification, repeat/concurrency and preserva
       const row=before[1][i];
       assert.equal(row.id,`10000000-0000-4000-8000-00000000000${i+1}`);
       assert.ok(/^\$argon2id\$v=19\$m=19456,(?:t=2,p=1|p=1,t=2)\$/.test(row.password_hash),"unexpected Argon2id parameters");
+      assert.equal(Buffer.from(row.password_hash.split("$")[4],"base64").length,16,"unexpected salt length");
       assert.ok(await argon2.verify(row.password_hash,env[`DEMO_${keys[i]}_PASSWORD`]).catch(()=>false),"hash verification failed");
       assert.equal(row.active,i!==4);
     }
@@ -109,7 +110,7 @@ test("identity collisions and intermediate failure roll back all inserts", async
   } finally { await pool.end(); }
 });
 
-test("bootstrap lock timeout is clean and retry succeeds", async () => {
+test("seed lock timeout is clean and retry succeeds", async () => {
   const pool=await database();
   try {
     await migrated(pool);

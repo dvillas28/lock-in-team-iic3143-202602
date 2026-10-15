@@ -10,7 +10,7 @@
     "lint": "eslint \"{src,test}/**/*.{ts,mjs}\"",
     "test": "pnpm build && node --test test/*.test.mjs",
     "db:migrate": "node dist/platform/database/migrate.js",
-    "db:bootstrap": "node dist/platform/database/bootstrap.js",
+    "db:seed": "node dist/platform/database/seed.js",
     "test:integration": "pnpm build && node --test --test-concurrency=1 test/integration/*.test.mjs"
   },
   "dependencies": {

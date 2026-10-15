@@ -11,7 +11,6 @@ async function bootstrap() {
   try {
     app = await NestFactory.create(AppModule, { abortOnError: false, logger: false });
     app.enableShutdownHooks();
-    await app.init();
     await app.listen(Number(process.env.PORT ?? 3001), "0.0.0.0");
   } catch (error) {
     if (app) await app.close();

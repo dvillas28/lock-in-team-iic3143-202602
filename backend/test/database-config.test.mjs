@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import pg from "pg";
 import config from "../dist/platform/database/config.js";
-import { sanitized } from "./integration/helpers.mjs";
+import { sanitized, testUrl } from "./integration/helpers.mjs";
 
 test("TLS policy is explicit in pg and rejects unsafe environment overrides", () => {
   const previous={PGSSLMODE:process.env.PGSSLMODE,NODE_TLS_REJECT_UNAUTHORIZED:process.env.NODE_TLS_REJECT_UNAUTHORIZED};
@@ -43,4 +43,11 @@ test("sanitization assertions never report the sensitive actual output", () => {
     if(TEST_DATABASE_URL===undefined) delete process.env.TEST_DATABASE_URL;
     else process.env.TEST_DATABASE_URL=TEST_DATABASE_URL;
   }
+});
+
+test("test guard refuses absent, malformed and non-test destinations before connecting", () => {
+  for (const TEST_DATABASE_URL of [undefined, "bad", "postgres://localhost/academix", "postgres://localhost/foo_test?options=-csearch_path=other", "http://localhost/a_test", "postgres://localhost/a_test?host=other", "postgres://localhost/a_test?database=production"]) {
+    assert.throws(() => testUrl({ TEST_DATABASE_URL, DATABASE_URL: "postgres://localhost/production" }));
+  }
+  assert.ok(testUrl({ TEST_DATABASE_URL: "postgres://localhost/isolated_test" }));
 });

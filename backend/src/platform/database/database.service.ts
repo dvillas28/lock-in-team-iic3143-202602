@@ -13,16 +13,9 @@ export function createPool(env: NodeJS.ProcessEnv = process.env) {
   return pool;
 }
 
-export async function assertReady(pool: Pool) {
-  const client = await pool.connect();
-  try { await assertSchema(client); }
-  catch (error) { client.release(true); throw error; }
-  client.release();
-}
-
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
   constructor(@Inject(Pool) public readonly pool: Pool) {}
-  async onModuleInit() { await assertReady(this.pool); }
+  async onModuleInit() { await assertSchema(this.pool); }
   async onApplicationShutdown() { await this.pool.end(); }
 }

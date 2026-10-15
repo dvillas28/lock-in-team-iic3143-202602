@@ -1,4 +1,4 @@
-import type { Pool, PoolClient } from "pg";
+import type { Pool, Client } from "pg";
 import { OperationError } from "./config";
 
 const columns = {
@@ -17,7 +17,7 @@ const keys: Record<string, string[]> = {
   institution_memberships: ["PRIMARY KEY (id)", "UNIQUE (institution_id, user_id)", "UNIQUE (institution_id, id)", "FOREIGN KEY (institution_id) REFERENCES institutions(id) ON UPDATE RESTRICT ON DELETE RESTRICT", "FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE RESTRICT ON DELETE RESTRICT"],
 };
 
-export async function assertSchema(db: Pool | PoolClient) {
+export async function assertSchema(db: Pool | Client) {
   // One catalog query keeps the readiness budget bounded even when the DB stalls.
   const { rows } = await db.query(`SELECT c.relname AS table_name,
     (SELECT jsonb_object_agg(a.attname, jsonb_build_object('type',format_type(a.atttypid,a.atttypmod),'required',a.attnotnull,'default',pg_get_expr(d.adbin,d.adrelid)))

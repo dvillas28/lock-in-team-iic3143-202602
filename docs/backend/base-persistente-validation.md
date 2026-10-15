@@ -22,7 +22,7 @@ No cierra el spec. T025–T030 permanecen pendientes.
   Al terminar se detuvieron los contenedores creados, se conservaron los volúmenes
   y se eliminaron los archivos temporales de credenciales.
 
-## Validación inicial: comandos y resultados
+## Validación inicial: comandos y resultados (antes del renombrado a seed)
 
 | Check ejecutado | Resultado |
 | --- | --- |
@@ -34,7 +34,7 @@ No cierra el spec. T025–T030 permanecen pendientes.
 | `pnpm --dir backend audit --audit-level=high` | Sin vulnerabilidades conocidas |
 | `docker compose config --quiet` | OK |
 | `docker build -t academix-persistence-validation backend` | Imagen Alpine final construida |
-| CLI dentro de la imagen final | Migración y bootstrap OK con `node` |
+| CLI dentro de la imagen final | Migración y seed OK con `node` |
 | `pnpm docs:api:lint` | Válido; warning esperado de 4xx en `/ready` |
 | Lint contrato readiness independiente | Válido; warnings documentales esperados |
 | `python3 .github/scripts/check-doc-length.py` | Documentos modificados dentro del límite |
@@ -63,9 +63,9 @@ la suite secuencialmente: 10/10 OK (~22,5 s), sin builds host competidores.
   consulta `pg_sleep(10)` queda acotada por timeout de 2 s.
 - SIGTERM cierra conexiones HTTP; Pool finaliza sin conexiones pendientes.
 - `/health` conserva sus cinco campos y sigue 200 durante la caída de DB.
-  `/bootstrap` y `/db/bootstrap` responden 404.
+  `/seed` y `/db/seed` responden 404.
 
-## US2: bootstrap demo
+## US2: seed demo
 
 - Ausente/false: salida 0 omitida incluso con URL inválida; sin conexión.
 - Flag ajeno, cualquiera de las cinco contraseñas ausente o longitud 7/31:
@@ -82,7 +82,7 @@ la suite secuencialmente: 10/10 OK (~22,5 s), sin builds host competidores.
 - UUID con otro email o email normalizado de otro UUID: error/conflict y rollback.
 - Trigger de test fuerza error tras inserciones iniciales: rollback completo;
   sin flag productivo de inyección. Reintento posterior funciona.
-- Advisory lock de bootstrap retenido: timeout limpio (~10 s), cero inserciones;
+- Advisory lock de seed retenido: timeout limpio (~10 s), cero inserciones;
   liberar y reintentar crea el dataset sin duplicados.
 - Logs finales de CLI/contenedor sin credenciales, hashes, emails ni SQL con valores.
   Harness sanitiza también errores inesperados de PostgreSQL antes de reportarlos.
@@ -92,13 +92,13 @@ la suite secuencialmente: 10/10 OK (~22,5 s), sin builds host competidores.
 - Runner conserva SQL en `/app/migrations`, dependencias productivas y usuario
   no privilegiado. No dispone de npm/pnpm/npx/corepack/yarn.
 - Migrador ejecutado desde `/tmp` con ruta absoluta al JS: OK.
-- Bootstrap omitido ejecutado sin DATABASE_URL dentro de imagen: salida 0.
-  Otra DB vacía aislada: migración + bootstrap false + HTTP ready con 0/0/0.
-- Compose ejecutó migración → bootstrap → HTTP hasta healthy.
-  Dos bootstrap concurrentes en el contenedor: misma identidad/dataset 2/5/6.
-- Comparación en memoria de snapshots completos antes/después de repetir bootstrap
+- Seed omitido ejecutado sin DATABASE_URL dentro de imagen: salida 0.
+  Otra DB vacía aislada: migración + seed false + HTTP ready con 0/0/0.
+- Compose ejecutó migración → seed → HTTP hasta healthy.
+  Dos seed concurrentes en el contenedor: misma identidad/dataset 2/5/6.
+- Comparación en memoria de snapshots completos antes/después de repetir seed
   y reiniciar PostgreSQL/backend con el volumen nuevo: igualdad exacta.
-- Nombres editados y memberships revocadas sobreviven bootstrap y ambos reinicios.
+- Nombres editados y memberships revocadas sobreviven seed y ambos reinicios.
 - PostgreSQL detenido de verdad: readiness 503 en menos de 5 s; health 200.
   Arranque de PostgreSQL y reinicio del backend recuperan readiness 200.
 - Frontend depende declarativamente del backend healthy; no se modificó su código.
@@ -132,3 +132,16 @@ No se declara satisfecho SC-003 Railway ni recuperación del spec completo.
   de los cinco usuarios, repetición y rechazo del override TLS inseguro correctos.
 - T025–T030 siguen pendientes; estos resultados no acreditan operación remota,
   compatibilidad con app anterior ni recuperación. Warnings previos sin cambios.
+
+## Simplificación posterior
+
+- Un seed explícito (db:seed, DEMO_SEED_ENABLED) contiene ejecución y dataset;
+  reemplaza los nombres anteriores db:bootstrap/DEMO_BOOTSTRAP_ENABLED sin alias.
+- Se eliminan demo-data.ts, PlatformModule, assertReady y el export público de Pool.
+  AppModule registra controladores; readiness usa directamente pool.query mediante assertSchema.
+- Seed usa un Client, reutiliza RETURNING tras inserts y delega la sal aleatoria a Argon2.
+  Su prueba verifica 16 bytes de sal; se conservan transacción, lock y rollback.
+- El guard de TEST_DATABASE_URL pasa a la suite sin DB: 5/5 tests sin DB y 9/9
+  de integración (~26,2 s) OK. Lint, build, OpenAPI y checks documentales OK.
+- Nueva imagen/Compose aislado: seed concurrente, sal de 16 bytes y reinicio durable OK;
+  PostgreSQL detenido: readiness 503 exacto en 2,026 s y health 200; recuperación 200.

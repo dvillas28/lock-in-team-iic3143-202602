@@ -15,12 +15,15 @@ La imagen productiva elimina gestores de paquetes y conserva dist/node_modules.
 
 ## Decisión
 
-- pg 8.23.1 para consultas parametrizadas y un Pool por proceso; SQL explícito.
+- pg 8.23.1 con Pool HTTP y Client por CLI; SQL explícito parametrizado.
 - node-pg-migrate 9.0.0 con SQL versionado, bloqueo y transacción del lote.
 - Comandos compilados ejecutables con node; SQL copiado en imagen final.
-- Migración separada de bootstrap; Railway usa pre-deploy y Compose secuencia
+- Migración separada de seed; Railway usa pre-deploy y Compose secuencia
   preparación antes de iniciar HTTP.
-- Bootstrap demo opt-in y transaccional, sin modificar credenciales/estados previos.
+- Seed demo opt-in y transaccional, sin modificar credenciales/estados previos.
+  Dataset y ejecución viven en seed.ts; no hay una capa seed adicional.
+- Migraciones de datos se reservan para cambios requeridos por toda instalación;
+  la demo opcional con contraseñas del entorno no pertenece al historial de esquema.
 - argon2 0.45.1 para PHC Argon2id requerido por el modelo; no implementar formato
   de contraseña propio ni anticipar autenticación.
 - Mantener /health y agregar /ready para disponibilidad de persistencia.

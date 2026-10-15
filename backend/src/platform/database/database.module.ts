@@ -4,6 +4,6 @@ import { createPool, DatabaseService } from "./database.service";
 
 @Module({
   providers: [{ provide: Pool, useFactory: () => createPool() }, DatabaseService],
-  exports: [Pool, DatabaseService],
+  exports: [DatabaseService],
 })
 export class DatabaseModule {}

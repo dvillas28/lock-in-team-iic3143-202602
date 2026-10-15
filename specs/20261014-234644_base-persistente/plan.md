@@ -6,7 +6,7 @@
 ## Summary
 
 Incorporar una PostgreSQL compartida al backend existente. Persistir Institution,
-User global y Membership; migrar estructura separadamente del bootstrap demo.
+User global y Membership; migrar estructura separadamente del seed demo.
 Elegir SQL parametrizado con pg y migraciones node-pg-migrate, sin ORM.
 US1 entrega arranque verificable y datos durables; US2 agrega demo repetible sobre
 esa base, comprobable con fixtures sin depender de autenticación todavía.
@@ -17,7 +17,7 @@ esa base, comprobable con fixtures sin depender de autenticación todavía.
 | --- | --- |
 | Lenguaje/runtime | TypeScript 5.9.3, Node 24, NestJS 12.1.0 existentes |
 | Dependencias nuevas | pg 8.23.1, node-pg-migrate 9.0.0, argon2 0.45.1; @types/pg en desarrollo |
-| Persistencia | PostgreSQL 17, schema public; una URL y un Pool por proceso |
+| Persistencia | PostgreSQL 17, schema public; una URL; Pool HTTP y Client por CLI |
 | Migraciones | SQL versionado, runner compilado, historia pgmigrations |
 | Pruebas | node:test y assert existentes; integración real contra PostgreSQL 17 |
 | Plataforma | Docker Compose y Railway con la imagen Node 24 Alpine existente |
@@ -29,7 +29,7 @@ esa base, comprobable con fixtures sin depender de autenticación todavía.
 Versiones y lockfile fijados para US1/US2; no se agregan proveedores ni ORM.
 Un Pool con máximo 5 conexiones, conexión/cola 2 s, consultas 2 s y cierre en shutdown.
 Readiness usa presupuesto menor: conexión/cola 2 s y consulta 2 s, total ≤5 s.
-No usar credenciales o identidades recibidas desde HTTP para ejecutar bootstrap.
+No usar credenciales o identidades recibidas desde HTTP para ejecutar seed.
 La URL fija la política TLS efectiva; rechazar overrides que desactiven validación.
 Probar entradas inválidas con URL válida y cero conexiones; assertions sin valores sensibles.
 
@@ -41,9 +41,9 @@ Evaluación inicial y posterior al diseño: PASS para esta misión.
 | --- | --- |
 | Aislamiento | Membership tiene institution_id; claves/FK y consultas explícitas; User global |
 | Permisos | Solo operador ejecuta CLI; ninguna ruta permite alta o cambios de roles |
-| Integridad/historia | Transacciones, no borrados/cascadas; bootstrap conserva existentes |
+| Integridad/historia | Transacciones, no borrados/cascadas; seed conserva existentes |
 | Auditoría | Log operativo sanitizado; sin inventar AuditEvent que requiere Course |
-| Entregabilidad | US1 base vacía durable; US2 bootstrap sobre esa base |
+| Entregabilidad | US1 base vacía durable; US2 seed sobre esa base |
 | Complejidad | Reusar Nest, node:test y Compose; sin ORM/repositorio genérico |
 | Documentación | Archivos <150 líneas y referencias por responsabilidad |
 | Aclaraciones | Sin bloqueos propios; admin docente es dependencia de misiones posteriores |
@@ -72,29 +72,29 @@ backend/
     database.module.ts
     database.service.ts
     migrate.ts
-    bootstrap.ts
-    demo-data.ts
+    seed.ts
   src/platform/health/readiness.controller.ts
-  src/app.module.ts                         # importar DatabaseModule
-  src/platform/platform.module.ts          # registrar readiness
+  src/app.module.ts                         # DatabaseModule y controladores
   src/main.ts                              # shutdown y error de arranque
   test/database-config.test.mjs
   test/integration/persistence.test.mjs
-  test/integration/bootstrap.test.mjs
+  test/integration/seed.test.mjs
   test/integration/readiness.test.mjs
   package.json / pnpm-lock.yaml / Dockerfile / railway.json
 docker-compose.yml / .env.example / .github/workflows/ci.yml
 docs/reference/openapi/openapi.yaml / paths/platform.yaml
 ```
 
-**Structure Decision**: DatabaseModule exporta una única conexión compartida.
+**Structure Decision**: DatabaseModule exporta DatabaseService sobre un único Pool HTTP compartido.
 SQL permanece junto a su operación; no agregar interfaces/repositorios genéricos.
+Seed usa un Client para una transacción y contiene su dataset; migración y seed
+son operaciones separadas. AppModule registra directamente los controladores.
 Integración usa una DB exclusiva de test, sin requerir DB para los tests actuales.
 
 ## Execution and Verification
 
 1. US1: migración inicial, conexión Nest y readiness; persistencia local/imagen.
-2. US2: CLI bootstrap opt-in, dataset estable, rollback e idempotencia concurrente.
+2. US2: CLI seed opt-in, dataset estable, rollback e idempotencia concurrente.
 3. Integración: Compose, pre-deploy Railway, recuperación y evidencias.
 4. Mantener /health y su contrato/consumidores; /ready no retorna metadatos.
 5. T025 agregará PostgreSQL 17 y test:integration a CI junto a checks existentes;
@@ -104,7 +104,7 @@ Integración usa una DB exclusiva de test, sin requerir DB para los tests actual
 | Requisitos | Validación exigida |
 | --- | --- |
 | FR-001/002 | Persistir/reiniciar; dos institutions para una identidad; unicidades/FK |
-| FR-003 | Migración repetida; error revierte lote; bootstrap sin mezclar estructura |
+| FR-003 | Migración repetida; error revierte lote; seed sin mezclar estructura |
 | FR-004/007 | Dataset exacto; variables obligatorias; sin secretos ni rutas nuevas de alta |
 | FR-005 | Colisiones, FK inválida y error inducido no confirman cambios parciales |
 | FR-006 | Arranque local/imagen; recuperación en DB separada; evidencia Railway real |
@@ -115,7 +115,7 @@ Integración usa una DB exclusiva de test, sin requerir DB para los tests actual
 
 Sin violaciones. /ready distingue disponibilidad de persistencia sin modificar
 el contrato de /health. El migrador runtime y Argon2id son necesarios para operar
-la imagen y crear credenciales válidas; el bootstrap no añade un servicio.
+la imagen y crear credenciales válidas; el seed no añade un servicio.
 
 ## Validation
 

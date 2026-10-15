@@ -1,4 +1,4 @@
-# Contract: Dataset demo y bootstrap
+# Contract: Dataset demo y seed
 
 Datos iniciales exclusivamente demostrativos, sin roles académicos.
 Usuarios identificados por UUID estable, no por email.
@@ -44,15 +44,15 @@ No reclamar permiso institucional ni curso por tener una identidad demo.
 
 1. Si demo=false/ausente, terminar como omitido sin tocar DB.
 2. Validar variables, longitudes y formato del manifiesto antes de cualquier cambio.
-3. Abrir cliente y transacción; tomar advisory xact lock con clave fija de bootstrap.
+3. Abrir cliente y transacción; tomar advisory xact lock con clave fija de seed.
 4. Verificar esquema; resolver instituciones y validar identidad de usuarios.
 5. Para usuarios faltantes, producir PHC Argon2id con sal aleatoria por usuario.
 6. Insertar instituciones, usuarios y memberships faltantes dentro de la transacción.
 7. Ante cualquier error: rollback total, resumen sanitizado y salida 1.
-8. En éxito: commit, resumen de cantidades y salida 0; liberar cliente y cerrar Pool.
+8. En éxito: commit, resumen de cantidades y salida 0; cerrar el Client.
 
 Hash nuevo solo para usuario nuevo. Cambiar variables de contraseña en un segundo
-bootstrap no rota credenciales ni actualiza hashes.
+seed no rota credenciales ni actualiza hashes.
 No imprimir contraseñas, hashes, emails o SQL con parámetros, incluso en errores.
 
 ## Pruebas de aceptación que deja la implementación
