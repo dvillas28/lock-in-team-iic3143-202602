@@ -120,7 +120,7 @@ El frontend consulta al backend desde el servidor de Next. Fuera de Docker usa
 - Docker.
 - Docker Compose.
 
-Para desarrollo sin Docker se requiere Node.js 20.9 o superior y pnpm 9.15.9.
+Para desarrollo sin Docker se requiere Node.js 24 y pnpm 9.15.9.
 
 ### Levantar El Proyecto
 
@@ -158,6 +158,8 @@ docker compose down
 `.env.example` documenta las variables disponibles. No contienen secretos:
 
 - `API_URL`: URL que usa el servidor de Next para consultar al backend.
+- `NEXT_PUBLIC_API_URL`: URL pública para consultas desde el navegador, si se
+  requieren. Next.js la incorpora durante el build; nunca contiene secretos.
 - `PORT`: puerto de escucha de NestJS; su valor por defecto es `3001`.
 - `APP_VERSION`: versión informada por `GET /health`.
 - `DATABASE_URL`: conexión única a PostgreSQL; no existe una URL por Institution.
@@ -174,3 +176,7 @@ pnpm test
 pnpm docs:api:lint
 docker compose config
 ```
+
+### Cliente API del frontend
+
+Consulta la [guía del cliente API](docs/guides/frontend-api-client.md).
