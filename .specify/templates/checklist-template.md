@@ -33,6 +33,8 @@
 - [ ] CHK-LMS-003 Academic record audit/history behavior is defined
 - [ ] CHK-LMS-004 Added complexity is justified by the current feature
 
+- [ ] CHK-LMS-005 Document length passes; mission coverage and exclusions are explicit
+
 ## [Category 2]
 
 - [ ] CHK004 Another category item

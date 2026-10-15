@@ -36,7 +36,7 @@ docs/update-roadmap
 
 ```bash
 git switch -c feat/course-sections
-export SPECIFY_FEATURE_DIRECTORY=specs/<timestamp>-<short-name>
+export SPECIFY_FEATURE_DIRECTORY=specs/<timestamp>_<descripcion-mision>
 pnpm install
 git status
 git push -u origin HEAD
@@ -64,3 +64,74 @@ de arriba:
 
 Ejemplo: con `v0.2.0` publicado, un `fix` en `dev` crea `v0.2.1-dev.1`; un
 `feat` posterior crea `v0.3.0-dev.1`; el merge a `main` publica `v0.3.0`.
+
+### Version desplegada
+
+Al publicar un release, el workflow fija `APP_VERSION` en los servicios
+`backend` y `frontend` de Railway sin redesplegar. Railway espera al workflow y
+solo redespliega el servicio cuyos archivos cambiaron (`watchPatterns`), asi que
+cada servicio muestra **el release con el que se desplego por ultima vez**:
+
+- Release con cambios en ambos: los dos muestran la misma version.
+- Release con cambios solo en `frontend/`: el frontend muestra la nueva y el
+  backend sigue con la anterior. Es correcto: es el codigo que esta corriendo.
+
+El frontend muestra su version en la home; el backend la expone en `/health`.
+En local, sin `APP_VERSION`, ambos muestran `dev`.
+
+## Rollback
+
+Pendiente de definir como proceso. Lo que ya sabemos:
+
+- Un rollback en Railway (Deployments → menu del deployment sano → Rollback)
+  restaura la imagen **y las variables** de ese deployment, incluida
+  `APP_VERSION`, por lo que la version mostrada sigue siendo la real.
+- Solo esta disponible dentro de la retencion de imagenes del plan; despues hay
+  que usar Redeploy, que reconstruye desde el codigo original.
+- Si el release cambio el contrato de la API, revertir ambos servicios juntos:
+  un frontend nuevo contra un backend viejo puede romperse.
+- El rollback no cambia git: `main` sigue con el codigo malo y el proximo deploy
+  lo vuelve a subir. El arreglo definitivo es un `git revert` mergeado, que
+  publica un tag nuevo (por ejemplo `v0.3.1`); los tags nunca se reutilizan.
+- Cuando haya base de datos, un rollback de codigo no revierte el esquema; las
+  migraciones deberan ser compatibles hacia atras (decision pendiente de ADR).
+
+## Trivy en CI
+
+El job `<app> (docker build + trivy)` revisa dependencias, secretos y
+Dockerfile de la app, y luego la imagen construida. Falla solo con
+vulnerabilidades HIGH o CRITICAL que ya tienen version corregida; las demas
+quedan visibles en la pestana Security del repo.
+
+Si un PR falla por Trivy:
+
+1. Leer en el log del job el paquete, el CVE y la version corregida.
+2. Actualizar la dependencia directa, o forzar la transitiva con
+   `pnpm.overrides` en el `package.json` de la app.
+3. Si no se puede corregir ahora, agregar el CVE a `.trivyignore` en la raiz
+   con un comentario que diga por que y hasta cuando.
+
+Para reproducirlo local (requiere Docker):
+
+```bash
+.github/scripts/trivy.sh fs --ignore-unfixed --severity HIGH,CRITICAL frontend
+```
+
+## SonarQube en CI
+
+El job `SonarQube (quality gate)` analiza el codigo propio (`backend/src`,
+`frontend/src`) en SonarQube Cloud. El quality gate "Sonar way" evalua solo el
+codigo nuevo del PR: la deuda existente no bloquea, pero el PR no puede
+agregar bugs, vulnerabilidades, hotspots sin revisar ni duplicacion excesiva.
+La configuracion esta en `sonar-project.properties`.
+
+El gate solo bloquea en los PRs. En `main` el analisis corre igual y alimenta
+el dashboard, pero no espera el gate: un problema de calidad que ya paso
+revision no debe bloquear el deploy a produccion.
+
+Si un PR falla por SonarQube:
+
+1. Abrir el link al dashboard que deja el job o el comentario del bot en el PR.
+2. Corregir los issues marcados en el codigo nuevo.
+3. Si es un falso positivo o un hotspot seguro, marcarlo en SonarQube
+   ("Accept" o "Safe") con un comentario que diga por que.
