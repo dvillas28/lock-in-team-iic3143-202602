@@ -31,9 +31,7 @@ codegraph explore "<symbols, files, or flow question>"
 
 Use `rg` next for docs, config, or files not covered by CodeGraph.
 
-<!-- SPECKIT START -->
-For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan.
+## Spec Kit Conventions
 
 Specs use timestamp prefixes: `YYYYMMDD-HHMMSS_descripcion-mision`.
 Git branches use `<type>/<short-name>`.
@@ -51,6 +49,11 @@ Constitution gates:
 - Authored docs target <150 lines; 150–200 require a length-exception comment;
   >200 fail CI. Unmodified historical docs and imported skills remain exempt.
 - Reconcile the course admin UI capability before planning academic permissions.
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+at specs/20261014-234644_base-persistente/plan.md
 <!-- SPECKIT END -->
 
 ## UI & Design

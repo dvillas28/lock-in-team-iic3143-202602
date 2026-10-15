@@ -1,0 +1,49 @@
+# Persistencia backend con pg y node-pg-migrate
+
+Fecha: 2026-10-15.
+
+## Estado
+
+Aceptado para planificación de base-persistente; implementación pendiente.
+
+## Contexto
+
+AcademiX ya usa NestJS/TypeScript, Node 24 y PostgreSQL 17 local.
+El modelo exige constraints compuestas institution-aware, transacciones e
+historial de migraciones. La primera misión solo agrega tres tablas.
+La imagen productiva elimina gestores de paquetes y conserva dist/node_modules.
+
+## Decisión
+
+- pg 8.23.1 para consultas parametrizadas y un Pool por proceso; SQL explícito.
+- node-pg-migrate 9.0.0 con SQL versionado, bloqueo y transacción del lote.
+- Comandos compilados ejecutables con node; SQL copiado en imagen final.
+- Migración separada de bootstrap; Railway usa pre-deploy y Compose secuencia
+  preparación antes de iniciar HTTP.
+- Bootstrap demo opt-in y transaccional, sin modificar credenciales/estados previos.
+- argon2 0.45.1 para PHC Argon2id requerido por el modelo; no implementar formato
+  de contraseña propio ni anticipar autenticación.
+- Mantener /health y agregar /ready para disponibilidad de persistencia.
+- Evolución aditiva y rollback de aplicación; no down destructivo sobre datos.
+
+No agregar ORM, repositorio genérico, servicios adicionales ni tablas futuras.
+
+## Alternativas consideradas
+
+Prisma y TypeORM agregan un segundo modelo/capa que tres tablas no necesitan.
+SQL directo con migrador propio traslada al equipo bloqueo, historia y recuperación.
+Argon2 nativo exige encoding/verificación propios; bcrypt cambia el modelo vigente.
+Migrar o sembrar sin separación desde hooks HTTP mezcla operación y tráfico.
+
+## Consecuencias
+
+El equipo escribe SQL y mantiene sus tipos/test de integración.
+Las reglas de scope no las impone un ORM: cada operación académica futura debe
+incluir institution_id, membership y rol, junto a constraints de base.
+La imagen debe incluir migrador y binarios Argon2 compatibles con Alpine.
+Una dependencia menor no elimina la obligación de verificar sus actualizaciones.
+
+No se cambia el [ADR multi-tenant](adopt-shared-postgresql-multitenancy.md).
+[Investigación y fuentes](../../specs/20261014-234644_base-persistente/research.md)
+justifican versiones, transacciones y operación.
+
