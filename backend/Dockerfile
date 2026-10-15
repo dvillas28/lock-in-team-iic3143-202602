@@ -33,6 +33,7 @@ RUN rm -rf /usr/local/lib/node_modules /opt/yarn-* \
 
 COPY --from=production-dependencies /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/migrations ./migrations
 
 USER node
 

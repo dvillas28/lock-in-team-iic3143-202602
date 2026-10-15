@@ -1,3 +1,39 @@
+/ready:
+  get:
+    tags: [Platform]
+    operationId: getReadiness
+    summary: Confirmar disponibilidad de la persistencia
+    description: >
+      Público, sin datos institucionales ni credenciales. Responde en un máximo
+      de cinco segundos. Comprueba tablas y columnas requeridas sin leer filas; no inspecciona
+      tipos, defaults, índices ni constraints ni ejecuta migraciones o seed.
+    security: []
+    responses:
+      '200':
+        description: Proceso inicializado y persistencia mínima disponible.
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [ok]
+      '503':
+        description: Persistencia inaccesible o estructura mínima ausente.
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [unavailable]
+
 /health:
   get:
     tags:

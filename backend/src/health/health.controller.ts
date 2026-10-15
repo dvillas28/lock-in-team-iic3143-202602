@@ -1,4 +1,5 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, ServiceUnavailableException } from "@nestjs/common";
+import { DatabaseService } from "../database/database.service";
 
 interface HealthResponse {
   status: "ok";
@@ -11,9 +12,11 @@ interface HealthResponse {
 // The process starts on each deploy or restart, so this is when the running version went live.
 const startedAt = new Date().toISOString();
 
-@Controller("health")
+@Controller()
 export class HealthController {
-  @Get()
+  constructor(private readonly database: DatabaseService) {}
+
+  @Get("health")
   getHealth(): HealthResponse {
     return {
       status: "ok",
@@ -23,5 +26,10 @@ export class HealthController {
       deployedAt: startedAt,
       timestamp: new Date().toISOString(),
     };
+  }
+  @Get("ready")
+  async getReadiness() {
+    try { await this.database.check(); return {status: "ok"}; }
+    catch { throw new ServiceUnavailableException({status: "unavailable"}); }
   }
 }

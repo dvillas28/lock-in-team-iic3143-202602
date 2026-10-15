@@ -4,7 +4,7 @@ Fecha: 2026-10-15.
 
 ## Estado
 
-Aceptado para planificación de base-persistente; implementación pendiente.
+Aceptado e implementado para US1/US2 de base-persistente; cierre operativo pendiente.
 
 ## Contexto
 
@@ -15,15 +15,22 @@ La imagen productiva elimina gestores de paquetes y conserva dist/node_modules.
 
 ## Decisión
 
-- pg 8.23.1 para consultas parametrizadas y un Pool por proceso; SQL explícito.
+- pg 8.23.1 con Pool HTTP y Client por CLI; SQL explícito parametrizado.
 - node-pg-migrate 9.0.0 con SQL versionado, bloqueo y transacción del lote.
 - Comandos compilados ejecutables con node; SQL copiado en imagen final.
-- Migración separada de bootstrap; Railway usa pre-deploy y Compose secuencia
+- Migración separada de seed; Railway usa pre-deploy y Compose secuencia
   preparación antes de iniciar HTTP.
-- Bootstrap demo opt-in y transaccional, sin modificar credenciales/estados previos.
+- Seed demo manual y transaccional, sin modificar credenciales/estados previos.
+  Dataset y ejecución viven en src/seeds/demo.ts; sin framework ni bandera.
+  Ningún arranque ejecuta demo: db:seed es la decisión explícita del operador.
+- Migraciones de datos se reservan para cambios requeridos por toda instalación;
+  la demo opcional con contraseñas del entorno no pertenece al historial de esquema.
 - argon2 0.45.1 para PHC Argon2id requerido por el modelo; no implementar formato
   de contraseña propio ni anticipar autenticación.
-- Mantener /health y agregar /ready para disponibilidad de persistencia.
+- Un DatabaseService registrado en AppModule; un controlador para /health y /ready.
+- Arranque/readiness resuelven tablas/columnas sin leer filas; SQL e integración
+  verifican constraints. No detectar drift manual de tipos/defaults/índices en runtime.
+- Fijar TLS desde la URL y rechazar overrides inseguros del entorno; assertions sin secretos.
 - Evolución aditiva y rollback de aplicación; no down destructivo sobre datos.
 
 No agregar ORM, repositorio genérico, servicios adicionales ni tablas futuras.

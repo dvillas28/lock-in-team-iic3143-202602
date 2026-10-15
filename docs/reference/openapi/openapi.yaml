@@ -39,6 +39,8 @@ tags:
   - name: Audit
     description: Consulta inmutable del historial académico sensible.
 paths:
+  /ready:
+    $ref: './paths/platform.yaml#/~1ready'
   /health:
     $ref: './paths/platform.yaml#/~1health'
   /api/v1/institutions:
