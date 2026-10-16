@@ -2103,14 +2103,17 @@ export interface operations {
             /** @description Identidad autenticada y sus alcances dentro de la Institution seleccionada. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["CurrentUser"];
                 };
             };
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     searchInstitutionUsers: {
