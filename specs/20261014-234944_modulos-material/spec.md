@@ -1,9 +1,9 @@
 # Feature Specification: Módulos y material compartido
 
-**Feature Branch**: `feat/modulos-material` (propuesta)
+**Feature Branch**: `feat/modulos-material-api`
 **Feature Directory**: `specs/20261014-234944_modulos-material`
 **Created**: 2026-10-14
-**Status**: Draft
+**Status**: Implementado y verificado localmente
 **Input**: Backend MVP de Entrega 2: Módulos y material compartido.
 
 ## User Scenarios & Testing *(mandatory)*
