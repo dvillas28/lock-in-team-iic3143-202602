@@ -1,15 +1,14 @@
 <!--
 Sync Impact Report
-Version change: 1.2.0 -> 1.3.0
-Modified: Product Constraints aligned with Delivery 2; Development Workflow naming.
-Added: VI. Bounded Documentation; backend mission traceability.
-Removed: outdated manual-submission/correction MVP scope.
-Synced: spec-template.md, plan-template.md, tasks-template.md, checklist-template.md;
-AGENTS.md, docs/guides/speckit-flow.md, speckit-specify skill.
-Validation: .github/scripts/check-doc-length.py and CI documentation gate.
-Command templates: .specify/templates/commands/ absent; local skill updated instead.
-Follow-up: course admin capability requires clarification before affected plans.
+Version change: 1.3.0 -> 1.4.0 (bounded onboarding and tenant privilege delegation).
+Core principles: unchanged; Product Constraints: limited institutional admin added.
+Added: PM-controlled onboarding and tenant superadmin scope; removed: blanket exclusion.
+Updated: plan-template.md, spec-template.md, tasks-template.md; feature plan/contracts/tasks.
+Reviewed: README.md and AGENTS.md; no conflicting runtime rule to change.
+Command templates: .specify/templates/commands/ absent; no sync needed.
+Follow-up: implementation and checks remain pending in cursos-roles/tasks.md.
 -->
+
 
 # LMS Multi-Tenant Universitario Constitution
 
@@ -65,11 +64,17 @@ memberships, contextual teacher/student/assistant roles, courses, sections,
 shared modules and markdown material, multiple-choice quizzes, automatic grading,
 explicit grade publication, gradebook and immutable academic audit.
 
-Manual submissions/correction, institutional administration, AI, chat, calendar,
+Manual submissions/correction, general institutional administration, AI, chat, calendar,
 binary upload/download, RLS, workers and advanced analytics remain outside the
 core MVP. Binary material is an optional P2 extension requiring its own spec.
-The admin/non-admin UI capability MUST be reconciled with domain permissions
-before planning dependent academic features; a URL profile never grants access.
+PM-controlled tenant onboarding and delegation of course-creation privileges are
+included: InstitutionMembership.is_super_admin grants/revokes is_admin only inside
+its Institution. Neither flag grants access to courses owned by others. Initial
+superadmin provisioning MUST be controlled, repeat-safe and auditable, with no
+credentials stored in migration source. Superadmin assignment/recovery remains
+operational; account invitations and general user management remain excluded.
+The admin/non-admin UI capability MUST match domain permissions; URL profiles
+never grant access. Enrollment remains the source of academic roles.
 
 ## Development Workflow
 
@@ -109,4 +114,4 @@ for wording and clarification.
 Reviews MUST verify constitution compliance before merge. Complexity violations
 MUST be documented in the feature plan's Complexity Tracking section.
 
-**Version**: 1.3.0 | **Ratified**: 2026-08-27 | **Last Amended**: 2026-10-14
+**Version**: 1.4.0 | **Ratified**: 2026-08-27 | **Last Amended**: 2026-10-16

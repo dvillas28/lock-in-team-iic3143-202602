@@ -13,8 +13,8 @@
 
 ## Requirement Completeness
 
-- [ ] No clarification markers remain
-- [ ] Requirements are testable and unambiguous
+- [x] No clarification markers remain
+- [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic
 - [x] All acceptance scenarios are defined
@@ -32,4 +32,4 @@
 ## Notes
 
 - Validación documental, no pruebas de backend ejecutadas.
-- Pendiente FR-009: alcance teacher del modelo frente a capacidad administrativa de ADR. Resolver con speckit-clarify antes del plan.
+- FR-009 resuelto con usuario el 2026-10-16: is_admin institucional y ownership por creador; roles académicos independientes; ampliado con onboarding PM y delegación superadmin institucional.

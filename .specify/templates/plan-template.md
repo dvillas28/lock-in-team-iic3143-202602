@@ -41,7 +41,7 @@
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 - Tenant isolation is explicit for all affected reads, writes, and background work.
-- Role permissions cover student, assistant, teacher and explicit course administration capability; no institutional admin is implied.
+- Role permissions cover student, assistant, teacher and explicit course administration capability; tenant superadmin only delegates is_admin within its Institution.
 - Attempts, grades, role changes and publication have an auditable state/history decision.
 - User stories remain independently implementable and testable.
 - Authored documents target <150 lines; justify 150–200, split above 200.

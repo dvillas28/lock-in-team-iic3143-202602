@@ -75,3 +75,7 @@ Como estudiante, consulto un quiz sin acceder a respuestas correctas.
 - Backlog: BE-15–BE-17; parte de BE-24; conservar responsables del equipo sin reasignación implícita.
 - Fuentes: [alcance](../../docs/deliveries/2/02-scope.md), [CU/RF/RNF](../../docs/deliveries/2/03-use-cases-and-requirements.md), [dominio](../../docs/deliveries/2/05-domain-model.md), [datos](../../docs/deliveries/2/06-data-model.md).
 - [ADR de permisos](../../docs/adr/ui-admin-non-admin-experiences.md): resolver divergencias antes del plan afectado.
+
+Permisos vigentes: [ADR de admin y ownership](../../docs/adr/institution-admin-and-course-ownership.md).
+Teacher activo habilita evaluación; admin dueño amplía alcance, sin reemplazar rol.
+Assistant conserva solo lectura de seguimiento; superadmin no concede docencia.

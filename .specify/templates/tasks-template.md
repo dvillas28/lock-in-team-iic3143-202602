@@ -63,7 +63,7 @@ Repeat this phase for each remaining story, with unique task IDs.
 - Setup precedes foundation; story implementation starts after its prerequisites.
 - Each story declares dependencies; do not invent independence between required specs.
 - Shared migrations have one owner; parallel tasks must avoid conflicting files.
-- Audit generation ships with the first sensitive write, not only with its viewer.
+- Audit generation ships with the first sensitive write, including onboarding and privilege delegation.
 - Publication and grading require concurrency and visibility checks before merge.
 
 ## Implementation Strategy

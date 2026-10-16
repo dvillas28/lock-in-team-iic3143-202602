@@ -12,8 +12,10 @@ secciones. Dominio/persistencia/API aún deben representar y validar ese privile
 ## Decisión de UI/UX
 
 - El rol académico y el alcance administrativo son dimensiones distintas.
-  Admin es una capacidad del curso, sin agregar un administrador institucional,
-  coordinador ni valor nuevo al enum académico.
+  Resolución 2026-10-16: `InstitutionMembership.is_admin` habilita creación
+  en esa institución; administrar un curso exige además `Course.created_by`
+  igual al actor. No agrega coordinador ni acceso a cursos ajenos.
+  La política detallada está en [admin institucional y ownership](institution-admin-and-course-ownership.md).
 - Hay dos inicios: admin (07) y no admin (03). El inicio no admin es compartido
   por estudiante, ayudante y docente. Sus acciones se adaptan al rol.
 - Carla es docente de sección 2. Como no admin gestiona esa sección; como admin
@@ -71,7 +73,7 @@ otras funciones de Canvas a este MVP. El estado es local a la página de ejemplo
 Esta rama cambia UI y documentación, sin modificar esquemas, OpenAPI o código de
 producto. Antes de implementar:
 
-1. Representar y auditar concesión/revocación del alcance admin del curso.
+1. Representar y auditar concesión/revocación de is_admin institucional.
    No inferirlo solo de `teacher` ni de parámetros de URL.
 2. Resolver la ambigüedad curso/sección de CU-03/CU-16 y alinear los permisos de
    CU-04/07/10/11/13/15 y RF12/RF28/RF29 con la matriz acordada. Conservar el
