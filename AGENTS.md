@@ -53,7 +53,7 @@ Constitution gates:
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
-at specs/20261014-234644_base-persistente/plan.md
+at specs/20261014-234744_identidad-acceso/plan.md
 <!-- SPECKIT END -->
 
 ## UI & Design

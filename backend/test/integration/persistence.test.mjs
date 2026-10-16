@@ -17,8 +17,8 @@ test("migration repeat, constraints, tenant identity and restricted deletion", a
     try { summary = JSON.parse(repeat.output); }
     catch { throw new Error("invalid migration summary"); }
     assert.equal(summary.created, 0);
-    assert.equal(summary.existing, 1);
-    assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount, 1);
+    assert.equal(summary.existing, 2);
+    assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount, 2);
     const schema = await pool.query(`SELECT c.relname AS table_name,a.attname AS column_name,
       format_type(a.atttypid,a.atttypmod) AS type,a.attnotnull AS required,
       pg_get_expr(d.adbin,d.adrelid) AS default_value
@@ -43,7 +43,7 @@ test("migration repeat, constraints, tenant identity and restricted deletion", a
     }
     const ids = Array.from({length: 6}, randomUUID);
     await pool.query("INSERT INTO institutions(id,slug,name) VALUES($1,'uc','UC'),($2,'utfsm','UTFSM')", ids.slice(0,2));
-    await pool.query("INSERT INTO users(id,email,name,password_hash) VALUES($1,'same@example.test','A','$argon2id$v=19$m=19456,t=2,p=1$fixture$fixture'),($2,'same@example.test','B','$argon2id$v=19$m=19456,t=2,p=1$fixture$fixture')", ids.slice(2,4));
+    await pool.query("INSERT INTO users(id,email,name,password_hash) VALUES($1,'same@example.test','A','$argon2id$v=19$m=19456,t=2,p=1$fixture$fixture'),($2,'other@example.test','B','$argon2id$v=19$m=19456,t=2,p=1$fixture$fixture')", ids.slice(2,4));
     await pool.query("INSERT INTO institution_memberships(id,institution_id,user_id) VALUES($1,$2,$3),($4,$5,$3)", [ids[4], ids[0], ids[2], ids[5], ids[1]]);
     const before = await snapshot(pool);
     const invalid = [
@@ -85,8 +85,9 @@ test("failed pending batch rolls back DDL/history and migrator refuses competing
   try {
     await migrated(pool);
     await writeFile(join(dir,"20261015000100_institutional-foundation.sql"), "-- Up Migration\nSELECT 1;");
-    await writeFile(join(dir,"20261015000200_pending.sql"), "-- Up Migration\nCREATE TABLE public.pending_fixture(id int);");
-    await writeFile(join(dir,"20261015000300_failed.sql"), "-- Up Migration\nSELECT * FROM public.nonexistent_fixture;");
+    await writeFile(join(dir,"20261015000400_unique_login_email.sql"), "-- Up Migration\nSELECT 1;");
+    await writeFile(join(dir,"20261015000500_pending.sql"), "-- Up Migration\nCREATE TABLE public.pending_fixture(id int);");
+    await writeFile(join(dir,"20261015000600_failed.sql"), "-- Up Migration\nSELECT * FROM public.nonexistent_fixture;");
     const previous = process.env.DATABASE_URL;
     try {
       process.env.DATABASE_URL = testUrl();
@@ -96,7 +97,7 @@ test("failed pending batch rolls back DDL/history and migrator refuses competing
       else process.env.DATABASE_URL = previous;
     }
     assert.equal((await pool.query("SELECT to_regclass('public.pending_fixture') AS t")).rows[0].t, null);
-    assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount, 1);
+    assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount, 2);
     const client = await pool.connect();
     try {
       await client.query("SELECT pg_advisory_lock(7241865325823964)");

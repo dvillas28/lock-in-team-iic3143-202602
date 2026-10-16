@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/ready": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Confirmar disponibilidad de la persistencia
+         * @description Público, sin datos institucionales ni credenciales. Responde en un máximo de cinco segundos. Comprueba tablas y columnas requeridas sin leer filas; no inspecciona tipos, defaults, índices ni constraints ni ejecuta migraciones o seed.
+         */
+        get: operations["getReadiness"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -1901,6 +1921,41 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getReadiness: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Proceso inicializado y persistencia mínima disponible. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "ok";
+                    };
+                };
+            };
+            /** @description Persistencia inaccesible o estructura mínima ausente. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "unavailable";
+                    };
+                };
+            };
+        };
+    };
     getHealth: {
         parameters: {
             query?: never;

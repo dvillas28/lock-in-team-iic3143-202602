@@ -37,7 +37,7 @@ Como usuario multiinstitución, cambio de contexto conservando separados mis dat
 ### Edge Cases
 
 - Probar identificador ajeno, pertenencia revocada, entrada inválida, operación repetida y fallo antes de confirmar: sin exposición ni cambios parciales.
-- Verificar concurrencia al asignar identidad, orden, intento, nota o publicación.
+- Verificar unicidad del identificador global ante inserciones concurrentes en fixtures, cuota ante logins simultáneos y separación de contextos ante consultas UC/UTFSM concurrentes.
 
 ## Requirements *(mandatory)*
 
