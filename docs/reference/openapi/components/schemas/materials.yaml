@@ -1,28 +1,16 @@
 MaterialKind:
   type: string
   enum:
-    - markdown
-    - file
-
-MaterialContentType:
-  type: string
-  enum:
-    - application/pdf
-    - text/csv
-    - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-    - text/plain
-    - image/jpeg
-    - image/png
-
+  - markdown
 MaterialSummary:
   type: object
   required:
-    - id
-    - moduleId
-    - title
-    - kind
-    - publishedAt
-    - createdBy
+  - id
+  - moduleId
+  - title
+  - kind
+  - publishedAt
+  - createdBy
   properties:
     id:
       type: string
@@ -34,83 +22,63 @@ MaterialSummary:
       readOnly: true
     title:
       type: string
+      minLength: 1
+      maxLength: 200
     kind:
       $ref: '#/MaterialKind'
     publishedAt:
-      type: [string, 'null']
+      type:
+      - string
+      - 'null'
       format: date-time
       readOnly: true
     createdBy:
       type: string
       format: uuid
       readOnly: true
-
 MarkdownMaterial:
   unevaluatedProperties: false
   allOf:
-    - $ref: '#/MaterialSummary'
-    - type: object
-      required:
-        - markdownBody
-      properties:
-        kind:
-          const: markdown
-        markdownBody:
-          type: string
-
-FileMaterial:
-  unevaluatedProperties: false
-  allOf:
-    - $ref: '#/MaterialSummary'
-    - type: object
-      required:
-        - filename
-        - contentType
-        - sizeBytes
-      properties:
-        kind:
-          const: file
-        filename:
-          type: string
-        contentType:
-          $ref: '#/MaterialContentType'
-        sizeBytes:
-          type: integer
-          minimum: 0
-
+  - $ref: '#/MaterialSummary'
+  - type: object
+    required:
+    - markdownBody
+    properties:
+      kind:
+        const: markdown
+      markdownBody:
+        type: string
+        minLength: 1
+        maxLength: 10000
 Material:
-  oneOf:
-    - $ref: '#/MarkdownMaterial'
-    - $ref: '#/FileMaterial'
-  discriminator:
-    propertyName: kind
-    mapping:
-      markdown: '#/MarkdownMaterial'
-      file: '#/FileMaterial'
-
+  $ref: '#/MarkdownMaterial'
 MaterialListResponse:
   type: object
   additionalProperties: false
   required:
-    - items
+  - items
   properties:
     items:
       type: array
       items:
         $ref: '#/Material'
-
 MarkdownMaterialCreate:
   type: object
   additionalProperties: false
   required:
-    - title
-    - markdownBody
+  - title
+  - markdownBody
   properties:
     title:
       type: string
+      minLength: 1
+      maxLength: 200
     markdownBody:
       type: string
-
+      minLength: 1
+      maxLength: 10000
+      description: Cadena inerte; no blanco, sin NUL. JSON HTTP máximo heredado 4096
+        bytes (413). No se renderiza HTML ni se siguen URLs.
 MarkdownMaterialUpdate:
   type: object
   additionalProperties: false
@@ -118,33 +86,13 @@ MarkdownMaterialUpdate:
   properties:
     title:
       type: string
+      minLength: 1
+      maxLength: 200
     markdownBody:
       type: string
-
-FileMaterialUpdate:
-  type: object
-  additionalProperties: false
-  required:
-    - title
-  properties:
-    title:
-      type: string
-
+      minLength: 1
+      maxLength: 10000
+      description: Cadena inerte; no blanco, sin NUL. JSON HTTP máximo heredado 4096
+        bytes (413). No se renderiza HTML ni se siguen URLs.
 MaterialUpdate:
-  anyOf:
-    - $ref: '#/MarkdownMaterialUpdate'
-    - $ref: '#/FileMaterialUpdate'
-
-FileMaterialUpload:
-  type: object
-  additionalProperties: false
-  required:
-    - title
-    - file
-  properties:
-    title:
-      type: string
-    file:
-      type: string
-      format: binary
-      description: Archivo PDF, CSV, XLSX, TXT, JPEG o PNG.
+  $ref: '#/MarkdownMaterialUpdate'

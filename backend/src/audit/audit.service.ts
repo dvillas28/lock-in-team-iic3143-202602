@@ -4,11 +4,16 @@ import { BadRequestException,NotFoundException,Injectable } from "@nestjs/common
 import { randomUUID } from "node:crypto";
 import type { PoolClient } from "pg";
 const fields: Record<string,string[]> = {
+ courseModule:["id","courseId","title","position","publishedAt"],
+ material:["id","moduleId","title","kind","markdownBody","publishedAt","createdBy"],
  course:["code","name","term","createdBy"], section:["code","capacity"],
  enrollment:["id","userId","sectionId","role","active"],
  institutionMembership:["id","userId","isAdmin","isSuperAdmin","source","operatorRef","operationId","inputFingerprint"],
 };
 export function snapshot(type: string, value: Record<string,unknown>|null) {
+  if(type==="moduleOrder" && value!==null) {
+    return {modules:(value.modules as {id:string;position:number}[]).map(m=>({id:m.id,position:m.position}))};
+  }
   return value===null ? null : Object.fromEntries(Object.entries(value).filter(([key])=>fields[type]?.includes(key)));
 }
 export interface Event {institutionId:string; actorUserId:string|null; action:string; resourceType:string; resourceId:string; courseId?:string|null; sectionId?:string|null; before:Record<string,unknown>|null; after:Record<string,unknown>|null}
@@ -17,7 +22,7 @@ export class AuditService {
   async record(client: PoolClient, e: Event) {
     await client.query(`INSERT INTO public.audit_events(id,institution_id,actor_user_id,action,resource_type,resource_id,course_id,section_id,changes)
       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`, [randomUUID(),e.institutionId,e.actorUserId,e.action,e.resourceType,e.resourceId,e.courseId??null,e.sectionId??null,
-      {before:snapshot(e.resourceType,e.before),after:snapshot(e.resourceType,e.after)}]);
+      {before:snapshot(e.action==="module.reordered"?"moduleOrder":e.resourceType,e.before),after:snapshot(e.action==="module.reordered"?"moduleOrder":e.resourceType,e.after)}]);
   }
   async list(db:Sql,actor:string,slug:string,course:string,query:Record<string,unknown>) {
     const m=await context(db,actor,slug),scope=await courseScope(db,m,course);
