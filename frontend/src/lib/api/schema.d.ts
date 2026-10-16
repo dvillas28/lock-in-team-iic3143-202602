@@ -334,13 +334,13 @@ export interface paths {
         };
         /**
          * Listar módulos visibles del curso
-         * @description Estudiantes reciben solo módulos publicados; el staff autorizado puede ver borradores.
+         * @description Teacher activo de cualquier sección ve borradores y escribe contenido compartido. Assistant/student solo leen publicado; material exige padre e ítem publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
          */
         get: operations["listCourseModules"];
         put?: never;
         /**
          * Crear un módulo del curso
-         * @description Requiere rol `teacher`, porque el módulo tiene alcance de curso.
+         * @description Teacher activo de cualquier sección ve borradores y escribe contenido compartido. Assistant/student solo leen publicado; material exige padre e ítem publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
          */
         post: operations["createCourseModule"];
         delete?: never;
@@ -367,7 +367,7 @@ export interface paths {
         get?: never;
         /**
          * Reemplazar atómicamente el orden de módulos
-         * @description Requiere rol `teacher`.
+         * @description Teacher activo de cualquier sección ve borradores y escribe contenido compartido. Assistant/student solo leen publicado; material exige padre e ítem publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
          */
         put: operations["reorderCourseModules"];
         post?: never;
@@ -392,7 +392,10 @@ export interface paths {
             };
             cookie?: never;
         };
-        /** Consultar un módulo visible */
+        /**
+         * Consultar un módulo visible
+         * @description Teacher activo de cualquier sección ve borradores y escribe contenido compartido. Assistant/student solo leen publicado; material exige padre e ítem publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
+         */
         get: operations["getCourseModule"];
         put?: never;
         post?: never;
@@ -401,7 +404,7 @@ export interface paths {
         head?: never;
         /**
          * Actualizar un módulo
-         * @description Requiere rol `teacher`.
+         * @description Teacher activo de cualquier sección ve borradores y escribe contenido compartido. Assistant/student solo leen publicado; material exige padre e ítem publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
          */
         patch: operations["updateCourseModule"];
         trace?: never;
@@ -425,7 +428,7 @@ export interface paths {
         put?: never;
         /**
          * Publicar un módulo
-         * @description Requiere `teacher` y genera un evento de auditoría inmutable.
+         * @description Teacher activo de cualquier sección ve borradores y escribe contenido compartido. Assistant/student solo leen publicado; material exige padre e ítem publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
          */
         post: operations["publishCourseModule"];
         delete?: never;
@@ -453,7 +456,7 @@ export interface paths {
         put?: never;
         /**
          * Ocultar un módulo publicado
-         * @description Requiere `teacher` y genera un evento de auditoría inmutable.
+         * @description Teacher activo de cualquier sección ve borradores y escribe contenido compartido. Assistant/student solo leen publicado; material exige padre e ítem publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
          */
         post: operations["unpublishCourseModule"];
         delete?: never;
@@ -479,45 +482,15 @@ export interface paths {
         };
         /**
          * Listar materiales visibles de un módulo
-         * @description Estudiantes reciben solo material publicado de módulos publicados.
+         * @description Teacher activo de cualquier sección ve borradores y escribe contenido compartido. Assistant/student solo leen publicado; material exige padre e ítem publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
          */
         get: operations["listModuleMaterials"];
         put?: never;
         /**
          * Crear material markdown
-         * @description Requiere rol `teacher`, porque el material tiene alcance de curso.
+         * @description Teacher activo de cualquier sección ve borradores y escribe contenido compartido. Assistant/student solo leen publicado; material exige padre e ítem publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
          */
         post: operations["createMarkdownMaterial"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/institutions/{institutionSlug}/modules/{moduleId}/materials/files": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
-                 *     valida que la identidad tenga una InstitutionMembership activa.
-                 * @example uc
-                 */
-                institutionSlug: components["parameters"]["InstitutionSlug"];
-                moduleId: components["parameters"]["ModuleId"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Subir un archivo como material
-         * @description Requiere rol `teacher`. Acepta PDF, CSV, XLSX, TXT, JPEG y PNG. El
-         *     límite máximo de tamaño permanece pendiente; el binario se envía como
-         *     multipart y nunca como Base64 en JSON.
-         */
-        post: operations["uploadFileMaterial"];
         delete?: never;
         options?: never;
         head?: never;
@@ -541,7 +514,7 @@ export interface paths {
         };
         /**
          * Consultar material autorizado
-         * @description No expone `storageKey` ni ubicación física del archivo.
+         * @description Teacher activo de cualquier sección ve borradores y escribe contenido compartido. Assistant/student solo leen publicado; material exige padre e ítem publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
          */
         get: operations["getMaterial"];
         put?: never;
@@ -551,37 +524,9 @@ export interface paths {
         head?: never;
         /**
          * Actualizar metadatos o contenido editable de un material
-         * @description Requiere `teacher`; no reemplaza el binario de un archivo existente.
+         * @description Teacher activo de cualquier sección ve borradores y escribe contenido compartido. Assistant/student solo leen publicado; material exige padre e ítem publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
          */
         patch: operations["updateMaterial"];
-        trace?: never;
-    };
-    "/api/v1/institutions/{institutionSlug}/materials/{materialId}/content": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
-                 *     valida que la identidad tenga una InstitutionMembership activa.
-                 * @example uc
-                 */
-                institutionSlug: components["parameters"]["InstitutionSlug"];
-                materialId: components["parameters"]["MaterialId"];
-            };
-            cookie?: never;
-        };
-        /**
-         * Descargar el contenido binario autorizado
-         * @description Solo aplica a material de tipo `file`; no revela la clave interna del storage.
-         */
-        get: operations["downloadMaterialContent"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
         trace?: never;
     };
     "/api/v1/institutions/{institutionSlug}/materials/{materialId}/publish": {
@@ -603,7 +548,7 @@ export interface paths {
         put?: never;
         /**
          * Publicar material
-         * @description Requiere `teacher` y genera un evento de auditoría inmutable.
+         * @description Teacher activo de cualquier sección ve borradores y escribe contenido compartido. Assistant/student solo leen publicado; material exige padre e ítem publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
          */
         post: operations["publishMaterial"];
         delete?: never;
@@ -631,7 +576,7 @@ export interface paths {
         put?: never;
         /**
          * Ocultar material publicado
-         * @description Requiere `teacher` y genera un evento de auditoría inmutable.
+         * @description Teacher activo de cualquier sección ve borradores y escribe contenido compartido. Assistant/student solo leen publicado; material exige padre e ítem publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
          */
         post: operations["unpublishMaterial"];
         delete?: never;
@@ -1415,7 +1360,9 @@ export interface components {
             readonly id: string;
             /** Format: uuid */
             readonly courseId: string;
+            /** @description Título recortado; 1–200 caracteres Unicode, sin NUL. */
             title: string;
+            /** Format: int32 */
             position: number;
             /** Format: date-time */
             readonly publishedAt: string | null;
@@ -1424,7 +1371,9 @@ export interface components {
             items: components["schemas"]["CourseModule"][];
         };
         ModuleCreate: {
+            /** @description Título recortado; 1–200 caracteres Unicode, sin NUL. */
             title: string;
+            /** Format: int32 */
             position: number;
         };
         ModuleOrderRequest: {
@@ -1432,10 +1381,11 @@ export interface components {
             moduleIds: string[];
         };
         ModuleUpdate: {
-            title?: string;
+            /** @description Título recortado; 1–200 caracteres Unicode, sin NUL. */
+            title: string;
         };
         /** @enum {string} */
-        MaterialKind: "markdown" | "file";
+        MaterialKind: "markdown";
         MaterialSummary: {
             /** Format: uuid */
             readonly id: string;
@@ -1452,52 +1402,20 @@ export interface components {
             /** @constant */
             kind?: "markdown";
             markdownBody: string;
-        } & {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            kind: "markdown";
         };
-        /** @enum {string} */
-        MaterialContentType: "application/pdf" | "text/csv" | "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" | "text/plain" | "image/jpeg" | "image/png";
-        FileMaterial: components["schemas"]["MaterialSummary"] & {
-            /** @constant */
-            kind?: "file";
-            filename: string;
-            contentType: components["schemas"]["MaterialContentType"];
-            sizeBytes: number;
-        } & {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            kind: "file";
-        };
-        Material: components["schemas"]["MarkdownMaterial"] | components["schemas"]["FileMaterial"];
         MaterialListResponse: {
-            items: components["schemas"]["Material"][];
+            items: components["schemas"]["MarkdownMaterial"][];
         };
         MarkdownMaterialCreate: {
             title: string;
+            /** @description Cadena inerte; no blanco, sin NUL. JSON HTTP máximo heredado 4096 bytes (413). No se renderiza HTML ni se siguen URLs. */
             markdownBody: string;
-        };
-        FileMaterialUpload: {
-            title: string;
-            /**
-             * Format: binary
-             * @description Archivo PDF, CSV, XLSX, TXT, JPEG o PNG.
-             */
-            file: string;
         };
         MarkdownMaterialUpdate: {
             title?: string;
+            /** @description Cadena inerte; no blanco, sin NUL. JSON HTTP máximo heredado 4096 bytes (413). No se renderiza HTML ni se siguen URLs. */
             markdownBody?: string;
         };
-        FileMaterialUpdate: {
-            title: string;
-        };
-        MaterialUpdate: components["schemas"]["MarkdownMaterialUpdate"] | components["schemas"]["FileMaterialUpdate"];
         /** @enum {string} */
         QuizStatus: "draft" | "published";
         QuizSummary: {
@@ -2016,6 +1934,41 @@ export interface components {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
+        /** @description Error de contenido; estado y código Problem indican la causa, sin datos protegidos. */
+        ContentProblem: {
+            headers: {
+                "Cache-Control"?: "no-store";
+                "X-Content-Type-Options"?: "nosniff";
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description JWT ausente, inválido o expirado. */
+        ContentUnauthorized: {
+            headers: {
+                "WWW-Authenticate"?: "Bearer";
+                "Cache-Control"?: "no-store";
+                "X-Content-Type-Options"?: "nosniff";
+                [name: string]: unknown;
+            };
+            content: {
+                /**
+                 * @example {
+                 *       "type": "https://academix/errors/unauthorized",
+                 *       "title": "Autenticación requerida",
+                 *       "status": 401,
+                 *       "detail": "Se requiere una identidad autenticada válida.",
+                 *       "code": "UNAUTHORIZED",
+                 *       "instance": "/api/v1/institutions/uc/courses",
+                 *       "traceId": "01JQ4Y2X7B3QK5XEM0XZ4MSH8Z",
+                 *       "errors": []
+                 *     }
+                 */
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
     };
     parameters: {
         /**
@@ -2034,6 +1987,9 @@ export interface components {
         SectionId: string;
         EnrollmentId: string;
         ModuleId: string;
+        MaterialId: string;
+        SectionIdFilter: string;
+        QuizId: string;
         /**
          * @description Clave opaca elegida por el cliente para una operación sensible. Su scope
          *     incluye la Institution del path. Repetir la misma solicitud con igual clave
@@ -2041,9 +1997,6 @@ export interface components {
          *     produce 409 Conflict.
          */
         IdempotencyKey: string;
-        MaterialId: string;
-        SectionIdFilter: string;
-        QuizId: string;
         AttemptId: string;
         /** @description Filtro docente; nunca selecciona la identidad estudiantil autenticada. */
         StudentIdFilter: string;
@@ -2698,15 +2651,19 @@ export interface operations {
             /** @description Módulos visibles en orden. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["ModuleListResponse"];
                 };
             };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            404: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
         };
     };
     createCourseModule: {
@@ -2735,18 +2692,24 @@ export interface operations {
                 headers: {
                     /** @description URI del módulo creado. */
                     Location?: string;
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["CourseModule"];
                 };
             };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableEntity"];
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
+            404: components["responses"]["ContentProblem"];
+            409: components["responses"]["ContentProblem"];
+            413: components["responses"]["ContentProblem"];
+            415: components["responses"]["ContentProblem"];
+            422: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
         };
     };
     reorderCourseModules: {
@@ -2773,18 +2736,24 @@ export interface operations {
             /** @description Orden actualizado. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["ModuleListResponse"];
                 };
             };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableEntity"];
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
+            404: components["responses"]["ContentProblem"];
+            409: components["responses"]["ContentProblem"];
+            413: components["responses"]["ContentProblem"];
+            415: components["responses"]["ContentProblem"];
+            422: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
         };
     };
     getCourseModule: {
@@ -2807,15 +2776,19 @@ export interface operations {
             /** @description Módulo solicitado. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["CourseModule"];
                 };
             };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            404: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
         };
     };
     updateCourseModule: {
@@ -2842,18 +2815,24 @@ export interface operations {
             /** @description Módulo actualizado. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["CourseModule"];
                 };
             };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableEntity"];
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
+            404: components["responses"]["ContentProblem"];
+            409: components["responses"]["ContentProblem"];
+            413: components["responses"]["ContentProblem"];
+            415: components["responses"]["ContentProblem"];
+            422: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
         };
     };
     publishCourseModule: {
@@ -2876,17 +2855,24 @@ export interface operations {
             /** @description Módulo publicado. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["CourseModule"];
                 };
             };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
+            404: components["responses"]["ContentProblem"];
+            409: components["responses"]["ContentProblem"];
+            413: components["responses"]["ContentProblem"];
+            415: components["responses"]["ContentProblem"];
+            422: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
         };
     };
     unpublishCourseModule: {
@@ -2909,17 +2895,24 @@ export interface operations {
             /** @description Módulo ocultado. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["CourseModule"];
                 };
             };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
+            404: components["responses"]["ContentProblem"];
+            409: components["responses"]["ContentProblem"];
+            413: components["responses"]["ContentProblem"];
+            415: components["responses"]["ContentProblem"];
+            422: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
         };
     };
     listModuleMaterials: {
@@ -2942,15 +2935,19 @@ export interface operations {
             /** @description Materiales visibles. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["MaterialListResponse"];
                 };
             };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            404: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
         };
     };
     createMarkdownMaterial: {
@@ -2979,66 +2976,24 @@ export interface operations {
                 headers: {
                     /** @description URI del material creado. */
                     Location?: string;
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["MarkdownMaterial"];
                 };
             };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["UnprocessableEntity"];
-        };
-    };
-    uploadFileMaterial: {
-        parameters: {
-            query?: never;
-            header: {
-                /**
-                 * @description Clave opaca elegida por el cliente para una operación sensible. Su scope
-                 *     incluye la Institution del path. Repetir la misma solicitud con igual clave
-                 *     y payload devuelve el primer resultado; reutilizarla con otro payload
-                 *     produce 409 Conflict.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-            };
-            path: {
-                /**
-                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
-                 *     valida que la identidad tenga una InstitutionMembership activa.
-                 * @example uc
-                 */
-                institutionSlug: components["parameters"]["InstitutionSlug"];
-                moduleId: components["parameters"]["ModuleId"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": components["schemas"]["FileMaterialUpload"];
-            };
-        };
-        responses: {
-            /** @description Archivo almacenado y material creado en estado no publicado. */
-            201: {
-                headers: {
-                    /** @description URI del material creado. */
-                    Location?: string;
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FileMaterial"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            415: components["responses"]["UnsupportedMediaType"];
-            422: components["responses"]["UnprocessableEntity"];
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
+            404: components["responses"]["ContentProblem"];
+            409: components["responses"]["ContentProblem"];
+            413: components["responses"]["ContentProblem"];
+            415: components["responses"]["ContentProblem"];
+            422: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
         };
     };
     getMaterial: {
@@ -3061,15 +3016,19 @@ export interface operations {
             /** @description Material solicitado. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Material"];
+                    "application/json": components["schemas"]["MarkdownMaterial"];
                 };
             };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            404: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
         };
     };
     updateMaterial: {
@@ -3089,64 +3048,31 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["MaterialUpdate"];
+                "application/json": components["schemas"]["MarkdownMaterialUpdate"];
             };
         };
         responses: {
             /** @description Material actualizado. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Material"];
+                    "application/json": components["schemas"]["MarkdownMaterial"];
                 };
             };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableEntity"];
-        };
-    };
-    downloadMaterialContent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
-                 *     valida que la identidad tenga una InstitutionMembership activa.
-                 * @example uc
-                 */
-                institutionSlug: components["parameters"]["InstitutionSlug"];
-                materialId: components["parameters"]["MaterialId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Contenido del archivo con su Content-Type real permitido. */
-            200: {
-                headers: {
-                    /** @description Nombre seguro sugerido para el archivo. */
-                    "Content-Disposition"?: string;
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/pdf": string;
-                    "text/csv": string;
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
-                    "text/plain": string;
-                    "image/jpeg": string;
-                    "image/png": string;
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["UnprocessableEntity"];
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
+            404: components["responses"]["ContentProblem"];
+            409: components["responses"]["ContentProblem"];
+            413: components["responses"]["ContentProblem"];
+            415: components["responses"]["ContentProblem"];
+            422: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
         };
     };
     publishMaterial: {
@@ -3169,18 +3095,24 @@ export interface operations {
             /** @description Material publicado. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Material"];
+                    "application/json": components["schemas"]["MarkdownMaterial"];
                 };
             };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableEntity"];
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
+            404: components["responses"]["ContentProblem"];
+            409: components["responses"]["ContentProblem"];
+            413: components["responses"]["ContentProblem"];
+            415: components["responses"]["ContentProblem"];
+            422: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
         };
     };
     unpublishMaterial: {
@@ -3203,17 +3135,24 @@ export interface operations {
             /** @description Material ocultado. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Material"];
+                    "application/json": components["schemas"]["MarkdownMaterial"];
                 };
             };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
+            404: components["responses"]["ContentProblem"];
+            409: components["responses"]["ContentProblem"];
+            413: components["responses"]["ContentProblem"];
+            415: components["responses"]["ContentProblem"];
+            422: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
         };
     };
     listCourseQuizzes: {

@@ -29,13 +29,19 @@ python3 .github/scripts/check-doc-length.py
 No correr migración contra datos reales para verificar este plan. Prueba de upgrade
 usa el migrador existente en DB exclusiva con datos del prerequisito.
 
+Límite HTTP heredado: 4096 bytes JSON; aun con campos válidos, superarlo da 413.
+El máximo semántico de markdown (10000 caracteres) también se prueba fuera de HTTP.
+
 ## Fixtures compartidas
 
 content-fixtures.mjs reutiliza helpers.mjs y course-fixtures.mjs; crea UC/UTFSM,
 actor docente no admin y docente admin, assistant/student de dos secciones,
 dueño sin teacher, admin ajeno, usuario con dos roles y membresía revocada.
 No modificar seed demo ni responsables del backlog.
-Para independencia, lectura US2 inserta módulos/materiales por SQL y no llama POST US1.
+Foundation completa registro compilable, contrato y tipos antes de ambas historias.
+Para independencia, US2 inserta contenido y simula ocultación/revocación concurrente
+con transacciones SQL controladas; no llama endpoints de escritura US1. Verificar
+arranque HTTP y pruebas de cada historia sin ejecutar tareas de la otra.
 
 ## US1: organizar contenido
 
@@ -49,6 +55,10 @@ Para independencia, lectura US2 inserta módulos/materiales por SQL y no llama P
 8. Provocar fallo de auditoría revierte datos, posición y publicación; conexiones se liberan.
 9. Altas simultáneas misma posición: una gana y otra 409; dos órdenes válidos
    serializan sin posiciones duplicadas. Alta vs orden da resultado serial o 409.
+10. Ejecutar publish vs unpublish simultáneos sobre módulo y material en ambos
+    órdenes de lock: estado final/eventos siguen commits; fallo de audit revierte todo.
+11. Verificar module.reordered con before/after {modules:[{id,position}]} contra
+    AuditChanges canónico; no devolver arreglos como snapshot raíz.
 
 Esperado: FR-001/002/003/006/007 y SC-002 con historial completo e inmutable.
 

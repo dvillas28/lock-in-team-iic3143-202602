@@ -4,6 +4,8 @@ import audit from "../dist/audit/audit.service.js";
 
 test("audit persists only the allowed snapshot fields for every resource",async()=>{
  const resources={
+  courseModule:{id:"module",courseId:"c",title:"Module",position:1,publishedAt:null},
+  material:{id:"item",moduleId:"module",title:"Source",kind:"markdown",markdownBody:"historical",publishedAt:null,createdBy:"u"},
   course:{code:"C",name:"Course",term:"2026-2",createdBy:"owner"},
   section:{code:"1",capacity:42},
   enrollment:{id:"e",userId:"u",sectionId:"s",role:"teacher",active:true},
@@ -18,4 +20,9 @@ test("audit persists only the allowed snapshot fields for every resource",async(
   assert.deepEqual(persisted,{before:allowed,after:allowed});
   assert.equal(audit.snapshot(resourceType,null),null);
  }
+});
+
+test("reorder snapshots project nested id/position without expanding ordinary course snapshots",()=>{
+ assert.deepEqual(audit.snapshot("moduleOrder",{modules:[{id:"m",position:1,secret:"discard"}],secret:"discard"}),{modules:[{id:"m",position:1}]});
+ assert.deepEqual(audit.snapshot("course",{modules:[{id:"m",position:1}]}),{});
 });

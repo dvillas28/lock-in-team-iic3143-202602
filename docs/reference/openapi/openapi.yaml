@@ -82,12 +82,8 @@ paths:
     $ref: ./paths/sections.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1modules~1{moduleId}~1unpublish
   /api/v1/institutions/{institutionSlug}/modules/{moduleId}/materials:
     $ref: ./paths/materials.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1modules~1{moduleId}~1materials
-  /api/v1/institutions/{institutionSlug}/modules/{moduleId}/materials/files:
-    $ref: ./paths/materials.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1modules~1{moduleId}~1materials~1files
   /api/v1/institutions/{institutionSlug}/materials/{materialId}:
     $ref: ./paths/materials.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1materials~1{materialId}
-  /api/v1/institutions/{institutionSlug}/materials/{materialId}/content:
-    $ref: ./paths/materials.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1materials~1{materialId}~1content
   /api/v1/institutions/{institutionSlug}/materials/{materialId}/publish:
     $ref: ./paths/materials.yaml#/~1api~1v1~1institutions~1{institutionSlug}~1materials~1{materialId}~1publish
   /api/v1/institutions/{institutionSlug}/materials/{materialId}/unpublish:

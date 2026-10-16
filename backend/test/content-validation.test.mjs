@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import {test} from 'node:test';
+import validation from '../dist/content/content-validation.js';
+const {title,markdown,position,order,noBody}=validation;
+test('strict content validation: Unicode bounds, whitespace, NUL, inert strings and keys',()=>{
+ assert.equal(title('  académico  '),'académico');
+ assert.equal(title('😀'.repeat(200)),'😀'.repeat(200));
+ assert.equal(markdown('😀'.repeat(10000)),'😀'.repeat(10000));
+ const hostile='<script>throw 1</script><img onerror="alert(1)"><iframe/><svg onload="x"/>[x](javascript:x) data:text/html,&lt;';
+ assert.equal(markdown(hostile),hostile);
+ for(const value of [null,{},[]]) for(const fn of [title,markdown,position])assert.throws(()=>fn(value),e=>e.getStatus()===400);
+ for(const value of ['', ' \n\t\u2003', 'a\0b'])for(const fn of [title,markdown])assert.throws(()=>fn(value),e=>e.getStatus()===422);
+ assert.throws(()=>title('😀'.repeat(201)),e=>e.getStatus()===422);
+ assert.throws(()=>markdown('😀'.repeat(10001)),e=>e.getStatus()===422);
+ for(const value of [0,-1,1.2,2147483648,NaN,Infinity])assert.throws(()=>position(value),e=>e.getStatus()===422);
+ assert.equal(position(2147483647),2147483647);assert.deepEqual(order([]),[]);
+ for(const value of [null,{},42])assert.throws(()=>order(value),e=>e.getStatus()===400);
+ const id='10000000-0000-4000-8000-00000000000a';assert.deepEqual(order([id.toUpperCase()]),[id]);
+ assert.throws(()=>order([id,id.toUpperCase()]),e=>e.getStatus()===422);
+ assert.throws(()=>order(['bad']),e=>e.getStatus()===400);
+ noBody(undefined);for(const value of [{},null,[],true,''])assert.throws(()=>noBody(value),e=>e.getStatus()===400);
+});

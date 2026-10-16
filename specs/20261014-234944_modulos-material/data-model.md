@@ -46,7 +46,8 @@ resource_type: courseModule o material; resource_id validado en la transacción.
 Acciones: module.created/updated/reordered/published/unpublished;
 material.created/updated/published/unpublished.
 module.reordered usa resource_id de Course y resource_type='course'; changes contiene
-before/after de [{id,position}], sin body ni copia de recursos de otro curso.
+before/after como objetos {modules:[{id,position}]}, compatibles con AuditChanges
+de docs/reference/openapi/components/schemas/audit.yaml; sin body ni recursos ajenos.
 Snapshot módulo: id/courseId/title/position/publishedAt.
 Snapshot material: id/moduleId/title/kind/markdownBody/publishedAt/createdBy.
 Guardar before/after permitidos conserva contenido e historia; no-op no crea evento.
@@ -74,6 +75,9 @@ Diferir solo la constraint de posiciones, asignar 1..N y confirmar; nunca estado
 Dos órdenes válidos se serializan; prevalece último commit. Alta concurrente puede
 invalidar el conjunto de una orden, que obtiene 409 sin mutación.
 Ediciones concurrentes se serializan; último commit gana con ambos eventos históricos.
+Publish/unpublish simultáneos de módulo o material se serializan por el mismo lock:
+estado y snapshots corresponden al orden de commits; no-op no añade eventos.
+Si falla auditoría, rollback revierte estado y evento antes de permitir la siguiente tx.
 No retry automático de POST create: sin clave idempotente un POST repetido es otra alta
 (si reutiliza posición ocupada, 409). Publish/unpublish/order/PATCH sin cambios son no-op.
 

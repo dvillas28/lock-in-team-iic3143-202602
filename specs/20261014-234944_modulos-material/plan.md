@@ -1,8 +1,8 @@
 # Implementation Plan: Módulos y material compartido
 
-**Branch actual**: `feat/cursos-roles` | **Prevista**: `feat/modulos-material`
+**Branch actual**: `feat/modulos-material-foundation` | **Prevista**: `feat/modulos-material`
 **Date**: 2026-10-16 | **Spec**: [spec.md](spec.md)
-**Status**: Planificado; implementación y aceptación funcional pendientes.
+**Status**: Foundation implementada; rutas de US1/US2 pendientes en la capa siguiente.
 **Input**: `specs/20261014-234944_modulos-material/spec.md`.
 
 ## Summary
@@ -41,7 +41,7 @@ explícito: identidad-acceso y cursos-roles deben estar operativos, no solo plan
 | Tenant isolation | institution_id y FK compuestas; acceso vigente en cada consulta |
 | Roles/admin | Teacher activo de alguna sección escribe; flags admin no sustituyen rol |
 | Audit/history | Mutación y snapshots before/after en la misma tx; historial append-only |
-| Independencia | US1 con fixtures académicos; US2 con contenido SQL sin depender de endpoints US1 |
+| Independencia | Foundation registra servicios/controladores y sincroniza contrato/tipos; US1/US2 con fixtures propias |
 | Checked changes | Negativos de dos tenants, revocación, XSS, concurrencia y rollback |
 | Documentación | Artefactos menores de 150 líneas |
 | Traceability | CU-14/05/06; RF13–16/25–26; RNF1–4; BE-21–23 y parte BE-24 |
@@ -95,9 +95,13 @@ DatabaseService.check verifica columnas nuevas; AppModule registra controladores
 ## Execution and Verification
 
 1. Confirmar prerequisitos y contratos existentes; no confirmar cambios ajenos.
-2. Crear migración, autorización común y fixtures de dos tenants.
-3. US1: creación/edición/orden/publicación, auditoría y contrato sincronizado.
-4. US2: lectura filtrada, enlaces directos y revocación con fixtures propios.
+2. Foundation: migración, autorización, fixtures de dos tenants, servicios/controladores
+   compilables registrados sin rutas y contrato/tipos sincronizados antes de historias.
+3. US1: creación/edición/orden/publicación y auditoría; probar publish vs unpublish
+   concurrentes en módulo/material y snapshots de orden como objetos {modules:[{id,position}]}.
+4. US2: implementar GET con registro/DTO de Foundation, enlaces directos y revocación
+   con fixtures propias; cambios concurrentes por SQL sin depender de escrituras US1.
+   Validar arranque HTTP y contrato de cada historia sin tareas de la otra.
 5. Validar migración desde identidad+cursos, rollback de operación y concurrencia.
 6. Ejecutar checks del quickstart y registrar evidencia sin marcar tareas pendientes.
 
@@ -110,3 +114,7 @@ SC-003: ninguna lectura/escritura/relación cruzada ni enlace revocado expone da
 Sin violaciones. Bloquear Course reutiliza la serialización existente; constraint
 UNIQUE diferible permite intercambiar posiciones sin valores temporales.
 No agregar versionado paralelo: auditoría before/after conserva historia de edición.
+
+Base comprobada: PR #86, `feat/cursos-roles-backend` @ `57a113e`. HTTP real de
+identidad/cursos, roles, revocación y auditoría PASS en DB exclusiva PostgreSQL 17.
+Trazabilidad CU/RF/RNF y teacher no admin reconciliados; sin dependencia faltante.

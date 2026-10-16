@@ -5,9 +5,9 @@ Investigación 2026-10-16 basada en fuentes y contratos locales. No cambia stack
 ## 1. Integración existente
 
 **Decision**: reutilizar NestJS, SQL pg, AuthGuard, Problem y auditoría del plan
-cursos-roles; implementación bloqueada hasta que esos permisos/tablas existan.
+cursos-roles; implementación depende de verificar sus permisos/tablas operativos.
 **Rationale**: backend ya tiene identidad y DatabaseService; cursos/auditoría son
-artefactos planeados, no servicios disponibles hoy.
+artefactos planeados al investigar; implementación comprobada en PR #86 @ 57a113e.
 **Alternatives considered**: ORM, repositorio genérico y nuevo servicio: sin necesidad.
 **Evidence**: backend/package.json, backend/src/database/database.service.ts,
 [plan cursos](../20261014-234844_cursos-roles/plan.md).
@@ -64,5 +64,5 @@ existentes para markdown/módulos y explicitar assistant como lectura publicada.
 **Alternatives considered**: implementar storage o anunciar rutas sin servicio: descartados.
 **Evidence**: docs/reference/openapi/paths/materials.yaml y paths/sections.yaml.
 
-Sin NEEDS CLARIFICATION pendientes. Son decisiones de planificación; las pruebas
-funcionales y mediciones quedan para implementación.
+Sin NEEDS CLARIFICATION pendientes. Decisiones verificadas durante implementación;
+[evidencia funcional](../../docs/backend/modules-material-validation.md).

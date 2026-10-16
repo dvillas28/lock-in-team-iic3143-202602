@@ -290,3 +290,25 @@ test("createCourse declares and preserves validation and access Problem errors",
   }),error=>error instanceof ApiHttpError && error.status===status && error.problem.code==="REJECTED");
  }
 });
+
+test("markdown-only consumer preserves inert strings and uses generated lists/detail/errors",async()=>{
+ const markdown='<script>alert(1)</script><img onerror="x"><iframe/><svg onload="x"/>[x](javascript:x) [d](data:text/html,x) &lt;b&gt;';
+ const material:components["schemas"]["MarkdownMaterial"]={id:"item",moduleId:"module",title:"Text",kind:"markdown",markdownBody:markdown,publishedAt:null,createdBy:"actor"};
+ let calls=0;
+ const client=mockClient(request=>{calls++;assert.equal(request.cache,"no-store");return Response.json(request.url.endsWith('/materials')?{items:[material]}:material);});
+ const list=await client.GET("/api/v1/institutions/{institutionSlug}/modules/{moduleId}/materials",{params:{path:{institutionSlug:"uc",moduleId:"module"}}});
+ assert.equal(list.data?.items[0].kind,"markdown");assert.equal(list.data?.items[0].markdownBody,markdown);
+ const detail=await client.GET("/api/v1/institutions/{institutionSlug}/materials/{materialId}",{params:{path:{institutionSlug:"uc",materialId:"item"}}});
+ assert.equal(detail.data?.markdownBody,markdown);assert.equal(typeof detail.data?.markdownBody,"string");assert.equal(calls,2);
+ const empty=mockClient(()=>Response.json({items:[]}));
+ assert.deepEqual((await empty.GET("/api/v1/institutions/{institutionSlug}/courses/{courseId}/modules",{params:{path:{institutionSlug:"uc",courseId:"c"}}})).data?.items,[]);
+});
+export function checkMarkdownOnlyTypes(client:ApiClient) {
+ // @ts-expect-error Binary upload is outside the MVP contract.
+ client.POST("/api/v1/institutions/{institutionSlug}/modules/{moduleId}/materials/files",{});
+ // @ts-expect-error Content downloads are outside the MVP contract.
+ client.GET("/api/v1/institutions/{institutionSlug}/materials/{materialId}/content",{});
+ // @ts-expect-error Caller cannot choose kind or actor.
+ const input:components["schemas"]["MarkdownMaterialCreate"]={title:"T",markdownBody:"text",kind:"file",createdBy:"other"};
+ void input;
+}

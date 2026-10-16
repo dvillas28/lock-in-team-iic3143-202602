@@ -97,3 +97,53 @@ InternalError:
     application/problem+json:
       schema:
         $ref: ./schemas/common.yaml#/Problem
+PayloadTooLarge:
+  description: Cuerpo HTTP supera 4096 bytes.
+  content:
+    application/problem+json:
+      schema:
+        $ref: ./schemas/common.yaml#/Problem
+ContentProblem:
+  description: Error de contenido; estado y código Problem indican la causa, sin datos
+    protegidos.
+  content:
+    application/problem+json:
+      schema:
+        $ref: ./schemas/common.yaml#/Problem
+  headers:
+    Cache-Control:
+      schema:
+        type: string
+        const: no-store
+    X-Content-Type-Options:
+      schema:
+        type: string
+        const: nosniff
+ContentUnauthorized:
+  headers:
+    WWW-Authenticate:
+      schema:
+        type: string
+        const: Bearer
+    Cache-Control:
+      schema:
+        type: string
+        const: no-store
+    X-Content-Type-Options:
+      schema:
+        type: string
+        const: nosniff
+  description: JWT ausente, inválido o expirado.
+  content:
+    application/problem+json:
+      schema:
+        $ref: ./schemas/common.yaml#/Problem
+      example:
+        type: https://academix/errors/unauthorized
+        title: Autenticación requerida
+        status: 401
+        detail: Se requiere una identidad autenticada válida.
+        code: UNAUTHORIZED
+        instance: /api/v1/institutions/uc/courses
+        traceId: 01JQ4Y2X7B3QK5XEM0XZ4MSH8Z
+        errors: []
