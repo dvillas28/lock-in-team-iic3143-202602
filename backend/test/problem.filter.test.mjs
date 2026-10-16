@@ -4,7 +4,7 @@ import { HttpException } from "@nestjs/common";
 import filter from "../dist/http/problem.filter.js";
 
 test("Problem sanitizes every status, generates traceId and preserves headers/probes", () => {
-  for (const status of [400,401,403,404,413,415,429,500,503]) {
+  for (const status of [400,401,403,404,409,413,415,422,429,500,503]) {
     const headers = {"Retry-After": 60}; let body, actual;
     const response = {setHeader(k,v) {headers[k]=v;}, status(s) {actual=s;return this;}, json(b) {body=b;}};
     const host = {switchToHttp:()=>({getRequest:()=>({originalUrl:"/api/v1/test?secret=sentinel",headers:{"x-trace-id":"sentinel"}}),getResponse:()=>response})};
@@ -35,5 +35,14 @@ test("unexpected errors and validation fields never reflect arbitrary payloads",
   new filter.ProblemFilter().catch(error,{switchToHttp:()=>({getRequest:()=>({url:"/test"}),getResponse:()=>response})});
   assert.ok(!JSON.stringify(body).includes("sentinel"));
   if(error instanceof HttpException && error.getResponse().field==="email")assert.deepEqual(body.errors,[{field:"email",message:"Campo inválido."}]);
+ }
+});
+
+test("database connection failures are sanitized as 503; other failures stay 500",()=>{
+ for(const [code,expected] of [["ECONNREFUSED",503],["08006",503],["57P01",503],["23505",500]]) {
+  let actual,body;
+  const response={setHeader(){},status(s){actual=s;return this;},json(b){body=b;}};
+  new filter.ProblemFilter().catch(Object.assign(new Error("sentinel"),{code}),{switchToHttp:()=>({getRequest:()=>({url:"/test"}),getResponse:()=>response})});
+  assert.equal(actual,expected);assert.ok(!JSON.stringify(body).includes("sentinel"));
  }
 });

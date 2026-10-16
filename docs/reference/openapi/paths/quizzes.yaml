@@ -32,7 +32,7 @@
     operationId: createQuiz
     summary: Crear un quiz en estado draft
     description: |
-      Teachers pueden crear quizzes de curso o sección dentro de su alcance académico.
+      Teacher activo es obligatorio para autoría/pauta. is_admin más ownership amplía destinatarios; teacher ordinario conserva sus secciones. Admin o superadmin por sí solos no conceden docencia.
       Assistants y students no pueden crear quizzes.
     requestBody:
       required: true
@@ -396,8 +396,8 @@
     operationId: listQuizAttempts
     summary: Listar intentos para revisión académica
     description: |
-      Teacher puede consultar todas las secciones del curso. Teacher y
-      assistant solo secciones donde tengan membership activa. Students no tienen acceso.
+      Teacher con is_admin y ownership puede consultar todo su curso. Teacher
+      ordinario y assistant solo secciones con Enrollment activo propio. Students no tienen acceso.
     parameters:
       - $ref: '../components/parameters.yaml#/SectionIdFilter'
       - $ref: '../components/parameters.yaml#/StudentIdFilter'

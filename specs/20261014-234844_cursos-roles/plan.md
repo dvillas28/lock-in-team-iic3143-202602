@@ -2,7 +2,7 @@
 
 **Branch actual**: `feat/identidad-acceso` | **Prevista**: `feat/cursos-roles`
 **Date**: 2026-10-16 | **Spec**: [spec.md](spec.md)
-**Status**: Planificado; implementación y validación en el siguiente PR del stack.
+**Status**: Implementado; validación y evidencia en docs/backend/courses-roles-validation.md.
 **Input**: `specs/20261014-234844_cursos-roles/spec.md`.
 
 ## Summary

@@ -1,7 +1,7 @@
 # Data Model: Cursos, roles y auditoría
 
 Todas las tablas usan UUID; fechas timestamptz(6). SQL público parametrizado.
-Modelo previsto mediante migración nueva; implementación en el siguiente PR del stack.
+Modelo implementado mediante migración nueva; evidencia en docs/backend/courses-roles-validation.md.
 
 ## InstitutionMembership (extensión)
 

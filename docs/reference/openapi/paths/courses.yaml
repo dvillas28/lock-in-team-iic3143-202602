@@ -1,33 +1,88 @@
 /api/v1/institutions/{institutionSlug}/courses:
   parameters:
-    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+  - $ref: ../components/parameters.yaml#/InstitutionSlug
   get:
     tags:
-      - Courses
+    - Courses
     operationId: listCourses
     summary: Listar cursos visibles para el usuario
-    description: Retorna únicamente cursos donde existe una membership académica activa.
+    description: Admin dueño o Enrollment activo; privilegios institucionales vigentes,
+      sin acceso a cursos ajenos.
     responses:
       '200':
         description: Cursos visibles dentro de la Institution seleccionada.
         content:
           application/json:
             schema:
-              $ref: '../components/schemas/courses.yaml#/CourseListResponse'
+              $ref: ../components/schemas/courses.yaml#/CourseListResponse
+        headers:
+          Cache-Control:
+            schema:
+              type: string
+              const: no-store
       '400':
-        $ref: '../components/responses.yaml#/BadRequest'
+        $ref: ../components/responses.yaml#/BadRequest
       '401':
-        $ref: '../components/responses.yaml#/Unauthorized'
+        $ref: ../components/responses.yaml#/Unauthorized
       '404':
-        $ref: '../components/responses.yaml#/NotFound'
-
+        $ref: ../components/responses.yaml#/NotFound
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+  post:
+    tags:
+    - Courses
+    operationId: createCourse
+    summary: Crear curso propio, primera sección y teacher inicial
+    description: Exige is_admin vigente. createdBy deriva del actor y es inmutable.
+      Una transacción incluye curso, sección, teacher y eventos. Repetición code/term
+      produce 409.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/courses.yaml#/CourseCreate
+    responses:
+      '201':
+        description: Curso creado atómicamente.
+        headers:
+          Location:
+            schema:
+              type: string
+              format: uri-reference
+          Cache-Control:
+            schema:
+              type: string
+              const: no-store
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/courses.yaml#/Course
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '403':
+        $ref: ../components/responses.yaml#/Forbidden
+      '404':
+        $ref: ../components/responses.yaml#/NotFound
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+      '409':
+        $ref: ../components/responses.yaml#/Conflict
+      '422':
+        $ref: ../components/responses.yaml#/UnprocessableEntity
 /api/v1/institutions/{institutionSlug}/courses/{courseId}:
   parameters:
-    - $ref: '../components/parameters.yaml#/InstitutionSlug'
-    - $ref: '../components/parameters.yaml#/CourseId'
+  - $ref: ../components/parameters.yaml#/InstitutionSlug
+  - $ref: ../components/parameters.yaml#/CourseId
   get:
     tags:
-      - Courses
+    - Courses
     operationId: getCourse
     summary: Consultar un curso visible
     responses:
@@ -36,39 +91,60 @@
         content:
           application/json:
             schema:
-              $ref: '../components/schemas/courses.yaml#/Course'
+              $ref: ../components/schemas/courses.yaml#/Course
+        headers:
+          Cache-Control:
+            schema:
+              type: string
+              const: no-store
       '400':
-        $ref: '../components/responses.yaml#/BadRequest'
+        $ref: ../components/responses.yaml#/BadRequest
       '401':
-        $ref: '../components/responses.yaml#/Unauthorized'
+        $ref: ../components/responses.yaml#/Unauthorized
       '404':
-        $ref: '../components/responses.yaml#/NotFound'
+        $ref: ../components/responses.yaml#/NotFound
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
   patch:
     tags:
-      - Courses
+    - Courses
     operationId: updateCourse
     summary: Actualizar configuración general del curso
-    description: Requiere rol `teacher` en el curso. Los cambios sensibles generan auditoría.
+    description: Exige is_admin institucional y createdBy igual al actor. Mismo estado
+      es no-op sin evento.
     requestBody:
       required: true
       content:
         application/json:
           schema:
-            $ref: '../components/schemas/courses.yaml#/CourseUpdate'
+            $ref: ../components/schemas/courses.yaml#/CourseUpdate
     responses:
       '200':
         description: Curso actualizado.
         content:
           application/json:
             schema:
-              $ref: '../components/schemas/courses.yaml#/Course'
+              $ref: ../components/schemas/courses.yaml#/Course
+        headers:
+          Cache-Control:
+            schema:
+              type: string
+              const: no-store
       '400':
-        $ref: '../components/responses.yaml#/BadRequest'
+        $ref: ../components/responses.yaml#/BadRequest
       '401':
-        $ref: '../components/responses.yaml#/Unauthorized'
+        $ref: ../components/responses.yaml#/Unauthorized
       '403':
-        $ref: '../components/responses.yaml#/Forbidden'
+        $ref: ../components/responses.yaml#/Forbidden
       '404':
-        $ref: '../components/responses.yaml#/NotFound'
+        $ref: ../components/responses.yaml#/NotFound
       '422':
-        $ref: '../components/responses.yaml#/UnprocessableEntity'
+        $ref: ../components/responses.yaml#/UnprocessableEntity
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+      '409':
+        $ref: ../components/responses.yaml#/Conflict

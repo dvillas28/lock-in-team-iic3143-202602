@@ -6,6 +6,8 @@ const problems: Record<number, [string, string, string]> = {
   401: ["UNAUTHORIZED", "Autenticación requerida", "Se requiere una identidad autenticada válida."],
   403: ["FORBIDDEN", "Acceso prohibido", "La acción no está permitida."],
   404: ["RESOURCE_NOT_FOUND", "Recurso no encontrado", "El recurso no existe o no es visible en el contexto autorizado."],
+  409: ["CONFLICT", "Conflicto", "La operación entra en conflicto con el estado actual."],
+  422: ["UNPROCESSABLE_ENTITY", "Restricción de dominio", "La operación viola una restricción de dominio."],
   413: ["PAYLOAD_TOO_LARGE", "Cuerpo excesivo", "El cuerpo supera el límite permitido."],
   415: ["UNSUPPORTED_MEDIA_TYPE", "Tipo no admitido", "Se requiere application/json."],
   429: ["TOO_MANY_REQUESTS", "Demasiadas solicitudes", "Intente nuevamente después del bloqueo."],
@@ -19,7 +21,9 @@ export class ProblemFilter implements ExceptionFilter {
     const http = host.switchToHttp();
     const request = http.getRequest();
     const response = http.getResponse();
-    const status = error instanceof HttpException ? error.getStatus() : 500;
+    const databaseCode=(error as {code?:string})?.code;
+    const unavailable=typeof databaseCode==="string" && (databaseCode.startsWith("08") || ["57P01","57P02","57P03","53300","ECONNREFUSED","ECONNRESET","ETIMEDOUT"].includes(databaseCode));
+    const status = error instanceof HttpException ? error.getStatus() : unavailable ? 503 : 500;
     const path = (request.originalUrl ?? request.url).split("?", 1)[0];
     if (/^\/ready\/?$/i.test(path) && status === 503) {
       response.status(503).json({status: "unavailable"}); return;
