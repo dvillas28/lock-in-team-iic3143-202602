@@ -1,8 +1,8 @@
 # Implementation Plan: Módulos y material compartido
 
-**Branch actual**: `feat/modulos-material-foundation` | **Prevista**: `feat/modulos-material`
+**Branch actual**: `feat/modulos-material-api` | **Prevista**: `feat/modulos-material`
 **Date**: 2026-10-16 | **Spec**: [spec.md](spec.md)
-**Status**: Foundation implementada; rutas de US1/US2 pendientes en la capa siguiente.
+**Status**: Implementado y verificado localmente; ver [evidencia](../../docs/backend/modules-material-validation.md).
 **Input**: `specs/20261014-234944_modulos-material/spec.md`.
 
 ## Summary
