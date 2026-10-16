@@ -2,7 +2,6 @@ name: CI
 
 on:
   pull_request:
-    branches: [main, dev]
   # Railway "Wait for CI" only waits on workflows triggered by pushes to the deploy branch.
   push:
     branches: [main]
@@ -33,6 +32,25 @@ jobs:
           else
             python3 .github/scripts/check-doc-length.py --base HEAD~1
           fi
+
+  contracts:
+    name: OpenAPI and generated client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            frontend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir frontend install --frozen-lockfile
+      - run: pnpm docs:api:lint
+      - run: pnpm --dir frontend api:check
+      - run: pnpm --dir frontend typecheck
 
   changes:
     name: Detect changes
@@ -256,7 +274,7 @@ jobs:
   result:
     name: CI result
     if: always()
-    needs: [documentation, changes, checks, docker, backend-coverage, sonarqube]
+    needs: [documentation, contracts, changes, checks, docker, backend-coverage, sonarqube]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any job failed or was cancelled

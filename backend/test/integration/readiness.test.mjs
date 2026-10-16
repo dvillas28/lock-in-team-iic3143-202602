@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { setTimeout as delay } from "node:timers/promises";
 import { test } from "node:test";
 import pg from "pg";
-import { database, migrated, cli, sanitized, testUrl } from "./helpers.mjs";
+import { database, migrated, cli, sanitized, testUrl, terminateHttpConnections } from "./helpers.mjs";
 import service from "../../dist/database/database.service.js";
 
 async function failedStartup(extra) {
@@ -58,24 +58,28 @@ test("HTTP readiness, health, schema/DB loss, recovery and graceful shutdown", a
     await waitReady(13982,app);
     await pool.query("ALTER TABLE users RENAME COLUMN email TO missing_email");
     const start = performance.now();
-    const unavailable = await fetch("http://localhost:13982/ready");
-    assert.equal(unavailable.status,503);
-    assert.deepEqual(await unavailable.json(), {status:"unavailable"});
+    for (const path of ["/ready", "/ready/", "/READY", "/READY/?probe=1"]) {
+      const unavailable = await fetch(`http://localhost:13982${path}`);
+      assert.equal(unavailable.status,503);
+      assert.equal(unavailable.headers.get("content-type").split(";")[0],"application/json");
+      assert.deepEqual(await unavailable.json(), {status:"unavailable"});
+    }
     assert.ok(performance.now()-start < 5000);
     assert.equal((await fetch("http://localhost:13982/health")).status,200);
     await pool.query("ALTER TABLE users RENAME COLUMN missing_email TO email");
     await waitReady(13982,app);
-    await pool.query("SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE application_name='academix-http'");
+    await terminateHttpConnections(pool);
     await waitReady(13982,app);
     const maintenanceUrl = new URL(testUrl());
     const dbName = maintenanceUrl.pathname.slice(1);
     // PostgreSQL requires another database for toggling connections to this test DB.
     maintenanceUrl.pathname = "/postgres";
-    const maintenance = new pg.Client({connectionString:maintenanceUrl.href});
+    const maintenance = new pg.Client({connectionString:maintenanceUrl.href,application_name:"academix-http"});
     await maintenance.connect();
     try {
       await maintenance.query(`ALTER DATABASE "${dbName}" ALLOW_CONNECTIONS false`);
-      await pool.query("SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE application_name='academix-http'");
+      await terminateHttpConnections(pool);
+      assert.equal((await maintenance.query("SELECT 1 AS alive")).rows[0].alive,1,"other database connection terminated");
       const lostAt = performance.now();
       const lost = await fetch("http://localhost:13982/ready");
       assert.equal(lost.status,503);

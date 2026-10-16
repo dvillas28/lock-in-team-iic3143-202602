@@ -46,6 +46,9 @@ export async function reset(pool) {
   testUrl();
   await pool.query("DROP SCHEMA public CASCADE; CREATE SCHEMA public");
 }
+export async function terminateHttpConnections(pool) {
+  await pool.query("SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE application_name='academix-http' AND datname=current_database()");
+}
 export async function migrated(pool) {
   await reset(pool);
   const result = await cli("commands/migrate").result;
