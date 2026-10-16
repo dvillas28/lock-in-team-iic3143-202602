@@ -1,0 +1,39 @@
+/api/v1/auth/login:
+  post:
+    tags: [Authentication]
+    operationId: login
+    summary: Autenticar identidad global activa
+    description: Cinco solicitudes por IP en 60000 ms; sexta bloquea 60000 ms. JSON máximo 4 KiB.
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/auth.yaml#/LoginRequest'
+    responses:
+      '200':
+        description: Identidad autenticada por 900 segundos.
+        headers:
+          Cache-Control:
+            schema: {type: string, const: no-store}
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/auth.yaml#/LoginResponse'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '413':
+        description: Cuerpo mayor que 4 KiB.
+        content:
+          application/problem+json:
+            schema:
+              $ref: '../components/schemas/common.yaml#/Problem'
+      '415':
+        $ref: '../components/responses.yaml#/UnsupportedMediaType'
+      '429':
+        $ref: '../components/responses.yaml#/TooManyRequests'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'

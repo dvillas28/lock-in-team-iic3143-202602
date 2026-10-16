@@ -16,6 +16,8 @@ servers:
 security:
   - bearerAuth: []
 tags:
+  - name: Authentication
+    description: Identidad global.
   - name: Platform
     description: Salud del servicio.
   - name: Institutions
@@ -39,6 +41,8 @@ tags:
   - name: Audit
     description: Consulta inmutable del historial académico sensible.
 paths:
+  /api/v1/auth/login:
+    $ref: './paths/auth.yaml#/~1api~1v1~1auth~1login'
   /ready:
     $ref: './paths/platform.yaml#/~1ready'
   /health:

@@ -25,6 +25,7 @@ services:
     build:
       context: ./backend
     environment:
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:?AUTH_JWT_SECRET is required}
       APP_VERSION: 0.1.0
       DATABASE_URL: postgresql://${POSTGRES_USER:-academix}:${POSTGRES_PASSWORD:-academix_dev}@postgres:5432/${POSTGRES_DB:-academix}
       DEMO_UC_PASSWORD: ${DEMO_UC_PASSWORD:-}

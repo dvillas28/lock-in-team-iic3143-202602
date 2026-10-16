@@ -6,6 +6,9 @@ BadRequest:
         $ref: './schemas/common.yaml#/Problem'
 
 Unauthorized:
+  headers:
+    WWW-Authenticate:
+      schema: {type: string, const: Bearer}
   description: JWT ausente, inválido o expirado.
   content:
     application/problem+json:
@@ -77,6 +80,10 @@ ServiceUnavailable:
         $ref: './schemas/common.yaml#/Problem'
 
 TooManyRequests:
+  headers:
+    Retry-After:
+      description: Segundos restantes de bloqueo, sin prolongar ante rechazos.
+      schema: {type: integer, minimum: 1}
   description: Demasiadas solicitudes.
   content:
     application/problem+json:
