@@ -1,0 +1,20 @@
+LoginRequest:
+  type: object
+  additionalProperties: false
+  required: [email, password]
+  properties:
+    email:
+      type: string
+      description: Trim, ASCII 3–254, un @, sin espacios ni controles y dominio con punto; normalizado lowercase.
+    password:
+      type: string
+      minLength: 1
+      description: Exacta, sin normalizar ni truncar; máximo 128 bytes UTF-8.
+LoginResponse:
+  type: object
+  additionalProperties: false
+  required: [accessToken, tokenType, expiresIn]
+  properties:
+    accessToken: {type: string}
+    tokenType: {type: string, const: Bearer}
+    expiresIn: {type: integer, const: 900}

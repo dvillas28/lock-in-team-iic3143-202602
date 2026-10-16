@@ -240,3 +240,14 @@ export function checkRequestTypes(client: ApiClient) {
   const moduleRequest: FetchOptions<operations["createCourseModule"]> = { params: { path: { institutionSlug: "uc", courseId: "id" } }, body: { title: "Module" } };
   void moduleRequest;
 }
+
+test("all public operations remove explicit Authorization and skip getToken", async () => {
+  const client = mockClient((request) => {
+    assert.equal(request.headers.has("Authorization"), false);
+    return Response.json({status: "ok"});
+  }, () => { throw new Error("public operation read token"); });
+  const headers = {Authorization: "Bearer explicit"};
+  await client.GET("/health", {headers});
+  await client.GET("/ready", {headers});
+  await client.POST("/api/v1/auth/login", {headers, body: {email: "user@example.test", password: "fixture"}});
+});

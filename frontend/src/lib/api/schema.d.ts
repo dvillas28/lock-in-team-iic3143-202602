@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/api/v1/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Autenticar identidad global activa
+         * @description Cinco solicitudes por IP en 60000 ms; sexta bloquea 60000 ms. JSON máximo 4 KiB.
+         */
+        post: operations["login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/ready": {
         parameters: {
             query?: never;
@@ -53,7 +73,7 @@ export interface paths {
         };
         /**
          * Listar instituciones accesibles para la identidad actual
-         * @description Devuelve únicamente las instituciones con una membership activa para el User autenticado.
+         * @description User, membership e Institution deben estar activos. Orden por slug; sin pertenencias retorna items vacío.
          */
         get: operations["listAccessibleInstitutions"];
         put?: never;
@@ -1145,20 +1165,18 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        HealthResponse: {
-            /** @enum {string} */
-            status: "ok";
-            /** @description Release del último deploy del backend. Una release sin cambios en el backend no lo redespliega, así que puede quedar atrás de la última release publicada. */
-            version: string;
-            /** @description SHA del commit desplegado; null fuera de Railway. */
-            commit: string | null;
-            /**
-             * Format: date-time
-             * @description Inicio del proceso actual, que coincide con el último deploy o reinicio.
-             */
-            deployedAt: string;
-            /** Format: date-time */
-            timestamp: string;
+        LoginRequest: {
+            /** @description Trim, ASCII 3–254, un @, sin espacios ni controles y dominio con punto; normalizado lowercase. */
+            email: string;
+            /** @description Exacta, sin normalizar ni truncar; máximo 128 bytes UTF-8. */
+            password: string;
+        };
+        LoginResponse: {
+            accessToken: string;
+            /** @constant */
+            tokenType: "Bearer";
+            /** @constant */
+            expiresIn: 900;
         };
         ProblemFieldError: {
             field: string;
@@ -1188,6 +1206,21 @@ export interface components {
             instance: string | null;
             traceId: string;
             errors: components["schemas"]["ProblemFieldError"][];
+        };
+        HealthResponse: {
+            /** @enum {string} */
+            status: "ok";
+            /** @description Release del último deploy del backend. Una release sin cambios en el backend no lo redespliega, así que puede quedar atrás de la última release publicada. */
+            version: string;
+            /** @description SHA del commit desplegado; null fuera de Railway. */
+            commit: string | null;
+            /**
+             * Format: date-time
+             * @description Inicio del proceso actual, que coincide con el último deploy o reinicio.
+             */
+            deployedAt: string;
+            /** Format: date-time */
+            timestamp: string;
         };
         InstitutionSummary: {
             /** Format: uuid */
@@ -1781,8 +1814,8 @@ export interface components {
         };
     };
     responses: {
-        /** @description Demasiadas solicitudes. */
-        TooManyRequests: {
+        /** @description Request o parámetro sintácticamente inválido. */
+        BadRequest: {
             headers: {
                 [name: string]: unknown;
             };
@@ -1793,6 +1826,7 @@ export interface components {
         /** @description JWT ausente, inválido o expirado. */
         Unauthorized: {
             headers: {
+                "WWW-Authenticate"?: "Bearer";
                 [name: string]: unknown;
             };
             content: {
@@ -1808,6 +1842,35 @@ export interface components {
                  *       "errors": []
                  *     }
                  */
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description El tipo de archivo no pertenece al conjunto permitido por el MVP. */
+        UnsupportedMediaType: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description Demasiadas solicitudes. */
+        TooManyRequests: {
+            headers: {
+                /** @description Segundos restantes de bloqueo, sin prolongar ante rechazos. */
+                "Retry-After"?: number;
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description Un servicio necesario para completar la operación no está disponible. */
+        ServiceUnavailable: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
@@ -1835,15 +1898,6 @@ export interface components {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
-        /** @description Request o parámetro sintácticamente inválido. */
-        BadRequest: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/problem+json": components["schemas"]["Problem"];
-            };
-        };
         /**
          * @description La identidad puede ver la Institution y el recurso, pero no tiene el rol o
          *     permiso necesario para la operación.
@@ -1867,15 +1921,6 @@ export interface components {
         };
         /** @description La operación entra en conflicto con el estado actual del recurso. */
         Conflict: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/problem+json": components["schemas"]["Problem"];
-            };
-        };
-        /** @description El tipo de archivo no pertenece al conjunto permitido por el MVP. */
-        UnsupportedMediaType: {
             headers: {
                 [name: string]: unknown;
             };
@@ -1921,6 +1966,45 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            /** @description Identidad autenticada por 900 segundos. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description Cuerpo mayor que 4 KiB. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            415: components["responses"]["UnsupportedMediaType"];
+            429: components["responses"]["TooManyRequests"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
     getReadiness: {
         parameters: {
             query?: never;
@@ -1989,6 +2073,7 @@ export interface operations {
             /** @description Instituciones accesibles. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
                     [name: string]: unknown;
                 };
                 content: {
@@ -1996,6 +2081,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     getCurrentUser: {

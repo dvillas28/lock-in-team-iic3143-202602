@@ -58,16 +58,22 @@
       - Institutions
     operationId: listAccessibleInstitutions
     summary: Listar instituciones accesibles para la identidad actual
-    description: Devuelve únicamente las instituciones con una membership activa para el User autenticado.
+    description: User, membership e Institution deben estar activos. Orden por slug; sin pertenencias retorna items vacío.
     responses:
       '200':
         description: Instituciones accesibles.
+        headers:
+          Cache-Control:
+            schema: {type: string, const: no-store}
         content:
           application/json:
             schema:
               $ref: '../components/schemas/tenancy.yaml#/InstitutionListResponse'
       '401':
         $ref: '../components/responses.yaml#/Unauthorized'
+
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'
 
 /api/v1/institutions/{institutionSlug}/me:
   parameters:

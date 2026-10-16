@@ -44,8 +44,8 @@ export function createApiClient({
 
   client.use({
     async onRequest({ request, schemaPath }) {
-      // /health is the contract's only public operation. Do not send a session token.
-      if (schemaPath === "/health") {
+      // Public operations never read or transmit session credentials.
+      if (["/health", "/ready", "/api/v1/auth/login"].includes(schemaPath)) {
         request.headers.delete("Authorization");
       } else if (getToken) {
         const token = await getToken();

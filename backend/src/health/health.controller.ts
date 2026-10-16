@@ -1,4 +1,5 @@
 import { Controller, Get, ServiceUnavailableException } from "@nestjs/common";
+import { Public } from "../auth/auth.guard";
 import { DatabaseService } from "../database/database.service";
 
 interface HealthResponse {
@@ -17,6 +18,7 @@ export class HealthController {
   constructor(private readonly database: DatabaseService) {}
 
   @Get("health")
+  @Public()
   getHealth(): HealthResponse {
     return {
       status: "ok",
@@ -28,6 +30,7 @@ export class HealthController {
     };
   }
   @Get("ready")
+  @Public()
   async getReadiness() {
     try { await this.database.check(); return {status: "ok"}; }
     catch { throw new ServiceUnavailableException({status: "unavailable"}); }

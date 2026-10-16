@@ -134,3 +134,14 @@ test("shared pool bounds saturation/query time and closes connections", async ()
   }
   assert.equal(pool.totalCount,0);
 });
+
+test("HTTP never listens with missing, invalid or short JWT secret", async () => {
+ const pool=await database();
+ try {
+  await migrated(pool);
+  for(const AUTH_JWT_SECRET of [undefined,"","invalid","eA=="]){
+   const result=await failedStartup({AUTH_JWT_SECRET});assert.equal(result.code,1);
+   sanitized(result.output,AUTH_JWT_SECRET?[AUTH_JWT_SECRET]:[]);
+  }
+ } finally {await pool.end();}
+});

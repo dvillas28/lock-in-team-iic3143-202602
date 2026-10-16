@@ -201,6 +201,8 @@ jobs:
           cache: pnpm
           cache-dependency-path: backend/pnpm-lock.yaml
       - run: pnpm --dir backend install --frozen-lockfile
+      # Integration exercises the generated frontend client against real HTTP.
+      - run: pnpm --dir frontend install --frozen-lockfile
       - name: Configure exclusive test database
         env:
           PGUSER: postgres

@@ -3,6 +3,8 @@ import { randomBytes } from "node:crypto";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
 import pg from "pg";
+import { createServer } from "node:net";
+import { setTimeout as delay } from "node:timers/promises";
 
 export function testUrl(env = process.env) {
   try {
@@ -22,7 +24,7 @@ export function secrets() {
 export function cli(file, extra = {}) {
   const child = spawn(process.execPath, [`dist/${file}.js`], {
     cwd: new URL("../../", import.meta.url),
-    env: { ...process.env, DATABASE_URL: testUrl(), ...extra },
+    env: { ...process.env, DATABASE_URL: testUrl(), AUTH_JWT_SECRET: randomBytes(32).toString("base64"), ...extra },
     stdio: ["ignore", "pipe", "pipe"],
     timeout: 35000, killSignal: "SIGKILL",
   });
@@ -63,3 +65,35 @@ export function sanitized(output, values = []) {
   for (const value of [testUrl(), ...values]) assert.ok(!output.includes(value), "secret in output");
   assert.ok(!/\$argon2|@academix\.example|password_hash|INSERT INTO/i.test(output), "sensitive output");
 }
+
+export async function http(extra = {}) {
+  const server = createServer(); server.listen(0, "127.0.0.1"); await once(server,"listening");
+  const port = server.address().port; await new Promise(resolve=>server.close(resolve));
+  const app = cli("main", {PORT:String(port), ...extra});
+  const base = `http://127.0.0.1:${port}`;
+  const close = async () => {
+    if (app.child.exitCode === null && app.child.signalCode === null) app.child.kill("SIGTERM");
+    return app.result;
+  };
+  try {
+    for (let i=0;i<150;i++) {
+      if(app.child.exitCode !== null) throw new Error("HTTP startup failed");
+      try { if((await fetch(`${base}/ready`)).ok) return {...app, base, close}; } catch { /* Startup only. */ }
+      await delay(20);
+    }
+    throw new Error("HTTP readiness deadline");
+  } catch(error) { await close(); throw error; }
+}
+export async function fixture(pool) {
+  await migrated(pool); const env=secrets();
+  assert.equal((await cli("seeds/demo",env).result).code,0,"seed failed"); return env;
+}
+export async function login(app, env, account="MULTI") {
+  const response=await fetch(`${app.base}/api/v1/auth/login`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:`demo-${account.toLowerCase().replace("revoked","revocado").replace("inactive","inactivo")}@academix.example`,password:env[`DEMO_${account}_PASSWORD`]})});
+  assert.equal(response.status,200,"fixture login failed");
+  assert.equal(response.headers.get("cache-control"),"no-store");
+  const body=await response.json(); assert.equal(body.tokenType,"Bearer"); assert.equal(body.expiresIn,900);
+  assert.deepEqual(Object.keys(body).sort(),["accessToken","expiresIn","tokenType"]); assert.ok(typeof body.accessToken==="string","login token missing");
+  return body.accessToken;
+}
+export function authorized(token) {return {headers:{Authorization:`Bearer ${token}`}};}
