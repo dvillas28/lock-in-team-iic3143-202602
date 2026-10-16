@@ -56,6 +56,7 @@ Bodies de publish/unpublish ausentes; objeto o contenido inesperado → 400.
 | 404 | Tenant/membership/curso/recurso ausente o invisible; también padre oculto |
 | 409 | Posición ocupada o conjunto order local incompleto/desactualizado |
 | 413 | Límite HTTP de payload existente excedido |
+| 415 | Body no application/json; no se interpreta como HTML/texto activo |
 | 422 | Título/cuerpo vacío/excesivo, posición fuera de rango o IDs duplicados |
 | 500/503 | Fallo inesperado/DB no disponible, Problem sanitizado |
 
@@ -67,11 +68,14 @@ Errores application/problem+json sin SQL, stack, payload markdown ni datos priva
 Publish/unpublish y PATCH/order sin diferencias devuelven estado actual sin evento.
 No garantizar idempotencia de altas; no reintentar POST automáticamente.
 
-## Sincronización por historia
+## Sincronización compartida e historias
 
-US1 alinea paths/sections.yaml, paths/materials.yaml, schemas/courses.yaml,
+Foundation alinea paths/sections.yaml, paths/materials.yaml, schemas/courses.yaml,
 schemas/materials.yaml, openapi.yaml y README.md en docs/reference/openapi/:
 eliminar staff ambiguo, separar teacher de assistant, retirar binarios del MVP,
 añadir límites/no-store/nosniff y errores. Regenerar frontend/src/lib/api/schema.d.ts.
-US2 comprueba filtros/autorización de todos los GET con esos tipos, sin nuevos DTO.
+Foundation también registra servicios/controladores compilables sin rutas; cada historia
+implementa sus endpoints sobre ese registro y verifica arranque HTTP por separado.
+US2 comprueba filtros/autorización de todos los GET con esos tipos, sin nuevos DTO
+ni endpoints US1; revocación/ocultación concurrente usa transacciones SQL de fixtures.
 Pruebas HTTP usan cliente generado y verifican valores/headers/negativos, no solo tipos.

@@ -299,8 +299,11 @@
     - Modules
     operationId: listCourseModules
     summary: Listar módulos visibles del curso
-    description: Estudiantes reciben solo módulos publicados; el staff autorizado
-      puede ver borradores.
+    description: Teacher activo de cualquier sección ve borradores y escribe contenido
+      compartido. Assistant/student solo leen publicado; material exige padre e ítem
+      publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría
+      atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después
+      de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
     responses:
       '200':
         description: Módulos visibles en orden.
@@ -308,18 +311,35 @@
           application/json:
             schema:
               $ref: ../components/schemas/courses.yaml#/ModuleListResponse
+        headers:
+          Cache-Control:
+            schema:
+              type: string
+              const: no-store
+          X-Content-Type-Options:
+            schema:
+              type: string
+              const: nosniff
       '400':
-        $ref: ../components/responses.yaml#/BadRequest
+        $ref: ../components/responses.yaml#/ContentProblem
       '401':
-        $ref: ../components/responses.yaml#/Unauthorized
+        $ref: ../components/responses.yaml#/ContentUnauthorized
       '404':
-        $ref: ../components/responses.yaml#/NotFound
+        $ref: ../components/responses.yaml#/ContentProblem
+      '500':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '503':
+        $ref: ../components/responses.yaml#/ContentProblem
   post:
     tags:
     - Modules
     operationId: createCourseModule
     summary: Crear un módulo del curso
-    description: Requiere rol `teacher`, porque el módulo tiene alcance de curso.
+    description: Teacher activo de cualquier sección ve borradores y escribe contenido
+      compartido. Assistant/student solo leen publicado; material exige padre e ítem
+      publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría
+      atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después
+      de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
     requestBody:
       required: true
       content:
@@ -335,22 +355,38 @@
             schema:
               type: string
               format: uri-reference
+          Cache-Control:
+            schema:
+              type: string
+              const: no-store
+          X-Content-Type-Options:
+            schema:
+              type: string
+              const: nosniff
         content:
           application/json:
             schema:
               $ref: ../components/schemas/courses.yaml#/CourseModule
       '400':
-        $ref: ../components/responses.yaml#/BadRequest
+        $ref: ../components/responses.yaml#/ContentProblem
       '401':
-        $ref: ../components/responses.yaml#/Unauthorized
+        $ref: ../components/responses.yaml#/ContentUnauthorized
       '403':
-        $ref: ../components/responses.yaml#/Forbidden
+        $ref: ../components/responses.yaml#/ContentProblem
       '404':
-        $ref: ../components/responses.yaml#/NotFound
+        $ref: ../components/responses.yaml#/ContentProblem
       '409':
-        $ref: ../components/responses.yaml#/Conflict
+        $ref: ../components/responses.yaml#/ContentProblem
       '422':
-        $ref: ../components/responses.yaml#/UnprocessableEntity
+        $ref: ../components/responses.yaml#/ContentProblem
+      '500':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '503':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '413':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '415':
+        $ref: ../components/responses.yaml#/ContentProblem
 /api/v1/institutions/{institutionSlug}/courses/{courseId}/modules/order:
   parameters:
   - $ref: ../components/parameters.yaml#/InstitutionSlug
@@ -360,7 +396,11 @@
     - Modules
     operationId: reorderCourseModules
     summary: Reemplazar atómicamente el orden de módulos
-    description: Requiere rol `teacher`.
+    description: Teacher activo de cualquier sección ve borradores y escribe contenido
+      compartido. Assistant/student solo leen publicado; material exige padre e ítem
+      publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría
+      atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después
+      de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
     requestBody:
       required: true
       content:
@@ -374,18 +414,35 @@
           application/json:
             schema:
               $ref: ../components/schemas/courses.yaml#/ModuleListResponse
+        headers:
+          Cache-Control:
+            schema:
+              type: string
+              const: no-store
+          X-Content-Type-Options:
+            schema:
+              type: string
+              const: nosniff
       '400':
-        $ref: ../components/responses.yaml#/BadRequest
+        $ref: ../components/responses.yaml#/ContentProblem
       '401':
-        $ref: ../components/responses.yaml#/Unauthorized
+        $ref: ../components/responses.yaml#/ContentUnauthorized
       '403':
-        $ref: ../components/responses.yaml#/Forbidden
+        $ref: ../components/responses.yaml#/ContentProblem
       '404':
-        $ref: ../components/responses.yaml#/NotFound
+        $ref: ../components/responses.yaml#/ContentProblem
       '409':
-        $ref: ../components/responses.yaml#/Conflict
+        $ref: ../components/responses.yaml#/ContentProblem
       '422':
-        $ref: ../components/responses.yaml#/UnprocessableEntity
+        $ref: ../components/responses.yaml#/ContentProblem
+      '500':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '503':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '413':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '415':
+        $ref: ../components/responses.yaml#/ContentProblem
 /api/v1/institutions/{institutionSlug}/modules/{moduleId}:
   parameters:
   - $ref: ../components/parameters.yaml#/InstitutionSlug
@@ -402,18 +459,40 @@
           application/json:
             schema:
               $ref: ../components/schemas/courses.yaml#/CourseModule
+        headers:
+          Cache-Control:
+            schema:
+              type: string
+              const: no-store
+          X-Content-Type-Options:
+            schema:
+              type: string
+              const: nosniff
       '400':
-        $ref: ../components/responses.yaml#/BadRequest
+        $ref: ../components/responses.yaml#/ContentProblem
       '401':
-        $ref: ../components/responses.yaml#/Unauthorized
+        $ref: ../components/responses.yaml#/ContentUnauthorized
       '404':
-        $ref: ../components/responses.yaml#/NotFound
+        $ref: ../components/responses.yaml#/ContentProblem
+      '500':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '503':
+        $ref: ../components/responses.yaml#/ContentProblem
+    description: Teacher activo de cualquier sección ve borradores y escribe contenido
+      compartido. Assistant/student solo leen publicado; material exige padre e ítem
+      publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría
+      atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después
+      de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
   patch:
     tags:
     - Modules
     operationId: updateCourseModule
     summary: Actualizar un módulo
-    description: Requiere rol `teacher`.
+    description: Teacher activo de cualquier sección ve borradores y escribe contenido
+      compartido. Assistant/student solo leen publicado; material exige padre e ítem
+      publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría
+      atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después
+      de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
     requestBody:
       required: true
       content:
@@ -427,18 +506,35 @@
           application/json:
             schema:
               $ref: ../components/schemas/courses.yaml#/CourseModule
+        headers:
+          Cache-Control:
+            schema:
+              type: string
+              const: no-store
+          X-Content-Type-Options:
+            schema:
+              type: string
+              const: nosniff
       '400':
-        $ref: ../components/responses.yaml#/BadRequest
+        $ref: ../components/responses.yaml#/ContentProblem
       '401':
-        $ref: ../components/responses.yaml#/Unauthorized
+        $ref: ../components/responses.yaml#/ContentUnauthorized
       '403':
-        $ref: ../components/responses.yaml#/Forbidden
+        $ref: ../components/responses.yaml#/ContentProblem
       '404':
-        $ref: ../components/responses.yaml#/NotFound
+        $ref: ../components/responses.yaml#/ContentProblem
       '409':
-        $ref: ../components/responses.yaml#/Conflict
+        $ref: ../components/responses.yaml#/ContentProblem
       '422':
-        $ref: ../components/responses.yaml#/UnprocessableEntity
+        $ref: ../components/responses.yaml#/ContentProblem
+      '500':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '503':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '413':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '415':
+        $ref: ../components/responses.yaml#/ContentProblem
 /api/v1/institutions/{institutionSlug}/modules/{moduleId}/publish:
   parameters:
   - $ref: ../components/parameters.yaml#/InstitutionSlug
@@ -448,7 +544,11 @@
     - Modules
     operationId: publishCourseModule
     summary: Publicar un módulo
-    description: Requiere `teacher` y genera un evento de auditoría inmutable.
+    description: Teacher activo de cualquier sección ve borradores y escribe contenido
+      compartido. Assistant/student solo leen publicado; material exige padre e ítem
+      publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría
+      atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después
+      de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
     responses:
       '200':
         description: Módulo publicado.
@@ -456,16 +556,35 @@
           application/json:
             schema:
               $ref: ../components/schemas/courses.yaml#/CourseModule
+        headers:
+          Cache-Control:
+            schema:
+              type: string
+              const: no-store
+          X-Content-Type-Options:
+            schema:
+              type: string
+              const: nosniff
       '400':
-        $ref: ../components/responses.yaml#/BadRequest
+        $ref: ../components/responses.yaml#/ContentProblem
       '401':
-        $ref: ../components/responses.yaml#/Unauthorized
+        $ref: ../components/responses.yaml#/ContentUnauthorized
       '403':
-        $ref: ../components/responses.yaml#/Forbidden
+        $ref: ../components/responses.yaml#/ContentProblem
       '404':
-        $ref: ../components/responses.yaml#/NotFound
+        $ref: ../components/responses.yaml#/ContentProblem
       '409':
-        $ref: ../components/responses.yaml#/Conflict
+        $ref: ../components/responses.yaml#/ContentProblem
+      '500':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '503':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '413':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '422':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '415':
+        $ref: ../components/responses.yaml#/ContentProblem
 /api/v1/institutions/{institutionSlug}/modules/{moduleId}/unpublish:
   parameters:
   - $ref: ../components/parameters.yaml#/InstitutionSlug
@@ -475,7 +594,11 @@
     - Modules
     operationId: unpublishCourseModule
     summary: Ocultar un módulo publicado
-    description: Requiere `teacher` y genera un evento de auditoría inmutable.
+    description: Teacher activo de cualquier sección ve borradores y escribe contenido
+      compartido. Assistant/student solo leen publicado; material exige padre e ítem
+      publicados. Admin/superadmin sin Enrollment no accede. Mutaciones y auditoría
+      atómicas; no-op sin evento. JSON inerte; sin HTML ni binarios. Validación después
+      de scope visible. Publish/unpublish sin body. Límite HTTP heredado 4096 bytes.
     responses:
       '200':
         description: Módulo ocultado.
@@ -483,13 +606,32 @@
           application/json:
             schema:
               $ref: ../components/schemas/courses.yaml#/CourseModule
+        headers:
+          Cache-Control:
+            schema:
+              type: string
+              const: no-store
+          X-Content-Type-Options:
+            schema:
+              type: string
+              const: nosniff
       '400':
-        $ref: ../components/responses.yaml#/BadRequest
+        $ref: ../components/responses.yaml#/ContentProblem
       '401':
-        $ref: ../components/responses.yaml#/Unauthorized
+        $ref: ../components/responses.yaml#/ContentUnauthorized
       '403':
-        $ref: ../components/responses.yaml#/Forbidden
+        $ref: ../components/responses.yaml#/ContentProblem
       '404':
-        $ref: ../components/responses.yaml#/NotFound
+        $ref: ../components/responses.yaml#/ContentProblem
       '409':
-        $ref: ../components/responses.yaml#/Conflict
+        $ref: ../components/responses.yaml#/ContentProblem
+      '500':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '503':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '413':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '422':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '415':
+        $ref: ../components/responses.yaml#/ContentProblem
