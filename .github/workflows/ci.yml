@@ -213,6 +213,8 @@ jobs:
           echo "::add-mask::$test_url"
           echo "TEST_DATABASE_URL=$test_url" >> "$GITHUB_ENV"
       - run: pnpm --dir backend test:coverage
+      - name: Validate backend image and isolated Compose
+        run: node backend/test/compose-smoke.mjs
       - name: Prepare TypeScript coverage for Sonar
         run: |
           test -s backend/coverage/lcov.info
