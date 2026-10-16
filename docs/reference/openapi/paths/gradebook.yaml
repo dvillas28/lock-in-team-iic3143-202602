@@ -34,7 +34,7 @@
     operationId: updateGradebookWeights
     summary: Reemplazar ponderaciones del curso de forma atómica
     description: |
-      Requiere rol `teacher`. El conjunto completo debe sumar 100%. Si existe
+      Requiere is_admin institucional y createdBy igual al actor. El conjunto completo debe sumar 100%. Si existe
       cualquier nota publicada del curso, responde 409 con código
       `GRADE_WEIGHTS_LOCKED`. Tampoco se agregan grade items tras la primera
       publicación. Todo cambio exitoso genera un evento de auditoría con before y after.
@@ -74,8 +74,8 @@
     operationId: getCourseGradebook
     summary: Consultar libro de notas docente
     description: |
-      Teacher puede consultar el curso completo. Teacher y assistant deben
-      filtrar y quedan limitados a secciones donde tengan membership activa.
+      Teacher con is_admin y ownership puede consultar el curso completo.
+      Teacher ordinario y assistant quedan limitados a sus secciones activas.
       Assistant es de solo lectura.
     parameters:
       - $ref: '../components/parameters.yaml#/SectionIdFilter'
@@ -107,8 +107,8 @@
     operationId: publishGrades
     summary: Publicar notas por grade items y secciones
     description: |
-      Teacher puede publicar en cualquier sección del curso. Teacher solo en
-      sus secciones. Assistant y student no pueden publicar. La primera
+      Teacher con is_admin y ownership puede publicar en todo su curso;
+      teacher ordinario solo en sus secciones activas. Assistant y student no pueden publicar. La primera
       publicación exige ponderaciones del curso que sumen 100%. Toda publicación
       exige ausencia de intentos activos para los estudiantes y quizzes de las
       notas seleccionadas.

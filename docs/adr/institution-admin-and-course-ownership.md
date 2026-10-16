@@ -1,6 +1,6 @@
 # Admin institucional y dueño de curso
 
-Fecha: 2026-10-16. Estado: aceptado por usuario; implementación pendiente.
+Fecha: 2026-10-16. Estado: aceptado e implementado; validación en docs/backend/courses-roles-validation.md.
 
 ## Decisión
 

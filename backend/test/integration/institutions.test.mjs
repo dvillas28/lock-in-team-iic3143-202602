@@ -21,7 +21,7 @@ test("CurrentUser projection, empty roles, indistinguishable contexts and auth b
    const body=await response.json();assert.deepEqual(Object.keys(body).sort(),["email","id","institutionMembership","name","sectionMemberships"]);
    assert.deepEqual(body.sectionMemberships,[]);assert.equal(body.institutionMembership.institution.slug,slug);
    assert.equal(body.institutionMembership.active,true);assert.equal(body.institutionMembership.institution.active,true);
-   assert.deepEqual(Object.keys(body.institutionMembership).sort(),["active","id","institution"]);
+   assert.deepEqual(Object.keys(body.institutionMembership).sort(),["active","id","institution","isAdmin","isSuperAdmin"]);
    if(userId)assert.equal(body.id,userId);userId=body.id;
    assert.ok(!JSON.stringify(body).includes("password"));assert.ok(!JSON.stringify(body).includes(multi));
   }

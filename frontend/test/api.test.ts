@@ -44,8 +44,8 @@ test("protected institution operations use Bearer, the slug path and generated r
   };
   const me: components["schemas"]["CurrentUser"] = {
     id: "user-id", email: "user@example.test", name: "User",
-    institutionMembership: { id: "membership-id", institution, active: true },
-    sectionMemberships: [],
+    institutionMembership: { id: "membership-id", institution, active: true, isAdmin: true, isSuperAdmin: false },
+    sectionMemberships: [{courseId:"course-id",sectionId:"section-id",role:"teacher"}],
   };
   const client = mockClient((request) => {
     assert.equal(request.headers.get("Authorization"), "Bearer test-token");
@@ -250,4 +250,43 @@ test("all public operations remove explicit Authorization and skip getToken", as
   await client.GET("/health", {headers});
   await client.GET("/ready", {headers});
   await client.POST("/api/v1/auth/login", {headers, body: {email: "user@example.test", password: "fixture"}});
+});
+
+test("institutional delegation serializes only isAdmin with Bearer", async () => {
+ const client=mockClient(async request=>{
+  assert.equal(request.headers.get("Authorization"),"Bearer member-token");
+  assert.equal(request.method,"PUT");
+  assert.deepEqual(await request.json(),{isAdmin:false});
+  return Response.json({id:"member",user:{id:"user",name:"User",email:"u@example.test",active:true},isAdmin:false,isSuperAdmin:false,active:true});
+ },()=>"member-token");
+ const result=await client.PUT("/api/v1/institutions/{institutionSlug}/memberships/{membershipId}/course-admin",{
+  params:{path:{institutionSlug:"uc",membershipId:"member"}},body:{isAdmin:false}});
+ assert.equal(result.data?.isAdmin,false);
+});
+
+test("course create and successor enrollment use generated contracts and Bearer",async()=>{
+ const client=mockClient(async req=>{
+  assert.equal(req.headers.get("Authorization"),"Bearer current");
+  if(req.method==="POST") {
+   assert.deepEqual(await req.json(),{code:"C",name:"Course",term:"2026-2",initialSection:{code:"1",capacity:0}});
+   return Response.json({id:"c",code:"C",name:"Course",term:"2026-2",createdBy:"actor",createdAt:health.timestamp},{status:201});
+  }
+  assert.deepEqual(await req.json(),{role:"assistant"});
+  return Response.json({id:"successor",sectionId:"s",user:{id:"u",name:"U",email:"u@example.test",active:true},role:"assistant",active:true,createdAt:health.timestamp});
+ },()=>"current");
+ const course=await client.POST("/api/v1/institutions/{institutionSlug}/courses",{params:{path:{institutionSlug:"uc"}},body:{code:"C",name:"Course",term:"2026-2",initialSection:{code:"1",capacity:0}}});
+ assert.equal(course.data?.createdBy,"actor");
+ const changed=await client.PATCH("/api/v1/institutions/{institutionSlug}/sections/{sectionId}/enrollments/{enrollmentId}",{params:{path:{institutionSlug:"uc",sectionId:"s",enrollmentId:"original"}},body:{role:"assistant"}});
+ assert.equal(changed.data?.id,"successor");
+});
+
+test("createCourse declares and preserves validation and access Problem errors",async()=>{
+ const statuses: (keyof operations["createCourse"]["responses"])[]=[400,401,403,404];
+ for(const status of statuses){
+  const client=mockClient(()=>Response.json({type:"https://academix/errors/test",title:"Rejected",status,detail:"Rejected",code:"REJECTED",instance:"/courses",traceId:"trace",errors:[]},
+   {status,headers:{"Content-Type":"application/problem+json"}}));
+  await assert.rejects(client.POST("/api/v1/institutions/{institutionSlug}/courses",{
+   params:{path:{institutionSlug:"uc"}},body:{code:"C",name:"Course",term:"2026-2",initialSection:{code:"1"}},
+  }),error=>error instanceof ApiHttpError && error.status===status && error.problem.code==="REJECTED");
+ }
 });

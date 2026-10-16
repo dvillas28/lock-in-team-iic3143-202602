@@ -2,10 +2,10 @@ CourseSummary:
   type: object
   additionalProperties: false
   required:
-    - id
-    - code
-    - name
-    - term
+  - id
+  - code
+  - name
+  - term
   properties:
     id:
       type: string
@@ -13,21 +13,27 @@ CourseSummary:
       readOnly: true
     code:
       type: string
+      minLength: 1
+      maxLength: 32
     name:
       type: string
+      minLength: 1
+      maxLength: 200
     term:
       type: string
       example: 2026-2
-
+      minLength: 1
+      maxLength: 16
 Course:
   type: object
   additionalProperties: false
   required:
-    - id
-    - code
-    - name
-    - term
-    - createdAt
+  - id
+  - code
+  - name
+  - term
+  - createdAt
+  - createdBy
   properties:
     id:
       type: string
@@ -35,16 +41,25 @@ Course:
       readOnly: true
     code:
       type: string
+      minLength: 1
+      maxLength: 32
     name:
       type: string
+      minLength: 1
+      maxLength: 200
     term:
       type: string
       example: 2026-2
+      minLength: 1
+      maxLength: 16
     createdAt:
       type: string
       format: date-time
       readOnly: true
-
+    createdBy:
+      type: string
+      format: uuid
+      readOnly: true
 CourseUpdate:
   type: object
   additionalProperties: false
@@ -52,31 +67,35 @@ CourseUpdate:
   properties:
     code:
       type: string
+      minLength: 1
+      maxLength: 32
     name:
       type: string
+      minLength: 1
+      maxLength: 200
     term:
       type: string
-
+      minLength: 1
+      maxLength: 16
 CourseListResponse:
   type: object
   additionalProperties: false
   required:
-    - items
+  - items
   properties:
     items:
       type: array
       items:
         $ref: '#/CourseSummary'
-
 CourseModule:
   type: object
   additionalProperties: false
   required:
-    - id
-    - courseId
-    - title
-    - position
-    - publishedAt
+  - id
+  - courseId
+  - title
+  - position
+  - publishedAt
   properties:
     id:
       type: string
@@ -91,22 +110,22 @@ CourseModule:
     position:
       type: integer
     publishedAt:
-      type: [string, 'null']
+      type:
+      - string
+      - 'null'
       format: date-time
       readOnly: true
-
 ModuleCreate:
   type: object
   additionalProperties: false
   required:
-    - title
-    - position
+  - title
+  - position
   properties:
     title:
       type: string
     position:
       type: integer
-
 ModuleUpdate:
   type: object
   additionalProperties: false
@@ -114,12 +133,11 @@ ModuleUpdate:
   properties:
     title:
       type: string
-
 ModuleOrderRequest:
   type: object
   additionalProperties: false
   required:
-    - moduleIds
+  - moduleIds
   properties:
     moduleIds:
       type: array
@@ -129,14 +147,36 @@ ModuleOrderRequest:
       items:
         type: string
         format: uuid
-
 ModuleListResponse:
   type: object
   additionalProperties: false
   required:
-    - items
+  - items
   properties:
     items:
       type: array
       items:
         $ref: '#/CourseModule'
+CourseCreate:
+  type: object
+  additionalProperties: false
+  required:
+  - code
+  - name
+  - term
+  - initialSection
+  properties:
+    code:
+      type: string
+      minLength: 1
+      maxLength: 32
+    name:
+      type: string
+      minLength: 1
+      maxLength: 200
+    term:
+      type: string
+      minLength: 1
+      maxLength: 16
+    initialSection:
+      $ref: ./sections.yaml#/SectionCreate

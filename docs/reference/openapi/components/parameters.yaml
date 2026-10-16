@@ -16,7 +16,7 @@ Cursor:
   name: cursor
   in: query
   required: false
-  description: Cursor opaco retornado por la página anterior.
+  description: Cursor base64url JSON con fecha/UUID, actor y scope/filtros; no concede acceso. Cursor opaco retornado por la página anterior.
   schema:
     type: string
 
