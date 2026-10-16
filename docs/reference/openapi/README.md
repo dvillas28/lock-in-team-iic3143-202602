@@ -20,7 +20,7 @@ operación, el backend resuelve la Institution, valida una
 InstitutionMembership activa y luego aplica Enrollment y los
 permisos del recurso.
 
-`GET /health` es público. `GET /api/v1/institutions` requiere autenticación y
+`GET /health`, `GET /ready` y `POST /api/v1/auth/login` son públicos. `GET /api/v1/institutions` requiere autenticación y
 retorna únicamente Institutions accesibles para el User. No existe un endpoint
 público de provisioning.
 
@@ -45,12 +45,34 @@ pnpm docs:api:lint
 Redocly usa `openapi.yaml` y sus referencias relativas. La configuración vive
 en `redocly.yaml`.
 
-## Decisiones pendientes de implementación
+## Identidad implementada
 
-- Emisor, audiencia, expiración y provisioning de identidades JWT.
-- Capa de persistencia y herramienta de migraciones.
-- Límite máximo de archivos y proveedor de object storage.
-- Bootstrap idempotente de las Institutions demo `uc` y `utfsm`.
+Login admite JSON exacto email/password, máximo 4 KiB. Email se normaliza con
+trim/lowercase; índice único `lower(btrim(email))` impide ambigüedad. Una colisión
+aborta la migración completa sin borrar, fusionar ni sobrescribir usuarios.
+Argon2 verifica hash persistido o dummy de arranque; desconocido/inactivo/password
+incorrecta producen el mismo 401. JWT HS256, issuer academix-api,
+audience academix-clients, claims sub/iat/exp y vigencia exacta de 900 segundos.
+AUTH_JWT_SECRET obligatorio, base64 canónico de ≥32 bytes, nunca NEXT_PUBLIC.
+
+Cada operación revalida User activo en PostgreSQL; listado y /me unen User,
+InstitutionMembership e Institution activos. /me conserva CurrentUser y
+sectionMemberships=[]; no implementa permisos académicos ni cambia sesión.
+Revocación posterior al COMMIT se observa en la siguiente operación; consultas
+ya iniciadas no se cancelan. DB inaccesible devuelve 503 sin fallback.
+Login y éxitos protegidos usan Cache-Control:no-store; 401 incluye
+WWW-Authenticate:Bearer. Errores Problem no reflejan entradas ni secretos.
+
+Throttler admite cinco logins por IP/60000 ms; sexto bloquea 60000 ms desde el
+exceso con Retry-After restante. Memoria por instancia, reinicio restablece cuotas;
+proxy/NAT puede compartir cuota entre usuarios. No se confía X-Forwarded-For.
+Antes de exposición pública/escalado se requiere validar proxy y coordinación.
+
+Persistencia: PostgreSQL 17, migrador y seed idempotente existentes. Comandos,
+variables y pruebas en el [quickstart](../../../specs/20261014-234744_identidad-acceso/quickstart.md)
+y [evidencia](../../backend/identity-access-validation.md).
+Provisioning, refresh, SSO, UI, roles académicos y administración quedan fuera.
+Object storage y límites de archivos requieren otra misión.
 
 RLS, provisioning dinámico de Institutions, jerarquías institucionales y
 restore lógico individual están fuera del MVP.
