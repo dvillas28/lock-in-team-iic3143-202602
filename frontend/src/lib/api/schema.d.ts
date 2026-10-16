@@ -151,11 +151,15 @@ export interface paths {
         };
         /**
          * Listar cursos visibles para el usuario
-         * @description Retorna únicamente cursos donde existe una membership académica activa.
+         * @description Admin dueño o Enrollment activo; privilegios institucionales vigentes, sin acceso a cursos ajenos.
          */
         get: operations["listCourses"];
         put?: never;
-        post?: never;
+        /**
+         * Crear curso propio, primera sección y teacher inicial
+         * @description Exige is_admin vigente. createdBy deriva del actor y es inmutable. Una transacción incluye curso, sección, teacher y eventos. Repetición code/term produce 409.
+         */
+        post: operations["createCourse"];
         delete?: never;
         options?: never;
         head?: never;
@@ -186,7 +190,7 @@ export interface paths {
         head?: never;
         /**
          * Actualizar configuración general del curso
-         * @description Requiere rol `teacher` en el curso. Los cambios sensibles generan auditoría.
+         * @description Exige is_admin institucional y createdBy igual al actor. Mismo estado es no-op sin evento.
          */
         patch: operations["updateCourse"];
         trace?: never;
@@ -208,13 +212,13 @@ export interface paths {
         };
         /**
          * Listar secciones visibles del curso
-         * @description Teachers ven todas; los demás roles solo sus secciones.
+         * @description Admin dueño ve todas; resto solo secciones con Enrollment activo propio.
          */
         get: operations["listSections"];
         put?: never;
         /**
          * Crear una sección del curso
-         * @description Requiere rol `teacher` en el curso.
+         * @description Exige is_admin institucional vigente y dueño del curso. Teacher sin admin no configura secciones.
          */
         post: operations["createSection"];
         delete?: never;
@@ -247,7 +251,7 @@ export interface paths {
         head?: never;
         /**
          * Actualizar una sección
-         * @description Requiere rol `teacher` en el curso de la sección.
+         * @description Exige is_admin institucional vigente y dueño del curso. Teacher sin admin no configura secciones.
          */
         patch: operations["updateSection"];
         trace?: never;
@@ -269,15 +273,13 @@ export interface paths {
         };
         /**
          * Listar memberships de una sección autorizada
-         * @description Teachers ven el curso completo; teachers y assistants solo sus secciones.
+         * @description Admin dueño o teacher/assistant activo de esta sección; student no lista participantes.
          */
         get: operations["listSectionEnrollments"];
         put?: never;
         /**
          * Crear una membership de sección
-         * @description Requiere rol `teacher`. Una persona puede tener varios roles activos
-         *     en la misma sección, pero no dos memberships activas del mismo rol. La
-         *     creación genera un evento de auditoría.
+         * @description Admin dueño o teacher activo de esta sección. Miembro destinatario provisionado y activo; roles múltiples distintos, historial preservado. Sin privilegios desde JWT o body.
          */
         post: operations["createSectionEnrollment"];
         delete?: never;
@@ -310,8 +312,7 @@ export interface paths {
         head?: never;
         /**
          * Cambiar rol o desactivar una membership
-         * @description Requiere rol `teacher`. No elimina físicamente la membership. El cambio
-         *     de rol o estado se registra con valores anterior y nuevo en auditoría.
+         * @description Admin dueño o teacher activo de esta sección. Miembro destinatario provisionado y activo; roles múltiples distintos, historial preservado. Sin privilegios desde JWT o body. Exactamente role o active. Cambio de rol devuelve sucesor (ID puede cambiar). Último teacher se puede revocar; el curso permanece.
          */
         patch: operations["updateSectionEnrollment"];
         trace?: never;
@@ -662,7 +663,7 @@ export interface paths {
         put?: never;
         /**
          * Crear un quiz en estado draft
-         * @description Teachers pueden crear quizzes de curso o sección dentro de su alcance académico.
+         * @description Teacher activo es obligatorio para autoría/pauta. is_admin más ownership amplía destinatarios; teacher ordinario conserva sus secciones. Admin o superadmin por sí solos no conceden docencia.
          *     Assistants y students no pueden crear quizzes.
          */
         post: operations["createQuiz"];
@@ -962,8 +963,8 @@ export interface paths {
         };
         /**
          * Listar intentos para revisión académica
-         * @description Teacher puede consultar todas las secciones del curso. Teacher y
-         *     assistant solo secciones donde tengan membership activa. Students no tienen acceso.
+         * @description Teacher con is_admin y ownership puede consultar todo su curso. Teacher
+         *     ordinario y assistant solo secciones con Enrollment activo propio. Students no tienen acceso.
          */
         get: operations["listQuizAttempts"];
         put?: never;
@@ -1020,7 +1021,7 @@ export interface paths {
         get?: never;
         /**
          * Reemplazar ponderaciones del curso de forma atómica
-         * @description Requiere rol `teacher`. El conjunto completo debe sumar 100%. Si existe
+         * @description Requiere is_admin institucional y createdBy igual al actor. El conjunto completo debe sumar 100%. Si existe
          *     cualquier nota publicada del curso, responde 409 con código
          *     `GRADE_WEIGHTS_LOCKED`. Tampoco se agregan grade items tras la primera
          *     publicación. Todo cambio exitoso genera un evento de auditoría con before y after.
@@ -1050,8 +1051,8 @@ export interface paths {
         };
         /**
          * Consultar libro de notas docente
-         * @description Teacher puede consultar el curso completo. Teacher y assistant deben
-         *     filtrar y quedan limitados a secciones donde tengan membership activa.
+         * @description Teacher con is_admin y ownership puede consultar el curso completo.
+         *     Teacher ordinario y assistant quedan limitados a sus secciones activas.
          *     Assistant es de solo lectura.
          */
         get: operations["getCourseGradebook"];
@@ -1082,8 +1083,8 @@ export interface paths {
         put?: never;
         /**
          * Publicar notas por grade items y secciones
-         * @description Teacher puede publicar en cualquier sección del curso. Teacher solo en
-         *     sus secciones. Assistant y student no pueden publicar. La primera
+         * @description Teacher con is_admin y ownership puede publicar en todo su curso;
+         *     teacher ordinario solo en sus secciones activas. Assistant y student no pueden publicar. La primera
          *     publicación exige ponderaciones del curso que sumen 100%. Toda publicación
          *     exige ausencia de intentos activos para los estudiantes y quizzes de las
          *     notas seleccionadas.
@@ -1148,12 +1149,65 @@ export interface paths {
         };
         /**
          * Consultar historial de auditoría del curso
-         * @description Requiere rol `teacher`. Los eventos son generados por operaciones de
-         *     dominio y son inmutables; la API no permite crearlos, modificarlos ni eliminarlos.
-         *     Los cambios se sanitizan para no incluir secretos ni ubicaciones internas.
+         * @description Admin dueño ve todos los eventos del curso, incluidos sectionId=null, aunque también sea teacher. Solo en ausencia de ese permiso aplica scope de secciones teacher activas. Eventos institucionales excluidos. Inmutable y sanitizado.
          */
         get: operations["listCourseAuditEvents"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institutions/{institutionSlug}/memberships": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Listar miembros activos
+         * @description Exige superadmin vigente del tenant. Sin altas ni cambios de isSuperAdmin. Mismo estado es no-op sin evento.
+         */
+        get: operations["listInstitutionMemberships"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institutions/{institutionSlug}/memberships/{membershipId}/course-admin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                membershipId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Conceder o revocar creación de cursos
+         * @description Exige superadmin vigente del tenant. Sin altas ni cambios de isSuperAdmin. Mismo estado es no-op sin evento.
+         */
+        put: operations["setInstitutionCourseAdmin"];
         post?: never;
         delete?: never;
         options?: never;
@@ -1239,6 +1293,8 @@ export interface components {
             readonly id: string;
             institution: components["schemas"]["InstitutionSummary"];
             readonly active: boolean;
+            readonly isAdmin: boolean;
+            readonly isSuperAdmin: boolean;
         };
         SectionMembershipSummary: {
             /** Format: uuid */
@@ -1284,6 +1340,16 @@ export interface components {
         CourseListResponse: {
             items: components["schemas"]["CourseSummary"][];
         };
+        SectionCreate: {
+            code: string;
+            capacity?: number | null;
+        };
+        CourseCreate: {
+            code: string;
+            name: string;
+            term: string;
+            initialSection: components["schemas"]["SectionCreate"];
+        };
         Course: {
             /** Format: uuid */
             readonly id: string;
@@ -1293,6 +1359,8 @@ export interface components {
             term: string;
             /** Format: date-time */
             readonly createdAt: string;
+            /** Format: uuid */
+            readonly createdBy: string;
         };
         CourseUpdate: {
             code?: string;
@@ -1311,10 +1379,6 @@ export interface components {
         };
         SectionListResponse: {
             items: components["schemas"]["Section"][];
-        };
-        SectionCreate: {
-            code: string;
-            capacity?: number | null;
         };
         SectionUpdate: {
             code?: string;
@@ -1341,6 +1405,7 @@ export interface components {
             userId: string;
             role: components["schemas"]["EnrollmentRole"];
         };
+        /** @description Exactamente role o active. Cambio de rol desactiva origen y devuelve sucesor; origen inactivo produce 409. Reactivar con duplicado activo produce 409. */
         EnrollmentUpdate: {
             role?: components["schemas"]["EnrollmentRole"];
             active?: boolean;
@@ -1787,9 +1852,9 @@ export interface components {
             readonly institutionId: string;
             /**
              * Format: uuid
-             * @description Derivado de la identidad autenticada.
+             * @description Nulo solo para onboarding/superadmin con evidencia operativa; HTTP exige actor autenticado.
              */
-            readonly actorUserId: string;
+            readonly actorUserId: string | null;
             /**
              * @example quiz.published
              * @example quizAttempt.cancelled
@@ -1802,7 +1867,7 @@ export interface components {
             /** Format: uuid */
             resourceId: string;
             /** Format: uuid */
-            courseId: string;
+            courseId: string | null;
             /** Format: uuid */
             sectionId: string | null;
             /** Format: date-time */
@@ -1811,6 +1876,20 @@ export interface components {
         };
         AuditEventListResponse: components["schemas"]["PageInfo"] & {
             items: components["schemas"]["AuditEvent"][];
+        };
+        MembershipAdmin: {
+            /** Format: uuid */
+            readonly id: string;
+            user: components["schemas"]["UserSummary"];
+            isAdmin: boolean;
+            readonly isSuperAdmin: boolean;
+            readonly active: boolean;
+        };
+        MembershipAdminListResponse: components["schemas"]["PageInfo"] & {
+            items: components["schemas"]["MembershipAdmin"][];
+        };
+        MembershipAdminUpdate: {
+            isAdmin: boolean;
         };
     };
     responses: {
@@ -1910,8 +1989,8 @@ export interface components {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
-        /** @description El request es válido, pero viola una regla académica. */
-        UnprocessableEntity: {
+        /** @description Fallo inesperado sanitizado; ninguna mutación parcial. */
+        InternalError: {
             headers: {
                 [name: string]: unknown;
             };
@@ -1921,6 +2000,15 @@ export interface components {
         };
         /** @description La operación entra en conflicto con el estado actual del recurso. */
         Conflict: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description El request es válido, pero viola una regla académica. */
+        UnprocessableEntity: {
             headers: {
                 [name: string]: unknown;
             };
@@ -1938,12 +2026,14 @@ export interface components {
         InstitutionSlug: string;
         /** @description Texto para buscar Users accesibles dentro de la Institution actual. */
         Search: string;
-        /** @description Cursor opaco retornado por la página anterior. */
+        /** @description Cursor base64url JSON con fecha/UUID, actor y scope/filtros; no concede acceso. Cursor opaco retornado por la página anterior. */
         Cursor: string;
         /** @description Cantidad máxima de elementos a retornar. */
         Limit: number;
         CourseId: string;
         SectionId: string;
+        EnrollmentId: string;
+        ModuleId: string;
         /**
          * @description Clave opaca elegida por el cliente para una operación sensible. Su scope
          *     incluye la Institution del path. Repetir la misma solicitud con igual clave
@@ -1951,8 +2041,6 @@ export interface components {
          *     produce 409 Conflict.
          */
         IdempotencyKey: string;
-        EnrollmentId: string;
-        ModuleId: string;
         MaterialId: string;
         SectionIdFilter: string;
         QuizId: string;
@@ -2121,7 +2209,7 @@ export interface operations {
             query: {
                 /** @description Texto para buscar Users accesibles dentro de la Institution actual. */
                 search: components["parameters"]["Search"];
-                /** @description Cursor opaco retornado por la página anterior. */
+                /** @description Cursor base64url JSON con fecha/UUID, actor y scope/filtros; no concede acceso. Cursor opaco retornado por la página anterior. */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Cantidad máxima de elementos a retornar. */
                 limit?: components["parameters"]["Limit"];
@@ -2173,6 +2261,7 @@ export interface operations {
             /** @description Cursos visibles dentro de la Institution seleccionada. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
                     [name: string]: unknown;
                 };
                 content: {
@@ -2182,6 +2271,49 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    createCourse: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseCreate"];
+            };
+        };
+        responses: {
+            /** @description Curso creado atómicamente. */
+            201: {
+                headers: {
+                    Location?: string;
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     getCourse: {
@@ -2204,6 +2336,7 @@ export interface operations {
             /** @description Curso solicitado. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
                     [name: string]: unknown;
                 };
                 content: {
@@ -2213,6 +2346,8 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     updateCourse: {
@@ -2239,6 +2374,7 @@ export interface operations {
             /** @description Curso actualizado. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
                     [name: string]: unknown;
                 };
                 content: {
@@ -2249,7 +2385,10 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     listSections: {
@@ -2272,6 +2411,7 @@ export interface operations {
             /** @description Secciones visibles. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
                     [name: string]: unknown;
                 };
                 content: {
@@ -2281,6 +2421,8 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     createSection: {
@@ -2309,6 +2451,7 @@ export interface operations {
                 headers: {
                     /** @description URI de la sección creada. */
                     Location?: string;
+                    "Cache-Control"?: "no-store";
                     [name: string]: unknown;
                 };
                 content: {
@@ -2321,6 +2464,8 @@ export interface operations {
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     getSection: {
@@ -2343,6 +2488,7 @@ export interface operations {
             /** @description Sección solicitada. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
                     [name: string]: unknown;
                 };
                 content: {
@@ -2352,6 +2498,8 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     updateSection: {
@@ -2378,6 +2526,7 @@ export interface operations {
             /** @description Sección actualizada. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
                     [name: string]: unknown;
                 };
                 content: {
@@ -2390,12 +2539,14 @@ export interface operations {
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     listSectionEnrollments: {
         parameters: {
             query?: {
-                /** @description Cursor opaco retornado por la página anterior. */
+                /** @description Cursor base64url JSON con fecha/UUID, actor y scope/filtros; no concede acceso. Cursor opaco retornado por la página anterior. */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Cantidad máxima de elementos a retornar. */
                 limit?: components["parameters"]["Limit"];
@@ -2417,6 +2568,7 @@ export interface operations {
             /** @description Memberships de la sección. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
                     [name: string]: unknown;
                 };
                 content: {
@@ -2427,20 +2579,14 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     createSectionEnrollment: {
         parameters: {
             query?: never;
-            header: {
-                /**
-                 * @description Clave opaca elegida por el cliente para una operación sensible. Su scope
-                 *     incluye la Institution del path. Repetir la misma solicitud con igual clave
-                 *     y payload devuelve el primer resultado; reutilizarla con otro payload
-                 *     produce 409 Conflict.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-            };
+            header?: never;
             path: {
                 /**
                  * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
@@ -2458,11 +2604,22 @@ export interface operations {
             };
         };
         responses: {
+            /** @description Rol ya activo; mismo ID, sin nuevo evento. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Enrollment"];
+                };
+            };
             /** @description Membership creada. */
             201: {
                 headers: {
                     /** @description URI de la membership creada. */
                     Location?: string;
+                    "Cache-Control"?: "no-store";
                     [name: string]: unknown;
                 };
                 content: {
@@ -2475,6 +2632,8 @@ export interface operations {
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     updateSectionEnrollment: {
@@ -2502,6 +2661,7 @@ export interface operations {
             /** @description Membership actualizada. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
                     [name: string]: unknown;
                 };
                 content: {
@@ -2514,6 +2674,8 @@ export interface operations {
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     listCourseModules: {
@@ -3457,7 +3619,7 @@ export interface operations {
                 /** @description Filtro docente; nunca selecciona la identidad estudiantil autenticada. */
                 studentId?: components["parameters"]["StudentIdFilter"];
                 status?: components["schemas"]["QuizAttemptStatus"];
-                /** @description Cursor opaco retornado por la página anterior. */
+                /** @description Cursor base64url JSON con fecha/UUID, actor y scope/filtros; no concede acceso. Cursor opaco retornado por la página anterior. */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Cantidad máxima de elementos a retornar. */
                 limit?: components["parameters"]["Limit"];
@@ -3565,7 +3727,7 @@ export interface operations {
         parameters: {
             query?: {
                 sectionId?: components["parameters"]["SectionIdFilter"];
-                /** @description Cursor opaco retornado por la página anterior. */
+                /** @description Cursor base64url JSON con fecha/UUID, actor y scope/filtros; no concede acceso. Cursor opaco retornado por la página anterior. */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Cantidad máxima de elementos a retornar. */
                 limit?: components["parameters"]["Limit"];
@@ -3687,7 +3849,7 @@ export interface operations {
                 sectionId?: components["parameters"]["SectionIdFilter"];
                 from?: string;
                 to?: string;
-                /** @description Cursor opaco retornado por la página anterior. */
+                /** @description Cursor base64url JSON con fecha/UUID, actor y scope/filtros; no concede acceso. Cursor opaco retornado por la página anterior. */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Cantidad máxima de elementos a retornar. */
                 limit?: components["parameters"]["Limit"];
@@ -3709,6 +3871,7 @@ export interface operations {
             /** @description Eventos de auditoría filtrados y paginados. */
             200: {
                 headers: {
+                    "Cache-Control"?: "no-store";
                     [name: string]: unknown;
                 };
                 content: {
@@ -3719,6 +3882,86 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    listInstitutionMemberships: {
+        parameters: {
+            query?: {
+                /** @description Cursor base64url JSON con fecha/UUID, actor y scope/filtros; no concede acceso. Cursor opaco retornado por la página anterior. */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Cantidad máxima de elementos a retornar. */
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Resultado institucional. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MembershipAdminListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    setInstitutionCourseAdmin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                membershipId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MembershipAdminUpdate"];
+            };
+        };
+        responses: {
+            /** @description Resultado institucional. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MembershipAdmin"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
 }

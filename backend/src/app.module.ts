@@ -1,3 +1,13 @@
+import { EnrollmentsService } from "./enrollments/enrollments.service";
+import { EnrollmentsController } from "./enrollments/enrollments.controller";
+import { AuditController } from "./audit/audit.controller";
+import { AuditService } from "./audit/audit.service";
+import { MembershipAdminService } from "./institutions/membership-admin.service";
+import { MembershipAdminController } from "./institutions/membership-admin.controller";
+import { CoursesService } from "./courses/courses.service";
+import { CoursesController } from "./courses/courses.controller";
+import { SectionsService } from "./sections/sections.service";
+import { SectionsController } from "./sections/sections.controller";
 import { Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
@@ -14,7 +24,7 @@ import { InstitutionsController } from "./institutions/institutions.controller";
   imports: [JwtModule.register({}),
     // shortcut: memory per instance; coordinate quotas before running multiple instances.
     ThrottlerModule.forRoot([{limit: 5, ttl: 60000, blockDuration: 60000}])],
-  providers: [DatabaseService, AuthService, InstitutionsService, {provide: APP_GUARD, useClass: AuthGuard}],
-  controllers: [HealthController, AuthController, InstitutionsController],
+  providers: [EnrollmentsService, AuditService, MembershipAdminService, CoursesService, SectionsService, DatabaseService, AuthService, InstitutionsService, {provide: APP_GUARD, useClass: AuthGuard}],
+  controllers: [EnrollmentsController, AuditController, MembershipAdminController, CoursesController, SectionsController, HealthController, AuthController, InstitutionsController],
 })
 export class AppModule {}
