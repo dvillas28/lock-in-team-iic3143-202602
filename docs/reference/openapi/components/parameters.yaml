@@ -7,7 +7,9 @@ InstitutionSlug:
     valida que la identidad tenga una InstitutionMembership activa.
   schema:
     type: string
-    pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+    minLength: 1
+    maxLength: 63
+    pattern: '^[a-z0-9]([a-z0-9-]*[a-z0-9])?$'
   example: uc
 
 Cursor:

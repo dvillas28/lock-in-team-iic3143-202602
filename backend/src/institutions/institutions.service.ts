@@ -1,4 +1,4 @@
-import { Injectable, ServiceUnavailableException } from "@nestjs/common";
+import { Injectable, NotFoundException, ServiceUnavailableException } from "@nestjs/common";
 import { DatabaseService } from "../database/database.service";
 
 @Injectable()
@@ -12,5 +12,21 @@ export class InstitutionsService {
         WHERE u.id=$1 AND u.active AND m.active AND i.active ORDER BY i.slug`, [userId]);
       return {items: result.rows};
     } catch { throw new ServiceUnavailableException(); }
+  }
+  async current(userId: string, slug: string) {
+    let row;
+    try {
+      const result = await this.database.pool.query(`SELECT u.id,u.email,u.name,
+        m.id AS membership_id,i.id AS institution_id,i.slug,i.name AS institution_name
+        FROM public.users u JOIN public.institution_memberships m ON m.user_id=u.id
+        JOIN public.institutions i ON i.id=m.institution_id
+        WHERE u.id=$1 AND i.slug=$2 AND u.active AND m.active AND i.active`, [userId, slug]);
+      row = result.rows[0];
+    } catch { throw new ServiceUnavailableException(); }
+    if (!row) throw new NotFoundException();
+    return {id: row.id, email: row.email, name: row.name,
+      institutionMembership: {id: row.membership_id, active: true,
+        institution: {id: row.institution_id, slug: row.slug, name: row.institution_name, active: true}},
+      sectionMemberships: []};
   }
 }

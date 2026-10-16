@@ -86,6 +86,9 @@
     responses:
       '200':
         description: Identidad autenticada y sus alcances dentro de la Institution seleccionada.
+        headers:
+          Cache-Control:
+            schema: {type: string, const: no-store}
         content:
           application/json:
             schema:
@@ -94,6 +97,11 @@
         $ref: '../components/responses.yaml#/Unauthorized'
       '404':
         $ref: '../components/responses.yaml#/NotFound'
+
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'
 
 /api/v1/institutions/{institutionSlug}/users:
   parameters:
