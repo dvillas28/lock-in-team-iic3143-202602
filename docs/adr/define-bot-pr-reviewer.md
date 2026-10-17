@@ -72,25 +72,25 @@ Para mitigar riesgos de seguridad y respetar el principio de mínimo privilegio 
 
 El bot tomará como base directa las reglas de la skill local [`.agents/skills/lms-reviewer/SKILL.md`](../../.agents/skills/lms-reviewer/SKILL.md) y los ADRs vigentes del proyecto (`CI-11`). Evaluará los siguientes ejes obligatorios:
 
-1. **Aislamiento Multi-Tenant (Prioridad P0 - Crítico):**
+1. **Aislamiento Multi-Tenant (Crítico):**
    - **Regla Path vs. Body:** La institución se resuelve exclusivamente desde el path HTTP (`/api/v1/institutions/{institutionSlug}/...`). **El frontend o cliente jamás debe enviar `institution_id` en el body** de los requests académicos; el backend debe inyectarlo a partir de la institución resuelta y validada.
    - **Alcance de consultas:** Toda consulta o mutación tenant-owned debe aplicar el filtro de institución correspondiente. Alerta máxima ante posibles fugas entre instituciones (UC vs. UTFSM).
    - **Modelo de persistencia:** Toda tabla o entidad académica tenant-owned debe incluir la columna `institution_id` y restricciones/FKs compuestas cuando corresponda.
-2. **Control de Roles y Autorización (Prioridad P0 - Crítico):**
+2. **Control de Roles y Autorización (Crítico):**
    - El backend debe validar una `InstitutionMembership` activa antes de autorizar permisos de curso o sección.
    - Validar permisos por operación y alcance: `coordinator` a nivel de curso; `teacher`, `assistant` y `student` a nivel de sección.
    - Prohibir incompatibilidades de rol (ej. quien tenga acceso a la pauta de corrección no puede rendir ese quiz como estudiante).
-3. **Auditoría Inmutable (`AuditEvents`) (Prioridad P0 - Requisito Constitucional):**
+3. **Auditoría Inmutable (`AuditEvents`) (Requisito Constitucional):**
    - Toda mutación académica crítica (publicación de notas, cancelación de intentos de quiz, cambios de ponderación, modificaciones de membresías o roles) **debe emitir un `AuditEvent` inmutable y sanitizado en la misma transacción de base de datos** (`logEvent(...)`).
    - Alertar si una operación de cambio de estado omite el registro de auditoría.
-4. **Flujos Académicos y Consistencia de Calificaciones (Prioridad P1):**
+4. **Flujos Académicos y Consistencia de Calificaciones:**
    - **Cálculo en Backend:** La escala y los promedios parciales/finales se calculan exclusivamente en el backend; el cliente no realiza cálculos oficiales.
    - **Congelamiento de ponderaciones:** Tras la primera nota publicada de un curso, se bloquea la creación de nuevos ítems evaluativos y cualquier alteración de ponderaciones.
    - **Pauta protegida:** La pauta de corrección jamás se expone en endpoints accesibles para estudiantes y no puede modificarse una vez que existan intentos iniciados.
    - **Intentos y estados terminales:** Los intentos cancelados o notas publicadas son terminales e inmutables (no se reabren ni sobrescriben).
-5. **Presencia de Pruebas Automatizadas (Prioridad P1):**
+5. **Presencia de Pruebas Automatizadas:**
    - Cambios en endpoints, lógica de negocio o esquemas deben incluir tests unitarios o pruebas de integración que verifiquen el aislamiento y las fronteras de seguridad.
-6. **Complejidad y Filosofía Stack-Light (Prioridad P2):**
+6. **Complejidad y Filosofía Stack-Light:**
    - Señalar dependencias, frameworks, cachés o abstracciones no justificadas por los requerimientos inmediatos del proyecto.
 
 - **Borrador de System Prompt propuesto (plantilla para el script):**
