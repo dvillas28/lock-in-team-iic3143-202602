@@ -126,8 +126,6 @@ El bot tomará como base directa las reglas de la skill local [`.agents/skills/l
     - `[CRÍTICO|ALTO|MEDIO]` `ruta/al/archivo:línea`: Explicación concisa del riesgo y sugerencia de corrección según la arquitectura de AcademiX.
   ```
 
----
-
 ### 4. Mitigación de Ruido y Modo de Operación (Riesgo R-16)
 
 Para evitar que el bot entorpezca el flujo de desarrollo del equipo:
@@ -149,4 +147,3 @@ Para evitar que el bot entorpezca el flujo de desarrollo del equipo:
 - **Habilita `CI-09`:** Base definida para implementar el workflow `.github/workflows/pr-reviewer.yml` y el script consumidor de la API.
 - **Habilita `CI-11` y `CI-13`:** Reglas estructuradas para calibrar prompts y eliminar falsos positivos observados durante los primeros PRs del equipo.
 - **Evidencia para E3 y E4:** Cumple con la documentación requerida para la justificación de herramientas automáticas de calidad en las entregas académicas.
-
