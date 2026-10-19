@@ -10,6 +10,8 @@
     description: Admin dueño ve todos los eventos del curso, incluidos sectionId=null,
       aunque también sea teacher. Solo en ausencia de ese permiso aplica scope de
       secciones teacher activas. Eventos institucionales excluidos. Inmutable y sanitizado.
+      Admin dueño conserva acceso sin teacher; assistant/student no acceden. Se filtran también
+      snapshots históricos al leer; pesos globales solo owner y publicaciones con sección histórica.
     parameters:
     - name: action
       in: query

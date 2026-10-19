@@ -932,6 +932,9 @@ export interface paths {
          * Listar intentos para revisión académica
          * @description Teacher con is_admin y ownership puede consultar todo su curso. Teacher
          *     ordinario y assistant solo secciones con Enrollment activo propio. Students no tienen acceso.
+         *     Cada fila usa vista académica o assistant según permiso de pauta en su sección histórica;
+         *     assistant nunca recibe isCorrect/pointsAwarded. Cursor ligado a actor, tenant, quiz y filtros;
+         *     cada página revalida permisos. Destinatarios revocados conservan historia.
          */
         get: operations["listQuizAttempts"];
         put?: never;
@@ -988,10 +991,9 @@ export interface paths {
         get?: never;
         /**
          * Reemplazar ponderaciones del curso de forma atómica
-         * @description Requiere is_admin institucional y createdBy igual al actor. El conjunto completo debe sumar 100%. Si existe
-         *     cualquier nota publicada del curso, responde 409 con código
-         *     `GRADE_WEIGHTS_LOCKED`. Tampoco se agregan grade items tras la primera
-         *     publicación. Todo cambio exitoso genera un evento de auditoría con before y after.
+         * @description Teacher activo más is_admin institucional y createdBy=actor. Colección completa, única, pesos
+         *     de hasta dos decimales, suma exacta 100. Primera publicación congela pesos e ítems; 409
+         *     GRADE_WEIGHTS_LOCKED incluso en no-op. Antes de freeze no-op no emite evento.
          */
         put: operations["updateGradebookWeights"];
         post?: never;
@@ -1018,9 +1020,11 @@ export interface paths {
         };
         /**
          * Consultar libro de notas docente
-         * @description Teacher con is_admin y ownership puede consultar el curso completo.
-         *     Teacher ordinario y assistant quedan limitados a sus secciones activas.
-         *     Assistant es de solo lectura.
+         * @description Teacher con is_admin y ownership puede consultar el curso completo. Teacher ordinario y
+         *     assistant quedan limitados a sus secciones activas. Assistant es de solo lectura.  Filas por
+         *     estudiante y sección histórica, incluso destinatarios revocados; cursor (createdAt mínimo,
+         *     studentId, sectionId) ligado a actor/tenant/curso/filtro. Notas publicadas y no publicadas
+         *     dentro del alcance, sin pauta; promedio solo sobre publicadas.
          */
         get: operations["getCourseGradebook"];
         put?: never;
@@ -1050,17 +1054,18 @@ export interface paths {
         put?: never;
         /**
          * Publicar notas por grade items y secciones
-         * @description Teacher con is_admin y ownership puede publicar en todo su curso;
-         *     teacher ordinario solo en sus secciones activas. Assistant y student no pueden publicar. La primera
-         *     publicación exige ponderaciones del curso que sumen 100%. Toda publicación
-         *     exige ausencia de intentos activos para los estudiantes y quizzes de las
-         *     notas seleccionadas.
-         *     Solo `inProgress` es activo; `cancelled` no bloquea, no genera nota y no
-         *     sustituye el requisito de un intento `graded` para publicar una nota.
-         *     Un intento abandonado debe cancelarse explícitamente antes de publicar;
-         *     esta operación no lo cancela automáticamente y responde 409 Conflict si
-         *     aún existe un intento activo. La operación es atómica,
-         *     no sobrescribe notas publicadas y genera auditoría histórica.
+         * @description Teacher con is_admin y ownership puede publicar en todo su curso; teacher ordinario solo en
+         *     sus secciones activas. Assistant y student no pueden publicar. La primera publicación exige
+         *     ponderaciones del curso que sumen 100%. Toda publicación exige ausencia de intentos activos
+         *     para los estudiantes y quizzes de las notas seleccionadas. Solo `inProgress` es activo;
+         *     `cancelled` no bloquea, no genera nota y no sustituye el requisito de un intento `graded` para
+         *     publicar una nota. Un intento abandonado debe cancelarse explícitamente antes de publicar;
+         *     esta operación no lo cancela automáticamente y responde 409 Conflict si aún existe un intento
+         *     activo. La operación es atómica, no sobrescribe notas publicadas y genera auditoría histórica.
+         *     Selección explícita completa de gradeItemIds, sectionIds y studentIds. Recibo persistente por
+         *     tenant/actor/clave; selección canónica igual devuelve original tras revalidar permisos,
+         *     distinta selección o curso da 409 IDEMPOTENCY_CONFLICT. Otra clave sobre nota publicada da
+         *     GRADE_ALREADY_PUBLISHED. Fallos no reservan clave.
          */
         post: operations["publishGrades"];
         delete?: never;
@@ -1086,9 +1091,9 @@ export interface paths {
         };
         /**
          * Consultar notas publicadas del estudiante autenticado
-         * @description La identidad se deriva de `sub`; no acepta `studentId`. Retorna solo notas
-         *     propias publicadas. El promedio parcial es
-         *     `sum(grade * weight) / sum(published weights)` y no se recibe del cliente.
+         * @description La identidad se deriva de `sub`; no acepta `studentId`. Retorna solo notas propias publicadas.
+         *     El promedio parcial es `sum(grade * weight) / sum(published weights)` y no se recibe del
+         *     cliente.
          */
         get: operations["getStudentGrades"];
         put?: never;
@@ -1116,7 +1121,7 @@ export interface paths {
         };
         /**
          * Consultar historial de auditoría del curso
-         * @description Admin dueño ve todos los eventos del curso, incluidos sectionId=null, aunque también sea teacher. Solo en ausencia de ese permiso aplica scope de secciones teacher activas. Eventos institucionales excluidos. Inmutable y sanitizado.
+         * @description Admin dueño ve todos los eventos del curso, incluidos sectionId=null, aunque también sea teacher. Solo en ausencia de ese permiso aplica scope de secciones teacher activas. Eventos institucionales excluidos. Inmutable y sanitizado. Admin dueño conserva acceso sin teacher; assistant/student no acceden. Se filtran también snapshots históricos al leer; pesos globales solo owner y publicaciones con sección histórica.
          */
         get: operations["listCourseAuditEvents"];
         put?: never;
@@ -1724,7 +1729,7 @@ export interface components {
             readonly submittedAt: string;
         };
         QuizAttemptListResponse: components["schemas"]["PageInfo"] & {
-            items: components["schemas"]["QuizAttemptAcademicView"][];
+            items: (components["schemas"]["QuizAttemptAcademicView"] | components["schemas"]["QuizAttemptAssistantView"])[];
         };
         GradeItem: {
             /** Format: uuid */
@@ -1788,6 +1793,7 @@ export interface components {
         PublishGradesRequest: {
             gradeItemIds: string[];
             sectionIds: string[];
+            studentIds: string[];
         };
         PublishGradesResponse: {
             publishedCount: number;
@@ -1812,14 +1818,14 @@ export interface components {
             /**
              * @description Promedio de notas publicadas normalizado por la suma de sus ponderaciones:
              *     sum(grade * weight) / sum(weight). Se redondea a un decimal con HALF_UP y
-             *     es null cuando no hay notas publicadas.
+             *     es null cuando no hay notas publicadas o el peso publicado es cero.
              */
             readonly partialAverage: components["schemas"]["GradeValue"] | null;
             readonly publishedWeightPercent: number;
             /** @description True cuando la suma de ponderaciones publicadas es menor que 100%. */
             readonly isPartial: boolean;
         };
-        /** @description Snapshot sanitizado; nunca contiene secretos, credenciales ni storage keys. */
+        /** @description Snapshot sanitizado al escribir y al leer historia; nunca contiene secretos, credenciales, claves de idempotencia, answers, isCorrect ni pointsAwarded. Pesos usan items con solo gradeItemId/weightPercent; publicaciones usan campos públicos de Grade. */
         AuditChanges: {
             before?: {
                 [key: string]: unknown;
@@ -3732,6 +3738,8 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     updateGradebookWeights: {
@@ -3770,6 +3778,8 @@ export interface operations {
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     getCourseGradebook: {
@@ -3808,6 +3818,8 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     publishGrades: {
@@ -3854,6 +3866,8 @@ export interface operations {
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     getStudentGrades: {
@@ -3886,6 +3900,8 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     listCourseAuditEvents: {

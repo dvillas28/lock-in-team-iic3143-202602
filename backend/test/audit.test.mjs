@@ -36,3 +36,9 @@ test('attempt and grade allowlists exclude answers, corrections, idempotency key
   assert.deepEqual(snapshot(type,input),{id:'id',studentId:'student',sectionId:'section'});
  }
 });
+
+ test("gradebook weight snapshots filter nested objects and read/write hostile payloads",()=>{
+  const service=new audit.AuditService();assert.ok(service);
+  assert.deepEqual(audit.snapshot("gradebook",{items:[{gradeItemId:"id",weightPercent:100,answers:["secret"],key:"secret"},{gradeItemId:{key:"secret"},weightPercent:0},{gradeItemId:"id",weightPercent:"secret"}],key:"secret"}),{items:[{gradeItemId:"id",weightPercent:100},{weightPercent:0},{gradeItemId:"id"}]});
+  assert.deepEqual(audit.snapshot("grade",{grade:6.1,studentId:{answers:"secret"},answers:["secret"]}),{grade:6.1});
+ });

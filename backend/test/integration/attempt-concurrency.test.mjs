@@ -66,10 +66,11 @@ async function publishSQL(pool,tenant,course,quiz,student) {
   await c.query('COMMIT');return {status:200};
  }finally{await c.query('ROLLBACK');c.release();}
 }
-test('SQL publication protocol races start/submit/cancel in both deterministic lock orders (no future HTTP endpoint)',async()=>{
+test('SQL publication protocol complements HTTP races for start/submit/cancel in both lock orders',async()=>{
  const pool=await database();let app;try{
   const f=await attemptFixture(pool);app=await http();const t=await tokens(app,f),quizzes=[];
   for(let i=0;i<6;i++)quizzes.push(await f.make({published:true}));
+  await pool.query('UPDATE grade_items SET weight_percent=CASE WHEN quiz_id=$1 THEN 100 ELSE 0 END WHERE course_id=$2',[quizzes[0],f.own]);
   for(const operation of ['start','submit','cancel'])for(const first of ['operation','publication']){
    const quiz=quizzes.shift(),old=await f.create({quiz,status:'graded',percent:100,grade:7});
    await pool.query(`INSERT INTO grades(id,institution_id,grade_item_id,quiz_id,student_id,section_id,attempt_id,score_percent,grade_value)

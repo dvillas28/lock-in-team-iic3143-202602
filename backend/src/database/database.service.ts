@@ -13,6 +13,7 @@ export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
   constructor() { this.pool.on("error", error => reportError("database", error)); }
 
   async check() {
+    await this.pool.query(`SELECT id,institution_id,course_id,actor_user_id,idempotency_key,request,published_count,published_at FROM public.grade_publications LIMIT 0`);
     await this.pool.query(`SELECT a.id,a.institution_id,a.course_id,a.quiz_id,a.section_id,a.student_id,a.attempt_number,a.status,
       a.started_at,a.submitted_at,a.cancelled_at,a.answers,a.score_points,a.score_percent,a.grade_value,a.start_key,a.submit_key,
       g.id,g.institution_id,g.grade_item_id,g.quiz_id,g.student_id,g.section_id,g.attempt_id,g.score_percent,g.grade_value,g.published_at,g.created_at,g.updated_at

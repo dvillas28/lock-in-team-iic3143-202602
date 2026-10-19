@@ -91,3 +91,10 @@ Diagrama conservado en partes:
 
 - [ERD 1](06-data-model-erd-1.md)
 - [ERD 2](06-data-model-erd-2.md)
+
+Publicación: selección explícita ítems×estudiantes, sección histórica; teacher activo,
+pesos además admin dueño. Primer published_at congela pesos/ítems; Grade publicada
+inmutable. grade_publications persiste recibo/selección canónica por tenant/actor/clave,
+append-only con FK tenant/curso/membership. Pesos NUMERIC(5,2), total exacto 100;
+promedio publicado HALF_UP, null con peso cero. Detalle y trazabilidad:
+[ADR de publicación](../../adr/grade-publication-and-weight-freeze.md).

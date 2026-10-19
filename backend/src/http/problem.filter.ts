@@ -1,4 +1,5 @@
 import { Catch, HttpException, type ArgumentsHost, type ExceptionFilter } from "@nestjs/common";
+import { reportError } from "../database/config";
 import { randomUUID } from "node:crypto";
 
 const problems: Record<number, [string, string, string]> = {
@@ -28,7 +29,11 @@ export class ProblemFilter implements ExceptionFilter {
     if (/^\/ready\/?$/i.test(path) && status === 503) {
       response.status(503).json({status: "unavailable"}); return;
     }
-    const [code, title, detail] = problems[status] ?? problems[500];
+    const [defaultCode, title, detail] = problems[status] ?? problems[500];
+    if(status>=500)reportError("http",error);
+    const domain=error instanceof HttpException?error.getResponse():null;
+    const candidate=domain && typeof domain==="object" && "code" in domain?domain.code:null;
+    const code=status===409 && typeof candidate==="string" && ["GRADE_WEIGHTS_LOCKED","GRADE_ALREADY_PUBLISHED","IDEMPOTENCY_CONFLICT"].includes(candidate)?candidate:defaultCode;
     response.setHeader("Content-Type", "application/problem+json");
     response.setHeader("Cache-Control", "no-store");
     if (status === 401) response.setHeader("WWW-Authenticate", "Bearer");

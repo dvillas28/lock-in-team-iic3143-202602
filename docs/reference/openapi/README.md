@@ -134,3 +134,11 @@ assistant ve agregados autorizados sin isCorrect/pointsAwarded. Permisos vigente
 revalidados en cada operación/replay. Errores y respuestas no-store/nosniff.
 Publicación/listado académico/pesos/libro quedan en notas; carreras aquí usan SQL.
 [Evidencia](../../backend/attempts-grading-validation.md).
+
+Libro de notas: studentIds obligatorio en publicación; clave persistida por
+institución/actor, replay autorizado y conflicto si cambia selección o curso.
+Pesos de hasta dos decimales requieren teacher activo más admin dueño; primera
+publicación congela pesos/ítems. Libro mantiene sección histórica y listado de
+intentos admite vistas teacher/assistant por fila. Promedio null con peso cero.
+[ADR](../../adr/grade-publication-and-weight-freeze.md) y
+[validación](../../backend/gradebook-validation.md).

@@ -129,3 +129,10 @@ Reglas:
 - `(institution_id, id, quiz_id)` es único para Grade;
 - `weight_percent between 0 and 100`;
 - el reemplazo de ponderaciones es atómico y debe sumar 100 % antes de publicar;
+
+Publicación: selección explícita ítems×estudiantes, sección histórica; teacher activo,
+pesos además admin dueño. Primer published_at congela pesos/ítems; Grade publicada
+inmutable. grade_publications persiste recibo/selección canónica por tenant/actor/clave,
+append-only con FK tenant/curso/membership. Pesos NUMERIC(5,2), total exacto 100;
+promedio publicado HALF_UP, null con peso cero. Detalle y trazabilidad:
+[ADR de publicación](../../adr/grade-publication-and-weight-freeze.md).

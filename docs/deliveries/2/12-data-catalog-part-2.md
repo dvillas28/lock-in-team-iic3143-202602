@@ -128,3 +128,15 @@ Intentos: checks coherentes de estado/fechas/resultados, claves de 1..200 única
 por tenant/student/operación; constraint diferible impide submitted persistido.
 Triggers conservan identidad e intentos terminales; Grade publicada es inmutable.
 GET student omite resultados/corrección; assistant omite corrección por respuesta.
+
+Publicación: selección explícita ítems×estudiantes, sección histórica; teacher activo,
+pesos además admin dueño. Primer published_at congela pesos/ítems; Grade publicada
+inmutable. grade_publications persiste recibo/selección canónica por tenant/actor/clave,
+append-only con FK tenant/curso/membership. Pesos NUMERIC(5,2), total exacto 100;
+promedio publicado HALF_UP, null con peso cero. Detalle y trazabilidad:
+[ADR de publicación](../../adr/grade-publication-and-weight-freeze.md).
+
+Ledger: id, institution_id, course_id, actor_user_id UUID; idempotency_key text
+(1..200), request JSONB canónico privado, published_count integer >0,
+published_at timestamptz(6). UNIQUE(tenant,actor,key); FK tenant/curso y
+membership; UPDATE/DELETE prohibidos, recibo público solo count/timestamp.

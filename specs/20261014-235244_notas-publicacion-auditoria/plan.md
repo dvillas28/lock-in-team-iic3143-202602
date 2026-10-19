@@ -2,7 +2,7 @@
 
 **Branch actual**: `feat/notas-publicacion-auditoria` | **Base**: `cf7ef53`
 **Date**: 2026-10-19 | **Spec**: [spec.md](spec.md)
-**Status**: Planificado; implementación/evidencia en la capa siguiente; bloqueo heredado #96 pendiente.
+**Status**: Implementado; cierre pendiente por bloqueo heredado #96; ver docs/backend/gradebook-validation.md.
 **Input**: `specs/20261014-235244_notas-publicacion-auditoria/spec.md`.
 
 ## Summary

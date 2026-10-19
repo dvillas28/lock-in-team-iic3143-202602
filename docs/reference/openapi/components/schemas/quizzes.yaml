@@ -724,4 +724,6 @@ QuizAttemptListResponse:
         items:
           type: array
           items:
-            $ref: '#/QuizAttemptAcademicView'
+            anyOf:
+              - $ref: '#/QuizAttemptAcademicView'
+              - $ref: '#/QuizAttemptAssistantView'

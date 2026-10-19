@@ -1,4 +1,4 @@
-import {Controller,Post,Get,Put,HttpCode,Req,Param,Body,Res} from "@nestjs/common";
+import {Controller,Post,Get,Put,HttpCode,Req,Param,Body,Res,Query} from "@nestjs/common";
 import type {IdentityRequest} from "../auth/auth.guard";
 import {slug,uuid} from "../courses/validation";
 import {AttemptsService} from "./attempts.service";
@@ -12,6 +12,8 @@ export class AttemptsController {
   const result=await this.attempts.start(r.userId,slug(s),uuid(quiz),uuid(section),idempotencyKey(r.rawHeaders),body);
   response.setHeader("Location",`/api/v1/institutions/${s}/quiz-attempts/${result.id}`);return result;
  }
+ @Get("quizzes/:quizId/attempts")
+ list(@Req() r:IdentityRequest,@Param("institutionSlug") s:string,@Param("quizId") id:string,@Query() q:Record<string,unknown>) {return this.attempts.list(r.userId,slug(s),uuid(id),q);}
  @Get("quiz-attempts/:attemptId")
  get(@Req() r:IdentityRequest,@Param("institutionSlug") s:string,@Param("attemptId") id:string) {return this.attempts.get(r.userId,slug(s),uuid(id));}
  @Put("quiz-attempts/:attemptId/answers")
