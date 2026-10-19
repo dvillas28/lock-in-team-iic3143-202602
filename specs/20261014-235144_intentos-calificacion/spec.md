@@ -72,6 +72,7 @@ Como estudiante, finalizo respuestas y conservo resultado íntegro hasta publica
 - Depende del alcance docente aclarado. submitted es transitorio durante envío/calificación, sin dejar corrección pendiente indefinidamente. Validar política temporal de guardado/envío en clarify.
 - Pruebas con dos instituciones incluyen permisos, integridad, sanitización y revocación; no se cierra con pruebas negativas pendientes.
 - Dependencias: [autoria-quizzes](../20261014-235044_autoria-quizzes/spec.md).
+- Integración obligatoria: consumir el guard/predicado de [autoría](../20261014-235044_autoria-quizzes/contracts/academic-integration.md), probar student+teacher por HTTP y verificar bloqueo de edición con primer intento real antes de cerrar FR-001 y SC-001.
 
 ## Sources & Traceability
 
