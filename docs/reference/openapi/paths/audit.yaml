@@ -6,6 +6,7 @@
     tags:
     - Audit
     operationId: listCourseAuditEvents
+    x-permissions: "Membership activa; dueño admin ve todo el curso; teacher activo ve solo eventos de sus secciones. Assistant/student sin acceso."
     summary: Consultar historial de auditoría del curso
     description: Admin dueño ve todos los eventos del curso, incluidos sectionId=null,
       aunque también sea teacher. Solo en ausencia de ese permiso aplica scope de

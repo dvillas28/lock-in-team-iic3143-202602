@@ -1,0 +1,16 @@
+/* Official Swagger UI layout and method backgrounds; accessibility overrides only. */
+body { margin: 0; }
+.catalog-header { box-sizing: border-box; max-width: 1460px; margin: auto; padding: 16px 20px; font: 14px/1.5 sans-serif; color: var(--text-1); overflow-wrap: anywhere; }
+.catalog-header a { color: var(--primary-ink); }
+.catalog-header p { margin: 8px 0; }
+:focus-visible { outline: 2px solid var(--primary-ink); outline-offset: 2px; }
+.swagger-ui .opblock-summary-path { overflow-wrap: anywhere; }
+.swagger-ui .responses-inner { overflow-x: auto; }
+.swagger-ui a { color: var(--primary-ink); }
+.swagger-ui .opblock .opblock-summary-method, .swagger-ui .info .title small { color: var(--text-1); text-shadow: none; }
+.swagger-ui .btn.authorize { color: var(--success); border-color: var(--success); }
+.swagger-ui .btn.authorize svg { fill: currentColor; }
+.swagger-ui .parameter__name.required::after { color: var(--danger); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

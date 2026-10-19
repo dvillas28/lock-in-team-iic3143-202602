@@ -3,7 +3,7 @@
 **Feature Branch**: Propuesta `docs/catalogo-endpoints`; actual `docs/catalogo-endpoints-plan`.
 **Feature Directory**: `specs/20261019-121536_catalogo-endpoints`
 **Created**: 2026-10-19
-**Status**: Planificada; implementación y validación en el siguiente PR.
+**Status**: Implementada y validada localmente sobre #98; despliegue y evaluación humana pendientes.
 **Input**: Consultar endpoints con Swagger UI y su formato/estilos estándar, según revisión del usuario del 2026-10-19.
 
 ## User Scenarios & Testing *(mandatory)*

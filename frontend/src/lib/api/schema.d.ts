@@ -1191,6 +1191,12 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * @example {
+         *       "email": "persona@example.test",
+         *       "password": "REEMPLAZAR_PASSWORD_DE_PRUEBA"
+         *     }
+         */
         LoginRequest: {
             /** @description Trim, ASCII 3–254, un @, sin espacios ni controles y dominio con punto; normalizado lowercase. */
             email: string;
@@ -1198,6 +1204,7 @@ export interface components {
             password: string;
         };
         LoginResponse: {
+            /** @example TOKEN_SINTETICO_NO_VALIDO */
             accessToken: string;
             /** @constant */
             tokenType: "Bearer";
@@ -1255,6 +1262,18 @@ export interface components {
             name: string;
             readonly active: boolean;
         };
+        /**
+         * @example {
+         *       "items": [
+         *         {
+         *           "id": "00000000-0000-4000-8000-000000000001",
+         *           "slug": "institucion-demo",
+         *           "name": "Institución de demostración",
+         *           "active": true
+         *         }
+         *       ]
+         *     }
+         */
         InstitutionListResponse: {
             /** @description Institutions activas y visibles para el User autenticado. */
             items: components["schemas"]["InstitutionSummary"][];
@@ -1276,6 +1295,26 @@ export interface components {
             /** @enum {string} */
             role: "teacher" | "assistant" | "student";
         };
+        /**
+         * @example {
+         *       "id": "00000000-0000-4000-8000-000000000001",
+         *       "email": "persona@example.test",
+         *       "name": "Persona de prueba",
+         *       "institutionMembership": {
+         *         "id": "00000000-0000-4000-8000-000000000001",
+         *         "institution": {
+         *           "id": "00000000-0000-4000-8000-000000000001",
+         *           "slug": "institucion-demo",
+         *           "name": "Institución de demostración",
+         *           "active": true
+         *         },
+         *         "active": true,
+         *         "isAdmin": false,
+         *         "isSuperAdmin": false
+         *       },
+         *       "sectionMemberships": []
+         *     }
+         */
         CurrentUser: {
             /** Format: uuid */
             readonly id: string;
@@ -1377,7 +1416,12 @@ export interface components {
             userId: string;
             role: components["schemas"]["EnrollmentRole"];
         };
-        /** @description Exactamente role o active. Cambio de rol desactiva origen y devuelve sucesor; origen inactivo produce 409. Reactivar con duplicado activo produce 409. */
+        /**
+         * @description Exactamente role o active. Cambio de rol desactiva origen y devuelve sucesor; origen inactivo produce 409. Reactivar con duplicado activo produce 409.
+         * @example {
+         *       "role": "student"
+         *     }
+         */
         EnrollmentUpdate: {
             role?: components["schemas"]["EnrollmentRole"];
             active?: boolean;
@@ -2182,7 +2226,6 @@ export interface operations {
                     "application/json": components["schemas"]["HealthResponse"];
                 };
             };
-            429: components["responses"]["TooManyRequests"];
         };
     };
     listAccessibleInstitutions: {
