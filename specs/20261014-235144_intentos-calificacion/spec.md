@@ -1,9 +1,9 @@
 # Feature Specification: Intentos y calificación automática
 
-**Feature Branch**: `feat/intentos-calificacion` (propuesta)
+**Feature Branch**: `feat/intentos-calificacion`
 **Feature Directory**: `specs/20261014-235144_intentos-calificacion`
 **Created**: 2026-10-14
-**Status**: Draft
+**Status**: Planned; prerequisite authoring validated on PR #94 (2026-10-19)
 **Input**: Backend MVP de Entrega 2: Intentos y calificación automática.
 
 ## User Scenarios & Testing *(mandatory)*
@@ -31,7 +31,7 @@ Como estudiante, finalizo respuestas y conservo resultado íntegro hasta publica
 **Acceptance Scenarios**:
 
 1. Enviar inmoviliza respuestas y calcula nota sin mostrarla antes de publicación.
-2. Repetir envío ya calificado conserva resultado sin duplicar nota ni evento.
+2. Repetir envío ya calificado con la misma clave conserva resultado sin duplicar nota ni evento; otra clave produce conflicto sin cambios.
 3. Fallo durante calificación/auditoría no deja envío parcial.
 
 ### Edge Cases
@@ -46,10 +46,10 @@ Como estudiante, finalizo respuestas y conservo resultado íntegro hasta publica
 - **FR-001**: Validar usuario, membership, Enrollment student, destinatarios, ventana, máximo, incompatibilidad con pauta y ausencia de nota publicada al iniciar.
 - **FR-002**: Numerar secuencialmente por estudiante/quiz/institución y admitir un único intento en progreso incluso ante concurrencia.
 - **FR-003**: Conservar curso/sección históricos; rechazar preguntas/alternativas ajenas y escrituras sobre intentos ajenos o terminales.
-- **FR-004**: Guardar respuestas solo en progreso; aplicar cierre temporal al guardar/enviar sin cancelar automáticamente intentos; supuesto pendiente de validar en clarify.
+- **FR-004**: Guardar respuestas solo en progreso; permitir iniciar/guardar/enviar solo con opensAt ≤ reloj actual < closesAt (límites ausentes sin restricción); fuera de ventana rechazar sin cambios ni cancelación automática.
 - **FR-005**: Permitir cancelación explícita al propietario o docente con permiso sobre sección histórica; ayudante no cancela.
 - **FR-006**: Cancelado es terminal, consume máximo, no modifica nota vigente ni bloquea publicación.
-- **FR-007**: Finalizar, corregir, actualizar nota no publicada y auditar atómicamente; reintentos de envío son idempotentes.
+- **FR-007**: Finalizar, corregir, actualizar nota no publicada y auditar atómicamente; reintentos con la clave original son idempotentes; otra clave sobre un intento ya calificado produce conflicto sin cambios.
 - **FR-008**: Calcular porcentaje a dos decimales HALF_UP y nota a un decimal HALF_UP: hasta 60 %, 1 + porcentaje × 3 / 60; sobre 60 %, 4 + (porcentaje − 60) × 3 / 40.
 - **FR-009**: Respuesta omitida/incorrecta aporta cero; acierto aporta puntos de pregunta. Usar último intento graded por número, nunca mejor nota.
 - **FR-010**: Impedir intentos nuevos y sobrescritura de nota publicada; conservar respuestas/corrección de intentos calificados.
@@ -69,10 +69,14 @@ Como estudiante, finalizo respuestas y conservo resultado íntegro hasta publica
 
 ## Assumptions
 
-- Depende del alcance docente aclarado. submitted es transitorio durante envío/calificación, sin dejar corrección pendiente indefinidamente. Validar política temporal de guardado/envío en clarify.
+- Depende del alcance docente aclarado. submitted es transitorio durante envío/calificación, sin dejar corrección pendiente indefinidamente. Política temporal ratificada por usuario el 2026-10-19: ventana [opensAt, closesAt); lectura/cancelación explícita siguen disponibles tras cierre. Un replay de envío ya confirmado no es un envío nuevo y conserva recibo, revalidando autorización vigente.
 - Pruebas con dos instituciones incluyen permisos, integridad, sanitización y revocación; no se cierra con pruebas negativas pendientes.
 - Dependencias: [autoria-quizzes](../20261014-235044_autoria-quizzes/spec.md).
-- Integración obligatoria: consumir el guard/predicado de [autoría](../20261014-235044_autoria-quizzes/contracts/academic-integration.md), probar student+teacher por HTTP y verificar bloqueo de edición con primer intento real antes de cerrar FR-001 y SC-001.
+
+Deuda aceptada por usuario tras auditoría: intentos conserva resolución temporal
+real de milisegundos al leer timestamps; límites pueden adelantarse menos de 1 ms.
+La precisión submilisegundo de FR-004 queda diferida según el
+[ADR](../../docs/adr/quiz-attempt-lifecycle-and-grading.md).
 
 ## Sources & Traceability
 
