@@ -1,6 +1,6 @@
 # Ciclo temporal y calificación de intentos
 
-Fecha: 2026-10-19. Estado: política temporal ratificada; diseño técnico propuesto.
+Fecha: 2026-10-19. Estado: implementado y validado, con deuda temporal aceptada.
 
 ## Decisión
 

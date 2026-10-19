@@ -620,6 +620,77 @@ QuizAttemptAcademicView:
       readOnly: true
       description: Null si el intento aún no fue calificado o fue cancelado.
 
+QuizAttemptAssistantView:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - quizId
+    - sectionId
+    - studentId
+    - attemptNumber
+    - startedAt
+    - submittedAt
+    - cancelledAt
+    - status
+    - answers
+    - scorePercent
+    - grade
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    quizId:
+      type: string
+      format: uuid
+      readOnly: true
+    sectionId:
+      type: string
+      format: uuid
+      readOnly: true
+    studentId:
+      type: string
+      format: uuid
+      readOnly: true
+    attemptNumber:
+      type: integer
+      minimum: 1
+      readOnly: true
+    startedAt:
+      type: string
+      format: date-time
+      readOnly: true
+    submittedAt:
+      type: [string, 'null']
+      format: date-time
+      readOnly: true
+      description: Null si el intento no fue enviado, incluido uno cancelado.
+    cancelledAt:
+      type: [string, 'null']
+      format: date-time
+      readOnly: true
+      description: Fecha de cancelación; null si el intento no fue cancelado.
+    status:
+      $ref: '#/QuizAttemptStatus'
+    answers:
+      type: array
+      description: Seguimiento sin isCorrect ni pointsAwarded.
+      items:
+        $ref: '#/QuizAttemptAnswerStudentView'
+    scorePercent:
+      type: [number, 'null']
+      minimum: 0
+      maximum: 100
+      readOnly: true
+      description: Null si el intento aún no fue calificado o fue cancelado.
+    grade:
+      oneOf:
+        - $ref: './grades.yaml#/GradeValue'
+        - type: 'null'
+      readOnly: true
+      description: Null si el intento aún no fue calificado o fue cancelado.
+
 QuizAttemptSubmissionReceipt:
   type: object
   additionalProperties: false

@@ -88,7 +88,8 @@ Campos: `id uuid PK`, `institution_id uuid`, `course_id uuid`, `quiz_id uuid`,
 `section_id uuid`, `student_id uuid`, `attempt_number integer`, `status varchar(16)`,
 `started_at timestamptz(6)`, `submitted_at timestamptz(6) nullable`,
 `cancelled_at timestamptz(6) nullable`, `answers jsonb`,
-`score_points numeric(8,2) nullable`, `score_percent numeric(5,2) nullable`.
+`score_points numeric(8,2) nullable`, `score_percent numeric(5,2) nullable`,
+`grade_value numeric(3,1) nullable`, `start_key text NOT NULL`, `submit_key text nullable`.
 
 Reglas:
 
@@ -104,7 +105,12 @@ Reglas:
   pauta y ausencia de nota publicada;
 - `score_percent between 0 and 100` cuando exista;
 - cancelación conserva número, no crea Grade y genera AuditEvent;
-- respuestas y corrección quedan inmutables al calificar.
+- respuestas y corrección quedan inmutables al calificar; cancelled también es terminal;
+- claves 1..200 únicas por tenant/student/operación; submit original sin alias;
+- submitted solo dentro de tx: constraint diferible rechaza commit pendiente;
+- porcentaje HALF_UP a dos decimales y nota histórica a uno, calculada desde ese porcentaje;
+- ventana [opens_at,closes_at), NULL ilimitado, reloj DB después de locks.
+
 
 ### grade_items
 

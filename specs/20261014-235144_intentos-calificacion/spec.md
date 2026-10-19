@@ -3,7 +3,7 @@
 **Feature Branch**: `feat/intentos-calificacion`
 **Feature Directory**: `specs/20261014-235144_intentos-calificacion`
 **Created**: 2026-10-14
-**Status**: Planned; prerequisite authoring validated on PR #94 (2026-10-19)
+**Status**: Implemented; final validation blocked by additional privacy finding (2026-10-19)
 **Input**: Backend MVP de Entrega 2: Intentos y calificación automática.
 
 ## User Scenarios & Testing *(mandatory)*

@@ -111,14 +111,17 @@ y decisiones pendientes se conservan en este documento, fuera del XLSX.
 | quiz_attempts | quiz_id | uuid | Sí | FK | Quiz respondido. |
 | quiz_attempts | section_id | uuid | Sí | FK | Sección histórica del estudiante. |
 | quiz_attempts | student_id | uuid | Sí | FK | Estudiante que responde. |
-| quiz_attempts | attempt_number | integer | Sí | — | Número correlativo por quiz y estudiante. Secuencia entera; CHECK > 0 pendiente de cierre. |
+| quiz_attempts | attempt_number | integer | Sí | — | Número correlativo por quiz y estudiante. Secuencia entera; CHECK > 0, tenant/quiz/student único. |
 | quiz_attempts | status | varchar(16) | Sí | — | Estado del intento: in_progress, submitted, graded o cancelled; máximo 16 caracteres y valores restringidos por CHECK. |
 | quiz_attempts | started_at | timestamptz(6) | Sí | — | Inicio del intento. |
 | quiz_attempts | submitted_at | timestamptz(6) | No | — | Envío del intento. |
 | quiz_attempts | cancelled_at | timestamptz(6) | No | — | Cancelación del intento. |
 | quiz_attempts | answers | jsonb | Sí | — | Respuestas del estudiante. Documento estructurado; campos internos en Contratos JSON; no implica FK internas. |
-| quiz_attempts | score_points | numeric(8,2) | No | — | Puntaje obtenido. Puntaje exacto de hasta 999999.99; precisión de puntos JSON y rango de dominio pendientes. |
+| quiz_attempts | score_points | numeric(8,2) | No | — | Puntaje obtenido. Puntaje exacto de hasta 999999.99; CHECK 0..999999.99; puntos JSON positivos de hasta dos decimales. |
 | quiz_attempts | score_percent | numeric(5,2) | No | — | Porcentaje obtenido. Porcentaje decimal exacto con dos decimales; CHECK limita a 0..100. |
+| quiz_attempts | grade_value | numeric(3,1) | No | — | Nota histórica 1.0..7.0; HALF_UP usando porcentaje redondeado. |
+| quiz_attempts | start_key | text | Sí | UNIQUE por tenant/student | Clave original de inicio, longitud 1..200. |
+| quiz_attempts | submit_key | text | No | UNIQUE parcial por tenant/student | Clave original aceptada al enviar; sin alias. |
 | grade_items | id | uuid | Sí | PK | Identificador del ítem evaluado del libro de notas. |
 | grade_items | institution_id | uuid | Sí | FK | Tenant lógico. |
 | grade_items | course_id | uuid | Sí | FK | Curso dueño. |
