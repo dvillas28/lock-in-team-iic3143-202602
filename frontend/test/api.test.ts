@@ -312,3 +312,28 @@ export function checkMarkdownOnlyTypes(client:ApiClient) {
  const input:components["schemas"]["MarkdownMaterialCreate"]={title:"T",markdownBody:"text",kind:"file",createdBy:"other"};
  void input;
 }
+
+test("quiz consumer uses generated safe views and draft section reassignment without changing identities",async()=>{
+ const quiz:components["schemas"]["QuizStudentView"]={id:"q",courseId:"c",sectionId:"s",title:"Control",instructions:null,opensAt:null,closesAt:null,maxAttempts:null,status:"published",publishedAt:health.timestamp,
+  questions:[{id:"p",prompt:"2+2",position:1,points:2.5,alternatives:[{id:"a",text:"4"},{id:"b",text:"5"}]}]};
+ const client=mockClient(async request=>{
+  assert.equal(request.headers.get("Authorization"),"Bearer student");
+  if(request.method==="PATCH"){assert.deepEqual(await request.json(),{sectionId:"new-section"});return Response.json({...quiz,sectionId:"new-section",createdBy:"actor",questions:[]});}
+  return Response.json(request.url.includes("/courses/")?{items:[{...quiz,questions:undefined}]}:quiz);
+ },()=>"student");
+ const view=await client.GET("/api/v1/institutions/{institutionSlug}/quizzes/{quizId}",{params:{path:{institutionSlug:"uc",quizId:"q"}}});
+ assert.equal("isCorrect" in view.data!.questions[0].alternatives[0],false);
+ const list=await client.GET("/api/v1/institutions/{institutionSlug}/courses/{courseId}/quizzes",{params:{path:{institutionSlug:"uc",courseId:"c"},query:{sectionId:"s"}}});
+ assert.equal(list.data?.items[0].id,"q");
+ const changed=await client.PATCH("/api/v1/institutions/{institutionSlug}/quizzes/{quizId}",{params:{path:{institutionSlug:"uc",quizId:"q"}},body:{sectionId:"new-section"}});
+ assert.equal(changed.data?.id,"q");assert.equal(changed.data?.sectionId,"new-section");
+});
+export function checkQuizTypes() {
+ const update:components["schemas"]["QuizUpdate"]={sectionId:null,questions:[{id:"retained",prompt:"p",position:1,points:1,alternatives:[{id:"a",text:"a",isCorrect:true},{id:"b",text:"b",isCorrect:false}]}]};
+ void update;
+ // @ts-expect-error Safe alternatives never contain the answer key.
+ const safe:components["schemas"]["AlternativeStudentView"]={id:"a",text:"a",isCorrect:true};
+ // @ts-expect-error Creation does not accept an existing question identity.
+ const create:components["schemas"]["QuestionCreate"]={id:"forged",prompt:"p",position:1,points:1,alternatives:[]};
+ void safe;void create;
+}

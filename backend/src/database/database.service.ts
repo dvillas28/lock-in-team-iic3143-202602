@@ -13,6 +13,10 @@ export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
   constructor() { this.pool.on("error", error => reportError("database", error)); }
 
   async check() {
+    await this.pool.query(`SELECT c.grade_items_locked_at,q.id,q.institution_id,q.course_id,q.section_id,q.title,
+      q.instructions,q.opens_at,q.closes_at,q.max_attempts,q.published_at,q.created_by,q.questions,
+      g.id,g.institution_id,g.course_id,g.quiz_id,g.title,g.weight_percent,g.created_at
+      FROM public.courses c,public.quizzes q,public.grade_items g LIMIT 0`);
     // Resolve required columns without reading rows; SQL and integration tests own the constraints.
     await this.pool.query(`SELECT i.id,i.slug,i.name,i.active,i.created_at,i.updated_at,
       u.id,u.email,u.password_hash,u.name,u.active,u.created_at,u.updated_at,

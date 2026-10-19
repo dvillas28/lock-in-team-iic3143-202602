@@ -2,7 +2,7 @@
 
 **Branch**: `docs/autoria-quizzes-plan` | **Date**: 2026-10-19
 **Spec**: [spec.md](spec.md) | **Implementación prevista**: `feat/autoria-quizzes`.
-**Estado**: Diseño terminado; implementación y aceptación funcional pendientes.
+**Estado**: Implementación y validación local completas; integración con intentos/notas pendiente.
 **Base**: `upstream/feat/modulos-material-api`, commit `e34499e`, PR #90.
 Cadena pendiente: #85 → #86 → #87 → #89 → #90; continuar sin esperar aprobación.
 La integración final sigue dependiendo de los cambios que reciba esa cadena.
@@ -41,7 +41,7 @@ Resolver todos los desconocidos mediante evidencia local en [research.md](resear
 
 ## Constitution Check
 
-Gates previos y posteriores al diseño: PASS; aceptación funcional aún pendiente.
+Gates de diseño y aceptación local: PASS; ver [evidencia](../../docs/backend/quiz-authoring-validation.md).
 
 | Gate | Evidencia |
 | --- | --- |

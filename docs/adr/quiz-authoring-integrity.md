@@ -1,6 +1,6 @@
 # Autoría inmutable y coordinación del libro de notas
 
-Fecha: 2026-10-19. Estado: propuesto por plan; implementación pendiente.
+Fecha: 2026-10-19. Estado: aceptado por usuario; implementado y validado localmente.
 
 ## Contexto
 

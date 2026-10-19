@@ -156,7 +156,11 @@ test("readiness rejects every missing academic table and institutional flag",asy
    await pool.query(`ALTER TABLE institution_memberships RENAME COLUMN missing_flag TO ${column}`);
   }
   app=cli("main",{PORT:"13983"});await waitReady(13983,app);
-  for(const table of ["courses","sections","enrollments","audit_events","course_modules","materials"]){
+  await pool.query("ALTER TABLE courses RENAME COLUMN grade_items_locked_at TO missing_quiz_lock");
+  assert.equal((await fetch("http://localhost:13983/ready")).status,503);
+  await pool.query("ALTER TABLE courses RENAME COLUMN missing_quiz_lock TO grade_items_locked_at");
+  await waitReady(13983,app);
+  for(const table of ["courses","sections","enrollments","audit_events","course_modules","materials","quizzes","grade_items"]){
    await pool.query(`ALTER TABLE ${table} RENAME TO missing_table`);
    assert.equal((await fetch("http://localhost:13983/ready")).status,503);
    await pool.query(`ALTER TABLE missing_table RENAME TO ${table}`);

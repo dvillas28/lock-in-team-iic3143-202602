@@ -4,6 +4,7 @@ import { BadRequestException,NotFoundException,Injectable } from "@nestjs/common
 import { randomUUID } from "node:crypto";
 import type { PoolClient } from "pg";
 const fields: Record<string,string[]> = {
+ quiz:["id","courseId","sectionId","title","opensAt","closesAt","maxAttempts","publishedAt","createdBy","questionCount","totalPoints","gradeItemId"],
  courseModule:["id","courseId","title","position","publishedAt"],
  material:["id","moduleId","title","kind","markdownBody","publishedAt","createdBy"],
  course:["code","name","term","createdBy"], section:["code","capacity"],

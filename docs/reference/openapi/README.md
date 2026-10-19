@@ -108,3 +108,17 @@ RF15 y archivos de RF14 quedan P2: upload/content y variantes file se retiran de
 contrato activo y cliente generado. Límite HTTP heredado 4096 bytes; máximo
 semántico markdown 10000 caracteres, sujeto además al límite HTTP (413).
 [Evidencia](../../backend/modules-material-validation.md).
+
+## Autoría de quizzes
+
+Crear/editar draft, GET authoring y publish exigen teacher vigente en el alcance;
+admin dueño amplía al curso completo, sin sustituir Enrollment teacher.
+Quiz.sectionId se reasigna solo en draft con permiso sobre origen y destino del
+mismo curso/tenant; Quiz.id y Section.id no cambian. Publicado no se edita.
+Lista/GET seguro nunca exponen isCorrect; authoring es una ruta explícita.
+Publish crea GradeItem único con peso 0 y audit en una tx; retry es no-op incluso
+tras congelar el curso. Pauta nunca se almacena en auditoría ni logs.
+Marcador de Course protege nuevos ítems; publicación de Grade real y consumo HTTP
+del guard estudiantil pertenecen a las siguientes misiones, con contrato obligatorio.
+Máximo HTTP heredado 4096 bytes (413); JSON inerte, no-store/nosniff, sin UI nueva.
+[Evidencia](../../backend/quiz-authoring-validation.md).

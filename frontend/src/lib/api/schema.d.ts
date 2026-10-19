@@ -602,7 +602,7 @@ export interface paths {
         };
         /**
          * Listar quizzes visibles del curso
-         * @description Estudiantes ven quizzes publicados aplicables a su sección. Teachers y assistants quedan restringidos a sus secciones; teachers ven su alcance académico.
+         * @description Student/assistant ven publicados globales y de sus secciones activas. Teacher ve drafts de sus secciones; teacher con is_admin y ownership amplía alcance al curso completo. Las vistas de lista/detalle siempre excluyen pauta.
          */
         get: operations["listCourseQuizzes"];
         put?: never;
@@ -646,7 +646,7 @@ export interface paths {
         /**
          * Actualizar un quiz editable
          * @description Solo se admite en estado draft. Teacher puede modificar quizzes dentro de su alcance académico. Un quiz publicado
-         *     o utilizado produce 409 Conflict.
+         *     o utilizado produce 409 Conflict. sectionId puede reasignarse dentro del mismo curso/institución con permiso vigente sobre origen y destino; omitir conserva, null amplía al curso. Quiz.id y Section.id son inmutables.
          */
         patch: operations["updateQuiz"];
         trace?: never;
@@ -702,7 +702,7 @@ export interface paths {
          * @description Valida fechas, puntajes, preguntas, al menos dos alternativas con IDs únicos
          *     y exactamente una alternativa correcta por pregunta. Genera auditoría. Teacher puede publicar quizzes dentro de su alcance académico. La operación
          *     asegura que exista un único GradeItem vinculado al quiz; se rechaza
-         *     si ya se publicó alguna nota del curso.
+         *     si ya se publicó alguna nota del curso y el quiz aún era draft. Repetir uno ya publicado devuelve 200 sin nuevo ítem, timestamp ni evento, incluso con el curso congelado. Peso inicial del ítem: 0; sin pauta en auditoría.
          */
         post: operations["publishQuiz"];
         delete?: never;
@@ -1538,7 +1538,23 @@ export interface components {
             readonly publishedAt: string | null;
             questions: components["schemas"]["QuestionStudentView"][];
         };
+        QuestionUpdate: {
+            /**
+             * Format: uuid
+             * @description ID actual de pregunta retenida; omitir genera una nueva pregunta.
+             */
+            id?: string;
+            prompt: string;
+            position: number;
+            points: number;
+            alternatives: components["schemas"]["AlternativeInput"][];
+        };
         QuizUpdate: {
+            /**
+             * Format: uuid
+             * @description Reasignable solo en draft con permiso sobre origen y destino; null indica curso completo.
+             */
+            sectionId?: string | null;
             title?: string;
             instructions?: string | null;
             /** Format: date-time */
@@ -1548,7 +1564,7 @@ export interface components {
             /** @description Null permite intentos ilimitados; un entero positivo limita los intentos iniciados. */
             maxAttempts?: number | null;
             /** @description Reemplaza la pauta completa mientras el quiz esté en draft. */
-            questions?: components["schemas"]["QuestionCreate"][];
+            questions?: components["schemas"]["QuestionUpdate"][];
         };
         /**
          * @description Solo `inProgress` es activo. `submitted` es transitorio durante el envío;
@@ -1966,6 +1982,15 @@ export interface components {
                  *       "errors": []
                  *     }
                  */
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description Cuerpo HTTP supera 4096 bytes. */
+        PayloadTooLarge: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
@@ -3187,6 +3212,9 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     createQuiz: {
@@ -3225,7 +3253,10 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
             422: components["responses"]["UnprocessableEntity"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     getQuiz: {
@@ -3257,6 +3288,9 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     updateQuiz: {
@@ -3294,7 +3328,10 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
             422: components["responses"]["UnprocessableEntity"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     getQuizAuthoringView: {
@@ -3327,6 +3364,9 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     publishQuiz: {
@@ -3360,7 +3400,10 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
             422: components["responses"]["UnprocessableEntity"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     startQuizAttempt: {
