@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import "@/styles/tokens.css";
 import "@/styles/app.css";
+import "@/styles/institution-layout.css";
 
 const inter = Inter({
   subsets: ["latin"],
