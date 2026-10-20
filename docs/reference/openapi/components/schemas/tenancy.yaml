@@ -2,10 +2,10 @@ InstitutionSummary:
   type: object
   additionalProperties: false
   required:
-    - id
-    - slug
-    - name
-    - active
+  - id
+  - slug
+  - name
+  - active
   properties:
     id:
       type: string
@@ -15,32 +15,32 @@ InstitutionSummary:
       type: string
       minLength: 1
       maxLength: 63
-      pattern: '^[a-z0-9]([a-z0-9-]*[a-z0-9])?$'
+      pattern: ^[a-z0-9]([a-z0-9-]*[a-z0-9])?$
     name:
       type: string
     active:
       type: boolean
       readOnly: true
-
 InstitutionListResponse:
   type: object
   additionalProperties: false
   required:
-    - items
+  - items
   properties:
     items:
       type: array
       description: Institutions activas y visibles para el User autenticado.
       items:
         $ref: '#/InstitutionSummary'
-
 InstitutionMembershipSummary:
   type: object
   additionalProperties: false
   required:
-    - id
-    - institution
-    - active
+  - id
+  - institution
+  - active
+  - isAdmin
+  - isSuperAdmin
   properties:
     id:
       type: string
@@ -51,15 +51,20 @@ InstitutionMembershipSummary:
     active:
       type: boolean
       readOnly: true
+    isAdmin:
+      type: boolean
+      readOnly: true
+    isSuperAdmin:
+      type: boolean
+      readOnly: true
   description: Pertenencia institucional; no contiene roles académicos.
-
 SectionMembershipSummary:
   type: object
   additionalProperties: false
   required:
-    - courseId
-    - sectionId
-    - role
+  - courseId
+  - sectionId
+  - role
   properties:
     courseId:
       type: string
@@ -70,19 +75,18 @@ SectionMembershipSummary:
     role:
       type: string
       enum:
-        - teacher
-        - assistant
-        - student
-
+      - teacher
+      - assistant
+      - student
 CurrentUser:
   type: object
   additionalProperties: false
   required:
-    - id
-    - email
-    - name
-    - institutionMembership
-    - sectionMemberships
+  - id
+  - email
+  - name
+  - institutionMembership
+  - sectionMemberships
   properties:
     id:
       type: string
@@ -99,15 +103,14 @@ CurrentUser:
       type: array
       items:
         $ref: '#/SectionMembershipSummary'
-
 UserSummary:
   type: object
   additionalProperties: false
   required:
-    - id
-    - email
-    - name
-    - active
+  - id
+  - email
+  - name
+  - active
   properties:
     id:
       type: string
@@ -120,16 +123,59 @@ UserSummary:
       type: string
     active:
       type: boolean
-
 UserListResponse:
   unevaluatedProperties: false
   allOf:
-    - $ref: './common.yaml#/PageInfo'
-    - type: object
-      required:
-        - items
-      properties:
+  - $ref: ./common.yaml#/PageInfo
+  - type: object
+    required:
+    - items
+    properties:
+      items:
+        type: array
         items:
-          type: array
-          items:
-            $ref: '#/UserSummary'
+          $ref: '#/UserSummary'
+MembershipAdmin:
+  type: object
+  additionalProperties: false
+  required:
+  - id
+  - user
+  - isAdmin
+  - isSuperAdmin
+  - active
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    user:
+      $ref: '#/UserSummary'
+    isAdmin:
+      type: boolean
+    isSuperAdmin:
+      type: boolean
+      readOnly: true
+    active:
+      type: boolean
+      readOnly: true
+MembershipAdminUpdate:
+  type: object
+  additionalProperties: false
+  required:
+  - isAdmin
+  properties:
+    isAdmin:
+      type: boolean
+MembershipAdminListResponse:
+  unevaluatedProperties: false
+  allOf:
+  - $ref: ./common.yaml#/PageInfo
+  - type: object
+    required:
+    - items
+    properties:
+      items:
+        type: array
+        items:
+          $ref: '#/MembershipAdmin'

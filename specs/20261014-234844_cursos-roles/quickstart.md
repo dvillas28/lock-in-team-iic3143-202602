@@ -1,7 +1,7 @@
 # Quickstart: Validar cursos, roles y admin institucional
 
-Guía de ejecución prevista de [tasks.md](tasks.md); implementación y evidencia
-se incorporan en el siguiente PR del stack.
+Guía de ejecución de [tasks.md](tasks.md). Evidencia detallada en
+[validación](../../docs/backend/courses-roles-validation.md).
 Requisitos: Node 24, pnpm 9.15.9, PostgreSQL 17 y dependencia identidad-acceso operativa.
 Exportar DATABASE_URL, AUTH_JWT_SECRET y DEMO_*_PASSWORD sin registrarlos.
 TEST_DATABASE_URL debe ser exclusiva, nombre terminado en _test: los helpers
@@ -102,4 +102,12 @@ Actualizar asserts de conteo de migraciones y readiness existentes.
 Registrar resultados reales en docs/backend/courses-roles-validation.md.
 No declarar deployment ni cierre de specs posteriores; sin UI ni transferencia.
 
+US1: PostgreSQL 17, foundation/lecturas/persistencia/contexto: 5 pruebas PASS.
+OpenAPI lint PASS (warning público /ready), generación, typecheck y 21 pruebas frontend PASS.
+
 Alcance: CU-03/04, RF8–12/25–26 y RNF1–4; PREP-10, BE-09–14.
+Baseline identidad-acceso antes de editar: lint, 11 unitarias y 16 integración PASS.
+
+Tras correcciones de auditoría: backend 13 unitarias + 34 integración; coverage 47/47,
+líneas 99,41 %, ramas 92,86 %. Frontend 24/24; contratos, tipos, lint/build y Compose PASS.
+Trivy corresponde a ejecución anterior; limitaciones de audit/Sonar en documento de validación.

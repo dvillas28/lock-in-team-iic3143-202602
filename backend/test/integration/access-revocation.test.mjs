@@ -41,3 +41,17 @@ test("same JWT sees committed membership/institution/user revocation and fails c
   assert.equal((await list()).status,200);assert.equal((await get("uc")).status,200);
  } finally {if(app)sanitized((await app.close()).output,token?[token]:[]);await pool.end();}
 });
+
+test("institutional flags and academic roles refresh with an existing JWT",async()=>{
+ const {coursesFixture,request,users}=await import("./course-fixtures.mjs");
+ const pool=await database();let app;
+ try{
+  const f=await coursesFixture(pool);app=await http();const token=await login(app,f.env);
+  assert.equal((await request(app,token,"uc/me")).body.institutionMembership.isSuperAdmin,true);
+  await pool.query("UPDATE institution_memberships SET is_admin=false,is_super_admin=false WHERE user_id=$1 AND institution_id=$2",[users.owner,f.tenants.uc]);
+  const me=(await request(app,token,"uc/me")).body;
+  assert.equal(me.institutionMembership.isAdmin,false);assert.equal(me.institutionMembership.isSuperAdmin,false);assert.equal(me.sectionMemberships.length,3);
+  await pool.query("UPDATE enrollments SET active=false WHERE user_id=$1",[users.owner]);
+  assert.deepEqual((await request(app,token,"uc/me")).body.sectionMemberships,[]);
+ }finally{if(app)await app.close();await pool.end();}
+});

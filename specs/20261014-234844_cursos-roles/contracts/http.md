@@ -1,6 +1,6 @@
 # Contrato HTTP: Cursos y roles
 
-Contrato previsto; OpenAPI canónico y tipos se sincronizan en el siguiente PR del stack.
+Contrato implementado y alineado con OpenAPI canónico y tipos regenerados.
 Base: /api/v1/institutions/{institutionSlug}; JWT Bearer, JSON camelCase.
 Conservar operationIds existentes. No se implementan rutas modules de sections.yaml.
 

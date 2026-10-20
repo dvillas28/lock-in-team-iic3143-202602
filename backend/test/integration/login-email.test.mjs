@@ -19,7 +19,7 @@ test("email migration populated/empty/repeat, collision rollback and concurrent 
    await insert("Case@Example.test");if(collision)await insert(" case@example.test ");
    const before=await snapshot(pool);const result=await cli("commands/migrate").result;sanitized(result.output);
    assert.equal(result.code,collision?1:0);assert.ok(JSON.stringify(await snapshot(pool))===JSON.stringify(before),"migration mutated users");
-   assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount,collision?1:2);
+   assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount,collision?1:3);
    if(!collision){
     const results=await Promise.allSettled([insert("RACE@example.test"),insert(" race@EXAMPLE.test ")]);
     assert.equal(results.filter(r=>r.status==="fulfilled").length,1);

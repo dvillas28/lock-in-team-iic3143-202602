@@ -145,3 +145,22 @@ test("HTTP never listens with missing, invalid or short JWT secret", async () =>
   }
  } finally {await pool.end();}
 });
+
+test("readiness rejects every missing academic table and institutional flag",async()=>{
+ const pool=await database();let app;
+ try{
+  await migrated(pool);
+  for(const column of ["is_admin","is_super_admin"]){
+   await pool.query(`ALTER TABLE institution_memberships RENAME COLUMN ${column} TO missing_flag`);
+   assert.equal((await failedStartup({})).code,1);
+   await pool.query(`ALTER TABLE institution_memberships RENAME COLUMN missing_flag TO ${column}`);
+  }
+  app=cli("main",{PORT:"13983"});await waitReady(13983,app);
+  for(const table of ["courses","sections","enrollments","audit_events"]){
+   await pool.query(`ALTER TABLE ${table} RENAME TO missing_table`);
+   assert.equal((await fetch("http://localhost:13983/ready")).status,503);
+   await pool.query(`ALTER TABLE missing_table RENAME TO ${table}`);
+   await waitReady(13983,app);
+  }
+ }finally{if(app){app.child.kill("SIGTERM");await app.result;}await pool.end();}
+});

@@ -57,7 +57,8 @@ AUTH_JWT_SECRET obligatorio, base64 canónico de ≥32 bytes, nunca NEXT_PUBLIC.
 
 Cada operación revalida User activo en PostgreSQL; listado y /me unen User,
 InstitutionMembership e Institution activos. /me conserva CurrentUser y
-sectionMemberships=[]; no implementa permisos académicos ni cambia sesión.
+sectionMemberships contiene Enrollment vigente del actor e isAdmin/isSuperAdmin
+son flags institucionales readOnly; no cambia sesión.
 Revocación posterior al COMMIT se observa en la siguiente operación; consultas
 ya iniciadas no se cancelan. DB inaccesible devuelve 503 sin fallback.
 Login y éxitos protegidos usan Cache-Control:no-store; 401 incluye
@@ -71,8 +72,26 @@ Antes de exposición pública/escalado se requiere validar proxy y coordinación
 Persistencia: PostgreSQL 17, migrador y seed idempotente existentes. Comandos,
 variables y pruebas en el [quickstart](../../../specs/20261014-234744_identidad-acceso/quickstart.md)
 y [evidencia](../../backend/identity-access-validation.md).
-Provisioning, refresh, SSO, UI, roles académicos y administración quedan fuera.
+Refresh, SSO, UI y administración general de personas quedan fuera.
 Object storage y límites de archivos requieren otra misión.
 
 RLS, provisioning dinámico de Institutions, jerarquías institucionales y
 restore lógico individual están fuera del MVP.
+
+## Cursos y privilegios implementados
+
+Admin institucional puede crear cursos; configurar exige además createdBy=actor.
+Dueño único inmutable, sin transferencia ni coadministración.
+Teacher conserva gestión de participantes de su sección; assistant solo lectura.
+Admin dueño ve todas sus secciones y eventos, incluidos los eventos sin sección.
+El flag superadmin solo permite listar miembros y conceder/revocar isAdmin.
+No concede docencia, cursos ajenos ni promoción de otros superadmins por HTTP.
+
+La migración nueva preserva identidad/pertenencias pobladas con flags false.
+Onboarding PM de tenant nuevo y recuperación de superadmin son artefactos operativos
+separados: no hay endpoint de provisioning, invitaciones ni altas generales.
+Destinatarios deben tener User/membership activos previamente provisionados por PM.
+Repetición de operaciones aplicadas no restaura privilegios ni cambia credenciales.
+Seed no promueve; para UC/UTFSM existentes usar set-superadmin explícitamente.
+[Operación y evidencia](../../backend/courses-roles-validation.md) distingue checks
+ejecutados de escenarios pendientes; rutas de contenido/quizzes/notas siguen futuras.
