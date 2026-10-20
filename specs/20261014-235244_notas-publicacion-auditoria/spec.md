@@ -72,6 +72,7 @@ Como participante, consulto únicamente los resultados/eventos que mi rol permit
 - Depende de aclaración de cursos-roles. No añade exportación, corrección manual ni cambios posteriores a publicación.
 - Pruebas con dos instituciones incluyen permisos, integridad, sanitización y revocación; no se cierra con pruebas negativas pendientes.
 - Dependencias: [intentos-calificacion](../20261014-235144_intentos-calificacion/spec.md), [modulos-material](../20261014-234944_modulos-material/spec.md).
+- Integración obligatoria: seguir el [contrato de autoría](../20261014-235044_autoria-quizzes/contracts/academic-integration.md); primera Grade publicada fija marcador de Course con enforcement DB y auditoría en la misma tx; probar carrera con publish de quiz real antes de cerrar FR-005/010.
 
 ## Sources & Traceability
 

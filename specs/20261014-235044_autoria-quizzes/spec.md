@@ -19,6 +19,7 @@ Como docente autorizado, preparo pauta y destinatarios antes de publicar.
 
 1. Borrador válido se publica para sus destinatarios con un único elemento de nota.
 2. Pauta inválida impide publicación y no genera elementos parciales.
+3. Reasignar un borrador cambia su referencia de sección, conserva los IDs del quiz y las secciones, y exige autorización sobre origen y destino.
 
 ### User Story 2 - Proteger pauta (Priority: P1)
 
@@ -42,6 +43,7 @@ Como estudiante, consulto un quiz sin acceder a respuestas correctas.
 ### Functional Requirements
 
 - **FR-001**: Crear/editar borradores con título, instrucciones, destinatarios de curso o sección autorizada, ventana y máximo positivo de intentos o ilimitados.
+  sectionId referencia Section.id: se puede reasignar solo en draft, dentro del mismo curso/institución y con permiso sobre origen y destino; las claves primarias no cambian.
 - **FR-002**: Exigir preguntas con puntos positivos, al menos dos alternativas y exactamente una correcta; identificadores estables y no duplicados.
 - **FR-003**: Validar apertura anterior al cierre cuando existan y destinatarios del mismo curso e institución.
 - **FR-004**: Publicar quiz, crear un GradeItem único y auditar como una operación indivisible; repetir no duplica el ítem.
@@ -68,6 +70,13 @@ Como estudiante, consulto un quiz sin acceder a respuestas correctas.
 - Preguntas y alternativas integran Quiz según el modelo vigente; no imponer tablas por títulos históricos del backlog. Configurar ponderaciones corresponde a notas-publicacion-auditoria.
 - Pruebas con dos instituciones incluyen permisos, integridad, sanitización y revocación; no se cierra con pruebas negativas pendientes.
 - Dependencias: [cursos-roles](../20261014-234844_cursos-roles/spec.md).
+
+### Alcance de aceptación por misión
+
+- FR-005: aquí se prueba el bloqueo por marcador y carreras con SQL; notas-publicacion-auditoria debe verificarlo con primera Grade publicada real y enforcement DB en la misma transacción.
+- FR-007: aquí se entrega y prueba el guard de elegibilidad; intentos-calificacion debe consumirlo y verificar rechazo HTTP con student+teacher. El guard aislado no acredita el bloqueo HTTP.
+- FR-008/SC-003: aquí se rechaza toda edición desde publicación, protección anterior al primer intento; intentos-calificacion verifica además el caso con intento real.
+- El cierre local exige todos sus negativos; la aceptación integrada de FR-005/007 y del primer intento se cierra en las misiones consumidoras, según [contrato](contracts/academic-integration.md).
 
 ## Sources & Traceability
 
