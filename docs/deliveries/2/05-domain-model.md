@@ -1,5 +1,7 @@
 # Modelo de dominio
 
+<!-- length-exception: conservar modelo de Entrega 2 y reconciliar permisos con decisión confirmada -->
+
 [Diagrama de clases UML del dominio](05-domain-model-uml.md).
 
 ## Límites
@@ -31,7 +33,10 @@ institución.
 ### InstitutionMembership
 
 Relación entre User e Institution que indica si el User puede entrar al contexto
-institucional. No contiene roles de curso o sección. Una membership activa es
+institucional. No contiene roles de curso o sección. `is_admin` es un privilegio
+administrativo institucional, independiente de los roles académicos.
+`is_super_admin` habilita delegar is_admin en su institución tras onboarding PM.
+Una membership activa es
 precondición para cualquier operación académica dentro de la Institution.
 
 ## Entidades académicas tenant-owned
@@ -65,11 +70,13 @@ Los roles permitidos son `teacher`, `student` y `assistant`. Requiere
 InstitutionMembership activa y admite varios roles distintos para la misma
 persona en una sección, pero no duplica el mismo rol activo.
 
-`teacher` es el rol docente administrativo del MVP. Un docente con rol activo en
-una sección puede crear y administrar contenido, quizzes, notas y configuración
-del curso dentro del alcance operativo acordado. `assistant` apoya el seguimiento
-académico sin administrar la configuración central. `student` consume material,
-rinde quizzes y consulta sus notas publicadas.
+`teacher` habilita autoría de contenido compartido y gestión académica de sus
+secciones. `assistant` conserva seguimiento de su sección sin escritura;
+`student` consume material, rinde quizzes y consulta sus notas publicadas.
+`InstitutionMembership.is_admin` permite crear cursos en esa Institution y,
+si `Course.created_by` coincide con el actor, administrar configuración,
+secciones y participantes de ese curso. No concede docencia automáticamente.
+Ver [decisión vigente](../../adr/institution-admin-and-course-ownership.md).
 
 ### CourseModule y Material
 
@@ -125,8 +132,9 @@ un flujo explícito futuro; nunca una sobrescritura silenciosa.
 
 ### AuditEvent
 
-Evento inmutable con Institution, actor global, acción, recurso, Course, Section
-opcional, fecha y valores anterior/posterior sanitizados. Se escribe en la misma
+Evento inmutable con Institution, actor global, acción, recurso, Course y Section
+cuando apliquen, fecha y valores anterior/posterior sanitizados. Solo onboarding y cambios de
+privilegios institucionales admiten Course nulo; cambios académicos requieren Course. Se escribe en la misma
 transacción que el cambio y nunca incluye secretos, claves internas ni pautas.
 
 ## Relaciones principales

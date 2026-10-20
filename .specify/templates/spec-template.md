@@ -20,7 +20,8 @@
   you should still have a viable MVP (Minimum Viable Product) that delivers value.
 
   Assign priorities (P1, P2, P3, etc.) to each story, where P1 is the most critical.
-  For LMS work, always call out tenant, role, course/section, and grade visibility assumptions when relevant.
+  For LMS work, call out tenant, role, course/section and grade visibility assumptions.
+  If onboarding/delegation applies, distinguish tenant superadmin, is_admin and ownership.
   Think of each story as a standalone slice of functionality that can be:
   - Developed independently
   - Tested independently
