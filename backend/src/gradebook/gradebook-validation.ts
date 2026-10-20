@@ -16,13 +16,17 @@ export function publicationInput(body:unknown) {
  const keys=["gradeItemIds","sectionIds","studentIds"],input=object(body,keys,keys);
  const list=(name:string)=>{
   const value=input[name];if(!Array.isArray(value) || !value.length)throw new BadRequestException();
-  const ids=value.map(uuid);if(new Set(ids).size!==ids.length)throw new BadRequestException();return ids.sort();
+  const ids=value.map(uuid);
+  if(new Set(ids).size!==ids.length)throw new BadRequestException();
+  return ids.sort((a,b)=>a.localeCompare(b));
  };
  return {gradeItemIds:list("gradeItemIds"),sectionIds:list("sectionIds"),studentIds:list("studentIds")};
 }
 export type Selection=ReturnType<typeof publicationInput>;
 export function publicationKey(headers:string[]) {
- const key=idempotencyKey(headers);if(key!==key.trim())throw new BadRequestException();return key;
+ const key=idempotencyKey(headers);
+ if(key!==key.trim())throw new BadRequestException();
+ return key;
 }
 export function bookPage(query:Record<string,unknown>,scope:string) {
  const p=page(query,scope,["sectionId"]);
