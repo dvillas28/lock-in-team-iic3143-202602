@@ -9,7 +9,8 @@ export async function contentScope(db:PoolClient,actor:string,slug:string,id:str
    `SELECT m.course_id FROM public.materials a JOIN public.course_modules m ON m.institution_id=a.institution_id AND m.id=a.module_id
     WHERE a.institution_id=$1 AND a.id=$2`;
   const row=(await db.query(query,[member.institution_id,id])).rows[0];
-  if(!row)throw new NotFoundException();courseId=row.course_id;
+  if(!row)throw new NotFoundException();
+  courseId=row.course_id;
  }
  // The shared course lock serializes visibility changes and revocation with reads and writes.
  const scope=await courseScope(db,member,courseId,true);
@@ -24,12 +25,14 @@ export const materialDto=(m:MaterialRow)=>({id:m.id,moduleId:m.module_id,title:m
 export async function visibleModule(db:PoolClient,s:ContentScope,id:string) {
  const row=(await db.query<ModuleRow>(`SELECT id,course_id,title,position,published_at FROM public.course_modules
   WHERE institution_id=$1 AND course_id=$2 AND id=$3 AND ($4::boolean OR published_at IS NOT NULL)`,[s.member.institution_id,s.courseId,id,s.teacher])).rows[0];
- if(!row)throw new NotFoundException();return row;
+ if(!row)throw new NotFoundException();
+ return row;
 }
 export async function visibleMaterial(db:PoolClient,s:ContentScope,id:string) {
  const row=(await db.query<MaterialRow>(`SELECT a.id,a.module_id,a.title,a.kind,a.markdown_body,a.published_at,a.created_by
   FROM public.materials a JOIN public.course_modules m ON m.institution_id=a.institution_id AND m.id=a.module_id
   WHERE a.institution_id=$1 AND m.course_id=$2 AND a.id=$3 AND ($4::boolean OR (m.published_at IS NOT NULL AND a.published_at IS NOT NULL))`,
   [s.member.institution_id,s.courseId,id,s.teacher])).rows[0];
- if(!row)throw new NotFoundException();return row;
+ if(!row)throw new NotFoundException();
+ return row;
 }

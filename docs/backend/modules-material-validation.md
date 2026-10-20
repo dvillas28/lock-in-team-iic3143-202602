@@ -115,3 +115,11 @@ API: feat/modulos-material-api → feat/modulos-material-foundation, también dr
 Stack nativo #88 conserva #85 → #86 → #87 y añade ambas capas.
 Worktree de publicación: /tmp/academix-modulos-stack. El original permanece intacto.
 División sin cambios funcionales respecto del código completo validado 63/63.
+
+## Integración con dev (2026-10-20)
+
+Conflictos de #90 resueltos conservando API/US1/US2 y las correcciones de #89.
+Se retienen pruebas de acceso/publicación/revocación; el chequeo HTTP heredado
+usa rutas existentes y espera 401 sin autenticación, manteniendo 415 no JSON.
+Suite serial PostgreSQL 17 aislada: 65/65 PASS, sin pruebas omitidas.
+Lint, TypeScript, longitud documental y diff check: PASS.
