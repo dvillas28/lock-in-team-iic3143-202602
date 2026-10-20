@@ -2,12 +2,12 @@
 
 Fecha: 2026-10-19. Evidencia del repositorio en base e34499e; sin stack nuevo.
 
-## R1. Base de trabajo pendiente
+## R1. Base de trabajo integrada
 
-- Decisión: rama documental sobre upstream/feat/modulos-material-api (#90).
-- Razón: continuar #85/#86/#87/#89/#90 sin perder trabajo todavía no aprobado.
-- Alternativas: dev omitiría prerequisitos; cambiar la carpeta original arriesga
-  mezclar cambios sin confirmar. Usar worktree separado.
+- Decisión actualizada 2026-10-20: rama documental sobre origin/dev @ 52aa9ee (#90).
+- Razón: #85/#86/#87/#89/#90 ya están integrados; dev contiene los prerequisitos.
+- La base inicial fue feat/modulos-material-api @ e34499e, antes de su integración.
+- Mantener worktree separado para no mezclar cambios locales sin confirmar.
 - Evidencia: estados y bases consultados con gh pr view/list; prerequisitos
   técnicos reales en app.module.ts, course-access.ts y migración de módulos.
 - Dependencia funcional: cursos-roles; módulos/material es base de integración,

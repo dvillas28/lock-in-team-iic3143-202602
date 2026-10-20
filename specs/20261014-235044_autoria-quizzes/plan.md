@@ -3,9 +3,9 @@
 **Branch**: `docs/autoria-quizzes-plan` | **Date**: 2026-10-19
 **Spec**: [spec.md](spec.md) | **Implementación prevista**: `feat/autoria-quizzes`.
 **Estado**: Diseño terminado; implementación y aceptación funcional pendientes.
-**Base**: `upstream/feat/modulos-material-api`, commit `e34499e`, PR #90.
-Cadena pendiente: #85 → #86 → #87 → #89 → #90; continuar sin esperar aprobación.
-La integración final sigue dependiendo de los cambios que reciba esa cadena.
+**Base vigente**: `origin/dev`, commit `52aa9ee` (PR #90 integrado el 2026-10-20).
+La cadena #85 → #86 → #87 → #89 → #90 ya está integrada en dev.
+El PR documental apunta a dev; implementación y aceptación funcional siguen pendientes.
 
 Entrega acordada: dos PRs apilados. `docs/autoria-quizzes-plan` contiene spec,
 plan, tareas, contratos y ADR sobre #90; `feat/autoria-quizzes` parte de esa rama
