@@ -487,6 +487,9 @@
     description: |
       Teacher con is_admin y ownership puede consultar todo su curso. Teacher
       ordinario y assistant solo secciones con Enrollment activo propio. Students no tienen acceso.
+      Cada fila usa vista académica o assistant según permiso de pauta en su sección histórica;
+      assistant nunca recibe isCorrect/pointsAwarded. Cursor ligado a actor, tenant, quiz y filtros;
+      cada página revalida permisos. Destinatarios revocados conservan historia.
     parameters:
       - $ref: '../components/parameters.yaml#/SectionIdFilter'
       - $ref: '../components/parameters.yaml#/StudentIdFilter'

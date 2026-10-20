@@ -12,8 +12,9 @@ AuditChanges:
       - object
       - 'null'
       additionalProperties: true
-  description: Snapshot sanitizado; nunca contiene secretos, credenciales ni storage
-    keys.
+  description: Snapshot sanitizado al escribir y al leer historia; nunca contiene secretos,
+    credenciales, claves de idempotencia, answers, isCorrect ni pointsAwarded. Pesos usan
+    items con solo gradeItemId/weightPercent; publicaciones usan campos públicos de Grade.
 AuditEvent:
   type: object
   additionalProperties: false

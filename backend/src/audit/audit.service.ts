@@ -13,11 +13,15 @@ const fields: Record<string,string[]> = {
  enrollment:["id","userId","sectionId","role","active"],
  institutionMembership:["id","userId","isAdmin","isSuperAdmin","source","operatorRef","operationId","inputFingerprint"],
 };
-export function snapshot(type: string, value: Record<string,unknown>|null) {
-  if(type==="moduleOrder" && value!==null) {
-    return {modules:(value.modules as {id:string;position:number}[]).map(m=>({id:m.id,position:m.position}))};
+export function snapshot(type: string, value: unknown): Record<string,unknown>|null {
+  if(value===null || typeof value!=="object" || Array.isArray(value))return null;
+  const source=value as Record<string,unknown>;
+  if(type==="moduleOrder" || type==="gradebook") {
+    const key=type==="moduleOrder"?"modules":"items",allowed=type==="moduleOrder"?["id","position"]:["gradeItemId","weightPercent"];
+    return {[key]:Array.isArray(source[key])?source[key].filter(v=>v && typeof v==="object" && !Array.isArray(v)).map(v=>
+      Object.fromEntries(Object.entries(v).filter(([k,val])=>((k===allowed[0] && typeof val==="string") || (k===allowed[1] && typeof val==="number" && Number.isFinite(val)))))):[]};
   }
-  return value===null ? null : Object.fromEntries(Object.entries(value).filter(([key])=>fields[type]?.includes(key)));
+  return Object.fromEntries(Object.entries(source).filter(([key,val])=>fields[type]?.includes(key) && (val===null || typeof val==="string" || typeof val==="number" || typeof val==="boolean" || val instanceof Date)));
 }
 export interface Event {institutionId:string; actorUserId:string|null; action:string; resourceType:string; resourceId:string; courseId?:string|null; sectionId?:string|null; before:Record<string,unknown>|null; after:Record<string,unknown>|null}
 @Injectable()
@@ -49,7 +53,7 @@ export class AuditService {
       AND ($12::timestamptz IS NULL OR (a.occurred_at,a.id)>($12::timestamptz,$13::uuid)) ORDER BY a.occurred_at,a.id LIMIT $14`,
       [m.institution_id,course,scope.owner,sections,filters.action??null,filters.resourceType??null,filters.resourceId??null,filters.actorUserId??null,filters.sectionId??null,filters.from??null,filters.to??null,p.date,p.id,p.limit+1])).rows;
     const result=paginated(rows,p,r=>r.cursor_date);
-    return {...result,items:result.items.map(e=>({id:e.id,institutionId:e.institution_id,actorUserId:e.actor_user_id,action:e.action,resourceType:e.resource_type,resourceId:e.resource_id,courseId:e.course_id,sectionId:e.section_id,occurredAt:e.occurred_at,changes:e.changes}))};
+    return {...result,items:result.items.map(e=>({id:e.id,institutionId:e.institution_id,actorUserId:e.actor_user_id,action:e.action,resourceType:e.resource_type,resourceId:e.resource_id,courseId:e.course_id,sectionId:e.section_id,occurredAt:e.occurred_at,changes:{before:snapshot(e.action==="module.reordered"?"moduleOrder":e.resource_type,e.changes?.before),after:snapshot(e.action==="module.reordered"?"moduleOrder":e.resource_type,e.changes?.after)}}))};
   }
 
 }

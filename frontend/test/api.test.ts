@@ -364,3 +364,26 @@ test("submit consumer sends original key and receives only stable receipt",async
  });
  assert.deepEqual(response.data,receipt);assert.ok(!("grade" in receipt));
 });
+
+test("grade publication requires explicit students and preserves the original durable receipt",async()=>{
+ const body:components["schemas"]["PublishGradesRequest"]={gradeItemIds:["item"],sectionIds:["section"],studentIds:["student"]};
+ const receipt:components["schemas"]["PublishGradesResponse"]={publishedCount:1,publishedAt:health.timestamp};
+ const client=mockClient(async request=>{
+  assert.equal(request.headers.get("Idempotency-Key"),"original");assert.equal(request.cache,"no-store");assert.deepEqual(await request.json(),body);return Response.json(receipt);
+ },()=>"teacher");
+ const result=await client.POST("/api/v1/institutions/{institutionSlug}/courses/{courseId}/gradebook/publications",{params:{path:{institutionSlug:"uc",courseId:"course"},header:{"Idempotency-Key":"original"}},body});
+ assert.deepEqual(result.data,receipt);
+});
+test("zero published weight keeps an absent average; assistant listing has no correction",async()=>{
+ const own:components["schemas"]["StudentGradesResponse"]={courseId:"course",items:[],partialAverage:null,publishedWeightPercent:0,isPartial:true};
+ const client=mockClient(()=>Response.json(own));
+ const result=await client.GET("/api/v1/institutions/{institutionSlug}/courses/{courseId}/my-grades",{params:{path:{institutionSlug:"uc",courseId:"course"}}});assert.equal(result.data?.partialAverage,null);
+ const assistant:components["schemas"]["QuizAttemptAssistantView"]={id:"a",quizId:"q",sectionId:"s",studentId:"u",attemptNumber:1,status:"graded",startedAt:health.timestamp,submittedAt:health.timestamp,cancelledAt:null,answers:[],scorePercent:90,grade:6.5};
+ const listing=mockClient(()=>Response.json({items:[assistant],hasMore:false,nextCursor:null}));
+ const attempts=await listing.GET("/api/v1/institutions/{institutionSlug}/quizzes/{quizId}/attempts",{params:{path:{institutionSlug:"uc",quizId:"q"},query:{status:"graded",limit:1}}});assert.deepEqual(attempts.data?.items[0],assistant);
+});
+export function checkPublicationTypes(){
+ // @ts-expect-error Every publication requires an explicit student selection.
+ const missing:components["schemas"]["PublishGradesRequest"]={gradeItemIds:["i"],sectionIds:["s"]};
+ void missing;
+}

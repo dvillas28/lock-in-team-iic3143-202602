@@ -15,7 +15,7 @@ async function bootstrap() {
     app = await NestFactory.create<NestExpressApplication>(AppModule, { abortOnError: false, logger: false, bodyParser: false });
     app.getHttpAdapter().getInstance().set("trust proxy", false);
     app.use((request: {method: string; path: string; headers: Record<string, string>}, response: {setHeader(name:string,value:string):void}, next: (error?: unknown) => void) => {
-      if (/^\/api\/v1\/institutions\/[^/]+\/(?:courses\/[^/]+\/(?:modules|quizzes)|sections\/[^/]+\/quizzes\/[^/]+\/attempts|quiz-attempts|modules|materials|quizzes)(?:\/|$)/i.test(request.path)) {
+      if (/^\/api\/v1\/institutions\/[^/]+\/(?:courses\/[^/]+\/(?:modules|quizzes|grade-items|gradebook|my-grades)|sections\/[^/]+\/quizzes\/[^/]+\/attempts|quiz-attempts|modules|materials|quizzes)(?:\/|$)/i.test(request.path)) {
         response.setHeader("Cache-Control", "no-store");
         response.setHeader("X-Content-Type-Options", "nosniff");
         if ((Number(request.headers["content-length"])>0 || request.headers["transfer-encoding"]) && request.headers["content-type"]?.split(";",1)[0].trim().toLowerCase()!=="application/json") {

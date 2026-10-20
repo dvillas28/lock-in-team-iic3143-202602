@@ -3,7 +3,7 @@
 **Feature Branch**: `feat/notas-publicacion-auditoria`
 **Feature Directory**: `specs/20261014-235244_notas-publicacion-auditoria`
 **Created**: 2026-10-14
-**Status**: Planned; implementación en la siguiente capa del stack; bloqueo heredado #96 pendiente
+**Status**: Implemented; aceptación pendiente por bloqueo heredado #96; ver docs/backend/gradebook-validation.md
 **Input**: Backend MVP de Entrega 2: Libro de notas, publicación y auditoría.
 
 ## User Scenarios & Testing *(mandatory)*

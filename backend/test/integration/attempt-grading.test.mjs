@@ -40,6 +40,7 @@ test('US2 replay keys A/B, last worse grade, immutable history, replay after pub
   for(const sql of ["UPDATE quiz_attempts SET answers='[]' WHERE id=$1","DELETE FROM quiz_attempts WHERE id=$1"])
    await assert.rejects(pool.query(sql,[first]));
   await pool.query("UPDATE quizzes SET closes_at=clock_timestamp()-interval '1 second' WHERE id=$1",[quiz]);
+  await pool.query('UPDATE grade_items SET weight_percent=CASE WHEN quiz_id=$1 THEN 100 ELSE 0 END WHERE course_id=$2',[quiz,f.own]);
   await pool.query('BEGIN;');await pool.query('UPDATE grades SET published_at=clock_timestamp() WHERE id=$1',[g.id]);await pool.query('COMMIT');
   const published=await state(pool);assert.deepEqual((await request(app,t.student,p,'POST',undefined,'A')).body,a.body);assert.deepEqual(await state(pool),published);
   assert.equal((await request(app,t.student,f.startPath,'POST',undefined,'new')).status,409);

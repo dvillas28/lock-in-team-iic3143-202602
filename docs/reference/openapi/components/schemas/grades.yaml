@@ -38,6 +38,7 @@ GradeItem:
       type: number
       minimum: 0
       maximum: 100
+      multipleOf: 0.01
     createdAt:
       type: string
       format: date-time
@@ -72,6 +73,7 @@ GradeWeightInput:
       type: number
       minimum: 0
       maximum: 100
+      multipleOf: 0.01
 
 UpdateGradebookWeightsRequest:
   type: object
@@ -199,6 +201,7 @@ PublishGradesRequest:
   required:
     - gradeItemIds
     - sectionIds
+    - studentIds
   properties:
     gradeItemIds:
       type: array
@@ -215,6 +218,14 @@ PublishGradesRequest:
         type: string
         format: uuid
 
+    studentIds:
+      type: array
+      minItems: 1
+      uniqueItems: true
+      items:
+        type: string
+        format: uuid
+
 PublishGradesResponse:
   type: object
   additionalProperties: false
@@ -224,7 +235,7 @@ PublishGradesResponse:
   properties:
     publishedCount:
       type: integer
-      minimum: 0
+      minimum: 1
     publishedAt:
       type: string
       format: date-time
@@ -251,6 +262,7 @@ PublishedGradeStudentView:
       type: number
       minimum: 0
       maximum: 100
+      multipleOf: 0.01
     scorePercent:
       type: number
       minimum: 0
@@ -289,7 +301,7 @@ StudentGradesResponse:
       description: |
         Promedio de notas publicadas normalizado por la suma de sus ponderaciones:
         sum(grade * weight) / sum(weight). Se redondea a un decimal con HALF_UP y
-        es null cuando no hay notas publicadas.
+        es null cuando no hay notas publicadas o el peso publicado es cero.
     publishedWeightPercent:
       type: number
       minimum: 0

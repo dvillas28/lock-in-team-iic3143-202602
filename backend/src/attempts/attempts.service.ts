@@ -1,4 +1,4 @@
-import {Injectable,ConflictException,NotFoundException} from "@nestjs/common";
+import {Injectable,ConflictException,NotFoundException,BadRequestException} from "@nestjs/common";
 import {randomUUID} from "node:crypto";
 import {isDeepStrictEqual} from "node:util";
 import type {PoolClient} from "pg";
@@ -7,6 +7,8 @@ import {AuditService} from "../audit/audit.service";
 import {transaction,requirePermission} from "../courses/course-access";
 import {attemptScope,attemptView,requireStudent,studentEligible,requireWindow,validateAnswers,type Scope} from "./attempt-access";
 import {attemptDto,attemptSnapshot,submissionReceipt,type AttemptRow} from "./attempt-dto";
+import {page,paginated,uuid} from "../courses/validation";
+import {academicScope,selectedSections} from "../gradebook/gradebook-access";
 import {calculateGrade} from "./grading";
 import {answersInput,emptyBody} from "./attempt-validation";
 @Injectable()
@@ -38,6 +40,27 @@ export class AttemptsService {
    const a=(await c.query<AttemptRow>(`INSERT INTO public.quiz_attempts(id,institution_id,course_id,quiz_id,section_id,student_id,attempt_number,status,start_key)
     VALUES($1,$2,$3,$4,$5,$6,$7,'in_progress',$8) RETURNING *`,[randomUUID(),s.member.institution_id,s.q.course_id,quiz,section,actor,previous.number+1,key])).rows[0];
    await this.event(c,s,"attempt.started",null,a);return attemptDto(a,"student");
+  });
+ }
+ async list(actor:string,slug:string,quiz:string,query:Record<string,unknown>) {
+  return transaction(this.db.pool,async c=>{
+   const s=await attemptScope(c,actor,slug,quiz,"quiz"),book={...s,courseId:s.q.course_id},scope=academicScope(book);
+   const section=query.sectionId===undefined?null:uuid(query.sectionId),student=query.studentId===undefined?null:uuid(query.studentId);
+   if(section)await selectedSections(c,book,[section]);
+   const status=query.status===undefined?null:query.status;
+   if(status!==null && !["inProgress","submitted","graded","cancelled"].includes(status as string))throw new BadRequestException();
+   const p=page(query,JSON.stringify(["attempt-list",s.member.institution_id,quiz,actor,section,student,status]),["sectionId","studentId","status"]);
+   const rows=(await c.query<AttemptRow & {cursor_date:string}>(`SELECT a.*,to_char(a.started_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS cursor_date
+    FROM public.quiz_attempts a WHERE a.institution_id=$1 AND a.quiz_id=$2 AND ($3::boolean OR a.section_id=ANY($4::uuid[]))
+    AND ($5::uuid IS NULL OR a.section_id=$5) AND ($6::uuid IS NULL OR a.student_id=$6) AND ($7::text IS NULL OR a.status=$7)
+    AND ($8::timestamptz IS NULL OR (a.started_at,a.id)>($8::timestamptz,$9::uuid)) ORDER BY a.started_at,a.id LIMIT $10`,
+    [s.member.institution_id,quiz,scope.global,scope.sections,section,student,status==="inProgress"?"in_progress":status,p.date,p.id,p.limit+1])).rows;
+   const result=paginated(rows,p,r=>r.cursor_date);
+   return {...result,items:result.items.map(a=>{
+    const view=attemptView({...s,a});
+    // This staff route projects accumulated assistant/student roles as staff, including own attempts.
+    return attemptDto(a,view==="student"?"assistant":view);
+   })};
   });
  }
  async get(actor:string,slug:string,id:string) {

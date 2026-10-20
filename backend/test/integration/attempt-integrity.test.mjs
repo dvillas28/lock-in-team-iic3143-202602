@@ -33,6 +33,8 @@ test('attempt SQL integrity: tenant FKs, serial uniqueness, state consistency an
   await insert(item,f.quizzes.section,users.revoked,f.s1,terminal);
   await assert.rejects(insert(item,f.quizzes.section,users.revoked,f.s1,terminal));
   await assert.rejects(pool.query('DELETE FROM grades'));
+  await pool.query("UPDATE quiz_attempts SET status='cancelled',cancelled_at=now() WHERE id=$1",[next]);
+  await pool.query('UPDATE grade_items SET weight_percent=CASE WHEN id=$1 THEN 100 ELSE 0 END WHERE course_id=$2',[item,f.own]);
   await pool.query('UPDATE grades SET published_at=now()');
   for(const sql of ['UPDATE grades SET grade_value=7','UPDATE grades SET published_at=NULL','DELETE FROM grades'])await assert.rejects(pool.query(sql));
   assert.equal((await cli('commands/migrate').result).code,0);
@@ -46,7 +48,7 @@ test('attempt migration upgrades populated authoring data, repeats, restarts and
   const parentTables=['users','institutions','institution_memberships','courses','sections','enrollments','quizzes','grade_items','audit_events'];
   const snapshot=()=>Promise.all(parentTables.map(async table=>(await pool.query(`SELECT * FROM ${table} ORDER BY id`)).rows));
   const parent=await snapshot();
-  try{await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir:new URL('../../migrations/',import.meta.url).pathname,direction:'down',count:1,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});}finally{c.release();}
+  try{await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir:new URL('../../migrations/',import.meta.url).pathname,direction:'down',count:3,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});}finally{c.release();}
   assert.equal((await pool.query("SELECT to_regclass('public.quiz_attempts') AS table")).rows[0].table,null);
   assert.equal((await cli('commands/migrate').result).code,0);assert.deepEqual(await snapshot(),parent);
   const id=await f.create();

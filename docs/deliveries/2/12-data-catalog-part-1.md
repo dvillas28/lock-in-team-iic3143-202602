@@ -128,3 +128,15 @@ y decisiones pendientes se conservan en este documento, fuera del XLSX.
 | grade_items | quiz_id | uuid | Sí | FK | Quiz asociado. |
 | grade_items | title | varchar(200) | Sí | — | Nombre visible del ítem. |
 | grade_items | weight_percent | numeric(5,2) | Sí | — | Ponderación porcentual. Porcentaje decimal exacto con dos decimales; CHECK limita a 0..100. |
+
+Publicación: selección explícita ítems×estudiantes, sección histórica; teacher activo,
+pesos además admin dueño. Primer published_at congela pesos/ítems; Grade publicada
+inmutable. grade_publications persiste recibo/selección canónica por tenant/actor/clave,
+append-only con FK tenant/curso/membership. Pesos NUMERIC(5,2), total exacto 100;
+promedio publicado HALF_UP, null con peso cero. Detalle y trazabilidad:
+[ADR de publicación](../../adr/grade-publication-and-weight-freeze.md).
+
+Ledger: id, institution_id, course_id, actor_user_id UUID; idempotency_key text
+(1..200), request JSONB canónico privado, published_count integer >0,
+published_at timestamptz(6). UNIQUE(tenant,actor,key); FK tenant/curso y
+membership; UPDATE/DELETE prohibidos, recibo público solo count/timestamp.
