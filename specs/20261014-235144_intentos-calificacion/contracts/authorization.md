@@ -51,6 +51,7 @@ en éxito/error; errores Problem genéricos, sin respuestas, SQL ni pauta.
 Recursos/tenants invisibles → 404; acción prohibida sobre visible → 403;
 identidad inválida/inactiva → 401. Membership revocada deja tenant invisible.
 Comprobar visibilidad antes de distinguir estado terminal para no filtrar existencia.
+Inicio aplica visibilidad de autoría: borrador invisible y quiz ajeno devuelven 404.
 
 POST/PUT revalidan bajo protocolo de locks del modelo. Operaciones posteriores al
 COMMIT de revocación se deniegan con el mismo JWT; carreras definen un orden válido.

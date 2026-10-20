@@ -1,7 +1,7 @@
 # Quickstart: Validación posterior a implementación
 
-Estado actual: plan sobre PR #94; implementación pendiente en feat/intentos-calificacion.
-Gate ejecutado y resultados futuros: docs/backend/attempts-grading-validation.md.
+Estado actual: implementación en feat/intentos-calificacion, basada en PR #94.
+Resultados ejecutados: docs/backend/attempts-grading-validation.md.
 
 ## Prerrequisitos
 

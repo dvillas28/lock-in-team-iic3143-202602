@@ -105,7 +105,7 @@
 | quizzes.questions | $[].alternatives | array | Sí | Al menos dos; exactamente una correcta. |
 | quizzes.questions | $[].alternatives[].id | ID local | Sí | Único dentro de la pregunta; estable; representación pendiente. |
 | quizzes.questions | $[].alternatives[] | object | Sí | Nombre/tipo del contenido y marcador de corrección pendientes; pauta protegida. |
-| quiz_attempts.answers | $ | Pendiente | Sí | Usa IDs de pregunta y alternativa del quiz; estructura, duplicados y validación pendientes. |
+| quiz_attempts.answers | $ | array de questionId/alternativeId | Sí | Reemplazo completo; pregunta única y alternativa de su pregunta; graded añade isCorrect/pointsAwarded. |
 | audit_events.changes | $ | Pendiente | Sí | Snapshot sanitizado; estructura por acción pendiente; excluir secretos y pauta. |
 
 ## Pendientes
@@ -123,3 +123,8 @@
 | Auditoría | Resuelto: course_id nullable solo en eventos de privilegios; actor nulo requiere evidencia operativa. |
 | Inmutabilidad | Definir mecanismos de bloqueo de pauta, respuestas, notas publicadas y UPDATE/DELETE de auditoría. |
 | Persistencia | Elegir ORM/migraciones y materializar las reglas documentadas en DDL y transacciones. |
+
+Intentos: checks coherentes de estado/fechas/resultados, claves de 1..200 únicas
+por tenant/student/operación; constraint diferible impide submitted persistido.
+Triggers conservan identidad e intentos terminales; Grade publicada es inmutable.
+GET student omite resultados/corrección; assistant omite corrección por respuesta.

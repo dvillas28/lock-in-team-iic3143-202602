@@ -2,7 +2,7 @@
 
 **Branch**: `feat/intentos-calificacion` | **Base**: PR #94, `da8b59b`
 **Date**: 2026-10-19 | **Spec**: [spec.md](spec.md)
-**Status**: Plan listo; gate T001 verificado, implementación pendiente.
+**Status**: Implementado; cierre pendiente por hallazgo adicional de privacidad.
 **Input**: `specs/20261014-235144_intentos-calificacion/spec.md`.
 
 ## Summary

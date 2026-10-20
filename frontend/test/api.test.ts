@@ -337,3 +337,30 @@ export function checkQuizTypes() {
  const create:components["schemas"]["QuestionCreate"]={id:"forged",prompt:"p",position:1,points:1,alternatives:[]};
  void safe;void create;
 }
+
+
+test("attempt consumer uses generated student/assistant views and receipt without grade", async () => {
+  const attempt: components["schemas"]["QuizAttemptStudentView"] = {
+    id:"attempt",quizId:"quiz",sectionId:"section",studentId:"student",attemptNumber:1,
+    startedAt:health.timestamp,submittedAt:null,cancelledAt:null,status:"inProgress",answers:[],
+  };
+  const assistant: components["schemas"]["QuizAttemptAssistantView"] = {...attempt,scorePercent:null,grade:null};
+  const client=mockClient(()=>Response.json(assistant));
+  const result=await client.GET("/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}",{
+    params:{path:{institutionSlug:"uc",attemptId:"attempt"}},
+  });
+  assert.deepEqual(result.data,assistant);
+  assert.ok(!JSON.stringify(result.data).includes("isCorrect"));
+});
+
+
+test("submit consumer sends original key and receives only stable receipt",async()=>{
+ const receipt: components["schemas"]["QuizAttemptSubmissionReceipt"]={id:"attempt",status:"graded",submittedAt:health.timestamp};
+ const client=mockClient(request=>{
+  assert.equal(request.headers.get("Idempotency-Key"),"original");return Response.json(receipt);
+ });
+ const response=await client.POST("/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}/submit",{
+  params:{path:{institutionSlug:"uc",attemptId:"attempt"},header:{"Idempotency-Key":"original"}},
+ });
+ assert.deepEqual(response.data,receipt);assert.ok(!("grade" in receipt));
+});

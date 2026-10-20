@@ -94,7 +94,7 @@ Destinatarios deben tener User/membership activos previamente provisionados por 
 Repetición de operaciones aplicadas no restaura privilegios ni cambia credenciales.
 Seed no promueve; para UC/UTFSM existentes usar set-superadmin explícitamente.
 [Operación y evidencia](../../backend/courses-roles-validation.md) distingue checks
-ejecutados de escenarios pendientes; rutas de quizzes/notas siguen futuras.
+ejecutados de escenarios pendientes; quizzes e intentos se detallan abajo; notas/publicación HTTP siguen futuras.
 
 ## Módulos y material compartido
 
@@ -122,3 +122,15 @@ Marcador de Course protege nuevos ítems; publicación de Grade real y consumo H
 del guard estudiantil pertenecen a las siguientes misiones, con contrato obligatorio.
 Máximo HTTP heredado 4096 bytes (413); JSON inerte, no-store/nosniff, sin UI nueva.
 [Evidencia](../../backend/quiz-authoring-validation.md).
+
+## Intentos y calificación
+
+Start/GET/PUT answers/cancel/submit implementados; ventana [opensAt,closesAt),
+NULL ilimitado y reloj DB posterior a locks. Cancelación explícita conserva Grade.
+Submit confirma corrección NUMERIC y Grade desde último graded en una transacción;
+replay solo con clave original devuelve id/status/submittedAt sin recalcular.
+GET usa anyOf student/teacher/assistant: student nunca ve nota/corrección;
+assistant ve agregados autorizados sin isCorrect/pointsAwarded. Permisos vigentes
+revalidados en cada operación/replay. Errores y respuestas no-store/nosniff.
+Publicación/listado académico/pesos/libro quedan en notas; carreras aquí usan SQL.
+[Evidencia](../../backend/attempts-grading-validation.md).

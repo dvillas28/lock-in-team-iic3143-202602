@@ -13,6 +13,10 @@ export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
   constructor() { this.pool.on("error", error => reportError("database", error)); }
 
   async check() {
+    await this.pool.query(`SELECT a.id,a.institution_id,a.course_id,a.quiz_id,a.section_id,a.student_id,a.attempt_number,a.status,
+      a.started_at,a.submitted_at,a.cancelled_at,a.answers,a.score_points,a.score_percent,a.grade_value,a.start_key,a.submit_key,
+      g.id,g.institution_id,g.grade_item_id,g.quiz_id,g.student_id,g.section_id,g.attempt_id,g.score_percent,g.grade_value,g.published_at,g.created_at,g.updated_at
+      FROM public.quiz_attempts a,public.grades g LIMIT 0`);
     await this.pool.query(`SELECT c.grade_items_locked_at,q.id,q.institution_id,q.course_id,q.section_id,q.title,
       q.instructions,q.opens_at,q.closes_at,q.max_attempts,q.published_at,q.created_by,q.questions,
       g.id,g.institution_id,g.course_id,g.quiz_id,g.title,g.weight_percent,g.created_at

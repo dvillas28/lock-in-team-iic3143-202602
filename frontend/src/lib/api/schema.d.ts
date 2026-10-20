@@ -739,6 +739,10 @@ export interface paths {
          *     `closesAt` limita la disponibilidad del quiz, pero no cancela por sí solo
          *     un intento ya iniciado. Los intentos cancelados cuentan entre los iniciados.
          *     Si el usuario puede consultar la pauta de ese quiz como teacher, no puede rendirlo aunque también tenga rol student.
+         *     Ventana [opensAt, closesAt), límites null ilimitados, reloj DB después de locks.
+         *     Repetir clave/destino retorna la representación original de creación aun tras
+         *     cierre/cancelación/publicación; revalida permisos. Otro destino da 409.
+         *     Clave de 1..200 caracteres sin controles ni headers duplicados; scope tenant/actor/start.
          */
         post: operations["startQuizAttempt"];
         delete?: never;
@@ -766,7 +770,9 @@ export interface paths {
          * Consultar un intento autorizado
          * @description El estudiante solo puede consultar su intento y recibe la vista estudiantil,
          *     sin pauta ni corrección. Teacher y staff de la sección pueden recibir la
-         *     vista académica según sus permisos.
+         *     vista docente con corrección o assistant sin isCorrect/pointsAwarded según permisos
+         *     vigentes sobre la sección histórica. Admin/superadmin no sustituye teacher.
+         *     anyOf permite solapamiento entre las vistas académicas sin corrección.
          */
         get: operations["getQuizAttempt"];
         put?: never;
@@ -799,11 +805,14 @@ export interface paths {
          *     un snapshot de permisos tomado al iniciar el intento. El usuario autenticado
          *     debe ser el propietario del intento, mantener una membership `student` activa
          *     en el curso correspondiente y no tener acceso actual de autoría ni a la pauta
-         *     de respuestas del quiz. Si cualquiera de estas condiciones deja de cumplirse,
-         *     la operación produce 403 Forbidden. El request no acepta `studentId`,
+         *     de respuestas del quiz. Identidad inválida/inactiva produce 401;
+         *     institución, membership o recurso no visible produce 404; una acción prohibida
+         *     sobre un recurso visible produce 403. El request no acepta `studentId`,
          *     `isCorrect`, `pointsAwarded`, `scorePercent` ni `grade`. Si el intento ya
          *     fue enviado, calificado o cancelado, no se guardan respuestas y responde
-         *     409 Conflict.
+         *     409 Conflict. Ventana [opensAt, closesAt), con límites null ilimitados y reloj DB
+         *     posterior a locks; fuera de ventana da 409 sin cancelar. PUT reemplaza todo;
+         *     answers [] borra respuestas; preguntas/alternativas ajenas dan 422.
          */
         put: operations["saveQuizAttemptAnswers"];
         post?: never;
@@ -836,13 +845,23 @@ export interface paths {
          *     snapshot de permisos tomado al iniciar el intento. El usuario autenticado
          *     debe ser el propietario del intento, mantener una membership `student` activa
          *     en el curso correspondiente y no tener acceso actual de autoría ni a la pauta
-         *     de respuestas del quiz. Si cualquiera de estas condiciones deja de cumplirse,
-         *     la operación produce 403 Forbidden. El servidor inmoviliza respuestas,
+         *     de respuestas del quiz. Identidad inválida/inactiva produce 401;
+         *     institución, membership o recurso no visible produce 404; una acción prohibida
+         *     sobre un recurso visible produce 403. El servidor inmoviliza respuestas,
          *     calcula score y nota, y crea o actualiza el registro académico desde el último
          *     intento calificado por `attemptNumber` en una sola transacción. Una nota ya
          *     publicada bloquea nuevos envíos. Repetir la misma clave no duplica resultados;
          *     un submit incompatible o sobre un intento cancelado devuelve 409. La
-         *     respuesta no revela la nota antes de publicarla.
+         *     respuesta no revela la nota antes de publicarla. Recibo exacto id/status/submittedAt.
+         *     Solo la clave original permite replay de graded; otra clave da 409 sin reservar
+         *     alias. Una clave ligada a otro intento da 409. Scope tenant/actor/submit,
+         *     separado de start. Revalidar permisos incluso tras cierre/publicación;
+         *     replay original no exige ventana ni recalcula ni agrega eventos.
+         *     Primer envío exige [opensAt, closesAt), límites null ilimitados y reloj DB
+         *     después de locks. Fuera de ventana da 409 sin cancelar. Porcentaje NUMERIC
+         *     HALF_UP a dos decimales; nota HALF_UP a uno usando ese porcentaje, escala
+         *     1+porcentaje*3/60 hasta 60; sobre 60, 4+(porcentaje-60)*3/40.
+         *     Omisiones/errores aportan cero. submitted nunca queda pendiente al commit.
          */
         post: operations["submitQuizAttempt"];
         delete?: never;
@@ -872,10 +891,12 @@ export interface paths {
          * Cancelar un intento en progreso
          * @description El estudiante propietario puede cancelar su intento solo si mantiene una
          *     membership `student` activa en el curso y no tiene acceso actual de autoría
-         *     ni a la pauta del quiz. Teacher con membership activa en el curso o
-         *     teacher con membership activa en la sección histórica del intento también
+         *     ni a la pauta del quiz. Teacher activo más is_admin y ownership del curso o
+         *     teacher con Enrollment activo en la sección histórica del intento también
          *     pueden cancelarlo para resolver un intento abandonado. El servidor revalida
-         *     estos permisos al cancelar; la falta de autorización produce 403 Forbidden.
+         *     estos permisos al cancelar: identidad inválida/inactiva produce 401;
+         *     institución, membership o recurso no visible produce 404; una acción prohibida
+         *     sobre un recurso visible produce 403.
          *     Solo un intento `inProgress` pasa atómicamente a `cancelled`, registra
          *     `cancelledAt` y genera auditoría con el actor, sin calcular nota ni modificar
          *     una nota existente. `cancelled` es terminal: deja de bloquear la publicación,
@@ -883,6 +904,7 @@ export interface paths {
          *     iniciado. Repetir la cancelación de un intento ya cancelado devuelve 204
          *     sin duplicar la auditoría. Un intento `submitted` o `graded` produce 409
          *     Conflict. La cancelación no modifica ni reabre una nota ya publicada.
+         *     No exige ventana abierta; teacher autorizado puede cancelar aunque el estudiante esté revocado.
          */
         post: operations["cancelQuizAttempt"];
         delete?: never;
@@ -1649,6 +1671,36 @@ export interface components {
             status: components["schemas"]["QuizAttemptStatus"];
             /** @description La corrección solo se incluye para intentos calificados. */
             answers: components["schemas"]["QuizAttemptAnswerAcademicView"][];
+            /** @description Null si el intento aún no fue calificado o fue cancelado. */
+            readonly scorePercent: number | null;
+            /** @description Null si el intento aún no fue calificado o fue cancelado. */
+            readonly grade: components["schemas"]["GradeValue"] | null;
+        };
+        QuizAttemptAssistantView: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly quizId: string;
+            /** Format: uuid */
+            readonly sectionId: string;
+            /** Format: uuid */
+            readonly studentId: string;
+            readonly attemptNumber: number;
+            /** Format: date-time */
+            readonly startedAt: string;
+            /**
+             * Format: date-time
+             * @description Null si el intento no fue enviado, incluido uno cancelado.
+             */
+            readonly submittedAt: string | null;
+            /**
+             * Format: date-time
+             * @description Fecha de cancelación; null si el intento no fue cancelado.
+             */
+            readonly cancelledAt: string | null;
+            status: components["schemas"]["QuizAttemptStatus"];
+            /** @description Seguimiento sin isCorrect ni pointsAwarded. */
+            answers: components["schemas"]["QuizAttemptAnswerStudentView"][];
             /** @description Null si el intento aún no fue calificado o fue cancelado. */
             readonly scorePercent: number | null;
             /** @description Null si el intento aún no fue calificado o fue cancelado. */
@@ -3448,7 +3500,10 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
             422: components["responses"]["UnprocessableEntity"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     getQuizAttempt: {
@@ -3474,13 +3529,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["QuizAttemptStudentView"] | components["schemas"]["QuizAttemptAcademicView"];
+                    "application/json": components["schemas"]["QuizAttemptStudentView"] | components["schemas"]["QuizAttemptAcademicView"] | components["schemas"]["QuizAttemptAssistantView"];
                 };
             };
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     saveQuizAttemptAnswers: {
@@ -3518,7 +3576,10 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
             422: components["responses"]["UnprocessableEntity"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     submitQuizAttempt: {
@@ -3560,7 +3621,10 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
             422: components["responses"]["UnprocessableEntity"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     cancelQuizAttempt: {
@@ -3592,6 +3656,9 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            503: components["responses"]["ServiceUnavailable"];
         };
     };
     listQuizAttempts: {

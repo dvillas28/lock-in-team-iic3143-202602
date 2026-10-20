@@ -27,3 +27,12 @@ test("reorder snapshots project nested id/position without expanding ordinary co
  assert.deepEqual(audit.snapshot("moduleOrder",{modules:[{id:"m",position:1,secret:"discard"}],secret:"discard"}),{modules:[{id:"m",position:1}]});
  assert.deepEqual(audit.snapshot("course",{modules:[{id:"m",position:1}]}),{});
 });
+
+
+test('attempt and grade allowlists exclude answers, corrections, idempotency keys and secrets',()=>{
+ const {snapshot}=audit;
+ for(const type of ['quizAttempt','grade']) {
+  const input={id:'id',studentId:'student',sectionId:'section',answers:[{isCorrect:true}],questions:[],start_key:'secret',submitKey:'secret',password:'secret'};
+  assert.deepEqual(snapshot(type,input),{id:'id',studentId:'student',sectionId:'section'});
+ }
+});
