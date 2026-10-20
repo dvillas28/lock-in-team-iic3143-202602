@@ -1,7 +1,7 @@
 # Tasks: Autoría y publicación de quizzes
 
 **Input**: `specs/20261014-235044_autoria-quizzes/`.
-**Base**: `upstream/feat/modulos-material-api` (#90, e34499e); stack pendiente autorizado.
+**Base**: `origin/dev` @ `4c24dbc`; #90 y #93 integrados el 2026-10-20.
 **Prerequisitos**: [plan](plan.md), [modelo](data-model.md), [HTTP](contracts/http.md),
 [autorización](contracts/authorization.md), [integración](contracts/academic-integration.md).
 **Estado**: 38/38 tareas locales completadas; aceptación de consumidores futuros pendiente. Preservar responsables BE-15–17 y parte BE-24.
@@ -107,7 +107,7 @@ Entrega en dos PRs: documentación en `docs/autoria-quizzes-plan` sobre #90;
 código, contratos OpenAPI/tipos generados, pruebas y evidencia en `feat/autoria-quizzes`
 sobre el documental. Foundation es una fase interna del PR de código, sin PR separado.
 
-1. Confirmar base pendiente y completar Foundation sin tablas/endpoints futuros.
+1. Confirmar base integrada en dev y completar Foundation sin tablas/endpoints futuros.
 2. MVP: US1 con todos sus negativos, auditoría y unicidad; no omitir sanitización.
 3. Agregar US2 con fixtures independientes y guard de elegibilidad compartido.
 4. Cerrar regresiones, trazabilidad y evidencia; no marcar tests no ejecutados.
