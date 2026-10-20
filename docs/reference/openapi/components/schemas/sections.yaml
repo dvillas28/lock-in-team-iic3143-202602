@@ -2,11 +2,11 @@ Section:
   type: object
   additionalProperties: false
   required:
-    - id
-    - courseId
-    - code
-    - capacity
-    - createdAt
+  - id
+  - courseId
+  - code
+  - capacity
+  - createdAt
   properties:
     id:
       type: string
@@ -18,26 +18,34 @@ Section:
       readOnly: true
     code:
       type: string
+      minLength: 1
+      maxLength: 32
     capacity:
-      type: [integer, 'null']
+      type:
+      - integer
+      - 'null'
       minimum: 0
+      maximum: 2147483647
     createdAt:
       type: string
       format: date-time
       readOnly: true
-
 SectionCreate:
   type: object
   additionalProperties: false
   required:
-    - code
+  - code
   properties:
     code:
       type: string
+      minLength: 1
+      maxLength: 32
     capacity:
-      type: [integer, 'null']
+      type:
+      - integer
+      - 'null'
       minimum: 0
-
+      maximum: 2147483647
 SectionUpdate:
   type: object
   additionalProperties: false
@@ -45,38 +53,40 @@ SectionUpdate:
   properties:
     code:
       type: string
+      minLength: 1
+      maxLength: 32
     capacity:
-      type: [integer, 'null']
+      type:
+      - integer
+      - 'null'
       minimum: 0
-
+      maximum: 2147483647
 SectionListResponse:
   type: object
   additionalProperties: false
   required:
-    - items
+  - items
   properties:
     items:
       type: array
       items:
         $ref: '#/Section'
-
 EnrollmentRole:
   type: string
   enum:
-    - teacher
-    - assistant
-    - student
-
+  - teacher
+  - assistant
+  - student
 Enrollment:
   type: object
   additionalProperties: false
   required:
-    - id
-    - sectionId
-    - user
-    - role
-    - active
-    - createdAt
+  - id
+  - sectionId
+  - user
+  - role
+  - active
+  - createdAt
   properties:
     id:
       type: string
@@ -87,7 +97,7 @@ Enrollment:
       format: uuid
       readOnly: true
     user:
-      $ref: './tenancy.yaml#/UserSummary'
+      $ref: ./tenancy.yaml#/UserSummary
     role:
       $ref: '#/EnrollmentRole'
     active:
@@ -96,21 +106,20 @@ Enrollment:
       type: string
       format: date-time
       readOnly: true
-
 EnrollmentCreate:
   type: object
   additionalProperties: false
   required:
-    - userId
-    - role
+  - userId
+  - role
   properties:
     userId:
       type: string
       format: uuid
     role:
       $ref: '#/EnrollmentRole'
-
 EnrollmentUpdate:
+  example: {"role": "student"}
   type: object
   additionalProperties: false
   minProperties: 1
@@ -119,16 +128,18 @@ EnrollmentUpdate:
       $ref: '#/EnrollmentRole'
     active:
       type: boolean
-
+  maxProperties: 1
+  description: Exactamente role o active. Cambio de rol desactiva origen y devuelve
+    sucesor; origen inactivo produce 409. Reactivar con duplicado activo produce 409.
 EnrollmentListResponse:
   unevaluatedProperties: false
   allOf:
-    - $ref: './common.yaml#/PageInfo'
-    - type: object
-      required:
-        - items
-      properties:
+  - $ref: ./common.yaml#/PageInfo
+  - type: object
+    required:
+    - items
+    properties:
+      items:
+        type: array
         items:
-          type: array
-          items:
-            $ref: '#/Enrollment'
+          $ref: '#/Enrollment'

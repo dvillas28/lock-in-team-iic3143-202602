@@ -3,8 +3,8 @@
 ## Project
 
 Build **AcademiX**, a university LMS multi-tenant platform focused on the critical academic
-flow: courses, modules, material, evaluations, submissions, correction, grade
-publication, and gradebook.
+flow: courses, modules, material, quizzes, automatic grading, grade
+publication, and gradebook. Delivery 2 defines the current MVP.
 
 ## Working Rules
 
@@ -31,15 +31,13 @@ codegraph explore "<symbols, files, or flow question>"
 
 Use `rg` next for docs, config, or files not covered by CodeGraph.
 
-<!-- SPECKIT START -->
-For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan.
+## Spec Kit Conventions
 
-Specs use timestamp prefixes: `YYYYMMDD-HHMMSS-feature-name`.
+Specs use timestamp prefixes: `YYYYMMDD-HHMMSS_descripcion-mision`.
 Git branches use `<type>/<short-name>`.
 
 When a task targets a specific spec from any branch, prefer:
-`SPECIFY_FEATURE_DIRECTORY=specs/<timestamp>-<short-name>`.
+`SPECIFY_FEATURE_DIRECTORY=specs/<timestamp>_<descripcion-mision>`.
 
 Constitution gates:
 - Tenant isolation must be explicit.
@@ -47,6 +45,15 @@ Constitution gates:
 - Academic records need an audit/history decision.
 - User stories should remain independently deliverable.
 - Complexity must be justified in the plan.
+- Each spec maps CU/RF/RNF, backlog references, dependencies and exclusions.
+- Authored docs target <150 lines; 150–200 require a length-exception comment;
+  >200 fail CI. Unmodified historical docs and imported skills remain exempt.
+- Reconcile the course admin UI capability before planning academic permissions.
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+at specs/20261019-121536_catalogo-endpoints/plan.md
 <!-- SPECKIT END -->
 
 ## UI & Design

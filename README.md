@@ -1,5 +1,7 @@
 # AcademiX — LMS Multi-Tenant Universitario
 
+<!-- length-exception: índice principal conserva visión, alcance y guía operativa de arranque -->
+
 Proyecto grupal para el ramo de Desarrollo de Software. La propuesta es construir un LMS universitario multi-tenant orientado al flujo académico crítico de cursos semestrales: material, evaluaciones, publicación de notas y seguimiento del estudiante.
 
 El objetivo no es replicar todas las funcionalidades de Canvas o Moodle, sino proponer una plataforma integrada, trazable y preparada para crecer por institución.
@@ -59,6 +61,7 @@ El sistema de diseno esta en [DESIGN.md](DESIGN.md): tokens de color, tipografia
 ## Documentacion
 
 - [Indice de documentacion](docs/README.md): estructura viva del repo.
+- [Misiones backend](docs/backend/README.md): siete specs, cobertura CU/RF/RNF y dependencias.
 - [Entrega 2](docs/deliveries/2/README.md): documentación arquitectónica vigente.
 - [ADR de PostgreSQL compartida](docs/adr/adopt-shared-postgresql-multitenancy.md): decisión de multi-tenancy actual.
 - [OpenAPI](docs/reference/openapi/README.md): contrato HTTP institution-scoped.
@@ -70,7 +73,7 @@ vigente.
 ## Starter Del Repo
 
 - Gestor de paquetes: pnpm, fijado en `package.json`.
-- Specs: timestamp `YYYYMMDD-HHMMSS-feature-name`.
+- Specs: timestamp `YYYYMMDD-HHMMSS_descripcion-mision`.
 - Ramas: `<type>/<short-name>`, por ejemplo `feat/course-sections`.
 - Constitution: `.specify/memory/constitution.md`.
 - Guias: `docs/guides/`.
@@ -81,7 +84,7 @@ vigente.
 ```bash
 /speckit-specify "descripcion funcional del cambio"
 git switch -c feat/short-name
-export SPECIFY_FEATURE_DIRECTORY=specs/<timestamp>-<short-name>
+export SPECIFY_FEATURE_DIRECTORY=specs/<timestamp>_<descripcion-mision>
 /speckit-plan
 /speckit-tasks
 git push -u origin HEAD
@@ -117,7 +120,7 @@ El frontend consulta al backend desde el servidor de Next. Fuera de Docker usa
 - Docker.
 - Docker Compose.
 
-Para desarrollo sin Docker se requiere Node.js 20.9 o superior y pnpm 9.15.9.
+Para desarrollo sin Docker se requiere Node.js 24 y pnpm 9.15.9.
 
 ### Levantar El Proyecto
 
@@ -155,6 +158,8 @@ docker compose down
 `.env.example` documenta las variables disponibles. No contienen secretos:
 
 - `API_URL`: URL que usa el servidor de Next para consultar al backend.
+- `NEXT_PUBLIC_API_URL`: URL pública para consultas desde el navegador, si se
+  requieren. Next.js la incorpora durante el build; nunca contiene secretos.
 - `PORT`: puerto de escucha de NestJS; su valor por defecto es `3001`.
 - `APP_VERSION`: versión informada por `GET /health`.
 - `DATABASE_URL`: conexión única a PostgreSQL; no existe una URL por Institution.
@@ -171,3 +176,7 @@ pnpm test
 pnpm docs:api:lint
 docker compose config
 ```
+
+### Cliente API del frontend
+
+Consulta la [guía del cliente API](docs/guides/frontend-api-client.md).

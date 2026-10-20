@@ -1,0 +1,115 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+
+import InstitutionLayout from "../src/app/institutions/[institutionSlug]/layout.tsx";
+import InstitutionHome from "../src/app/institutions/[institutionSlug]/page.tsx";
+import Loading from "../src/app/institutions/[institutionSlug]/loading.tsx";
+import InstitutionError from "../src/app/institutions/[institutionSlug]/error.tsx";
+import NotFound from "../src/app/not-found.tsx";
+import InstitutionNotFound from "../src/app/institutions/[institutionSlug]/not-found.tsx";
+import { InstitutionShell } from "../src/components/institutions/institution-shell.tsx";
+import { EmptyState, ErrorState } from "../src/components/route-states.tsx";
+import { ApiHttpError, ApiNetworkError, ApiResponseError } from "../src/lib/api/errors.ts";
+import { institutionHomePath, isInstitutionSlug } from "../src/lib/institution-routes.ts";
+import { getRouteFeedback } from "../src/lib/route-feedback.ts";
+
+test("institution links accept contract slugs without an institution allowlist", () => {
+  for (const slug of ["uc", "utfsm", "campus-2", "another-institution"]) {
+    assert.equal(isInstitutionSlug(slug), true);
+    assert.equal(institutionHomePath(slug), `/institutions/${slug}`);
+  }
+});
+
+test("invalid slugs cannot become links, paths or URL injections", () => {
+  for (const slug of ["", "UC", "uc_utfsm", "-uc", "uc-", "uc--other", "uc/utfsm", "..", "uc?role=teacher", "uc#other", "uc%2Futfsm", "uc\n", "ü"]) {
+    assert.equal(isInstitutionSlug(slug), false, slug);
+    assert.throws(() => institutionHomePath(slug), TypeError);
+  }
+});
+
+test("layout awaits params and routes malformed slugs to Next's not-found boundary", async () => {
+  const layout = await InstitutionLayout({ params: Promise.resolve({ institutionSlug: "uc" }), children: "content" });
+  assert.match(renderToStaticMarkup(layout), /href="\/institutions\/uc"/);
+  await assert.rejects(
+    InstitutionLayout({ params: Promise.resolve({ institutionSlug: "UC" }), children: "private" }),
+    (error: unknown) => error instanceof Error && "digest" in error && error.digest === "NEXT_HTTP_ERROR_FALLBACK;404",
+  );
+});
+
+test("each institution renders only its own navigation and no invented identity or roles", () => {
+  for (const [slug, other] of [["uc", "utfsm"], ["utfsm", "uc"]]) {
+    const html = renderToStaticMarkup(createElement(InstitutionShell, { institutionSlug: slug }, "Public structure"));
+    assert.match(html, new RegExp(`href="/institutions/${slug}"`));
+    assert.doesNotMatch(html, new RegExp(`/institutions/${other}`));
+    assert.match(html, new RegExp(`<strong>${slug}</strong>`));
+    assert.match(html, /aria-current="page"/);
+    assert.match(html, /href="#main-content"/);
+    assert.match(html, /id="main-content"[^>]*tabindex="-1"/);
+    assert.match(html, /aria-label="Navegación institucional"/);
+    assert.doesNotMatch(html, /teacher|student|assistant|admin|@|tenant-dot/);
+  }
+});
+
+test("home is an honest empty state without simulated courses or session", () => {
+  const html = renderToStaticMarkup(createElement(InstitutionHome));
+  assert.match(html, /<h1>Inicio<\/h1>/);
+  assert.match(html, /<h2[^>]*>Sin contenido para mostrar<\/h2>/);
+  assert.doesNotMatch(html, /Sin cursos|\/login|<button|<a /);
+  assert.match(renderToStaticMarkup(createElement(EmptyState)), /aria-labelledby=/);
+});
+
+test("loading announces progress and marks the content as busy", () => {
+  const html = renderToStaticMarkup(createElement(Loading));
+  assert.match(html, /aria-busy="true"/);
+  assert.match(html, /role="status"/);
+  assert.match(html, /Cargando contenido/);
+});
+
+for (const [status, title, retryable] of [
+  [401, "Sesión requerida", false], [403, "Permisos insuficientes", false],
+  [404, "Recurso no disponible", false], [400, "No se pudo completar la solicitud", false],
+  [500, "No se pudo completar la solicitud", true], [503, "No se pudo completar la solicitud", true],
+] as const) {
+  test(`HTTP ${status} presents safe feedback with the appropriate recovery action`, () => {
+    const error = new ApiHttpError(status, { title: "PRIVATE_TITLE", detail: "PRIVATE_DETAIL", traceId: "PRIVATE_TRACE" });
+    const feedback = getRouteFeedback(error);
+    assert.equal(feedback.title, title);
+    assert.equal(feedback.retryable, retryable);
+    const html = renderToStaticMarkup(createElement(ErrorState, { feedback, onRetry: () => {} }));
+    assert.match(html, /role="alert"/);
+    assert.match(html, /href="\/"/);
+    assert.equal(html.includes("Reintentar"), retryable);
+    assert.doesNotMatch(html, /PRIVATE_|\/login/);
+  });
+}
+
+test("network, malformed response and unexpected errors never expose internal details", () => {
+  for (const error of [new ApiNetworkError(new Error("PRIVATE_CAUSE")), new ApiResponseError(), new Error("PRIVATE_STACK"), null, { message: "PRIVATE_PAYLOAD", status: 401 }]) {
+    const feedback = getRouteFeedback(error);
+    assert.equal(feedback.retryable, true);
+    const html = renderToStaticMarkup(createElement(ErrorState, { feedback, onRetry: () => {} }));
+    assert.match(html, /Reintentar/);
+    assert.doesNotMatch(html, /PRIVATE_/);
+  }
+  const withoutRetry = renderToStaticMarkup(createElement(ErrorState, { feedback: getRouteFeedback(new Error()) }));
+  assert.doesNotMatch(withoutRetry, /<button/);
+});
+
+test("the Next error boundary safely handles redacted production errors", () => {
+  const html = renderToStaticMarkup(createElement(InstitutionError, {
+    error: Object.assign(new Error("PRIVATE_SERVER_ERROR"), { digest: "PRIVATE_DIGEST" }),
+    reset: () => {},
+  }));
+  assert.match(html, /Reintentar/);
+  assert.doesNotMatch(html, /PRIVATE_/);
+});
+
+test("not-found offers a working public destination without leaking a slug", () => {
+  const html = renderToStaticMarkup(createElement(NotFound));
+  assert.match(html, /<main/);
+  assert.match(html, /Recurso no disponible/);
+  assert.match(html, /href="\/"/);
+  assert.match(renderToStaticMarkup(createElement(InstitutionNotFound)), /Recurso no disponible/);
+});

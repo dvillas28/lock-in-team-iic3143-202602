@@ -8,18 +8,29 @@
     "start": "node dist/main.js",
     "start:dev": "nest start --watch",
     "lint": "eslint \"{src,test}/**/*.{ts,mjs}\"",
-    "test": "pnpm build && node --test test/*.test.mjs"
+    "test": "pnpm build && node --test test/*.test.mjs",
+    "db:migrate": "node dist/commands/migrate.js",
+    "db:seed": "node dist/seeds/demo.js",
+    "test:integration": "pnpm build && node --test --test-concurrency=1 test/integration/*.test.mjs",
+    "test:coverage": "pnpm build && c8 --all --src dist --include \"dist/**/*.js\" --reporter=text --reporter=lcov node --test --test-concurrency=1 test/*.test.mjs test/integration/*.test.mjs"
   },
   "dependencies": {
     "@nestjs/common": "12.1.0",
     "@nestjs/core": "12.1.0",
+    "@nestjs/jwt": "12.0.3",
     "@nestjs/platform-express": "12.1.0",
+    "@nestjs/throttler": "6.7.1",
+    "argon2": "0.45.1",
+    "node-pg-migrate": "9.0.0",
+    "pg": "8.23.1",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2"
   },
   "devDependencies": {
     "@nestjs/cli": "12.0.7",
     "@types/node": "^24.0.0",
+    "@types/pg": "8.23.1",
+    "c8": "12.0.0",
     "eslint": "9.39.5",
     "typescript": "5.9.3",
     "typescript-eslint": "8.70.1"

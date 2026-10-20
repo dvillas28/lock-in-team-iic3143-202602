@@ -3,15 +3,18 @@
   "private": true,
   "packageManager": "pnpm@9.15.9",
   "scripts": {
-    "docs:api": "redocly preview-docs docs/reference/openapi/openapi.yaml",
+    "docs:api": "python3 -m http.server 8080 --bind 127.0.0.1 --directory dist/api-catalog",
     "docs:api:lint": "redocly lint docs/reference/openapi/openapi.yaml",
     "build": "pnpm --dir frontend build && pnpm --dir backend build",
     "lint": "pnpm --dir frontend lint && pnpm --dir backend lint",
     "test": "pnpm --dir backend test",
     "dev:frontend": "pnpm --dir frontend dev",
-    "dev:backend": "pnpm --dir backend start:dev"
+    "dev:backend": "pnpm --dir backend start:dev",
+    "docs:api:build": "pnpm --dir backend build && node scripts/api-catalog.mjs",
+    "docs:api:test": "pnpm --dir backend build && node --test scripts/api-catalog.test.mjs"
   },
   "devDependencies": {
-    "@redocly/cli": "1.25.11"
+    "@redocly/cli": "1.25.11",
+    "swagger-ui-dist": "5.34.0"
   }
 }

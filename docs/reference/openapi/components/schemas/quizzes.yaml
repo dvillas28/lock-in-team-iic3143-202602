@@ -44,8 +44,11 @@ QuizSummary:
       description: Null indica alcance para todo el curso.
     title:
       type: string
+      minLength: 1
+      maxLength: 200
     instructions:
       type: [string, 'null']
+      maxLength: 10000
     opensAt:
       type: [string, 'null']
       format: date-time
@@ -55,6 +58,7 @@ QuizSummary:
     maxAttempts:
       type: [integer, 'null']
       minimum: 1
+      maximum: 2147483647
       description: Null permite intentos ilimitados; un entero positivo limita los intentos iniciados.
     status:
       $ref: '#/QuizStatus'
@@ -72,8 +76,10 @@ AlternativeStudentView:
   properties:
     id:
       type: string
+      minLength: 1
     text:
       type: string
+      minLength: 1
 
 AlternativeAuthoring:
   type: object
@@ -85,8 +91,10 @@ AlternativeAuthoring:
   properties:
     id:
       type: string
+      minLength: 1
     text:
       type: string
+      minLength: 1
     isCorrect:
       type: boolean
 
@@ -106,11 +114,16 @@ QuestionStudentView:
       readOnly: true
     prompt:
       type: string
+      minLength: 1
     position:
       type: integer
+      minimum: 1
+      maximum: 2147483647
     points:
       type: number
       exclusiveMinimum: 0
+      maximum: 999999.99
+      multipleOf: 0.01
     alternatives:
       type: array
       minItems: 2
@@ -133,11 +146,16 @@ QuestionAuthoringView:
       readOnly: true
     prompt:
       type: string
+      minLength: 1
     position:
       type: integer
+      minimum: 1
+      maximum: 2147483647
     points:
       type: number
       exclusiveMinimum: 0
+      maximum: 999999.99
+      multipleOf: 0.01
     alternatives:
       type: array
       minItems: 2
@@ -173,8 +191,11 @@ QuizStudentView:
       format: uuid
     title:
       type: string
+      minLength: 1
+      maxLength: 200
     instructions:
       type: [string, 'null']
+      maxLength: 10000
     opensAt:
       type: [string, 'null']
       format: date-time
@@ -184,6 +205,7 @@ QuizStudentView:
     maxAttempts:
       type: [integer, 'null']
       minimum: 1
+      maximum: 2147483647
       description: Null permite intentos ilimitados; un entero positivo limita los intentos iniciados.
     status:
       $ref: '#/QuizStatus'
@@ -226,8 +248,11 @@ QuizAuthoringView:
       format: uuid
     title:
       type: string
+      minLength: 1
+      maxLength: 200
     instructions:
       type: [string, 'null']
+      maxLength: 10000
     opensAt:
       type: [string, 'null']
       format: date-time
@@ -237,6 +262,7 @@ QuizAuthoringView:
     maxAttempts:
       type: [integer, 'null']
       minimum: 1
+      maximum: 2147483647
       description: Null permite intentos ilimitados; un entero positivo limita los intentos iniciados.
     status:
       $ref: '#/QuizStatus'
@@ -265,8 +291,11 @@ QuizCreate:
       description: Null crea un quiz de alcance de curso dentro del alcance docente.
     title:
       type: string
+      minLength: 1
+      maxLength: 200
     instructions:
       type: [string, 'null']
+      maxLength: 10000
     opensAt:
       type: [string, 'null']
       format: date-time
@@ -276,6 +305,7 @@ QuizCreate:
     maxAttempts:
       type: [integer, 'null']
       minimum: 1
+      maximum: 2147483647
       description: Omitido o null permite intentos ilimitados; un entero positivo limita los iniciados.
     questions:
       type: array
@@ -288,10 +318,17 @@ QuizUpdate:
   additionalProperties: false
   minProperties: 1
   properties:
+    sectionId:
+      type: [string, 'null']
+      format: uuid
+      description: Reasignable solo en draft con permiso sobre origen y destino; null indica curso completo.
     title:
       type: string
+      minLength: 1
+      maxLength: 200
     instructions:
       type: [string, 'null']
+      maxLength: 10000
     opensAt:
       type: [string, 'null']
       format: date-time
@@ -301,12 +338,13 @@ QuizUpdate:
     maxAttempts:
       type: [integer, 'null']
       minimum: 1
+      maximum: 2147483647
       description: Null permite intentos ilimitados; un entero positivo limita los intentos iniciados.
     questions:
       type: array
       description: Reemplaza la pauta completa mientras el quiz esté en draft.
       items:
-        $ref: '#/QuestionCreate'
+        $ref: '#/QuestionUpdate'
 
 AlternativeInput:
   type: object
@@ -318,8 +356,10 @@ AlternativeInput:
   properties:
     id:
       type: string
+      minLength: 1
     text:
       type: string
+      minLength: 1
     isCorrect:
       type: boolean
 
@@ -334,11 +374,47 @@ QuestionCreate:
   properties:
     prompt:
       type: string
+      minLength: 1
     position:
       type: integer
+      minimum: 1
+      maximum: 2147483647
     points:
       type: number
       exclusiveMinimum: 0
+      maximum: 999999.99
+      multipleOf: 0.01
+    alternatives:
+      type: array
+      minItems: 2
+      items:
+        $ref: '#/AlternativeInput'
+
+QuestionUpdate:
+  type: object
+  additionalProperties: false
+  required:
+    - prompt
+    - position
+    - points
+    - alternatives
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: ID actual de pregunta retenida; omitir genera una nueva pregunta.
+    prompt:
+      type: string
+      minLength: 1
+    position:
+      type: integer
+      minimum: 1
+      maximum: 2147483647
+    points:
+      type: number
+      exclusiveMinimum: 0
+      maximum: 999999.99
+      multipleOf: 0.01
     alternatives:
       type: array
       minItems: 2
@@ -544,6 +620,77 @@ QuizAttemptAcademicView:
       readOnly: true
       description: Null si el intento aún no fue calificado o fue cancelado.
 
+QuizAttemptAssistantView:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - quizId
+    - sectionId
+    - studentId
+    - attemptNumber
+    - startedAt
+    - submittedAt
+    - cancelledAt
+    - status
+    - answers
+    - scorePercent
+    - grade
+  properties:
+    id:
+      type: string
+      format: uuid
+      readOnly: true
+    quizId:
+      type: string
+      format: uuid
+      readOnly: true
+    sectionId:
+      type: string
+      format: uuid
+      readOnly: true
+    studentId:
+      type: string
+      format: uuid
+      readOnly: true
+    attemptNumber:
+      type: integer
+      minimum: 1
+      readOnly: true
+    startedAt:
+      type: string
+      format: date-time
+      readOnly: true
+    submittedAt:
+      type: [string, 'null']
+      format: date-time
+      readOnly: true
+      description: Null si el intento no fue enviado, incluido uno cancelado.
+    cancelledAt:
+      type: [string, 'null']
+      format: date-time
+      readOnly: true
+      description: Fecha de cancelación; null si el intento no fue cancelado.
+    status:
+      $ref: '#/QuizAttemptStatus'
+    answers:
+      type: array
+      description: Seguimiento sin isCorrect ni pointsAwarded.
+      items:
+        $ref: '#/QuizAttemptAnswerStudentView'
+    scorePercent:
+      type: [number, 'null']
+      minimum: 0
+      maximum: 100
+      readOnly: true
+      description: Null si el intento aún no fue calificado o fue cancelado.
+    grade:
+      oneOf:
+        - $ref: './grades.yaml#/GradeValue'
+        - type: 'null'
+      readOnly: true
+      description: Null si el intento aún no fue calificado o fue cancelado.
+
 QuizAttemptSubmissionReceipt:
   type: object
   additionalProperties: false
@@ -577,4 +724,6 @@ QuizAttemptListResponse:
         items:
           type: array
           items:
-            $ref: '#/QuizAttemptAcademicView'
+            anyOf:
+              - $ref: '#/QuizAttemptAcademicView'
+              - $ref: '#/QuizAttemptAssistantView'

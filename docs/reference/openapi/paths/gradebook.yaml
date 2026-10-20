@@ -7,7 +7,8 @@
       - Gradebook
     operationId: listCourseGradeItems
     summary: Listar elementos del libro de notas
-    description: Disponible para teacher y staff autorizado del curso.
+    description: |
+      Disponible para teacher y staff autorizado del curso.
     responses:
       '200':
         description: Grade items y suma actual de ponderaciones.
@@ -23,6 +24,10 @@
         $ref: '../components/responses.yaml#/Forbidden'
       '404':
         $ref: '../components/responses.yaml#/NotFound'
+      '500':
+        $ref: '../components/responses.yaml#/InternalError'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'
 
 /api/v1/institutions/{institutionSlug}/courses/{courseId}/gradebook/weights:
   parameters:
@@ -34,10 +39,9 @@
     operationId: updateGradebookWeights
     summary: Reemplazar ponderaciones del curso de forma atómica
     description: |
-      Requiere rol `teacher`. El conjunto completo debe sumar 100%. Si existe
-      cualquier nota publicada del curso, responde 409 con código
-      `GRADE_WEIGHTS_LOCKED`. Tampoco se agregan grade items tras la primera
-      publicación. Todo cambio exitoso genera un evento de auditoría con before y after.
+      Teacher activo más is_admin institucional y createdBy=actor. Colección completa, única, pesos
+      de hasta dos decimales, suma exacta 100. Primera publicación congela pesos e ítems; 409
+      GRADE_WEIGHTS_LOCKED incluso en no-op. Antes de freeze no-op no emite evento.
     requestBody:
       required: true
       content:
@@ -63,6 +67,10 @@
         $ref: '../components/responses.yaml#/Conflict'
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
+      '500':
+        $ref: '../components/responses.yaml#/InternalError'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'
 
 /api/v1/institutions/{institutionSlug}/courses/{courseId}/gradebook:
   parameters:
@@ -74,9 +82,11 @@
     operationId: getCourseGradebook
     summary: Consultar libro de notas docente
     description: |
-      Teacher puede consultar el curso completo. Teacher y assistant deben
-      filtrar y quedan limitados a secciones donde tengan membership activa.
-      Assistant es de solo lectura.
+      Teacher con is_admin y ownership puede consultar el curso completo. Teacher ordinario y
+      assistant quedan limitados a sus secciones activas. Assistant es de solo lectura.  Filas por
+      estudiante y sección histórica, incluso destinatarios revocados; cursor (createdAt mínimo,
+      studentId, sectionId) ligado a actor/tenant/curso/filtro. Notas publicadas y no publicadas
+      dentro del alcance, sin pauta; promedio solo sobre publicadas.
     parameters:
       - $ref: '../components/parameters.yaml#/SectionIdFilter'
       - $ref: '../components/parameters.yaml#/Cursor'
@@ -96,6 +106,10 @@
         $ref: '../components/responses.yaml#/Forbidden'
       '404':
         $ref: '../components/responses.yaml#/NotFound'
+      '500':
+        $ref: '../components/responses.yaml#/InternalError'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'
 
 /api/v1/institutions/{institutionSlug}/courses/{courseId}/gradebook/publications:
   parameters:
@@ -107,17 +121,18 @@
     operationId: publishGrades
     summary: Publicar notas por grade items y secciones
     description: |
-      Teacher puede publicar en cualquier sección del curso. Teacher solo en
-      sus secciones. Assistant y student no pueden publicar. La primera
-      publicación exige ponderaciones del curso que sumen 100%. Toda publicación
-      exige ausencia de intentos activos para los estudiantes y quizzes de las
-      notas seleccionadas.
-      Solo `inProgress` es activo; `cancelled` no bloquea, no genera nota y no
-      sustituye el requisito de un intento `graded` para publicar una nota.
-      Un intento abandonado debe cancelarse explícitamente antes de publicar;
-      esta operación no lo cancela automáticamente y responde 409 Conflict si
-      aún existe un intento activo. La operación es atómica,
-      no sobrescribe notas publicadas y genera auditoría histórica.
+      Teacher con is_admin y ownership puede publicar en todo su curso; teacher ordinario solo en
+      sus secciones activas. Assistant y student no pueden publicar. La primera publicación exige
+      ponderaciones del curso que sumen 100%. Toda publicación exige ausencia de intentos activos
+      para los estudiantes y quizzes de las notas seleccionadas. Solo `inProgress` es activo;
+      `cancelled` no bloquea, no genera nota y no sustituye el requisito de un intento `graded` para
+      publicar una nota. Un intento abandonado debe cancelarse explícitamente antes de publicar;
+      esta operación no lo cancela automáticamente y responde 409 Conflict si aún existe un intento
+      activo. La operación es atómica, no sobrescribe notas publicadas y genera auditoría histórica.
+      Selección explícita completa de gradeItemIds, sectionIds y studentIds. Recibo persistente por
+      tenant/actor/clave; selección canónica igual devuelve original tras revalidar permisos,
+      distinta selección o curso da 409 IDEMPOTENCY_CONFLICT. Otra clave sobre nota publicada da
+      GRADE_ALREADY_PUBLISHED. Fallos no reservan clave.
     parameters:
       - $ref: '../components/parameters.yaml#/IdempotencyKey'
     requestBody:
@@ -145,6 +160,10 @@
         $ref: '../components/responses.yaml#/Conflict'
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
+      '500':
+        $ref: '../components/responses.yaml#/InternalError'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'
 
 /api/v1/institutions/{institutionSlug}/courses/{courseId}/my-grades:
   parameters:
@@ -156,9 +175,9 @@
     operationId: getStudentGrades
     summary: Consultar notas publicadas del estudiante autenticado
     description: |
-      La identidad se deriva de `sub`; no acepta `studentId`. Retorna solo notas
-      propias publicadas. El promedio parcial es
-      `sum(grade * weight) / sum(published weights)` y no se recibe del cliente.
+      La identidad se deriva de `sub`; no acepta `studentId`. Retorna solo notas propias publicadas.
+      El promedio parcial es `sum(grade * weight) / sum(published weights)` y no se recibe del
+      cliente.
     responses:
       '200':
         description: Notas propias publicadas y promedio parcial derivado.
@@ -174,3 +193,7 @@
         $ref: '../components/responses.yaml#/Forbidden'
       '404':
         $ref: '../components/responses.yaml#/NotFound'
+      '500':
+        $ref: '../components/responses.yaml#/InternalError'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'
