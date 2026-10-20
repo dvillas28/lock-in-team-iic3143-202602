@@ -1,8 +1,8 @@
 # Módulos y material: Foundation
 
-Capa draft sobre PR #87, docs/modulos-material-plan @ 67aa9a4.
+Capa Foundation sobre PR #87, integrado en dev.
 Rama feat/modulos-material-foundation; siguiente capa feat/modulos-material-api.
-Fecha 2026-10-16. Variable explícita:
+Validación actualizada 2026-10-20. Variable explícita:
 SPECIFY_FEATURE_DIRECTORY=specs/20261014-234944_modulos-material.
 
 ## Alcance verificado
@@ -18,15 +18,17 @@ Contratos corrigen snapshots de orden y detallan headers/415/límite HTTP hereda
 ## Validación propia de esta capa
 
 Instalaciones existentes con lockfiles intactos; Node 24.14.0, pnpm 9.15.9.
-PostgreSQL 17 exclusivo, academix_modulos_stack_test en puerto local 55448.
+PostgreSQL 17 exclusivo, academix_pr89_test en puerto local dinámico.
 Helpers recrean public; suite serial, sin bases compartidas.
 
-- Backend lint y test:coverage: PASS; 51/51 pruebas, líneas 95.81 %, ramas 92.67 %.
+- Backend lint y test:coverage: PASS; 53/53 pruebas, líneas 99.47 %, ramas 93.24 %.
 - OpenAPI lint y frontend api:check/typecheck/test: PASS; 25/25 frontend.
 - FK institucionales cruzadas y de autor, CHECK, posición ocupada y swap diferible.
 - Instalación vacía, upgrade poblado preserva cursos/Enrollment/auditoría,
   repetición no altera filas; down solo en DB exclusiva vacía.
 - Validación Unicode, whitespace, NUL, límites y cadenas hostiles como datos.
+- Acceso docente, estudiante y ayudante; publicación, curso/tenant y revocación.
+- Content-access y validación: 100 % líneas/ramas; headers inertes y rechazo 415.
 - Regresión de identidad/cursos permanece operativa; no cambia su autorización.
 - Longitud documental y git diff --check: PASS.
 
