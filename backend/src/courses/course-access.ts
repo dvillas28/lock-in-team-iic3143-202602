@@ -12,7 +12,7 @@ export async function context(db: Sql, actor: string, slug: string) {
   return row;
 }
 export async function lockContext(db: PoolClient, actor: string, slug: string, targets: string[] = [], flags = false) {
-  const users = [...new Set([actor,...targets])].sort();
+  const users = [...new Set([actor,...targets])].sort((a,b)=>a.localeCompare(b));
   await db.query("SELECT id FROM public.users WHERE id=ANY($1::uuid[]) ORDER BY id FOR SHARE", [users]);
   await db.query("SELECT id FROM public.institutions WHERE slug=$1 FOR SHARE", [slug]);
   await db.query(`SELECT m.id FROM public.institution_memberships m JOIN public.institutions i ON i.id=m.institution_id

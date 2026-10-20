@@ -18,7 +18,8 @@ export class SectionsController {
  @Patch("sections/:sectionId") @Header("Cache-Control","no-store")
  update(@Req() r:IdentityRequest,@Param("institutionSlug") s:string,@Param("sectionId") id:string,@Body() body:unknown) {
   const dto=object(body,["code","capacity"]),input:{code?:string;capacity?:number|null}={};
-  if("code" in dto)input.code=text(dto.code,32);if("capacity" in dto)input.capacity=capacity(dto.capacity);
+  if("code" in dto)input.code=text(dto.code,32);
+  if("capacity" in dto)input.capacity=capacity(dto.capacity);
   return this.sections.update(r.userId,slug(s),uuid(id),input);
  }
 }

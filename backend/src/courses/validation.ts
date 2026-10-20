@@ -4,7 +4,8 @@ export function uuid(value: unknown): string {
   return value.toLowerCase();
 }
 export function slug(value: string) {
-  if(value.length>63 || !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(value)) throw new BadRequestException(); return value;
+  if(value.length>63 || !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(value)) throw new BadRequestException();
+  return value;
 }
 export function object(body: unknown, allowed: string[], required: string[] = []) {
   if (!body || typeof body!=="object" || Array.isArray(body)) throw new BadRequestException();
@@ -13,16 +14,22 @@ export function object(body: unknown, allowed: string[], required: string[] = []
   return dto;
 }
 export function text(value: unknown, max: number) {
-  if(typeof value!=="string" || !value.trim() || [...value.trim()].length>max) throw new BadRequestException(); return value.trim();
+  if(typeof value!=="string" || !value.trim() || [...value.trim()].length>max) throw new BadRequestException();
+  return value.trim();
 }
 export function capacity(value: unknown) {
   if(value===null || value===undefined) return null;
-  if(typeof value!=="number" || !Number.isInteger(value) || value<0 || value>2147483647) throw new BadRequestException(); return value;
+  if(typeof value!=="number" || !Number.isInteger(value) || value<0 || value>2147483647) throw new BadRequestException();
+  return value;
 }
 export function role(value: unknown) {
-  if(!["teacher","assistant","student"].includes(value as string)) throw new BadRequestException(); return value as string;
+  if(!["teacher","assistant","student"].includes(value as string)) throw new BadRequestException();
+  return value as string;
 }
-export function boolean(value: unknown) {if(typeof value!=="boolean") throw new BadRequestException();return value;}
+export function boolean(value: unknown) {
+  if(typeof value!=="boolean") throw new BadRequestException();
+  return value;
+}
 export function timestamp(value: unknown) {
   if(typeof value!=="string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?Z$/.test(value) ||
     value.startsWith("0000") || !Number.isFinite(Date.parse(value)) || new Date(value).toISOString().slice(0,19)!==value.slice(0,19))throw new BadRequestException();

@@ -11,7 +11,7 @@ export async function setSuperadmin(pool:Pool,env:NodeJS.ProcessEnv=process.env)
  if(!["true","false"].includes(input.enabled) || input.replacement===input.userId || (input.enabled==="true" && input.replacement))throw new BadRequestException();
  const inputFingerprint=fingerprint(input);
  return transaction(pool,async db=>{
-  const users=[...new Set([input.userId,...(input.replacement?[input.replacement]:[])])].sort();
+  const users=[...new Set([input.userId,...(input.replacement?[input.replacement]:[])])].sort((a,b)=>a.localeCompare(b));
   const identities=(await db.query("SELECT id,active FROM public.users WHERE id=ANY($1::uuid[]) ORDER BY id FOR SHARE",[users])).rows;
   const institution=(await db.query("SELECT * FROM public.institutions WHERE slug=$1 FOR UPDATE",[input.institutionSlug])).rows[0];
   if(!institution?.active)throw new NotFoundException();
