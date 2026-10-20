@@ -48,12 +48,12 @@ test('content access enforces academic roles, publication, course and tenant bou
  }finally{await pool.end();}
 });
 
-test('foundation content paths set inert headers and reject non-JSON bodies before routes exist',async()=>{
+test('content paths set inert headers, require authentication and reject non-JSON bodies',async()=>{
  const pool=await database();let app;
  try {
   const f=await contentFixture(pool);app=await http();
   for(const path of [`courses/${f.own}/modules`,`modules/${randomUUID()}`,`materials/${randomUUID()}`]) {
-   for(const [method,type,body,status] of [['GET',undefined,undefined,404],['POST','text/plain','source',415],['POST','application/json; charset=utf-8','{}',404]]) {
+   for(const [method,type,body,status] of [['GET',undefined,undefined,401],['POST','text/plain','source',415],[path.startsWith('courses/')?'POST':'PATCH','application/json; charset=utf-8','{}',401]]) {
     const response=await fetch(`${app.base}/api/v1/institutions/uc/${path}`,{method,headers:type?{'Content-Type':type}:{},body});
     assert.equal(response.status,status);assert.equal(response.headers.get('cache-control'),'no-store');
     assert.equal(response.headers.get('x-content-type-options'),'nosniff');
