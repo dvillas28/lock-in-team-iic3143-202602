@@ -1,3 +1,5 @@
+import {QuizzesService} from "./quizzes/quizzes.service";
+import {QuizzesController} from "./quizzes/quizzes.controller";
 import {ModulesService} from "./modules/modules.service";
 import {ModulesController} from "./modules/modules.controller";
 import {MaterialsService} from "./materials/materials.service";
@@ -28,7 +30,7 @@ import { InstitutionsController } from "./institutions/institutions.controller";
   imports: [JwtModule.register({}),
     // shortcut: memory per instance; coordinate quotas before running multiple instances.
     ThrottlerModule.forRoot([{limit: 5, ttl: 60000, blockDuration: 60000}])],
-  providers: [ModulesService, MaterialsService, EnrollmentsService, AuditService, MembershipAdminService, CoursesService, SectionsService, DatabaseService, AuthService, InstitutionsService, {provide: APP_GUARD, useClass: AuthGuard}],
-  controllers: [ModulesController, MaterialsController, EnrollmentsController, AuditController, MembershipAdminController, CoursesController, SectionsController, HealthController, AuthController, InstitutionsController],
+  providers: [QuizzesService, ModulesService, MaterialsService, EnrollmentsService, AuditService, MembershipAdminService, CoursesService, SectionsService, DatabaseService, AuthService, InstitutionsService, {provide: APP_GUARD, useClass: AuthGuard}],
+  controllers: [QuizzesController, ModulesController, MaterialsController, EnrollmentsController, AuditController, MembershipAdminController, CoursesController, SectionsController, HealthController, AuthController, InstitutionsController],
 })
 export class AppModule {}

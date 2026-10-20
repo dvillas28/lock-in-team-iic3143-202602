@@ -2,10 +2,10 @@
 
 **Branch**: `docs/autoria-quizzes-plan` | **Date**: 2026-10-19
 **Spec**: [spec.md](spec.md) | **Implementación prevista**: `feat/autoria-quizzes`.
-**Estado**: Diseño terminado; implementación y aceptación funcional pendientes.
-**Base vigente**: `origin/dev`, commit `52aa9ee` (PR #90 integrado el 2026-10-20).
-La cadena #85 → #86 → #87 → #89 → #90 ya está integrada en dev.
-El PR documental apunta a dev; implementación y aceptación funcional siguen pendientes.
+**Estado**: Implementación y validación local completas; integración con intentos/notas pendiente.
+**Base vigente**: `origin/dev` @ `4c24dbc`; #93 integrado el 2026-10-20.
+La cadena #85 → #86 → #87 → #89 → #90 → #93 ya está integrada en dev.
+Este PR entrega autoría; integración con intentos/notas conserva sus gates posteriores.
 
 Entrega acordada: dos PRs apilados. `docs/autoria-quizzes-plan` contiene spec,
 plan, tareas, contratos y ADR sobre #90; `feat/autoria-quizzes` parte de esa rama
@@ -41,7 +41,7 @@ Resolver todos los desconocidos mediante evidencia local en [research.md](resear
 
 ## Constitution Check
 
-Gates previos y posteriores al diseño: PASS; aceptación funcional aún pendiente.
+Gates de diseño y aceptación local: PASS; ver [evidencia](../../docs/backend/quiz-authoring-validation.md).
 
 | Gate | Evidencia |
 | --- | --- |

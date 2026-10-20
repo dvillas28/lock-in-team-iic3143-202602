@@ -1,6 +1,6 @@
 # Quickstart de validación: Autoría y publicación de quizzes
 
-Guía para ejecutar después de implementar tasks.md; no representa pruebas ya pasadas.
+Guía reproducible; resultados ejecutados en [evidencia](../../docs/backend/quiz-authoring-validation.md).
 
 ## Prerequisitos
 

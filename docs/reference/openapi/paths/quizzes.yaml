@@ -8,7 +8,7 @@
     operationId: listCourseQuizzes
     summary: Listar quizzes visibles del curso
     description: |
-      Estudiantes ven quizzes publicados aplicables a su sección. Teachers y assistants quedan restringidos a sus secciones; teachers ven su alcance académico.
+      Student/assistant ven publicados globales y de sus secciones activas. Teacher ve drafts de sus secciones; teacher con is_admin y ownership amplía alcance al curso completo. Las vistas de lista/detalle siempre excluyen pauta.
     parameters:
       - $ref: '../components/parameters.yaml#/SectionIdFilter'
     responses:
@@ -26,6 +26,12 @@
         $ref: '../components/responses.yaml#/Forbidden'
       '404':
         $ref: '../components/responses.yaml#/NotFound'
+      '413':
+        $ref: '../components/responses.yaml#/PayloadTooLarge'
+      '415':
+        $ref: '../components/responses.yaml#/UnsupportedMediaType'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'
   post:
     tags:
       - Quizzes
@@ -61,6 +67,12 @@
         $ref: '../components/responses.yaml#/Forbidden'
       '404':
         $ref: '../components/responses.yaml#/NotFound'
+      '413':
+        $ref: '../components/responses.yaml#/PayloadTooLarge'
+      '415':
+        $ref: '../components/responses.yaml#/UnsupportedMediaType'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'
       '422':
         $ref: '../components/responses.yaml#/UnprocessableEntity'
 
@@ -87,6 +99,12 @@
         $ref: '../components/responses.yaml#/Unauthorized'
       '404':
         $ref: '../components/responses.yaml#/NotFound'
+      '413':
+        $ref: '../components/responses.yaml#/PayloadTooLarge'
+      '415':
+        $ref: '../components/responses.yaml#/UnsupportedMediaType'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'
   patch:
     tags:
       - Quizzes
@@ -94,7 +112,7 @@
     summary: Actualizar un quiz editable
     description: |
       Solo se admite en estado draft. Teacher puede modificar quizzes dentro de su alcance académico. Un quiz publicado
-      o utilizado produce 409 Conflict.
+      o utilizado produce 409 Conflict. sectionId puede reasignarse dentro del mismo curso/institución con permiso vigente sobre origen y destino; omitir conserva, null amplía al curso. Quiz.id y Section.id son inmutables.
     requestBody:
       required: true
       content:
@@ -116,6 +134,12 @@
         $ref: '../components/responses.yaml#/Forbidden'
       '404':
         $ref: '../components/responses.yaml#/NotFound'
+      '413':
+        $ref: '../components/responses.yaml#/PayloadTooLarge'
+      '415':
+        $ref: '../components/responses.yaml#/UnsupportedMediaType'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'
       '409':
         $ref: '../components/responses.yaml#/Conflict'
       '422':
@@ -148,6 +172,12 @@
         $ref: '../components/responses.yaml#/Forbidden'
       '404':
         $ref: '../components/responses.yaml#/NotFound'
+      '413':
+        $ref: '../components/responses.yaml#/PayloadTooLarge'
+      '415':
+        $ref: '../components/responses.yaml#/UnsupportedMediaType'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'
 
 /api/v1/institutions/{institutionSlug}/quizzes/{quizId}/publish:
   parameters:
@@ -162,7 +192,7 @@
       Valida fechas, puntajes, preguntas, al menos dos alternativas con IDs únicos
       y exactamente una alternativa correcta por pregunta. Genera auditoría. Teacher puede publicar quizzes dentro de su alcance académico. La operación
       asegura que exista un único GradeItem vinculado al quiz; se rechaza
-      si ya se publicó alguna nota del curso.
+      si ya se publicó alguna nota del curso y el quiz aún era draft. Repetir uno ya publicado devuelve 200 sin nuevo ítem, timestamp ni evento, incluso con el curso congelado. Peso inicial del ítem: 0; sin pauta en auditoría.
     responses:
       '200':
         description: Quiz publicado e inmutable para cambios incompatibles.
@@ -178,6 +208,12 @@
         $ref: '../components/responses.yaml#/Forbidden'
       '404':
         $ref: '../components/responses.yaml#/NotFound'
+      '413':
+        $ref: '../components/responses.yaml#/PayloadTooLarge'
+      '415':
+        $ref: '../components/responses.yaml#/UnsupportedMediaType'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'
       '409':
         $ref: '../components/responses.yaml#/Conflict'
       '422':

@@ -138,16 +138,16 @@ test('content migration upgrades populated courses/audit unchanged and down is c
   await pool.query('INSERT INTO enrollments(id,institution_id,section_id,user_id,role) VALUES($1,$2,$3,$4,\u0027teacher\u0027)',[enrollment,tenant,section,users.owner]);
   await pool.query('INSERT INTO audit_events(id,institution_id,actor_user_id,action,resource_type,resource_id,course_id,changes) VALUES($1,$2,$3,\u0027course.created\u0027,\u0027course\u0027,$4,$4,$5)',[randomUUID(),tenant,users.owner,course,{before:null,after:{name:'Migration'}}]);
   const tables=['users','institutions','institution_memberships','courses','sections','enrollments','audit_events'];
-  const snapshot=async()=>Promise.all(tables.map(async table=>(await pool.query(`SELECT * FROM ${table} ORDER BY id`)).rows));
-  const before=await snapshot();assert.deepEqual(await migration.default.migrate(),{created:1,existing:3});assert.deepEqual(await snapshot(),before);
-  assert.deepEqual(await migration.default.migrate(),{created:0,existing:4});assert.deepEqual(await snapshot(),before);
+  const snapshot=async()=>Promise.all(tables.map(async table=>(await pool.query(`SELECT to_jsonb(t)-'grade_items_locked_at' AS row FROM ${table} t ORDER BY id`)).rows));
+  const before=await snapshot();assert.deepEqual(await migration.default.migrate(),{created:2,existing:3});assert.deepEqual(await snapshot(),before);
+  assert.deepEqual(await migration.default.migrate(),{created:0,existing:5});assert.deepEqual(await snapshot(),before);
   // Destructive down is deliberately restricted to a freshly reset, data-free _test database.
   await reset(pool);await migration.default.migrate();
   for(const table of tables)assert.equal((await pool.query(`SELECT * FROM ${table}`)).rowCount,0);
   const c=await pool.connect();try{
-   const down=await runner({dbClient:c,schema:"public",migrationsSchema:"public",migrationsTable:"pgmigrations",dir:new URL('../../migrations/',import.meta.url).pathname,direction:'down',count:1,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});assert.equal(down.length,1);
+   const down=await runner({dbClient:c,schema:"public",migrationsSchema:"public",migrationsTable:"pgmigrations",dir:new URL('../../migrations/',import.meta.url).pathname,direction:'down',count:2,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});assert.equal(down.length,2);
   }finally{c.release();}
   assert.deepEqual((await pool.query("SELECT to_regclass('public.course_modules') AS modules,to_regclass('public.materials') AS materials")).rows,[{modules:null,materials:null}]);
-  assert.deepEqual(await migration.default.migrate(),{created:1,existing:3});
+  assert.deepEqual(await migration.default.migrate(),{created:2,existing:3});
  }finally{if(saved===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=saved;await rm(dir,{recursive:true,force:true});await pool.end();}
 });
