@@ -21,6 +21,7 @@ global con memberships y despliegue en Railway.
 - [Alcance del MVP de la Entrega 2](adr/choose-delivery-2-mvp-scope.md)
 - [Dominio y API de la Entrega 2](adr/align-delivery-2-domain-and-api.md)
 - [Cierre de intentos de quiz abandonados](adr/close-abandoned-quiz-attempts.md)
+- [Bot PR reviewer: proveedor, seguridad y criterios](adr/define-bot-pr-reviewer.md)
 
 Los estados de los ADR indican cuáles fueron reemplazados parcialmente. El ADR
 de PostgreSQL compartida es la autoridad vigente para persistencia, tenancy y
