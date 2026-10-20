@@ -2,6 +2,7 @@
   post:
     tags: [Authentication]
     operationId: login
+    x-permissions: "Público. User activo y credenciales propias válidas; sin contexto institucional."
     summary: Autenticar identidad global activa
     description: Cinco solicitudes por IP en 60000 ms; sexta bloquea 60000 ms. JSON máximo 4 KiB.
     security: []

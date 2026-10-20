@@ -3,6 +3,7 @@
     tags:
     - Platform
     operationId: getReadiness
+    x-permissions: "Público; comprueba persistencia sin leer registros académicos."
     summary: Confirmar disponibilidad de la persistencia
     description: 'Público, sin datos institucionales ni credenciales. Responde en
       un máximo de cinco segundos. Comprueba tablas y columnas requeridas sin leer
@@ -45,6 +46,7 @@
     tags:
     - Platform
     operationId: getHealth
+    x-permissions: "Público; sin datos institucionales."
     summary: Consultar salud del servicio
     description: No consulta ni expone secretos o configuración interna sensible.
     security: []
@@ -55,13 +57,12 @@
           application/json:
             schema:
               $ref: ../components/schemas/common.yaml#/HealthResponse
-      '429':
-        $ref: ../components/responses.yaml#/TooManyRequests
 /api/v1/institutions:
   get:
     tags:
     - Institutions
     operationId: listAccessibleInstitutions
+    x-permissions: "JWT y User activo; retorna solo memberships e instituciones activas propias."
     summary: Listar instituciones accesibles para la identidad actual
     description: User, membership e Institution deben estar activos. Orden por slug;
       sin pertenencias retorna items vacío.
@@ -88,6 +89,7 @@
     tags:
     - Institutions
     operationId: getCurrentUser
+    x-permissions: "JWT, User e Institution activos y membership activa del actor en institutionSlug."
     summary: Consultar identidad y memberships del contexto institucional
     responses:
       '200':
@@ -146,6 +148,7 @@
     tags:
     - Institutions
     operationId: listInstitutionMemberships
+    x-permissions: "Membership activa e isSuperAdmin vigente en esta institución. No concede acceso académico."
     summary: Listar miembros activos
     description: Exige superadmin vigente del tenant. Sin altas ni cambios de isSuperAdmin.
       Mismo estado es no-op sin evento.
@@ -189,6 +192,7 @@
     tags:
     - Institutions
     operationId: setInstitutionCourseAdmin
+    x-permissions: "Membership activa e isSuperAdmin vigente; solo concede/revoca isAdmin dentro de su institución. No promueve superadmins."
     summary: Conceder o revocar creación de cursos
     description: Exige superadmin vigente del tenant. Sin altas ni cambios de isSuperAdmin.
       Mismo estado es no-op sin evento.

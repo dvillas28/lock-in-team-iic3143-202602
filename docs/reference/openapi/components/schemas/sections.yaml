@@ -119,6 +119,7 @@ EnrollmentCreate:
     role:
       $ref: '#/EnrollmentRole'
 EnrollmentUpdate:
+  example: {"role": "student"}
   type: object
   additionalProperties: false
   minProperties: 1

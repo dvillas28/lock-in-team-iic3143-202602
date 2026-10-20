@@ -38,12 +38,15 @@ y se valida server-side.
 
 ```bash
 pnpm install
-pnpm docs:api
+pnpm --dir backend install --frozen-lockfile
 pnpm docs:api:lint
+pnpm docs:api:build
+pnpm docs:api
 ```
 
-Redocly usa `openapi.yaml` y sus referencias relativas. La configuración vive
-en `redocly.yaml`.
+Redocly valida y resuelve el contrato. Swagger UI con estilos oficiales y assets
+locales abre en `http://localhost:8080/`, sin backend ni CDN; Try it out deshabilitado.
+[Generación, revisión y evidencia](../api-catalog.md).
 
 ## Identidad implementada
 

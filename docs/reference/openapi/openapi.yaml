@@ -2,19 +2,10 @@ openapi: 3.1.0
 info:
   title: AcademiX API
   version: 0.2.0
-  description: 'Contrato HTTP del MVP académico multi-tenant de AcademiX.
-
-
-    El JWT identifica un User global. Los recursos académicos se solicitan bajo
-
-    `/api/v1/institutions/{institutionSlug}`. El slug no concede acceso: el
-
-    backend valida InstitutionMembership y permisos académicos antes de ejecutar
-
-    una operación. Los bodies no aceptan `institutionId` como fuente de scope.
-
-    '
-jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+  description: >-
+    API de AcademiX. Obtén un token en login y úsalo como Bearer.
+    Elige tu institución con GET /api/v1/institutions.
+    Consulta permisos y ejemplos dentro de cada operación.
 servers:
 - url: /
   description: Host actual

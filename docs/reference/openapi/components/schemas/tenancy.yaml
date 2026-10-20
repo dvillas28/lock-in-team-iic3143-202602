@@ -22,6 +22,7 @@ InstitutionSummary:
       type: boolean
       readOnly: true
 InstitutionListResponse:
+  example: {"items": [{"id": "00000000-0000-4000-8000-000000000001", "slug": "institucion-demo", "name": "Institución de demostración", "active": true}]}
   type: object
   additionalProperties: false
   required:
@@ -79,6 +80,7 @@ SectionMembershipSummary:
       - assistant
       - student
 CurrentUser:
+  example: {"id": "00000000-0000-4000-8000-000000000001", "email": "persona@example.test", "name": "Persona de prueba", "institutionMembership": {"id": "00000000-0000-4000-8000-000000000001", "institution": {"id": "00000000-0000-4000-8000-000000000001", "slug": "institucion-demo", "name": "Institución de demostración", "active": true}, "active": true, "isAdmin": false, "isSuperAdmin": false}, "sectionMemberships": []}
   type: object
   additionalProperties: false
   required:

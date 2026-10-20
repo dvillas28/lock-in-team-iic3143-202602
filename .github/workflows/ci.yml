@@ -49,6 +49,14 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --dir frontend install --frozen-lockfile
       - run: pnpm docs:api:lint
+      - run: pnpm --dir backend install --frozen-lockfile
+      - run: pnpm docs:api:test
+      - run: pnpm docs:api:build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: api-catalog
+          path: dist/api-catalog/
+          if-no-files-found: error
       - run: pnpm --dir frontend api:check
       - run: pnpm --dir frontend typecheck
 

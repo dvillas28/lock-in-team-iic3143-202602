@@ -34,10 +34,12 @@ del contrato; toda ruta sin contrato o contradicción público/Bearer bloquea bu
 Operaciones presentes solo en contrato quedan **planificadas**, nunca disponibles.
 `x-permissions` y descripciones documentan condiciones; no conceden permisos.
 
-La implementación recalculará el conteo sobre la base publicada de #98; no se
-traslada el conteo del checkout original. Las operaciones de contrato sin ruta
-registrada seguirán planificadas. Rutas implícitas HEAD/OPTIONS de Express no
-son operaciones de negocio adicionales.
+Sobre la base publicada `ad00b3b` (#98), se verificaron **49 operaciones
+implementadas de 50 documentadas**. Solo `searchInstitutionUsers` sigue planificada.
+Módulos, material markdown, quizzes, intentos y notas sí están registrados en esa
+base. No se trasladó el snapshot antiguo del checkout original, que solo tenía 19.
+Esto acredita registro en código compilado local, no disponibilidad de un deploy.
+Rutas implícitas HEAD/OPTIONS no cuentan como operaciones de negocio adicionales.
 
 JWT identifica User global; institutionSlug solicita contexto, no lo autoriza.
 Membership activa y Enrollment/propiedad se validan server-side en cada operación.
@@ -78,12 +80,34 @@ cambiar su entrada atómicamente según capacidades del hosting. Conservar relea
 anterior. La aprobación del despliegue externo sigue pendiente; no se configuró
 proveedor ni se modificó infraestructura. [Decisión](../adr/static-api-catalog.md).
 
-## Estado de esta capa documental
+## Evidencia de la revisión Swagger UI (2026-10-19)
 
-Los comandos y el mecanismo descritos son el contrato operativo propuesto.
-Esta capa no agrega scripts, assets, dependencia ni configuración de CI.
-El siguiente PR implementará el catálogo, verificará cobertura sobre la base
-real y registrará resultados propios, sin atribuir pruebas del checkout anterior.
+- Dependencia `swagger-ui-dist@5.34.0` fijada con pnpm; assets y licencias incluidos
+  en cada release. Estilos oficiales sustituyen las fichas HTML propias.
+- Portada breve: login/Bearer e institución. La guía detallada vive en este documento;
+  los permisos, contexto y errores permanecen dentro de cada operación.
+- `pnpm docs:api:test`: ejemplos sintéticos, escape, cobertura/seguridad de 49 rutas,
+  referencias resueltas, estados/permisos por operación, descarga/revisión,
+  assets locales y rechazo de contrato/referencia inválidos preservando entrada previa.
+- `pnpm docs:api:build`: release completa con Swagger UI y descarga.
+- Validación sintáctica individual de generador, preparación e inicializador.
+- Playwright Chromium visible, backend detenido: 50 operaciones, filtro por tag/path,
+  enlaces profundos de curso, ejemplos de login/errores y permisos, navegación por
+  teclado con foco visible, descarga con revisión coincidente y Try it out ausente.
+  Fallos HTTP 500 y JSON inválido muestran alert sin fichas parciales.
+  Texto al 200 % y ancho móvil 375 sin desborde de página; tablas desplazables localmente.
+  Contraste mínimo medido de etiquetas HTTP, versiones y Authorize: 4.75:1.
+  Portada sin guía extensa ni línea de dialecto. Revisión exacta en la salida del build.
+  Consultas solo a HTML/CSS/JS/JSON locales; sin llamadas académicas ni errores de página.
+  Script: `/tmp/playwright-test-swagger-pr.js`; capturas: `/tmp/academix-swagger-desktop.png`,
+  `/tmp/academix-swagger-mobile.png` y `/tmp/academix-swagger-200.png`.
+- `pnpm audit --audit-level high`: misma deuda previa de Redocly, 2 críticas,
+  2 altas y 2 moderadas transitivas; ninguna atribuida a swagger-ui-dist por el auditor.
+  Redocly no se incluye en los assets publicados. Sigue pendiente actualizar su cadena de build.
+- Evidencia del cliente sobre esta rama: api:check, typecheck y 30 pruebas pasan.
+  Contrato y tipos regenerados; no cambia código de backend ni permisos.
+- Redocly conserva dos warnings operation-4xx-response de health/ready; no se
+  inventan respuestas para silenciarlos.
 
 ## Pendiente y límites
 

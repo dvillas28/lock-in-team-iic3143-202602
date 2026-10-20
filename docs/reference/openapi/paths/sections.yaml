@@ -6,6 +6,7 @@
     tags:
     - Sections
     operationId: listSections
+    x-permissions: "Membership activa; dueño admin ve todas; otros solo secciones con Enrollment activo propio."
     summary: Listar secciones visibles del curso
     description: Admin dueño ve todas; resto solo secciones con Enrollment activo
       propio.
@@ -35,6 +36,7 @@
     tags:
     - Sections
     operationId: createSection
+    x-permissions: "Membership activa, isAdmin vigente y createdBy=actor del curso."
     summary: Crear una sección del curso
     description: Exige is_admin institucional vigente y dueño del curso. Teacher sin
       admin no configura secciones.
@@ -85,6 +87,7 @@
     tags:
     - Sections
     operationId: getSection
+    x-permissions: "Membership activa; dueño admin o Enrollment activo en esta sección."
     summary: Consultar una sección visible
     responses:
       '200':
@@ -112,6 +115,7 @@
     tags:
     - Sections
     operationId: updateSection
+    x-permissions: "Membership activa, isAdmin vigente y createdBy=actor del curso."
     summary: Actualizar una sección
     description: Exige is_admin institucional vigente y dueño del curso. Teacher sin
       admin no configura secciones.
@@ -157,6 +161,7 @@
     tags:
     - Enrollments
     operationId: listSectionEnrollments
+    x-permissions: "Membership activa; dueño admin o teacher/assistant activo de esta sección. Student no lista participantes."
     summary: Listar memberships de una sección autorizada
     description: Admin dueño o teacher/assistant activo de esta sección; student no
       lista participantes.
@@ -191,6 +196,7 @@
     tags:
     - Enrollments
     operationId: createSectionEnrollment
+    x-permissions: "Membership activa; dueño admin o teacher activo de esta sección; destinatario con User y membership activos."
     summary: Crear una membership de sección
     description: Admin dueño o teacher activo de esta sección. Miembro destinatario
       provisionado y activo; roles múltiples distintos, historial preservado. Sin
@@ -251,6 +257,7 @@
     tags:
     - Enrollments
     operationId: updateSectionEnrollment
+    x-permissions: "Membership activa; dueño admin o teacher activo de esta sección; cambios de rol conservan historia y auditoría."
     summary: Cambiar rol o desactivar una membership
     description: Admin dueño o teacher activo de esta sección. Miembro destinatario
       provisionado y activo; roles múltiples distintos, historial preservado. Sin
