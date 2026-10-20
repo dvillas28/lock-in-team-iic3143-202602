@@ -31,7 +31,7 @@ try {
  const version=docker("exec","-T","postgres","psql","-U",env.POSTGRES_USER,"-d",env.POSTGRES_DB,"-Atc","SHOW server_version_num");
  assert.equal(Math.floor(Number(version.trim())/10000),17);
  const migrate=JSON.parse(docker("exec","-T","backend","node","dist/commands/migrate.js"));
- assert.equal(migrate.created,0);assert.equal(migrate.existing,3);
+ assert.equal(migrate.created,0);assert.equal(migrate.existing,4);
  const seed=()=>JSON.parse(docker("exec","-T","backend","node","dist/seeds/demo.js"));
  assert.deepEqual(seed().created,{institutions:2,users:5,memberships:6});
  const fingerprint=()=>docker("exec","-T","postgres","psql","-U",env.POSTGRES_USER,"-d",env.POSTGRES_DB,"-Atc",

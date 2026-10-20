@@ -94,4 +94,17 @@ Destinatarios deben tener User/membership activos previamente provisionados por 
 Repetición de operaciones aplicadas no restaura privilegios ni cambia credenciales.
 Seed no promueve; para UC/UTFSM existentes usar set-superadmin explícitamente.
 [Operación y evidencia](../../backend/courses-roles-validation.md) distingue checks
-ejecutados de escenarios pendientes; rutas de contenido/quizzes/notas siguen futuras.
+ejecutados de escenarios pendientes; rutas de quizzes/notas siguen futuras.
+
+## Módulos y material compartido
+
+Teacher activo de cualquier sección gestiona módulos y markdown del curso.
+Assistant/student requieren publicación; material exige también padre publicado.
+Flags admin/superadmin sin Enrollment no conceden acceso académico.
+Orden completo admite [] solo en curso vacío; posiciones positivas int32 únicas.
+Escrituras y snapshots se confirman juntos; no-op no añade eventos.
+JSON inerte con no-store/nosniff; no hay renderizador, navegación ni descarga.
+RF15 y archivos de RF14 quedan P2: upload/content y variantes file se retiran del
+contrato activo y cliente generado. Límite HTTP heredado 4096 bytes; máximo
+semántico markdown 10000 caracteres, sujeto además al límite HTTP (413).
+[Evidencia](../../backend/modules-material-validation.md).

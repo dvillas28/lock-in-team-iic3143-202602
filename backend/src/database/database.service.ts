@@ -23,6 +23,10 @@ export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
       e.id,e.institution_id,e.section_id,e.user_id,e.role,e.active,e.created_at,
       a.id,a.institution_id,a.actor_user_id,a.action,a.resource_type,a.resource_id,a.course_id,a.section_id,a.occurred_at,a.changes
       FROM public.courses c,public.sections s,public.enrollments e,public.audit_events a LIMIT 0`);
+
+    await this.pool.query(`SELECT m.id,m.institution_id,m.course_id,m.title,m.position,m.published_at,
+      a.id,a.institution_id,a.module_id,a.title,a.kind,a.markdown_body,a.published_at,a.created_by
+      FROM public.course_modules m,public.materials a LIMIT 0`);
   }
 
   async onModuleInit() { await this.check(); }
