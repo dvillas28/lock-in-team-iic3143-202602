@@ -2,6 +2,7 @@ import { HttpException, UnsupportedMediaTypeException } from "@nestjs/common";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import { NestFactory } from "@nestjs/core";
 import { ProblemFilter } from "./http/problem.filter";
+import { corsOptions } from "./http/cors";
 import { AppModule } from "./app.module";
 import { reportError } from "./database/config";
 
@@ -14,6 +15,7 @@ async function bootstrap() {
   try {
     app = await NestFactory.create<NestExpressApplication>(AppModule, { abortOnError: false, logger: false, bodyParser: false });
     app.getHttpAdapter().getInstance().set("trust proxy", false);
+    app.enableCors(corsOptions());
     app.use((request: {method: string; path: string; headers: Record<string, string>}, response: {setHeader(name:string,value:string):void}, next: (error?: unknown) => void) => {
       if (/^\/api\/v1\/institutions\/[^/]+\/(?:courses\/[^/]+\/(?:modules|quizzes|grade-items|gradebook|my-grades)|sections\/[^/]+\/quizzes\/[^/]+\/attempts|quiz-attempts|modules|materials|quizzes)(?:\/|$)/i.test(request.path)) {
         response.setHeader("Cache-Control", "no-store");

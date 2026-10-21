@@ -16,14 +16,14 @@ import { institutionHomePath, isInstitutionSlug } from "../src/lib/institution-r
 import { getRouteFeedback } from "../src/lib/route-feedback.ts";
 
 test("institution links accept contract slugs without an institution allowlist", () => {
-  for (const slug of ["uc", "utfsm", "campus-2", "another-institution"]) {
+  for (const slug of ["uc", "utfsm", "campus-2", "another-institution", "uc--other", "a".repeat(63)]) {
     assert.equal(isInstitutionSlug(slug), true);
     assert.equal(institutionHomePath(slug), `/institutions/${slug}`);
   }
 });
 
 test("invalid slugs cannot become links, paths or URL injections", () => {
-  for (const slug of ["", "UC", "uc_utfsm", "-uc", "uc-", "uc--other", "uc/utfsm", "..", "uc?role=teacher", "uc#other", "uc%2Futfsm", "uc\n", "ü"]) {
+  for (const slug of ["", "UC", "uc_utfsm", "-uc", "uc-", "a".repeat(64), "uc/utfsm", "..", "uc?role=teacher", "uc#other", "uc%2Futfsm", "uc\n", "ü"]) {
     assert.equal(isInstitutionSlug(slug), false, slug);
     assert.throws(() => institutionHomePath(slug), TypeError);
   }
@@ -31,7 +31,8 @@ test("invalid slugs cannot become links, paths or URL injections", () => {
 
 test("layout awaits params and routes malformed slugs to Next's not-found boundary", async () => {
   const layout = await InstitutionLayout({ params: Promise.resolve({ institutionSlug: "uc" }), children: "content" });
-  assert.match(renderToStaticMarkup(layout), /href="\/institutions\/uc"/);
+  assert.equal(layout.props.slug, "uc");
+  assert.equal(layout.props.children, "content");
   await assert.rejects(
     InstitutionLayout({ params: Promise.resolve({ institutionSlug: "UC" }), children: "private" }),
     (error: unknown) => error instanceof Error && "digest" in error && error.digest === "NEXT_HTTP_ERROR_FALLBACK;404",

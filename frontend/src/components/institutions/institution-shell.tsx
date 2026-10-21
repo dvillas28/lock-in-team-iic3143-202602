@@ -7,9 +7,11 @@ import { institutionHomePath } from "../../lib/institution-routes.ts";
 type InstitutionShellProps = Readonly<{
   institutionSlug: string;
   children?: ReactNode;
+  institutionName?: string;
+  actions?: ReactNode;
 }>;
 
-export function InstitutionShell({ institutionSlug, children }: InstitutionShellProps) {
+export function InstitutionShell({ institutionSlug, institutionName, actions, children }: InstitutionShellProps) {
   const homePath = institutionHomePath(institutionSlug);
 
   return (
@@ -22,7 +24,7 @@ export function InstitutionShell({ institutionSlug, children }: InstitutionShell
             <span className="logo-name">AcademiX</span>
           </Link>
           <div className="tenant-badge institution-context">
-            <span>Institución: <strong>{institutionSlug}</strong></span>
+            <span>Institución: <strong>{institutionName ?? institutionSlug}</strong></span>
           </div>
         </div>
         <nav className="sidebar-nav" aria-label="Navegación institucional">
@@ -41,6 +43,7 @@ export function InstitutionShell({ institutionSlug, children }: InstitutionShell
             <ChevronRight size={14} aria-hidden="true" />
             <span className="crumb-active">Inicio</span>
           </nav>
+          {actions}
         </header>
         <main key={institutionSlug} id="main-content" className="content" tabIndex={-1}>
           {children}
