@@ -1,20 +1,20 @@
 # Métricas del tablero
 
-Snapshots: 10 (2026-10-11 a 2026-10-20).
+Snapshots: 11 (2026-10-11 a 2026-10-21).
 
 ## Avance
 
 |  | Alcance | Terminado | % |
 | --- | --- | --- | --- |
-| Tarjetas | 120 | 12 | 10 |
-| Horas estimadas | 457.0 | 28.0 | 6 |
+| Tarjetas | 120 | 49 | 41 |
+| Horas estimadas | 457.0 | 179.0 | 39 |
 
 ## Tiempos (días)
 
 | Métrica | n | Mediana | Promedio | Máximo |
 | --- | --- | --- | --- | --- |
-| Lead time (creada → Done) | 12 | 4.8 | 5.3 | 16.1 |
-| Cycle time (In progress → Done) | 1 | 4.6 | 4.6 | 4.6 |
+| Lead time (creada → Done) | 49 | 3.7 | 4.1 | 17.0 |
+| Cycle time (In progress → Done) | 18 | 5.3 | 4.9 | 5.9 |
 
 El cycle time solo cuenta tarjetas que algún snapshot vio en In progress. Los drafts que ya estaban en Done en su primer snapshot no tienen fecha de término y quedan fuera.
 
@@ -22,39 +22,39 @@ El cycle time solo cuenta tarjetas que algún snapshot vio en In progress. Los d
 
 | Semana | Tarjetas | Terminadas | Estimado (h) | Real (h) | Real / estimado |
 | --- | --- | --- | --- | --- | --- |
-| Semana 1 E3 | 15 | 11 | 37.0 | 10.0 | 0.63 |
-| Semana 2 E3 | 14 | 1 | 45.0 | — | — |
-| Semana 3 E3 | 15 | 0 | 53.0 | — | — |
-| Semana 4 E3 | 21 | 0 | 85.0 | — | — |
-| Semana 5 E4 | 20 | 0 | 102.0 | — | — |
-| Semana 6 E4 | 18 | 0 | 79.0 | — | — |
-| Semana 7 E4 | 17 | 0 | 56.0 | — | — |
+| Semana 1 E3 | 15 | 13 | 37.0 | 10.0 | 0.63 |
+| Semana 2 E3 | 14 | 9 | 45.0 | — | — |
+| Semana 3 E3 | 19 | 8 | 73.0 | — | — |
+| Semana 4 E3 | 20 | 6 | 88.0 | — | — |
+| Semana 5 E4 | 17 | 7 | 79.0 | — | — |
+| Semana 6 E4 | 18 | 5 | 79.0 | — | — |
+| Semana 7 E4 | 17 | 1 | 56.0 | — | — |
 
 Real / estimado usa solo tarjetas terminadas con ambos campos; sobre 1 significa que se subestimó.
 
-Tarjetas en Done sin Real (h): 4.
+Tarjetas en Done sin Real (h): 41.
 
 ## Por tipo
 
 | Tipo | Tarjetas | Terminadas | Estimado (h) |
 | --- | --- | --- | --- |
-| feat | 46 | 1 | 259.0 |
-| docs | 32 | 3 | 86.0 |
+| feat | 46 | 21 | 259.0 |
+| docs | 32 | 13 | 86.0 |
 | ci | 17 | 6 | 42.0 |
-| chore | 14 | 2 | 30.0 |
-| test | 5 | 0 | 19.0 |
-| build | 4 | 0 | 11.0 |
-| fix | 2 | 0 | 10.0 |
+| chore | 14 | 4 | 30.0 |
+| test | 5 | 1 | 19.0 |
+| build | 4 | 3 | 11.0 |
+| fix | 2 | 1 | 10.0 |
 
 ## Por área
 
 | Área | Tarjetas | Terminadas | Estimado (h) |
 | --- | --- | --- | --- |
-| BE | 33 | 0 | 180.0 |
-| DOC | 22 | 1 | 51.0 |
-| FE | 21 | 1 | 112.0 |
-| PREP | 18 | 3 | 52.0 |
+| BE | 33 | 21 | 180.0 |
+| DOC | 22 | 6 | 51.0 |
+| FE | 21 | 2 | 112.0 |
+| PREP | 18 | 8 | 52.0 |
 | CI | 15 | 4 | 36.0 |
-| INST | 6 | 3 | 15.0 |
-| INF | 5 | 0 | 11.0 |
+| INST | 6 | 5 | 15.0 |
+| INF | 5 | 3 | 11.0 |
 
