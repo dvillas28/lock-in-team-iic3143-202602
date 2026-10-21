@@ -264,7 +264,7 @@ jobs:
           TSX_TSCONFIG_PATH: frontend/tsconfig.json
         run: |
           mkdir -p frontend/coverage
-          frontend/node_modules/.bin/c8 --reporter=text --reporter=lcov \
+          frontend/node_modules/.bin/c8 --all --src frontend/src --check-coverage --lines 80 --branches 80 --reporter=text --reporter=lcov \
             --reports-dir=frontend/coverage \
             node --import ./frontend/node_modules/tsx/dist/loader.mjs --test \
             frontend/test/*.test.ts
