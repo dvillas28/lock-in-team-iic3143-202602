@@ -11,8 +11,8 @@
 - 429 conserva `Retry-After` (segundos o fecha, hasta 24 horas; fallback 60 segundos).
   La cuota real permanece en backend: cinco solicitudes por IP/minuto, una instancia.
 - Después de login se verifica el JWT consultando `GET /api/v1/institutions`.
-  Cero membresías muestra un estado vacío; una o más se ofrecen en el selector.
-- `/institutions/{slug}` no muestra el shell privado hasta validar
+  El login abre `/courses` en el dominio actual; no hay selector de instituciones.
+- `/courses` no muestra el shell privado hasta validar
   `GET /api/v1/institution/{slug}/me`. No se inventan roles ni dashboards.
 - 401 limpia toda la sesión. 403/404 retiran el contexto; 503/red/respuesta inválida
   muestran recuperación sin reutilizar identidad anterior. No hay reintentos automáticos.
@@ -30,7 +30,7 @@ Cada solicitud tiene cancelación y timeout de 15 segundos, incluido el consumo 
 Los temporizadores suspendidos no permiten enviar un token vencido.
 Logout borra token, directorio, identidad y contexto; cancela solicitudes pendientes,
 descarta respuestas de generaciones anteriores y redirige a `/login`, aun sin backend.
-El selector usa navegación interna para conservar memoria; cambiar de subdominio requiere
+La navegación interna conserva memoria; abrir otro subdominio requiere
 nuevo login. Recargar o abandonar el documento también cierra la sesión local.
 Un JWT copiado no queda revocado en servidor. No hay refresh token ni endpoint de logout.
 
@@ -41,20 +41,21 @@ puede impedir que un Server Component futuro ejecute una consulta privada por su
 
 ## Contexto institucional
 
-Producción reconoce `{slug}.academix.dvillasc.me` con el patrón OpenAPI (máximo 63).
-Incluye UC/UTFSM sin una lista de membresías hardcodeada. El host solo propone el slug:
-`/me` comprueba la pertenencia real. Host y path distintos bloquean la vista.
-Dominios inesperados no habilitan login ni contenido institucional. Los enlaces para
-cambiar de institución se construyen desde slugs validados devueltos por la API.
-En localhost, 127.0.0.1 o IPv6 loopback se elige institución por path usando el selector.
-No se necesita DNS de producción. `next` solo permite `/institutions` o su inicio por slug;
-se descartan URLs externas, query, fragmentos, rutas codificadas y rutas no implementadas.
-El backend no toma autorización de Host, Origin, X-Forwarded-Host o x-tenant.
-
-**Compatibilidad:** tras integrar el PR #125 de `dev`, el prefijo API institucional es
-`/api/v1/institution/{slug}`; el directorio global sigue en `/api/v1/institutions`.
-El backend conserva RLS y credenciales runtime/migración separadas. Las URLs del navegador
-siguen en `/institutions/{slug}`: no son endpoints de la API.
+`NEXT_PUBLIC_INSTITUTION_ORIGINS` es un JSON público origin→slug incorporado al build.
+Si falta, admite exclusivamente `https://uc.academix.dvillasc.me` y
+`https://utfsm.academix.dvillasc.me`. Si está presente e inválido, bloquea el acceso.
+Esquema y puerto son parte del origin; no se admiten sufijos, aliases ni defaults por path.
+Cada slug tiene un único destino; HTTP solo se permite para hosts locales explícitos.
+El origin propone el slug para `/api/v1/institution/{slug}/me`; backend autoriza por
+path, JWT y pertenencia activa, con RLS. Host/Origin nunca conceden permisos.
+No se presenta el directorio como selector. `/institutions` solo redirige a `/courses`,
+sin contenido ni enlace para elegir institución. Otro dominio requiere login independiente.
+Localhost/loopback sin contexto no envía credenciales: orienta a los hosts configurados.
+`next` acepta un único valor exacto `/courses` o `/institutions`; cualquier otro valor
+cae en `/courses`, incluidos repetidos, query/hash, externos y encoding residual.
+URLSearchParams decodifica una sola vez. Legacy `/institutions/{slug}` solo compara
+slug con el origin: igualdad redirige a `/courses`; diferencia rechaza sin adoptar tenant.
+No hay consultas académicas ni fetch privado servidor: el inicio indica integración pendiente.
 
 ## Configuración y ejecución
 
@@ -81,7 +82,7 @@ usuario multiinstitución, membresías revocadas, preflight CORS y headers adver
 El Quality Gate de esta rama queda **PENDIENTE DE VALIDACIÓN EN CI**; la cobertura local
 no sustituye el análisis remoto de SonarQube.
 
-Resultado local tras integrar #125, 2026-10-21: frontend 96/96, backend 157/157,
+Resultado histórico tras integrar #125, 2026-10-21: frontend 96/96, backend 157/157,
 catálogo API 4/4 y test del smoke postdeploy 1/1.
 Cobertura frontend: 89,68% líneas y 90,10% ramas; backend: 99,65% y 95,49%.
 La configuración CORS consolidada tiene 100% de líneas y ramas.
@@ -92,3 +93,7 @@ sin hallazgos HIGH/CRITICAL corregibles en dependencias productivas, secretos o 
 `pnpm audit` también informa un HIGH previo en `braces@3.0.3`, dependencia de desarrollo
 de eslint-config-next ya presente en dev, sin versión corregida publicada según el aviso.
 No se incorpora al runtime productivo; no se alteraron reglas ni exclusiones para ocultarlo.
+
+Misión de dominio posterior: frontend 130/130 (86,98% líneas / 89,98% ramas),
+integración backend aislada 126/126. Sin selector de instituciones.
+[Evidencia y bloqueo HTTPS público](../../specs/20261021-141348_frontend-acceso-multitenant/validation.md).

@@ -2,8 +2,7 @@
 
 Desde la raíz del repositorio, con Docker Compose, Python 3 y puertos 3000/3001 libres.
 Esta guía prepara cuentas locales; no conecta ni modifica Railway.
-La rama es `feat/issue-80-login-session`.
-El revisor puede hacer `git fetch origin` y `git switch feat/issue-80-login-session`.
+Rama de la misión: `feat/frontend-acceso-multitenant`.
 
 ## 1. Preparar configuración y claves locales
 
@@ -40,8 +39,12 @@ PY
 ```
 
 Para localhost, comprobar `NEXT_PUBLIC_API_URL=http://localhost:3001` y
-`CORS_ALLOWED_ORIGINS=["http://localhost:3000"]` en `.env`; el ejemplo ya contiene ambos.
-Usar `http://localhost:3000`, no otro origen sin añadirlo explícitamente a CORS.
+`CORS_ALLOWED_ORIGINS=["http://uc.localhost:3000","http://utfsm.localhost:3000"]`.
+El ejemplo configura NEXT_PUBLIC_INSTITUTION_ORIGINS con ambos origins exactos.
+Comprobar resolución con `getent hosts uc.localhost utfsm.localhost`; si falta,
+agregar `127.0.0.1 uc.localhost utfsm.localhost` al archivo hosts del equipo.
+Reconstruir frontend al cambiar las variables NEXT_PUBLIC_*; Next ejecutado en frontend/
+requiere exportarlas: no lee automáticamente el `.env` raíz. API_URL es solo del servidor.
 Si 5432 está ocupado, cambiar solo el puerto host PostgreSQL de Compose a `5433:5432`.
 
 ## 2. Levantar y crear las cuentas
@@ -63,7 +66,7 @@ aplica sus variables nuevas antes del seed. No hace falta borrar volúmenes.
 
 ## 3. Ingresar desde el navegador
 
-Abrir [login local](http://localhost:3000/login). Copiar solo el valor de la variable,
+Abrir [login local](http://uc.localhost:3000/login). Copiar solo el valor de la variable,
 sin su nombre ni `=`. `.env` es privado: no adjuntarlo a la PR ni a capturas.
 
 | Correo | Contraseña en `.env` | Resultado |
@@ -76,10 +79,10 @@ sin su nombre ni `=`. `.env` es privado: no adjuntarlo a la PR ni a capturas.
 
 ## 4. Casos para el revisor
 
-1. Multi: ingresar, abrir UC, volver al selector y abrir UTFSM; cada vista muestra su institución.
-2. UC: abrir manualmente `/institutions/utfsm`; no aparece identidad/contenido UTFSM.
-3. UTFSM: probar `/institutions/uc`; mismo rechazo. Cerrar sesión entre cuentas.
-4. Revocado: estado sin membresías; inactivo o contraseña incorrecta: mensaje genérico.
+1. Multi: ingresar en UC abre `/courses`; abrir UTFSM pide nuevo login y muestra UTFSM.
+2. UC-only: ingresar en dominio UTFSM; `/me` rechaza sin mostrar datos UTFSM.
+3. UTFSM-only: ingresar en dominio UC; mismo rechazo. Cerrar sesión entre cuentas.
+4. Revocado: `/courses` rechazado sin datos institucionales; inactivo/clave incorrecta: mensaje genérico.
 5. Hacer doble clic en Continuar: solo un POST de login, botón ocupado mientras responde.
 6. Cerrar sesión y volver a una ruta institucional: redirige al login sin mostrar datos anteriores.
 7. Recargar una vista autenticada: pide login porque el JWT estaba en memoria.
@@ -90,14 +93,15 @@ En Network verificar método, path y estado: login 200 → listado 200 → `/me`
 contexto no autorizado 404. No compartir bodies, Authorization, JWT ni archivos HAR.
 Un 401 no aparece en logs normales: el filtro existente registra errores ≥500.
 
-### Entrada directa a una institución en localhost
+### Entrada directa y compatibilidad
 
-Cerrar sesión y abrir `http://localhost:3000/institutions/uc`: pide login y luego abre UC,
-sin pasar por el selector, incluso con `demo-multi@academix.example`.
-Repetir con `/institutions/utfsm` para abrir UTFSM. Con `demo-uc@academix.example`,
-la entrada a UTFSM debe rechazarse. `/login` sin destino muestra el selector al ingresar.
-Esto verifica el destino y la membresía; no reproduce la restricción por hostname.
-`uc.localhost` y `utfsm.localhost` todavía no están habilitados en esta implementación.
+Abrir `http://uc.localhost:3000/courses`: login con next limpio y luego `/me` UC.
+Repetir en UTFSM; no hay selector de instituciones. Navegación interna
+conserva sesión; recarga, nueva pestaña y cambio de dominio requieren login independiente.
+`/institutions/uc` en UC redirige a `/courses`; `/institutions/utfsm` rechaza en UC.
+Localhost desnudo y origins desconocidos no habilitan login ni adoptan tenant desde path.
+Retornos adversariales, pruebas CORS reales y evidencia se detallan en el
+[quickstart de la misión](../../specs/20261021-141348_frontend-acceso-multitenant/quickstart.md).
 
 ## 5. Verificación automatizada y diagnóstico
 

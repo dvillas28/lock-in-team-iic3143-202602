@@ -187,21 +187,39 @@ test("session instances do not share credentials or authenticated state",async()
   const a=harness(),b=harness();await signIn(a.session);assert.equal(b.session.getSnapshot().status,"anonymous");
   await assert.rejects(b.session.request(c=>c.GET("/api/v1/institutions")));assert.equal(b.requests.length,0);a.session.logout();
 });
-test("safe destinations reject open redirects, encoding, queries, fragments and extra routes",()=>{
-  for(const path of [null,"//evil.test","https://evil.test","/institutions/uc?admin=true","/institutions/uc#x","/institutions/%75c","/institutions/../uc","/institutions/uc/course","/login","/\\evil.test"]){assert.equal(safeReturnPath(path),"/institutions");}
-  for(const path of ["/institutions","/institutions/uc","/institutions/utfsm","/institutions/a--b"])assert.equal(safeReturnPath(path),path);
+test("safe destinations accept only exact implemented paths",()=>{
+  for(const path of [null,"//evil.test","https://evil.test","/institutions/uc","/courses?admin=true","/courses#x","%2Finstitutions","/login","/\\evil.test"])
+    assert.equal(safeReturnPath(path),"/courses");
+  for(const path of ["/courses","/institutions"]) assert.equal(safeReturnPath(path),path);
 });
-test("hostname only selects visual context; unexpected domains and path mismatch are rejected",()=>{
-  for(const host of ["localhost","127.0.0.1","[::1]"])assert.deepEqual(hostInstitution(host),{valid:true});
-  for(const host of ["evil.test","uc.academix.dvillasc.me.evil.test","uc.evil.test","api.dvillasc.me","academix.dvillasc.me"])assert.equal(hostInstitution(host).valid,false);
-  assert.equal(loginDestination("uc.academix.dvillasc.me","/institutions/utfsm"),"/institutions/uc");
-  assert.equal(loginDestination("localhost","/institutions/utfsm"),"/institutions/utfsm");
-  assert.equal(loginDestination("evil.test",null),undefined);
-  assert.equal(matchesHost("uc.academix.dvillasc.me","utfsm"),false);assert.equal(matchesHost("localhost","utfsm"),true);
-  assert.equal(institutionHref("localhost","uc"),"/institutions/uc");
-  assert.equal(institutionHref("uc.academix.dvillasc.me","uc"),"/institutions/uc");
-  assert.equal(institutionHref("uc.academix.dvillasc.me","utfsm"),"https://utfsm.academix.dvillasc.me/institutions/utfsm");
-  assert.throws(()=>institutionHref("evil.test","uc"));assert.throws(()=>institutionHref("localhost","../uc"));
+test("origins match scheme, port and configured destination exactly",()=>{
+  const uc="https://uc.academix.dvillasc.me";
+  assert.deepEqual(hostInstitution(uc),{valid:true,slug:"uc"});
+  for(const host of ["localhost","http://localhost:3000","http://127.0.0.1:3000","http://[::1]:3000",uc+":444",uc+".evil.test",uc+"/","http://uc.academix.dvillasc.me","https://unknown.academix.dvillasc.me"])
+    assert.equal(hostInstitution(host).valid,false,host);
+  assert.equal(loginDestination(uc,"/institutions/utfsm"),"/courses");
+  assert.equal(loginDestination(uc,"/institutions"),"/institutions");
+  assert.equal(loginDestination("https://evil.test",null),undefined);
+  assert.equal(matchesHost(uc,"utfsm"),false);
+  assert.equal(matchesHost(uc,"uc"),true);
+  assert.equal(institutionHref(uc,"uc"),"/courses");
+  assert.equal(institutionHref(uc,"utfsm"),"https://utfsm.academix.dvillasc.me/courses");
+  assert.equal(institutionHref(uc,"unknown"),undefined);
+  assert.equal(institutionHref("https://evil.test","uc"),undefined);
+});
+test("public origin configuration fails closed and supports explicit local hosts",()=>{
+  const old=process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS;
+  try {
+    for(const value of ["", "null", "[]", "{}", "bad", '{"https://a.test":"UC"}', '{"https://a.test":"uc","https://b.test":"uc"}',
+      ...["http://remote.test","https://a.test/","https://A.test","https://a.test:443","https://u:p@a.test","https://a.test?q=x","https://a.test#x","ftp://a.test"].map(origin=>JSON.stringify({[origin]:"uc"}))]) {
+      process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS=value;
+      assert.equal(hostInstitution("https://uc.academix.dvillasc.me").valid,false,value);
+    }
+    process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS=JSON.stringify({"http://uc.localhost:3000":"uc","http://utfsm.localhost:3000":"utfsm"});
+    assert.deepEqual(hostInstitution("http://uc.localhost:3000"),{valid:true,slug:"uc"});
+    assert.equal(hostInstitution("http://uc.localhost:3001").valid,false);
+    assert.equal(institutionHref("http://uc.localhost:3000","utfsm"),"http://utfsm.localhost:3000/courses");
+  } finally { if(old===undefined) delete process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS; else process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS=old; }
 });
 
 test("JWT issuance in the next second during login is accepted without extending the deadline",async()=>{
@@ -209,4 +227,33 @@ test("JWT issuance in the next second during login is accepted without extending
   const result=signIn(h.session);await flush();h.advance(1000);
   pending.resolve(Response.json({...login(),accessToken:jwt(id,instant/1000+1)}));assert.equal(await result,true);
   h.advance(899_000);h.fire();assert.equal(h.session.getSnapshot().status,"anonymous");
+});
+
+for (const operation of ["login", "directory", "context"] as const) {
+  for (const replacement of [false, true]) {
+    test(`${operation} delayed body cannot restore data after ${replacement ? "new identity" : "logout"}`, async () => {
+      const body = deferred<Uint8Array>(); let hold = false;
+      const h = harness(r => {
+        const selected = operation === "login" ? r.method === "POST" : operation === "context" ? r.url.endsWith("/me") : r.url.endsWith("/institutions");
+        const value = r.method === "POST" ? login(hold ? id : other) : r.url.endsWith("/me") ? user("uc", other) : {items:[institution()]};
+        return hold && selected ? new Response(new ReadableStream({async start(c) {c.enqueue(await body.promise);c.close();}})) : Response.json(value);
+      });
+      if(operation !== "login") await signIn(h.session);
+      hold = true;
+      const pending = operation === "login" ? signIn(h.session) : operation === "context" ? h.session.loadContext("uc") : h.session.loadInstitutions();
+      await flush(); h.session.logout(); hold = false;
+      if(replacement) await signIn(h.session);
+      const expected = h.session.getSnapshot();
+      body.resolve(new TextEncoder().encode(JSON.stringify(operation === "login" ? login() : operation === "context" ? user() : {items:[institution("utfsm")]})));
+      await pending;
+      assert.deepEqual(h.session.getSnapshot(),expected);
+      assert.equal(h.session.getSnapshot().context,undefined);h.session.logout();
+    });
+  }
+}
+test("a deferred operation cannot borrow credentials from a later generation",async()=>{
+  const gate=deferred<void>(); const h=harness(); await signIn(h.session);
+  const pending=h.session.request(async client=>{await gate.promise;return client.GET("/api/v1/institutions");});
+  h.session.logout();await signIn(h.session);const count=h.requests.length;gate.resolve();
+  await assert.rejects(pending,StaleSessionError);assert.equal(h.requests.length,count);h.session.logout();
 });

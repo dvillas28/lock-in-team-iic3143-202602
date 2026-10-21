@@ -8,7 +8,7 @@ import { AppRouterContext, type AppRouterInstance } from "next/dist/shared/lib/a
 import { SessionProvider, useSession } from "../src/components/auth/session-provider.tsx";
 import { LoginForm } from "../src/components/auth/login-form.tsx";
 import { ProtectedInstitution } from "../src/components/auth/protected-institution.tsx";
-import { InstitutionPicker } from "../src/components/auth/institution-picker.tsx";
+import InstitutionsPage from "../src/app/institutions/page.tsx";
 
 const id="10000000-0000-4000-8000-000000000003";
 const institution=(slug="uc")=>({id:slug==="uc"?id:"10000000-0000-4000-8000-000000000004",slug,name:slug.toUpperCase(),active:true});
@@ -18,7 +18,7 @@ const flush=()=>new Promise<void>(resolve=>setImmediate(resolve));
 function deferred<T>() {let resolve!:(value:T)=>void;const promise=new Promise<T>(r=>{resolve=r;});return {resolve,promise};}
 
 async function mount(options:{url?:string;reply?:(request:Request)=>Response|Promise<Response>}={}){
-  const dom=new JSDOM('<div id="root"></div>',{url:options.url??"http://localhost:3000/login"});
+  const dom=new JSDOM('<div id="root"></div>',{url:options.url??"https://uc.academix.dvillasc.me/login"});
   const old=new Map<string,PropertyDescriptor|undefined>();
   for(const [key,value] of Object.entries({window:dom.window,self:dom.window,document:dom.window.document,navigator:dom.window.navigator,
     HTMLElement:dom.window.HTMLElement,HTMLInputElement:dom.window.HTMLInputElement,FormData:dom.window.FormData,
@@ -37,14 +37,15 @@ async function mount(options:{url?:string;reply?:(request:Request)=>Response|Pro
   };
   const root=createRoot(dom.window.document.getElementById("root")!);
   let path=dom.window.location.pathname;
+  if(path==="/institutions"){path="/courses";dom.window.history.replaceState({},"",path);}
   let custom:ReactNode;
   const router:AppRouterInstance={back(){},forward(){},refresh(){},prefetch(){},bfcacheId:"test",
     push(href){navigate(href);},replace(href){navigate(href);}};
-  function navigate(href:string){dom.window.history.replaceState({},"",href);path=dom.window.location.pathname;render();}
+  function navigate(href:string){if(href==="/institutions")href="/courses";dom.window.history.replaceState({},"",href);path=dom.window.location.pathname;render();}
   function render(){
     const match=path.match(/^\/institutions\/([a-z0-9-]+)$/);
-    const view=custom??(match?createElement(ProtectedInstitution,{slug:match[1]},createElement("p",null,"PRIVATE_CONTENT")):
-      path==="/institutions"?createElement(InstitutionPicker):createElement(LoginForm));
+    const view=custom??(match || path==="/courses"?createElement(ProtectedInstitution,{slug:match?.[1]},createElement("p",null,"PRIVATE_CONTENT")):
+      createElement(LoginForm));
     root.render(createElement(AppRouterContext.Provider,{value:router},createElement(SessionProvider,null,view)));
   }
   await act(async()=>{render();await flush();});
@@ -77,23 +78,24 @@ test("accessible form, validation, password toggle and successful institution na
     await ui.click("Mostrar contraseña");assert.equal(ui.doc.querySelector('#password')?.getAttribute("type"),"text");
     await ui.click("Ocultar contraseña");assert.equal(ui.doc.querySelector('#password')?.getAttribute("type"),"password");
     await ui.submit("not an email","");assert.match(ui.doc.body.textContent!,/correo válido/);assert.equal(ui.requests.length,0);
+    ui.doc.querySelector<HTMLButtonElement>("button[type=submit]")!.focus();await ui.submit("not an email","");assert.equal(ui.doc.activeElement?.id,"login-message");
     await ui.submit("persona@example.test", "ñ".repeat(65));assert.match(ui.doc.body.textContent!,/contraseña es demasiado larga/);assert.equal(ui.requests.length,0);
-    await ui.submit();assert.equal(ui.path,"/institutions");assert.match(ui.doc.body.textContent!,/Tus instituciones/);
+    await ui.submit();assert.equal(ui.path,"/courses");assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
     assert.deepEqual(await ui.requests[0].json(),{email:"persona@example.test",password:" pass "});
-    await ui.click("UC");assert.equal(ui.path,"/institutions/uc");assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+    await ui.navigate("/institutions");assert.equal(ui.path,"/courses");assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
     assert.ok(ui.requests.some(request=>new URL(request.url).pathname==="/api/v1/institution/uc/me"));
     assert.match(ui.doc.body.textContent!,/Persona · persona@example.test/);
-    await ui.navigate("/institutions/utfsm");assert.match(ui.doc.body.textContent!,/Institución: UTFSM/);
+    await ui.navigate("/institutions/utfsm");assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);await ui.navigate("/courses");
     await ui.click("Cerrar sesión");assert.equal(ui.path,"/login");assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT|persona@example.test/);
-    await ui.navigate("/institutions/uc");assert.equal(ui.path,"/login");assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+    await ui.navigate("/courses");assert.equal(ui.path,"/login");assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
     assert.equal(ui.dom.window.localStorage.length,0);assert.equal(ui.dom.window.sessionStorage.length,0);assert.equal(ui.doc.cookie,"");
   }finally{await ui.close();}
 });
 
 test("initial protected route and reload contain no private shell or content",async()=>{
-  const ui=await mount({url:"http://localhost:3000/institutions/uc"});try{
+  const ui=await mount({url:"https://uc.academix.dvillasc.me/courses"});try{
     assert.equal(ui.path,"/login");assert.match(ui.dom.window.location.search,/next=/);assert.doesNotMatch(ui.doc.body.innerHTML,/PRIVATE_CONTENT|Contexto institucional/);
-    await ui.submit();assert.equal(ui.path,"/institutions/uc");assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+    await ui.submit();assert.equal(ui.path,"/courses");assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
     await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event("pagehide"));await flush();});
     assert.equal(ui.path,"/login");assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
   }finally{await ui.close();}
@@ -106,7 +108,7 @@ test("double submit shows busy, clears password immediately and only sends once"
     await act(async()=>{ui.doc.querySelector("form")!.dispatchEvent(new ui.dom.window.Event("submit",{bubbles:true,cancelable:true}));await flush();});
     assert.equal(ui.requests.length,1);
     await act(async()=>{pending.resolve(Response.json(login()));await flush();});
-    assert.match(ui.doc.body.textContent!,/no tiene membresías/);
+    assert.equal(ui.path,"/courses");
   }finally{await ui.close();}
 });
 
@@ -118,23 +120,23 @@ test("login failure, rate limit countdown and recovery use safe messages",async 
     status=429;await ui.submit();assert.match(ui.doc.body.textContent!,/Demasiados intentos/);assert.equal(ui.doc.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled,true);
     await act(async()=>{t.mock.timers.tick(3000);await flush();});
     assert.equal(ui.doc.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled,false);
-    status=200;await ui.submit();assert.equal(ui.path,"/institutions");
+    status=200;await ui.submit();assert.equal(ui.path,"/courses");
   }finally{await ui.close();t.mock.timers.reset();}
 });
 
 test("unknown hosts block login and mismatched institution subdomains block content",async()=>{
   const bad=await mount({url:"https://evil.test/login"});try{assert.match(bad.doc.body.textContent!,/dominio no está habilitado/);assert.equal(bad.doc.querySelector("form"),null);assert.equal(bad.requests.length,0);}finally{await bad.close();}
   const ui=await mount({url:"https://uc.academix.dvillasc.me/login?next=%2Finstitutions%2Futfsm"});try{
-    await ui.submit();assert.equal(ui.path,"/institutions/uc");await ui.navigate("/institutions/utfsm");assert.match(ui.doc.body.textContent!,/Contexto institucional inválido/);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
-    await ui.navigate("/institutions");assert.match(ui.doc.querySelector('a[href^="https://utfsm."]')?.getAttribute("href")??"",/https:\/\/utfsm\.academix\.dvillasc\.me\/institutions\/utfsm/);
+    await ui.submit();assert.equal(ui.path,"/courses");await ui.navigate("/institutions/utfsm");assert.match(ui.doc.body.textContent!,/Contexto institucional inválido/);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+    await ui.navigate("/institutions");assert.equal(ui.path,"/courses");assert.equal(ui.doc.querySelector('a[href="/institutions"]'),null);
   }finally{await ui.close();}
-  const picker=await mount({url:"https://evil.test/institutions"});try{assert.match(picker.doc.body.textContent!,/dominio no está habilitado/);}finally{await picker.close();}
+  const picker=await mount({url:"https://evil.test/institutions"});try{assert.match(picker.doc.body.textContent!,/Contexto institucional inválido/);}finally{await picker.close();}
 });
 
 test("context loading hides children; revocation, outage, retry and 401 fail closed",async()=>{
   let status=200;let pending:ReturnType<typeof deferred<Response>>|undefined;
   const ui=await mount({reply:r=>r.method==="POST"?Response.json(login()):r.url.endsWith("/me")?(pending?pending.promise:Response.json(status===200?user():{detail:"PRIVATE_INTERNAL"},{status})):Response.json({items:[institution()]})});try{
-    await ui.submit();pending=deferred<Response>();await ui.navigate("/institutions/uc");
+    await ui.submit();pending=deferred<Response>();await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event("focus"));await flush();});
     assert.match(ui.doc.body.textContent!,/Cargando contenido/);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
     await act(async()=>{pending!.resolve(Response.json(user()));await flush();});pending=undefined;assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
     for(const code of [404,503]){
@@ -146,12 +148,11 @@ test("context loading hides children; revocation, outage, retry and 401 fail clo
   }finally{await ui.close();}
 });
 
-test("directory outage hides previous list and supports recovery",async()=>{
-  let fail=false;
-  const ui=await mount({reply:r=>r.method==="POST"?Response.json(login()):fail?Response.json({}, {status:503}):Response.json({items:[institution()]})});try{
-    await ui.submit();assert.match(ui.doc.body.textContent!,/UC/);
-    fail=true;await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event("focus"));await flush();});assert.match(ui.doc.body.textContent!,/No se pudo completar/);assert.equal(ui.doc.querySelector('a[href="/institutions/uc"]'),null);
-    fail=false;await ui.click("Reintentar");assert.ok(ui.doc.querySelector('a[href="/institutions/uc"]'));
+test("directory verification outage prevents login and supports explicit resubmission",async()=>{
+  let fail=true;
+  const ui=await mount({reply:r=>r.method==="POST"?Response.json(login()):r.url.endsWith('/me')?Response.json(user()):fail?Response.json({}, {status:503}):Response.json({items:[institution()]})});
+  try{await ui.submit();assert.equal(ui.path,'/login');assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+    fail=false;await ui.submit();assert.equal(ui.path,'/courses');assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
   }finally{await ui.close();}
 });
 
@@ -166,10 +167,98 @@ test("provider denies access outside its boundary; server rendering never emits 
 test("token expiry redirects private UI; logout still works during a backend outage",async t=>{
   t.mock.timers.enable({apis:["setTimeout","Date"],now:1_800_000_000_000});
   const ui=await mount();try{
-    await ui.submit();await ui.navigate("/institutions/uc");assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+    await ui.submit();await ui.navigate("/courses");assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
     await act(async()=>{t.mock.timers.tick(900_001);await flush();});assert.equal(ui.path,"/login");assert.match(ui.doc.body.textContent!,/sesión venció/);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
-    await ui.submit();await ui.navigate("/institutions/uc");
+    await ui.submit();await ui.navigate("/courses");
     const count=ui.requests.length;globalThis.fetch=async()=>{throw new Error("offline");};await ui.click("Cerrar sesión");
     assert.equal(ui.path,"/login");assert.equal(ui.requests.length,count);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
   }finally{await ui.close();t.mock.timers.reset();}
+});
+
+for(const status of [400,403,404,413,415,503,0,-1]) {
+  test(`login feedback ${status} is announced, focused, safe and never retried`,async()=>{
+    const ui=await mount({reply:()=>{if(status===0)throw new Error("PRIVATE_NETWORK");return status===-1?Response.json({}):Response.json({detail:"PRIVATE_INTERNAL"},{status});}});
+    try {await ui.submit();assert.equal(ui.requests.length,1);assert.equal(ui.doc.activeElement?.id,"login-message");
+      assert.equal(ui.doc.querySelector('#login-message')?.getAttribute('aria-live'),"polite");
+      assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_/);assert.equal(ui.doc.querySelector<HTMLInputElement>('#password')?.value,"");
+    }finally{await ui.close();}
+  });
+}
+test("UTFSM selects its own context for multi membership without opening selector",async()=>{
+  const ui=await mount({url:"https://utfsm.academix.dvillasc.me/login"});try{
+    await ui.submit();assert.equal(ui.path,"/courses");assert.match(ui.doc.body.textContent!,/Institución: UTFSM/);
+    assert.ok(ui.requests.some(r=>r.url.endsWith('/institution/utfsm/me')));
+    assert.ok(ui.requests.every(r=>!r.url.includes('/institution/uc/')));
+  }finally{await ui.close();}
+});
+for(const value of [403,404,"inactive","malformed"] as const){
+  test(`context ${value} cannot mount private children despite accessible directory`,async()=>{
+    const ui=await mount({reply:r=>r.method==="POST"?Response.json(login()):!r.url.endsWith('/me')?Response.json({items:[institution()]}):
+      typeof value==="number"?Response.json({detail:"PRIVATE_INTERNAL"},{status:value}):Response.json(value==="malformed"?{}:{...user(),institutionMembership:{...user().institutionMembership,institution:{...institution(),active:false}}})});
+    try{await ui.submit();assert.equal(ui.path,"/courses");assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT|persona@example.test|PRIVATE_INTERNAL|Contexto institucional/);}finally{await ui.close();}
+  });
+}
+test("unknown origins and loopback never redirect to login or fetch private context",async()=>{
+  for(const origin of ["http://localhost:3000","http://127.0.0.1:3000","https://uc.academix.dvillasc.me:444","https://uc.academix.dvillasc.me.evil.test"]){
+    const ui=await mount({url:origin+'/courses'});try{assert.equal(ui.path,'/courses');assert.equal(ui.requests.length,0);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);}finally{await ui.close();}
+  }
+});
+test("late context body and pageshow cannot restore DOM after pagehide",async()=>{
+  const body=deferred<Uint8Array>();let delayed=false;
+  const ui=await mount({reply:r=>r.method==="POST"?Response.json(login()):r.url.endsWith('/me')?(delayed?new Response(new ReadableStream({async start(c){c.enqueue(await body.promise);c.close();}})):Response.json(user())):Response.json({items:[institution()]})});
+  try{await ui.submit();assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);delayed=true;
+    await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event('focus'));await flush();});
+    assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+    await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event('pagehide'));await flush();body.resolve(new TextEncoder().encode(JSON.stringify(user())));await flush();ui.dom.window.dispatchEvent(new ui.dom.window.Event('pageshow'));await flush();});
+    assert.equal(ui.path,'/login');assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT|persona@example.test/);
+    assert.equal(ui.dom.window.localStorage.length,0);assert.equal(ui.dom.window.sessionStorage.length,0);assert.equal(ui.doc.cookie,'');
+  }finally{await ui.close();}
+});
+
+for(const [query,expected] of [["next=%2Finstitutions","/courses"],["next=%252Finstitutions","/courses"],["next=%2Finstitutions&next=%2Finstitutions","/courses"],["next=https%3A%2F%2Fevil.test","/courses"],["next=%2Fcourses%3Fx%3D1","/courses"],["next=%2Finstitutions%2Fuc","/courses"]]) {
+  test(`login return ${query} resolves exactly once`,async()=>{
+    const ui=await mount({url:`https://uc.academix.dvillasc.me/login?${query}`});
+    try{await ui.submit();assert.equal(ui.path,expected);assert.doesNotMatch(ui.dom.window.location.href,/signature|password|accessToken/);}finally{await ui.close();}
+  });
+}
+test("institutions compatibility route redirects without rendering a selector",()=>{
+  assert.throws(()=>InstitutionsPage(),(error:unknown)=>error instanceof Error && 'digest' in error && String(error.digest).includes('/courses'));
+});
+test("accessible directory is never rendered as institution choices",async()=>{
+  const ui=await mount();try{await ui.submit();assert.equal(ui.doc.querySelector('a[href="/institutions"]'),null);
+    assert.doesNotMatch(ui.doc.body.textContent!,/Tus instituciones/);assert.equal(ui.doc.querySelector('input[name="slug"]'),null);
+  }finally{await ui.close();}
+});
+
+test("local UC and UTFSM use configured origins and clean same/cross document destinations",async()=>{
+  const old=process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS;
+  process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS=JSON.stringify({'http://uc.localhost:3000':'uc','http://utfsm.localhost:3000':'utfsm'});
+  try{for(const slug of ['uc','utfsm']){
+    const ui=await mount({url:`http://${slug}.localhost:3000/courses`});try{
+      assert.equal(ui.path,'/login');await ui.submit();assert.match(ui.doc.body.textContent!,new RegExp(`Institución: ${slug.toUpperCase()}`));
+      await ui.navigate(`/institutions/${slug}`);assert.equal(ui.path,'/courses');
+      const count=ui.requests.filter(r=>r.method==='POST').length;await ui.navigate('/institutions');const other=slug==='uc'?'utfsm':'uc';
+      assert.equal(ui.path,'/courses');assert.equal(ui.doc.querySelector('a[href="/institutions"]'),null);
+      assert.equal(ui.requests.filter(r=>r.method==='POST').length,count);
+      await ui.navigate(`/institutions/${other}`);assert.match(ui.doc.body.textContent!,/Contexto institucional inválido/);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+    }finally{await ui.close();}
+  }}finally{if(old===undefined)delete process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS;else process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS=old;}
+});
+test("a fresh document after authenticated teardown has no shared identity",async()=>{
+  const first=await mount();try{await first.submit();assert.match(first.doc.body.textContent!,/PRIVATE_CONTENT/);}finally{await first.close();}
+  const second=await mount({url:'https://uc.academix.dvillasc.me/courses'});try{assert.equal(second.path,'/login');assert.equal(second.requests.length,0);assert.doesNotMatch(second.doc.body.textContent!,/PRIVATE_CONTENT|persona@example.test/);}finally{await second.close();}
+});
+
+test("revocation revalidation wins over an older successful context body",async()=>{
+  const body=deferred<Uint8Array>();let mode="active";
+  const ui=await mount({reply:r=>r.method==="POST"?Response.json(login()):!r.url.endsWith('/me')?Response.json({items:[institution()]}):
+    mode==="active"?Response.json(user()):mode==="revoked"?Response.json({}, {status:404}):new Response(new ReadableStream({async start(c){c.enqueue(await body.promise);c.close();}}))});
+  try{await ui.submit();assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);mode="delayed";
+    await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event('focus'));await flush();});
+    assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);mode="revoked";
+    await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event('focus'));await flush();});
+    assert.match(ui.doc.body.textContent!,/Recurso no disponible/);
+    await act(async()=>{body.resolve(new TextEncoder().encode(JSON.stringify(user())));await flush();});
+    assert.match(ui.doc.body.textContent!,/Recurso no disponible/);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT|persona@example.test/);
+  }finally{await ui.close();}
 });

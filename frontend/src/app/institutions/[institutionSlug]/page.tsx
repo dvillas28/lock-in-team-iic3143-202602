@@ -1,10 +1,2 @@
-import { EmptyState } from "../../../components/route-states.tsx";
-
-export default function InstitutionHome() {
-  return (
-    <>
-      <div className="page-heading"><h1>Inicio</h1></div>
-      <EmptyState />
-    </>
-  );
-}
+// The legacy layout redirects only when its slug matches the configured origin.
+export default function LegacyInstitutionHome() { return null; }

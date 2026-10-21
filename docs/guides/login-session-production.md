@@ -11,18 +11,18 @@ La [prueba local con Docker](login-session-testing.md) no modifica Railway ni su
 | `https://utfsm.academix.dvillasc.me` | Mismo frontend | Portada con enlace al login |
 | `https://api.dvillasc.me` | Backend, puerto 3001 | API compartida |
 
-Al abrir `https://uc.academix.dvillasc.me/login`, el frontend toma `uc` del hostname.
+Al abrir `https://uc.academix.dvillasc.me/login`, el frontend resuelve `uc` del origin HTTPS exacto configurado.
 Después de autenticar, comprueba la membresía y abre directamente UC, incluso para
 una persona con membresías en ambas instituciones. No pasa primero por el selector.
-La dirección final conserva `https://uc.academix.dvillasc.me/institutions/uc`.
+La dirección final conserva `https://uc.academix.dvillasc.me/courses`.
 En UTFSM ocurre lo mismo con `utfsm`. La raíz `/` no redirige automáticamente al login.
 
 El flujo HTTP vigente es login global `POST /api/v1/auth/login`, directorio
 `GET /api/v1/institutions` y contexto `GET /api/v1/institution/uc/me` en la API central.
 El último endpoint exige JWT, usuario activo, institución activa y membresía activa.
 El dominio no concede permisos. Host y path institucional distintos bloquean la vista.
-El botón Instituciones permite abrir el selector después de ingresar; cambiar de
-subdominio abre otro documento y exige autenticarse nuevamente porque el JWT está en memoria.
+No existe selector ni botón Instituciones. `/institutions` redirige a `/courses` sin
+mostrar contenido. Abrir otro subdominio exige autenticarse porque el JWT está en memoria.
 
 ## Configuración de los servicios
 
@@ -32,6 +32,9 @@ subdominio abre otro documento y exige autenticarse nuevamente porque el JWT est
    Registrar `api.dvillasc.me` en el backend si todavía no está configurado.
 3. Configurar `NEXT_PUBLIC_API_URL=https://api.dvillasc.me` en la construcción del frontend.
    El Dockerfile lo recibe como build argument; cambiarlo requiere reconstruir la imagen.
+   NEXT_PUBLIC_INSTITUTION_ORIGINS ausente usa los dos origins HTTPS de la tabla;
+   si se declara, debe ser JSON origin→slug válido y completo, sin paths ni slugs duplicados.
+   Una variable presente vacía bloquea acceso; no usar valor vacío como default.
 4. Configurar `API_URL` del servidor frontend hacia el backend: puede usarse
    `https://api.dvillasc.me` o su dirección privada efectiva dentro de Railway.
 5. Configurar `DATABASE_URL` con el rol `academix_runtime` y `MIGRATION_DATABASE_URL`

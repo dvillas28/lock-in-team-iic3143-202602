@@ -4,7 +4,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import InstitutionLayout from "../src/app/institutions/[institutionSlug]/layout.tsx";
-import InstitutionHome from "../src/app/institutions/[institutionSlug]/page.tsx";
+import InstitutionHome from "../src/app/courses/page.tsx";
 import Loading from "../src/app/institutions/[institutionSlug]/loading.tsx";
 import InstitutionError from "../src/app/institutions/[institutionSlug]/error.tsx";
 import NotFound from "../src/app/not-found.tsx";
@@ -18,7 +18,7 @@ import { getRouteFeedback } from "../src/lib/route-feedback.ts";
 test("institution links accept contract slugs without an institution allowlist", () => {
   for (const slug of ["uc", "utfsm", "campus-2", "another-institution", "uc--other", "a".repeat(63)]) {
     assert.equal(isInstitutionSlug(slug), true);
-    assert.equal(institutionHomePath(slug), `/institutions/${slug}`);
+    assert.equal(institutionHomePath(slug), "/courses");
   }
 });
 
@@ -42,7 +42,7 @@ test("layout awaits params and routes malformed slugs to Next's not-found bounda
 test("each institution renders only its own navigation and no invented identity or roles", () => {
   for (const [slug, other] of [["uc", "utfsm"], ["utfsm", "uc"]]) {
     const html = renderToStaticMarkup(createElement(InstitutionShell, { institutionSlug: slug }, "Public structure"));
-    assert.match(html, new RegExp(`href="/institutions/${slug}"`));
+    assert.match(html, /href="\/courses"/);
     assert.doesNotMatch(html, new RegExp(`/institutions/${other}`));
     assert.match(html, new RegExp(`<strong>${slug}</strong>`));
     assert.match(html, /aria-current="page"/);

@@ -1,2 +1,4 @@
-import { InstitutionPicker } from "../../components/auth/institution-picker.tsx";
-export default function InstitutionsPage() { return <InstitutionPicker />; }
+import { redirect } from "next/navigation";
+
+// Compatibility only: institutional context always comes from the configured origin.
+export default function InstitutionsPage() { redirect("/courses"); }

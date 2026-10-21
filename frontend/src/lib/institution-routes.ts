@@ -7,5 +7,5 @@ export function institutionHomePath(institutionSlug: string): string {
   if (!isInstitutionSlug(institutionSlug)) {
     throw new TypeError("Invalid institution slug");
   }
-  return `/institutions/${institutionSlug}`;
+  return "/courses";
 }
