@@ -21,7 +21,7 @@ Unauthorized:
         status: 401
         detail: Se requiere una identidad autenticada válida.
         code: UNAUTHORIZED
-        instance: /api/v1/institutions/uc/courses
+        instance: /api/v1/institution/uc/courses
         traceId: 01JQ4Y2X7B3QK5XEM0XZ4MSH8Z
         errors: []
 Forbidden:
@@ -52,7 +52,7 @@ NotFound:
         status: 404
         detail: El recurso no existe o no es visible en el contexto autorizado.
         code: RESOURCE_NOT_FOUND
-        instance: /api/v1/institutions/uc/courses/8dc9f252-bf1a-4b50-85c0-a2937484c429
+        instance: /api/v1/institution/uc/courses/8dc9f252-bf1a-4b50-85c0-a2937484c429
         traceId: 01JQ4Y2X7B3QK5XEM0XZ4MSH8Z
         errors: []
 Conflict:
@@ -144,6 +144,6 @@ ContentUnauthorized:
         status: 401
         detail: Se requiere una identidad autenticada válida.
         code: UNAUTHORIZED
-        instance: /api/v1/institutions/uc/courses
+        instance: /api/v1/institution/uc/courses
         traceId: 01JQ4Y2X7B3QK5XEM0XZ4MSH8Z
         errors: []

@@ -40,7 +40,7 @@ test('publication migration upgrades populated attempts and grades without rewri
   const f=await gradebookFixture(pool),{runner}=await import('node-pg-migrate'),c=await pool.connect();
   const state=()=>Promise.all(['users','institution_memberships','courses','quiz_attempts','grades','grade_items','audit_events'].map(async table=>(await pool.query(`SELECT * FROM ${table} ORDER BY id`)).rows));
   const before=await state();
-  try{await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir:new URL('../../migrations/',import.meta.url).pathname,direction:'down',count:2,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});}finally{c.release();}
+  try{await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir:new URL('../../migrations/',import.meta.url).pathname,direction:'down',count:4,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});}finally{c.release();}
   assert.equal((await pool.query("SELECT to_regclass('grade_publications') AS t")).rows[0].t,null);
   assert.equal((await cli('commands/migrate').result).code,0);assert.deepEqual(await state(),before);
   assert.equal((await cli('commands/migrate').result).code,0);assert.deepEqual(await state(),before);assert.ok(f.own);
@@ -49,7 +49,7 @@ test('publication migration upgrades populated attempts and grades without rewri
 test('upgrade rejects invalid legacy publications atomically without silently repairing history',async()=>{
  const pool=await database();try{
   const f=await gradebookFixture(pool),{runner}=await import('node-pg-migrate'),c=await pool.connect();
-  try{await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir:new URL('../../migrations/',import.meta.url).pathname,direction:'down',count:2,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});}finally{c.release();}
+  try{await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir:new URL('../../migrations/',import.meta.url).pathname,direction:'down',count:4,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});}finally{c.release();}
   await pool.query('UPDATE grades SET score_percent=99 WHERE id=$1',[f.grades[0].id]);
   await pool.query('UPDATE grades SET published_at=now() WHERE id=$1',[f.grades[0].id]);
   const before=(await pool.query('SELECT * FROM grades ORDER BY id')).rows;

@@ -23,7 +23,7 @@ export async function coursesFixture(pool) {
  return {env,tenants,own,other,foreign,s1,s2,s3,s4,teacher,add};
 }
 export async function request(app,token,path,method="GET",body) {
- const response=await fetch(`${app.base}/api/v1/institutions/${path}`,{...authorized(token),method,...(body===undefined?{}:{headers:{...authorized(token).headers,"Content-Type":"application/json"},body:JSON.stringify(body)})});
+ const response=await fetch(`${app.base}/api/v1/institution/${path}`,{...authorized(token),method,...(body===undefined?{}:{headers:{...authorized(token).headers,"Content-Type":"application/json"},body:JSON.stringify(body)})});
  const result=await response.json();assert.equal(response.headers.get("cache-control"),"no-store");return {status:response.status,body:result,headers:response.headers};
 }
 export async function failAudit(pool, action="*", resourceId=null) {

@@ -1,4 +1,4 @@
-/* Swagger UI reads only the bundled public description; no academic requests. */
+/* API central api.dvillasc.me; slug in path. Catalog reads only the bundled description. */
 (async () => {
   try {
     const response = await fetch('./openapi.json', {credentials:'omit'});

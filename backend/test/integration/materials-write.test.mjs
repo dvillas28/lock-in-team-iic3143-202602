@@ -7,7 +7,7 @@ test('US1 markdown: server actor, shared editing, independent publication, valid
   const f=await contentFixture(pool,true);app=await http();const t=await tokens(app,f),path=`uc/modules/${f.modules[0]}/materials`;
   const created=await request(app,t.teacher,path,'POST',{title:' Source ',markdownBody:hostile});assert.equal(created.status,201);const id=created.body.id,detail=`uc/materials/${id}`;
   assert.equal(created.body.createdBy,users.other);assert.equal(created.body.kind,'markdown');assert.equal(created.body.publishedAt,null);
-  assert.equal(created.headers.get('location'),`/api/v1/institutions/uc/materials/${id}`);
+  assert.equal(created.headers.get('location'),`/api/v1/institution/uc/materials/${id}`);
   assert.equal((await request(app,t.owner,detail,'PATCH',{title:'Edited',markdownBody:'new '+hostile})).status,200);
   const published=await request(app,t.teacher,detail+'/publish','POST');assert.equal(published.status,200);assert.ok(published.body.publishedAt);
   const count=(await pool.query('SELECT * FROM audit_events')).rowCount;

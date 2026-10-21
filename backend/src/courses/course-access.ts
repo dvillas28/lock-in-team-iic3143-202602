@@ -1,4 +1,4 @@
-import { ForbiddenException, NotFoundException, UnauthorizedException, ConflictException, UnprocessableEntityException, ServiceUnavailableException } from "@nestjs/common";
+import { ForbiddenException, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import type { Pool, PoolClient } from "pg";
 
 export type Sql = Pool | PoolClient;
@@ -7,7 +7,7 @@ export async function context(db: Sql, actor: string, slug: string) {
   const user = (await db.query("SELECT active FROM public.users WHERE id=$1", [actor])).rows[0];
   if (!user?.active) throw new UnauthorizedException();
   const row = (await db.query<Membership>(`SELECT m.* FROM public.institution_memberships m JOIN public.institutions i ON i.id=m.institution_id
-    WHERE m.user_id=$1 AND i.slug=$2 AND m.active AND i.active`, [actor,slug])).rows[0];
+    WHERE m.user_id=$1 AND i.id=NULLIF(current_setting('academix.institution_id',true),'')::uuid AND i.slug=$2 AND m.active AND i.active`, [actor,slug])).rows[0];
   if (!row) throw new NotFoundException();
   return row;
 }
@@ -49,16 +49,4 @@ export async function sectionScope(db: Sql, m: Membership, sectionId: string, lo
   return {...scope,section,roles};
 }
 export function requirePermission(allowed: boolean) {if (!allowed) throw new ForbiddenException();}
-export async function transaction<T>(pool: Pool, operation: (client: PoolClient)=>Promise<T>) {
-  const client=await pool.connect();
-  try {
-    await client.query("BEGIN"); const result=await operation(client); await client.query("COMMIT"); return result;
-  } catch(error) {
-    await client.query("ROLLBACK").catch(()=>{});
-    const code=(error as {code?:string}).code;
-    if (code==="23505") throw new ConflictException();
-    if (code==="23514" || code==="23503") throw new UnprocessableEntityException();
-    if (code?.startsWith("08") || code==="57P01" || code==="ECONNREFUSED") throw new ServiceUnavailableException();
-    throw error;
-  } finally {client.release();}
-}
+export { transaction } from "../database/tenant-transaction";

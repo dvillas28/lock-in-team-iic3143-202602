@@ -1,4 +1,4 @@
-/api/v1/institutions/{institutionSlug}/modules/{moduleId}/materials:
+/api/v1/institution/{institutionSlug}/modules/{moduleId}/materials:
   parameters:
   - $ref: ../components/parameters.yaml#/InstitutionSlug
   - $ref: ../components/parameters.yaml#/ModuleId
@@ -95,7 +95,7 @@
         $ref: ../components/responses.yaml#/ContentProblem
       '415':
         $ref: ../components/responses.yaml#/ContentProblem
-/api/v1/institutions/{institutionSlug}/materials/{materialId}:
+/api/v1/institution/{institutionSlug}/materials/{materialId}:
   parameters:
   - $ref: ../components/parameters.yaml#/InstitutionSlug
   - $ref: ../components/parameters.yaml#/MaterialId
@@ -187,7 +187,7 @@
         $ref: ../components/responses.yaml#/ContentProblem
       '415':
         $ref: ../components/responses.yaml#/ContentProblem
-/api/v1/institutions/{institutionSlug}/materials/{materialId}/publish:
+/api/v1/institution/{institutionSlug}/materials/{materialId}/publish:
   parameters:
   - $ref: ../components/parameters.yaml#/InstitutionSlug
   - $ref: ../components/parameters.yaml#/MaterialId
@@ -237,7 +237,7 @@
         $ref: ../components/responses.yaml#/ContentProblem
       '415':
         $ref: ../components/responses.yaml#/ContentProblem
-/api/v1/institutions/{institutionSlug}/materials/{materialId}/unpublish:
+/api/v1/institution/{institutionSlug}/materials/{materialId}/unpublish:
   parameters:
   - $ref: ../components/parameters.yaml#/InstitutionSlug
   - $ref: ../components/parameters.yaml#/MaterialId

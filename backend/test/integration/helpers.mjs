@@ -16,17 +16,25 @@ export function testUrl(env = process.env) {
     return url.href;
   } catch { throw new Error("Exclusive TEST_DATABASE_URL ending in _test required"); }
 }
+export function runtimeUrl(env=process.env) {
+ const runtime=new URL(env.TEST_RUNTIME_DATABASE_URL ?? "");
+ const admin=new URL(testUrl(env));
+ assert.equal(runtime.hostname,admin.hostname);assert.equal(runtime.port,admin.port);assert.equal(runtime.pathname,admin.pathname);
+ assert.equal(runtime.username,"academix_runtime");
+ testUrl({TEST_DATABASE_URL:runtime.href});
+ return runtime.href;
+}
 export function secrets() {
   return Object.fromEntries(["UC", "UTFSM", "MULTI", "REVOKED", "INACTIVE"].map(
     name => [`DEMO_${name}_PASSWORD`, randomBytes(12).toString("hex")],
   ));
 }
-export function cli(file, extra = {}) {
+export function cli(file, extra = {}, timeout = 35000) {
   const child = spawn(process.execPath, [`dist/${file}.js`], {
     cwd: new URL("../../", import.meta.url),
-    env: { ...process.env, DATABASE_URL: testUrl(), AUTH_JWT_SECRET: randomBytes(32).toString("base64"), ...extra },
+    env: { ...process.env, MIGRATION_DATABASE_URL: testUrl(), DATABASE_URL: runtimeUrl(), AUTH_JWT_SECRET: randomBytes(32).toString("base64"), ...extra },
     stdio: ["ignore", "pipe", "pipe"],
-    timeout: 35000, killSignal: "SIGKILL",
+    timeout, killSignal: "SIGKILL",
   });
   let output = "";
   child.stdout.on("data", data => { output += data; });
@@ -41,7 +49,7 @@ export async function database() {
     catch (error) { throw new Error(`Integration SQL failure (${error.code ?? "connection"})`); }
   };
   const version = await pool.query("SHOW server_version_num");
-  assert.equal(Math.floor(Number(version.rows[0].server_version_num) / 10000), 17);
+  assert.ok([17,18].includes(Math.floor(Number(version.rows[0].server_version_num) / 10000)));
   return pool;
 }
 export async function reset(pool) {
@@ -55,6 +63,7 @@ export async function migrated(pool) {
   await reset(pool);
   const result = await cli("commands/migrate").result;
   assert.equal(result.code, 0, "migration failed");
+  assert.equal((await cli("commands/provision-runtime").result).code,0,"provision failed");
 }
 export async function snapshot(pool) {
   return Promise.all(["institutions", "users", "institution_memberships"].map(async table =>
@@ -69,7 +78,7 @@ export function sanitized(output, values = []) {
 export async function http(extra = {}) {
   const server = createServer(); server.listen(0, "127.0.0.1"); await once(server,"listening");
   const port = server.address().port; await new Promise(resolve=>server.close(resolve));
-  const app = cli("main", {PORT:String(port), ...extra});
+  const app = cli("commands/start", {PORT:String(port), ...extra}, 180000);
   const base = `http://127.0.0.1:${port}`;
   const close = async () => {
     if (app.child.exitCode === null && app.child.signalCode === null) app.child.kill("SIGTERM");
@@ -97,3 +106,9 @@ export async function login(app, env, account="MULTI") {
   return body.accessToken;
 }
 export function authorized(token) {return {headers:{Authorization:`Bearer ${token}`}};}
+
+export async function runtimeDatabase() {
+ const {DatabaseService}=await import("../../dist/database/database.service.js");
+ const previous=process.env.DATABASE_URL;process.env.DATABASE_URL=runtimeUrl();
+ try{return new DatabaseService();}finally{if(previous===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=previous;}
+}

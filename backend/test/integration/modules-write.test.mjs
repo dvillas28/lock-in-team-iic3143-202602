@@ -8,7 +8,7 @@ test('US1 modules: teacher in either section, complete order, role/tenant negati
   const f=await contentFixture(pool);app=await http();const t=await tokens(app,f),path=`uc/courses/${f.own}/modules`;
   assert.deepEqual((await request(app,t.teacher,path+'/order','PUT',{moduleIds:[]})).body,{items:[]});
   const one=await request(app,t.teacher,path,'POST',{title:' One ',position:4});assert.equal(one.status,201);assert.equal(one.body.title,'One');assert.equal(one.body.publishedAt,null);
-  assert.equal(one.headers.get('location'),`/api/v1/institutions/uc/modules/${one.body.id}`);
+  assert.equal(one.headers.get('location'),`/api/v1/institution/uc/modules/${one.body.id}`);
   const two=await request(app,t.owner,path,'POST',{title:'Two',position:2});assert.equal(two.status,201);
   const id=one.body.id,detail=`uc/modules/${id}`;
   assert.equal((await request(app,t.owner,detail)).body.id,id);

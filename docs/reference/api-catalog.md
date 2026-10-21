@@ -41,6 +41,9 @@ base. No se trasladó el snapshot antiguo del checkout original, que solo tenía
 Esto acredita registro en código compilado local, no disponibilidad de un deploy.
 Rutas implícitas HEAD/OPTIONS no cuentan como operaciones de negocio adicionales.
 
+Rutas institucionales: `/api/v1/institution/{institutionSlug}/...`; listado global `/api/v1/institutions`.
+Frontend UC/UTFSM usa API central; Origin no selecciona tenant.
+
 JWT identifica User global; institutionSlug solicita contexto, no lo autoriza.
 Membership activa y Enrollment/propiedad se validan server-side en cada operación.
 Student, assistant y teacher son roles de sección. Admin requiere isAdmin vigente
@@ -50,7 +53,7 @@ ningún flag concede acceso académico implícito. Auditoría y persistencia no 
 ## Reproducir ejemplos fuera del portal
 
 Usar backend y cuentas propias de prueba previamente provisionadas por PM.
-Definir `API_URL` en terminal, copiar curl de login, sustituir email/password y
+Definir `API_URL=https://api.dvillasc.me` (solo origen; local `http://localhost:3001`) en terminal, copiar curl de login, sustituir email/password y
 copiar accessToken de su respuesta a `TOKEN`. Seguir instituciones accesibles y
 usar un slug devuelto en la consulta /me. Ejemplos de respuesta son sintéticos;
 no contienen tokens válidos ni registros académicos. Swagger UI permite seleccionar

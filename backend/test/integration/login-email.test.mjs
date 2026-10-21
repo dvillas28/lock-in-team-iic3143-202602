@@ -13,8 +13,8 @@ test("email migration populated/empty/repeat, collision rollback and concurrent 
    await reset(pool);
    // Invoke the existing migrator with a temporary directory, using its standard exported entrypoint.
    const {default:migration}=await import("../../dist/commands/migrate.js");
-   const prev=process.env.DATABASE_URL;process.env.DATABASE_URL=process.env.TEST_DATABASE_URL;
-   try {await migration.migrate(dir);} finally {if(prev===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=prev;}
+   const prev=process.env.MIGRATION_DATABASE_URL;process.env.MIGRATION_DATABASE_URL=process.env.TEST_DATABASE_URL;
+   try {await migration.migrate(dir);} finally {if(prev===undefined)delete process.env.MIGRATION_DATABASE_URL;else process.env.MIGRATION_DATABASE_URL=prev;}
    const insert=email=>pool.query("INSERT INTO users(id,email,name,password_hash) VALUES($1,$2,'Fixture','$argon2id$v=19$m=19456,t=2,p=1$fixture$fixture')",[randomUUID(),email]);
    await insert("Case@Example.test");if(collision)await insert(" case@example.test ");
    const before=await snapshot(pool);const result=await cli("commands/migrate").result;sanitized(result.output);

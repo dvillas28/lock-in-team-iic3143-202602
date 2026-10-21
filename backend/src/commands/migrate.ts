@@ -1,10 +1,10 @@
 import { resolve } from "node:path";
 import { Client } from "pg";
 import { runner } from "node-pg-migrate";
-import { connectionConfig, reportError } from "../database/config";
+import { operationalConfig, reportError } from "../database/config";
 
-export async function migrate(dir = resolve(__dirname, "../../migrations")) {
-  const client = new Client({ ...connectionConfig(), connectionTimeoutMillis: 5000,
+export async function migrate(dir = resolve(__dirname, "../../migrations"), env:NodeJS.ProcessEnv=process.env) {
+  const client = new Client({ ...operationalConfig(env), connectionTimeoutMillis: 5000,
     options: "-c lock_timeout=10000 -c statement_timeout=30000 -c search_path=public" });
   client.on("error", () => { /* The active operation reports a sanitized failure. */ });
   try {

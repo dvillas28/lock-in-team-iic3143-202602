@@ -6,7 +6,7 @@ test("same JWT sees committed membership/institution/user revocation and fails c
  const pool=await database();let app;let token;
  try {
   const env=await fixture(pool);app=await http();token=await login(app,env);
-  const get=slug=>fetch(`${app.base}/api/v1/institutions/${slug}/me`,authorized(token));
+  const get=slug=>fetch(`${app.base}/api/v1/institution/${slug}/me`,authorized(token));
   const list=()=>fetch(`${app.base}/api/v1/institutions`,authorized(token));
   const alternating=await Promise.all(Array.from({length:20},async(_,i)=>{
    const slug=i%2?"uc":"utfsm";const response=await get(slug);assert.equal(response.status,200);

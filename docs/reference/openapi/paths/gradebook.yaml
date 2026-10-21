@@ -1,4 +1,4 @@
-/api/v1/institutions/{institutionSlug}/courses/{courseId}/grade-items:
+/api/v1/institution/{institutionSlug}/courses/{courseId}/grade-items:
   parameters:
     - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/CourseId'
@@ -29,7 +29,7 @@
       '503':
         $ref: '../components/responses.yaml#/ServiceUnavailable'
 
-/api/v1/institutions/{institutionSlug}/courses/{courseId}/gradebook/weights:
+/api/v1/institution/{institutionSlug}/courses/{courseId}/gradebook/weights:
   parameters:
     - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/CourseId'
@@ -72,7 +72,7 @@
       '503':
         $ref: '../components/responses.yaml#/ServiceUnavailable'
 
-/api/v1/institutions/{institutionSlug}/courses/{courseId}/gradebook:
+/api/v1/institution/{institutionSlug}/courses/{courseId}/gradebook:
   parameters:
     - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/CourseId'
@@ -111,7 +111,7 @@
       '503':
         $ref: '../components/responses.yaml#/ServiceUnavailable'
 
-/api/v1/institutions/{institutionSlug}/courses/{courseId}/gradebook/publications:
+/api/v1/institution/{institutionSlug}/courses/{courseId}/gradebook/publications:
   parameters:
     - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/CourseId'
@@ -165,7 +165,7 @@
       '503':
         $ref: '../components/responses.yaml#/ServiceUnavailable'
 
-/api/v1/institutions/{institutionSlug}/courses/{courseId}/my-grades:
+/api/v1/institution/{institutionSlug}/courses/{courseId}/my-grades:
   parameters:
     - $ref: '../components/parameters.yaml#/InstitutionSlug'
     - $ref: '../components/parameters.yaml#/CourseId'

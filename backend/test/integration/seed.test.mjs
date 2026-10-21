@@ -10,10 +10,10 @@ const run = env => cli("seeds/demo",env).result;
 const demo = secrets;
 const same = (a,b) => assert.ok(JSON.stringify(a)===JSON.stringify(b), "persisted rows changed");
 
-async function rejectInvalidInputs(DATABASE_URL) {
+async function rejectInvalidInputs(MIGRATION_DATABASE_URL) {
   for(const key of Object.keys(secrets())) {
     for(const password of [undefined, "", "x".repeat(7),"x".repeat(31),"😀".repeat(7),"😀".repeat(31)]) {
-      const result=await run({...demo(),[key]:password,DATABASE_URL});
+      const result=await run({...demo(),[key]:password,MIGRATION_DATABASE_URL});
       sanitized(result.output,password ? [password] : []);
       assert.equal(result.code,1); assert.ok(/config/.test(result.output),"configuration error missing");
     }
@@ -25,9 +25,9 @@ test("manual seed validates all passwords before connecting", async () => {
   const server=createServer(socket=>{connections++;socket.destroy();});
   server.listen(0,"127.0.0.1");
   await once(server,"listening");
-  const DATABASE_URL=`postgres://127.0.0.1:${server.address().port}/seed_validation_test`;
+  const MIGRATION_DATABASE_URL=`postgres://127.0.0.1:${server.address().port}/seed_validation_test`;
   try {
-    await rejectInvalidInputs(DATABASE_URL);
+    await rejectInvalidInputs(MIGRATION_DATABASE_URL);
     assert.equal(connections,0,"invalid seed connected to DB");
   } finally { await new Promise(resolve=>server.close(resolve)); }
 });
