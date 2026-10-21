@@ -7,10 +7,11 @@ type HttpErrorKind = "authentication" | "authorization" | "not-found" | "http";
 export class ApiHttpError extends Error {
   readonly kind: HttpErrorKind;
   readonly status: number;
+  readonly retryAfterMs?: number;
   /** Diagnostic metadata only. Show message in the UI, not server detail/title/errors. */
   readonly problem: Partial<Problem> & { status: number };
 
-  constructor(status: number, problem: Partial<Problem> = {}) {
+  constructor(status: number, problem: Partial<Problem> = {}, retryAfterMs?: number) {
     const kind = status === 401 ? "authentication"
       : status === 403 ? "authorization"
       : status === 404 ? "not-found" : "http";
@@ -24,6 +25,7 @@ export class ApiHttpError extends Error {
     this.name = "ApiHttpError";
     this.kind = kind;
     this.status = status;
+    this.retryAfterMs = retryAfterMs;
     // The actual HTTP response determines classification, even if Problem disagrees.
     this.problem = { ...problem, status };
   }
@@ -81,5 +83,8 @@ export async function toApiHttpError(response: Response): Promise<ApiHttpError> 
       // Empty, invalid JSON, or an unreadable error body still has a meaningful status.
     }
   }
-  return new ApiHttpError(response.status, problem);
+  const retry = response.headers.get("Retry-After");
+  const seconds = retry && /^\d+$/.test(retry) ? Number(retry) * 1000 : Date.parse(retry ?? "") - Date.now();
+  const delay = Number.isFinite(seconds) && seconds > 0 ? Math.min(seconds, 86_400_000) : undefined;
+  return new ApiHttpError(response.status, problem, delay);
 }

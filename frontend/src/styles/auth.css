@@ -1,0 +1,7 @@
+/* Composes the canonical card, field, button and shell styles. */
+.auth-content { width: 100%; }
+.auth-panel { max-width: 480px; margin: 32px auto; }
+.auth-password { display: flex; align-items: center; gap: 8px; }
+.auth-password .field { min-width: 0; }
+.auth-password .icon-btn { flex-shrink: 0; }
+button:disabled { cursor: wait; opacity: 0.65; }

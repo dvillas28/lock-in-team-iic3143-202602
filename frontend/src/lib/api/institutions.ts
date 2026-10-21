@@ -1,7 +1,7 @@
 import type { ApiClient } from "./client.ts";
 import type { operations } from "./schema";
 
-/** Contract operations: require backend JWT/membership support before live use. */
+/** Live backend authorization is evaluated on every operation. */
 export function listAccessibleInstitutions(client: ApiClient) {
   return client.GET("/api/v1/institutions");
 }
