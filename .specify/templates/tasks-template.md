@@ -13,6 +13,7 @@ length-exception comment; split above 200 and link child task files here.
 - `[P]` means different files and no unresolved dependency.
 - Each task references a spec requirement or acceptance scenario.
 - Tests are required for non-trivial behavior, isolation, permissions and integrity.
+- Cover route-context tampering, runtime DB role without bypass, missing predicates, connection reuse and bounded global exceptions.
 - Use actual repository paths: `backend/src/`, `frontend/src/`, applicable tests.
 - Replace examples with feature-specific tasks; do not retain sample scaffolding.
 

@@ -98,7 +98,7 @@
 - **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
 - **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]
-- **FR-006**: System MUST preserve tenant isolation for affected academic records.
+- **FR-006**: System MUST preserve tenant isolation from a validated institutional route and membership through persistence, even when a query omits its tenant predicate.
 - **FR-007**: System MUST define which roles can view or mutate the affected data.
 
 *Example of marking unclear requirements:*

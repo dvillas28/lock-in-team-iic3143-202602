@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { Client } from "pg";
 import { hash, argon2id } from "argon2";
-import { connectionConfig, OperationError, reportError } from "../database/config";
+import { operationalConfig, OperationError, reportError } from "../database/config";
 
 const demoInstitutions = [{slug: "uc", name: "UC"}, {slug: "utfsm", name: "UTFSM"}] as const;
 const demoUsers = [
@@ -51,7 +51,7 @@ export async function seed(env: NodeJS.ProcessEnv = process.env) {
   const started = Date.now();
   const created = {institutions: 0, users: 0, memberships: 0};
   const existing = {institutions: 0, users: 0, memberships: 0};
-  const client = new Client({...connectionConfig(env), connectionTimeoutMillis: 5000,
+  const client = new Client({...operationalConfig(env), connectionTimeoutMillis: 5000,
     options: "-c lock_timeout=10000 -c statement_timeout=15000 -c search_path=public"});
   client.on("error", () => { /* The active operation reports a sanitized failure. */ });
   try {

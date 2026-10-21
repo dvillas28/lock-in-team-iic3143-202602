@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { setTimeout as delay } from "node:timers/promises";
 import { test } from "node:test";
 import pg from "pg";
-import { database, migrated, cli, sanitized, testUrl, terminateHttpConnections } from "./helpers.mjs";
+import { database, migrated, cli, sanitized, testUrl, runtimeUrl, terminateHttpConnections } from "./helpers.mjs";
 import service from "../../dist/database/database.service.js";
 
 async function failedStartup(extra) {
@@ -109,7 +109,7 @@ test("shared pool bounds saturation/query time and closes connections", async ()
   const admin = await database();
   await migrated(admin);
   const previous = process.env.DATABASE_URL;
-  process.env.DATABASE_URL = testUrl();
+  process.env.DATABASE_URL = runtimeUrl();
   let databaseService;
   try { databaseService = new service.DatabaseService(); }
   finally {
@@ -167,4 +167,24 @@ test("readiness rejects every missing academic table and institutional flag",asy
    await waitReady(13983,app);
   }
  }finally{if(app){app.child.kill("SIGTERM");await app.result;}await pool.end();}
+});
+
+test('readiness rejects owner credentials, elevated role, unsafe grants, disabled RLS and permissive policies',async()=>{
+ const pool=await database();let app;try{
+  await migrated(pool);assert.equal((await failedStartup({DATABASE_URL:testUrl()})).code,1);
+  app=await (await import('./helpers.mjs')).http();
+  const ready=async status=>assert.equal((await fetch(app.base+'/ready')).status,status);
+  for(const [breakSql,restoreSql] of [
+   ['ALTER ROLE academix_runtime SUPERUSER','ALTER ROLE academix_runtime NOSUPERUSER'],
+   ['ALTER ROLE academix_runtime BYPASSRLS','ALTER ROLE academix_runtime NOBYPASSRLS'],
+   ['GRANT pg_read_all_data TO academix_runtime','REVOKE pg_read_all_data FROM academix_runtime'],
+   ['GRANT UPDATE(name) ON users TO academix_runtime','REVOKE UPDATE(name) ON users FROM academix_runtime'],
+   ['ALTER TABLE courses NO FORCE ROW LEVEL SECURITY','ALTER TABLE courses FORCE ROW LEVEL SECURITY'],
+   ['ALTER POLICY tenant_boundary ON courses USING (true)',"ALTER POLICY tenant_boundary ON courses USING (institution_id=NULLIF(current_setting('academix.institution_id',true),'')::uuid)"],
+   ['CREATE POLICY unsafe_extra ON courses USING (true)','DROP POLICY unsafe_extra ON courses'],
+  ]) {
+   await pool.query(breakSql);try{await ready(503);}finally{await pool.query(restoreSql);}
+   await ready(200);
+  }
+ }finally{await app?.close();await pool.end();}
 });

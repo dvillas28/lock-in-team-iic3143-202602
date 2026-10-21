@@ -52,6 +52,8 @@ test('Swagger loads local documentation read-only and rejects failed description
  test('registered routes are covered; public security agrees; missing routes fail', async () => {
   const routes = await registeredRoutes();
   assert(routes.length > 0);
+  assert(routes.some(r=>r.path==='/api/v1/institution/{institutionSlug}/me'));
+  assert(routes.every(r=>!r.path.startsWith('/api/v1/institutions/')));
   assert(routes.some(r => r.path === '/api/v1/auth/login' && r.public));
   assert.throws(() => checkCoverage({ paths: {} }, routes), /Missing/);
   const doc = { security: [{bearerAuth: []}], paths: {'/health': {get: {operationId: 'health'}}} };

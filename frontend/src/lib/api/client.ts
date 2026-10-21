@@ -29,7 +29,7 @@ export function createApiClient({
 
   const parsedUrl = new URL(url);
   if (!["http:", "https:"].includes(parsedUrl.protocol) || parsedUrl.username ||
-      parsedUrl.password || parsedUrl.search || parsedUrl.hash) {
+      parsedUrl.password || parsedUrl.search || parsedUrl.hash || !["", "/"].includes(parsedUrl.pathname)) {
     throw new Error("The API base URL must be an HTTP(S) URL without credentials, query or fragment");
   }
 

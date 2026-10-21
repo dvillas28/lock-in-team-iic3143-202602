@@ -1,4 +1,4 @@
-/api/v1/institutions/{institutionSlug}/courses/{courseId}/audit-events:
+/api/v1/institution/{institutionSlug}/courses/{courseId}/audit-events:
   parameters:
   - $ref: ../components/parameters.yaml#/InstitutionSlug
   - $ref: ../components/parameters.yaml#/CourseId

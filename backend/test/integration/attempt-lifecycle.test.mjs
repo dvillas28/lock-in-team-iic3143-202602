@@ -9,7 +9,7 @@ test('US1 independent: start, original replay, complete save, resume, cancel con
   const f=await attemptFixture(pool),secret=randomBytes(32).toString('base64');app=await http({AUTH_JWT_SECRET:secret});const t=await tokens(app,f);
   await pool.query('UPDATE quizzes SET max_attempts=2 WHERE id=$1',[f.quizzes.section]);
   const a=await request(app,t.student,f.startPath,'POST',{},'A');assert.equal(a.status,201);
-  const id=a.body.id,p=path(id);assert.equal(a.body.attemptNumber,1);assert.equal(a.headers.get('location'),'/api/v1/institutions/'+p);
+  const id=a.body.id,p=path(id);assert.equal(a.body.attemptNumber,1);assert.equal(a.headers.get('location'),'/api/v1/institution/'+p);
   assert.equal((await request(app,t.student,f.startPath,'POST',undefined,'B')).status,409);
   const q=(await pool.query('SELECT questions FROM quizzes WHERE id=$1',[f.quizzes.section])).rows[0].questions[0],answers=[{questionId:q.id,alternativeId:'a'}];
   assert.equal((await request(app,t.student,p+'/answers','PUT',{answers})).status,200);

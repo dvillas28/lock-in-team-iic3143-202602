@@ -1,4 +1,4 @@
-/api/v1/institutions/{institutionSlug}/courses:
+/api/v1/institution/{institutionSlug}/courses:
   parameters:
   - $ref: ../components/parameters.yaml#/InstitutionSlug
   get:
@@ -78,7 +78,7 @@
         $ref: ../components/responses.yaml#/Conflict
       '422':
         $ref: ../components/responses.yaml#/UnprocessableEntity
-/api/v1/institutions/{institutionSlug}/courses/{courseId}:
+/api/v1/institution/{institutionSlug}/courses/{courseId}:
   parameters:
   - $ref: ../components/parameters.yaml#/InstitutionSlug
   - $ref: ../components/parameters.yaml#/CourseId

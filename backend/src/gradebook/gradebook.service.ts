@@ -4,7 +4,7 @@ import {isDeepStrictEqual} from "node:util";
 import type {PoolClient} from "pg";
 import {DatabaseService} from "../database/database.service";
 import {AuditService} from "../audit/audit.service";
-import {transaction,requirePermission} from "../courses/course-access";
+import {requirePermission} from "../courses/course-access";
 import {uuid} from "../courses/validation";
 import {gradebookScope,academicScope,selectedSections,type GradebookScope} from "./gradebook-access";
 import {weightsInput,publicationInput,bookPage,type Selection} from "./gradebook-validation";
@@ -17,12 +17,12 @@ export class GradebookService {
   return (await c.query("SELECT *,sum(weight_percent) OVER() AS total FROM public.grade_items WHERE institution_id=$1 AND course_id=$2 ORDER BY id",[s.member.institution_id,s.courseId])).rows;
  }
  async listItems(actor:string,slug:string,course:string) {
-  return transaction(this.db.pool,async c=>{const s=await gradebookScope(c,actor,slug,course);academicScope(s);const rows=await this.items(c,s);
+  return this.db.withInstitution(actor,slug,async c=>{const s=await gradebookScope(c,actor,slug,course);academicScope(s);const rows=await this.items(c,s);
    return {items:rows.map(itemDto),totalWeightPercent:Number(rows[0]?.total??0)};});
  }
  async weights(actor:string,slug:string,course:string,body:unknown) {
   const input=weightsInput(body);
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await gradebookScope(c,actor,slug,course);academicScope(s,true);requirePermission(s.owner);
    if(s.course.grade_items_locked_at!==null)throw conflict("GRADE_WEIGHTS_LOCKED");
    const rows=await this.items(c,s);
@@ -46,7 +46,7 @@ export class GradebookService {
  }
  async publish(actor:string,slug:string,course:string,key:string,body:unknown) {
   const input=publicationInput(body);
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await gradebookScope(c,actor,slug,course),items=await this.selection(c,s,input);
    const existing=(await c.query("SELECT *,to_char(published_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"') AS published_at FROM public.grade_publications WHERE institution_id=$1 AND actor_user_id=$2 AND idempotency_key=$3",[s.member.institution_id,actor,key])).rows[0];
    if(existing) {
@@ -77,7 +77,7 @@ export class GradebookService {
  }
  async myGrades(actor:string,slug:string,course:string,query:Record<string,unknown>) {
   if(Object.keys(query).length)throw new BadRequestException();
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await gradebookScope(c,actor,slug,course);requirePermission(s.roles.some(e=>e.role==="student"));
    const rows=(await c.query(`SELECT g.*,i.title,i.weight_percent FROM public.grades g JOIN public.grade_items i ON i.institution_id=g.institution_id AND i.id=g.grade_item_id
     WHERE g.institution_id=$1 AND i.course_id=$2 AND g.student_id=$3 AND g.published_at IS NOT NULL ORDER BY i.created_at,i.id`,[s.member.institution_id,course,actor])).rows;
@@ -88,7 +88,7 @@ export class GradebookService {
   });
  }
  async book(actor:string,slug:string,course:string,query:Record<string,unknown>) {
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await gradebookScope(c,actor,slug,course),scope=academicScope(s),section=query.sectionId===undefined?null:uuid(query.sectionId);
    if(section)await selectedSections(c,s,[section]);
    const p=bookPage(query,JSON.stringify(["gradebook",s.member.institution_id,course,actor,section]));

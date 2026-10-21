@@ -3,7 +3,7 @@ import type {IdentityRequest} from "../auth/auth.guard";
 import {slug,uuid} from "../courses/validation";
 import {ModulesService} from "./modules.service";
 interface Response {setHeader(name:string,value:string):void}
-@Controller("api/v1/institutions/:institutionSlug")
+@Controller("api/v1/institution/:institutionSlug")
 export class ModulesController {
  constructor(private readonly modules:ModulesService) {}
  @Get("courses/:courseId/modules")
@@ -13,7 +13,7 @@ export class ModulesController {
  @Post("courses/:courseId/modules")
  async create(@Req() r:IdentityRequest,@Param("institutionSlug") s:string,@Param("courseId") id:string,@Body() body:unknown,@Res({passthrough:true}) response:Response) {
   const result=await this.modules.create(r.userId,slug(s),uuid(id),body);
-  response.setHeader("Location",`/api/v1/institutions/${s}/modules/${result.id}`);return result;
+  response.setHeader("Location",`/api/v1/institution/${s}/modules/${result.id}`);return result;
  }
  @Put("courses/:courseId/modules/order")
  reorder(@Req() r:IdentityRequest,@Param("institutionSlug") s:string,@Param("courseId") id:string,@Body() body:unknown) {return this.modules.reorder(r.userId,slug(s),uuid(id),body);}

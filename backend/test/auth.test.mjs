@@ -17,6 +17,7 @@ test("configuration, strict DTO, real/dummy verification and JWT mandatory claim
     const secret=randomBytes(32);process.env.AUTH_JWT_SECRET=secret.toString("base64");
     let calls=0; let rows=[];
     const database={pool:{query:async()=>{calls++; return {rows};}}};
+    database.withIdentity=(_actor,fn)=>fn(database.pool);
     const service=new auth.AuthService(database,new JwtService());await service.onModuleInit();
     for(const body of [null,[],{}, {email:"a@b.c",password:"x",role:"admin"}, {email:3,password:"x"}, {email:"a@@b.c",password:"x"}, {email:"a b@c.d",password:"x"}, {email:"é@b.c",password:"x"}, {email:"a@localhost",password:"x"}, {email:"a@b.c",password:""}, {email:"a@b.c",password:"😀".repeat(33)}, {email:"a@b.c",password:1}, {email:"a".repeat(251)+"@b.c",password:"x"}]) {
       await assert.rejects(service.login(body), e=>e.getStatus()===400);
@@ -54,7 +55,8 @@ test("Argon2 verifies persisted hash for inactive/wrong password and reuses star
  try {
   const password=randomBytes(12).toString("hex");const encoded=await argon2.hash(password);
   let rows=[];const database={pool:{query:async()=>({rows})}};
-  const service=new auth.AuthService(database,new JwtService());await service.onModuleInit();
+  database.withIdentity=(_actor,fn)=>fn(database.pool);
+    const service=new auth.AuthService(database,new JwtService());await service.onModuleInit();
   const real=argon2.verify;const seen=[];
   t.mock.method(argon2,"verify",async (hash,password)=>{seen.push(hash);return real(hash,password);});
   for(let i=0;i<2;i++) await assert.rejects(service.login({email:"unknown@example.test",password}),e=>e.getStatus()===401);

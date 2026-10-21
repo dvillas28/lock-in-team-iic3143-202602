@@ -2,7 +2,7 @@ import { Controller,Get,Put,Header,Param,Req,Body,Query } from "@nestjs/common";
 import type { IdentityRequest } from "../auth/auth.guard";
 import { MembershipAdminService } from "./membership-admin.service";
 import { slug,uuid,object,boolean } from "../courses/validation";
-@Controller("api/v1/institutions/:institutionSlug/memberships")
+@Controller("api/v1/institution/:institutionSlug/memberships")
 export class MembershipAdminController {
  constructor(private readonly members:MembershipAdminService) {}
  @Get() @Header("Cache-Control","no-store")

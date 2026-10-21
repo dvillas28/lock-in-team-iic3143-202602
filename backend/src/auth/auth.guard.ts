@@ -19,7 +19,7 @@ export class AuthGuard implements CanActivate {
     if (count > 1 || typeof header !== "string" || !/^Bearer [^\s,]+$/i.test(header) || Buffer.byteLength(header.slice(7)) > 4096) throw new UnauthorizedException();
     const {sub} = this.auth.verifyToken(header.slice(7));
     let active: boolean;
-    try { active = (await this.database.pool.query("SELECT active FROM public.users WHERE id=$1", [sub])).rows[0]?.active === true; }
+    try { active = (await this.database.withIdentity(sub,db=>db.query("SELECT active FROM public.users WHERE id=$1", [sub]))).rows[0]?.active === true; }
     catch { throw new ServiceUnavailableException(); }
     if (!active) throw new UnauthorizedException();
     request.userId = sub;
