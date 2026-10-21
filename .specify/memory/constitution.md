@@ -1,12 +1,11 @@
 <!--
 Sync Impact Report
-Version change: 1.3.0 -> 1.4.0 (bounded onboarding and tenant privilege delegation).
-Core principles: unchanged; Product Constraints: limited institutional admin added.
-Added: PM-controlled onboarding and tenant superadmin scope; removed: blanket exclusion.
-Updated: plan-template.md, spec-template.md, tasks-template.md; feature plan/contracts/tasks.
-Reviewed: README.md and AGENTS.md; no conflicting runtime rule to change.
-Command templates: .specify/templates/commands/ absent; no sync needed.
-Follow-up: implementation and checks remain pending in cursos-roles/tasks.md.
+Version change: 1.4.0 -> 1.5.0 (explicit path tenant context and minimal DB enforcement).
+Core principles retained; mandatory isolation now includes a database omission barrier.
+Product Constraints: permit bounded RLS and opt-in automated demo data migrations.
+Templates synced: plan-template.md, spec-template.md, tasks-template.md.
+ADR: institution-context-and-database-isolation.md retains path routing and supersedes RLS deferral.
+Runtime implementation remains pending; no infrastructure or data changed here.
 -->
 
 
@@ -19,6 +18,11 @@ Follow-up: implementation and checks remain pending in cursos-roles/tasks.md.
 Every feature MUST identify the tenant boundary for affected data. Reads,
 writes, background jobs, exports, and admin actions MUST NOT cross institutions
 unless the feature explicitly defines a cross-tenant operator flow.
+Institutional HTTP context MUST come from a validated institutional route parameter
+and an active membership, never from Host, Origin, body, query or arbitrary headers.
+Tenant-owned persistence MUST reject cross-tenant
+access even if an application query omits its tenant predicate; runtime database
+credentials MUST NOT bypass that barrier. Global identity exceptions MUST be bounded.
 
 ### II. Academic Records Are High Integrity
 
@@ -65,8 +69,13 @@ shared modules and markdown material, multiple-choice quizzes, automatic grading
 explicit grade publication, gradebook and immutable academic audit.
 
 Manual submissions/correction, general institutional administration, AI, chat, calendar,
-binary upload/download, RLS, workers and advanced analytics remain outside the
+binary upload/download, workers and advanced analytics remain outside the
 core MVP. Binary material is an optional P2 extension requiring its own spec.
+Minimal RLS on the shared database is included to enforce the route-derived tenant
+boundary; it does not replace academic permissions or parameterized SQL.
+Versioned demo data migrations MAY run automatically before deployment when
+explicitly enabled; they MUST be atomic, auditable and preserve credentials,
+revoked permissions and existing academic data on replay.
 PM-controlled tenant onboarding and delegation of course-creation privileges are
 included: InstitutionMembership.is_super_admin grants/revokes is_admin only inside
 its Institution. Neither flag grants access to courses owned by others. Initial
@@ -114,4 +123,4 @@ for wording and clarification.
 Reviews MUST verify constitution compliance before merge. Complexity violations
 MUST be documented in the feature plan's Complexity Tracking section.
 
-**Version**: 1.4.0 | **Ratified**: 2026-08-27 | **Last Amended**: 2026-10-16
+**Version**: 1.5.0 | **Ratified**: 2026-08-27 | **Last Amended**: 2026-10-20

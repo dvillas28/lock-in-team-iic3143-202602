@@ -38,6 +38,13 @@ Canvas LMS se consideró solamente como referencia conceptual de un LMS con
 aislamiento lógico y una entidad institucional raíz. AcademiX no adopta su
 arquitectura interna ni incorpora funcionalidades por analogía.
 
+## Actualización 2026-10-20
+
+[Contexto institucional y aislamiento DB](institution-context-and-database-isolation.md)
+conserva selección por path y sustituye el bootstrap exclusivamente manual y la exclusión
+de RLS descritos abajo. La base compartida, identidad global, claves compuestas
+y límites académicos permanecen vigentes; implementación pendiente de esa misión.
+
 ## Decisión
 
 AcademiX utilizará una única base de datos PostgreSQL compartida para todas las
@@ -53,15 +60,16 @@ instituciones del MVP.
 - Las relaciones tenant-owned usan unicidades y FK compuestas que incluyen
   `institution_id` cuando PostgreSQL puede expresar la invariante.
 - Las consultas académicas se ejecutan siempre bajo scope institucional.
-- La identidad global proviene del JWT. La Institution se expresa mediante el
-  path HTTP y nunca concede acceso por sí sola.
+- La identidad global proviene del JWT. Desde la misión de 2026-10-20, la
+  Institution se resuelve por parámetro de ruta validado y pertenencia activa;
+  el host y los orígenes frontend no conceden contexto ni acceso.
 - El backend valida una `InstitutionMembership` activa antes de aplicar los
   permisos de curso o sección.
 - Existe una sola secuencia de migraciones para la PostgreSQL compartida.
 - Los backfills futuros deben ser institution-scoped, idempotentes cuando
   corresponda y procesarse por lotes cuando su volumen lo requiera.
-- UC y UTFSM son Institutions demo dentro de la misma base. Su bootstrap futuro
-  será idempotente y separado de las migraciones.
+- UC y UTFSM son Institutions demo dentro de la misma base. Su carga versionada
+  es idempotente, separada del esquema y automatizable por entorno en predeploy.
 - Railway es la plataforma de despliegue elegida. No existe una migración
   planificada a Google Cloud.
 
@@ -69,9 +77,8 @@ El aislamiento del MVP combina autenticación, Institution explícita,
 InstitutionMembership, autorización contextual, scope de aplicación,
 `institution_id`, FK compuestas, constraints y tests de aislamiento.
 
-PostgreSQL Row-Level Security queda fuera del MVP. Puede evaluarse como defensa
-en profundidad futura, pero no se diseñan todavía roles de DB, variables de
-sesión ni integración con pools.
+La exclusión original de PostgreSQL RLS se sustituye por el ADR de 2026-10-20:
+RLS mínima, roles sin bypass y contexto transaccional sobre el pool existente.
 
 ## Consecuencias positivas
 
@@ -111,9 +118,8 @@ migraciones y routing lógico, y dificulta el modelo de User global.
 
 ### Row-Level Security en el MVP
 
-Diferida. Puede reforzar el aislamiento, pero requiere un diseño correcto de
-roles, contexto transaccional y pooling que todavía no corresponde al walking
-skeleton.
+Diferida originalmente; incluida por el ADR de 2026-10-20 para cubrir omisiones
+de filtros mediante el mínimo diseño de roles, contexto transaccional y pooling.
 
 ## Backup y recuperación
 
