@@ -32,6 +32,11 @@ plataforma de despliegue.
 
 - [OpenAPI de AcademiX](reference/openapi/README.md)
 
+## Misiones frontend
+
+- [Seis specs, dependencias y estado documental](frontend/README.md)
+- [Cobertura de CU, backlog, vistas y evidencia](frontend/coverage.md)
+
 ## Guías
 
 - [Spec Kit](guides/speckit-flow.md)
