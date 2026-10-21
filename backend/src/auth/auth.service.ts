@@ -31,7 +31,7 @@ export class AuthService implements OnModuleInit {
     let user: {id: string; password_hash: string; active: boolean} | undefined;
     let valid: boolean;
     try {
-      const result = await this.database.pool.query("SELECT id,password_hash,active FROM public.users WHERE lower(btrim(email))=$1", [email.toLowerCase()]);
+      const result = await this.database.withIdentity(null,db=>db.query("SELECT id,password_hash,active FROM public.users WHERE lower(btrim(email))=$1", [email.toLowerCase()]));
       user = result.rows[0];
       valid = await verify(user?.password_hash ?? this.dummy, dto.password);
     } catch { throw new ServiceUnavailableException(); }

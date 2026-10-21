@@ -220,6 +220,9 @@ jobs:
           test_url="postgresql://${PGUSER}@127.0.0.1:${PGPORT}/${PGDATABASE}"
           echo "::add-mask::$test_url"
           echo "TEST_DATABASE_URL=$test_url" >> "$GITHUB_ENV"
+          runtime_url="postgresql://academix_runtime:ci_runtime@127.0.0.1:${PGPORT}/${PGDATABASE}"
+          echo "::add-mask::$runtime_url"
+          echo "TEST_RUNTIME_DATABASE_URL=$runtime_url" >> "$GITHUB_ENV"
       - run: pnpm --dir backend test:coverage
       - name: Validate backend image and isolated Compose
         run: node backend/test/compose-smoke.mjs

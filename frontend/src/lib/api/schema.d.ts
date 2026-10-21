@@ -84,7 +84,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/me": {
+    "/api/v1/institution/{institutionSlug}/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -108,7 +108,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/users": {
+    "/api/v1/institution/{institutionSlug}/users": {
         parameters: {
             query?: never;
             header?: never;
@@ -135,7 +135,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/courses": {
+    "/api/v1/institution/{institutionSlug}/courses": {
         parameters: {
             query?: never;
             header?: never;
@@ -166,7 +166,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/courses/{courseId}": {
+    "/api/v1/institution/{institutionSlug}/courses/{courseId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -195,7 +195,7 @@ export interface paths {
         patch: operations["updateCourse"];
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/courses/{courseId}/sections": {
+    "/api/v1/institution/{institutionSlug}/courses/{courseId}/sections": {
         parameters: {
             query?: never;
             header?: never;
@@ -227,7 +227,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/sections/{sectionId}": {
+    "/api/v1/institution/{institutionSlug}/sections/{sectionId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -256,7 +256,7 @@ export interface paths {
         patch: operations["updateSection"];
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/sections/{sectionId}/enrollments": {
+    "/api/v1/institution/{institutionSlug}/sections/{sectionId}/enrollments": {
         parameters: {
             query?: never;
             header?: never;
@@ -288,7 +288,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/sections/{sectionId}/enrollments/{enrollmentId}": {
+    "/api/v1/institution/{institutionSlug}/sections/{sectionId}/enrollments/{enrollmentId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -317,7 +317,7 @@ export interface paths {
         patch: operations["updateSectionEnrollment"];
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/courses/{courseId}/modules": {
+    "/api/v1/institution/{institutionSlug}/courses/{courseId}/modules": {
         parameters: {
             query?: never;
             header?: never;
@@ -349,7 +349,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/courses/{courseId}/modules/order": {
+    "/api/v1/institution/{institutionSlug}/courses/{courseId}/modules/order": {
         parameters: {
             query?: never;
             header?: never;
@@ -377,7 +377,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/modules/{moduleId}": {
+    "/api/v1/institution/{institutionSlug}/modules/{moduleId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -409,7 +409,7 @@ export interface paths {
         patch: operations["updateCourseModule"];
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/modules/{moduleId}/publish": {
+    "/api/v1/institution/{institutionSlug}/modules/{moduleId}/publish": {
         parameters: {
             query?: never;
             header?: never;
@@ -437,7 +437,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/modules/{moduleId}/unpublish": {
+    "/api/v1/institution/{institutionSlug}/modules/{moduleId}/unpublish": {
         parameters: {
             query?: never;
             header?: never;
@@ -465,7 +465,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/modules/{moduleId}/materials": {
+    "/api/v1/institution/{institutionSlug}/modules/{moduleId}/materials": {
         parameters: {
             query?: never;
             header?: never;
@@ -497,7 +497,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/materials/{materialId}": {
+    "/api/v1/institution/{institutionSlug}/materials/{materialId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -529,7 +529,7 @@ export interface paths {
         patch: operations["updateMaterial"];
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/materials/{materialId}/publish": {
+    "/api/v1/institution/{institutionSlug}/materials/{materialId}/publish": {
         parameters: {
             query?: never;
             header?: never;
@@ -557,7 +557,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/materials/{materialId}/unpublish": {
+    "/api/v1/institution/{institutionSlug}/materials/{materialId}/unpublish": {
         parameters: {
             query?: never;
             header?: never;
@@ -585,7 +585,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/courses/{courseId}/quizzes": {
+    "/api/v1/institution/{institutionSlug}/courses/{courseId}/quizzes": {
         parameters: {
             query?: never;
             header?: never;
@@ -618,7 +618,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/quizzes/{quizId}": {
+    "/api/v1/institution/{institutionSlug}/quizzes/{quizId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -651,7 +651,7 @@ export interface paths {
         patch: operations["updateQuiz"];
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/quizzes/{quizId}/authoring": {
+    "/api/v1/institution/{institutionSlug}/quizzes/{quizId}/authoring": {
         parameters: {
             query?: never;
             header?: never;
@@ -680,7 +680,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/quizzes/{quizId}/publish": {
+    "/api/v1/institution/{institutionSlug}/quizzes/{quizId}/publish": {
         parameters: {
             query?: never;
             header?: never;
@@ -711,7 +711,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/sections/{sectionId}/quizzes/{quizId}/attempts": {
+    "/api/v1/institution/{institutionSlug}/sections/{sectionId}/quizzes/{quizId}/attempts": {
         parameters: {
             query?: never;
             header?: never;
@@ -751,7 +751,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}": {
+    "/api/v1/institution/{institutionSlug}/quiz-attempts/{attemptId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -783,7 +783,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}/answers": {
+    "/api/v1/institution/{institutionSlug}/quiz-attempts/{attemptId}/answers": {
         parameters: {
             query?: never;
             header?: never;
@@ -822,7 +822,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}/submit": {
+    "/api/v1/institution/{institutionSlug}/quiz-attempts/{attemptId}/submit": {
         parameters: {
             query?: never;
             header?: never;
@@ -870,7 +870,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}/cancel": {
+    "/api/v1/institution/{institutionSlug}/quiz-attempts/{attemptId}/cancel": {
         parameters: {
             query?: never;
             header?: never;
@@ -913,7 +913,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/quizzes/{quizId}/attempts": {
+    "/api/v1/institution/{institutionSlug}/quizzes/{quizId}/attempts": {
         parameters: {
             query?: never;
             header?: never;
@@ -945,7 +945,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/courses/{courseId}/grade-items": {
+    "/api/v1/institution/{institutionSlug}/courses/{courseId}/grade-items": {
         parameters: {
             query?: never;
             header?: never;
@@ -973,7 +973,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/courses/{courseId}/gradebook/weights": {
+    "/api/v1/institution/{institutionSlug}/courses/{courseId}/gradebook/weights": {
         parameters: {
             query?: never;
             header?: never;
@@ -1003,7 +1003,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/courses/{courseId}/gradebook": {
+    "/api/v1/institution/{institutionSlug}/courses/{courseId}/gradebook": {
         parameters: {
             query?: never;
             header?: never;
@@ -1035,7 +1035,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/courses/{courseId}/gradebook/publications": {
+    "/api/v1/institution/{institutionSlug}/courses/{courseId}/gradebook/publications": {
         parameters: {
             query?: never;
             header?: never;
@@ -1074,7 +1074,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/courses/{courseId}/my-grades": {
+    "/api/v1/institution/{institutionSlug}/courses/{courseId}/my-grades": {
         parameters: {
             query?: never;
             header?: never;
@@ -1104,7 +1104,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/courses/{courseId}/audit-events": {
+    "/api/v1/institution/{institutionSlug}/courses/{courseId}/audit-events": {
         parameters: {
             query?: never;
             header?: never;
@@ -1132,7 +1132,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/memberships": {
+    "/api/v1/institution/{institutionSlug}/memberships": {
         parameters: {
             query?: never;
             header?: never;
@@ -1159,7 +1159,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/institutions/{institutionSlug}/memberships/{membershipId}/course-admin": {
+    "/api/v1/institution/{institutionSlug}/memberships/{membershipId}/course-admin": {
         parameters: {
             query?: never;
             header?: never;
@@ -1223,7 +1223,7 @@ export interface components {
          *       "status": 409,
          *       "detail": "Existen notas publicadas afectadas por el cambio.",
          *       "code": "GRADE_WEIGHTS_LOCKED",
-         *       "instance": "/api/v1/institutions/uc/courses/8dc9f252-bf1a-4b50-85c0-a2937484c429/gradebook/weights",
+         *       "instance": "/api/v1/institution/uc/courses/8dc9f252-bf1a-4b50-85c0-a2937484c429/gradebook/weights",
          *       "traceId": "01JQ4Y2X7B3QK5XEM0XZ4MSH8Z",
          *       "errors": []
          *     }
@@ -1952,7 +1952,7 @@ export interface components {
                  *       "status": 401,
                  *       "detail": "Se requiere una identidad autenticada válida.",
                  *       "code": "UNAUTHORIZED",
-                 *       "instance": "/api/v1/institutions/uc/courses",
+                 *       "instance": "/api/v1/institution/uc/courses",
                  *       "traceId": "01JQ4Y2X7B3QK5XEM0XZ4MSH8Z",
                  *       "errors": []
                  *     }
@@ -2005,7 +2005,7 @@ export interface components {
                  *       "status": 404,
                  *       "detail": "El recurso no existe o no es visible en el contexto autorizado.",
                  *       "code": "RESOURCE_NOT_FOUND",
-                 *       "instance": "/api/v1/institutions/uc/courses/8dc9f252-bf1a-4b50-85c0-a2937484c429",
+                 *       "instance": "/api/v1/institution/uc/courses/8dc9f252-bf1a-4b50-85c0-a2937484c429",
                  *       "traceId": "01JQ4Y2X7B3QK5XEM0XZ4MSH8Z",
                  *       "errors": []
                  *     }
@@ -2079,7 +2079,7 @@ export interface components {
                  *       "status": 401,
                  *       "detail": "Se requiere una identidad autenticada válida.",
                  *       "code": "UNAUTHORIZED",
-                 *       "instance": "/api/v1/institutions/uc/courses",
+                 *       "instance": "/api/v1/institution/uc/courses",
                  *       "traceId": "01JQ4Y2X7B3QK5XEM0XZ4MSH8Z",
                  *       "errors": []
                  *     }

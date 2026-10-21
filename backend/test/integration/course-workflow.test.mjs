@@ -16,7 +16,7 @@ test("onboarding -> delegated admin -> real generated consumer create -> revoke;
   app=await http();const owner=await login(app,f.env),other=await login(app,f.env,"UC");tokens.push(owner,other);
   assert.equal((await request(app,owner,`workflow/memberships/${target}/course-admin`,"PUT",{isAdmin:true})).status,200);
   const client=createApiClient({baseUrl:app.base,getToken:()=>other});
-  const result=await client.POST("/api/v1/institutions/{institutionSlug}/courses",{params:{path:{institutionSlug:"workflow"}},body:{code:"FLOW",name:"Workflow",term:"2026-2",initialSection:{code:"1"}}});
+  const result=await client.POST("/api/v1/institution/{institutionSlug}/courses",{params:{path:{institutionSlug:"workflow"}},body:{code:"FLOW",name:"Workflow",term:"2026-2",initialSection:{code:"1"}}});
   assert.equal(result.response.status,201);const course=result.data;assert.equal(course.createdBy,users.other);
   assert.equal((await request(app,owner,`workflow/courses/${course.id}`)).status,404,"superadmin has no access to other owner");
   assert.equal((await request(app,owner,`workflow/memberships/${target}/course-admin`,"PUT",{isAdmin:false})).status,200);
@@ -37,7 +37,7 @@ test("generated consumer handles real createCourse 400/401/403/404 Problems",asy
   const body={code:"C",name:"Course",term:"2026-2",initialSection:{code:"1"}};
   for(const [status,slug,input,credential] of [[400,"uc",{},token],[401,"uc",body,undefined],[403,"utfsm",body,token],[404,"absent",body,token]]){
    const client=createApiClient({baseUrl:app.base,getToken:()=>credential});
-   await assert.rejects(client.POST("/api/v1/institutions/{institutionSlug}/courses",{params:{path:{institutionSlug:slug}},body:input}),error=>{
+   await assert.rejects(client.POST("/api/v1/institution/{institutionSlug}/courses",{params:{path:{institutionSlug:slug}},body:input}),error=>{
     assert.equal(error.status,status);assert.equal(error.problem.status,status);
     assert.ok(error.problem.code);assert.ok(error.problem.traceId);
     assert.ok(!JSON.stringify(error.problem).includes(token));return true;

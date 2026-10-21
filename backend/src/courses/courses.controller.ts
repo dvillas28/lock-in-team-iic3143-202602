@@ -3,7 +3,7 @@ import type { IdentityRequest } from "../auth/auth.guard";
 import { CoursesService } from "./courses.service";
 import { slug,uuid,object,text,capacity } from "./validation";
 interface Response {setHeader(name:string,value:string):void}
-@Controller("api/v1/institutions/:institutionSlug/courses")
+@Controller("api/v1/institution/:institutionSlug/courses")
 export class CoursesController {
  constructor(private readonly courses:CoursesService) {}
  @Get() @Header("Cache-Control","no-store")
@@ -14,7 +14,7 @@ export class CoursesController {
  async create(@Req() r:IdentityRequest,@Param("institutionSlug") s:string,@Body() body:unknown,@Res({passthrough:true}) response:Response) {
   const dto=object(body,["code","name","term","initialSection"],["code","name","term","initialSection"]),section=object(dto.initialSection,["code","capacity"],["code"]);
   const result=await this.courses.create(r.userId,slug(s),{code:text(dto.code,32),name:text(dto.name,200),term:text(dto.term,16),initialSection:{code:text(section.code,32),capacity:capacity(section.capacity)}});
-  response.setHeader("Location",`/api/v1/institutions/${s}/courses/${result.id}`);return result;
+  response.setHeader("Location",`/api/v1/institution/${s}/courses/${result.id}`);return result;
  }
  @Patch(":courseId") @Header("Cache-Control","no-store")
  update(@Req() r:IdentityRequest,@Param("institutionSlug") s:string,@Param("courseId") id:string,@Body() body:unknown) {

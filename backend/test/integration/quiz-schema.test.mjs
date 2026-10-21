@@ -26,9 +26,9 @@ test('quiz migration upgrades populated #90 unchanged, repeats safely and down o
  const {mkdtemp,copyFile,rm}=await import('node:fs/promises'),{tmpdir}=await import('node:os'),{join}=await import('node:path');
  const {reset,testUrl,secrets}=await import('./helpers.mjs'),migration=(await import('../../dist/commands/migrate.js')).default;
  const {runner}=await import('node-pg-migrate');
- const pool=await database(),dir=await mkdtemp(join(tmpdir(),'quiz-upgrade-')),saved=process.env.DATABASE_URL;
+ const pool=await database(),dir=await mkdtemp(join(tmpdir(),'quiz-upgrade-')),saved=process.env.MIGRATION_DATABASE_URL;
  try{
-  await reset(pool);process.env.DATABASE_URL=testUrl();
+  await reset(pool);process.env.MIGRATION_DATABASE_URL=testUrl();
   for(const file of ['20261015000100_institutional-foundation.sql','20261015000400_unique_login_email.sql','20261016000100_courses_roles.sql','20261016000200_modules_material.sql'])
    await copyFile(new URL('../../migrations/'+file,import.meta.url),join(dir,file));
   assert.deepEqual(await migration.migrate(dir),{created:4,existing:0});
@@ -54,5 +54,5 @@ test('quiz migration upgrades populated #90 unchanged, repeats safely and down o
   }finally{c.release();}
   assert.deepEqual((await pool.query("SELECT to_regclass('public.quizzes') AS q,to_regclass('public.grade_items') AS g")).rows,[{q:null,g:null}]);
   assert.deepEqual(await migration.migrate(dir),{created:1,existing:4});
- }finally{if(saved===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=saved;await rm(dir,{recursive:true,force:true});await pool.end();}
+ }finally{if(saved===undefined)delete process.env.MIGRATION_DATABASE_URL;else process.env.MIGRATION_DATABASE_URL=saved;await rm(dir,{recursive:true,force:true});await pool.end();}
 });

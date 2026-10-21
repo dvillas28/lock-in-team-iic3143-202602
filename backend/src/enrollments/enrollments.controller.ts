@@ -2,7 +2,7 @@ import { BadRequestException,Controller,Get,Post,Patch,Header,Param,Req,Body,Res
 import type { IdentityRequest } from "../auth/auth.guard";
 import { EnrollmentsService } from "./enrollments.service";
 import { slug,uuid,object,role,boolean } from "../courses/validation";
-@Controller("api/v1/institutions/:institutionSlug/sections/:sectionId/enrollments")
+@Controller("api/v1/institution/:institutionSlug/sections/:sectionId/enrollments")
 export class EnrollmentsController {
  constructor(private readonly enrollments:EnrollmentsService) {}
  @Get() @Header("Cache-Control","no-store")
@@ -11,7 +11,7 @@ export class EnrollmentsController {
  async create(@Req() r:IdentityRequest,@Param("institutionSlug") s:string,@Param("sectionId") id:string,@Body() body:unknown,@Res({passthrough:true}) response:{status(code:number):void;setHeader(name:string,value:string):void}) {
   const dto=object(body,["userId","role"],["userId","role"]),result=await this.enrollments.create(r.userId,slug(s),uuid(id),uuid(dto.userId),role(dto.role));
   response.status(result.created?201:200);
-  if(result.created)response.setHeader("Location",`/api/v1/institutions/${s}/sections/${id}/enrollments/${result.item.id}`);
+  if(result.created)response.setHeader("Location",`/api/v1/institution/${s}/sections/${id}/enrollments/${result.item.id}`);
   return result.item;
  }
  @Patch(":enrollmentId") @Header("Cache-Control","no-store")

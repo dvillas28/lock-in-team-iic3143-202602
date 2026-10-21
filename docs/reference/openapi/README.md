@@ -12,7 +12,7 @@ al User y los permisos se obtienen desde memberships persistidas.
 Los endpoints académicos declaran la Institution en el path:
 
 ```txt
-/api/v1/institutions/{institutionSlug}/...
+/api/v1/institution/{institutionSlug}/...
 ```
 
 El slug solicita un contexto; no autentica ni autoriza. Antes de ejecutar una
@@ -78,8 +78,8 @@ y [evidencia](../../backend/identity-access-validation.md).
 Refresh, SSO, UI y administración general de personas quedan fuera.
 Object storage y límites de archivos requieren otra misión.
 
-RLS, provisioning dinámico de Institutions, jerarquías institucionales y
-restore lógico individual están fuera del MVP.
+RLS mínima refuerza aislamiento; runtime sin bypass y API central `https://api.dvillasc.me`.
+[Runbook demo](../../backend/demo-tenant-bootstrap.md). Altas generales y restore individual quedan fuera.
 
 ## Cursos y privilegios implementados
 

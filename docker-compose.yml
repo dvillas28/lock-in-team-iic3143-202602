@@ -21,18 +21,34 @@ services:
       start_period: 5s
 
   backend:
-    command: ["sh", "-c", "node dist/commands/migrate.js && exec node dist/main.js"]
+    command: ["sh", "-c", "node dist/commands/predeploy.js && exec node dist/commands/start.js"]
     build:
       context: ./backend
     environment:
+      NODE_ENV: development
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:?AUTH_JWT_SECRET is required}
       APP_VERSION: 0.1.0
-      DATABASE_URL: postgresql://${POSTGRES_USER:-academix}:${POSTGRES_PASSWORD:-academix_dev}@postgres:5432/${POSTGRES_DB:-academix}
+      DATABASE_URL: postgresql://academix_runtime:${RUNTIME_PASSWORD:-runtime_dev}@postgres:5432/${POSTGRES_DB:-academix}
+      MIGRATION_DATABASE_URL: postgresql://${POSTGRES_USER:-academix}:${POSTGRES_PASSWORD:-academix_dev}@postgres:5432/${POSTGRES_DB:-academix}
+      CORS_ALLOWED_ORIGINS: '["http://localhost:3000"]'
+      DEMO_DATA_ENABLED: ${DEMO_DATA_ENABLED:-false}
+      DEMO_ADOPT_LEGACY: ${DEMO_ADOPT_LEGACY:-false}
+      DEMO_OPERATOR_REF: ${DEMO_OPERATOR_REF:-}
       DEMO_UC_PASSWORD: ${DEMO_UC_PASSWORD:-}
       DEMO_UTFSM_PASSWORD: ${DEMO_UTFSM_PASSWORD:-}
       DEMO_MULTI_PASSWORD: ${DEMO_MULTI_PASSWORD:-}
       DEMO_REVOKED_PASSWORD: ${DEMO_REVOKED_PASSWORD:-}
       DEMO_INACTIVE_PASSWORD: ${DEMO_INACTIVE_PASSWORD:-}
+      DEMO_UC_SUPERADMIN_PASSWORD: ${DEMO_UC_SUPERADMIN_PASSWORD:-}
+      DEMO_UC_ADMIN_PASSWORD: ${DEMO_UC_ADMIN_PASSWORD:-}
+      DEMO_UC_TEACHER_PASSWORD: ${DEMO_UC_TEACHER_PASSWORD:-}
+      DEMO_UC_ASSISTANT_PASSWORD: ${DEMO_UC_ASSISTANT_PASSWORD:-}
+      DEMO_UC_STUDENT_PASSWORD: ${DEMO_UC_STUDENT_PASSWORD:-}
+      DEMO_UTFSM_SUPERADMIN_PASSWORD: ${DEMO_UTFSM_SUPERADMIN_PASSWORD:-}
+      DEMO_UTFSM_ADMIN_PASSWORD: ${DEMO_UTFSM_ADMIN_PASSWORD:-}
+      DEMO_UTFSM_TEACHER_PASSWORD: ${DEMO_UTFSM_TEACHER_PASSWORD:-}
+      DEMO_UTFSM_ASSISTANT_PASSWORD: ${DEMO_UTFSM_ASSISTANT_PASSWORD:-}
+      DEMO_UTFSM_STUDENT_PASSWORD: ${DEMO_UTFSM_STUDENT_PASSWORD:-}
       PORT: 3001
     ports:
       - "3001:3001"

@@ -3,7 +3,7 @@ import type {IdentityRequest} from "../auth/auth.guard";
 import {slug,uuid} from "../courses/validation";
 import {GradebookService} from "./gradebook.service";
 import {publicationKey} from "./gradebook-validation";
-@Controller("api/v1/institutions/:institutionSlug/courses/:courseId")
+@Controller("api/v1/institution/:institutionSlug/courses/:courseId")
 export class GradebookController {
  constructor(private readonly gradebook:GradebookService) {}
  @Get("grade-items") @Header("Cache-Control","no-store")

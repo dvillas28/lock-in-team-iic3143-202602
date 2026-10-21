@@ -14,7 +14,7 @@ export async function attemptFixture(pool) {
  return {...f,create,startPath:`uc/sections/${f.s1}/quizzes/${f.quizzes.section}/attempts`};
 }
 export async function request(app,token,path,method='GET',body,key) {
- const response=await fetch(app.base+'/api/v1/institutions/'+path,{method,headers:{Authorization:'Bearer '+token,
+ const response=await fetch(app.base+'/api/v1/institution/'+path,{method,headers:{Authorization:'Bearer '+token,
   ...(body===undefined?{}:{'Content-Type':'application/json'}),...(key===undefined?{}:{'Idempotency-Key':key})},...(body===undefined?{}:{body:JSON.stringify(body)})});
  assert.equal(response.headers.get('cache-control'),'no-store');
  return {status:response.status,body:response.status===204?null:await response.json(),headers:response.headers};

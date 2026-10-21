@@ -11,7 +11,7 @@ test("CurrentUser projection, empty roles, indistinguishable contexts and auth b
   await pool.query("INSERT INTO institution_memberships(id,institution_id,user_id) VALUES($1,$2,'10000000-0000-4000-8000-000000000003')",[randomUUID(),institutionId]);
   app=await http();
   const multi=await login(app,env);const uc=await login(app,env,"UC");const utfsm=await login(app,env,"UTFSM");tokens.push(multi,uc,utfsm);
-  const get=(slug,token)=>fetch(`${app.base}/api/v1/institutions/${slug}/me`,authorized(token));
+  const get=(slug,token)=>fetch(`${app.base}/api/v1/institution/${slug}/me`,authorized(token));
   const before=await snapshot(pool);
   const listed=await fetch(app.base+"/api/v1/institutions",authorized(multi));
   assert.ok((await listed.json()).items.some(i=>i.slug==="legacy--campus"));

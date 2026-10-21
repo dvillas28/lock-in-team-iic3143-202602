@@ -28,15 +28,15 @@ test("populated identity schema upgrades without changing identities or membersh
  const {tmpdir}=await import("node:os");const {join}=await import("node:path");
  const {reset,testUrl,secrets,snapshot}=await import("./helpers.mjs");
  const migration=await import("../../dist/commands/migrate.js");
- const pool=await database(),dir=await mkdtemp(join(tmpdir(),"academic-upgrade-"));const saved=process.env.DATABASE_URL;
+ const pool=await database(),dir=await mkdtemp(join(tmpdir(),"academic-upgrade-"));const saved=process.env.MIGRATION_DATABASE_URL;
  try{
-  await reset(pool);process.env.DATABASE_URL=testUrl();
+  await reset(pool);process.env.MIGRATION_DATABASE_URL=testUrl();
   for(const file of ["20261015000100_institutional-foundation.sql","20261015000400_unique_login_email.sql"])await copyFile(new URL("../../migrations/"+file,import.meta.url),join(dir,file));
   await migration.default.migrate(dir);assert.equal((await cli("seeds/demo",secrets()).result).code,0);
   const before=await snapshot(pool);assert.equal((await cli("commands/migrate").result).code,0);
   const after=await snapshot(pool);assert.deepEqual(after.slice(0,2),before.slice(0,2));
   assert.deepEqual(after[2].map(({is_admin,is_super_admin,...m})=>{assert.equal(is_admin,false);assert.equal(is_super_admin,false);return m;}),before[2]);
- }finally{if(saved===undefined)delete process.env.DATABASE_URL;else process.env.DATABASE_URL=saved;await rm(dir,{recursive:true,force:true});await pool.end();}
+ }finally{if(saved===undefined)delete process.env.MIGRATION_DATABASE_URL;else process.env.MIGRATION_DATABASE_URL=saved;await rm(dir,{recursive:true,force:true});await pool.end();}
 });
 
 async function waitForLock(pool,pattern,count=1) {

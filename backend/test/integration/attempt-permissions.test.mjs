@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {randomUUID} from 'node:crypto';
 import service from '../../dist/attempts/attempts.service.js';
+import {runtimeDatabase} from './helpers.mjs';
 import audit from '../../dist/audit/audit.service.js';
 import {database,http} from './helpers.mjs';
 import {attemptFixture,tokens,request,path,users,state} from './attempt-fixtures.mjs';
@@ -67,8 +68,9 @@ test('invisible quiz start stays 404; foreign answers and rubric are never loade
   for(const quiz of [f.quizzes.section,draft,randomUUID()])
    assert.equal((await request(app,t.assistant,`uc/sections/${f.s2}/quizzes/${quiz}/attempts`,'POST',undefined,'hidden')).status,404);
   assert.deepEqual(await state(pool),before);
-  const connect=pool.connect.bind(pool),loaded=[];
-  pool.connect=async()=>{
+  const runtime=await runtimeDatabase(),runtimePool=runtime.pool;
+  const connect=runtimePool.connect.bind(runtimePool),loaded=[];
+  runtimePool.connect=async()=>{
    const c=await connect(),query=c.query.bind(c),release=c.release.bind(c);
    c.query=async(...args)=>{
     const result=await query(...args);
@@ -78,11 +80,11 @@ test('invisible quiz start stays 404; foreign answers and rubric are never loade
    c.release=()=>{c.query=query;c.release=release;release();};return c;
   };
   try{
-   const attempts=new service.AttemptsService({pool},new audit.AuditService());
+   const attempts=new service.AttemptsService(runtime,new audit.AuditService());
    await assert.rejects(attempts.get(users.inactive,'uc',id),e=>e.getStatus()===404);
    assert.deepEqual(loaded,[]);
    await assert.rejects(attempts.start(users.inactive,'uc',f.quizzes.section,f.s2,'hidden',undefined),e=>e.getStatus()===404);
    assert.deepEqual(loaded,[]);
-  }finally{pool.connect=connect;}
+  }finally{runtimePool.connect=connect;await runtime.onApplicationShutdown();}
  }finally{if(app)await app.close();await pool.end();}
 });

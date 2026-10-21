@@ -45,3 +45,8 @@ function category(error: unknown): OperationError["category"] {
 export function reportError(operation: string, error: unknown) {
   console.error(JSON.stringify({ operation, outcome: "error", category: category(error) }));
 }
+
+export function operationalConfig(env: NodeJS.ProcessEnv = process.env): PoolConfig {
+  if (!env.MIGRATION_DATABASE_URL) throw new OperationError("config");
+  return connectionConfig({...env, DATABASE_URL: env.MIGRATION_DATABASE_URL});
+}

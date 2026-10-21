@@ -82,7 +82,7 @@
         $ref: ../components/responses.yaml#/Unauthorized
       '503':
         $ref: ../components/responses.yaml#/ServiceUnavailable
-/api/v1/institutions/{institutionSlug}/me:
+/api/v1/institution/{institutionSlug}/me:
   parameters:
   - $ref: ../components/parameters.yaml#/InstitutionSlug
   get:
@@ -112,7 +112,7 @@
         $ref: ../components/responses.yaml#/BadRequest
       '503':
         $ref: ../components/responses.yaml#/ServiceUnavailable
-/api/v1/institutions/{institutionSlug}/users:
+/api/v1/institution/{institutionSlug}/users:
   parameters:
   - $ref: ../components/parameters.yaml#/InstitutionSlug
   get:
@@ -141,7 +141,7 @@
         $ref: ../components/responses.yaml#/Forbidden
       '404':
         $ref: ../components/responses.yaml#/NotFound
-/api/v1/institutions/{institutionSlug}/memberships:
+/api/v1/institution/{institutionSlug}/memberships:
   parameters:
   - $ref: ../components/parameters.yaml#/InstitutionSlug
   get:
@@ -179,7 +179,7 @@
     parameters:
     - $ref: ../components/parameters.yaml#/Cursor
     - $ref: ../components/parameters.yaml#/Limit
-/api/v1/institutions/{institutionSlug}/memberships/{membershipId}/course-admin:
+/api/v1/institution/{institutionSlug}/memberships/{membershipId}/course-admin:
   parameters:
   - $ref: ../components/parameters.yaml#/InstitutionSlug
   - name: membershipId

@@ -7,7 +7,7 @@ export function onboardingEnv() {return {ONBOARD_INSTITUTION_SLUG:"new-campus",O
 test("US3 onboarding new/reused identity, replay, collision, concurrency and atomic failure",async()=>{
  const pool=await database();try {
   await migrated(pool);const env=onboardingEnv();
-  const invalidConfig=await cli("data-migrations/onboard-institution",{...env,DATABASE_URL:""}).result;
+  const invalidConfig=await cli("data-migrations/onboard-institution",{...env,MIGRATION_DATABASE_URL:""}).result;
   assert.equal(invalidConfig.code,1);assert.deepEqual(JSON.parse(invalidConfig.output),{operation:"onboard-institution",outcome:"error",category:"config"});
   const results=await Promise.all([cli("data-migrations/onboard-institution",env).result,cli("data-migrations/onboard-institution",env).result]);
   assert.deepEqual(results.map(r=>r.code),[0,0]);assert.ok(results.some(r=>JSON.parse(r.output).outcome==="alreadyApplied"));

@@ -3,7 +3,7 @@ import {randomUUID} from "node:crypto";
 import {isDeepStrictEqual} from "node:util";
 import {DatabaseService} from "../database/database.service";
 import {AuditService} from "../audit/audit.service";
-import {transaction,requirePermission} from "../courses/course-access";
+import {requirePermission} from "../courses/course-access";
 import {uuid} from "../courses/validation";
 import {noBody} from "../content/content-validation";
 import {quizScope,visibleQuiz,canAuthorQuiz,requireDestination,requireDraft,visibilityArgs,visibleSql} from "./quiz-access";
@@ -13,7 +13,7 @@ import {quizColumns,quizInput,quizSnapshot,authoringDto,studentDto,summaryDto,ty
 export class QuizzesService {
  constructor(private readonly db:DatabaseService,private readonly audit:AuditService) {}
  async create(actor:string,slug:string,course:string,body:unknown) {
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await quizScope(c,actor,slug,course,"course"),input=validateQuiz(body);
    await requireDestination(c,s,input.sectionId,true);
    const id=randomUUID();
@@ -25,7 +25,7 @@ export class QuizzesService {
   });
  }
  async update(actor:string,slug:string,id:string,body:unknown) {
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await quizScope(c,actor,slug,id,"quiz"),row=await visibleQuiz(c,s,id);
    requirePermission(canAuthorQuiz(s,row.section_id));requireDraft(row);
    const before=quizInput(row),input=validateQuiz(body,before);
@@ -40,7 +40,7 @@ export class QuizzesService {
   });
  }
  async publish(actor:string,slug:string,id:string,body:unknown) {
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await quizScope(c,actor,slug,id,"quiz"),row=await visibleQuiz(c,s,id);
    requirePermission(canAuthorQuiz(s,row.section_id));noBody(body);
    if(row.published_at!==null)return authoringDto(row);
@@ -61,14 +61,14 @@ export class QuizzesService {
   });
  }
  async get(actor:string,slug:string,id:string,authoring=false) {
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await quizScope(c,actor,slug,id,"quiz"),row=await visibleQuiz(c,s,id);
    if(authoring){requirePermission(canAuthorQuiz(s,row.section_id));return authoringDto(row);}
    return studentDto(row);
   });
  }
  async list(actor:string,slug:string,course:string,query:Record<string,unknown>) {
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await quizScope(c,actor,slug,course,"course");
    if(Object.keys(query).some(key=>key!=="sectionId"))throw new BadRequestException();
    const section=query.sectionId===undefined?null:uuid(query.sectionId);

@@ -2,24 +2,30 @@ import { randomUUID } from "node:crypto";
 import { AuditService } from "../audit/audit.service";
 import { Injectable } from "@nestjs/common";
 import { DatabaseService } from "../database/database.service";
-import { context, courseScope,lockContext,transaction,requirePermission } from "./course-access";
+import { courseScope,lockContext,requirePermission } from "./course-access";
 import type { QueryResultRow } from "pg";
 export const courseDto=(c:QueryResultRow)=>({id:c.id,code:c.code,name:c.name,term:c.term,createdBy:c.created_by,createdAt:c.created_at});
 @Injectable()
 export class CoursesService {
   constructor(private readonly database: DatabaseService,private readonly audit:AuditService) {}
   async list(actor:string,slug:string) {
-    const m=await context(this.database.pool,actor,slug);
-    return {items:(await this.database.pool.query(`SELECT c.id,c.code,c.name,c.term FROM public.courses c
+ return this.database.withInstitution(actor,slug,async (db,member)=>{
+    const m=member;
+    return {items:(await db.query(`SELECT c.id,c.code,c.name,c.term FROM public.courses c
       JOIN public.institution_memberships m ON m.institution_id=c.institution_id AND m.user_id=$2
       JOIN public.users u ON u.id=m.user_id JOIN public.institutions i ON i.id=c.institution_id
       WHERE c.institution_id=$1 AND m.active AND u.active AND i.active AND
       ((m.is_admin AND c.created_by=$2) OR EXISTS(SELECT 1 FROM public.enrollments e JOIN public.sections s ON s.institution_id=e.institution_id AND s.id=e.section_id
        WHERE e.institution_id=c.institution_id AND s.course_id=c.id AND e.user_id=$2 AND e.active)) ORDER BY c.code,c.term,c.id`,[m.institution_id,actor])).rows};
-  }
-  async get(actor:string,slug:string,id:string) {const m=await context(this.database.pool,actor,slug);return courseDto((await courseScope(this.database.pool,m,id)).course);}
+
+ });
+}
+  async get(actor:string,slug:string,id:string) {
+ return this.database.withInstitution(actor,slug,async (db,member)=>{const m=member;return courseDto((await courseScope(db,m,id)).course);
+ });
+}
   async create(actor:string,slug:string,input:{code:string;name:string;term:string;initialSection:{code:string;capacity:number|null}}) {
-    return transaction(this.database.pool,async db=>{
+    return this.database.withInstitution(actor,slug,async db=>{
       const m=await lockContext(db,actor,slug);requirePermission(m.is_admin);
       const id=randomUUID(),sectionId=randomUUID(),enrollmentId=randomUUID();
       const c=(await db.query("INSERT INTO public.courses(id,institution_id,code,name,term,created_by) VALUES($1,$2,$3,$4,$5,$6) RETURNING *",
@@ -34,7 +40,7 @@ export class CoursesService {
     });
   }
   async update(actor:string,slug:string,id:string,input:{code?:string;name?:string;term?:string}) {
-    return transaction(this.database.pool,async db=>{
+    return this.database.withInstitution(actor,slug,async db=>{
       const m=await lockContext(db,actor,slug),scope=await courseScope(db,m,id,true);requirePermission(scope.owner);
       const before=courseDto(scope.course),after={...before,...input};
       if(before.code===after.code && before.name===after.name && before.term===after.term)return before;
