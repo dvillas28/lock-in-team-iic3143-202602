@@ -1,10 +1,15 @@
+import {checkRuntime} from "./runtime-check";
+import {NotFoundException,UnauthorizedException} from "@nestjs/common";
+import {transaction} from "./tenant-transaction";
+import {slug as validateSlug} from "../courses/validation";
+import {context,type Membership} from "../courses/course-access";
 import { Injectable, type OnModuleInit, type OnApplicationShutdown } from "@nestjs/common";
-import { Pool } from "pg";
+import { Pool, type PoolClient } from "pg";
 import { connectionConfig, reportError } from "./config";
 
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
-  readonly pool = new Pool({
+  private readonly pool = new Pool({
     ...connectionConfig(), application_name: "academix-http", max: 5,
     connectionTimeoutMillis: 2000, query_timeout: 2000, statement_timeout: 2000,
     options: "-c search_path=public", idleTimeoutMillis: 10000,
@@ -12,7 +17,27 @@ export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
 
   constructor() { this.pool.on("error", error => reportError("database", error)); }
 
+  withIdentity<T>(actor:string|null,fn:(client:PoolClient)=>Promise<T>) {
+    return transaction(this.pool,async client=>{
+      await client.query("SELECT set_config('academix.actor_id',$1,true),set_config('academix.institution_id','',true)",[actor??""]);
+      return fn(client);
+    });
+  }
+  withInstitution<T>(actor:string,slug:string,fn:(client:PoolClient,member:Membership)=>Promise<T>) {
+    validateSlug(slug);
+    return this.withIdentity(actor,async client=>{
+      const user=(await client.query("SELECT active FROM public.users WHERE id=$1",[actor])).rows[0];
+      if(!user?.active)throw new UnauthorizedException();
+      const institution=(await client.query("SELECT id FROM public.institutions WHERE slug=$1 AND active",[slug])).rows[0];
+      if(!institution)throw new NotFoundException();
+      await client.query("SELECT set_config('academix.institution_id',$1,true)",[institution.id]);
+      const member=await context(client,actor,slug);
+      return fn(client,member);
+    });
+  }
+
   async check() {
+    await checkRuntime(this.pool);
     await this.pool.query(`SELECT id,institution_id,course_id,actor_user_id,idempotency_key,request,published_count,published_at FROM public.grade_publications LIMIT 0`);
     await this.pool.query(`SELECT a.id,a.institution_id,a.course_id,a.quiz_id,a.section_id,a.student_id,a.attempt_number,a.status,
       a.started_at,a.submitted_at,a.cancelled_at,a.answers,a.score_points,a.score_percent,a.grade_value,a.start_key,a.submit_key,

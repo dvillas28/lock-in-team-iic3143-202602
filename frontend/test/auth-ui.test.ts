@@ -32,7 +32,7 @@ async function mount(options:{url?:string;reply?:(request:Request)=>Response|Pro
     const request=input as Request;requests.push(request);
     if(options.reply)return options.reply(request);
     if(request.method==="POST")return Response.json(login());
-    const match=new URL(request.url).pathname.match(/institutions\/([^/]+)\/me$/);
+    const match=new URL(request.url).pathname.match(/institution\/([^/]+)\/me$/);
     return Response.json(match?user(match[1]):{items:[institution(),institution("utfsm")]});
   };
   const root=createRoot(dom.window.document.getElementById("root")!);
@@ -81,6 +81,7 @@ test("accessible form, validation, password toggle and successful institution na
     await ui.submit();assert.equal(ui.path,"/institutions");assert.match(ui.doc.body.textContent!,/Tus instituciones/);
     assert.deepEqual(await ui.requests[0].json(),{email:"persona@example.test",password:" pass "});
     await ui.click("UC");assert.equal(ui.path,"/institutions/uc");assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+    assert.ok(ui.requests.some(request=>new URL(request.url).pathname==="/api/v1/institution/uc/me"));
     assert.match(ui.doc.body.textContent!,/Persona · persona@example.test/);
     await ui.navigate("/institutions/utfsm");assert.match(ui.doc.body.textContent!,/Institución: UTFSM/);
     await ui.click("Cerrar sesión");assert.equal(ui.path,"/login");assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT|persona@example.test/);

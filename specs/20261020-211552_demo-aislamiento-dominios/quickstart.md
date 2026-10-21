@@ -1,6 +1,6 @@
 # Quickstart: Demo y backend con institución por path
 
-Comandos previstos para DESPUÉS de implementar tasks.md; no describen cambios ya desplegados.
+Comandos locales implementados; no acreditan cambios desplegados. Ver [runbook](../../docs/backend/demo-tenant-bootstrap.md).
 Nunca ejecutar suites de fixtures contra producción: borran esquema. Las dos URLs de test deben
 apuntar a la misma base descartable terminada en _test, con credenciales operativa/runtime separadas.
 
@@ -105,4 +105,5 @@ Cliente generado: baseUrl=https://api.dvillasc.me; ruta ya incluye /api/v1 e ins
 El operador suministra DEMO_*_PASSWORD vigentes y SMOKE_ALLOWED_ORIGIN al smoke, no al runtime.
 `node scripts/postdeploy-demo.mjs` prueba salud/login/me/CORS; `--workflow` habilita mutaciones explícitas.
 La carga idempotente no recupera secretos ni permisos revocados para hacer pasar el smoke.
+Workflow requiere admin delegado; solo SMOKE_DELEGATE_ADMIN=true autoriza delegarlo explícitamente.
 Registrar commit/versión, readiness/RLS y pruebas por ambos paths; documentos no equivalen a despliegue.

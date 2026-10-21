@@ -3,7 +3,7 @@
 **Feature Branch**: `docs/demo-aislamiento-plan`
 **Feature Directory**: `specs/20261020-211552_demo-aislamiento-dominios`
 **Created**: 2026-10-20
-**Status**: Planificado; tareas generadas; implementación pendiente.
+**Status**: Implementación local validada; despliegue y smoke públicos pendientes (T042/T044).
 **Input**: Carga demo automática e idempotente en Railway, delegación institucional y aislamiento centralizado sobre PostgreSQL compartida; frontend por subdominio y API central api.dvillasc.me con institución explícita en el path.
 
 ## User Scenarios & Testing *(mandatory)*

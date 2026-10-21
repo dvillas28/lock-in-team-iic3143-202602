@@ -27,7 +27,7 @@ function harness(reply?: (request: Request) => Response | Promise<Response>) {
       const request = input as Request; requests.push(request);
       if (reply) return reply(request);
       if (request.method === "POST") return Response.json(login());
-      const match = new URL(request.url).pathname.match(/institutions\/([^/]+)\/me$/);
+      const match = new URL(request.url).pathname.match(/institution\/([^/]+)\/me$/);
       return Response.json(match ? user(match[1]) : { items: [institution(), institution("utfsm")] });
     } });
   return { session, requests, advance: (ms: number) => { clock += ms; }, fire: () => scheduled?.() };

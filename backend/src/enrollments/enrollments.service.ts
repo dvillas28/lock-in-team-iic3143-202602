@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import type { QueryResultRow,PoolClient } from "pg";
 import { DatabaseService } from "../database/database.service";
 import { AuditService } from "../audit/audit.service";
-import { context,lockContext,sectionScope,requirePermission,transaction } from "../courses/course-access";
+import { lockContext,sectionScope,requirePermission } from "../courses/course-access";
 import { page,paginated } from "../courses/validation";
 const dto=(e:QueryResultRow)=>({id:e.id,sectionId:e.section_id,user:{id:e.user_id,email:e.email,name:e.name,active:e.user_active},role:e.role,active:e.active,createdAt:e.created_at});
 const snapshot=(e:QueryResultRow)=>({id:e.id,userId:e.user_id,sectionId:e.section_id,role:e.role,active:e.active});
@@ -11,18 +11,21 @@ const snapshot=(e:QueryResultRow)=>({id:e.id,userId:e.user_id,sectionId:e.sectio
 export class EnrollmentsService {
  constructor(private readonly database:DatabaseService,private readonly audit:AuditService) {}
  async list(actor:string,slug:string,section:string,query:Record<string,unknown>) {
-  const m=await context(this.database.pool,actor,slug),scope=await sectionScope(this.database.pool,m,section);
+ return this.database.withInstitution(actor,slug,async (db,member)=>{
+  const m=member,scope=await sectionScope(db,m,section);
   requirePermission(scope.owner || scope.roles.some(e=>["teacher","assistant"].includes(e.role)));
   const p=page(query,JSON.stringify(["enrollments",m.institution_id,section,actor]));
-  const rows=(await this.database.pool.query(`SELECT e.*,u.email,u.name,u.active AS user_active,
+  const rows=(await db.query(`SELECT e.*,u.email,u.name,u.active AS user_active,
    to_char(e.created_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS cursor_date
    FROM public.enrollments e JOIN public.users u ON u.id=e.user_id WHERE e.institution_id=$1 AND e.section_id=$2
    AND ($3::timestamptz IS NULL OR (e.created_at,e.id)>($3::timestamptz,$4::uuid)) ORDER BY e.created_at,e.id LIMIT $5`,[m.institution_id,section,p.date,p.id,p.limit+1])).rows;
   const result=paginated(rows,p,r=>r.cursor_date);return {...result,items:result.items.map(dto)};
- }
+
+ });
+}
  private async result(db:PoolClient,id:string) {return dto((await db.query("SELECT e.*,u.email,u.name,u.active AS user_active FROM public.enrollments e JOIN public.users u ON u.id=e.user_id WHERE e.id=$1",[id])).rows[0]);}
  async create(actor:string,slug:string,section:string,user:string,role:string) {
-  return transaction(this.database.pool,async db=>{
+  return this.database.withInstitution(actor,slug,async db=>{
    const m=await lockContext(db,actor,slug,[user]),scope=await sectionScope(db,m,section,true);
    requirePermission(scope.owner || scope.roles.some(e=>e.role==="teacher"));
    const existing=(await db.query("SELECT id FROM public.enrollments WHERE institution_id=$1 AND section_id=$2 AND user_id=$3 AND role=$4 AND active",[m.institution_id,section,user,role])).rows[0];
@@ -33,7 +36,7 @@ export class EnrollmentsService {
   });
  }
  async update(actor:string,slug:string,section:string,id:string,input:{role?:string;active?:boolean}) {
-  return transaction(this.database.pool,async db=>{
+  return this.database.withInstitution(actor,slug,async db=>{
    const target=(await db.query(`SELECT e.user_id FROM public.enrollments e JOIN public.institutions i ON i.id=e.institution_id
     WHERE i.slug=$1 AND e.section_id=$2 AND e.id=$3`,[slug,section,id])).rows[0];
    const m=await lockContext(db,actor,slug,target?[target.user_id]:[]),scope=await sectionScope(db,m,section,true,id);

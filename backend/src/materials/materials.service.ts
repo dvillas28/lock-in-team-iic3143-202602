@@ -2,14 +2,14 @@ import {Injectable} from "@nestjs/common";
 import {randomUUID} from "node:crypto";
 import {DatabaseService} from "../database/database.service";
 import {AuditService} from "../audit/audit.service";
-import {transaction,requirePermission} from "../courses/course-access";
+import {requirePermission} from "../courses/course-access";
 import {contentScope,visibleModule,visibleMaterial,materialDto,type MaterialRow} from "../content/content-access";
 import {object,title,markdown,noBody} from "../content/content-validation";
 @Injectable()
 export class MaterialsService {
  constructor(private readonly db:DatabaseService,private readonly audit:AuditService) {}
  async create(actor:string,slug:string,module:string,body:unknown) {
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await contentScope(c,actor,slug,module,"module");await visibleModule(c,s,module);requirePermission(s.teacher);
    const dto=object(body,["title","markdownBody"],["title","markdownBody"]),name=title(dto.title),source=markdown(dto.markdownBody);
    const row=(await c.query<MaterialRow>(`INSERT INTO public.materials(id,institution_id,module_id,title,markdown_body,created_by) VALUES($1,$2,$3,$4,$5,$6) RETURNING *`,[randomUUID(),s.member.institution_id,module,name,source,actor])).rows[0];
@@ -19,7 +19,7 @@ export class MaterialsService {
   });
  }
  async update(actor:string,slug:string,id:string,body:unknown,state?:boolean) {
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await contentScope(c,actor,slug,id,"material"),row=await visibleMaterial(c,s,id);requirePermission(s.teacher);
    const before=materialDto(row);
    if(state===undefined) {
@@ -36,10 +36,10 @@ export class MaterialsService {
   });
  }
  async get(actor:string,slug:string,id:string) {
-  return transaction(this.db.pool,async c=>{const s=await contentScope(c,actor,slug,id,"material");return materialDto(await visibleMaterial(c,s,id));});
+  return this.db.withInstitution(actor,slug,async c=>{const s=await contentScope(c,actor,slug,id,"material");return materialDto(await visibleMaterial(c,s,id));});
  }
  async list(actor:string,slug:string,module:string) {
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await contentScope(c,actor,slug,module,"module");await visibleModule(c,s,module);
    const rows=(await c.query<MaterialRow>(`SELECT a.id,a.module_id,a.title,a.kind,a.markdown_body,a.published_at,a.created_by
     FROM public.materials a JOIN public.course_modules m ON m.institution_id=a.institution_id AND m.id=a.module_id

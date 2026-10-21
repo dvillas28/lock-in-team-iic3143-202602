@@ -20,13 +20,16 @@ de `openapi-fetch`: `{ data, response }` en éxito y errores estructurados en
 fallos. Acepta `baseUrl`, `fetch` para pruebas y `getToken` para consultar el JWT
 actual. En servidor, crear una instancia por solicitud/sesión, sin compartir
 tokens entre usuarios. `institutions.ts` ofrece `listAccessibleInstitutions(client)`
-y `getCurrentUser(client, institutionSlug)`; requieren backend y autenticación
-todavía pendientes. `/health` conserva su consumo público y validación.
+y `getCurrentUser(client, institutionSlug)`; requieren JWT y pertenencia activa.
+`/health` conserva su consumo público y validación.
 
 El cliente usa `API_URL` en servidor y `NEXT_PUBLIC_API_URL` en navegador, o
 `http://localhost:3001` en desarrollo. Producción exige configurar la URL del
 entorno correspondiente (o pasar `baseUrl`). El consumo desde navegador a otro
-origen requiere CORS del backend, actualmente pendiente.
+origen usa la lista CORS explícita del backend; Origin no selecciona tenant.
+Producción: `https://api.dvillasc.me`; baseUrl acepta solo origen, sin `/api/v1`.
+Las rutas generadas ya incluyen `/api/v1/institution/{institutionSlug}/...`.
+Los frontend UC/UTFSM usan esa API central; configuración local separada.
 
 Los parámetros van en `params.path` / `params.query`; el contexto institucional
 se obtiene de `institutionSlug`. Para comprobar propiedades adicionales del

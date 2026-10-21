@@ -29,7 +29,7 @@ test('US2 stale links and US1 writes revalidate every revoked layer, retaining i
 test('US1 revocation vs each create/PATCH/publish serializes in both commit orders for every layer',async()=>{
  const pool=await database();let app;try{
   const f=await quizFixture(pool);app=await http();const t=await tokens(app,f);
-  await pool.query('CREATE TABLE quiz_test_gate(id integer PRIMARY KEY); INSERT INTO quiz_test_gate VALUES(1)');
+  await pool.query('CREATE TABLE quiz_test_gate(id integer PRIMARY KEY); INSERT INTO quiz_test_gate VALUES(1); GRANT SELECT,UPDATE ON quiz_test_gate TO academix_runtime');
   await pool.query("CREATE FUNCTION quiz_audit_gate() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN PERFORM id FROM quiz_test_gate WHERE id=1 FOR UPDATE; RETURN NEW; END $$; CREATE TRIGGER quiz_audit_gate BEFORE INSERT ON audit_events FOR EACH ROW EXECUTE FUNCTION quiz_audit_gate()");
   for(const layer of layers(f))for(const method of ['create','patch','publish'])for(const writeFirst of [false,true]){
    const id=await f.make({section:null}),path='uc/quizzes/'+id;

@@ -15,7 +15,7 @@ function validator() {
   const url=new URL('components/schemas/'+file,root);ajv.addSchema({...yaml.load(readFileSync(url,'utf8')),$id:url.href},url.href);
  }
  const url=new URL('paths/quizzes.yaml',root),doc=yaml.load(readFileSync(url,'utf8'));
- const schema=doc['/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}'].get.responses['200'].content['application/json'].schema;
+ const schema=doc['/api/v1/institution/{institutionSlug}/quiz-attempts/{attemptId}'].get.responses['200'].content['application/json'].schema;
  assert.equal(schema.anyOf.length,3);assert.equal(schema.oneOf,undefined);
  return {validate:ajv.compile({...schema,$id:url.href}),ajv,schema,url};
 }
@@ -36,10 +36,10 @@ test('US1 actual OpenAPI GET anyOf validates all three authorized views, includi
    }
   }
   const id=await f.create({quiz:await f.make({published:true})}),client=createApiClient({baseUrl:app.base,getToken:()=>t.student});
-  const response=await client.GET('/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}',{params:{path:{institutionSlug:'uc',attemptId:id}}});
+  const response=await client.GET('/api/v1/institution/{institutionSlug}/quiz-attempts/{attemptId}',{params:{path:{institutionSlug:'uc',attemptId:id}}});
   assert.equal(response.data.id,id);assert.ok(!('grade' in response.data));
   for(const [body,type,status] of [['{bad','application/json',400],['x','text/plain',415],[JSON.stringify({answers:['x'.repeat(4096)]}),'application/json',413]]){
-   const r=await fetch(app.base+'/api/v1/institutions/'+path(id)+'/answers',{method:'PUT',headers:{Authorization:'Bearer '+t.student,'Content-Type':type},body});
+   const r=await fetch(app.base+'/api/v1/institution/'+path(id)+'/answers',{method:'PUT',headers:{Authorization:'Bearer '+t.student,'Content-Type':type},body});
    assert.equal(r.status,status);assert.equal(r.headers.get('cache-control'),'no-store');
   }
  }finally{if(app)await app.close();await pool.end();}
@@ -51,11 +51,11 @@ test('US2 real receipt, corrected GET projections and strict transport/header/bo
   const q=(await pool.query('SELECT questions FROM quizzes WHERE id=$1',[f.quizzes.section])).rows[0].questions[0];
   const id=await f.create({answers:[{questionId:q.id,alternativeId:'a'}]});
   const client=createApiClient({baseUrl:app.base,getToken:()=>t.student});
-  const response=await client.POST('/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}/submit',{
+  const response=await client.POST('/api/v1/institution/{institutionSlug}/quiz-attempts/{attemptId}/submit',{
    params:{path:{institutionSlug:'uc',attemptId:id},header:{'Idempotency-Key':'receipt'}},
   });
   assert.deepEqual(Object.keys(response.data).sort(),['id','status','submittedAt']);
-  assert.deepEqual((await client.POST('/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}/submit',{
+  assert.deepEqual((await client.POST('/api/v1/institution/{institutionSlug}/quiz-attempts/{attemptId}/submit',{
    params:{path:{institutionSlug:'uc',attemptId:id},header:{'Idempotency-Key':'receipt'}},
   })).data,response.data);
   for(const who of ['student','teacher','assistant']){
@@ -67,7 +67,7 @@ test('US2 real receipt, corrected GET projections and strict transport/header/bo
    assert.equal((await request(app,t.student,path(id)+'/submit','POST',body,key)).status,400);
   const {request:rawRequest}=await import('node:http');
   const status=await new Promise((resolve,reject)=>{
-   const r=rawRequest(app.base+'/api/v1/institutions/'+path(id)+'/submit',{method:'POST',headers:['Authorization','Bearer '+t.student,'Idempotency-Key','a','idempotency-key','b']},res=>{res.resume();res.on('end',()=>resolve(res.statusCode));});r.on('error',reject);r.end();
+   const r=rawRequest(app.base+'/api/v1/institution/'+path(id)+'/submit',{method:'POST',headers:['Authorization','Bearer '+t.student,'Idempotency-Key','a','idempotency-key','b']},res=>{res.resume();res.on('end',()=>resolve(res.statusCode));});r.on('error',reject);r.end();
   });assert.equal(status,400);
  }finally{if(app)await app.close();await pool.end();}
 });

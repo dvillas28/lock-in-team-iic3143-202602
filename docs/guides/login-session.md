@@ -13,7 +13,7 @@
 - Después de login se verifica el JWT consultando `GET /api/v1/institutions`.
   Cero membresías muestra un estado vacío; una o más se ofrecen en el selector.
 - `/institutions/{slug}` no muestra el shell privado hasta validar
-  `GET /api/v1/institutions/{slug}/me`. No se inventan roles ni dashboards.
+  `GET /api/v1/institution/{slug}/me`. No se inventan roles ni dashboards.
 - 401 limpia toda la sesión. 403/404 retiran el contexto; 503/red/respuesta inválida
   muestran recuperación sin reutilizar identidad anterior. No hay reintentos automáticos.
 - Abrir institución, volver a la pestaña o recuperar foco revalida `/me`.
@@ -51,9 +51,10 @@ No se necesita DNS de producción. `next` solo permite `/institutions` o su inic
 se descartan URLs externas, query, fragmentos, rutas codificadas y rutas no implementadas.
 El backend no toma autorización de Host, Origin, X-Forwarded-Host o x-tenant.
 
-**Compatibilidad:** `dev` conserva prefijo API plural `/api/v1/institutions/{slug}`.
-El singular `/api/v1/institution/{slug}`, RLS, carga demo nueva y credencial runtime
-separada siguen pendientes en la misión de aislamiento; no se implementan parcialmente aquí.
+**Compatibilidad:** tras integrar el PR #125 de `dev`, el prefijo API institucional es
+`/api/v1/institution/{slug}`; el directorio global sigue en `/api/v1/institutions`.
+El backend conserva RLS y credenciales runtime/migración separadas. Las URLs del navegador
+siguen en `/institutions/{slug}`: no son endpoints de la API.
 
 ## Configuración y ejecución
 
@@ -80,9 +81,12 @@ usuario multiinstitución, membresías revocadas, preflight CORS y headers adver
 El Quality Gate de esta rama queda **PENDIENTE DE VALIDACIÓN EN CI**; la cobertura local
 no sustituye el análisis remoto de SonarQube.
 
-Resultado local, 2026-10-21: frontend 95/95 y backend 143/143; catálogo API 4/4.
-Cobertura frontend: 89,68% líneas y 90,08% ramas; backend: 99,70% y 96,08%.
+Resultado local tras integrar #125, 2026-10-21: frontend 96/96, backend 157/157,
+catálogo API 4/4 y test del smoke postdeploy 1/1.
+Cobertura frontend: 89,68% líneas y 90,10% ramas; backend: 99,65% y 95,49%.
+La configuración CORS consolidada tiene 100% de líneas y ramas.
 Lint, tipos, build, contrato generado, documentación y Compose aislado pasaron.
+`docker compose config` pasó con defaults y overrides, incluyendo CORS y build arg público.
 Trivy, con configuración de CI, pasó para fuentes e imágenes de ambas aplicaciones:
 sin hallazgos HIGH/CRITICAL corregibles en dependencias productivas, secretos o configuración.
 `pnpm audit` también informa un HIGH previo en `braces@3.0.3`, dependencia de desarrollo

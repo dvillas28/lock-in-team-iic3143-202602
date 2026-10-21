@@ -10,7 +10,7 @@ export function getCurrentUser(
   client: ApiClient,
   institutionSlug: operations["getCurrentUser"]["parameters"]["path"]["institutionSlug"],
 ) {
-  return client.GET("/api/v1/institutions/{institutionSlug}/me", {
+  return client.GET("/api/v1/institution/{institutionSlug}/me", {
     params: { path: { institutionSlug } },
   });
 }

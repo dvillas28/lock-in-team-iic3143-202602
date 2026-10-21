@@ -18,7 +18,7 @@ La dirección final conserva `https://uc.academix.dvillasc.me/institutions/uc`.
 En UTFSM ocurre lo mismo con `utfsm`. La raíz `/` no redirige automáticamente al login.
 
 El flujo HTTP vigente es login global `POST /api/v1/auth/login`, directorio
-`GET /api/v1/institutions` y contexto `GET /api/v1/institutions/uc/me` en la API central.
+`GET /api/v1/institutions` y contexto `GET /api/v1/institution/uc/me` en la API central.
 El último endpoint exige JWT, usuario activo, institución activa y membresía activa.
 El dominio no concede permisos. Host y path institucional distintos bloquean la vista.
 El botón Instituciones permite abrir el selector después de ingresar; cambiar de
@@ -34,7 +34,9 @@ subdominio abre otro documento y exige autenticarse nuevamente porque el JWT est
    El Dockerfile lo recibe como build argument; cambiarlo requiere reconstruir la imagen.
 4. Configurar `API_URL` del servidor frontend hacia el backend: puede usarse
    `https://api.dvillasc.me` o su dirección privada efectiva dentro de Railway.
-5. Configurar en el backend `DATABASE_URL` de su PostgreSQL y `AUTH_JWT_SECRET`
+5. Configurar `DATABASE_URL` con el rol `academix_runtime` y `MIGRATION_DATABASE_URL`
+   con la credencial operativa, ambas hacia la misma base PostgreSQL; HTTP usa solo runtime.
+   Configurar `AUTH_JWT_SECRET`
    como base64 canónico de al menos 32 bytes aleatorios. Mantener el secreto entre despliegues;
    rotarlo invalida los tokens firmados con el anterior. Nunca usar variables `NEXT_PUBLIC_*` para secretos.
 6. Configurar exactamente el siguiente valor en el backend y redesplegarlo:
@@ -44,9 +46,12 @@ CORS_ALLOWED_ORIGINS=["https://uc.academix.dvillasc.me","https://utfsm.academix.
 ```
 
 Comprobar la configuración efectiva de raíz, Dockerfile y predeploy del servicio;
-`backend/railway.json` declara `node dist/commands/migrate.js`, sin seed automático.
+`backend/railway.json` declara `node dist/commands/predeploy.js`; el arranque usa
+`node dist/commands/start.js`, que retira secretos operativos del proceso HTTP.
+Predeploy aplica esquema, provisiona runtime y valida RLS; la nueva demo es opt-in.
 CORS permite al navegador consumir la API; JWT y membresía siguen autorizando cada solicitud.
-Un backend en modo production sin esta variable no permite orígenes browser por defecto.
+En production, CORS exige ambos orígenes institucionales y solo admite HTTPS;
+una configuración ausente, incompleta o con HTTP impide arrancar el backend.
 
 ## Cuentas para probar
 
@@ -85,8 +90,9 @@ Con `Origin: https://example.invalid`, no debe incluir esa cabecera.
 
 ## Dependencias y límites
 
-La PR #123 contiene planificación: el cambio API a `/api/v1/institution/{slug}` singular,
-RLS, credenciales runtime separadas y nueva carga demo siguen pendientes en esa misión.
-Esta issue conserva el contrato plural vigente y los controles de autorización existentes.
+El PR #125 implementó el contrato singular, RLS, credenciales separadas y la nueva demo
+opt-in de diez cuentas. Esta rama integra esos cambios sin revertir su seguridad.
+Consultar [operación de la demo](../backend/demo-tenant-bootstrap.md) para ese bootstrap,
+la adopción de datos legacy y los pasos de despliegue/validación pública aún operativos.
 No hay refresh token, revocación individual del JWT ni SSO entre subdominios.
 La aprobación del Quality Gate de esta rama queda **PENDIENTE DE VALIDACIÓN EN CI**.

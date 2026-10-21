@@ -107,6 +107,10 @@ Usar ese mismo directorio explícito al invocar speckit-plan. No se eligió ORM
 ni se generaron planes/tasks antes de acordar las decisiones correspondientes.
 No aprovisionar infraestructura para completar esta fase documental.
 
+## Demo institucional
+
+[Runbook de bootstrap, RLS y entrega pendiente](demo-tenant-bootstrap.md).
+
 ## Fuentes
 
 - [Alcance](../deliveries/2/02-scope.md), [CU y RF/RNF](../deliveries/2/03-use-cases-and-requirements.md).

@@ -2,14 +2,14 @@ import {Injectable,ConflictException,NotFoundException} from "@nestjs/common";
 import {randomUUID} from "node:crypto";
 import {DatabaseService} from "../database/database.service";
 import {AuditService} from "../audit/audit.service";
-import {transaction,requirePermission} from "../courses/course-access";
+import {requirePermission} from "../courses/course-access";
 import {contentScope,visibleModule,moduleDto,type ModuleRow} from "../content/content-access";
 import {object,title,position,order,noBody} from "../content/content-validation";
 @Injectable()
 export class ModulesService {
  constructor(private readonly db:DatabaseService,private readonly audit:AuditService) {}
  async create(actor:string,slug:string,course:string,body:unknown) {
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await contentScope(c,actor,slug,course,"course");requirePermission(s.teacher);
    const dto=object(body,["title","position"],["title","position"]),name=title(dto.title),pos=position(dto.position);
    const row=(await c.query<ModuleRow>(`INSERT INTO public.course_modules(id,institution_id,course_id,title,position) VALUES($1,$2,$3,$4,$5) RETURNING *`,[randomUUID(),s.member.institution_id,course,name,pos])).rows[0];
@@ -19,7 +19,7 @@ export class ModulesService {
   });
  }
  async update(actor:string,slug:string,id:string,body:unknown,state?:boolean) {
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await contentScope(c,actor,slug,id,"module"),row=await visibleModule(c,s,id);requirePermission(s.teacher);
    const before=moduleDto(row);
    if(state===undefined) {
@@ -36,7 +36,7 @@ export class ModulesService {
   });
  }
  async reorder(actor:string,slug:string,course:string,body:unknown) {
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await contentScope(c,actor,slug,course,"course");requirePermission(s.teacher);
    const dto=object(body,["moduleIds"],["moduleIds"]),ids=order(dto.moduleIds);
    const rows=(await c.query<ModuleRow>("SELECT * FROM public.course_modules WHERE institution_id=$1 AND course_id=$2 ORDER BY position",[s.member.institution_id,course])).rows;
@@ -52,10 +52,10 @@ export class ModulesService {
   });
  }
  async get(actor:string,slug:string,id:string) {
-  return transaction(this.db.pool,async c=>{const s=await contentScope(c,actor,slug,id,"module");return moduleDto(await visibleModule(c,s,id));});
+  return this.db.withInstitution(actor,slug,async c=>{const s=await contentScope(c,actor,slug,id,"module");return moduleDto(await visibleModule(c,s,id));});
  }
  async list(actor:string,slug:string,course:string) {
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await contentScope(c,actor,slug,course,"course");
    const rows=(await c.query<ModuleRow>(`SELECT id,course_id,title,position,published_at FROM public.course_modules
     WHERE institution_id=$1 AND course_id=$2 AND ($3::boolean OR published_at IS NOT NULL) ORDER BY position`,[s.member.institution_id,course,s.teacher])).rows;

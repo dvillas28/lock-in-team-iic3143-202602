@@ -4,7 +4,7 @@ import {isDeepStrictEqual} from "node:util";
 import type {PoolClient} from "pg";
 import {DatabaseService} from "../database/database.service";
 import {AuditService} from "../audit/audit.service";
-import {transaction,requirePermission} from "../courses/course-access";
+import {requirePermission} from "../courses/course-access";
 import {attemptScope,attemptView,requireStudent,studentEligible,requireWindow,validateAnswers,type Scope} from "./attempt-access";
 import {attemptDto,attemptSnapshot,submissionReceipt,type AttemptRow} from "./attempt-dto";
 import {page,paginated,uuid} from "../courses/validation";
@@ -23,7 +23,7 @@ export class AttemptsService {
  }
  async start(actor:string,slug:string,quiz:string,section:string,key:string,body:unknown) {
   emptyBody(body);
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await attemptScope(c,actor,slug,quiz,"quiz");
    if(!s.roles.some(e=>e.section_id===section))throw new NotFoundException();
    if(s.q.section_id!==null && s.q.section_id!==section)throw new NotFoundException();
@@ -43,7 +43,7 @@ export class AttemptsService {
   });
  }
  async list(actor:string,slug:string,quiz:string,query:Record<string,unknown>) {
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await attemptScope(c,actor,slug,quiz,"quiz"),book={...s,courseId:s.q.course_id},scope=academicScope(book);
    const section=query.sectionId===undefined?null:uuid(query.sectionId),student=query.studentId===undefined?null:uuid(query.studentId);
    if(section)await selectedSections(c,book,[section]);
@@ -64,11 +64,11 @@ export class AttemptsService {
   });
  }
  async get(actor:string,slug:string,id:string) {
-  return transaction(this.db.pool,async c=>{const s=await attemptScope(c,actor,slug,id,"attempt");return attemptDto(s.a!,attemptView(s));});
+  return this.db.withInstitution(actor,slug,async c=>{const s=await attemptScope(c,actor,slug,id,"attempt");return attemptDto(s.a!,attemptView(s));});
  }
  async save(actor:string,slug:string,id:string,body:unknown) {
   const answers=answersInput(body);
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await attemptScope(c,actor,slug,id,"attempt"),a=s.a!;requireStudent(s);
    const grade=await this.grade(c,s,actor);
    if(a.status!=="in_progress" || grade?.published_at)throw new ConflictException();
@@ -80,7 +80,7 @@ export class AttemptsService {
  }
  async cancel(actor:string,slug:string,id:string,body:unknown) {
   emptyBody(body);
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await attemptScope(c,actor,slug,id,"attempt"),a=s.a!,view=attemptView(s);
    requirePermission(view==="student" || view==="teacher");
    if(a.status==="cancelled")return;
@@ -91,7 +91,7 @@ export class AttemptsService {
  }
  async submit(actor:string,slug:string,id:string,key:string,body:unknown) {
   emptyBody(body);
-  return transaction(this.db.pool,async c=>{
+  return this.db.withInstitution(actor,slug,async c=>{
    const s=await attemptScope(c,actor,slug,id,"attempt"),a=s.a!;requireStudent(s);
    const used=(await c.query("SELECT id FROM public.quiz_attempts WHERE institution_id=$1 AND student_id=$2 AND submit_key=$3",[s.member.institution_id,actor,key])).rows[0];
    if(used && used.id!==id)throw new ConflictException();

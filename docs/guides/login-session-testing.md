@@ -51,7 +51,10 @@ docker compose up --build -d --wait
 docker compose exec -T backend node dist/seeds/demo.js
 ```
 
-El arranque aplica migraciones; las cuentas requieren el segundo comando.
+El arranque ejecuta predeploy (migraciones, provisión runtime y validación RLS) y start.
+Con `DEMO_DATA_ENABLED=false`, las cinco cuentas legacy requieren el segundo comando.
+Compose conserva credenciales separadas: `MIGRATION_DATABASE_URL` operativa y
+`DATABASE_URL` de `academix_runtime`, con contraseña local `RUNTIME_PASSWORD`.
 En una DB vacía, seed reporta 2 instituciones, 5 usuarios y 6 membresías.
 Repetir preserva claves, estados y permisos; cambiar `.env` no resetea usuarios existentes.
 Si el volumen ya contenía esas cuentas, se necesitan sus claves originales.
@@ -99,8 +102,9 @@ Esto verifica el destino y la membresía; no reproduce la restricción por hostn
 ## 5. Verificación automatizada y diagnóstico
 
 `pnpm --dir frontend test:coverage` incluye casos negativos, concurrencia y pruebas DOM.
-La integración con PostgreSQL se ejecuta con `TEST_DATABASE_URL` exclusiva terminada en `_test`;
-no apuntarla a la base que se usa para la demo manual. Ver [verificación](login-session.md#verificación).
+La integración usa `TEST_DATABASE_URL` operativa y `TEST_RUNTIME_DATABASE_URL` de
+`academix_runtime`, hacia la misma base descartable terminada en `_test`;
+no apuntarlas a la demo manual. Ver [verificación](login-session.md#verificación).
 
 - 401: revisar cuenta creada y clave vigente; el campo se limpia después de enviar.
 - Red/CORS: verificar API disponible, origen exacto y URL del bundle; reconstruir si cambió NEXT_PUBLIC_API_URL.

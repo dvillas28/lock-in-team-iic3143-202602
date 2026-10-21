@@ -52,7 +52,7 @@ test("protected institution operations use Bearer, the slug path and generated r
     assert.equal(request.headers.has("x-tenant"), false);
     assert.equal(request.headers.has("institutionId"), false);
     if (request.url === `${baseUrl}/api/v1/institutions`) return Response.json({ items: [institution] });
-    assert.equal(request.url, `${baseUrl}/api/v1/institutions/uc/me`);
+    assert.equal(request.url, `${baseUrl}/api/v1/institution/uc/me`);
     return Response.json(me);
   }, async () => "test-token");
   const { data: list } = await listAccessibleInstitutions(client);
@@ -165,21 +165,21 @@ test("health retains runtime validation for invalid contract payloads", async ()
 
 test("typed query/path/body serialization uses the institutional route", async () => {
   const client = mockClient(async (request) => {
-    assert.equal(request.url, `${baseUrl}/api/v1/institutions/utfsm/courses/course-id`);
+    assert.equal(request.url, `${baseUrl}/api/v1/institution/utfsm/courses/course-id`);
     assert.equal(request.method, "PATCH");
     assert.equal(request.headers.get("Content-Type"), "application/json");
     assert.equal(request.headers.get("X-Request-Id"), "request-id");
     assert.deepEqual(await request.json(), { name: "New name" });
     return Response.json({ id: "course-id", code: "CODE", name: "New name", term: "2026-2", createdAt: health.timestamp });
   });
-  await client.PATCH("/api/v1/institutions/{institutionSlug}/courses/{courseId}", {
+  await client.PATCH("/api/v1/institution/{institutionSlug}/courses/{courseId}", {
     params: { path: { institutionSlug: "utfsm", courseId: "course-id" } },
     headers: { "X-Request-Id": "request-id" }, body: { name: "New name" },
   });
   await mockClient((request) => {
-    assert.equal(request.url, `${baseUrl}/api/v1/institutions/uc/users?search=Ana%20Maria&limit=10`);
+    assert.equal(request.url, `${baseUrl}/api/v1/institution/uc/users?search=Ana%20Maria&limit=10`);
     return Response.json({ items: [], nextCursor: null, hasMore: false });
-  }).GET("/api/v1/institutions/{institutionSlug}/users", {
+  }).GET("/api/v1/institution/{institutionSlug}/users", {
     params: { path: { institutionSlug: "uc" }, query: { search: "Ana Maria", limit: 10 } },
   });
 });
@@ -222,20 +222,20 @@ test("unsafe base URLs are rejected", () => {
 // Compile-time regression assertions, checked by pnpm typecheck; never executed.
 export function checkRequestTypes(client: ApiClient) {
   // @ts-expect-error The institutional operation requires path parameters.
-  client.GET("/api/v1/institutions/{institutionSlug}/me");
+  client.GET("/api/v1/institution/{institutionSlug}/me");
   // @ts-expect-error institutionSlug must be a string.
-  client.GET("/api/v1/institutions/{institutionSlug}/me", { params: { path: { institutionSlug: 37 } } });
+  client.GET("/api/v1/institution/{institutionSlug}/me", { params: { path: { institutionSlug: 37 } } });
   // @ts-expect-error Only contract paths are accepted.
   client.GET("/api/v1/tenants");
   // @ts-expect-error The query limit is numeric.
-  client.GET("/api/v1/institutions/{institutionSlug}/users", { params: { path: { institutionSlug: "uc" }, query: { search: "Ana", limit: "10" } } });
+  client.GET("/api/v1/institution/{institutionSlug}/users", { params: { path: { institutionSlug: "uc" }, query: { search: "Ana", limit: "10" } } });
   // @ts-expect-error CourseUpdate.name must be a string.
-  client.PATCH("/api/v1/institutions/{institutionSlug}/courses/{courseId}", { params: { path: { institutionSlug: "uc", courseId: "id" } }, body: { name: 37 } });
+  client.PATCH("/api/v1/institution/{institutionSlug}/courses/{courseId}", { params: { path: { institutionSlug: "uc", courseId: "id" } }, body: { name: 37 } });
   // @ts-expect-error Institution context comes from the path, never the request body.
   const courseRequest: FetchOptions<operations["updateCourse"]> = { params: { path: { institutionSlug: "uc", courseId: "id" } }, body: { institutionId: "other" } };
   void courseRequest;
   // @ts-expect-error CourseUpdate is required for PATCH.
-  client.PATCH("/api/v1/institutions/{institutionSlug}/courses/{courseId}", { params: { path: { institutionSlug: "uc", courseId: "id" } } });
+  client.PATCH("/api/v1/institution/{institutionSlug}/courses/{courseId}", { params: { path: { institutionSlug: "uc", courseId: "id" } } });
   // @ts-expect-error ModuleCreate requires a title and position.
   const moduleRequest: FetchOptions<operations["createCourseModule"]> = { params: { path: { institutionSlug: "uc", courseId: "id" } }, body: { title: "Module" } };
   void moduleRequest;
@@ -259,7 +259,7 @@ test("institutional delegation serializes only isAdmin with Bearer", async () =>
   assert.deepEqual(await request.json(),{isAdmin:false});
   return Response.json({id:"member",user:{id:"user",name:"User",email:"u@example.test",active:true},isAdmin:false,isSuperAdmin:false,active:true});
  },()=>"member-token");
- const result=await client.PUT("/api/v1/institutions/{institutionSlug}/memberships/{membershipId}/course-admin",{
+ const result=await client.PUT("/api/v1/institution/{institutionSlug}/memberships/{membershipId}/course-admin",{
   params:{path:{institutionSlug:"uc",membershipId:"member"}},body:{isAdmin:false}});
  assert.equal(result.data?.isAdmin,false);
 });
@@ -274,9 +274,9 @@ test("course create and successor enrollment use generated contracts and Bearer"
   assert.deepEqual(await req.json(),{role:"assistant"});
   return Response.json({id:"successor",sectionId:"s",user:{id:"u",name:"U",email:"u@example.test",active:true},role:"assistant",active:true,createdAt:health.timestamp});
  },()=>"current");
- const course=await client.POST("/api/v1/institutions/{institutionSlug}/courses",{params:{path:{institutionSlug:"uc"}},body:{code:"C",name:"Course",term:"2026-2",initialSection:{code:"1",capacity:0}}});
+ const course=await client.POST("/api/v1/institution/{institutionSlug}/courses",{params:{path:{institutionSlug:"uc"}},body:{code:"C",name:"Course",term:"2026-2",initialSection:{code:"1",capacity:0}}});
  assert.equal(course.data?.createdBy,"actor");
- const changed=await client.PATCH("/api/v1/institutions/{institutionSlug}/sections/{sectionId}/enrollments/{enrollmentId}",{params:{path:{institutionSlug:"uc",sectionId:"s",enrollmentId:"original"}},body:{role:"assistant"}});
+ const changed=await client.PATCH("/api/v1/institution/{institutionSlug}/sections/{sectionId}/enrollments/{enrollmentId}",{params:{path:{institutionSlug:"uc",sectionId:"s",enrollmentId:"original"}},body:{role:"assistant"}});
  assert.equal(changed.data?.id,"successor");
 });
 
@@ -285,7 +285,7 @@ test("createCourse declares and preserves validation and access Problem errors",
  for(const status of statuses){
   const client=mockClient(()=>Response.json({type:"https://academix/errors/test",title:"Rejected",status,detail:"Rejected",code:"REJECTED",instance:"/courses",traceId:"trace",errors:[]},
    {status,headers:{"Content-Type":"application/problem+json"}}));
-  await assert.rejects(client.POST("/api/v1/institutions/{institutionSlug}/courses",{
+  await assert.rejects(client.POST("/api/v1/institution/{institutionSlug}/courses",{
    params:{path:{institutionSlug:"uc"}},body:{code:"C",name:"Course",term:"2026-2",initialSection:{code:"1"}},
   }),error=>error instanceof ApiHttpError && error.status===status && error.problem.code==="REJECTED");
  }
@@ -296,18 +296,18 @@ test("markdown-only consumer preserves inert strings and uses generated lists/de
  const material:components["schemas"]["MarkdownMaterial"]={id:"item",moduleId:"module",title:"Text",kind:"markdown",markdownBody:markdown,publishedAt:null,createdBy:"actor"};
  let calls=0;
  const client=mockClient(request=>{calls++;assert.equal(request.cache,"no-store");return Response.json(request.url.endsWith('/materials')?{items:[material]}:material);});
- const list=await client.GET("/api/v1/institutions/{institutionSlug}/modules/{moduleId}/materials",{params:{path:{institutionSlug:"uc",moduleId:"module"}}});
+ const list=await client.GET("/api/v1/institution/{institutionSlug}/modules/{moduleId}/materials",{params:{path:{institutionSlug:"uc",moduleId:"module"}}});
  assert.equal(list.data?.items[0].kind,"markdown");assert.equal(list.data?.items[0].markdownBody,markdown);
- const detail=await client.GET("/api/v1/institutions/{institutionSlug}/materials/{materialId}",{params:{path:{institutionSlug:"uc",materialId:"item"}}});
+ const detail=await client.GET("/api/v1/institution/{institutionSlug}/materials/{materialId}",{params:{path:{institutionSlug:"uc",materialId:"item"}}});
  assert.equal(detail.data?.markdownBody,markdown);assert.equal(typeof detail.data?.markdownBody,"string");assert.equal(calls,2);
  const empty=mockClient(()=>Response.json({items:[]}));
- assert.deepEqual((await empty.GET("/api/v1/institutions/{institutionSlug}/courses/{courseId}/modules",{params:{path:{institutionSlug:"uc",courseId:"c"}}})).data?.items,[]);
+ assert.deepEqual((await empty.GET("/api/v1/institution/{institutionSlug}/courses/{courseId}/modules",{params:{path:{institutionSlug:"uc",courseId:"c"}}})).data?.items,[]);
 });
 export function checkMarkdownOnlyTypes(client:ApiClient) {
  // @ts-expect-error Binary upload is outside the MVP contract.
- client.POST("/api/v1/institutions/{institutionSlug}/modules/{moduleId}/materials/files",{});
+ client.POST("/api/v1/institution/{institutionSlug}/modules/{moduleId}/materials/files",{});
  // @ts-expect-error Content downloads are outside the MVP contract.
- client.GET("/api/v1/institutions/{institutionSlug}/materials/{materialId}/content",{});
+ client.GET("/api/v1/institution/{institutionSlug}/materials/{materialId}/content",{});
  // @ts-expect-error Caller cannot choose kind or actor.
  const input:components["schemas"]["MarkdownMaterialCreate"]={title:"T",markdownBody:"text",kind:"file",createdBy:"other"};
  void input;
@@ -321,11 +321,11 @@ test("quiz consumer uses generated safe views and draft section reassignment wit
   if(request.method==="PATCH"){assert.deepEqual(await request.json(),{sectionId:"new-section"});return Response.json({...quiz,sectionId:"new-section",createdBy:"actor",questions:[]});}
   return Response.json(request.url.includes("/courses/")?{items:[{...quiz,questions:undefined}]}:quiz);
  },()=>"student");
- const view=await client.GET("/api/v1/institutions/{institutionSlug}/quizzes/{quizId}",{params:{path:{institutionSlug:"uc",quizId:"q"}}});
+ const view=await client.GET("/api/v1/institution/{institutionSlug}/quizzes/{quizId}",{params:{path:{institutionSlug:"uc",quizId:"q"}}});
  assert.equal("isCorrect" in view.data!.questions[0].alternatives[0],false);
- const list=await client.GET("/api/v1/institutions/{institutionSlug}/courses/{courseId}/quizzes",{params:{path:{institutionSlug:"uc",courseId:"c"},query:{sectionId:"s"}}});
+ const list=await client.GET("/api/v1/institution/{institutionSlug}/courses/{courseId}/quizzes",{params:{path:{institutionSlug:"uc",courseId:"c"},query:{sectionId:"s"}}});
  assert.equal(list.data?.items[0].id,"q");
- const changed=await client.PATCH("/api/v1/institutions/{institutionSlug}/quizzes/{quizId}",{params:{path:{institutionSlug:"uc",quizId:"q"}},body:{sectionId:"new-section"}});
+ const changed=await client.PATCH("/api/v1/institution/{institutionSlug}/quizzes/{quizId}",{params:{path:{institutionSlug:"uc",quizId:"q"}},body:{sectionId:"new-section"}});
  assert.equal(changed.data?.id,"q");assert.equal(changed.data?.sectionId,"new-section");
 });
 export function checkQuizTypes() {
@@ -346,7 +346,7 @@ test("attempt consumer uses generated student/assistant views and receipt withou
   };
   const assistant: components["schemas"]["QuizAttemptAssistantView"] = {...attempt,scorePercent:null,grade:null};
   const client=mockClient(()=>Response.json(assistant));
-  const result=await client.GET("/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}",{
+  const result=await client.GET("/api/v1/institution/{institutionSlug}/quiz-attempts/{attemptId}",{
     params:{path:{institutionSlug:"uc",attemptId:"attempt"}},
   });
   assert.deepEqual(result.data,assistant);
@@ -359,7 +359,7 @@ test("submit consumer sends original key and receives only stable receipt",async
  const client=mockClient(request=>{
   assert.equal(request.headers.get("Idempotency-Key"),"original");return Response.json(receipt);
  });
- const response=await client.POST("/api/v1/institutions/{institutionSlug}/quiz-attempts/{attemptId}/submit",{
+ const response=await client.POST("/api/v1/institution/{institutionSlug}/quiz-attempts/{attemptId}/submit",{
   params:{path:{institutionSlug:"uc",attemptId:"attempt"},header:{"Idempotency-Key":"original"}},
  });
  assert.deepEqual(response.data,receipt);assert.ok(!("grade" in receipt));
@@ -371,19 +371,23 @@ test("grade publication requires explicit students and preserves the original du
  const client=mockClient(async request=>{
   assert.equal(request.headers.get("Idempotency-Key"),"original");assert.equal(request.cache,"no-store");assert.deepEqual(await request.json(),body);return Response.json(receipt);
  },()=>"teacher");
- const result=await client.POST("/api/v1/institutions/{institutionSlug}/courses/{courseId}/gradebook/publications",{params:{path:{institutionSlug:"uc",courseId:"course"},header:{"Idempotency-Key":"original"}},body});
+ const result=await client.POST("/api/v1/institution/{institutionSlug}/courses/{courseId}/gradebook/publications",{params:{path:{institutionSlug:"uc",courseId:"course"},header:{"Idempotency-Key":"original"}},body});
  assert.deepEqual(result.data,receipt);
 });
 test("zero published weight keeps an absent average; assistant listing has no correction",async()=>{
  const own:components["schemas"]["StudentGradesResponse"]={courseId:"course",items:[],partialAverage:null,publishedWeightPercent:0,isPartial:true};
  const client=mockClient(()=>Response.json(own));
- const result=await client.GET("/api/v1/institutions/{institutionSlug}/courses/{courseId}/my-grades",{params:{path:{institutionSlug:"uc",courseId:"course"}}});assert.equal(result.data?.partialAverage,null);
+ const result=await client.GET("/api/v1/institution/{institutionSlug}/courses/{courseId}/my-grades",{params:{path:{institutionSlug:"uc",courseId:"course"}}});assert.equal(result.data?.partialAverage,null);
  const assistant:components["schemas"]["QuizAttemptAssistantView"]={id:"a",quizId:"q",sectionId:"s",studentId:"u",attemptNumber:1,status:"graded",startedAt:health.timestamp,submittedAt:health.timestamp,cancelledAt:null,answers:[],scorePercent:90,grade:6.5};
  const listing=mockClient(()=>Response.json({items:[assistant],hasMore:false,nextCursor:null}));
- const attempts=await listing.GET("/api/v1/institutions/{institutionSlug}/quizzes/{quizId}/attempts",{params:{path:{institutionSlug:"uc",quizId:"q"},query:{status:"graded",limit:1}}});assert.deepEqual(attempts.data?.items[0],assistant);
+ const attempts=await listing.GET("/api/v1/institution/{institutionSlug}/quizzes/{quizId}/attempts",{params:{path:{institutionSlug:"uc",quizId:"q"},query:{status:"graded",limit:1}}});assert.deepEqual(attempts.data?.items[0],assistant);
 });
 export function checkPublicationTypes(){
  // @ts-expect-error Every publication requires an explicit student selection.
  const missing:components["schemas"]["PublishGradesRequest"]={gradeItemIds:["i"],sectionIds:["s"]};
  void missing;
 }
+
+ test("API base must be an origin so generated paths cannot duplicate /api/v1",()=>{
+  for(const baseUrl of ["https://api.dvillasc.me/api/v1","https://api.dvillasc.me/backend"])assert.throws(()=>createApiClient({baseUrl}));
+ });

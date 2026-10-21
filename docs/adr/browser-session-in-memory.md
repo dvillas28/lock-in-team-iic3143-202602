@@ -41,6 +41,7 @@ No hay SSO entre UC/UTFSM ni sincronización de logout entre pestañas independi
 Logout local no revoca el JWT: una copia conserva validez hasta expirar o rotar el secreto.
 El navegador limita presentación y navegación; el backend verifica firma, usuario,
 institución, membresía y permisos en cada operación. No se cachea autorización.
-RLS y la migración de prefijo singular siguen en otra misión.
+El backend integrado desde dev aplica RLS y el prefijo API institucional singular;
+esta decisión de almacenamiento del navegador no altera esos controles.
 
 Operación, pruebas y configuración: [guía](../guides/login-session.md).

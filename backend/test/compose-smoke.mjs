@@ -11,13 +11,18 @@ const root=new URL("../../",import.meta.url);
 const dir=await mkdtemp(join(tmpdir(),"academix-compose-"));
 const override=join(dir,"isolation.yaml");
 const env={...process.env,POSTGRES_DB:"academix_identity_compose_test",POSTGRES_USER:"identity_fixture",
- POSTGRES_PASSWORD:randomBytes(24).toString("hex"),AUTH_JWT_SECRET:randomBytes(32).toString("base64")};
+ POSTGRES_PASSWORD:randomBytes(24).toString("hex"),RUNTIME_PASSWORD:randomBytes(24).toString("hex"),AUTH_JWT_SECRET:randomBytes(32).toString("base64")};
 for(const name of ["UC","UTFSM","MULTI","REVOKED","INACTIVE"])env[`DEMO_${name}_PASSWORD`]=randomBytes(12).toString("hex");
-const values=[env.POSTGRES_PASSWORD,env.AUTH_JWT_SECRET,...Object.entries(env).filter(([key])=>key.startsWith("DEMO_")).map(([,v])=>v)];
+const values=[env.RUNTIME_PASSWORD,env.POSTGRES_PASSWORD,env.AUTH_JWT_SECRET,...Object.entries(env).filter(([key])=>key.startsWith("DEMO_")).map(([,v])=>v)];
 const compose=["compose","-p",`academix-identity-${process.pid}`,"-f",join(root.pathname,"docker-compose.yml"),"-f",override];
 function docker(...args){
  try {return execFileSync("docker",[...compose,...args],{cwd:root,env,encoding:"utf8",stdio:["ignore","pipe","pipe"],timeout:180000});}
- catch {throw new Error(`Compose ${args[0]} failed (output withheld to protect credentials)`);}
+ catch(error) {
+  let output=String(error.stderr??'')+String(error.stdout??'');
+  for(const value of values.filter(Boolean))output=output.replaceAll(value,'[redacted]');
+  output=output.replace(/postgres(?:ql)?:\/\/[^\s]+/g,'[database URL]');
+  throw new Error(`Compose ${args[0]} failed: ${output.slice(-2000)}`);
+ }
 }
 const clean=text=>{
  assert.ok(values.every(value=>!text.includes(value)),"credential in runtime output");
@@ -31,7 +36,7 @@ try {
  const version=docker("exec","-T","postgres","psql","-U",env.POSTGRES_USER,"-d",env.POSTGRES_DB,"-Atc","SHOW server_version_num");
  assert.equal(Math.floor(Number(version.trim())/10000),17);
  const migrate=JSON.parse(docker("exec","-T","backend","node","dist/commands/migrate.js"));
- assert.equal(migrate.created,0);assert.equal(migrate.existing,8);
+ assert.equal(migrate.created,0);assert.equal(migrate.existing,10);
  const seed=()=>JSON.parse(docker("exec","-T","backend","node","dist/seeds/demo.js"));
  assert.deepEqual(seed().created,{institutions:2,users:5,memberships:6});
  const fingerprint=()=>docker("exec","-T","postgres","psql","-U",env.POSTGRES_USER,"-d",env.POSTGRES_DB,"-Atc",
@@ -50,7 +55,7 @@ try {
   const list=await fetch(base+"/api/v1/institutions",{headers});assert.equal(list.status,200);
   assert.deepEqual((await list.json()).items.map(i=>i.slug),slugs);
   for(const slug of ["uc","utfsm"]) {
-   const me=await fetch(`${base}/api/v1/institutions/${slug}/me`,{headers});
+   const me=await fetch(`${base}/api/v1/institution/${slug}/me`,{headers});
    assert.equal(me.status,slugs.includes(slug)?200:404);
    const text=await me.text();assert.ok(!text.includes(body.accessToken));
    if(me.ok){const context=JSON.parse(text);assert.equal(context.institutionMembership.institution.slug,slug);assert.deepEqual(context.sectionMemberships,[]);}

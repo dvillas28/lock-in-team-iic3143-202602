@@ -37,10 +37,10 @@ test("browser session contract: real login, UC/UTFSM isolation, live revocation 
     }
     const origin="https://uc.academix.dvillasc.me";
     await app.close();
-    app=await http({CORS_ALLOWED_ORIGINS:JSON.stringify([origin,"https://utfsm.academix.dvillasc.me"])});
+    app=await http({NODE_ENV:"production",CORS_ALLOWED_ORIGINS:JSON.stringify([origin,"https://utfsm.academix.dvillasc.me"])});
     for (const candidate of [origin,"https://utfsm.academix.dvillasc.me","https://evil.test"]) {
       const allowed=candidate!=="https://evil.test";
-      for (const [path,method,headers] of [["/api/v1/auth/login","POST","content-type"],["/api/v1/institutions/uc/me","GET","authorization"]]) {
+      for (const [path,method,headers] of [["/api/v1/auth/login","POST","content-type"],["/api/v1/institution/uc/me","GET","authorization"]]) {
         const preflight=await fetch(app.base+path,{method:"OPTIONS",headers:{Origin:candidate,"Access-Control-Request-Method":method,"Access-Control-Request-Headers":headers}});
         assert.equal(preflight.status,204);
         assert.equal(preflight.headers.get("access-control-allow-origin"),allowed?candidate:null);
@@ -48,9 +48,10 @@ test("browser session contract: real login, UC/UTFSM isolation, live revocation 
         assert.match(preflight.headers.get("vary"),/Origin/);
         assert.equal(await preflight.text(),"");
       }
-      const response=await fetch(app.base+"/api/v1/institutions/uc/me",{headers:{Origin:candidate,"x-tenant":"uc","X-Forwarded-Host":"uc.academix.dvillasc.me"}});
+      const response=await fetch(app.base+"/api/v1/institution/uc/me",{headers:{Origin:candidate,"x-tenant":"uc","X-Forwarded-Host":"uc.academix.dvillasc.me"}});
       assert.equal(response.status,401);
       assert.equal(response.headers.get("access-control-allow-origin"),allowed?candidate:null);
+      assert.match(response.headers.get("access-control-expose-headers"),/Location.*Retry-After/);
     }
     // PR #123: browser origin and spoofed host/tenant headers never grant membership.
     // MULTI lost its UC membership above: a new login must preserve that revocation.
@@ -60,7 +61,7 @@ test("browser session contract: real login, UC/UTFSM isolation, live revocation 
         for (const slug of ["uc","utfsm"]) {
           const headers={Authorization:`Bearer ${token}`,Host:"another.invalid","X-Forwarded-Host":"another.invalid","x-tenant":slug==="uc"?"utfsm":"uc"};
           if(candidate)headers.Origin=candidate;
-          const response=await fetch(`${app.base}/api/v1/institutions/${slug}/me`,{headers});
+          const response=await fetch(`${app.base}/api/v1/institution/${slug}/me`,{headers});
           assert.equal(response.status,slugs.includes(slug)?200:404);
           assert.equal(response.headers.get("access-control-allow-origin"),candidate && candidate!=="https://evil.test"?candidate:null);
           if(response.ok)assert.equal((await response.json()).institutionMembership.institution.slug,slug);

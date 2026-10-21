@@ -67,7 +67,7 @@ export function prepareCatalog(doc) {
 
 ### Ejemplo de solicitud externa
 
-Ejemplo sintético copiable; sustituir entorno, credenciales e identificadores.
+Ejemplo sintético copiable; API_URL=https://api.dvillasc.me (solo origen; local http://localhost:3001). Sustituir credenciales e identificadores.
 
 \`\`\`bash
 ${curl}
