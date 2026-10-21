@@ -1,0 +1,92 @@
+# Probar login por dominio en producción — Issue #80
+
+Esta guía describe la configuración requerida; no acredita un despliegue ejecutado.
+La [prueba local con Docker](login-session-testing.md) no modifica Railway ni su base.
+
+## Dominios y recorrido
+
+| Dirección | Servicio | Resultado |
+| --- | --- | --- |
+| `https://uc.academix.dvillasc.me` | Frontend, puerto 3000 | Portada con enlace al login |
+| `https://utfsm.academix.dvillasc.me` | Mismo frontend | Portada con enlace al login |
+| `https://api.dvillasc.me` | Backend, puerto 3001 | API compartida |
+
+Al abrir `https://uc.academix.dvillasc.me/login`, el frontend toma `uc` del hostname.
+Después de autenticar, comprueba la membresía y abre directamente UC, incluso para
+una persona con membresías en ambas instituciones. No pasa primero por el selector.
+La dirección final conserva `https://uc.academix.dvillasc.me/institutions/uc`.
+En UTFSM ocurre lo mismo con `utfsm`. La raíz `/` no redirige automáticamente al login.
+
+El flujo HTTP vigente es login global `POST /api/v1/auth/login`, directorio
+`GET /api/v1/institutions` y contexto `GET /api/v1/institutions/uc/me` en la API central.
+El último endpoint exige JWT, usuario activo, institución activa y membresía activa.
+El dominio no concede permisos. Host y path institucional distintos bloquean la vista.
+El botón Instituciones permite abrir el selector después de ingresar; cambiar de
+subdominio abre otro documento y exige autenticarse nuevamente porque el JWT está en memoria.
+
+## Configuración de los servicios
+
+1. Desplegar los cambios del frontend y backend como versiones compatibles.
+2. Registrar ambos dominios institucionales en el servicio frontend de Railway y
+   configurar en DNS los registros que indique Railway; esperar DNS y certificado HTTPS válidos.
+   Registrar `api.dvillasc.me` en el backend si todavía no está configurado.
+3. Configurar `NEXT_PUBLIC_API_URL=https://api.dvillasc.me` en la construcción del frontend.
+   El Dockerfile lo recibe como build argument; cambiarlo requiere reconstruir la imagen.
+4. Configurar `API_URL` del servidor frontend hacia el backend: puede usarse
+   `https://api.dvillasc.me` o su dirección privada efectiva dentro de Railway.
+5. Configurar en el backend `DATABASE_URL` de su PostgreSQL y `AUTH_JWT_SECRET`
+   como base64 canónico de al menos 32 bytes aleatorios. Mantener el secreto entre despliegues;
+   rotarlo invalida los tokens firmados con el anterior. Nunca usar variables `NEXT_PUBLIC_*` para secretos.
+6. Configurar exactamente el siguiente valor en el backend y redesplegarlo:
+
+```text
+CORS_ALLOWED_ORIGINS=["https://uc.academix.dvillasc.me","https://utfsm.academix.dvillasc.me"]
+```
+
+Comprobar la configuración efectiva de raíz, Dockerfile y predeploy del servicio;
+`backend/railway.json` declara `node dist/commands/migrate.js`, sin seed automático.
+CORS permite al navegador consumir la API; JWT y membresía siguen autorizando cada solicitud.
+Un backend en modo production sin esta variable no permite orígenes browser por defecto.
+
+## Cuentas para probar
+
+Los valores del `.env` local no se transmiten a Railway. Una cuenta de Docker
+no existe en producción hasta que se aprovisione en esa base.
+Para una demo autorizada, un operador puede configurar las cinco variables `DEMO_*_PASSWORD`
+de la [tabla local](login-session-testing.md#3-ingresar-desde-el-navegador) en el entorno remoto
+y ejecutar `node dist/seeds/demo.js` dentro del servicio backend, con acceso a su base.
+Las claves deben tener 8–30 caracteres; no pasarlas por argumentos ni compartirlas en logs.
+Este seed existente crea dos instituciones y cinco usuarios si faltan; repetirlo preserva
+contraseñas, estados y membresías existentes. Cambiar una variable no resetea una cuenta.
+Su ejecución es manual y modifica esa base: no forma parte de probar la PR localmente.
+
+## Comprobación del despliegue
+
+1. Verificar HTTPS válido en ambos frontend y respuestas 200 en `/health` y `/ready` de la API.
+2. Abrir el login UC con la cuenta multiinstitución: debe abrir UC sin selector inicial.
+3. Cerrar sesión y repetir en UTFSM: debe abrir UTFSM directamente.
+4. En el dominio UTFSM, ingresar con la cuenta exclusiva UC: no debe mostrar contenido UTFSM.
+5. En el dominio UC, probar `/institutions/utfsm`: debe rechazar el contexto de dominio incompatible.
+6. Recargar una vista autenticada: debe pedir login; cerrar sesión debe funcionar aun sin API.
+7. En Network verificar login 200, directorio 200 y `/me` 200 para una membresía válida;
+   una membresía ausente/inactiva devuelve 404. No compartir JWT, Authorization ni cuerpos de login.
+
+El preflight se puede comprobar sin credenciales; repetir cambiando el Origin por UTFSM:
+
+```bash
+curl -i -X OPTIONS https://api.dvillasc.me/api/v1/auth/login \
+  -H 'Origin: https://uc.academix.dvillasc.me' \
+  -H 'Access-Control-Request-Method: POST' \
+  -H 'Access-Control-Request-Headers: content-type'
+```
+
+Debe responder 204 con `Access-Control-Allow-Origin` igual al origen permitido.
+Con `Origin: https://example.invalid`, no debe incluir esa cabecera.
+
+## Dependencias y límites
+
+La PR #123 contiene planificación: el cambio API a `/api/v1/institution/{slug}` singular,
+RLS, credenciales runtime separadas y nueva carga demo siguen pendientes en esa misión.
+Esta issue conserva el contrato plural vigente y los controles de autorización existentes.
+No hay refresh token, revocación individual del JWT ni SSO entre subdominios.
+La aprobación del Quality Gate de esta rama queda **PENDIENTE DE VALIDACIÓN EN CI**.
