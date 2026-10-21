@@ -44,6 +44,7 @@ pnpm --dir frontend typecheck
 pnpm --dir frontend api:check
 pnpm --dir frontend build
 pnpm --dir backend test:integration
+node backend/test/compose-smoke.mjs
 python3 .github/scripts/check-doc-length.py
 git diff --check
 ```

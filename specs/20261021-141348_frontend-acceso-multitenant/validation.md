@@ -101,3 +101,11 @@ Matriz FR-001–020 reconciliada: FR-014 pendiente en entorno público; resto ve
 SC-001–004 PASS en alcance local documentado; no acreditan producción.
 Lint frontend/backend, tipos, api:check, build, Compose, check-doc-length y diff --check PASS.
 Hook opcional git before/after omitido por instrucción explícita de no crear commits.
+
+## Corrección de CI — PR #128
+
+El primer CI aprobó backend 157/157 y cobertura 99,65% líneas / 95,49% ramas,
+pero el smoke de Compose omitía NEXT_PUBLIC_INSTITUTION_ORIGINS, ahora obligatoria.
+Error reproducido localmente; fixture corregido con ambos origins locales exactos.
+`node backend/test/compose-smoke.mjs`: PASS completo tras la corrección; limpieza incluida.
+`node --check` y lint backend: PASS. Sin relajar configuración, tests ni umbrales.

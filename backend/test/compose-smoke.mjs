@@ -10,7 +10,9 @@ import { JwtService } from "@nestjs/jwt";
 const root=new URL("../../",import.meta.url);
 const dir=await mkdtemp(join(tmpdir(),"academix-compose-"));
 const override=join(dir,"isolation.yaml");
-const env={...process.env,POSTGRES_DB:"academix_identity_compose_test",POSTGRES_USER:"identity_fixture",
+const env={...process.env,
+ NEXT_PUBLIC_INSTITUTION_ORIGINS:JSON.stringify({"http://uc.localhost:3000":"uc","http://utfsm.localhost:3000":"utfsm"}),
+ POSTGRES_DB:"academix_identity_compose_test",POSTGRES_USER:"identity_fixture",
  POSTGRES_PASSWORD:randomBytes(24).toString("hex"),RUNTIME_PASSWORD:randomBytes(24).toString("hex"),AUTH_JWT_SECRET:randomBytes(32).toString("base64")};
 for(const name of ["UC","UTFSM","MULTI","REVOKED","INACTIVE"])env[`DEMO_${name}_PASSWORD`]=randomBytes(12).toString("hex");
 const values=[env.RUNTIME_PASSWORD,env.POSTGRES_PASSWORD,env.AUTH_JWT_SECRET,...Object.entries(env).filter(([key])=>key.startsWith("DEMO_")).map(([,v])=>v)];
