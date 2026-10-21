@@ -41,6 +41,7 @@
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 - Tenant isolation is explicit for all affected reads, writes, and background work.
+- Institutional route-context resolution, DB omission barrier, runtime privileges and bounded global exceptions are defined.
 - Role permissions cover student, assistant, teacher and explicit course administration capability; tenant superadmin only delegates is_admin within its Institution.
 - Attempts, grades, role changes and publication have an auditable state/history decision.
 - User stories remain independently implementable and testable.
