@@ -57,12 +57,12 @@ services:
     envVars:
       - key: PORT
         value: "3000"
-      # Backend public URL. If Render added a suffix to the service URL, use that one here.
+      # Backend public URL as assigned by Render (the bare service name was taken).
       # Render passes service variables to Docker as build args; changing it requires a rebuild.
       - key: NEXT_PUBLIC_API_URL
-        value: https://academix-backend.onrender.com
+        value: https://academix-backend-ypwf.onrender.com
       - key: API_URL
-        value: https://academix-backend.onrender.com
+        value: https://academix-backend-ypwf.onrender.com
 
 databases:
   - name: academix-db

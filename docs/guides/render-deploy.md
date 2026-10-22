@@ -66,9 +66,9 @@ Nada de esto despliega; se puede hacer mientras la PR está en revisión.
 1. En `academix-frontend` → **Settings** → **Custom Domains** deben estar
    `uc.academix.dvillasc.me` y `utfsm.academix.dvillasc.me`. El plan Hobby incluye solo dos,
    así que el backend no tiene dominio propio y se usa su URL `onrender.com`.
-2. Revisar la URL pública del backend (arriba en su página). Si no es exactamente
-   `https://academix-backend.onrender.com`, cambiar `NEXT_PUBLIC_API_URL` y `API_URL`
-   en `render.yaml` por la real, mergear a `main` y esperar el rebuild del frontend.
+2. La URL pública del backend es `https://academix-backend-ypwf.onrender.com` (Render agregó
+   el sufijo). Si el servicio se recrea y cambia, actualizar `NEXT_PUBLIC_API_URL` y `API_URL`
+   en `render.yaml`, mergear a `main` y hacer **Manual Deploy** del frontend.
 3. En el proveedor DNS de `dvillasc.me`, reemplazar los registros de Railway por los
    CNAME que muestra Render (apuntan a la URL `onrender.com` del frontend).
    Borrar los registros viejos de Railway, incluido `api`.
@@ -77,11 +77,11 @@ Nada de esto despliega; se puede hacer mientras la PR está en revisión.
 ### 5. Verificar
 
 ```bash
-curl -s https://academix-backend.onrender.com/health
+curl -s https://academix-backend-ypwf.onrender.com/health
 ```
 
 ```bash
-curl -s -o /dev/null -w "%{http_code}\n" https://academix-backend.onrender.com/ready
+curl -s -o /dev/null -w "%{http_code}\n" https://academix-backend-ypwf.onrender.com/ready
 ```
 
 - `/health` muestra `commit` con el SHA de `main` y `/ready` responde 200.
