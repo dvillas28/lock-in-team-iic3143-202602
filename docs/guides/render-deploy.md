@@ -64,20 +64,24 @@ Nada de esto despliega; se puede hacer mientras la PR está en revisión.
 ### 4. Dominios y DNS
 
 1. En `academix-frontend` → **Settings** → **Custom Domains** deben estar
-   `uc.academix.dvillasc.me` y `utfsm.academix.dvillasc.me`; en el backend, `api.dvillasc.me`.
-2. En el proveedor DNS de `dvillasc.me`, reemplazar los registros de Railway por los
-   CNAME que muestra Render (apuntan a `academix-frontend.onrender.com` y
-   `academix-backend.onrender.com`). Borrar los TXT/CNAME viejos de Railway.
-3. Volver a Render y pulsar **Verify** en cada dominio. Esperar el certificado *Issued*.
+   `uc.academix.dvillasc.me` y `utfsm.academix.dvillasc.me`. El plan Hobby incluye solo dos,
+   así que el backend no tiene dominio propio y se usa su URL `onrender.com`.
+2. Revisar la URL pública del backend (arriba en su página). Si no es exactamente
+   `https://academix-backend.onrender.com`, cambiar `NEXT_PUBLIC_API_URL` y `API_URL`
+   en `render.yaml` por la real, mergear a `main` y esperar el rebuild del frontend.
+3. En el proveedor DNS de `dvillasc.me`, reemplazar los registros de Railway por los
+   CNAME que muestra Render (apuntan a la URL `onrender.com` del frontend).
+   Borrar los registros viejos de Railway, incluido `api`.
+4. Volver a Render y pulsar **Verify** en cada dominio. Esperar el certificado *Issued*.
 
 ### 5. Verificar
 
 ```bash
-curl -s https://api.dvillasc.me/health
+curl -s https://academix-backend.onrender.com/health
 ```
 
 ```bash
-curl -s -o /dev/null -w "%{http_code}\n" https://api.dvillasc.me/ready
+curl -s -o /dev/null -w "%{http_code}\n" https://academix-backend.onrender.com/ready
 ```
 
 - `/health` muestra `commit` con el SHA de `main` y `/ready` responde 200.

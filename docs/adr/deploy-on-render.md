@@ -31,6 +31,8 @@ Los únicos acoplamientos eran `railway.json`, el CLI de Railway en Release, el 
 - Solo instancias free, por falta de presupuesto. El plan free no tiene `preDeployCommand`:
   `dist/commands/serve.js` ejecuta predeploy en un proceso hijo y, si termina bien, carga
   `start.js`, que sigue retirando los secretos operativos antes del HTTP.
+- El workspace Hobby incluye dos dominios propios; ambos van al frontend (`uc.academix`,
+  `utfsm.academix`). La API queda en `https://academix-backend.onrender.com`, sin dominio propio.
 
 ## Consecuencias
 
@@ -43,7 +45,10 @@ Los únicos acoplamientos eran `railway.json`, el CLI de Railway en Release, el 
 - La base nueva parte vacía. Predeploy aplica esquema y provisiona runtime; la demo es opt-in.
   Si se recupera un dump de Railway, restaurarlo antes del primer despliegue.
 - Hay que verificar que el usuario propietario de Render pueda crear `academix_runtime`.
-- DNS de `uc.academix`, `utfsm.academix` y `api` debe apuntar a Render; TLS lo emite Render.
+- DNS de `uc.academix` y `utfsm.academix` debe apuntar a Render; TLS lo emite Render.
+- Specs, OpenAPI y guías históricas siguen nombrando `api.dvillasc.me`: es el destino previsto,
+  no el desplegado. Recuperarlo cuesta US$0,25/mes por dominio extra. Un cuarto dominio
+  (`academix.dvillasc.me`, spec de dominios y CORS) tampoco cabe en el plan gratuito.
 - Conservar `AUTH_JWT_SECRET` si es recuperable; si no, las sesiones vigentes caducan.
 - Rollback: Render permite redeploy de un deploy anterior; revertir ambos servicios
   juntos si cambió el contrato de la API.
