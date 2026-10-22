@@ -32,7 +32,7 @@ Los únicos acoplamientos eran `railway.json`, el CLI de Railway en Release, el 
   `dist/commands/serve.js` ejecuta predeploy en un proceso hijo y, si termina bien, carga
   `start.js`, que sigue retirando los secretos operativos antes del HTTP.
 - El workspace Hobby incluye dos dominios propios; ambos van al frontend (`uc.academix`,
-  `utfsm.academix`). La API queda en `https://academix-backend-ypwf.onrender.com`, sin dominio propio.
+  `utfsm.academix`). La API queda en `https://academix-backend-lr8x.onrender.com`, sin dominio propio.
 
 ## Consecuencias
 
