@@ -9,7 +9,7 @@ La [prueba local con Docker](login-session-testing.md) no modifica Render ni su 
 | --- | --- | --- |
 | `https://uc.academix.dvillasc.me` | Frontend, puerto 3000 | Portada con enlace al login |
 | `https://utfsm.academix.dvillasc.me` | Mismo frontend | Portada con enlace al login |
-| `https://academix-backend-ypwf.onrender.com` | Backend, puerto 3001 | API compartida (sin dominio propio en plan free) |
+| `https://academix-backend-lr8x.onrender.com` | Backend, puerto 3001 | API compartida (sin dominio propio en plan free) |
 
 Al abrir `https://uc.academix.dvillasc.me/login`, el frontend resuelve `uc` del origin HTTPS exacto configurado.
 Después de autenticar, comprueba la membresía y abre directamente UC, incluso para
@@ -32,13 +32,13 @@ dominios y valores no secretos. Los pasos indican qué revisar o ingresar en el 
 1. Desplegar los cambios del frontend y backend como versiones compatibles.
 2. Ambos dominios institucionales están en el frontend; el backend usa su URL `onrender.com`.
    Configurar en DNS los registros que indique Render; esperar DNS y certificado HTTPS válidos.
-3. Configurar `NEXT_PUBLIC_API_URL=https://academix-backend-ypwf.onrender.com` en la construcción del frontend.
+3. Configurar `NEXT_PUBLIC_API_URL=https://academix-backend-lr8x.onrender.com` en la construcción del frontend.
    El Dockerfile lo recibe como build argument; cambiarlo requiere reconstruir la imagen.
    NEXT_PUBLIC_INSTITUTION_ORIGINS ausente usa los dos origins HTTPS de la tabla;
    si se declara, debe ser JSON origin→slug válido y completo, sin paths ni slugs duplicados.
    Una variable presente vacía bloquea acceso; no usar valor vacío como default.
 4. Configurar `API_URL` del servidor frontend hacia el backend: usar
-   `https://academix-backend-ypwf.onrender.com` (un frontend free no puede usar la red privada).
+   `https://academix-backend-lr8x.onrender.com` (un frontend free no puede usar la red privada).
 5. `MIGRATION_DATABASE_URL` viene de la base del Blueprint. Ingresar `DATABASE_URL` con el rol
    `academix_runtime` en el mismo host interno y base; HTTP usa solo runtime.
    Configurar `AUTH_JWT_SECRET`
@@ -84,7 +84,7 @@ Su ejecución es manual y modifica esa base: no forma parte de probar la PR loca
 El preflight se puede comprobar sin credenciales; repetir cambiando el Origin por UTFSM:
 
 ```bash
-curl -i -X OPTIONS https://academix-backend-ypwf.onrender.com/api/v1/auth/login \
+curl -i -X OPTIONS https://academix-backend-lr8x.onrender.com/api/v1/auth/login \
   -H 'Origin: https://uc.academix.dvillasc.me' \
   -H 'Access-Control-Request-Method: POST' \
   -H 'Access-Control-Request-Headers: content-type'

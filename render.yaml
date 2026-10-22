@@ -60,9 +60,9 @@ services:
       # Backend public URL as assigned by Render (the bare service name was taken).
       # Render passes service variables to Docker as build args; changing it requires a rebuild.
       - key: NEXT_PUBLIC_API_URL
-        value: https://academix-backend-ypwf.onrender.com
+        value: https://academix-backend-lr8x.onrender.com
       - key: API_URL
-        value: https://academix-backend-ypwf.onrender.com
+        value: https://academix-backend-lr8x.onrender.com
 
 databases:
   - name: academix-db
