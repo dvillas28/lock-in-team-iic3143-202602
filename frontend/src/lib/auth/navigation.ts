@@ -1,7 +1,10 @@
+import { isId } from "../courses/validation.ts";
 import { institutionOrigins } from "./institution-origins.ts";
 
 /** URLSearchParams already decodes once. Accept only implemented routes. */
 export function safeReturnPath(value: string | null): string {
+  const match = value && /^\/attempts\/([^/]+)$/.exec(value);
+  if (match && isId(match[1])) return value!;
   return value === "/institutions" ? value : "/courses";
 }
 

@@ -5,6 +5,7 @@ import { act, createElement, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
 import { AppRouterContext, type AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime.js";
+import { PathnameContext } from "next/dist/shared/lib/hooks-client-context.shared-runtime.js";
 import { SessionProvider, useSession } from "../src/components/auth/session-provider.tsx";
 import { LoginForm } from "../src/components/auth/login-form.tsx";
 import { ProtectedInstitution } from "../src/components/auth/protected-institution.tsx";
@@ -44,9 +45,9 @@ async function mount(options:{url?:string;reply?:(request:Request)=>Response|Pro
   function navigate(href:string){if(href==="/institutions")href="/courses";dom.window.history.replaceState({},"",href);path=dom.window.location.pathname;render();}
   function render(){
     const match=path.match(/^\/institutions\/([a-z0-9-]+)$/);
-    const view=custom??(match || path==="/courses"?createElement(ProtectedInstitution,{slug:match?.[1]},createElement("p",null,"PRIVATE_CONTENT")):
+    const view=custom??(match || path==="/courses" || path.startsWith("/attempts/")?createElement(ProtectedInstitution,{slug:match?.[1]},createElement("p",null,"PRIVATE_CONTENT")):
       createElement(LoginForm));
-    root.render(createElement(AppRouterContext.Provider,{value:router},createElement(SessionProvider,null,view)));
+    root.render(createElement(AppRouterContext.Provider,{value:router},createElement(PathnameContext.Provider,{value:path},createElement(SessionProvider,null,view))));
   }
   await act(async()=>{render();await flush();});
   const doc=dom.window.document;
@@ -271,4 +272,18 @@ test("an unavailable resource context unmounts private content without revalidat
  await act(async()=>{try{await session!.request(c=>c.GET('/api/v1/institution/{institutionSlug}/courses',{params:{path:{institutionSlug:'uc'}}}));}catch{}await flush();});
  assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_RESOURCE|persona@example.test/);assert.match(ui.doc.body.textContent!,/Permisos insuficientes/);assert.ok(ui.requests.filter(r=>r.url.endsWith('/me')).length<=3);
  }finally{await ui.close();}
+});
+
+test("login keeps one known attempt next, rejects duplicate next",async()=>{
+ const path="/attempts/10000000-0000-4000-8000-000000000080";
+ for(const query of [`?next=${encodeURIComponent(path)}`,`?next=${encodeURIComponent(path)}&next=${encodeURIComponent(path)}`]){
+ const ui=await mount({url:"https://uc.academix.dvillasc.me/login"+query});
+ try{await ui.submit();assert.equal(ui.path,query.includes("&")?"/courses":path);}finally{await ui.close();}
+ }
+});
+
+test("protected known attempt returns through login to exact pathname",async()=>{
+ const path='/attempts/10000000-0000-4000-8000-000000000080';
+ const ui=await mount({url:'https://uc.academix.dvillasc.me'+path});
+ try{assert.equal(ui.path,'/login');assert.equal(new URLSearchParams(ui.dom.window.location.search).get('next'),path);await ui.submit();assert.equal(ui.path,path);assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);}finally{await ui.close();}
 });
