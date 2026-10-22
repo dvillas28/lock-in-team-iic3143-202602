@@ -1,5 +1,6 @@
 "use client";
 import { capabilities } from "../../lib/courses/capabilities.ts";
+import {gradebookCapabilities} from '../../lib/gradebook/capabilities.ts';
 import { CourseForm } from "./course-form.tsx";
 import Link from "next/link";
 import { useSession } from "../auth/session-provider.tsx";
@@ -26,7 +27,7 @@ export function CourseDetail({ courseId, sections = false }: {
     return <ErrorState feedback={result.error} onRetry={() => void result.reload()} />;
   if (!result.data)
     return <LoadingState />;
-  const { course, items } = result.data;
+  const { course, items } = result.data, academic=gradebookCapabilities(context.user,course);
   return <div className="stack">
     <div className="page-heading">
       <div>
@@ -35,6 +36,9 @@ export function CourseDetail({ courseId, sections = false }: {
       </div>
     </div>
     <nav className="actions" aria-label="Curso">
+      {academic.student && <Link href={`/courses/${courseId}/grades`}>Mis notas</Link>}
+      {academic.book && <Link href={`/courses/${courseId}/gradebook`}>Libro de notas</Link>}
+      {academic.audit && <Link href={`/courses/${courseId}/audit`}>Auditoría</Link>}
       <Link href={`/courses/${courseId}/quizzes`}>Quizzes</Link>
       <Link href={`/courses/${courseId}/modules`}>Módulos y material</Link>
       <Link href={`/courses/${courseId}`} aria-current={!sections ? "page" : undefined}>Detalle</Link>
