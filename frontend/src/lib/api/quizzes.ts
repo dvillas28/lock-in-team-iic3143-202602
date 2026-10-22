@@ -1,15 +1,20 @@
 import type { ApiClient } from "./client.ts";
 import { ApiResponseError } from "./errors.ts";
-import { path, list, FieldError } from "../courses/validation.ts";
-import { quizDto, quizList, quizInput, gradeItem, type Create, type Update, type Authoring } from "../quizzes/validation.ts";
+import { isRecord } from "../auth/validation.ts";
+import { path, list, FieldError, isId } from "../courses/validation.ts";
+import { quizDto, quizList, quizInput, gradeItem, summary, type Summary, type SafeQuiz, type Create, type Update, type Authoring } from "../quizzes/validation.ts";
 export async function listCourseQuizzes(client: ApiClient, slug: string, courseId: string, sectionId?: string) {
   const p = path(slug, {courseId, ...(sectionId === undefined ? {} : {sectionId})});
   const result = await client.GET("/api/v1/institution/{institutionSlug}/courses/{courseId}/quizzes", {params:{path:{...p,courseId},query:sectionId === undefined ? {} : {sectionId}}});
   return quizList(result.data,courseId);
 }
-export async function getQuiz(client: ApiClient, slug: string, courseId: string, quizId: string) {
-  const result = await client.GET("/api/v1/institution/{institutionSlug}/quizzes/{quizId}", {params:{path:{...path(slug,{courseId,quizId}),quizId}}});
-  return quizDto(result.data,courseId,quizId);
+export function getQuiz(client: ApiClient, slug: string, courseId: string | undefined, quizId: string): Promise<SafeQuiz>;
+export function getQuiz(client: ApiClient, slug: string, courseId: string | undefined, quizId: string, metadata: true): Promise<Summary>;
+export async function getQuiz(client: ApiClient, slug: string, courseId: string | undefined, quizId: string, metadata = false) {
+  const result = await client.GET("/api/v1/institution/{institutionSlug}/quizzes/{quizId}", {params:{path:{...path(slug,{...(courseId === undefined ? {} : {courseId}),quizId}),quizId}}});
+  const resolved = courseId ?? (isRecord(result.data) && isId(result.data.courseId) ? result.data.courseId : undefined);
+  if (!resolved) throw new ApiResponseError();
+  return metadata ? summary(result.data,resolved,quizId) : quizDto(result.data,resolved,quizId);
 }
 export async function getQuizAuthoringView(client: ApiClient, slug: string, courseId: string, quizId: string) {
   const result = await client.GET("/api/v1/institution/{institutionSlug}/quizzes/{quizId}/authoring", {params:{path:{...path(slug,{courseId,quizId}),quizId}}});

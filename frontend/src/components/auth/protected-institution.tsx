@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { hostInstitution } from "../../lib/auth/navigation.ts";
+import { hostInstitution, safeReturnPath } from "../../lib/auth/navigation.ts";
 import { InstitutionShell } from "../institutions/institution-shell.tsx";
 import { ErrorState, LoadingState } from "../route-states.tsx";
 import { useSession } from "./session-provider.tsx";
@@ -12,13 +12,15 @@ export function ProtectedInstitution({ slug: legacySlug, children }: Readonly<{ 
   const { session, state, origin } = useSession();
   const router = useRouter();
   const pathname = usePathname() ?? "/courses";
+  const returnPath = useRef(pathname);
+  useEffect(() => { returnPath.current = pathname; }, [pathname]);
   const slug = origin ? hostInstitution(origin).slug : undefined;
   const validHost = !!slug && (!legacySlug || legacySlug === slug);
   useEffect(() => {
     if (!origin || !validHost || !slug) return;
     if (legacySlug) { router.replace("/courses"); return; }
     if (state.status === "anonymous") {
-      router.replace(`/login?next=${encodeURIComponent("/courses")}`); return;
+      router.replace(`/login?next=${encodeURIComponent(safeReturnPath(returnPath.current))}`); return;
     }
     if (state.status !== "authenticated" || !validHost) return;
     const refresh = () => { void session.loadContext(slug); };

@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import {AttemptStart} from "../attempts/attempt-start.tsx";
 import { useSession } from "../auth/session-provider.tsx";
 import { useResource } from "../courses/use-resource.ts";
 import { getCourse } from "../../lib/api/courses.ts";
@@ -23,6 +24,7 @@ export function QuizDetail({courseId,quizId}:{courseId:string;quizId:string}) {
     <p>{quiz.status === "draft" ? "Borrador" : "Publicado"} · {quiz.sectionId ? `Sección ${sections.find(s=>s.id===quiz.sectionId)?.code}` : "Todo el curso"}</p>
     <p className="markdown-source">{quiz.instructions}</p><p>Apertura: {quiz.opensAt ?? "Sin límite"} · Cierre: {quiz.closesAt ?? "Sin límite"} · Intentos: {quiz.maxAttempts ?? "Ilimitados"}</p>
     {author && <><Link prefetch={false} href={`/courses/${courseId}/quizzes/${quizId}/authoring`}>Abrir autoría y pauta</Link><p className="notice">El acceso autorizado a pauta impide rendir este quiz, incluso con rol student.</p></>}
+    <AttemptStart key={`${state.generation}:${slug}:${quizId}:${JSON.stringify(context.user)}`} session={session} slug={slug} user={context.user} course={course} quiz={quiz} sections={sections}/>
     <ol className="stack">{quiz.questions.map(q=><li className="panel stack" key={q.id}><h2 className="serif">{q.prompt}</h2><p className="tnum">{q.points} puntos</p><ul>{q.alternatives.map(a=><li key={a.id}>{a.text}</li>)}</ul></li>)}</ol>
   </div>;
 }

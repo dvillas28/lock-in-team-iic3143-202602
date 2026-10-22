@@ -53,7 +53,7 @@ Constitution gates:
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
-at specs/20261021-141351_frontend-autoria-quizzes/plan.md
+at specs/20261021-141352_frontend-rendicion-quizzes/plan.md
 <!-- SPECKIT END -->
 
 ## UI & Design

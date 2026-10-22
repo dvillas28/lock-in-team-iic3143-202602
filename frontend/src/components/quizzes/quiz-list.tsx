@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import {KnownAttemptLink} from "../attempts/attempt-start.tsx";
 import { useSession } from "../auth/session-provider.tsx";
 import { useResource } from "../courses/use-resource.ts";
 import { getCourse } from "../../lib/api/courses.ts";
@@ -23,6 +24,7 @@ export function QuizList({courseId}:{courseId:string}) {
     {result.error && <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/>}
     <ul className="stack">{items.map(q=><li className="panel stack" key={q.id}><Link href={`/courses/${courseId}/quizzes/${q.id}`}>{q.title}</Link><p>{q.status === "draft" ? "Borrador" : "Publicado"} · {q.sectionId ? `Sección ${sections.find(s=>s.id===q.sectionId)?.code}` : "Todo el curso"}</p></li>)}</ul>
     {!items.length && !result.error && <EmptyState/>}
+    <KnownAttemptLink key={scope+":known"}/>
     <QuizCreate key={scope} session={session} slug={slug} user={context.user} course={course} sections={sections} onSaved={result.reload}/>
   </div>;
 }

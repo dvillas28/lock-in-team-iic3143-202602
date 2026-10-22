@@ -265,3 +265,10 @@ test("resource rejection revalidates me once and retains an unavailable context 
  await flush();assert.equal(h.session.getSnapshot().context?.user,undefined);assert.match(h.session.getSnapshot().context?.error?.message??'',/permisos/);
  assert.equal(h.requests.filter(r=>r.url.endsWith('/me')).length,2);h.session.logout();
 });
+
+test("only exact attempt UUID survives login return allowlist",()=>{
+ const path="/attempts/10000000-0000-4000-8000-000000000080";
+ assert.equal(safeReturnPath(path),path);
+ for(const suffix of ["\n","\r","\r\n"," ","%0A"])assert.equal(safeReturnPath(path+suffix),"/courses");
+ for(const v of [path+"?x=1",path+"#x",path+"/",path.replace("/attempts/","/attempts\\"),path.replace("/attempts/","%2Fattempts%2F"),"%252Fattempts%252F", "https://evil.test"+path,"//evil.test"+path,"/attempts/bad"])assert.equal(safeReturnPath(v),"/courses");
+});

@@ -9,7 +9,7 @@ export type Enrollment = components["schemas"]["Enrollment"];
 export type UserSummary = components["schemas"]["UserSummary"];
 export type Role = components["schemas"]["EnrollmentRole"];
 export const roles: Role[] = ["teacher", "assistant", "student"];
-export const isId = (v: unknown): v is string => typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+export const isId = (v: unknown): v is string => typeof v === "string" && v.length === 36 && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
 export function path(slug: string, ids: Record<string, string> = {}) {
   if (!isInstitutionSlug(slug) || !Object.values(ids).every(isId))
     throw new TypeError("Recurso inválido.");
