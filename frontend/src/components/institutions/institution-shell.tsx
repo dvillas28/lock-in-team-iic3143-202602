@@ -43,7 +43,9 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, ch
             <span>{institutionSlug}</span>
             <ChevronRight size={14} aria-hidden="true" />
             <Link href={homePath} aria-current={pathname === homePath ? "page" : undefined}>Cursos</Link>
-            {pathname !== homePath && <span className="crumb-active" aria-current="page">{pathname.endsWith("/sections") ? "Secciones" : "Detalle del curso"}</span>}
+            {pathname.includes("/modules") && <><ChevronRight size={14} aria-hidden="true" /><Link href={pathname.split("/modules")[0]}>Curso</Link></>}
+            {pathname.includes("/materials/") && <><ChevronRight size={14} aria-hidden="true" /><Link href={pathname.split("/modules")[0] + "/modules"}>Módulos</Link></>}
+            {pathname !== homePath && <><ChevronRight size={14} aria-hidden="true" /><span className="crumb-active" aria-current="page">{pathname.includes("/materials/") ? "Material" : pathname.endsWith("/modules") ? "Módulos" : pathname.endsWith("/sections") ? "Secciones" : "Detalle del curso"}</span></>}
           </nav>
           {actions}
         </header>

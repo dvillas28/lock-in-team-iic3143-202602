@@ -7,6 +7,7 @@ import "@/styles/tokens.css";
 import "@/styles/app.css";
 import "@/styles/institution-layout.css";
 import "@/styles/auth.css";
+import "@/styles/content.css";
 
 const inter = Inter({
   subsets: ["latin"],

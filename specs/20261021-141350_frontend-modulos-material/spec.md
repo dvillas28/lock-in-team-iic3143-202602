@@ -3,7 +3,7 @@
 **Feature Branch**: `feat/frontend-modulos-material` (propuesta)
 **Feature Directory**: `specs/20261021-141350_frontend-modulos-material`
 **Created**: 2026-10-21
-**Status**: Ready for planning — validación documental, producto pendiente
+**Status**: US1–US3 implementadas; validación backend real pendiente (T026)
 **Input**: Conectar organización, edición y lectura de contenido markdown del curso.
 
 ## User Scenarios & Testing *(mandatory)*

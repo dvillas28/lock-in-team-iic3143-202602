@@ -53,7 +53,7 @@ Constitution gates:
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
-at specs/20261021-141349_frontend-cursos-participacion/plan.md
+at specs/20261021-141350_frontend-modulos-material/plan.md
 <!-- SPECKIT END -->
 
 ## UI & Design

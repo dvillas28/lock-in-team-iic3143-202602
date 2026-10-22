@@ -22,7 +22,7 @@ export async function mount(view:ReactNode, reply:(r:Request)=>Response|Promise<
  return {dom,doc,requests,session,id,
  async render(next:ReactNode){view=next;await act(async()=>{root.render(createElement(SessionProvider,null,createElement(Probe)));await flush();});},
  setActor(profile:string){actor=user(profile,slug);},
- async actor(profile:string){actor=user(profile,slug);await act(async()=>{await session.loadContext(slug);await flush();});},
+ async actor(profile:string,tenant=slug){actor=user(profile,tenant);await act(async()=>{await session.loadContext(tenant);await flush();});},
  async click(text:string){const el=Array.from(doc.querySelectorAll<HTMLElement>('button,a')).find(e=>e.textContent===text);if(!el)throw new Error(`Missing ${text}: ${doc.body.textContent}`);await act(async()=>{el.click();await flush();});},
  async submit(selector='form',values:Record<string,string>={}){const form=doc.querySelector<HTMLFormElement>(selector)!;for(const [key,value]of Object.entries(values))(form.elements.namedItem(key) as HTMLInputElement).value=value;await act(async()=>{form.dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));await flush();});},
  async settle(action:()=>void){await act(async()=>{action();await flush();});},
