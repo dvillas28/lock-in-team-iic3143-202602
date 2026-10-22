@@ -43,9 +43,10 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, ch
             <span>{institutionSlug}</span>
             <ChevronRight size={14} aria-hidden="true" />
             <Link href={homePath} aria-current={pathname === homePath ? "page" : undefined}>Cursos</Link>
+            {pathname.includes("/quizzes") && <><ChevronRight size={14} aria-hidden="true" /><Link href={pathname.split("/quizzes")[0]}>Curso</Link><ChevronRight size={14} aria-hidden="true" /><Link href={pathname.split("/quizzes")[0] + "/quizzes"}>Quizzes</Link></>}
             {pathname.includes("/modules") && <><ChevronRight size={14} aria-hidden="true" /><Link href={pathname.split("/modules")[0]}>Curso</Link></>}
             {pathname.includes("/materials/") && <><ChevronRight size={14} aria-hidden="true" /><Link href={pathname.split("/modules")[0] + "/modules"}>Módulos</Link></>}
-            {pathname !== homePath && <><ChevronRight size={14} aria-hidden="true" /><span className="crumb-active" aria-current="page">{pathname.includes("/materials/") ? "Material" : pathname.endsWith("/modules") ? "Módulos" : pathname.endsWith("/sections") ? "Secciones" : "Detalle del curso"}</span></>}
+            {pathname !== homePath && <><ChevronRight size={14} aria-hidden="true" /><span className="crumb-active" aria-current="page">{pathname.endsWith("/authoring") ? "Autoría y pauta" : pathname.includes("/quizzes/") ? "Detalle del quiz" : pathname.endsWith("/quizzes") ? "Quizzes" : pathname.includes("/materials/") ? "Material" : pathname.endsWith("/modules") ? "Módulos" : pathname.endsWith("/sections") ? "Secciones" : "Detalle del curso"}</span></>}
           </nav>
           {actions}
         </header>

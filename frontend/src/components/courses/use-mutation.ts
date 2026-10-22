@@ -45,7 +45,7 @@ export function useMutation(session: Session) {
           return;
         const rejectedField = error.problem.errors?.[0]?.field;
         const field = rejectedField === 'initialSection.code' ? 'sectionCode' : rejectedField === 'initialSection.capacity' ? 'capacity' : rejectedField;
-        setStatus({ busy: false, field, message: error.status === 409 ? "Conflicto: revisa el estado antes de cambiar los datos." : error.status === 400 || error.status === 422 ? "Revisa los campos y sus límites. El servidor rechazó los valores." : getRouteFeedback(error).message });
+        setStatus({ busy: false, field, message: error.status === 409 ? "Conflicto: revisa el estado antes de cambiar los datos." : error.status === 413 ? "Revisa el tamaño total: JSON máximo 4096 bytes UTF-8. El formulario autorizado se conserva." : error.status === 400 || error.status === 422 ? "Revisa los campos y sus límites. El servidor rechazó los valores." : getRouteFeedback(error).message });
         locked.current = false;
         return;
       }

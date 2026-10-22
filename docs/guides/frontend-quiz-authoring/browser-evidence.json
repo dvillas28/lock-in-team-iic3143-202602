@@ -1,0 +1,38 @@
+[
+  {
+    "slug": "uc",
+    "courseId": "e8675290-c5b7-476a-aa90-a7e6af073f28",
+    "quizId": "1febe2a7-371a-4c50-ac99-6426d972b4fb",
+    "publishedAt": "2026-10-22T14:54:27.985357Z",
+    "gradeItemId": "b7b7a9c4-bcf1-44d5-a9a7-80c359516532",
+    "auditEventId": "e0296680-ba32-49b4-b711-306aec08786a",
+    "checks": [
+      "create/edit/publish real",
+      "repeat timestamp/item/event real",
+      "cross-tenant rejected",
+      "safe no prefetch",
+      "375/1280 light/dark",
+      "dialog keyboard/focus",
+      "storage empty"
+    ],
+    "errors": []
+  },
+  {
+    "slug": "utfsm",
+    "courseId": "bd1021ed-ba4a-4052-9700-490b80764a22",
+    "quizId": "20c3d10e-3562-4aa5-86e5-3d795dbd642c",
+    "publishedAt": "2026-10-22T14:54:43.132738Z",
+    "gradeItemId": "9fd52a2b-231c-4c5a-8bf6-f6aeaef9345c",
+    "auditEventId": "c7173c27-d66c-447f-9cd6-de890e2f2bf1",
+    "checks": [
+      "create/edit/publish real",
+      "repeat timestamp/item/event real",
+      "cross-tenant rejected",
+      "safe no prefetch",
+      "375/1280 light/dark",
+      "dialog keyboard/focus",
+      "storage empty"
+    ],
+    "errors": []
+  }
+]
