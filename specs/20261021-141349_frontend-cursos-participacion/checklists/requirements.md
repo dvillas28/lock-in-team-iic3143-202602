@@ -12,7 +12,8 @@
 
 ## Requirement Completeness
 
-- [x] Sin aclaraciones bloqueantes; supuestos/exclusiones explícitos.
+- [x] Sin aclaraciones de producto bloqueantes; supuestos/exclusiones explícitos.
+- [x] Dependencia runtime de búsqueda registrada en [DEP-FE-SEARCH-001](../dependencies/participant-search.md); aceptación real completa de US3 pendiente.
 - [x] FR verificables y SC medibles sin implementación específica.
 - [x] Éxito/rechazo y límites por institución/curso/sección.
 - [x] CU/RF/RNF, FE y fuentes con responsables conservados.

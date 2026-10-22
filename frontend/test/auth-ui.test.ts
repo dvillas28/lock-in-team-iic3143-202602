@@ -262,3 +262,13 @@ test("revocation revalidation wins over an older successful context body",async(
     assert.match(ui.doc.body.textContent!,/Recurso no disponible/);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT|persona@example.test/);
   }finally{await ui.close();}
 });
+
+test("an unavailable resource context unmounts private content without revalidation loops",async()=>{
+ let session:ReturnType<typeof useSession>['session']|undefined;
+ function ResourceProbe(){session=useSession().session;return null;}
+ const ui=await mount({reply:r=>r.method==='POST'?Response.json(login()):r.url.endsWith('/me')?Response.json(user()):r.url.endsWith('/courses')?Response.json({},{status:403}):Response.json({items:[institution()]})});
+ try{await ui.submit();await ui.custom(createElement(ProtectedInstitution,null,createElement(ResourceProbe),'PRIVATE_RESOURCE'));
+ await act(async()=>{try{await session!.request(c=>c.GET('/api/v1/institution/{institutionSlug}/courses',{params:{path:{institutionSlug:'uc'}}}));}catch{}await flush();});
+ assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_RESOURCE|persona@example.test/);assert.match(ui.doc.body.textContent!,/Permisos insuficientes/);assert.ok(ui.requests.filter(r=>r.url.endsWith('/me')).length<=3);
+ }finally{await ui.close();}
+});

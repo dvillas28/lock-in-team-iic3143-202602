@@ -55,7 +55,7 @@ export class Session {
     this.checkExpiry();
     if (generation !== this.state.generation) throw new StaleSessionError();
   }
-  private async perform<T>(generation: number, token: string | undefined, operation: (client: ApiClient) => Promise<T>): Promise<T> {
+  private async perform<T>(generation: number, token: string | undefined, operation: (client: ApiClient) => Promise<T>, current: () => boolean = () => true): Promise<T> {
     const context = this.state.context;
     const controller = new AbortController(); this.controllers.add(controller);
     try {
@@ -63,26 +63,30 @@ export class Session {
       const client = createApiClient({ baseUrl: this.options.baseUrl, getToken: () => token,
         fetch: async input => {
           this.assertCurrent(generation);
+          if (!current()) throw new StaleSessionError();
           const request = input instanceof Request ? input : new Request(input);
           const response = await (this.options.fetch ?? globalThis.fetch)(new Request(request, { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15_000)]) }));
           this.assertCurrent(generation);
+          if (!current()) throw new StaleSessionError();
           return response;
         } });
       const result = await operation(client);
       this.assertCurrent(generation);
+      if (!current()) throw new StaleSessionError();
       return result;
     } catch (error) {
       this.assertCurrent(generation);
+      if (!current()) throw new StaleSessionError();
       if (token && error instanceof ApiHttpError && error.status === 401) this.logout("Tu sesión ya no es válida. Inicia sesión nuevamente.");
-      if (token && this.state.context === context && error instanceof ApiHttpError && [403, 404].includes(error.status)) this.update({ context: undefined });
+      if (token && context?.user && this.state.context === context && error instanceof ApiHttpError && [403, 404].includes(error.status)) void this.loadContext(context.slug, getRouteFeedback(error));
       throw error;
     } finally { this.controllers.delete(controller); }
   }
   /** All private consumers use this boundary; old completions/401s cannot affect a new identity. */
-  request = async <T>(operation: (client: ApiClient) => Promise<T>): Promise<T> => {
+  request = async <T>(operation: (client: ApiClient) => Promise<T>, current?: () => boolean): Promise<T> => {
     this.checkExpiry();
     if (this.state.status !== "authenticated" || !this.token) throw new StaleSessionError();
-    return this.perform(this.state.generation, this.token, operation);
+    return this.perform(this.state.generation, this.token, operation, current);
   };
   login = async (email: string, password: string): Promise<boolean> => {
     if (this.state.status === "authenticating" || this.now() < this.state.retryAt) return false;
@@ -123,13 +127,16 @@ export class Session {
       if (generation === this.state.generation && sequence === this.directoryRequest) this.update({ directoryError: getRouteFeedback(error) });
     }
   };
-  loadContext = async (slug: string) => {
+  loadContext = async (slug: string, unavailable?: RouteFeedback) => {
     const generation = this.state.generation, sequence = ++this.contextRequest;
     this.update({ context: { slug } });
     try {
       if (!isInstitutionSlug(slug)) throw new ApiHttpError(400);
       const result = await this.request(client => getCurrentUser(client, slug));
-      if (sequence === this.contextRequest) this.update({ context: { slug, user: currentUser(result.data, slug, this.subject) } });
+      if (sequence === this.contextRequest) {
+        const user = currentUser(result.data, slug, this.subject);
+        this.update({ context: unavailable ? { slug, error: unavailable } : { slug, user } });
+      }
     } catch (error) {
       if (generation === this.state.generation && sequence === this.contextRequest) this.update({ context: { slug, error: getRouteFeedback(error) } });
     }
