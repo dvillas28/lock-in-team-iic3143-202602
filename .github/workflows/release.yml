@@ -47,15 +47,20 @@ jobs:
           TAG: ${{ steps.next.outputs.tag }}
         run: gh release create "$TAG" --target "$GITHUB_SHA" --title "$TAG" --generate-notes
 
-      # Railway waits for this workflow before deploying, so that deploy picks up the new value.
+      # Render deploys after every check passes, this workflow included, so that deploy picks up the new value.
+      # Updating a variable through the API does not deploy by itself.
       # A service without changes in the release is not redeployed and keeps showing its last deployed version.
-      - name: Set APP_VERSION in Railway
+      - name: Set APP_VERSION in Render
         if: github.ref_name == 'main' && steps.next.outputs.tag != ''
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          SERVICES: ${{ vars.RENDER_BACKEND_SERVICE_ID }} ${{ vars.RENDER_FRONTEND_SERVICE_ID }}
           TAG: ${{ steps.next.outputs.tag }}
         run: |
-          for service in backend frontend; do
-            npx --yes @railway/cli@5.63.1 variable set "APP_VERSION=${TAG#v}" \
-              --service "$service" --environment production --skip-deploys
+          for service in $SERVICES; do
+            curl --fail-with-body --silent --show-error --request PUT \
+              "https://api.render.com/v1/services/$service/env-vars/APP_VERSION" \
+              --header "Authorization: Bearer $RENDER_API_KEY" \
+              --header "Content-Type: application/json" \
+              --data "{\"value\":\"${TAG#v}\"}" > /dev/null
           done

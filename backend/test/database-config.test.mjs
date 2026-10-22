@@ -30,6 +30,13 @@ test("TLS policy is explicit in pg and rejects unsafe environment overrides", ()
   }
 });
 
+test("only Render's private Postgres host may skip TLS", () => {
+  assert.ok(config.connectionConfig({DATABASE_URL:"postgres://u:p@dpg-d1abc234def567-a/academix"}));
+  for(const host of ["dpg-d1abc234def567-a.oregon-postgres.render.com","dpg-d1abc234def567-a.attacker.example","xdpg-d1abc234def567-a"]) {
+    assert.throws(()=>config.connectionConfig({DATABASE_URL:`postgres://u:p@${host}/academix`}),{category:"config"});
+  }
+});
+
 test("sanitization assertions never report the sensitive actual output", () => {
   const TEST_DATABASE_URL=process.env.TEST_DATABASE_URL;
   process.env.TEST_DATABASE_URL="postgres://localhost/report_test";

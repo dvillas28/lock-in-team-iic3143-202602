@@ -4,7 +4,8 @@
 
 La [Entrega 2](deliveries/2/README.md) es la base documental actual de AcademiX.
 Define una PostgreSQL compartida, aislamiento lógico por `Institution`, User
-global con memberships y despliegue en Railway.
+global con memberships y despliegue en Railway, hoy reemplazado por
+[Render](adr/deploy-on-render.md).
 
 - [Alcance vigente](deliveries/2/02-scope.md)
 - [Casos de uso y requerimientos](deliveries/2/03-use-cases-and-requirements.md)

@@ -67,7 +67,7 @@ Crear PR hacia main enlazando el spec. [Git Flow](docs/guides/git-flow.md).
 
 ## Stack y despliegue
 
-Frontend Next.js; backend NestJS; PostgreSQL compartida; Railway.
+Frontend Next.js; backend NestJS; PostgreSQL compartida; Render ([ADR](docs/adr/deploy-on-render.md)).
 RLS mínima y contexto transaccional; runtime sin ownership ni bypass.
 Redis, workers, microservicios y sharding quedan fuera del MVP.
 
