@@ -71,7 +71,7 @@ Frontend Next.js; backend NestJS; PostgreSQL compartida; Render ([ADR](docs/adr/
 RLS mínima y contexto transaccional; runtime sin ownership ni bypass.
 Redis, workers, microservicios y sharding quedan fuera del MVP.
 
-API central: `https://api.dvillasc.me`.
+API central: `https://academix-backend.onrender.com` (destino previsto `api.dvillasc.me`, ver ADR de Render).
 Frontend: `uc.academix.dvillasc.me` y `utfsm.academix.dvillasc.me`.
 Host/Origin no seleccionan tenant: el path lo solicita y la pertenencia lo autoriza.
 Implementación local no acredita despliegue, DNS ni TLS públicos: consultar runbook.

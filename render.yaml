@@ -10,8 +10,8 @@ services:
     region: virginia
     branch: main
     rootDir: ./backend
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     buildFilter:
       paths: ["backend/**"]
     # Deploy only after every GitHub check on the commit passes (CI and Release).
@@ -19,8 +19,7 @@ services:
     # Free instances have no preDeployCommand: serve.js runs predeploy in its own process on each start.
     dockerCommand: node dist/commands/serve.js
     healthCheckPath: /ready
-    domains:
-      - api.dvillasc.me
+    # No custom domain: the Hobby workspace includes two, both used by the frontend.
     envVars:
       - key: PORT
         value: "3001"
@@ -46,8 +45,8 @@ services:
     region: virginia
     branch: main
     rootDir: ./frontend
-    dockerfilePath: ./frontend/Dockerfile
-    dockerContext: ./frontend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     buildFilter:
       paths: ["frontend/**"]
     autoDeployTrigger: checksPass
@@ -58,11 +57,12 @@ services:
     envVars:
       - key: PORT
         value: "3000"
+      # Backend public URL. If Render added a suffix to the service URL, use that one here.
       # Render passes service variables to Docker as build args; changing it requires a rebuild.
       - key: NEXT_PUBLIC_API_URL
-        value: https://api.dvillasc.me
+        value: https://academix-backend.onrender.com
       - key: API_URL
-        value: https://api.dvillasc.me
+        value: https://academix-backend.onrender.com
 
 databases:
   - name: academix-db
