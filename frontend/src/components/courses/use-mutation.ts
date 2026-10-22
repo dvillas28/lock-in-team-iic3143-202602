@@ -13,7 +13,7 @@ export function useMutation(session: Session) {
   }>({ busy: false });
   const locked = useRef(false), alive = useRef(true);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
-  async function run(operation: (current: () => boolean) => Promise<void>, reconcile: (current: () => boolean) => Promise<string>) {
+  async function run(operation: (current: () => boolean) => Promise<void | string>, reconcile: (current: () => boolean) => Promise<string>) {
     if (locked.current)
       return;
     locked.current = true;
@@ -21,9 +21,9 @@ export function useMutation(session: Session) {
     const current = () => alive.current && context === session.getSnapshot().context && generation === session.getSnapshot().generation;
     setStatus({ busy: true });
     try {
-      await operation(current);
+      const message = await operation(current);
       if (current())
-        setStatus({ busy: false, message: "Cambio confirmado." });
+        setStatus({ busy: false, message: message || "Cambio confirmado." });
       locked.current = false;
     }
     catch (error) {

@@ -35,6 +35,7 @@ export function CourseDetail({ courseId, sections = false }: {
       </div>
     </div>
     <nav className="actions" aria-label="Curso">
+      <Link href={`/courses/${courseId}/modules`}>Módulos y material</Link>
       <Link href={`/courses/${courseId}`} aria-current={!sections ? "page" : undefined}>Detalle</Link>
       <Link href={`/courses/${courseId}/sections`} aria-current={sections ? "page" : undefined}>Secciones</Link>
     </nav>
