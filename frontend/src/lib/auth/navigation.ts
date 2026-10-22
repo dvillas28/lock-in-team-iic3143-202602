@@ -5,6 +5,10 @@ import { institutionOrigins } from "./institution-origins.ts";
 export function safeReturnPath(value: string | null): string {
   const match = value && /^\/attempts\/([^/]+)$/.exec(value);
   if (match && isId(match[1])) return value!;
+  const course = value && /^\/courses\/([^/]+)\/(grades|gradebook|audit)$/.exec(value);
+  if (course && course[0] === value && isId(course[1])) return value!;
+  const review = value && /^\/courses\/([^/]+)\/quizzes\/([^/]+)\/attempts(?:\/([^/]+))?$/.exec(value);
+  if (review && review[0] === value && isId(review[1]) && isId(review[2]) && (review[3] === undefined || isId(review[3]))) return value!;
   return value === "/institutions" ? value : "/courses";
 }
 

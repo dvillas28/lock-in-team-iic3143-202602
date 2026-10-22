@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import {gradebookCapabilities} from '../../lib/gradebook/capabilities.ts';
 import {AttemptStart} from "../attempts/attempt-start.tsx";
 import { useSession } from "../auth/session-provider.tsx";
 import { useResource } from "../courses/use-resource.ts";
@@ -22,6 +23,7 @@ export function QuizDetail({courseId,quizId}:{courseId:string;quizId:string}) {
   const {course,sections,quiz}=result.data, author=canAuthor(context.user,course,sections,quiz.sectionId);
   return <div className="stack"><Link href={`/courses/${courseId}/quizzes`}>Volver a quizzes</Link><h1 className="serif">{quiz.title}</h1>
     <p>{quiz.status === "draft" ? "Borrador" : "Publicado"} · {quiz.sectionId ? `Sección ${sections.find(s=>s.id===quiz.sectionId)?.code}` : "Todo el curso"}</p>
+    {gradebookCapabilities(context.user,course).book && <Link href={`/courses/${courseId}/quizzes/${quizId}/attempts`}>Consultar intentos</Link>}
     <p className="markdown-source">{quiz.instructions}</p><p>Apertura: {quiz.opensAt ?? "Sin límite"} · Cierre: {quiz.closesAt ?? "Sin límite"} · Intentos: {quiz.maxAttempts ?? "Ilimitados"}</p>
     {author && <><Link prefetch={false} href={`/courses/${courseId}/quizzes/${quizId}/authoring`}>Abrir autoría y pauta</Link><p className="notice">El acceso autorizado a pauta impide rendir este quiz, incluso con rol student.</p></>}
     <AttemptStart key={`${state.generation}:${slug}:${quizId}:${JSON.stringify(context.user)}`} session={session} slug={slug} user={context.user} course={course} quiz={quiz} sections={sections}/>

@@ -11,6 +11,8 @@ export const historical = {...attempt,sectionId:otherSection.id};
 export const boundedQuiz = {...quiz,opensAt:"2026-10-21T12:00:00Z",closesAt:"2026-10-21T13:00:00Z",maxAttempts:2};
 export const revoked = {...user("student"),sectionMemberships:[]};
 export const tenants = ["uc","utfsm"];
+export const staffReview={...graded,scorePercent:80,grade:5.5};
+export const teacherReview={...staffReview,answers:answers.map(a=>({...a,isCorrect:true,pointsAwarded:2}))};
 export function reply(r:Request, value:unknown=attempt) {
  return Response.json(r.url.includes("/quiz-attempts/")?value:r.url.endsWith("/sections")?{items:[section,otherSection]}:r.url.endsWith("/quizzes")?{items:[quiz]}:r.url.includes("/quizzes/")?quiz:course);
 }

@@ -43,10 +43,12 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, ch
             <span>{institutionSlug}</span>
             <ChevronRight size={14} aria-hidden="true" />
             <Link href={homePath} aria-current={pathname === homePath ? "page" : undefined}>Cursos</Link>
+            {/\/(grades|gradebook|audit)$/.test(pathname) && <><ChevronRight size={14} aria-hidden="true"/><Link href={pathname.replace(/\/(grades|gradebook|audit)$/, '')}>Curso</Link></>}
             {pathname.includes("/quizzes") && <><ChevronRight size={14} aria-hidden="true" /><Link href={pathname.split("/quizzes")[0]}>Curso</Link><ChevronRight size={14} aria-hidden="true" /><Link href={pathname.split("/quizzes")[0] + "/quizzes"}>Quizzes</Link></>}
             {pathname.includes("/modules") && <><ChevronRight size={14} aria-hidden="true" /><Link href={pathname.split("/modules")[0]}>Curso</Link></>}
             {pathname.includes("/materials/") && <><ChevronRight size={14} aria-hidden="true" /><Link href={pathname.split("/modules")[0] + "/modules"}>Módulos</Link></>}
-            {pathname !== homePath && <><ChevronRight size={14} aria-hidden="true" /><span className="crumb-active" aria-current="page">{pathname.endsWith("/authoring") ? "Autoría y pauta" : pathname.includes("/quizzes/") ? "Detalle del quiz" : pathname.endsWith("/quizzes") ? "Quizzes" : pathname.includes("/materials/") ? "Material" : pathname.endsWith("/modules") ? "Módulos" : pathname.endsWith("/sections") ? "Secciones" : "Detalle del curso"}</span></>}
+            {pathname.includes('/attempts/') && pathname.startsWith('/courses/') && <><ChevronRight size={14} aria-hidden="true"/><Link href={pathname.split('/attempts/')[0]+'/attempts'}>Intentos</Link></>}
+            {pathname !== homePath && <><ChevronRight size={14} aria-hidden="true" /><span className="crumb-active" aria-current="page">{pathname.endsWith('/grades')?'Mis notas':pathname.endsWith('/gradebook')?'Libro de notas':pathname.endsWith('/audit')?'Auditoría':pathname.includes('/attempts/')?'Revisión de intento':pathname.endsWith('/attempts')?'Intentos':pathname.endsWith("/authoring") ? "Autoría y pauta" : pathname.includes("/quizzes/") ? "Detalle del quiz" : pathname.endsWith("/quizzes") ? "Quizzes" : pathname.includes("/materials/") ? "Material" : pathname.endsWith("/modules") ? "Módulos" : pathname.endsWith("/sections") ? "Secciones" : "Detalle del curso"}</span></>}
           </nav>
           {actions}
         </header>

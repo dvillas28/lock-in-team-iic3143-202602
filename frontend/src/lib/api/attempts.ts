@@ -3,6 +3,28 @@ import {ApiResponseError} from "./errors.ts";
 import {path} from "../courses/validation.ts";
 import type {SafeQuiz} from "../quizzes/validation.ts";
 import {attemptDto,answersInput,sameAnswers,submissionReceipt,type Attempt,type Answer,type Expected} from "../attempts/validation.ts";
+import {reviewDto} from '../attempts/review.ts';
+import {pageInfo,queryPage,unique} from '../gradebook/validation.ts';
+import {attemptCapabilities} from '../attempts/capabilities.ts';
+import {gradebookCapabilities} from '../gradebook/capabilities.ts';
+import type {CurrentUser} from '../auth/validation.ts';
+import type {Course} from '../courses/validation.ts';
+import type {Summary} from '../quizzes/validation.ts';
+function review(v:unknown,user:CurrentUser,course:Course,quiz:Summary,list=false){
+ if(quiz.courseId!==course.id)throw new ApiResponseError();
+ const a=attemptDto(v,{quizId:quiz.id,staff:true}),cap=gradebookCapabilities(user,course,a.sectionId),access=attemptCapabilities(user,course,quiz,a);
+ if(!cap.book||(!access.teacher&&!access.student&&!user.sectionMemberships.some(m=>m.courseId===course.id&&m.sectionId===a.sectionId&&m.role==='assistant')))throw new ApiResponseError();
+ return reviewDto(v,{quizId:quiz.id,view:access.student?(list?'assistant':'student'):access.teacher?'teacher':'assistant'});
+}
+export async function getAttemptReview(c:ApiClient,slug:string,attemptId:string,user:CurrentUser,course:Course,quiz:Summary){
+ const r=await c.GET('/api/v1/institution/{institutionSlug}/quiz-attempts/{attemptId}',{params:{path:{...path(slug,{attemptId}),attemptId}}});const a=review(r.data,user,course,quiz);if(a.id!==attemptId)throw new ApiResponseError();return a;
+}
+export async function listQuizAttempts(c:ApiClient,slug:string,user:CurrentUser,course:Course,quiz:Summary,q:{sectionId?:string;studentId?:string;status?:Attempt['status'];cursor?:string;limit?:number}={}){
+ path(slug,{quizId:quiz.id,...(q.sectionId!==undefined?{sectionId:q.sectionId}:{}),...(q.studentId!==undefined?{studentId:q.studentId}:{})});
+ if(q.status!==undefined&&!['inProgress','submitted','graded','cancelled'].includes(q.status))throw new TypeError('Estado inválido.');
+ const r=await c.GET('/api/v1/institution/{institutionSlug}/quizzes/{quizId}/attempts',{params:{path:{institutionSlug:slug,quizId:quiz.id},query:{...q,...queryPage(q.cursor,q.limit)}}});
+ const p=pageInfo(r.data),items=p.items.map(v=>review(v,user,course,quiz,true));if(!unique(items.map(a=>a.id))||items.some(a=>(q.sectionId&&a.sectionId!==q.sectionId)||(q.studentId&&a.studentId!==q.studentId)||(q.status&&a.status!==q.status)))throw new ApiResponseError();return {...p,items};
+}
 function key(value:string) {
  if(!value.length||value.length>200||/[\x00-\x20\x7f]/.test(value))throw new TypeError("Clave inválida.");return {"Idempotency-Key":value};
 }
