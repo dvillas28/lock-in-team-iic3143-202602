@@ -36,23 +36,33 @@ test("browser session contract: real login, UC/UTFSM isolation, live revocation 
       await assert.rejects(session.request(client=>client.GET("/api/v1/institutions")));
     }
     const origin="https://uc.academix.dvillasc.me";
+    for (const origins of [[origin,"https://utfsm.academix.dvillasc.me"], ["http://uc.localhost:3000","http://utfsm.localhost:3000"]]) {
+      await app.close();
+      app=await http({NODE_ENV:origins[0].startsWith("https:")?"production":"development",CORS_ALLOWED_ORIGINS:JSON.stringify(origins)});
+      for (const candidate of [...origins,"https://evil.test"]) {
+        const allowed=origins.includes(candidate);
+        const attempts="/api/v1/institution/uc/sections/10000000-0000-4000-8000-000000000003/quizzes/10000000-0000-4000-8000-000000000004/attempts";
+        for (const [path,method,headers] of [["/api/v1/auth/login","POST","content-type"],["/api/v1/institution/uc/me","GET","authorization"], [attempts,"POST","authorization,content-type,idempotency-key"], [attempts,"POST","x-forbidden"]]) {
+          const preflight=await fetch(app.base+path,{method:"OPTIONS",headers:{Origin:candidate,"Access-Control-Request-Method":method,"Access-Control-Request-Headers":headers}});
+          assert.equal(preflight.status,204);
+          assert.equal(preflight.headers.get("access-control-allow-origin"),allowed?candidate:null);
+          assert.equal(preflight.headers.has("access-control-allow-credentials"),false);
+          assert.match(preflight.headers.get("vary"),/Origin/);
+          const permitted=preflight.headers.get("access-control-allow-headers").toLowerCase().split(/,\s*/);
+          for(const header of ["authorization","content-type","idempotency-key"]) assert.ok(permitted.includes(header));
+          assert.ok(!permitted.includes("x-forbidden"));
+          assert.equal(await preflight.text(),"");
+        }
+        const response=await fetch(app.base+"/api/v1/institution/uc/me",{headers:{Origin:candidate,"x-tenant":"uc","X-Forwarded-Host":"uc.academix.dvillasc.me"}});
+        assert.equal(response.status,401);
+        assert.equal(response.headers.get("access-control-allow-origin"),allowed?candidate:null);
+        assert.match(response.headers.get("access-control-expose-headers"),/Location.*Retry-After/);
+      }
+      const server=await fetch(app.base+"/api/v1/institution/uc/me");
+      assert.equal(server.status,401);assert.equal(server.headers.get("access-control-allow-origin"),null);
+    }
     await app.close();
     app=await http({NODE_ENV:"production",CORS_ALLOWED_ORIGINS:JSON.stringify([origin,"https://utfsm.academix.dvillasc.me"])});
-    for (const candidate of [origin,"https://utfsm.academix.dvillasc.me","https://evil.test"]) {
-      const allowed=candidate!=="https://evil.test";
-      for (const [path,method,headers] of [["/api/v1/auth/login","POST","content-type"],["/api/v1/institution/uc/me","GET","authorization"]]) {
-        const preflight=await fetch(app.base+path,{method:"OPTIONS",headers:{Origin:candidate,"Access-Control-Request-Method":method,"Access-Control-Request-Headers":headers}});
-        assert.equal(preflight.status,204);
-        assert.equal(preflight.headers.get("access-control-allow-origin"),allowed?candidate:null);
-        assert.equal(preflight.headers.has("access-control-allow-credentials"),false);
-        assert.match(preflight.headers.get("vary"),/Origin/);
-        assert.equal(await preflight.text(),"");
-      }
-      const response=await fetch(app.base+"/api/v1/institution/uc/me",{headers:{Origin:candidate,"x-tenant":"uc","X-Forwarded-Host":"uc.academix.dvillasc.me"}});
-      assert.equal(response.status,401);
-      assert.equal(response.headers.get("access-control-allow-origin"),allowed?candidate:null);
-      assert.match(response.headers.get("access-control-expose-headers"),/Location.*Retry-After/);
-    }
     // PR #123: browser origin and spoofed host/tenant headers never grant membership.
     // MULTI lost its UC membership above: a new login must preserve that revocation.
     for (const [account,slugs] of [["UC",["uc"]],["UTFSM",["utfsm"]],["MULTI",["utfsm"]]]) {

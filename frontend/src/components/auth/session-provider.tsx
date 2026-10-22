@@ -4,13 +4,13 @@ import { createContext, useContext, useEffect, useState, useSyncExternalStore, t
 import { Session } from "../../lib/auth/session.ts";
 
 const subscribeHost = () => () => {};
-const readHost = () => window.location.hostname;
+const readHost = () => window.location.origin;
 const serverHost = () => undefined;
 
-const SessionContext = createContext<{ session: Session; hostname?: string } | null>(null);
+const SessionContext = createContext<{ session: Session; origin?: string } | null>(null);
 export function SessionProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [session] = useState(() => new Session());
-  const hostname = useSyncExternalStore(subscribeHost, readHost, serverHost);
+  const origin = useSyncExternalStore(subscribeHost, readHost, serverHost);
   useEffect(() => {
     const expire = () => session.checkExpiry();
     const leave = () => session.logout();
@@ -26,7 +26,7 @@ export function SessionProvider({ children }: Readonly<{ children: ReactNode }>)
       session.logout();
     };
   }, [session]);
-  return <SessionContext.Provider value={{ session, hostname }}>{children}</SessionContext.Provider>;
+  return <SessionContext.Provider value={{ session, origin }}>{children}</SessionContext.Provider>;
 }
 export function useSession() {
   const context = useContext(SessionContext);
