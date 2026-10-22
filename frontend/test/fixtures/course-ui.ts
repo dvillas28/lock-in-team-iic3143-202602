@@ -8,6 +8,11 @@ import { user, id } from "./courses.ts";
 export const flush=()=>new Promise<void>(r=>setImmediate(r));
 export async function mount(view:ReactNode, reply:(r:Request)=>Response|Promise<Response>,profile="owner",slug="uc"){
  const dom=new JSDOM('<div id="root"></div>',{url:`http://${slug}.localhost:3000/courses`});
+ // React imported before jsdom selects its legacy input event fallback.
+ Object.assign(dom.window.HTMLElement.prototype,{attachEvent(){},detachEvent(){}});
+ Object.assign(dom.window.HTMLDialogElement.prototype,{
+  showModal(this: HTMLDialogElement){this.setAttribute("open","");},close(this: HTMLDialogElement){this.removeAttribute("open");}
+ });
  const old=new Map<string,PropertyDescriptor|undefined>();
  for(const [key,value] of Object.entries({window:dom.window,self:dom.window,document:dom.window.document,navigator:dom.window.navigator,HTMLElement:dom.window.HTMLElement,HTMLInputElement:dom.window.HTMLInputElement,FormData:dom.window.FormData,IS_REACT_ACT_ENVIRONMENT:true})){
  old.set(key,Object.getOwnPropertyDescriptor(globalThis,key));Object.defineProperty(globalThis,key,{value,writable:true,configurable:true});}

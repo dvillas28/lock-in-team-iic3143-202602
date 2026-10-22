@@ -3,7 +3,7 @@
 **Feature Branch**: `feat/frontend-autoria-quizzes` (propuesta)
 **Feature Directory**: `specs/20261021-141351_frontend-autoria-quizzes`
 **Created**: 2026-10-21
-**Status**: Ready for planning — validación documental, producto pendiente
+**Status**: Implementada y validada localmente — evidencia y límites en [guía](../../docs/guides/frontend-quiz-authoring.md)
 **Input**: Conectar configuración, preguntas, pauta y publicación docente de quizzes.
 
 ## User Scenarios & Testing *(mandatory)*
