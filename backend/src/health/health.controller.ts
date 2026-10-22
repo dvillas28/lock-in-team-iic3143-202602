@@ -24,7 +24,7 @@ export class HealthController {
       status: "ok",
       // Release of the last backend deploy: releases without backend changes do not redeploy it.
       version: process.env.APP_VERSION ?? "dev",
-      commit: process.env.RAILWAY_GIT_COMMIT_SHA ?? null,
+      commit: process.env.RENDER_GIT_COMMIT ?? null,
       deployedAt: startedAt,
       timestamp: new Date().toISOString(),
     };

@@ -23,7 +23,7 @@ test("GET /health response reports a healthy API", () => {
 });
 
 test("GET /health reports the deployed commit and a stable deploy time", () => {
-  process.env.RAILWAY_GIT_COMMIT_SHA = "a9bb898";
+  process.env.RENDER_GIT_COMMIT = "a9bb898";
 
   try {
     const controller = new HealthController(undefined);
@@ -33,6 +33,6 @@ test("GET /health reports the deployed commit and a stable deploy time", () => {
     assert.equal(first.commit, "a9bb898");
     assert.equal(first.deployedAt, second.deployedAt);
   } finally {
-    delete process.env.RAILWAY_GIT_COMMIT_SHA;
+    delete process.env.RENDER_GIT_COMMIT;
   }
 });
