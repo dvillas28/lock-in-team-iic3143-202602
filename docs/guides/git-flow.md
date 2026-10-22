@@ -68,8 +68,9 @@ Ejemplo: con `v0.2.0` publicado, un `fix` en `dev` crea `v0.2.1-dev.1`; un
 ### Version desplegada
 
 Al publicar un release, el workflow fija `APP_VERSION` en los servicios
-`backend` y `frontend` de Railway sin redesplegar. Railway espera al workflow y
-solo redespliega el servicio cuyos archivos cambiaron (`watchPatterns`), asi que
+`backend` y `frontend` de Render mediante su API, sin redesplegar. Render espera a
+que pasen todos los checks del commit (`autoDeployTrigger: checksPass`) y solo
+redespliega el servicio cuyos archivos cambiaron (`buildFilter`), asi que
 cada servicio muestra **el release con el que se desplego por ultima vez**:
 
 - Release con cambios en ambos: los dos muestran la misma version.
@@ -83,11 +84,9 @@ En local, sin `APP_VERSION`, ambos muestran `dev`.
 
 Pendiente de definir como proceso. Lo que ya sabemos:
 
-- Un rollback en Railway (Deployments → menu del deployment sano → Rollback)
-  restaura la imagen **y las variables** de ese deployment, incluida
-  `APP_VERSION`, por lo que la version mostrada sigue siendo la real.
-- Solo esta disponible dentro de la retencion de imagenes del plan; despues hay
-  que usar Redeploy, que reconstruye desde el codigo original.
+- Render permite volver a un deploy anterior desde Events del servicio.
+  Pendiente verificar si restaura tambien `APP_VERSION`; si no, la version
+  mostrada puede no coincidir con el codigo hasta el siguiente release.
 - Si el release cambio el contrato de la API, revertir ambos servicios juntos:
   un frontend nuevo contra un backend viejo puede romperse.
 - El rollback no cambia git: `main` sigue con el codigo malo y el proximo deploy

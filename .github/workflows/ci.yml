@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:
-  # Railway "Wait for CI" only waits on workflows triggered by pushes to the deploy branch.
+  # Render "After CI checks pass" only sees checks reported on the pushed commit of the deploy branch.
   push:
     branches: [main]
   workflow_dispatch:
@@ -267,7 +267,7 @@ jobs:
           TSX_TSCONFIG_PATH: frontend/tsconfig.json
         run: |
           mkdir -p frontend/coverage
-          frontend/node_modules/.bin/c8 --reporter=text --reporter=lcov \
+          frontend/node_modules/.bin/c8 --all --src frontend/src --check-coverage --lines 80 --branches 80 --reporter=text --reporter=lcov \
             --reports-dir=frontend/coverage \
             node --import ./frontend/node_modules/tsx/dist/loader.mjs --test \
             frontend/test/*.test.ts

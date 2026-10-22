@@ -4,7 +4,7 @@
 
 Implementación y validación locales: 153/153 backend, 99.51% líneas; frontend 46/46; PostgreSQL 18 8/8.
 Docker Compose, contratos/catálogo, runtime/RLS y Markdown <150 PASS. Producción NO modificada ni validada.
-T042 (Railway/DNS/TLS efectivo) y T044 (smoke HTTPS) requieren ejecución del operador.
+T042 (Render/DNS/TLS efectivo) y T044 (smoke HTTPS) requieren ejecución del operador.
 Despliegue y merge no ejecutados. La PR hacia dev no habilita operaciones remotas. Evidencia local: [checklist](../../specs/20261020-211552_demo-aislamiento-dominios/checklists/implementation.md).
 
 ## Contrato y credenciales
@@ -17,7 +17,7 @@ Despliegue y merge no ejecutados. La PR hacia dev no habilita operaciones remota
 - `MIGRATION_DATABASE_URL`: operador; mismo servidor/base que runtime. Nunca fallback desde HTTP.
 - `AUTH_JWT_SECRET`: conservar secreto actual; no rotación automática.
 - Runtime pierde variables MIGRATION/DEMO/ONBOARD/SUPERADMIN antes de cargar HTTP.
-- El contenedor sigue compartiendo el entorno de Railway: esto no protege ante compromiso del contenedor.
+- El contenedor sigue compartiendo el entorno de Render: esto no protege ante compromiso del contenedor.
 
 ## Preparación local
 
@@ -53,15 +53,15 @@ Deshabilitar demo después del bootstrap es válido. Replay no recupera cuentas 
 Operador, en ventana controlada y con CI aprobado:
 
 1. Revisar imagen completa: RLS + contextos + rutas + contrato deben desplegarse juntos.
-2. Confirmar Root Directory backend y Dockerfile; configurar predeploy efectivo
-   `node dist/commands/predeploy.js`, healthcheck `/ready`, watchPatterns `/backend/**`.
-   Revisar settings efectivos del servicio: modificar railway.json en Git no acredita read-back.
+2. Confirmar Root Directory backend y Dockerfile; comando efectivo `node dist/commands/serve.js`
+   (predeploy en cada arranque, plan free), healthcheck `/ready`, buildFilter `backend/**`.
+   Revisar settings efectivos del servicio: modificar render.yaml en Git no acredita read-back.
 3. Inyectar ambas URLs, secreto JWT vigente y configuración demo; comprobar rol runtime nuevo sin LOGIN previo.
    Primera provisión habilita LOGIN/password; siguientes verifican conexión, nunca rotan.
 4. Configurar `CORS_ALLOWED_ORIGINS` como array JSON de ambos orígenes frontend HTTPS exactos.
    No mezclar localhost ni wildcard en producción.
 5. Añadir `api.dvillasc.me` al backend con target port 3001; registrar los CNAME/TXT entregados
-   por Railway en DNS y esperar TLS válido. Los dos hosts academix pertenecen al frontend.
+   por Render en DNS y esperar TLS válido. Los dos hosts academix pertenecen al frontend.
 6. Ejecutar despliegue controlado. Predeploy: config → esquema → provisión → demo opt-in → validación runtime.
 7. Registrar commit/APP_VERSION, estado predeploy, settings efectivos sin secretos, DNS/TLS y `/ready`.
    Este documento no acredita ninguno de esos pasos remotos.

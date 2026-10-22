@@ -4,7 +4,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import InstitutionLayout from "../src/app/institutions/[institutionSlug]/layout.tsx";
-import InstitutionHome from "../src/app/institutions/[institutionSlug]/page.tsx";
+import InstitutionHome from "../src/app/courses/page.tsx";
 import Loading from "../src/app/institutions/[institutionSlug]/loading.tsx";
 import InstitutionError from "../src/app/institutions/[institutionSlug]/error.tsx";
 import NotFound from "../src/app/not-found.tsx";
@@ -16,14 +16,14 @@ import { institutionHomePath, isInstitutionSlug } from "../src/lib/institution-r
 import { getRouteFeedback } from "../src/lib/route-feedback.ts";
 
 test("institution links accept contract slugs without an institution allowlist", () => {
-  for (const slug of ["uc", "utfsm", "campus-2", "another-institution"]) {
+  for (const slug of ["uc", "utfsm", "campus-2", "another-institution", "uc--other", "a".repeat(63)]) {
     assert.equal(isInstitutionSlug(slug), true);
-    assert.equal(institutionHomePath(slug), `/institutions/${slug}`);
+    assert.equal(institutionHomePath(slug), "/courses");
   }
 });
 
 test("invalid slugs cannot become links, paths or URL injections", () => {
-  for (const slug of ["", "UC", "uc_utfsm", "-uc", "uc-", "uc--other", "uc/utfsm", "..", "uc?role=teacher", "uc#other", "uc%2Futfsm", "uc\n", "ü"]) {
+  for (const slug of ["", "UC", "uc_utfsm", "-uc", "uc-", "a".repeat(64), "uc/utfsm", "..", "uc?role=teacher", "uc#other", "uc%2Futfsm", "uc\n", "ü"]) {
     assert.equal(isInstitutionSlug(slug), false, slug);
     assert.throws(() => institutionHomePath(slug), TypeError);
   }
@@ -31,7 +31,8 @@ test("invalid slugs cannot become links, paths or URL injections", () => {
 
 test("layout awaits params and routes malformed slugs to Next's not-found boundary", async () => {
   const layout = await InstitutionLayout({ params: Promise.resolve({ institutionSlug: "uc" }), children: "content" });
-  assert.match(renderToStaticMarkup(layout), /href="\/institutions\/uc"/);
+  assert.equal(layout.props.slug, "uc");
+  assert.equal(layout.props.children, "content");
   await assert.rejects(
     InstitutionLayout({ params: Promise.resolve({ institutionSlug: "UC" }), children: "private" }),
     (error: unknown) => error instanceof Error && "digest" in error && error.digest === "NEXT_HTTP_ERROR_FALLBACK;404",
@@ -41,7 +42,7 @@ test("layout awaits params and routes malformed slugs to Next's not-found bounda
 test("each institution renders only its own navigation and no invented identity or roles", () => {
   for (const [slug, other] of [["uc", "utfsm"], ["utfsm", "uc"]]) {
     const html = renderToStaticMarkup(createElement(InstitutionShell, { institutionSlug: slug }, "Public structure"));
-    assert.match(html, new RegExp(`href="/institutions/${slug}"`));
+    assert.match(html, /href="\/courses"/);
     assert.doesNotMatch(html, new RegExp(`/institutions/${other}`));
     assert.match(html, new RegExp(`<strong>${slug}</strong>`));
     assert.match(html, /aria-current="page"/);
@@ -52,11 +53,8 @@ test("each institution renders only its own navigation and no invented identity 
   }
 });
 
-test("home is an honest empty state without simulated courses or session", () => {
-  const html = renderToStaticMarkup(createElement(InstitutionHome));
-  assert.match(html, /<h1>Inicio<\/h1>/);
-  assert.match(html, /<h2[^>]*>Sin contenido para mostrar<\/h2>/);
-  assert.doesNotMatch(html, /Sin cursos|\/login|<button|<a /);
+test("home delegates private content to the course directory", () => {
+  assert.equal(InstitutionHome().type.name,"CourseDirectory");
   assert.match(renderToStaticMarkup(createElement(EmptyState)), /aria-labelledby=/);
 });
 
@@ -112,4 +110,18 @@ test("not-found offers a working public destination without leaking a slug", () 
   assert.match(html, /Recurso no disponible/);
   assert.match(html, /href="\/"/);
   assert.match(renderToStaticMarkup(createElement(InstitutionNotFound)), /Recurso no disponible/);
+});
+
+test("course breadcrumbs reflect the real detail or section path without demo profiles",()=>{
+ for(const suffix of ['abc','abc/sections']){
+ const html=renderToStaticMarkup(createElement(InstitutionShell,{institutionSlug:'uc',pathname:'/courses/'+suffix}));
+ assert.match(html,/aria-current="page"/);assert.match(html,suffix.endsWith('sections')?/Secciones/:/Detalle del curso/);assert.doesNotMatch(html,/profile=|role=teacher/);
+ }
+});
+
+test('course breadcrumb labels cover every academic route',()=>{
+ const c='/courses/10000000-0000-4000-8000-000000000010';
+ for(const [suffix,label]of [['/grades','Mis notas'],['/gradebook','Libro de notas'],['/audit','Auditoría'],['/quizzes/q/attempts/a','Revisión de intento'],['/quizzes/q/attempts','Intentos'],['/quizzes/q/authoring','Autoría y pauta'],['/quizzes/q','Detalle del quiz'],['/quizzes','Quizzes'],['/modules/m/materials/x','Material'],['/modules','Módulos'],['/sections','Secciones'],['','Detalle del curso']]){
+ const html=renderToStaticMarkup(createElement(InstitutionShell,{institutionSlug:'uc',pathname:c+suffix}));assert.ok(html.includes('aria-current="page">'+label+'</span>'),label);
+ }
 });

@@ -20,7 +20,8 @@ export function connectionConfig(env: NodeJS.ProcessEnv = process.env): PoolConf
     if (env.NODE_TLS_REJECT_UNAUTHORIZED === "0" || process.env.NODE_TLS_REJECT_UNAUTHORIZED === "0"
       || env.PGSSLMODE === "no-verify" || process.env.PGSSLMODE === "no-verify") throw new Error();
     const privateHost = ["localhost", "127.0.0.1", "[::1]", "postgres"].includes(url.hostname)
-      || url.hostname.endsWith(".railway.internal")
+      // Render Postgres internal hosts (dpg-<id>-a) only resolve inside Render's private network.
+      || /^dpg-[a-z0-9]+-a$/.test(url.hostname)
       || (isIP(url.hostname) === 4 && (/^10\./.test(url.hostname) || /^192\.168\./.test(url.hostname)
         || /^172\.(1[6-9]|2[0-9]|3[01])\./.test(url.hostname)));
     if (mode && !["disable", "verify-full"].includes(mode)) throw new Error();

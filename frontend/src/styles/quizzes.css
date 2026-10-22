@@ -1,0 +1,5 @@
+.quiz-authoring, .quiz-questions, .quiz-alternative { min-width: 0; }
+.quiz-alternative { padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.quiz-questions legend { font-weight: 600; padding: 0 4px; }
+.quiz-authoring input[type="radio"] { accent-color: var(--primary); }
+.quiz-authoring .native-dialog { width: min(560px, calc(100% - 24px)); max-height: calc(100dvh - 24px); overflow: auto; }

@@ -4,7 +4,8 @@
 
 La [Entrega 2](deliveries/2/README.md) es la base documental actual de AcademiX.
 Define una PostgreSQL compartida, aislamiento lógico por `Institution`, User
-global con memberships y despliegue en Railway.
+global con memberships y despliegue en Railway, hoy reemplazado por
+[Render](adr/deploy-on-render.md).
 
 - [Alcance vigente](deliveries/2/02-scope.md)
 - [Casos de uso y requerimientos](deliveries/2/03-use-cases-and-requirements.md)
@@ -22,6 +23,7 @@ global con memberships y despliegue en Railway.
 - [Dominio y API de la Entrega 2](adr/align-delivery-2-domain-and-api.md)
 - [Cierre de intentos de quiz abandonados](adr/close-abandoned-quiz-attempts.md)
 - [Bot PR reviewer: proveedor, seguridad y criterios](adr/define-bot-pr-reviewer.md)
+- [Sesión del navegador en memoria](adr/browser-session-in-memory.md)
 
 Los estados de los ADR indican cuáles fueron reemplazados parcialmente. El ADR
 de PostgreSQL compartida es la autoridad vigente para persistencia, tenancy y
@@ -31,6 +33,11 @@ plataforma de despliegue.
 
 - [OpenAPI de AcademiX](reference/openapi/README.md)
 
+## Misiones frontend
+
+- [Seis specs, dependencias y estado documental](frontend/README.md)
+- [Cobertura de CU, backlog, vistas y evidencia](frontend/coverage.md)
+
 ## Guías
 
 - [Spec Kit](guides/speckit-flow.md)
@@ -38,6 +45,9 @@ plataforma de despliegue.
 - [Git Flow](guides/git-flow.md)
 - [Skills de agentes](guides/agent-skills.md)
 - [Tablero y métricas de avance](guides/board-metrics.md)
+- [Login y arquitectura de sesión](guides/login-session.md)
+- [Probar la PR de login con Docker](guides/login-session-testing.md)
+- [Probar login por dominios en producción](guides/login-session-production.md)
 
 ## Documentación histórica
 

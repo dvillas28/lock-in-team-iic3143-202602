@@ -10,7 +10,7 @@ test('manifest accounts complete delegated UC/UTFSM workflow with publication an
   const env={DEMO_DATA_ENABLED:'true',DEMO_OPERATOR_REF:'workflow-test',SMOKE_DELEGATE_ADMIN:'true'};
   for(const t of ['UC','UTFSM'])for(const r of ['SUPERADMIN','ADMIN','TEACHER','ASSISTANT','STUDENT'])env[`DEMO_${t}_${r}_PASSWORD`]=randomBytes(12).toString('hex');
   assert.equal((await cli('commands/predeploy',env).result).code,0);
-  app=await http({RAILWAY_GIT_COMMIT_SHA:"integration-demo",CORS_ALLOWED_ORIGINS:JSON.stringify(['https://uc.academix.dvillasc.me','https://utfsm.academix.dvillasc.me'])});
+  app=await http({RENDER_GIT_COMMIT:"integration-demo",CORS_ALLOWED_ORIGINS:JSON.stringify(['https://uc.academix.dvillasc.me','https://utfsm.academix.dvillasc.me'])});
   assert.equal((await smoke({baseUrl:app.base,env,workflow:true})).status,'ok');
   runtime=await runtimeDatabase();
   await runtime.withIdentity(null,async c=>{for(const table of tenantTables)assert.equal((await c.query(`SELECT * FROM ${table}`)).rowCount,0);});

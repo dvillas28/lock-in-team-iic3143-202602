@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { GraduationCap } from "lucide-react";
 
 import { getHealth } from "@/lib/api/health";
@@ -30,7 +31,8 @@ export default async function Home() {
         <h1 className="serif">AcademiX</h1>
       </div>
 
-      <p>Frontend funcionando correctamente.</p>
+      <p>Una identidad, tus instituciones accesibles.</p>
+      <Link className="btn btn-primary" href="/login">Iniciar sesión</Link>
 
       <p>
         <strong>Frontend:</strong>

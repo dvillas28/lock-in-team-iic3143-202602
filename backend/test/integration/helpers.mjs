@@ -75,10 +75,10 @@ export function sanitized(output, values = []) {
   assert.ok(!/\$argon2|@academix\.example|password_hash|INSERT INTO/i.test(output), "sensitive output");
 }
 
-export async function http(extra = {}) {
+export async function http(extra = {}, file = "commands/start") {
   const server = createServer(); server.listen(0, "127.0.0.1"); await once(server,"listening");
   const port = server.address().port; await new Promise(resolve=>server.close(resolve));
-  const app = cli("commands/start", {PORT:String(port), ...extra}, 180000);
+  const app = cli(file, {PORT:String(port), ...extra}, 180000);
   const base = `http://127.0.0.1:${port}`;
   const close = async () => {
     if (app.child.exitCode === null && app.child.signalCode === null) app.child.kill("SIGTERM");
