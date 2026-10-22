@@ -63,7 +63,7 @@ No hay consultas académicas ni fetch privado servidor: el inicio indica integra
 - [Prueba por dominios en producción](login-session-production.md): servicios, variables y recorrido UC/UTFSM.
 
 Node 24 y pnpm 9.15.9. NEXT_PUBLIC_API_URL se incorpora al construir; API_URL es solo del servidor.
-El JWT y las contraseñas son secretos diferentes; `.env` local no configura Railway.
+El JWT y las contraseñas son secretos diferentes; `.env` local no configura Render.
 
 ## Verificación
 

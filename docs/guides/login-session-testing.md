@@ -1,7 +1,7 @@
 # Cómo probar la PR de login — Issue #80
 
 Desde la raíz del repositorio, con Docker Compose, Python 3 y puertos 3000/3001 libres.
-Esta guía prepara cuentas locales; no conecta ni modifica Railway.
+Esta guía prepara cuentas locales; no conecta ni modifica Render.
 Rama de la misión: `feat/frontend-acceso-multitenant`.
 
 ## 1. Preparar configuración y claves locales
