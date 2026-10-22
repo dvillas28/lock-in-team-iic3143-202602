@@ -257,3 +257,11 @@ test("a deferred operation cannot borrow credentials from a later generation",as
   h.session.logout();await signIn(h.session);const count=h.requests.length;gate.resolve();
   await assert.rejects(pending,StaleSessionError);assert.equal(h.requests.length,count);h.session.logout();
 });
+
+test("resource rejection revalidates me once and retains an unavailable context even with valid membership",async()=>{
+ const h=harness(r=>Response.json(r.method==='POST'?login():r.url.endsWith('/me')?user():r.url.endsWith('/courses')?{}:{items:[institution()]},{status:r.url.endsWith('/courses')?403:200}));
+ await signIn(h.session);await h.session.loadContext('uc');
+ await assert.rejects(h.session.request(c=>c.GET('/api/v1/institution/{institutionSlug}/courses',{params:{path:{institutionSlug:'uc'}}})));
+ await flush();assert.equal(h.session.getSnapshot().context?.user,undefined);assert.match(h.session.getSnapshot().context?.error?.message??'',/permisos/);
+ assert.equal(h.requests.filter(r=>r.url.endsWith('/me')).length,2);h.session.logout();
+});

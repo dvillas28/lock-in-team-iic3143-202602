@@ -9,9 +9,10 @@ type InstitutionShellProps = Readonly<{
   children?: ReactNode;
   institutionName?: string;
   actions?: ReactNode;
+  pathname?: string;
 }>;
 
-export function InstitutionShell({ institutionSlug, institutionName, actions, children }: InstitutionShellProps) {
+export function InstitutionShell({ institutionSlug, institutionName, actions, children, pathname = "/courses" }: InstitutionShellProps) {
   const homePath = institutionHomePath(institutionSlug);
 
   return (
@@ -28,9 +29,9 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, ch
           </div>
         </div>
         <nav className="sidebar-nav" aria-label="Navegación institucional">
-          <Link href={homePath} className="nav-item active" aria-current="page">
+          <Link href={homePath} className="nav-item active" aria-current={pathname === homePath ? "page" : undefined}>
             <Home size={16} aria-hidden="true" />
-            Inicio
+            Mis cursos
           </Link>
         </nav>
       </aside>
@@ -41,7 +42,8 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, ch
             <ChevronRight size={14} aria-hidden="true" />
             <span>{institutionSlug}</span>
             <ChevronRight size={14} aria-hidden="true" />
-            <span className="crumb-active">Inicio</span>
+            <Link href={homePath} aria-current={pathname === homePath ? "page" : undefined}>Cursos</Link>
+            {pathname !== homePath && <span className="crumb-active" aria-current="page">{pathname.endsWith("/sections") ? "Secciones" : "Detalle del curso"}</span>}
           </nav>
           {actions}
         </header>

@@ -3,7 +3,7 @@
 **Feature Branch**: `feat/frontend-cursos-participacion` (propuesta)
 **Feature Directory**: `specs/20261021-141349_frontend-cursos-participacion`
 **Created**: 2026-10-21
-**Status**: Ready for planning — validación documental, producto pendiente
+**Status**: Frontend verificado con fixtures; aceptación real US3 pendiente de DEP-FE-SEARCH-001
 **Input**: Conectar shell, cursos, secciones y participantes con permisos reales.
 
 ## User Scenarios & Testing *(mandatory)*
@@ -28,7 +28,7 @@ Como admin institucional, quiero crear y configurar los cursos de los que soy du
 1. **Given** isAdmin vigente, **When** creo un curso válido, **Then** recibo curso, primera sección y teacher inicial definidos por backend.
 2. **Given** admin dueño sin Enrollment docente, **When** configuro curso/secciones, **Then** puedo administrarlos sin adquirir pauta/notas/contenido docente.
 3. **Given** admin ajeno o teacher sin admin, **When** intento configurar curso o crear sección, **Then** se rechaza sin cambio local confirmado.
-4. **Given** creación con respuesta perdida, **When** recupero la vista, **Then** consulto el estado antes de repetir y trato conflicto sin inventar idempotencia.
+4. **Given** creación de curso o sección con respuesta perdida, **When** recupero la vista, **Then** consulto el estado antes de repetir y trato conflicto sin inventar idempotencia.
 
 ### User Story 3 - Gestionar participantes dentro de mi alcance (Priority: P2)
 
@@ -87,7 +87,8 @@ Como docente o admin dueño, quiero asignar y revocar roles de participantes aut
 
 ## Assumptions
 
-- Las operaciones necesarias ya existen; la búsqueda de usuarios está reservada a teachers, sin ampliar permisos para facilitar el formulario.
+- Cursos, secciones y matrículas ya tienen operaciones backend. La búsqueda de usuarios tiene contrato, pero su implementación está pendiente en [DEP-FE-SEARCH-001](dependencies/participant-search.md).
+- US3 puede desarrollarse con fixtures; su aceptación real completa exige resolver esa dependencia con búsqueda autorizada para teachers, sin ampliar permisos ni incluir implementación backend en esta misión.
 - Shell enlaza capacidades pendientes sin inventar contenido; los mocks permiten validar esta spec independientemente.
 
 ## Sources & Traceability

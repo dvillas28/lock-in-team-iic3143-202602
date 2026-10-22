@@ -53,11 +53,8 @@ test("each institution renders only its own navigation and no invented identity 
   }
 });
 
-test("home is an honest empty state without simulated courses or session", () => {
-  const html = renderToStaticMarkup(createElement(InstitutionHome));
-  assert.match(html, /<h1>Inicio<\/h1>/);
-  assert.match(html, /<h2[^>]*>Sin contenido para mostrar<\/h2>/);
-  assert.doesNotMatch(html, /Sin cursos|\/login|<button|<a /);
+test("home delegates private content to the course directory", () => {
+  assert.equal(InstitutionHome().type.name,"CourseDirectory");
   assert.match(renderToStaticMarkup(createElement(EmptyState)), /aria-labelledby=/);
 });
 
@@ -113,4 +110,11 @@ test("not-found offers a working public destination without leaking a slug", () 
   assert.match(html, /Recurso no disponible/);
   assert.match(html, /href="\/"/);
   assert.match(renderToStaticMarkup(createElement(InstitutionNotFound)), /Recurso no disponible/);
+});
+
+test("course breadcrumbs reflect the real detail or section path without demo profiles",()=>{
+ for(const suffix of ['abc','abc/sections']){
+ const html=renderToStaticMarkup(createElement(InstitutionShell,{institutionSlug:'uc',pathname:'/courses/'+suffix}));
+ assert.match(html,/aria-current="page"/);assert.match(html,suffix.endsWith('sections')?/Secciones/:/Detalle del curso/);assert.doesNotMatch(html,/profile=|role=teacher/);
+ }
 });
