@@ -31,3 +31,9 @@ test('review API uses staff list for own multirol but limited student detail; fi
  assert.equal((await listQuizAttempts(c,'uc',actor,course,quiz)).items[0].grade,5.5);assert.equal((await getAttemptReview(c,'uc',attempt.id,actor,course,quiz)).grade,undefined);
  await assert.rejects(()=>listQuizAttempts(c,'uc',actor,course,quiz,{sectionId:otherSection.id}));await assert.rejects(()=>listQuizAttempts(c,'uc',actor,course,quiz,{limit:0}));
 });
+
+ test('attempt filters explicitly submit without a write operation',async()=>{
+ const {AttemptList}=await import('../src/components/attempts/attempt-list.tsx');
+ const ui=await mount(h(AttemptList,{courseId:course.id,quizId:quiz.id}),r=>new URL(r.url).pathname.endsWith('/attempts')?Response.json({items:[staffReview],hasMore:false,nextCursor:null}):reply(r),'assistant');
+ try{assert.equal(ui.doc.querySelector('form button')?.getAttribute('type'),'submit');assert.equal(ui.requests.some(r=>r.method!=='GET'&&!r.url.endsWith('/login')),false);}finally{await ui.close();}
+ });

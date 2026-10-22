@@ -9,7 +9,7 @@ test('feedback distinguishes invalid request, conflict, validation and unavailab
 });
 export const selected={gradeItemIds:[item.id],sectionIds:[section.id],studentIds:[row.student.id]};
 test('publication requires complete explicit rectangular selection and canonical unique UUIDs',()=>{
- assert.deepEqual(rectangle(selected,[row]),selected);assert.throws(()=>rectangle({...selected,studentIds:[id(99)]},[row]));assert.throws(()=>rectangle(selected,[{...row,grades:[{...row.grades[0],publishedAt:receipt.publishedAt}]}]));assert.throws(()=>selection({...selected,studentIds:[]}));assert.throws(()=>selection({...selected,studentIds:[row.student.id,row.student.id.toUpperCase()]}));
+ assert.deepEqual(selection({...selected,studentIds:[id(20),id(2)]}).studentIds,[id(2),id(20)]);assert.deepEqual(rectangle(selected,[row]),selected);assert.throws(()=>rectangle({...selected,studentIds:[id(99)]},[row]));assert.throws(()=>rectangle(selected,[{...row,grades:[{...row.grades[0],publishedAt:receipt.publishedAt}]}]));assert.throws(()=>selection({...selected,studentIds:[]}));assert.throws(()=>selection({...selected,studentIds:[row.student.id,row.student.id.toUpperCase()]}));
  const upper={...selected,studentIds:['AAAAAAAA-0000-4000-8000-000000000001']};assert.equal(selection(upper).studentIds[0],upper.studentIds[0].toLowerCase());
  assert.throws(()=>selection({...selected,studentIds:Array.from({length:200},(_,n)=>id(n+1000))}));
 });

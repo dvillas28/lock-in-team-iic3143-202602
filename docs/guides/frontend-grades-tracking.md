@@ -85,8 +85,8 @@ Estas comprobaciones evalúan las rutas existentes; no implementan otras misione
 ## Checks, revisión y límites
 
 `pnpm --dir frontend api:check`, `typecheck`, `lint`, `test` y `build`: APROBADOS.
-Suite completa final: 274/274, incluidas las pruebas previas de rendición.
-Preparación del PR: cobertura 94,07 % líneas / 86,49 % ramas, sin reducir umbrales.
+Suite completa final: 276/276, incluidas las pruebas previas de rendición.
+Cobertura tras correcciones Sonar: 91,33 % líneas / 86,82 % ramas, sin reducir umbrales.
 Longitud documental (20 archivos) y `git diff --check`: APROBADOS.
 Revisión lms-reviewer: permisos, aislamiento, historia, claves inciertas y regresiones
 de rendición; sin hallazgos bloqueantes. Corregidas pérdida de clave ante GET fallido,
@@ -105,3 +105,14 @@ binarios y cambios API/DB/infraestructura/dependencias. Sin validación de produ
 ni certificación WCAG completa. La recuperación después de recargar pierde la clave
 por diseño; una lectura nunca prueba que terminó una escritura en vuelo.
 Build conserva el aviso de Next por lockfiles múltiples; no se cambió configuración.
+
+## Correcciones Sonar del PR #133
+
+El CI inicial pasó contratos, frontend/Docker e integración backend; falló el quality
+gate por dos submits sin type explícito y ordenación UUID sin comparador.
+Se añadieron regresiones, submit/button explícitos y localeCompare sobre UUID canónicos.
+Bloques condicionales/bucles quedaron delimitados; breadcrumbs y filtros mantienen
+su comportamiento con menor complejidad. Props readonly, claves de tabla estables,
+outputs nativos y beforeunload con preventDefault conservan semántica accesible.
+Checks locales repetidos: 276/276, cobertura, API, tipos, lint, build y whitespace PASS.
+No se modificaron configuración CI/Sonar, exclusiones ni umbrales.
