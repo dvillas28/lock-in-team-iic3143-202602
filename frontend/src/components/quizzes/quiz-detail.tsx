@@ -1,4 +1,5 @@
 "use client";
+import { CourseNavigation } from "../courses/course-navigation.tsx";
 import Link from "next/link";
 import {gradebookCapabilities} from '../../lib/gradebook/capabilities.ts';
 import {AttemptStart} from "../attempts/attempt-start.tsx";
@@ -21,12 +22,12 @@ export function QuizDetail({courseId,quizId}:{courseId:string;quizId:string}) {
   if(result.error) return <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/>;
   if(!result.data) return <LoadingState/>;
   const {course,sections,quiz}=result.data, author=canAuthor(context.user,course,sections,quiz.sectionId);
-  return <div className="stack"><Link href={`/courses/${courseId}/quizzes`}>Volver a quizzes</Link><h1 className="serif">{quiz.title}</h1>
+  return <div className="stack"><Link href={`/courses/${courseId}/quizzes`}>Volver a quizzes</Link><h1 className="serif">{quiz.title}</h1><CourseNavigation course={course} user={context.user} active="/quizzes" />
     <p>{quiz.status === "draft" ? "Borrador" : "Publicado"} · {quiz.sectionId ? `Sección ${sections.find(s=>s.id===quiz.sectionId)?.code}` : "Todo el curso"}</p>
     {gradebookCapabilities(context.user,course).book && <Link href={`/courses/${courseId}/quizzes/${quizId}/attempts`}>Consultar intentos</Link>}
     <p className="markdown-source">{quiz.instructions}</p><p>Apertura: {quiz.opensAt ?? "Sin límite"} · Cierre: {quiz.closesAt ?? "Sin límite"} · Intentos: {quiz.maxAttempts ?? "Ilimitados"}</p>
     {author && <><Link prefetch={false} href={`/courses/${courseId}/quizzes/${quizId}/authoring`}>Abrir autoría y pauta</Link><p className="notice">El acceso autorizado a pauta impide rendir este quiz, incluso con rol student.</p></>}
     <AttemptStart key={`${state.generation}:${slug}:${quizId}:${JSON.stringify(context.user)}`} session={session} slug={slug} user={context.user} course={course} quiz={quiz} sections={sections}/>
-    <ol className="stack">{quiz.questions.map(q=><li className="panel stack" key={q.id}><h2 className="serif">{q.prompt}</h2><p className="tnum">{q.points} puntos</p><ul>{q.alternatives.map(a=><li key={a.id}>{a.text}</li>)}</ul></li>)}</ol>
+    <ol className="stack">{quiz.questions.map(q=><li className="card panel stack" key={q.id}><h2 className="serif">{q.prompt}</h2><p className="tnum">{q.points} puntos</p><ul>{q.alternatives.map(a=><li key={a.id}>{a.text}</li>)}</ul></li>)}</ol>
   </div>;
 }

@@ -1,4 +1,5 @@
 "use client";
+import { CourseNavigation } from "../courses/course-navigation.tsx";
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useSession } from "../auth/session-provider.tsx";
@@ -57,6 +58,7 @@ function AuthoringForm({course,sections,quiz}:{course:Awaited<ReturnType<typeof 
       const body=quizInput(changed,saved);
       const next=await session.request(c=>updateQuiz(c,slug,saved,body),current);
       if(current())accept(next);
+      return "Quiz actualizado.";
     },async current=>{
       const next=await session.request(c=>getQuizAuthoringView(c,slug,course.id,saved.id),current);
       if(!permitted(next)) {await session.loadContext(slug);return "Acceso revocado.";}
@@ -64,7 +66,7 @@ function AuthoringForm({course,sections,quiz}:{course:Awaited<ReturnType<typeof 
       return "Estado consultado. Revisa la versión recibida; tu texto local no fue reemplazado.";
     });
   }
-  return <div className="stack quiz-authoring"><Link href={`/courses/${course.id}/quizzes/${saved.id}`}>Volver al detalle seguro</Link><h1 className="serif">Autoría · {saved.title}</h1>
+  return <div className="stack quiz-authoring"><Link href={`/courses/${course.id}/quizzes/${saved.id}`}>Volver al detalle seguro</Link><h1 className="serif">Autoría · {saved.title}</h1><CourseNavigation course={course} user={user!} active="/quizzes" />
     <p className="notice">El acceso autorizado a pauta impide rendir este quiz, incluso con rol student.</p>
     <p>{immutable ? "Publicado: inmutable." : "Borrador: guardado manual."}</p>
     <form key={revision} ref={formRef} className="stack" aria-label="Editar quiz" onSubmit={submit} onInput={()=>setDirty(true)} onChange={()=>setDirty(true)} noValidate>

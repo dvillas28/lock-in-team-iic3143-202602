@@ -1,4 +1,5 @@
 "use client";
+import { CourseNavigation } from "../courses/course-navigation.tsx";
 import Link from 'next/link';
 import { useSession } from '../auth/session-provider.tsx';
 import { useResource } from '../courses/use-resource.ts';
@@ -36,8 +37,8 @@ export function AttemptReview({ courseId, quizId, attemptId }: Readonly<{
         return <LoadingState />;
     }
     const { course, quiz, attempt: a } = r.data, cap = attemptCapabilities(context.user, course, quiz, a);
-    return <div className="stack"><Link href={`/courses/${courseId}/quizzes/${quizId}/attempts`}>Volver a intentos</Link><h1>Revisión de intento {a.attemptNumber}</h1><p>{a.status} · Sección histórica: {a.sectionId} · Estudiante: {a.studentId}</p><p className="tnum">Nota: {a.grade ?? 'No disponible en esta vista'} · Resultado: {a.scorePercent ?? 'No disponible'}{a.scorePercent !== undefined && a.scorePercent !== null ? ' %' : ''}</p>
- <div className="table-scroll"><table className="data-table"><caption>Respuestas autorizadas del intento</caption><thead><tr><th scope="col">Pregunta</th><th scope="col">Alternativa</th>{cap.teacher && <th scope="col">Corrección entregada</th>}</tr></thead><tbody>{a.answers.map(x => {
+    return <div className="stack"><Link href={`/courses/${courseId}/quizzes/${quizId}/attempts`}>Volver a intentos</Link><h1>Revisión de intento {a.attemptNumber}</h1><CourseNavigation course={course} user={context.user} active="/quizzes" /><p>{a.status} · Sección histórica: {a.sectionId} · Estudiante: {a.studentId}</p><p className="tnum">Nota: {a.grade ?? 'No disponible en esta vista'} · Resultado: {a.scorePercent ?? 'No disponible'}{a.scorePercent !== undefined && a.scorePercent !== null ? ' %' : ''}</p>
+ <div className="table-scroll" role="region" aria-label="Tabla con desplazamiento horizontal" tabIndex={0}><table className="data-table"><caption>Respuestas autorizadas del intento</caption><thead><tr><th scope="col">Pregunta</th><th scope="col">Alternativa</th>{cap.teacher && <th scope="col">Corrección entregada</th>}</tr></thead><tbody>{a.answers.map(x => {
         const q = quiz.questions.find(q => q.id === x.questionId)!, correction = x.isCorrect ? 'Correcta' : 'Incorrecta';
         return <tr key={x.questionId}><th scope="row">{q.prompt}</th><td>{q.alternatives.find(a => a.id === x.alternativeId)!.text}</td>{cap.teacher && <td className="tnum">{x.isCorrect === undefined ? 'No disponible' : `${correction} · ${x.pointsAwarded} puntos`}</td>}</tr>;
     })}</tbody></table></div>

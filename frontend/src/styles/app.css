@@ -212,17 +212,17 @@ textarea.field { resize: vertical; min-height: 88px; line-height: 1.55; }
 
 /* ── Tabla de datos ── */
 .data-table { width: 100%; border-collapse: collapse; }
-.data-table th {
+.data-table thead th {
   font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
   color: var(--text-3); text-align: left;
   padding: 10px 16px; border-bottom: 1px solid var(--border);
 }
-.data-table td {
+.data-table td, .data-table tbody th {
   padding: 14px 16px; border-bottom: 1px solid var(--border);
-  font-size: 13px; vertical-align: middle;
+  font-size: 13px; vertical-align: middle; text-align: left;
 }
-.data-table tr:last-child td { border-bottom: none; }
-.data-table tbody tr.row-hover:hover td { background: var(--hover); }
+.data-table tbody tr:last-child :is(td, th) { border-bottom: none; }
+.data-table tbody tr.row-hover:hover :is(td, th) { background: var(--hover); }
 
 /* ── Zona vacía / dashed ── */
 .empty-zone {

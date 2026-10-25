@@ -5,5 +5,6 @@ export function capabilities(user: CurrentUser, course?: CourseSummary | Course,
   const create = active && user.institutionMembership.isAdmin;
   const configure = !!(create && course && "createdBy" in course && course.createdBy === user.id);
   const teacher = active && user.sectionMemberships.some(m => m.role === "teacher" && m.courseId === course?.id && m.sectionId === section?.id && section?.courseId === course?.id);
-  return { create, configure, manage: configure || teacher, search: active && user.sectionMemberships.some(m => m.role === "teacher") };
+  const sections = configure || active && user.sectionMemberships.some(m => m.role === "teacher" && m.courseId === course?.id);
+  return { create, configure, sections, manage: configure || teacher, search: active && user.sectionMemberships.some(m => m.role === "teacher") };
 }

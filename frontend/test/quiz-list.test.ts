@@ -22,8 +22,8 @@ test("create confirms draft; lost response stays blocked despite same-title cand
  for(const lost of [false,true]) {
  const ui=await mount(h(QuizList,{courseId:course.id}),async r=>r.method==='POST'?(lost?Promise.reject(new Error('lost')):Response.json({...emptyDraft,title:"Nuevo"},{status:201})):reply(r),"teacher");
  try {
- await ui.submit('form',{title:"Nuevo"});assert.match(ui.doc.body.textContent!,lost?/incierto/:/Borrador creado/);
- assert.equal(ui.doc.querySelector<HTMLInputElement>('input[name="title"]')!.value,'Nuevo');
+ await ui.submit('form',{title:"Nuevo"});assert.match(ui.doc.body.textContent!,lost?/incierto/:/Quiz creado/);
+ assert.equal(ui.doc.querySelector<HTMLInputElement>('input[name="title"]')!.value,lost?'Nuevo':'');
  if(lost){await ui.submit('form',{title:"Nuevo"});assert.match(ui.doc.body.textContent!,/coincidencias no prueban/);}
  assert.equal(ui.requests.filter(r=>r.method==='POST'&&!r.url.endsWith('/login')).length,1);
  }finally {await ui.close();}

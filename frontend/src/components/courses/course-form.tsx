@@ -15,12 +15,14 @@ export function CourseForm({ session, slug, course, onSaved }: {
   const mutation = useMutation(session);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const element = event.currentTarget;
+    const form = new FormData(element);
     await mutation.run(async (current) => {
       const values = { code: text(form.get("code"), 32, "code"), name: text(form.get("name"), 200, "name"), term: text(form.get("term"), 16, "term") };
       const saved = course ? await session.request(c => updateCourse(c, slug, course.id, changed(values, course)), current) : await session.request(c => createCourse(c, slug, { ...values, initialSection: { code: text(form.get("sectionCode"), 32, "sectionCode"), capacity: capacity(String(form.get("capacity") ?? "")) } }), current);
       if (!current())
         return;
+      if (!course) element.reset();
       if (!course)
         await session.request(c => listSections(c, slug, saved.id), current);
       if (!current())
@@ -28,6 +30,7 @@ export function CourseForm({ session, slug, course, onSaved }: {
       await onSaved();
       if (!course)
         await session.loadContext(slug);
+      return course ? "Curso actualizado." : "Curso creado.";
     }, async (current) => {
       if (course) {
         await session.request(c => getCourse(c, slug, course.id), current);
@@ -48,6 +51,6 @@ export function CourseForm({ session, slug, course, onSaved }: {
       </div>}
       <button className="btn btn-primary" type="submit">{mutation.busy ? "Guardando…" : course ? "Guardar curso" : "Crear curso"}</button>
     </fieldset>
-    {mutation.message && <p role={mutation.message === 'Cambio confirmado.' ? 'status' : 'alert'}>{mutation.message}</p>}
+    {mutation.message && <p role={mutation.confirmed ? 'status' : 'alert'}>{mutation.message}</p>}
   </form>;
 }
