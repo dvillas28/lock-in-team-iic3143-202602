@@ -110,6 +110,12 @@ Si un PR falla por Trivy:
 3. Si no se puede corregir ahora, agregar el CVE a `.trivyignore` en la raiz
    con un comentario que diga por que y hasta cuando.
 
+El backend fuerza `body-parser >=2.4.0` y `multer >=2.5.0` mediante overrides,
+porque sus dependencias padre aún resuelven versiones vulnerables. Esto corrige
+[GHSA-27r3-jxmh-p828](https://github.com/expressjs/body-parser/security/advisories/GHSA-27r3-jxmh-p828)
+y [GHSA-q7qp-rjg7-q26m](https://github.com/expressjs/multer/security/advisories/GHSA-q7qp-rjg7-q26m).
+Mantener el lockfile sincronizado y comprobar fuentes e imagen al actualizar.
+
 Para reproducirlo local (requiere Docker):
 
 ```bash
