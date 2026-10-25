@@ -77,8 +77,8 @@ cada servicio muestra **el release con el que se desplego por ultima vez**:
 - Release con cambios solo en `frontend/`: el frontend muestra la nueva y el
   backend sigue con la anterior. Es correcto: es el codigo que esta corriendo.
 
-El frontend muestra su version en la home; el backend la expone en `/health`.
-En local, sin `APP_VERSION`, ambos muestran `dev`.
+La landing pública no muestra versiones ni estado del backend. El backend expone
+su versión en `/health`; en local, sin `APP_VERSION`, informa `dev`.
 
 ## Rollback
 
