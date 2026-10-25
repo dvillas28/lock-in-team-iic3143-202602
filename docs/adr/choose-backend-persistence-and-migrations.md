@@ -53,3 +53,13 @@ Una dependencia menor no elimina la obligación de verificar sus actualizaciones
 No se cambia el [ADR multi-tenant](adopt-shared-postgresql-multitenancy.md).
 [Investigación y fuentes](../../specs/20261014-234644_base-persistente/research.md)
 justifican versiones, transacciones y operación.
+
+## Evolución: desconexiones durante una transacción (2026-10-25)
+
+`pg-pool` escucha errores de clientes disponibles; al prestar uno retira ese
+manejador. Cada transacción HTTP mantiene su propio listener hasta devolverlo,
+incluidos los intervalos entre consultas. Una desconexión descarta el cliente y
+responde 503 sin exponer el error ni entregar un resultado como confirmado.
+No se reintentan escrituras: un corte durante COMMIT puede dejar resultado incierto.
+Las pruebas fuerzan errores en BEGIN, operación, COMMIT y ROLLBACK, y terminan una
+conexión real con PostgreSQL para comprobar rechazo, recuperación y contexto vacío.
