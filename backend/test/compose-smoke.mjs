@@ -11,6 +11,7 @@ const root=new URL("../../",import.meta.url);
 const dir=await mkdtemp(join(tmpdir(),"academix-compose-"));
 const override=join(dir,"isolation.yaml");
 const env={...process.env,
+ NEXT_PUBLIC_PORTAL_ORIGIN:"http://localhost:3000",
  NEXT_PUBLIC_INSTITUTION_ORIGINS:JSON.stringify({"http://uc.localhost:3000":"uc","http://utfsm.localhost:3000":"utfsm"}),
  POSTGRES_DB:"academix_identity_compose_test",POSTGRES_USER:"identity_fixture",
  POSTGRES_PASSWORD:randomBytes(24).toString("hex"),RUNTIME_PASSWORD:randomBytes(24).toString("hex"),AUTH_JWT_SECRET:randomBytes(32).toString("base64")};

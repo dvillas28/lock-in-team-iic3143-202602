@@ -61,6 +61,8 @@ services:
       # Render passes service variables to Docker as build args; changing it requires a rebuild.
       - key: NEXT_PUBLIC_API_URL
         value: https://academix-backend-lr8x.onrender.com
+      - key: NEXT_PUBLIC_PORTAL_ORIGIN
+        value: https://academix-frontend-2ixy.onrender.com
       - key: API_URL
         value: https://academix-backend-lr8x.onrender.com
 

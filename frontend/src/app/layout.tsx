@@ -9,6 +9,7 @@ import "@/styles/institution-layout.css";
 import "@/styles/auth.css";
 import "@/styles/content.css";
 import "@/styles/quizzes.css";
+import "@/styles/landing.css";
 
 const inter = Inter({
   subsets: ["latin"],

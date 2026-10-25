@@ -7,6 +7,7 @@ import { InstitutionShell } from "../institutions/institution-shell.tsx";
 import { ErrorState, LoadingState } from "../route-states.tsx";
 import { useSession } from "./session-provider.tsx";
 import { SessionActions } from "./session-actions.tsx";
+import { InstitutionAccessNotice } from "./institution-access-notice.tsx";
 
 export function ProtectedInstitution({ slug: legacySlug, children }: Readonly<{ slug?: string; children?: ReactNode }>) {
   const { session, state, origin } = useSession();
@@ -34,7 +35,7 @@ export function ProtectedInstitution({ slug: legacySlug, children }: Readonly<{ 
       document.removeEventListener("visibilitychange", visible); session.clearContext();
     };
   }, [origin, validHost, state.status, state.generation, slug, legacySlug, session, router]);
-  if (origin && !validHost) return <main className="content">{state.status === "authenticated" && <SessionActions />}<ErrorState feedback={{ title: "Contexto institucional inválido", message: "Abre el dominio configurado de tu institución. En desarrollo, usa uc.localhost:3000 o utfsm.localhost:3000 según la configuración.", retryable: false }} /></main>;
+  if (origin && !validHost) return <main className="content auth-content">{state.status === "authenticated" && <SessionActions />}<InstitutionAccessNotice allowRecovery={state.status !== "authenticated"} /></main>;
   if (legacySlug || state.status !== "authenticated") return <main className="content"><LoadingState /></main>;
   const context = state.context?.slug === slug ? state.context : undefined;
   if (context?.error) return <main className="content"><SessionActions /><ErrorState feedback={context.error} onRetry={() => void session.loadContext(slug!)} /></main>;

@@ -74,6 +74,7 @@ services:
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
         NEXT_PUBLIC_INSTITUTION_ORIGINS: ${NEXT_PUBLIC_INSTITUTION_ORIGINS:?Configure institutional origins before building}
+        NEXT_PUBLIC_PORTAL_ORIGIN: ${NEXT_PUBLIC_PORTAL_ORIGIN:?Configure the public portal origin before building}
     environment:
       API_URL: http://backend:3001
     ports:
