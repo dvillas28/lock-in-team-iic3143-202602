@@ -9,8 +9,10 @@ US1, US2 y US3 implementadas. Validación con backend real pendiente: T026.
 Desde el curso, abrir **Módulos y material**. Expandir un módulo carga sus materiales.
 La lectura profunda verifica primero `module.courseId`, después `material.moduleId`.
 Breadcrumbs y retorno enlazan curso, módulos y módulo concreto.
-Markdown/metadatos se interpolan con React; espacios y saltos se conservan.
-No hay HTML interpretado, enlaces de contenido activos ni imágenes remotas.
+El lector usa `AcademicMarkdown`: elementos React semánticos, GFM, encabezados desde h2,
+listas anidadas, tablas y código literal. Metadatos permanecen como texto React seguro.
+La fuente permanece intacta al editar; prosa aplica reglas Markdown al representar.
+No hay HTML interpretado ni imágenes remotas. Política enriquecida vigente abajo.
 
 Teacher activo de cualquier sección del curso tiene autoría compartida.
 Admin/superadmin sin teacher no obtiene autoría. Sin Enrollment, API deniega contenido.
@@ -51,7 +53,7 @@ Salir, expirar, 401, revocación 403/404 o cambiar contexto limpia la vista auto
 Los cambios de contexto de la protección de sesión desmontan contenido privado.
 Nada privado se persiste en storage, URL o logs.
 
-## Evidencia automatizada
+## Evidencia histórica de la misión inicial (2026-10-22)
 
 Comandos finales desde raíz con `rtk pnpm --dir frontend <script>`.
 api:check, lint, typecheck, test, test:coverage y build: PASS.
@@ -59,13 +61,9 @@ api:check, lint, typecheck, test, test:coverage y build: PASS.
 Cobertura global: 92.88% líneas, 87.55% ramas; umbrales 80/80 intactos.
 check-doc-length.py y git diff --check: PASS.
 Build advierte lockfiles múltiples preexistentes; compila ambas rutas nuevas.
-Auditoría adicional `pnpm --dir frontend audit --audit-level high`: FAIL preexistente.
-Reporta `braces@3.0.3` vía eslint-config-next → fast-glob → micromatch (desarrollo),
-[GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm).
-El audit no ofrece versión corregida; dependencias/lockfiles permanecen intactos.
 Revisión `lms-reviewer`: sin hallazgos pendientes en el cambio de contenido;
 backend real y este aviso preexistente quedan separados de la evidencia de la feature.
-No se cambiaron dependencias, umbrales de cobertura ni exclusiones.
+Esa misión no cambió dependencias, umbrales de cobertura ni exclusiones.
 
 | Archivos de prueba | Evidencia |
 | --- | --- |
@@ -79,7 +77,7 @@ Pruebas escritas antes de implementación; fallaron por APIs/componentes ausente
 Pruebas adicionales reprodujeron vacío anterior tras refresh fallido, desbloqueo por
 colapso y publicación incierta cuyo estado observado no se refrescaba; corregidos.
 
-## Navegador con fixtures
+## Navegador histórico con fixtures (2026-10-22)
 
 Chromium visible mediante `playwright-skill`, Next local y respuestas API interceptadas.
 Recorrido: login fixture, curso, módulos, alta, edición, orden y publicación por teclado.
@@ -115,3 +113,37 @@ con backend y cuentas UC/UTFSM provisionadas: cuatro publicaciones por rol/URL d
 IDs cruzados, teacher de otra sección, denegaciones forzadas y auditoría/no-op reales.
 Fixtures UI no certifican RLS, barrera por omisión, transacciones ni auditoría SQL.
 No se modificó producción, no hubo despliegue ni commits automáticos.
+
+## Interfaz y Markdown enriquecido (2026-10-25)
+
+[Spec/plan](../../specs/20261025-120000_interfaz-academica-markdown/plan.md) contiene
+el mapa mockup→ruta, alcance y decisiones. Shell con identidad única, navegación
+contextual y tema usa el atributo data-theme vigente (preferencia de la página).
+Menú móvil desplegable: Enter/Espacio, Escape y retorno de foco; sin modal ni foco atrapado.
+Resumen da acceso académico; estudiantes ven ahí su sección sin gestión. Cada vista explica su propósito.
+Gestión usa selector filtrable, una sección y tabla acotada con acciones plegables y paginación.
+Formularios en details permanecen montados al plegar; conservan borrador/incertidumbre.
+Altas confirmadas limpian campos y muestran el recurso creado; errores/incertidumbre conservan entrada.
+El índice abre módulos por ancla y devuelve foco al encabezado al regresar del lector.
+Materiales siguen cargándose únicamente al expandir/visitar un módulo.
+
+`react-markdown` 10.1.0 y `remark-gfm` 4.0.1, React >=18, ESM/Node 16+:
+[renderer oficial](https://github.com/remarkjs/react-markdown),
+[GFM oficial](https://github.com/remarkjs/remark-gfm). Sin nuevo framework UI.
+`lib/content/markdown-policy.ts` aplica la política a todos los destinos de contenido:
+HTTP(S) absoluto con autoridad válida, sin userinfo, o fragmento no vacío (#main-content).
+Rechaza relativos, //, javascript/data/vbscript/file/mailto y esquemas desconocidos;
+controles, espacios (también codificados), formatos Unicode, barras inversas y escapes
+inválidos; comprueba decodificaciones sucesivas y después URL. No normaliza entradas
+ambiguas como https:///host. Nunca añade sesión, credenciales ni prefetch.
+HTTP(S) usa target=_blank, rel=noopener noreferrer y referrerPolicy=no-referrer.
+Fragmentos permanecen en la página; no se generan anclas automáticas para títulos.
+Imágenes, incluidas referencias, muestran solo alt textual; alt vacío se omite.
+HTML/scripts/handlers/embeds siguen literales, sin DOM activo; no rehype-raw.
+CSS solo bajo academic-markdown restaura marcadores y desplaza tablas/código internamente.
+La política no sustituye los controles API de tenant, padres, pertenencia y publicación.
+
+Pruebas nuevas: academic-markdown y academic-shell; content-reader conserva casos de
+padres, matriz de publicación, logout, revocación, cambio de tenant y respuestas tardías.
+[Resultados de revisión](../../specs/20261025-120000_interfaz-academica-markdown/validation.md)
+registra comandos, cobertura, capturas y límites de la validación actual.
