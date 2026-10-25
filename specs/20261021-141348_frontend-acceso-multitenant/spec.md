@@ -7,6 +7,10 @@
 **Corrección de producto 2026-10-21**: sin selector de instituciones. `/institutions`
 redirige a `/courses`; homes académicos teacher/student pertenecen a la próxima misión.
 **Input**: Adaptar el acceso existente a dominios institucionales y rutas visibles limpias.
+**Evolución de producto 2026-10-25**: la prohibición de selector sigue vigente dentro
+de la aplicación autenticada. Se permite un directorio público solo en la raíz del
+portal exacto configurado; sus enlaces institucionales no representan pertenencias
+ni conceden permisos. [Decisión y alcance](../../docs/adr/frontend-domain-routing.md#entrada-pública-por-dominio--2026-10-25).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -38,10 +42,21 @@ Como usuario multiinstitución, quiero abrir el dominio institucional y sus enla
 **Why this priority**: Completa CU-01 y permite desarrollo equivalente a producción.
 **Independent Test**: Dos hosts locales explícitos, enlaces directos y retornos manipulados con fixtures.
 **Acceptance Scenarios**:
-1. **Given** otro dominio configurado, **When** lo abro, **Then** inicio sesión independientemente; no existe selector ni token en URL.
+1. **Given** otro dominio configurado, **When** lo abro, **Then** inicio sesión independientemente; no existe selector autenticado ni token en URL.
 2. **Given** enlace directo a una ruta protegida del dominio, **When** ingreso, **Then** vuelvo solo a un destino interno implementado y autorizado.
 3. **Given** `uc.localhost:3000` y `utfsm.localhost:3000`, **When** repito el acceso, **Then** se solicitan respectivamente UC y UTFSM sin prefijo institucional.
 4. **Given** localhost sin contexto o path legacy de otro tenant, **When** navego, **Then** no se infiere institución desde ese path ni se concede acceso.
+
+### User Story 4 - Encontrar el acceso público institucional (Priority: P1)
+
+Como visitante, quiero encontrar UC o UTFSM desde el portal público y abrir su login.
+**Why this priority**: Completa la entrada pública sin convertir el portal en un tenant.
+**Independent Test**: Raíces, directorio y rechazo de login/privadas con backend caído.
+**Acceptance Scenarios**:
+1. **Given** portal exacto configurado, **When** abro `/`, **Then** veo landing y enlaces validados a ambos login, sin consultas API ni pertenencias.
+2. **Given** raíz UC/UTFSM, **When** abro `/`, **Then** voy a `/login` del mismo dominio sin mostrar landing.
+3. **Given** portal o dominio desconocido, **When** abro login/privadas, **Then** no veo credenciales ni contexto y no se envían solicitudes de acceso.
+4. **Given** configuración inválida u origin engañoso, **When** abro `/`, **Then** rechazo seguro sin fallback; localhost explícito solo puede ser portal.
 
 ### Edge Cases
 
@@ -63,7 +78,7 @@ Como usuario multiinstitución, quiero abrir el dominio institucional y sus enla
 - **FR-006**: JWT solo en memoria, máximo 900 segundos según vigencia real; recarga/nuevo documento requiere login, navegación interna conserva sesión.
 - **FR-007**: Logout/401/expiración limpian identidad, contexto y datos; cancelar/descartar respuestas antiguas y nunca compartir sesión entre usuarios, pestañas o dominios.
 - **FR-008**: No escribir JWT/contraseña en URLs, cookies, almacenamiento persistente o logs; logout local no implica revocación individual backend.
-- **FR-009**: No mostrar selector ni enlace para elegir institución. Abrir otro dominio exige nuevo login, sin transportar tokens ni asumir SSO.
+- **FR-009**: No mostrar selector ni enlace para elegir institución en la aplicación autenticada. Solo el portal público puede listar accesos institucionales configurados. Abrir otro dominio exige nuevo login, sin transportar tokens ni asumir SSO.
 - **FR-010**: Retornos aceptan solo rutas internas implementadas del dominio actual; recurso no autorizado conserva rechazo backend y no revela existencia.
 - **FR-011**: Desarrollo debe reproducir ambos tenants con `uc.localhost:3000` y `utfsm.localhost:3000`; configurar resolución y orígenes explícitos sin afectar producción.
 - **FR-012**: Localhost/loopback sin contexto muestra orientación hacia hosts locales configurados, sin usar slug de path ni institución predeterminada.
@@ -75,6 +90,7 @@ Como usuario multiinstitución, quiero abrir el dominio institucional y sus enla
 - **FR-018**: Datos privados usan la sesión vigente; no cargarlos en servidor mediante un guard únicamente visual ni compartir clientes autenticados entre solicitudes.
 - **FR-019**: Teclado, foco al error, labels, mensajes anunciados, contraste ≥4.5:1, móvil 375 px, ambos temas y movimiento reducido. Reutilizar el sistema visual vigente: paleta, tipografía, espaciado y componentes compartidos, sin rediseño ni estilos duplicados.
 - **FR-020**: Pruebas cubren dos tenants, usuario multiinstitución, revocación, host/path adversarial y separación por generación; sin modificar historial académico.
+- **FR-021**: Raíz del portal exacto muestra landing sin backend; raíces institucionales redirigen a `/login` del mismo dominio, con estado neutro durante resolución. Portal login/privadas y dominios desconocidos rechazan sin credenciales ni contexto. Configuración inválida nunca obtiene fallback.
 
 ### Key Entities
 

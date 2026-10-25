@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { Client } from "pg";
 import { hash, argon2id } from "argon2";
 import { operationalConfig, OperationError, reportError } from "../database/config";
+import { academicSeedConfig, seedAcademics } from "./demo-academics";
 
 const demoInstitutions = [{slug: "uc", name: "UC"}, {slug: "utfsm", name: "UTFSM"}] as const;
 const demoUsers = [
@@ -48,6 +49,7 @@ async function insertMembership(client: Client, institution: string, user: strin
 
 export async function seed(env: NodeJS.ProcessEnv = process.env) {
   validate(env);
+  const academicConfig = academicSeedConfig(env);
   const started = Date.now();
   const created = {institutions: 0, users: 0, memberships: 0};
   const existing = {institutions: 0, users: 0, memberships: 0};
@@ -72,8 +74,9 @@ export async function seed(env: NodeJS.ProcessEnv = process.env) {
           (await insertMembership(client, institutionIds.get(membership.slug)!, user.id, membership.active) ? created : existing).memberships++;
         }
       }
+      const academic = academicConfig ? await seedAcademics(client, institutionIds, academicConfig.operatorRef) : undefined;
       await client.query("COMMIT");
-      return {operation: "seed", outcome: "ok", created, existing, durationMs: Date.now()-started};
+      return {operation: "seed", outcome: "ok", created, existing, ...(academic ? {academic} : {}), durationMs: Date.now()-started};
     } catch (error) {
       await client.query("ROLLBACK").catch(() => {});
       throw error;

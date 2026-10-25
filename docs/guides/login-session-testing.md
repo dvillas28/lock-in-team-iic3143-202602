@@ -7,6 +7,7 @@ Rama de la misión: `feat/frontend-acceso-multitenant`.
 ## 1. Preparar configuración y claves locales
 
 Las cinco cuentas vienen de `backend/src/seeds/demo.ts`; definirlas no las crea en la DB.
+Para añadir cursos y matrículas, seguir la [carga académica opt-in](demo-academic-seed.md).
 En esta revisión se generaron sus claves con `secrets.token_hex(12)` de Python:
 12 bytes aleatorios → 24 caracteres hexadecimales, distintos por cuenta.
 Se guardaron solo en `.env`, ignorado por Git; el seed guarda hashes Argon2id en PostgreSQL.
@@ -41,6 +42,8 @@ PY
 Para localhost, comprobar `NEXT_PUBLIC_API_URL=http://localhost:3001` y
 `CORS_ALLOWED_ORIGINS=["http://uc.localhost:3000","http://utfsm.localhost:3000"]`.
 El ejemplo configura NEXT_PUBLIC_INSTITUTION_ORIGINS con ambos origins exactos.
+`NEXT_PUBLIC_PORTAL_ORIGIN=http://localhost:3000` habilita solo el directorio público;
+no añadir localhost al contexto institucional ni a CORS. Véase [landing](public-landing.md).
 Comprobar resolución con `getent hosts uc.localhost utfsm.localhost`; si falta,
 agregar `127.0.0.1 uc.localhost utfsm.localhost` al archivo hosts del equipo.
 Reconstruir frontend al cambiar las variables NEXT_PUBLIC_*; Next ejecutado en frontend/

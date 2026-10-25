@@ -32,6 +32,7 @@ services:
       MIGRATION_DATABASE_URL: postgresql://${POSTGRES_USER:-academix}:${POSTGRES_PASSWORD:-academix_dev}@postgres:5432/${POSTGRES_DB:-academix}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-["http://uc.localhost:3000","http://utfsm.localhost:3000"]}
       DEMO_DATA_ENABLED: ${DEMO_DATA_ENABLED:-false}
+      DEMO_ACADEMIC_DATA_ENABLED: ${DEMO_ACADEMIC_DATA_ENABLED:-false}
       DEMO_ADOPT_LEGACY: ${DEMO_ADOPT_LEGACY:-false}
       DEMO_OPERATOR_REF: ${DEMO_OPERATOR_REF:-}
       DEMO_UC_PASSWORD: ${DEMO_UC_PASSWORD:-}
@@ -74,6 +75,7 @@ services:
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
         NEXT_PUBLIC_INSTITUTION_ORIGINS: ${NEXT_PUBLIC_INSTITUTION_ORIGINS:?Configure institutional origins before building}
+        NEXT_PUBLIC_PORTAL_ORIGIN: ${NEXT_PUBLIC_PORTAL_ORIGIN:?Configure the public portal origin before building}
     environment:
       API_URL: http://backend:3001
     ports:

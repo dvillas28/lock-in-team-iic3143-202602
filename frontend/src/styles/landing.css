@@ -1,0 +1,54 @@
+/* Public layout composes canonical cards, buttons, icons and tokens. */
+.landing-width { width: min(1152px, calc(100% - 64px)); margin-inline: auto; }
+.landing-header { background: var(--header-bg); border-bottom: 1px solid var(--border); }
+.landing-nav { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.landing-brand { display: inline-flex; align-items: center; gap: 10px; }
+.landing-brand-link { display: inline-flex; text-decoration: none; }
+.landing-nav-actions { display: flex; align-items: center; gap: 20px; }
+.landing-features-link { color: var(--text-2); font-size: 13px; text-decoration: none; }
+.landing-hero { text-align: center; padding-block: 88px 56px; }
+.landing-hero .section-label { margin-bottom: 24px; }
+.landing-hero h1 { font-size: clamp(40px, 6vw, 68px); line-height: 1.12; font-weight: 600; letter-spacing: -0.01em; }
+.landing-hero h1 em { color: var(--accent); }
+.landing-intro { max-width: 600px; margin: 24px auto 32px; font-size: 16px; color: var(--text-2); }
+.landing-hero-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+.landing-hero-actions .btn { padding: 12px 24px; font-size: 14px; }
+.landing-flow { display: flex; justify-content: center; flex-wrap: wrap; gap: 24px; list-style: none; margin-top: 64px; }
+.landing-flow li { display: flex; align-items: center; gap: 10px; color: var(--text-2); font-size: 13px; }
+.landing-flow .tnum { color: var(--text-3); font-size: 12px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 4px 8px; }
+.landing-section { border-top: 1px solid var(--border); padding-block: 64px; scroll-margin-top: 24px; }
+.landing-section-heading { max-width: 640px; margin: 0 auto 32px; text-align: center; }
+.landing-section-heading h2 { font-size: clamp(30px, 4vw, 36px); font-weight: 600; line-height: 1.2; margin-block: 12px; }
+.landing-section-heading > p:last-child { color: var(--text-2); }
+.landing-feature-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.landing-feature { padding: 26px; }
+.landing-icon { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--primary-soft); color: var(--primary-ink); margin-bottom: 16px; }
+.landing-icon-accent { background: var(--accent-soft); color: var(--accent); }
+.landing-feature h3 { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+.landing-feature p { color: var(--text-2); }
+.landing-directory { background: var(--muted); }
+.landing-institution-grid { max-width: 880px; margin-inline: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.landing-institution { display: flex; flex-direction: column; align-items: flex-start; padding: 32px; text-decoration: none; }
+.landing-institution-initials { color: var(--primary-ink); font-size: 32px; font-weight: 600; margin-bottom: 16px; }
+.landing-institution h3 { font-size: 26px; line-height: 1.2; font-weight: 600; margin-bottom: 24px; }
+.landing-institution-action { display: flex; align-items: center; gap: 8px; margin-top: auto; color: var(--primary-ink); font-weight: 600; }
+.landing-directory-note { max-width: 700px; margin: 28px auto 0; display: flex; justify-content: center; align-items: flex-start; gap: 10px; text-align: center; color: var(--text-2); font-size: 13px; }
+.landing-directory-note svg { flex-shrink: 0; margin-top: 2px; }
+.landing-footer { padding-block: 28px; border-top: 1px solid var(--border); }
+.landing-footer > div { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.landing-footer p, .landing-footer a { font-size: 12px; color: var(--text-2); }
+@media (max-width: 900px) {
+  .landing-feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .landing-width { width: calc(100% - 32px); }
+  .landing-nav { min-height: 64px; gap: 8px; }
+  .landing-nav-actions { gap: 10px; }
+  .landing-features-link { display: none; }
+  .landing-hero { padding-block: 56px 40px; }
+  .landing-flow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; text-align: left; margin-top: 40px; }
+  .landing-section { padding-block: 40px; }
+  .landing-feature-grid, .landing-institution-grid { grid-template-columns: 1fr; gap: 16px; }
+  .landing-feature, .landing-institution { padding: 24px; }
+  .landing-footer > div { align-items: flex-start; flex-direction: column; gap: 16px; }
+}
