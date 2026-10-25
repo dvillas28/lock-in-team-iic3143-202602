@@ -39,7 +39,7 @@ export async function seedAcademics(db: Client, institutions: Map<string, string
   }
 
   // Preserve normal lock order and refuse inactive identities or memberships on first application.
-  const ids = [...new Set(expected.flatMap(t => [t.teacherId, t.studentId]))].sort();
+  const ids = [...new Set(expected.flatMap(t => [t.teacherId, t.studentId]))].sort((left, right) => left.localeCompare(right));
   const users = (await db.query("SELECT id,active FROM public.users WHERE id=ANY($1::uuid[]) ORDER BY id FOR SHARE", [ids])).rows;
   const tenants = (await db.query("SELECT id,active FROM public.institutions WHERE id=ANY($1::uuid[]) ORDER BY id FOR SHARE", [expected.map(t => t.institutionId)])).rows;
   const memberships = (await db.query(`SELECT institution_id,user_id,active FROM public.institution_memberships
