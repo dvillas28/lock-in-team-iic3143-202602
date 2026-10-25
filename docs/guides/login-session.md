@@ -2,7 +2,8 @@
 
 ## Flujo implementado
 
-- `/` enlaza a `/login`; login global envía correo normalizado y contraseña exacta
+- `/` muestra el [directorio público](public-landing.md) solo en el portal configurado;
+  en dominios institucionales redirige a `/login`. El login institucional envía correo normalizado y contraseña exacta
   con `openapi-fetch` y tipos generados a `POST /api/v1/auth/login`.
 - Correo: trim, ASCII 3–254, lowercase, un `@`, dominio con punto y sin espacios interiores.
   Contraseña: entre 1 y 128 bytes UTF-8; sin trim ni truncamiento.
@@ -48,8 +49,9 @@ Esquema y puerto son parte del origin; no se admiten sufijos, aliases ni default
 Cada slug tiene un único destino; HTTP solo se permite para hosts locales explícitos.
 El origin propone el slug para `/api/v1/institution/{slug}/me`; backend autoriza por
 path, JWT y pertenencia activa, con RLS. Host/Origin nunca conceden permisos.
-No se presenta el directorio como selector. `/institutions` solo redirige a `/courses`,
+El directorio de pertenencias no se presenta como selector. `/institutions` solo redirige a `/courses`,
 sin contenido ni enlace para elegir institución. Otro dominio requiere login independiente.
+La landing del portal lista únicamente accesos públicos, sin consultar pertenencias.
 Localhost/loopback sin contexto no envía credenciales: orienta a los hosts configurados.
 `next` acepta un único valor exacto `/courses` o `/institutions`; cualquier otro valor
 cae en `/courses`, incluidos repetidos, query/hash, externos y encoding residual.

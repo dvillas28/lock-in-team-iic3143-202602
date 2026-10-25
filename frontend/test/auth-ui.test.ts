@@ -2,14 +2,15 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { JSDOM } from "jsdom";
 import { act, createElement, type ReactNode } from "react";
-import { createRoot } from "react-dom/client";
-import { renderToStaticMarkup } from "react-dom/server";
+import { createRoot, hydrateRoot, type Root } from "react-dom/client";
+import { renderToStaticMarkup, renderToString } from "react-dom/server";
 import { AppRouterContext, type AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime.js";
 import { PathnameContext } from "next/dist/shared/lib/hooks-client-context.shared-runtime.js";
 import { SessionProvider, useSession } from "../src/components/auth/session-provider.tsx";
 import { LoginForm } from "../src/components/auth/login-form.tsx";
 import { ProtectedInstitution } from "../src/components/auth/protected-institution.tsx";
 import InstitutionsPage from "../src/app/institutions/page.tsx";
+import Home from "../src/app/page.tsx";
 
 const id="10000000-0000-4000-8000-000000000003";
 const institution=(slug="uc")=>({id:slug==="uc"?id:"10000000-0000-4000-8000-000000000004",slug,name:slug.toUpperCase(),active:true});
@@ -18,7 +19,7 @@ const login=()=>{const iat=Math.floor(Date.now()/1000);return {accessToken:`e30.
 const flush=()=>new Promise<void>(resolve=>setImmediate(resolve));
 function deferred<T>() {let resolve!:(value:T)=>void;const promise=new Promise<T>(r=>{resolve=r;});return {resolve,promise};}
 
-async function mount(options:{url?:string;reply?:(request:Request)=>Response|Promise<Response>}={}){
+async function mount(options:{url?:string;hydrate?:boolean;reply?:(request:Request)=>Response|Promise<Response>}={}){
   const dom=new JSDOM('<div id="root"></div>',{url:options.url??"https://uc.academix.dvillasc.me/login"});
   const old=new Map<string,PropertyDescriptor|undefined>();
   for(const [key,value] of Object.entries({window:dom.window,self:dom.window,document:dom.window.document,navigator:dom.window.navigator,
@@ -36,7 +37,10 @@ async function mount(options:{url?:string;reply?:(request:Request)=>Response|Pro
     const match=new URL(request.url).pathname.match(/institution\/([^/]+)\/me$/);
     return Response.json(match?user(match[1]):{items:[institution(),institution("utfsm")]});
   };
-  const root=createRoot(dom.window.document.getElementById("root")!);
+  const container=dom.window.document.getElementById("root")!;
+  let root:Root;
+  let initialHtml="";
+  const hydrationErrors:unknown[]=[];
   let path=dom.window.location.pathname;
   if(path==="/institutions"){path="/courses";dom.window.history.replaceState({},"",path);}
   let custom:ReactNode;
@@ -45,9 +49,13 @@ async function mount(options:{url?:string;reply?:(request:Request)=>Response|Pro
   function navigate(href:string){if(href==="/institutions")href="/courses";dom.window.history.replaceState({},"",href);path=dom.window.location.pathname;render();}
   function render(){
     const match=path.match(/^\/institutions\/([a-z0-9-]+)$/);
-    const view=custom??(match || path==="/courses" || path.startsWith("/attempts/")?createElement(ProtectedInstitution,{slug:match?.[1]},createElement("p",null,"PRIVATE_CONTENT")):
+    const view=custom??(path==="/"?createElement(Home):match || path==="/courses" || path.startsWith("/attempts/")?createElement(ProtectedInstitution,{slug:match?.[1]},createElement("p",null,"PRIVATE_CONTENT")):
       createElement(LoginForm));
-    root.render(createElement(AppRouterContext.Provider,{value:router},createElement(PathnameContext.Provider,{value:path},createElement(SessionProvider,null,view))));
+    const tree=createElement(AppRouterContext.Provider,{value:router},createElement(PathnameContext.Provider,{value:path},createElement(SessionProvider,null,view)));
+    if(!root && options.hydrate){
+      initialHtml=renderToString(tree);container.innerHTML=initialHtml;
+      root=hydrateRoot(container,tree,{onRecoverableError:error=>hydrationErrors.push(error)});
+    }else{root??=createRoot(container);root.render(tree);}
   }
   await act(async()=>{render();await flush();});
   const doc=dom.window.document;
@@ -62,7 +70,7 @@ async function mount(options:{url?:string;reply?:(request:Request)=>Response|Pro
     assert.ok(element,`missing control ${text}`);
     await act(async()=>{element.click();await flush();});
   }
-  return {dom,doc,requests,submit,click,get path(){return path;},
+  return {dom,doc,requests,submit,click,initialHtml,hydrationErrors,get path(){return path;},
     async navigate(href:string){await act(async()=>{navigate(href);await flush();});},
     async custom(view:ReactNode){await act(async()=>{custom=view;render();await flush();});},
     async close(){await act(async()=>root.unmount());dom.window.close();globalThis.fetch=previousFetch;
@@ -126,12 +134,12 @@ test("login failure, rate limit countdown and recovery use safe messages",async 
 });
 
 test("unknown hosts block login and mismatched institution subdomains block content",async()=>{
-  const bad=await mount({url:"https://evil.test/login"});try{assert.match(bad.doc.body.textContent!,/dominio no está habilitado/);assert.equal(bad.doc.querySelector("form"),null);assert.equal(bad.requests.length,0);}finally{await bad.close();}
+  const bad=await mount({url:"https://evil.test/login"});try{assert.match(bad.doc.body.textContent!,/Elige tu universidad para continuar/);assert.equal(bad.doc.querySelector("form"),null);assert.equal(bad.requests.length,0);}finally{await bad.close();}
   const ui=await mount({url:"https://uc.academix.dvillasc.me/login?next=%2Finstitutions%2Futfsm"});try{
-    await ui.submit();assert.equal(ui.path,"/courses");await ui.navigate("/institutions/utfsm");assert.match(ui.doc.body.textContent!,/Contexto institucional inválido/);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+    await ui.submit();assert.equal(ui.path,"/courses");await ui.navigate("/institutions/utfsm");assert.match(ui.doc.body.textContent!,/Elige tu universidad para continuar/);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
     await ui.navigate("/institutions");assert.equal(ui.path,"/courses");assert.equal(ui.doc.querySelector('a[href="/institutions"]'),null);
   }finally{await ui.close();}
-  const picker=await mount({url:"https://evil.test/institutions"});try{assert.match(picker.doc.body.textContent!,/Contexto institucional inválido/);}finally{await picker.close();}
+  const picker=await mount({url:"https://evil.test/institutions"});try{assert.match(picker.doc.body.textContent!,/Elige tu universidad para continuar/);}finally{await picker.close();}
 });
 
 test("context loading hides children; revocation, outage, retry and 401 fail closed",async()=>{
@@ -241,7 +249,7 @@ test("local UC and UTFSM use configured origins and clean same/cross document de
       const count=ui.requests.filter(r=>r.method==='POST').length;await ui.navigate('/institutions');const other=slug==='uc'?'utfsm':'uc';
       assert.equal(ui.path,'/courses');assert.equal(ui.doc.querySelector('a[href="/institutions"]'),null);
       assert.equal(ui.requests.filter(r=>r.method==='POST').length,count);
-      await ui.navigate(`/institutions/${other}`);assert.match(ui.doc.body.textContent!,/Contexto institucional inválido/);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+      await ui.navigate(`/institutions/${other}`);assert.match(ui.doc.body.textContent!,/Elige tu universidad para continuar/);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
     }finally{await ui.close();}
   }}finally{if(old===undefined)delete process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS;else process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS=old;}
 });
@@ -286,4 +294,129 @@ test("protected known attempt returns through login to exact pathname",async()=>
  const path='/attempts/10000000-0000-4000-8000-000000000080';
  const ui=await mount({url:'https://uc.academix.dvillasc.me'+path});
  try{assert.equal(ui.path,'/login');assert.equal(new URLSearchParams(ui.dom.window.location.search).get('next'),path);await ui.submit();assert.equal(ui.path,path);assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);}finally{await ui.close();}
+});
+
+test("public portal hydrates neutrally and offers only configured institutional logins while backend is down",async()=>{
+  const ui=await mount({url:"https://academix-frontend-2ixy.onrender.com/?next=https://evil.test",hydrate:true,reply:()=>{throw new Error("offline");}});
+  try{
+    assert.match(ui.initialHtml,/Preparando acceso/);assert.doesNotMatch(ui.initialHtml,/Elige tu universidad|<form|Correo electrónico/);
+    assert.deepEqual(ui.hydrationErrors,[]);
+    assert.equal(ui.doc.querySelector('h1')?.textContent,"Tus cursos, materiales y notas, en un solo lugar.");
+    const links=Array.from(ui.doc.querySelectorAll<HTMLAnchorElement>('#instituciones a'));
+    assert.deepEqual(links.map(a=>a.href),["https://uc.academix.dvillasc.me/login","https://utfsm.academix.dvillasc.me/login"]);
+    assert.match(links[0].textContent!,/Pontificia Universidad Católica de Chile/);
+    assert.match(links[1].textContent!,/Universidad Técnica Federico Santa María/);
+    assert.equal(ui.doc.querySelector('a[href="/login"]'),null);assert.equal(ui.doc.querySelector('form'),null);
+    assert.ok(Array.from(ui.doc.querySelectorAll<HTMLAnchorElement>('a')).every(a=>a.getAttribute('href')?.startsWith('#') || links.includes(a)));
+    await ui.click("Cambiar tema");assert.equal(ui.doc.documentElement.dataset.theme,"dark");
+    await ui.click("Cambiar tema");assert.equal(ui.doc.documentElement.dataset.theme,"light");
+    ui.doc.querySelector<HTMLAnchorElement>('.skip-link')!.focus();assert.equal(ui.doc.activeElement?.textContent,"Saltar al contenido");
+    assert.equal(ui.requests.length,0);assert.equal(ui.dom.window.localStorage.length,0);assert.equal(ui.dom.window.sessionStorage.length,0);assert.equal(ui.doc.cookie,"");
+  }finally{await ui.close();}
+});
+
+test("institutional roots replace with local login without rendering a landing or contacting backend",async()=>{
+  for(const slug of ["uc","utfsm"]){
+    const ui=await mount({url:`https://${slug}.academix.dvillasc.me/`,hydrate:true,reply:()=>{throw new Error("offline");}});
+    try{assert.equal(ui.path,"/login");assert.equal(ui.dom.window.location.origin,`https://${slug}.academix.dvillasc.me`);
+      assert.match(ui.initialHtml,/Preparando acceso/);assert.doesNotMatch(ui.initialHtml,/Elige tu universidad|<form/);
+      assert.deepEqual(ui.hydrationErrors,[]);assert.equal(ui.doc.querySelector('#instituciones'),null);assert.ok(ui.doc.querySelector('form'));assert.equal(ui.requests.length,0);
+    }finally{await ui.close();}
+  }
+});
+
+test("portal login and private routes reject before hydration or API calls; unknown roots also fail closed",async()=>{
+  for(const origin of ["https://academix-frontend-2ixy.onrender.com","https://academix-frontend-2ixy.onrender.com.evil.test","https://uc.academix.dvillasc.me:444","https://unknown.academix.dvillasc.me"]){
+    for(const path of ["/","/login","/courses","/attempts/"+id,"/institutions/uc"]){
+      if(origin==="https://academix-frontend-2ixy.onrender.com" && path==="/")continue;
+      const ui=await mount({url:origin+path,hydrate:true,reply:()=>{throw new Error("offline");}});
+      try{
+        assert.deepEqual(ui.hydrationErrors,[]);assert.equal(ui.doc.querySelector('form'),null);
+        assert.equal(ui.doc.querySelector('#instituciones'),null);assert.doesNotMatch(ui.initialHtml,/<form|PRIVATE_CONTENT|Correo electrónico/);
+        assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);assert.equal(ui.requests.length,0);assert.equal(ui.path,path);
+        assert.ok(ui.doc.querySelector('[role="alert"]'));
+      }finally{await ui.close();}
+    }
+  }
+});
+
+test("local portal and institutional roots reproduce the public flow without backend",async()=>{
+  const saved=[process.env.NEXT_PUBLIC_PORTAL_ORIGIN,process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS];
+  process.env.NEXT_PUBLIC_PORTAL_ORIGIN="http://localhost:3000";
+  process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS=JSON.stringify({"http://uc.localhost:3000":"uc","http://utfsm.localhost:3000":"utfsm"});
+  try{
+    for(const host of ["localhost","uc.localhost","utfsm.localhost"]){
+      const ui=await mount({url:`http://${host}:3000/`,reply:()=>{throw new Error("offline");}});
+      try{assert.equal(ui.requests.length,0);
+        if(host==="localhost")assert.deepEqual(Array.from(ui.doc.querySelectorAll<HTMLAnchorElement>('#instituciones a')).map(a=>a.href),["http://uc.localhost:3000/login","http://utfsm.localhost:3000/login"]);
+        else{assert.equal(ui.path,"/login");assert.equal(ui.doc.querySelector('#instituciones'),null);}
+        await ui.navigate('/courses');assert.equal(ui.requests.length,0);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+        if(host==="localhost"){await ui.navigate('/login');assert.equal(ui.doc.querySelector('form'),null);}
+      }finally{await ui.close();}
+    }
+  }finally{for(const [index,key] of ["NEXT_PUBLIC_PORTAL_ORIGIN","NEXT_PUBLIC_INSTITUTION_ORIGINS"].entries()){if(saved[index]===undefined)delete process.env[key];else process.env[key]=saved[index];}}
+});
+
+test("portal guards do not load context even with an authenticated in-memory fixture",async()=>{
+  let session:ReturnType<typeof useSession>['session']|undefined;
+  function Probe(){session=useSession().session;return null;}
+  const ui=await mount({url:"https://academix-frontend-2ixy.onrender.com/login"});
+  try{
+    // Seed the session directly, bypassing the UI, to exercise the authenticated guard branch.
+    await ui.custom(createElement(Probe));await act(async()=>{await session!.login("persona@example.test","fixture");await flush();});
+    const before=ui.requests.length;assert.equal(session!.getSnapshot().status,"authenticated");
+    await ui.custom(undefined);assert.equal(ui.doc.querySelector('form'),null);assert.equal(ui.path,'/login');
+    await ui.navigate('/courses');assert.match(ui.doc.body.textContent!,/Elige tu universidad para continuar/);
+    assert.equal(ui.doc.querySelector('a'),null); // No institution selection links inside an active session.
+    assert.equal(ui.requests.length,before);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT|persona@example.test/);
+    assert.ok(ui.requests.every(r=>!r.url.endsWith('/me')));
+  }finally{await ui.close();}
+});
+
+test("invalid build configuration rejects the root without landing, credentials or requests",async()=>{
+  const saved=process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS;
+  try{
+    for(const config of ["bad",JSON.stringify({"https://academix-frontend-2ixy.onrender.com":"uc"})]){
+      process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS=config;
+      for(const origin of ["https://academix-frontend-2ixy.onrender.com","https://uc.academix.dvillasc.me"]){
+        const ui=await mount({url:origin+'/',hydrate:true});
+        try{assert.ok(ui.doc.querySelector('[role="alert"]'));assert.equal(ui.doc.querySelector('#instituciones'),null);
+          assert.equal(ui.doc.querySelector('form'),null);assert.equal(ui.doc.querySelector('a'),null);assert.equal(ui.requests.length,0);assert.deepEqual(ui.hydrationErrors,[]);
+        }finally{await ui.close();}
+      }
+    }
+  }finally{if(saved===undefined)delete process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS;else process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS=saved;}
+});
+
+test("unavailable access offers only validated public recovery, without development details or API calls",async()=>{
+  for(const origin of ["https://academix-frontend-2ixy.onrender.com","https://unknown.example.test"]){
+    for(const path of ["/login","/courses"]){
+      const ui=await mount({url:origin+path+'?next=https://evil.test',hydrate:true});
+      try{
+        const recovery=ui.doc.querySelector<HTMLAnchorElement>('a');assert.ok(recovery);
+        assert.equal(recovery.textContent,'Elegir universidad');
+        assert.equal(recovery.href,'https://academix-frontend-2ixy.onrender.com/#instituciones');
+        assert.doesNotMatch(ui.doc.body.textContent!,/localhost|desarrollo|configuraci[oó]n|dominio|Contexto institucional/);
+        assert.equal(ui.doc.querySelector('form'),null);assert.equal(ui.requests.length,0);
+        assert.equal(ui.path,path);assert.deepEqual(ui.hydrationErrors,[]);
+      }finally{await ui.close();}
+    }
+  }
+});
+
+test("recovery follows explicit local portal configuration and disappears if portal config is invalid",async()=>{
+  const saved=[process.env.NEXT_PUBLIC_PORTAL_ORIGIN,process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS];
+  process.env.NEXT_PUBLIC_INSTITUTION_ORIGINS=JSON.stringify({'http://uc.localhost:3000':'uc','http://utfsm.localhost:3000':'utfsm'});
+  try{
+    for(const portal of ['http://localhost:3000','javascript:alert(1)','']){
+      process.env.NEXT_PUBLIC_PORTAL_ORIGIN=portal;
+      const ui=await mount({url:'http://localhost:3000/courses'});
+      try{
+        const recovery=ui.doc.querySelector<HTMLAnchorElement>('a');
+        if(portal==='http://localhost:3000')assert.equal(recovery?.href,'http://localhost:3000/#instituciones');
+        else assert.equal(recovery,null);
+        assert.equal(ui.doc.querySelector('form'),null);assert.equal(ui.requests.length,0);
+      }finally{await ui.close();}
+    }
+  }finally{for(const [index,key]of ['NEXT_PUBLIC_PORTAL_ORIGIN','NEXT_PUBLIC_INSTITUTION_ORIGINS'].entries()){if(saved[index]===undefined)delete process.env[key];else process.env[key]=saved[index];}}
 });

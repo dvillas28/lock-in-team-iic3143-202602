@@ -35,6 +35,10 @@ pnpm --dir backend start
 
 ## Bootstrap demo
 
+Para crear cursos y matrículas con las cuentas legacy existentes, usar el
+[seed académico manual](../guides/demo-academic-seed.md), habilitado por separado.
+El bootstrap descrito aquí crea identidades institucionales, sin cursos ni matrículas.
+
 `DEMO_DATA_ENABLED=true` habilita la carga; ausente/false no exige secretos demo.
 Inyectar `DEMO_OPERATOR_REF` técnico y diez secretos iniciales mediante entorno seguro:
 `DEMO_{UC,UTFSM}_{SUPERADMIN,ADMIN,TEACHER,ASSISTANT,STUDENT}_PASSWORD` (8–30 caracteres Unicode).

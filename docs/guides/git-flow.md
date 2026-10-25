@@ -77,8 +77,8 @@ cada servicio muestra **el release con el que se desplego por ultima vez**:
 - Release con cambios solo en `frontend/`: el frontend muestra la nueva y el
   backend sigue con la anterior. Es correcto: es el codigo que esta corriendo.
 
-El frontend muestra su version en la home; el backend la expone en `/health`.
-En local, sin `APP_VERSION`, ambos muestran `dev`.
+La landing pública no muestra versiones ni estado del backend. El backend expone
+su versión en `/health`; en local, sin `APP_VERSION`, informa `dev`.
 
 ## Rollback
 
@@ -109,6 +109,12 @@ Si un PR falla por Trivy:
    `pnpm.overrides` en el `package.json` de la app.
 3. Si no se puede corregir ahora, agregar el CVE a `.trivyignore` en la raiz
    con un comentario que diga por que y hasta cuando.
+
+El backend fuerza `body-parser >=2.4.0` y `multer >=2.5.0` mediante overrides,
+porque sus dependencias padre aún resuelven versiones vulnerables. Esto corrige
+[GHSA-27r3-jxmh-p828](https://github.com/expressjs/body-parser/security/advisories/GHSA-27r3-jxmh-p828)
+y [GHSA-q7qp-rjg7-q26m](https://github.com/expressjs/multer/security/advisories/GHSA-q7qp-rjg7-q26m).
+Mantener el lockfile sincronizado y comprobar fuentes e imagen al actualizar.
 
 Para reproducirlo local (requiere Docker):
 

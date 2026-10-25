@@ -27,6 +27,12 @@
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2"
   },
+  "pnpm": {
+    "overrides": {
+      "body-parser": "^2.4.0",
+      "multer": "^2.5.0"
+    }
+  },
   "devDependencies": {
     "@nestjs/cli": "12.0.7",
     "@types/node": "^24.0.0",

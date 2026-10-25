@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff, GraduationCap } from "lucide-react";
 import { loginDestination } from "../../lib/auth/navigation.ts";
 import { useSession } from "./session-provider.tsx";
+import { InstitutionAccessNotice } from "./institution-access-notice.tsx";
 
 export function LoginForm() {
   const { session, state, origin } = useSession();
@@ -37,12 +38,13 @@ export function LoginForm() {
     if (password instanceof HTMLInputElement) password.value = "";
     if (!await attempt) messageRef.current?.focus();
   }
+  if (origin && !destination) return <main className="content auth-content"><InstitutionAccessNotice /></main>;
   return (
     <main className="content auth-content">
       <div className="sidebar-logo"><GraduationCap aria-hidden="true" /><span className="logo-name">AcademiX</span></div>
       <section className="card panel stack auth-panel" aria-labelledby="login-title">
         <div><h1 id="login-title" className="serif">Iniciar sesión</h1><p className="hint">Una identidad, tus instituciones accesibles.</p></div>
-        {origin && !destination ? <p role="alert">Este dominio no está habilitado para AcademiX. En desarrollo, abre uc.localhost:3000 o utfsm.localhost:3000 según la configuración.</p> : (
+        {!origin ? <p role="status">Preparando acceso…</p> : (
           <form className="stack" onSubmit={submit} aria-busy={busy} noValidate>
             <div><label className="field-label" htmlFor="email">Correo electrónico</label>
               <input className="field" id="email" name="email" type="email" autoComplete="username" required maxLength={256} disabled={busy} aria-describedby="login-message" /></div>
