@@ -14,9 +14,12 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# On push to main the PR already ran documentation, contracts and checks on the same tree;
+# main only re-runs what feeds Sonar, the Security tab and the Render deploy gate.
 jobs:
   documentation:
     name: Documentation length
+    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -24,7 +27,7 @@ jobs:
           fetch-depth: 0
       - name: Check authored documents in this change
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           python3 .github/scripts/check-doc-length.py --self-test
           if [ -n "$BASE_SHA" ] && [ "$BASE_SHA" != "0000000000000000000000000000000000000000" ]; then
@@ -35,6 +38,7 @@ jobs:
 
   contracts:
     name: OpenAPI and generated client
+    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -102,7 +106,7 @@ jobs:
   checks:
     name: ${{ matrix.app }} (lint + ${{ matrix.app == 'backend' && 'test' || 'build' }})
     needs: changes
-    if: needs.changes.outputs.apps != '[]'
+    if: github.event_name != 'push' && needs.changes.outputs.apps != '[]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
