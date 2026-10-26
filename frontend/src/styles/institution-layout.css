@@ -12,3 +12,78 @@
 .content .stack, .content li { overflow-wrap: anywhere; }
 fieldset.stack { border: 0; padding: 0; min-width: 0; }
 .content .data-table { min-width: 640px; overflow-wrap: normal; }
+
+/* Academic composition is scoped so public access keeps its original layout. */
+.academic-app .sidebar { overflow-y: auto; }
+.academic-app .sidebar-nav { flex: 1 0 auto; }
+.academic-app .sidebar-bottom { margin-top: auto; }
+.academic-app .institution-user .user-row > div { min-width: 0; overflow-wrap: anywhere; }
+.academic-app .institution-user .state-actions { justify-content: start; margin-top: 16px; }
+.academic-app .top-header { height: auto; padding-block: 12px; }
+.academic-app .header-tools { display: flex; flex-shrink: 0; gap: 8px; }
+.academic-app .mobile-menu-button { display: none; }
+.academic-app .content > .stack > h1, .academic-app .content h1 { font-family: var(--font-eb-garamond), serif; font-size: 30px; font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; }
+.academic-app .page-heading { margin-bottom: 0; }
+.academic-app .page-heading p { margin-top: 4px; }
+.academic-app .section-label { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+.academic-app .course-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 20px; }
+.course-card { display: flex; flex-direction: column; gap: 12px; padding: 20px; min-width: 0; }
+.course-card-meta, .course-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.course-icon { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: var(--radius-sm); background: var(--primary-soft); color: var(--primary-ink); }
+.course-card h2 { font-family: var(--font-eb-garamond), serif; font-size: 22px; font-weight: 600; line-height: 1.25; }
+.course-card .section-label { color: var(--primary-ink); }
+.course-card-footer { border-top: 1px solid var(--border); padding-top: 16px; margin-top: auto; font-size: 13px; font-weight: 600; color: var(--primary-ink); }
+.course-navigation { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+.course-tab { padding: 8px 12px; text-decoration: none; border-radius: var(--radius-sm); font-size: 13px; color: var(--text-2); border-bottom: 2px solid transparent; }
+.course-tab:hover { background: var(--hover); }
+.course-tab.active { color: var(--primary-ink); background: var(--primary-soft); border-bottom-color: var(--primary-ink); font-weight: 600; }
+.academic-disclosure { min-width: 0; }
+.academic-disclosure > summary { cursor: pointer; padding: 12px 16px; font-weight: 600; color: var(--primary-ink); font-size: 13px; overflow-wrap: anywhere; }
+.academic-disclosure[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+.academic-disclosure > form, .academic-disclosure > .stack { padding: 0 16px 16px; }
+.academic-disclosure > form.card { border: 0; box-shadow: none; }
+.academic-app .stack > .btn, .academic-app fieldset > .btn { align-self: flex-start; }
+.academic-app .table-scroll { min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.academic-app .table-scroll .data-table :is(td, tbody th) { padding-block: 12px; }
+.academic-app .table-scroll:focus-visible { outline-offset: -3px; }
+.academic-app .section-list { gap: 0; }
+.academic-app .section-list > li { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center; gap: 12px; }
+.academic-app .section-list > li:last-child { border: 0; }
+.academic-app .section-list .hint { font-size: 12px; }
+.academic-app .content > .stack > a:first-child { align-self: start; font-size: 13px; color: var(--primary-ink); text-underline-offset: 3px; }
+@media (max-width: 760px) {
+  .academic-app .sidebar-top { position: relative; padding-right: 60px; }
+  .academic-app .mobile-menu-button { display: inline-flex; position: absolute; right: 16px; top: 16px; }
+  .academic-app .sidebar-nav, .academic-app .sidebar-bottom { display: none; }
+  .academic-app.menu-open .sidebar-nav { display: block; }
+  .academic-app.menu-open .sidebar-bottom { display: block; }
+  .academic-app .nav-section-label { display: block; }
+  .academic-app .top-header { flex-wrap: nowrap; }
+  .academic-app .content { padding: 20px 16px; }
+  .academic-app .content h1 { font-size: 28px; }
+  .course-tab { padding: 8px; }
+}
+
+.academic-app .section-overview > h2 { font-size: 22px; font-weight: 600; }
+.academic-app .academic-disclosure h3 { font-family: var(--font-eb-garamond), serif; font-size: 18px; font-weight: 600; }
+
+/* Section selection stays compact regardless of collection size. */
+.academic-app .section-picker { padding: 16px 20px; display: grid; gap: 12px; }
+.academic-app .section-picker h2 { font-size: 22px; font-weight: 600; }
+.academic-app .section-picker-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.academic-app .section-picker .field { margin-top: 6px; }
+.academic-app :is(.section-picker-footer, .section-workspace-meta) { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.academic-app :is(.section-picker-footer, .section-workspace-meta) > .hint { margin: 0; font-size: 12px; }
+.academic-app :is(.section-picker-footer, .section-workspace-meta) > details[open] { flex-basis: 100%; }
+.academic-app .section-workspace h3 { font-size: 22px; font-weight: 600; }
+.academic-app .participants-table { max-height: min(52dvh, 512px); overflow: auto; overscroll-behavior: contain; }
+.academic-app .participants-table thead th { position: sticky; top: 0; z-index: 1; background: var(--surface); }
+.academic-app .participants-table td { vertical-align: top; }
+.academic-app .participant-actions > summary { list-style: none; }
+.academic-app .participant-actions > summary::-webkit-details-marker { display: none; }
+.academic-app .participant-tools { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin-top: 12px; }
+.academic-app .participant-role-form { display: flex; align-items: end; flex-wrap: wrap; gap: 8px; }
+.academic-app .participant-role-form label { min-width: 160px; }
+.academic-app .participant-role-form select { margin-top: 6px; }
+.academic-app .participant-pagination { margin-top: 0; }
+@media (max-width: 760px) { .academic-app .section-picker-fields { grid-template-columns: minmax(0, 1fr); } }

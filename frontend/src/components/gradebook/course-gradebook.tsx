@@ -1,5 +1,6 @@
 "use client";
 import { useState } from 'react';
+import { CourseNavigation } from "../courses/course-navigation.tsx";
 import Link from 'next/link';
 import { useSession } from '../auth/session-provider.tsx';
 import { useResource } from '../courses/use-resource.ts';
@@ -48,7 +49,7 @@ function BookView({ courseId }: Readonly<{
         return <LoadingState />;
     }
     const { cap, sections, items, book } = r.data;
-    return <div className="stack"><Link href={`/courses/${courseId}`}>Volver al curso</Link><h1 className="serif">Libro de notas</h1>
+    return <div className="stack"><Link href={`/courses/${courseId}`}>Volver al curso</Link><h1 className="serif">Libro de notas</h1><CourseNavigation course={r.data.course} user={user} active="/gradebook" />
  {r.error && <><p role="alert">Consulta fallida: representación anterior, no vigente. La operación de publicación conserva su clave.</p><ErrorState feedback={r.error} onRetry={() => void r.reload()}/></>}
  <label className="field-label">Sección histórica<select disabled={busy} className="field" value={sectionId} onChange={e => {
         setSectionId(e.target.value);
@@ -57,7 +58,7 @@ function BookView({ courseId }: Readonly<{
     }}><option value="">Todas las autorizadas</option>{sections.filter(s => cap.global || cap.readSections.includes(s.id)).map(s => <option key={s.id} value={s.id}>{s.code}</option>)}</select></label>
  <p>Promedios publicados calculados por backend. Las notas sin publicar son de consulta académica.</p>
  {!book.items.length && <output>No hay resultados en esta página.</output>}
- <div className="table-scroll"><table className="data-table"><caption>Resultados por estudiante y sección histórica</caption><thead><tr><th scope="col">Estudiante</th><th scope="col">Sección histórica</th>{items.items.map(i => <th scope="col" key={i.id}>{i.title}</th>)}<th scope="col">Promedio publicado</th><th scope="col">Peso publicado</th></tr></thead><tbody>{book.items.map(row => <tr key={row.student.id + '/' + row.sectionId}><th scope="row">{row.student.name}<br />{row.student.email}{!row.student.active ? ' · Usuario inactivo' : ''}</th><td>{sections.find(s => s.id === row.sectionId)?.code ?? row.sectionId}</td>{items.items.map(i => {
+ <div className="table-scroll" role="region" aria-label="Tabla con desplazamiento horizontal" tabIndex={0}><table className="data-table"><caption>Resultados por estudiante y sección histórica</caption><thead><tr><th scope="col">Estudiante</th><th scope="col">Sección histórica</th>{items.items.map(i => <th scope="col" key={i.id}>{i.title}</th>)}<th scope="col">Promedio publicado</th><th scope="col">Peso publicado</th></tr></thead><tbody>{book.items.map(row => <tr key={row.student.id + '/' + row.sectionId}><th scope="row">{row.student.name}<br />{row.student.email}{!row.student.active ? ' · Usuario inactivo' : ''}</th><td>{sections.find(s => s.id === row.sectionId)?.code ?? row.sectionId}</td>{items.items.map(i => {
         const g = row.grades.find(g => g.gradeItemId === i.id);
         return <td key={i.id} className="tnum">{g ? <><Link href={`/courses/${courseId}/quizzes/${i.quizId}/attempts/${g.attemptId}`}>{g.grade}</Link><br />{g.publishedAt ? 'Publicada' : 'Sin publicar'}</> : 'Pendiente'}</td>;
     })}<td className="tnum">{row.partialAverage ?? 'Pendiente'}</td><td className="tnum">{row.publishedWeightPercent} %</td></tr>)}</tbody></table></div>

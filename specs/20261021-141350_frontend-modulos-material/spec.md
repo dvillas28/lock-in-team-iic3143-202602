@@ -5,6 +5,7 @@
 **Created**: 2026-10-21
 **Status**: US1–US3 implementadas; validación backend real pendiente (T026)
 **Input**: Conectar organización, edición y lectura de contenido markdown del curso.
+**Evolución UI (2026-10-25)**: [Interfaz académica y Markdown](../20261025-120000_interfaz-academica-markdown/spec.md).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -59,7 +60,7 @@ Como docente, quiero publicar cada unidad y conocer la visibilidad efectiva para
 - **FR-006**: Nuevos módulos/ítems quedan sin publicar; mostrar controles independientes, estado textual, estado accesible y visibilidad efectiva bajo el módulo.
 - **FR-007**: Publicar/ocultar conserva estado de hijos e historial; confirmar la respuesta real y refrescar representación autorizada, sin inventar eventos frontend.
 - **FR-008**: No modificar curso/tenant del material ni tratarlo como contenido de una sola sección; backend mantiene integridad y auditoría transaccionales.
-- **FR-009**: Contenido se representa de forma segura, sin ejecutar HTML ni scripts provenientes del markdown o metadatos; enlaces no deben ejecutar protocolos peligrosos.
+- **FR-009**: Renderizar Markdown/GFM semántico mediante React, sin HTML ejecutable ni recursos remotos. Solo enlaces HTTP(S) absolutos válidos sin credenciales y fragmentos internos; rechazar rutas relativas y protocolos peligrosos/ambiguos. Política y pruebas en la [guía](../../docs/guides/frontend-content.md).
 - **FR-010**: Validar formularios según contrato y manejar 400/409/413/415/422; conservar borrador solo en la sesión/vista autorizada, limpiar al logout/expiración.
 - **FR-011**: No declarar autosave, edición colaborativa, merge de versiones ni protección contra sobrescritura no ofrecida por API; una mutación confirmada sustituye la representación vigente según contrato.
 - **FR-012**: Ante resultado incierto de creación, verificar lista antes de repetir; no reintentar mutaciones automáticamente ni confundir red caída con vacío.

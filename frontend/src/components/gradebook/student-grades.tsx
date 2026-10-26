@@ -20,7 +20,7 @@ export function StudentGrades({ courseId }: Readonly<{
     }
     const d = r.data;
     return <div className="stack"><Link href={`/courses/${courseId}`}>Volver al curso</Link><h1 className="serif">Mis notas publicadas</h1>
- <section className="panel"><h2 className="serif">{d.isPartial ? 'Promedio parcial' : 'Promedio publicado'}</h2><p className="metric tnum">{d.partialAverage ?? 'Pendiente'}</p><p className="tnum">Peso publicado: {d.publishedWeightPercent} %</p></section>
+ <section className="card panel published-average"><h2 className="serif">{d.isPartial ? 'Promedio parcial' : 'Promedio publicado'}</h2><p className="metric tnum">{d.partialAverage ?? 'Pendiente'}</p><p className="tnum">Peso publicado: {d.publishedWeightPercent} %</p></section>
  {!d.items.length && <output>Aún no hay notas publicadas.</output>}
- <div className="table-scroll"><table className="data-table"><caption>Resultados propios publicados</caption><thead><tr>{['Evaluación', 'Peso', 'Resultado', 'Nota', 'Publicación'].map(x => <th scope="col" key={x}>{x}</th>)}</tr></thead><tbody>{d.items.map(i => <tr key={i.gradeItemId}><th scope="row">{i.title}</th><td className="tnum">{i.weightPercent} %</td><td className="tnum">{i.scorePercent} %</td><td className="tnum">{i.grade}</td><td>{i.publishedAt}</td></tr>)}</tbody></table></div></div>;
+ <div className="table-scroll" role="region" aria-label="Tabla con desplazamiento horizontal" tabIndex={0}><table className="data-table"><caption>Resultados propios publicados</caption><thead><tr>{['Evaluación', 'Peso', 'Resultado', 'Nota', 'Publicación'].map(x => <th scope="col" key={x}>{x}</th>)}</tr></thead><tbody>{d.items.map(i => <tr key={i.gradeItemId}><th scope="row">{i.title}</th><td className="tnum">{i.weightPercent} %</td><td className="tnum">{i.scorePercent} %</td><td className="tnum">{i.grade}</td><td>{i.publishedAt}</td></tr>)}</tbody></table></div></div>;
 }

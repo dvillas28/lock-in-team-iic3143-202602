@@ -28,9 +28,10 @@ export function QuizCreate({session,slug,user,course,sections,onSaved}:{session:
       if (!canAuthor(user,course,sections,values.sectionId ?? null)) throw new FieldError("sectionId","Destino fuera de tu alcance docente.");
       const saved=await session.request(c=>createQuiz(c,slug,course.id,{...values,title:values.title!,questions:[]}),current);
       if (!current()) return;
+      form.reset();
       // Creation returns authoring; retain only safe metadata for navigation.
       setCreated({id:saved.id,courseId:saved.courseId,sectionId:saved.sectionId,title:saved.title,instructions:saved.instructions,opensAt:saved.opensAt,closesAt:saved.closesAt,maxAttempts:saved.maxAttempts,status:saved.status,publishedAt:saved.publishedAt});
-      await onSaved();return "Borrador creado.";
+      await onSaved();return "Quiz creado.";
     },async current=>{
       const items=await session.request(c=>listCourseQuizzes(c,slug,course.id),current);
       if(current()) setCandidates(items);
@@ -38,11 +39,11 @@ export function QuizCreate({session,slug,user,course,sections,onSaved}:{session:
     });
 
   }
-  return <section className="panel stack"><form ref={formRef} aria-label="Crear quiz" className="stack" onSubmit={submit} noValidate>
+  return <section className="card panel stack"><form ref={formRef} aria-label="Crear quiz" className="stack" onSubmit={submit} noValidate>
     <h2 className="serif">Crear borrador</h2><fieldset className="stack" disabled={mutation.busy || mutation.uncertain || !!created}>
       <QuizConfiguration sections={allowed} wholeCourse={wholeCourse} field={mutation.field} message={mutation.message}/>
       <button type="submit" className="btn btn-primary">Crear borrador</button>
     </fieldset><p ref={feedback} tabIndex={-1} role="status" aria-live="polite">{mutation.message}</p>
-    {created && <Link href={`/courses/${course.id}/quizzes/${created.id}`}>Borrador creado: abrir detalle</Link>}
+    {created && <Link href={`/courses/${course.id}/quizzes/${created.id}`}>Quiz creado: abrir detalle</Link>}
   </form>{candidates && <div className="stack"><h3 className="serif">Quizzes para revisar</h3>{candidates.length ? candidates.map(q=><Link key={q.id} href={`/courses/${course.id}/quizzes/${q.id}`}>{q.title} · {q.id}</Link>):<p>No hay candidatos visibles. Esto no prueba que el envío haya fallado.</p>}</div>}</section>;
 }

@@ -49,7 +49,7 @@ test("late write cannot restore draft after logout or resource change",async()=>
  try{await ui.submit('form[aria-label="Crear módulo"]',{title:"Privado"});
  if(action==="logout")await ui.settle(()=>ui.session.logout());else if(action==="resource")await ui.render(h(ModulesPanel,{courseId:id(11)}));else await ui.actor("student");
  await ui.settle(()=>pending.resolve(Response.json({...unit,title:"Privado"},{status:201})));
- assert.doesNotMatch(ui.doc.body.textContent!,/Privado|Cambio confirmado/);
+ assert.doesNotMatch(ui.doc.body.textContent!,/Privado|creado|actualizado/);
  }finally{await ui.close();}
  }
 });
@@ -69,7 +69,7 @@ test("reorder includes drafts, keeps focused control, renders server order and n
  try{
  const b=ui.doc.querySelector<HTMLButtonElement>('button[aria-label="Bajar Unidad 1"]')!;b.focus();await ui.settle(()=>b.click());
  assert.deepEqual(await ui.requests.find(r=>r.method==="PUT")!.clone().json(),{moduleIds:[id(42),unit.id]});
- if(mode==="confirmed"){assert.equal(ui.doc.activeElement,b);assert.equal(ui.doc.querySelector("section[id]")?.id,"module-"+id(42));assert.match(ui.doc.body.textContent!,/Cambio confirmado/);}
+ if(mode==="confirmed"){assert.equal(ui.doc.activeElement,b);assert.equal(ui.doc.querySelector("section[id]")?.id,"module-"+id(42));assert.match(ui.doc.body.textContent!,/Orden de módulos actualizado/);}
  else {assert.match(ui.doc.body.textContent!,mode==="lost"?/incierto/:/Conflicto/);if(mode==="lost")await ui.settle(()=>b.click());}
  assert.equal(ui.requests.filter(r=>r.method==="PUT").length,1);
  }finally{await ui.close();}
@@ -86,7 +86,7 @@ test("material create ambiguity and rejected edit retain original whitespace; no
  try{
  await ui.click("Unidad 1");await ui.submit('form[aria-label="Crear material"]',{title:"Lectura",markdownBody:"  fuente local  "});
  const source=ui.doc.querySelector<HTMLTextAreaElement>('form[aria-label="Crear material"] textarea')!;
- assert.equal(source.value,"  fuente local  ");
+ assert.equal(source.value,mode==="lost"?"  fuente local  ":"");
  if(mode==="lost"){assert.match(ui.doc.body.textContent!,/coincidencias no prueban/);await ui.submit('form[aria-label="Crear material"]',{title:"Lectura",markdownBody:"otra"});assert.equal(ui.requests.filter(r=>r.method==="POST"&&!r.url.endsWith("/login")).length,1);}
  await ui.submit('form[aria-label="Editar material Lectura"]',{title:"Lectura",markdownBody:"  editar  "});
  assert.equal(ui.doc.querySelector<HTMLTextAreaElement>('form[aria-label="Editar material Lectura"] textarea')!.value,"  editar  ");
@@ -102,7 +102,7 @@ test("pending reorder, material update and create are discarded on context chang
  else{await ui.click("Unidad 1");await ui.submit(operation==="update"?'form[aria-label="Editar material Lectura"]':'form[aria-label="Crear material"]',{title:"Lectura",markdownBody:"Privado"});}
  await ui.actor("student");
  await ui.settle(()=>pending.resolve(Response.json(operation==="order"?{items:[]}:{...material,markdownBody:"Privado"})));
- assert.equal(ui.doc.querySelector("form"),null);assert.doesNotMatch(ui.doc.body.textContent!,/Privado|Cambio confirmado/);
+ assert.equal(ui.doc.querySelector("form"),null);assert.doesNotMatch(ui.doc.body.textContent!,/Privado|creado|actualizado/);
  }finally{await ui.close();}
  }
 });
@@ -114,7 +114,7 @@ test("confirmed create followed by failed empty refresh is not uncertain or a re
  },"teacher");
  try{
  assert.match(ui.doc.body.textContent!,/Sin contenido/);await ui.submit('form[aria-label="Crear módulo"]',{title:"Unidad 1"});
- assert.match(ui.doc.body.textContent!,/Cambio confirmado.*No se pudo actualizar/);assert.doesNotMatch(ui.doc.body.textContent!,/Resultado incierto|Sin contenido para mostrar/);
+ assert.match(ui.doc.body.textContent!,/Módulo creado.*No se pudo actualizar/);assert.doesNotMatch(ui.doc.body.textContent!,/Resultado incierto|Sin contenido para mostrar/);
  }finally{await ui.close();}
 });
 

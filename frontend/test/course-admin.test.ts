@@ -37,7 +37,7 @@ for(const mode of ['match','failed','absent']as const)test(`lost section respons
 });
 for(const status of [409,422,503])test(`mutation ${status} never invents success`,async()=>{
  const ui=await mount(h(CourseDirectory),r=>Response.json(r.method==='POST'?{}:{items:[]},{status:r.method==='POST'?status:200}));try{
- await ui.submit('form',values);assert.doesNotMatch(ui.doc.body.textContent!,/Cambio confirmado/);assert.ok(ui.doc.querySelector('[role="alert"]'));
+ await ui.submit('form',values);assert.doesNotMatch(ui.doc.body.textContent!,/Curso creado|Operación completada/);assert.ok(ui.doc.querySelector('[role="alert"]'));
  }finally{await ui.close();}
 });
 
@@ -48,7 +48,7 @@ test("configuration PATCH sends only changed fields and immutable ownership neve
  });try{
  await ui.submit('form[aria-label="Configurar curso"]',{name:'Nuevo nombre'});assert.deepEqual(await ui.requests.find(r=>r.method==='PATCH')!.json(),{name:'Nuevo nombre'});
  await ui.submit('form[aria-label="Configurar curso"]');assert.match(ui.doc.body.textContent!,/No hay cambios/);assert.equal(ui.requests.filter(r=>r.method==='PATCH').length,1);
- await ui.click('Abrir sección 1');await ui.submit('form[aria-label="Configurar sección"]',{capacity:'0'});assert.deepEqual(await ui.requests.filter(r=>r.method==='PATCH')[1].json(),{capacity:0});
+ await ui.select('select[name="managedSection"]',section.id);await ui.submit('form[aria-label="Configurar sección"]',{capacity:'0'});assert.deepEqual(await ui.requests.filter(r=>r.method==='PATCH')[1].json(),{capacity:0});
  assert.match(ui.doc.body.textContent!,/Capacidad: 0/);
  }finally{await ui.close();}
 });

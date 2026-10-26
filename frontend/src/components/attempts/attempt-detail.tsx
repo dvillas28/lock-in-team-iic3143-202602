@@ -1,4 +1,5 @@
 "use client";
+import { CourseNavigation } from "../courses/course-navigation.tsx";
 import Link from "next/link";
 import type {Session} from "../../lib/auth/session.ts";
 import type {CurrentUser} from "../../lib/auth/validation.ts";
@@ -49,7 +50,7 @@ export function AttemptDetail({attemptId}:{attemptId:string}){
 function AttemptWork({session,slug,user,course,quiz,attempt}:{session:Session;slug:string;user:CurrentUser;course:Course;quiz:SafeQuiz;attempt:Attempt}){
  const {ops,state}=useAttemptOperations(session,slug,user,course,quiz,attempt),a=state.attempt??attempt,cap=attemptCapabilities(user,course,quiz,a);
  const locked=state.busy||!!state.pending||!!state.cancelConfirmed||!cap.edit;
- return <div className="stack quiz-authoring"><Link href={`/courses/${course.id}/quizzes`}>Volver a quizzes</Link><h1 className="serif">{quiz.title}</h1>
+ return <div className="stack quiz-authoring"><Link href={`/courses/${course.id}/quizzes`}>Volver a quizzes</Link><h1 className="serif">{quiz.title}</h1><CourseNavigation course={course} user={user} active="/quizzes" />
  <p className="tnum">Intento {a.attemptNumber} · ID: {a.id}</p><p>Sección histórica: {a.sectionId}</p><p>Estado: {state.cancelConfirmed?"cancelled":a.status}</p>
  <p className="hint">Conserva este enlace para reanudar. Recargar pierde cambios locales y claves pendientes. El cierre no envía ni cancela automáticamente. No hay coordinación de cambios entre pestañas.</p>
  {cap.edit&&!state.cancelConfirmed&&<><p className="markdown-source">{quiz.instructions}</p><p>Apertura: {quiz.opensAt??"Sin límite"} · Cierre: {quiz.closesAt??"Sin límite"} · Máximo: {quiz.maxAttempts??"Ilimitado"}. El servidor revalida cada operación.</p>

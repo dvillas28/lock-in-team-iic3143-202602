@@ -1,4 +1,6 @@
 "use client";
+import { ChevronDown } from "lucide-react";
+import { roleLabel } from "../../lib/courses/role-label.ts";
 import { useRef, useState, type FormEvent } from "react";
 import type { Session } from "../../lib/auth/session.ts";
 import type { CurrentUser } from "../../lib/auth/validation.ts";
@@ -51,6 +53,7 @@ function Participants({ session, slug, user, course, section }: {
     await mutation.run(async (current) => {
       const confirmed = await session.request(c => updateSectionEnrollment(c, slug, section.id, enrollment.id, body), current); if (current())
         await saved(confirmed);
+      return "active" in body ? "Matrícula revocada." : "Rol actualizado.";
     }, async (current) => { await session.request(c => listSectionEnrollments(c, slug, section.id), current); return 'Se consultó el historial actual; el resultado de la escritura no está confirmado.'; });
   }
   function revoke(enrollment: Enrollment, button: HTMLElement) { setTarget(enrollment); trigger.current = button; dialog.current!.showModal(); cancel.current?.focus(); }
@@ -60,38 +63,41 @@ function Participants({ session, slug, user, course, section }: {
       void update(enrollment, { role: next });
   }
   return <section className="stack" aria-label="Participantes">
-    <h3>Participantes e historial · Sección {section.code}</h3>
+    <h3 className="serif">Participantes e historial · Sección {section.code}</h3>
     {result.error ? <ErrorState feedback={result.error} onRetry={() => void result.reload()} /> : !result.data ? <LoadingState /> : !result.data.items.length ? <EmptyState /> :
-      <div className="table-scroll">
+      <div className="table-scroll participants-table" role="region" aria-label={`Participantes de la sección ${section.code}`} tabIndex={0}>
         <table className="data-table">
           <caption>Matrículas activas e históricas</caption>
           <thead>
             <tr>
-              <th>Persona</th>
-              <th>Rol</th>
-              <th>Estado</th>
-              <th>Acciones</th>
+              <th scope="col">Persona</th>
+              <th scope="col">Rol</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Acciones</th>
             </tr>
           </thead>
           <tbody>{result.data.items.map(e => <tr key={e.id} data-enrollment-id={e.id}>
             <td>{e.user.name}<p className="hint">{e.user.email}</p>
             </td>
-            <td>{e.role}</td>
+            <td>{roleLabel(e.role)}</td>
             <td>{e.active ? 'Activa' : 'Histórica'}</td>
-            <td>{e.active && <div className="stack">
-              <form aria-label={`Cambiar rol ${e.id}`} onSubmit={event => role(event, e)}>
-                <label>Rol de {e.user.name}<select className="field" name="role" defaultValue={e.role} disabled={mutation.busy || mutation.uncertain}>{roles.map(r => <option key={r}>{r}</option>)}</select>
+            <td>{e.active ? <details className="participant-actions" onKeyDown={event => {
+              if (event.key === 'Escape') { event.preventDefault(); event.currentTarget.open = false; event.currentTarget.querySelector('summary')?.focus(); }
+            }}>
+              <summary className="btn btn-ghost" aria-label={`Gestionar ${e.user.name}, ${roleLabel(e.role)}`}>Gestionar<ChevronDown size={14} aria-hidden="true" /></summary>
+              <div className="participant-tools"><form className="participant-role-form" aria-label={`Cambiar rol ${e.id}`} onSubmit={event => role(event, e)}>
+                <label className="field-label">Rol de {e.user.name}<select className="field" name="role" defaultValue={e.role} disabled={mutation.busy || mutation.uncertain}>{roles.map(r => <option key={r} value={r}>{roleLabel(r)}</option>)}</select>
                 </label>
                 <button className="btn btn-ghost" type="submit" disabled={mutation.busy || mutation.uncertain}>Cambiar rol</button>
               </form>
-              <button className="btn btn-danger" disabled={mutation.busy || mutation.uncertain} onClick={event => revoke(e, event.currentTarget)}>Revocar {e.role}</button>
-            </div>}</td>
+              <button className="btn btn-danger" disabled={mutation.busy || mutation.uncertain} onClick={event => revoke(e, event.currentTarget)}>Revocar {roleLabel(e.role)}</button>
+            </div></details> : <span className="hint">Sin acciones</span>}</td>
           </tr>)}</tbody>
         </table>
       </div>}
-    <div className="actions">{cursor && <button className="btn btn-ghost" onClick={() => setCursor(undefined)}>Primera página</button>}{result.data?.hasMore && <button className="btn btn-ghost" onClick={() => setCursor(result.data!.nextCursor!)}>Más matrículas</button>}</div>
-    {receipt && <p role="status">Matrícula confirmada: {receipt}</p>}{mutation.message && <p role={mutation.message === 'Cambio confirmado.' ? 'status' : 'alert'}>{mutation.message}</p>}
-    <EnrollmentForm session={session} slug={slug} sectionId={section.id} search={capabilities(user, course, section).search} onSaved={saved} />
+    <div className="actions participant-pagination" aria-label="Páginas de participantes">{cursor && <button className="btn btn-ghost" onClick={() => setCursor(undefined)}>Primera página</button>}{result.data?.hasMore && <button className="btn btn-ghost" onClick={() => setCursor(result.data!.nextCursor!)}>Más matrículas</button>}</div>
+    {receipt && <p role="status">Matrícula confirmada: {receipt}</p>}{mutation.message && <p role={mutation.confirmed ? 'status' : 'alert'}>{mutation.message}</p>}
+    <details className="academic-disclosure"><summary>Asignar participante</summary><EnrollmentForm session={session} slug={slug} sectionId={section.id} search={capabilities(user, course, section).search} onSaved={saved} /></details>
     <dialog ref={dialog} className="modal native-dialog panel" aria-labelledby="revoke-title" onKeyDown={event => {
       if (event.key !== "Tab")
         return;
@@ -107,7 +113,7 @@ function Participants({ session, slug, user, course, section }: {
       }
     }} onCancel={() => trigger.current?.focus()} onClose={() => trigger.current?.focus()}>
       <h2 id="revoke-title">Confirmar revocación</h2>
-      <p>{target?.user.name} · {target?.role} · Sección {section.code}. Se conservará el historial.</p>
+      <p>{target?.user.name} · {target && roleLabel(target.role)} · Sección {section.code}. Se conservará el historial.</p>
       <div className="actions">
         <button ref={cancel} type="button" className="btn btn-ghost" onClick={close}>Cancelar</button>
         <button type="button" className="btn btn-danger" onClick={() => {

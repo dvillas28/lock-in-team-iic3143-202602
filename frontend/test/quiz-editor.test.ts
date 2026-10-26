@@ -20,7 +20,7 @@ test("PATCH saved minimal config; validation/red/conflict preserve inputs and lo
  },'teacher');
  try{await ui.submit('form',{title:'Título local'});assert.equal(ui.doc.querySelector<HTMLInputElement>('[name="title"]')!.value,'Título local');
  const body=await ui.requests.find(r=>r.method==='PATCH')!.clone().json();assert.deepEqual(body,{title:'Título local'});
- assert.match(ui.doc.body.textContent!,mode==='ok'?/Cambio confirmado/:mode==='lost'?/incierto/:mode==='conflict'?/Conflicto/:/Revisa/);
+ assert.match(ui.doc.body.textContent!,mode==='ok'?/Quiz actualizado/:mode==='lost'?/incierto/:mode==='conflict'?/Conflicto/:/Revisa/);
  if(mode==='lost'){await ui.submit('form',{title:'Otra'});assert.equal(ui.requests.filter(r=>r.method==='PATCH').length,1);}
  }finally{await ui.close();}
  }
