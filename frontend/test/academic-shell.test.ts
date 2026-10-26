@@ -32,3 +32,29 @@ test('shell exposes one identity, course scope and active navigation; theme and 
     await ui.settle(()=>first.click()); assert.equal(toggle.getAttribute('aria-expanded'),'false');
   } finally { await ui.close(); globalThis.requestAnimationFrame=previous; }
 });
+
+test('mobile navigation closes from each native link and respects Escape consumed by a control', async () => {
+  const previous = globalThis.requestAnimationFrame;
+  globalThis.requestAnimationFrame = callback => { callback(0); return 0; };
+  const ui = await mount(h(InstitutionShell, { institutionSlug: 'uc', pathname: `/courses/${course.id}` }, h('button', { type: 'button', 'aria-label': 'Control del curso' }, 'Control')), () => Response.json({}));
+  try {
+    const toggle = ui.doc.querySelector<HTMLButtonElement>('.mobile-menu-button')!;
+    for (const link of ui.doc.querySelectorAll<HTMLAnchorElement>('.sidebar-nav a')) {
+      link.addEventListener('click', event => event.preventDefault());
+      await ui.settle(() => toggle.click());
+      await ui.settle(() => link.click());
+      assert.equal(toggle.getAttribute('aria-expanded'), 'false');
+    }
+    await ui.settle(() => toggle.click());
+    const control = ui.doc.querySelector('button[aria-label="Control del curso"]')!;
+    control.addEventListener('keydown', event => event.preventDefault(), { once: true });
+    await ui.settle(() => control.dispatchEvent(new ui.dom.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })));
+    assert.equal(toggle.getAttribute('aria-expanded'), 'true');
+    await ui.settle(() => control.dispatchEvent(new ui.dom.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })));
+    assert.equal(toggle.getAttribute('aria-expanded'), 'false');
+    assert.equal(ui.doc.activeElement, toggle);
+    const closedEscape = new ui.dom.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+    await ui.settle(() => control.dispatchEvent(closedEscape));
+    assert.equal(closedEscape.defaultPrevented, false);
+  } finally { await ui.close(); globalThis.requestAnimationFrame = previous; }
+});

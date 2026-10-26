@@ -1,7 +1,7 @@
 "use client";
 import { BookOpen, ChevronRight, ClipboardList, FolderOpen, GraduationCap, Home, Menu, Moon, Sun, X } from "lucide-react";
 import Link from "next/link";
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { CurrentUser } from "../../lib/auth/validation.ts";
 import { isId } from "../../lib/courses/validation.ts";
 import { institutionHomePath } from "../../lib/institution-routes.ts";
@@ -49,6 +49,9 @@ function pageTitle(pathname: string) {
     }
     return 'Resumen del curso';
 }
+function toggleTheme() {
+    document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+}
 export function InstitutionShell({ institutionSlug, institutionName, actions, children, user, pathname = "/courses" }: InstitutionShellProps) {
     const homePath = institutionHomePath(institutionSlug);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -58,10 +61,18 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, ch
     const base = courseId && isId(courseId) ? `/courses/${courseId}` : undefined;
     const roles = user ? [...new Set(user.sectionMemberships.filter(m => !courseId || m.courseId === courseId).map(m => ({ teacher: 'Docente', student: 'Estudiante', assistant: 'Ayudante' })[m.role]))] : [];
     const closeMenu = () => { setMenuOpen(false); menuButton.current?.focus(); };
-    function toggleTheme() {
-      document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-    }
-    return (<div className={`app academic-app${menuOpen ? ' menu-open' : ''}`} onKeyDown={event => { if (event.key === 'Escape' && menuOpen) { event.preventDefault(); closeMenu(); } }}>
+    useEffect(() => {
+      if (!menuOpen) return;
+      function onEscape(event: KeyboardEvent) {
+        if (event.key !== 'Escape' || event.defaultPrevented) return;
+        event.preventDefault();
+        setMenuOpen(false);
+        menuButton.current?.focus();
+      }
+      window.addEventListener('keydown', onEscape);
+      return () => window.removeEventListener('keydown', onEscape);
+    }, [menuOpen]);
+    return (<div className={`app academic-app${menuOpen ? ' menu-open' : ''}`}>
       <a href="#main-content" className="btn btn-primary skip-link">Saltar al contenido</a>
       <aside className="sidebar" aria-label="Contexto institucional">
         <div className="sidebar-top">
@@ -76,9 +87,9 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, ch
             <span>Institución: <strong>{institutionName ?? institutionSlug}</strong></span>
           </div>
         </div>
-        <nav ref={navigation} id="institution-navigation" className="sidebar-nav" aria-label="Navegación institucional" onClick={event => { if ((event.target as HTMLElement).closest("a")) setMenuOpen(false); }}>
+        <nav ref={navigation} id="institution-navigation" className="sidebar-nav" aria-label="Navegación institucional">
           <p className="nav-section-label">Espacio académico</p>
-          <Link href={homePath} className={`nav-item${pathname === homePath ? " active" : ""}`} aria-current={pathname === homePath ? "page" : undefined}>
+          <Link href={homePath} className={`nav-item${pathname === homePath ? " active" : ""}`} aria-current={pathname === homePath ? "page" : undefined} onClick={() => setMenuOpen(false)}>
             <Home size={16} aria-hidden="true"/>
             Mis cursos
           </Link>
@@ -87,7 +98,7 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, ch
           ].map(([href, label, Icon]) => {
             const target = href as string, active = pathname === target || target !== base && pathname.startsWith(target + '/');
             const Glyph = Icon as typeof Home;
-            return <Link key={target} href={target} className={`nav-item${active ? ' active' : ''}`} aria-current={active ? 'page' : undefined}><Glyph size={16} aria-hidden="true" />{label as string}</Link>;
+            return <Link key={target} href={target} className={`nav-item${active ? ' active' : ''}`} aria-current={active ? 'page' : undefined} onClick={() => setMenuOpen(false)}><Glyph size={16} aria-hidden="true" />{label as string}</Link>;
           })}</>}
         </nav>
         {user && <div className="sidebar-bottom institution-user"><div className="user-row"><span className="avatar" aria-hidden="true">{user.name.slice(0, 1)}</span><div><p className="name">{user.name}</p><p className="role">{user.email}</p><p className="role">{[...roles, ...(user.institutionMembership.isAdmin ? ['Administración institucional'] : []), ...(user.institutionMembership.isSuperAdmin ? ['Superadministración'] : [])].join(' · ') || 'Miembro institucional'}</p></div></div>{actions}</div>}
