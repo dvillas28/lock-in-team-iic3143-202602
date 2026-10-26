@@ -7,6 +7,7 @@ import type { Session } from "../../lib/auth/session.ts";
 export function useMutation(session: Session) {
   const [status, setStatus] = useState<{
     busy: boolean;
+    confirmed?: boolean;
     message?: string;
     field?: string;
     uncertain?: boolean;
@@ -23,7 +24,7 @@ export function useMutation(session: Session) {
     try {
       const message = await operation(current);
       if (current())
-        setStatus({ busy: false, message: message || "Cambio confirmado." });
+        setStatus({ busy: false, confirmed: true, message: message || "Operación completada." });
       locked.current = false;
     }
     catch (error) {

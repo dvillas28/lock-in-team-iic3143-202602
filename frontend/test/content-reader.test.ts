@@ -4,22 +4,22 @@ import {createElement as h} from "react";
 import {ModulesPanel} from "../src/components/content/modules-panel.tsx";
 import {MaterialReader} from "../src/components/content/material-reader.tsx";
 import {mount} from "./fixtures/course-ui.ts";
-import {unit,material,course,matrix,adversarial,id} from "./fixtures/content.ts";
+import {unit,material,course,matrix,id} from "./fixtures/content.ts";
 import {deferred} from "./fixtures/courses.ts";
 const route={courseId:course.id,moduleId:unit.id,materialId:material.id};
 test("reader renders adversarial source inert and preserves whitespace; validates both parents",async()=>{
  const ui=await mount(h(MaterialReader,route),r=>Response.json(r.url.includes("/materials/")?material:unit),"teacher");
- try {assert.equal(ui.doc.querySelector(".markdown-source")?.textContent,adversarial);assert.equal(ui.doc.querySelectorAll("script,img,iframe").length,0);assert.equal(ui.requests.some(r=>r.url.includes("evil.test")),false);assert.ok(ui.doc.querySelector('a[href*="/modules#"]'));}
+ try {assert.match(ui.doc.querySelector(".academic-markdown")?.textContent ?? "", /globalThis.pwned=1/);assert.equal(ui.doc.querySelector(".academic-markdown a[href]"),null);assert.equal(ui.doc.querySelectorAll("script,img,iframe").length,0);assert.equal(ui.requests.some(r=>r.url.includes("evil.test")),false);assert.ok(ui.doc.querySelector('a[href*="/modules#"]'));}
  finally {await ui.close();}
  for(const wrong of ["course","material"]) {
  const u=await mount(h(MaterialReader,route),r=>Response.json(r.url.includes("/materials/")?{...material,moduleId:wrong==="material"?id(99):unit.id}:{...unit,courseId:wrong==="course"?id(11):course.id}),"teacher");
- try{assert.equal(u.doc.querySelector(".markdown-source"),null);}finally{await u.close();}
+ try{assert.equal(u.doc.querySelector(".academic-markdown"),null);}finally{await u.close();}
  }
 });
 test("student/assistant direct route publication matrix is enforced by rejected API",async()=>{
  for(const profile of ["student","assistant"])for(const m of matrix) {
  const ui=await mount(h(MaterialReader,route),r=>!m.visible?Response.json({},{status:404}):Response.json(r.url.includes("/materials/")?m.material:m.unit),profile);
- try{assert.equal(!!ui.doc.querySelector(".markdown-source"),m.visible);}finally{await ui.close();}
+ try{assert.equal(!!ui.doc.querySelector(".academic-markdown"),m.visible);}finally{await ui.close();}
  }
 });
 test("modules lazy-load material; loading, empty and errors differ; links navigate real routes",async()=>{
@@ -41,7 +41,7 @@ test("resource navigation and logout discard delayed content including old forbi
 test("identity/tenant changes and current 401/403/404 clear private reads; metadata stays inert",async()=>{
  for(const status of [401,403,404]){
  const ui=await mount(h(MaterialReader,route),r=>r.url.includes("/materials/")?Response.json({},{status}):Response.json(unit),"teacher");
- try{assert.equal(ui.doc.querySelector(".markdown-source"),null);assert.doesNotMatch(ui.doc.body.textContent!,/globalThis.pwned/);}finally{await ui.close();}
+ try{assert.equal(ui.doc.querySelector(".academic-markdown"),null);assert.doesNotMatch(ui.doc.body.textContent!,/globalThis.pwned/);}finally{await ui.close();}
  }
  for(const tenant of ["uc","utfsm"]){
  const old=deferred<Response>();const ui=await mount(h(MaterialReader,route),r=>r.url.includes("/institution/uc/")?old.promise:Response.json(r.url.includes("/materials/")?{...material,markdownBody:"UTFSM actual"}:unit),"teacher");

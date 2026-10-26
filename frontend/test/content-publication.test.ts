@@ -29,7 +29,7 @@ test("publication distinguishes rejected, uncertain and confirmed with failed re
  return Response.json(r.url.endsWith("/modules")?{items:[unit]}:r.url.endsWith(unit.id)?unit:course);
  },"teacher");
  try{const b=ui.doc.querySelector<HTMLButtonElement>('button[aria-label="Publicar módulo Unidad 1"]')!;await ui.settle(()=>b.click());
- assert.match(ui.doc.body.textContent!,mode==="uncertain"?/Resultado incierto/:mode==="refresh"?/Cambio confirmado.*No se pudo actualizar/:/Revisa/);
+ assert.match(ui.doc.body.textContent!,mode==="uncertain"?/Resultado incierto/:mode==="refresh"?/Módulo publicado.*No se pudo actualizar/:/Revisa/);
  assert.equal(ui.requests.filter(r=>r.method==="POST"&&!r.url.endsWith("/login")).length,1);
  if(mode==="uncertain"){await ui.settle(()=>b.click());assert.equal(ui.requests.filter(r=>r.method==="POST"&&!r.url.endsWith("/login")).length,1);}
  }finally{await ui.close();}
@@ -40,7 +40,7 @@ test("publication revoked or completed after logout never announces success",asy
  const pending=deferred<Response>();const ui=await mount(view(),r=>r.method==="POST"?pending.promise:Response.json(r.url.endsWith("/modules")?{items:[unit]}:course),"teacher");
  try{const b=ui.doc.querySelector<HTMLButtonElement>('button[aria-label="Publicar módulo Unidad 1"]')!;await ui.settle(()=>b.click());if(status===200)await ui.settle(()=>ui.session.logout());
  await ui.settle(()=>pending.resolve(Response.json({...unit,publishedAt:timestamp},{status})));
- assert.doesNotMatch(ui.doc.body.textContent!,/Cambio confirmado|Unidad 1/);
+ assert.doesNotMatch(ui.doc.body.textContent!,/Módulo publicado|Unidad 1/);
  }finally{await ui.close();}
  }
 });
@@ -53,7 +53,7 @@ test("uncertain item publication refreshes observed state without claiming write
  },"teacher");
  try{
  await ui.click("Unidad 1");const button=ui.doc.querySelector<HTMLButtonElement>('button[aria-label="Publicar material Lectura"]')!;
- await ui.settle(()=>button.click());assert.match(ui.doc.body.textContent!,/Resultado incierto/);assert.doesNotMatch(ui.doc.body.textContent!,/Cambio confirmado/);
+ await ui.settle(()=>button.click());assert.match(ui.doc.body.textContent!,/Resultado incierto/);assert.doesNotMatch(ui.doc.body.textContent!,/Material publicado/);
  assert.equal(button.getAttribute("aria-pressed"),"true");assert.equal(button.getAttribute("aria-disabled"),"true");
  }finally{await ui.close();}
 });

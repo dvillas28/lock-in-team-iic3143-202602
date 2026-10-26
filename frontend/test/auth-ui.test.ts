@@ -93,7 +93,7 @@ test("accessible form, validation, password toggle and successful institution na
     assert.deepEqual(await ui.requests[0].json(),{email:"persona@example.test",password:" pass "});
     await ui.navigate("/institutions");assert.equal(ui.path,"/courses");assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
     assert.ok(ui.requests.some(request=>new URL(request.url).pathname==="/api/v1/institution/uc/me"));
-    assert.match(ui.doc.body.textContent!,/Persona · persona@example.test/);
+    assert.match(ui.doc.body.textContent!,/Persona.*persona@example.test/);
     await ui.navigate("/institutions/utfsm");assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);await ui.navigate("/courses");
     await ui.click("Cerrar sesión");assert.equal(ui.path,"/login");assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT|persona@example.test/);
     await ui.navigate("/courses");assert.equal(ui.path,"/login");assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);

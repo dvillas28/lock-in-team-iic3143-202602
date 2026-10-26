@@ -13,14 +13,17 @@ export function MaterialForm({session, slug, moduleId, item, onSaved, disabled =
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (disabled) return;
-    const form = new FormData(event.currentTarget);
+    const element = event.currentTarget;
+    const form = new FormData(element);
     await mutation.run(async current => {
       const values = { title: title(form.get("title")), markdownBody: markdown(form.get("markdownBody")) };
       if (item) await session.request(c => updateMaterial(c, slug, item.id, moduleId, changed(values, item)), current);
       else await session.request(c => createMarkdownMaterial(c, slug, moduleId, values), current);
       if (!current()) return;
+      if (!item) element.reset();
       const refreshed = await onSaved();
-      return refreshed ? "Cambio confirmado." : "Cambio confirmado. No se pudo actualizar la consulta; reintenta solo la lectura.";
+      const message = item ? "Material actualizado." : "Material creado.";
+      return refreshed ? message : `${message} No se pudo actualizar la consulta; reintenta solo la lectura.`;
     }, async current => {
       if (item) await session.request(c => getMaterial(c, slug, item.id, moduleId), current);
       else await session.request(c => listModuleMaterials(c, slug, moduleId), current);
@@ -35,9 +38,9 @@ export function MaterialForm({session, slug, moduleId, item, onSaved, disabled =
     <p className="hint">Guardado explícito. Editar reemplaza el contenido, incluso publicado. Sin fusión de ediciones concurrentes.</p>
     <fieldset disabled={disabled || mutation.busy || mutation.uncertain} className="stack">
       <Field name="title" label="Título del material" value={item?.title} invalid={mutation.field === "title"} error={mutation.field === "title" ? mutation.message : undefined} />
-      <Field name="markdownBody" label="Contenido markdown" multiline value={item?.markdownBody} invalid={mutation.field === "markdownBody"} error={mutation.field === "markdownBody" ? mutation.message : "Texto sin formato enriquecido. JSON completo: hasta 4096 bytes UTF-8."} />
+      <Field name="markdownBody" label="Contenido markdown" multiline value={item?.markdownBody} invalid={mutation.field === "markdownBody"} error={mutation.field === "markdownBody" ? mutation.message : "Markdown: encabezados, listas, tablas y código. JSON completo: hasta 4096 bytes UTF-8. Imágenes externas deshabilitadas."} />
       <button className="btn btn-primary" type="submit">{item ? "Guardar material" : "Crear material"}</button>
     </fieldset>
-    {mutation.message && <p role={mutation.message.startsWith("Cambio confirmado.") ? "status" : "alert"}>{mutation.message}</p>}
+    {mutation.message && <p role={mutation.confirmed ? "status" : "alert"}>{mutation.message}</p>}
   </form>;
 }

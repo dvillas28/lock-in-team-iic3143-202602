@@ -1,6 +1,6 @@
 # Contenido markdown compartido y publicación independiente
 
-Fecha: 2026-10-16. Estado: aceptado para planificación; implementación pendiente.
+Fecha: 2026-10-16. Estado: implementado; lector enriquecido actualizado el 2026-10-25.
 
 ## Contexto
 
@@ -29,9 +29,14 @@ publicación padre/ítem, historial y consumo sin acciones ejecutables.
 Dos secciones reciben los mismos IDs; no se pueden mantener variantes por sección.
 Edición publicada aparece inmediatamente; no existe workflow de revisión adicional.
 No eliminar contenido para ocultarlo ni despublicar en cascada a los hijos.
-No sanitizar markdown con regex: el consumidor actual lo trata como texto.
-Antes de un visor enriquecido, definir sanitización probada y política de enlaces
-que no ejecute HTML/URLs aportados por usuarios; ese cambio requiere sus checks UI.
+El consumidor React usa `react-markdown` + `remark-gfm`, sin HTML habilitado,
+rehype-raw ni dangerouslySetInnerHTML. No se implementa parser/sanitizador con regex.
+La política central valida URLs con URL y rechaza entradas ambiguas antes de normalizar;
+solo HTTP(S) absolutos sin credenciales y fragmentos no vacíos. No hay resolución relativa.
+Enlaces HTTP(S) abren con noopener/noreferrer y no-referrer; sin prefetch ni tokens.
+Imágenes se sustituyen por texto alternativo inerte; ningún recurso remoto se monta.
+Código conserva texto literal. Encabezados comienzan en h2 dentro del h1 de la página.
+[Guía y pruebas](../guides/frontend-content.md) detallan límites y evidencia.
 Binarios/RF15 y parte de RF14 permanecen P2, sin storage/provider en este plan.
 
 Detalles: [plan](../../specs/20261014-234944_modulos-material/plan.md),

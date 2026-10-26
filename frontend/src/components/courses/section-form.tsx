@@ -15,7 +15,8 @@ export function SectionForm({ session, slug, courseId, section, onSaved }: {
   const mutation = useMutation(session);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const element = event.currentTarget;
+    const form = new FormData(element);
     await mutation.run(async (current) => {
       const body = { code: text(form.get("code"), 32, "code"), capacity: capacity(String(form.get("capacity") ?? "")) };
       if (section)
@@ -24,7 +25,9 @@ export function SectionForm({ session, slug, courseId, section, onSaved }: {
         await session.request(c => createSection(c, slug, courseId, body), current);
       if (!current())
         return;
+      if (!section) element.reset();
       await onSaved();
+      return section ? "Sección actualizada." : "Sección creada.";
     }, async (current) => {
       const items = await session.request(c => listSections(c, slug, courseId), current);
       const match = items.some(s => s.code === String(form.get("code")).trim() && s.capacity === capacity(String(form.get("capacity") ?? "")));
@@ -40,5 +43,5 @@ export function SectionForm({ session, slug, courseId, section, onSaved }: {
       </div>
       <button className="btn btn-primary" type="submit">{mutation.busy ? "Guardando…" : section ? "Guardar sección" : "Crear sección"}</button>
     </fieldset>
-    {mutation.message && <p role={mutation.message === 'Cambio confirmado.' ? 'status' : 'alert'}>{mutation.message}</p>}</form>;
+    {mutation.message && <p role={mutation.confirmed ? 'status' : 'alert'}>{mutation.message}</p>}</form>;
 }

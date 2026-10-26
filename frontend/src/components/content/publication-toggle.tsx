@@ -16,7 +16,8 @@ export function PublicationToggle({session, slug, kind, id, parentId, title, pub
       await session.request(async c => kind === "module" ? await setModulePublication(c, slug, id, parentId, !published) : await setMaterialPublication(c, slug, id, parentId, !published), current);
       if (!current()) return;
       const refreshed = await onSaved();
-      return refreshed ? "Cambio confirmado." : "Cambio confirmado. No se pudo actualizar la consulta; reintenta solo la lectura.";
+      const message = `${kind === "module" ? "Módulo" : "Material"} ${published ? "ocultado" : "publicado"}.`;
+      return refreshed ? message : `${message} No se pudo actualizar la consulta; reintenta solo la lectura.`;
     }, async current => {
       await session.request(async c => kind === "module" ? await getCourseModule(c, slug, id, parentId) : await getMaterial(c, slug, id, parentId), current);
       if (!current()) return "Contexto cambiado.";
@@ -25,11 +26,11 @@ export function PublicationToggle({session, slug, kind, id, parentId, title, pub
       return "Se consultó la publicación actual. Revisa antes de repetir.";
     });
   }
-  return <div className="stack">
-    <button type="button" className="btn btn-ghost" aria-label={`${published ? "Ocultar" : "Publicar"} ${label} ${title}`} aria-pressed={published} aria-disabled={disabled || mutation.busy || !!mutation.uncertain} onClick={toggle}>
+  return <div className="publication-control">
+    <button type="button" className={`btn btn-ghost${published ? " is-published" : ""}`} aria-label={`${published ? "Ocultar" : "Publicar"} ${label} ${title}`} aria-pressed={published} aria-disabled={disabled || mutation.busy || !!mutation.uncertain} onClick={toggle}>
       {published ? <CircleCheck size={18} aria-hidden="true" /> : <Circle size={18} aria-hidden="true" />}
-      {published ? "Publicado" : "Borrador"} · {published ? "Ocultar" : "Publicar"}
+      {published ? "Publicado" : "Borrador"}
     </button>
-    {mutation.message && <p role={mutation.message.startsWith("Cambio confirmado.") ? "status" : "alert"}>{mutation.message}</p>}
+    {mutation.message && <p role={mutation.confirmed ? "status" : "alert"}>{mutation.message}</p>}
   </div>;
 }

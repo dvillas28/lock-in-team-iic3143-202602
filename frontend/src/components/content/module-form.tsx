@@ -13,14 +13,17 @@ export function ModuleForm({session, slug, courseId, item, items, onSaved, disab
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (disabled) return;
-    const form = new FormData(event.currentTarget);
+    const element = event.currentTarget;
+    const form = new FormData(element);
     await mutation.run(async current => {
       const values = {title: title(form.get("title"))};
       if (item) await session.request(c => updateCourseModule(c, slug, item.id, courseId, changed(values, item) as {title: string}), current);
       else await session.request(c => createCourseModule(c, slug, courseId, {...values, position: nextPosition(items)}), current);
       if (!current()) return;
+      if (!item) element.reset();
       const refreshed = await onSaved();
-      return refreshed ? "Cambio confirmado." : "Cambio confirmado. No se pudo actualizar la consulta; reintenta solo la lectura.";
+      const message = item ? "Módulo actualizado." : "Módulo creado.";
+      return refreshed ? message : `${message} No se pudo actualizar la consulta; reintenta solo la lectura.`;
     }, async current => {
       if (item) await session.request(c => getCourseModule(c, slug, item.id, courseId), current);
       else await session.request(c => listCourseModules(c, slug, courseId), current);
@@ -36,6 +39,6 @@ export function ModuleForm({session, slug, courseId, item, items, onSaved, disab
       <Field name="title" label="Título del módulo" value={item?.title} invalid={mutation.field === "title"} error={mutation.field === "title" ? mutation.message : undefined} />
       <button className="btn btn-primary" type="submit">{item ? "Guardar módulo" : "Crear módulo"}</button>
     </fieldset>
-    {mutation.message && <p role={mutation.message.startsWith("Cambio confirmado.") ? "status" : "alert"}>{mutation.message}</p>}
+    {mutation.message && <p role={mutation.confirmed ? "status" : "alert"}>{mutation.message}</p>}
   </form>;
 }

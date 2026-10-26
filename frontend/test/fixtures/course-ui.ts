@@ -29,6 +29,7 @@ export async function mount(view:ReactNode, reply:(r:Request)=>Response|Promise<
  setActor(profile:string){actor=user(profile,slug);},
  async actor(profile:string,tenant=slug){actor=user(profile,tenant);await act(async()=>{await session.loadContext(tenant);await flush();});},
  async click(text:string){const el=Array.from(doc.querySelectorAll<HTMLElement>('button,a')).find(e=>e.textContent===text);if(!el)throw new Error(`Missing ${text}: ${doc.body.textContent}`);await act(async()=>{el.click();await flush();});},
+ async select(selector:string,value:string){const el=doc.querySelector<HTMLSelectElement>(selector)!;await act(async()=>{el.value=value;el.dispatchEvent(new dom.window.Event('change',{bubbles:true}));await flush();});},
  async submit(selector='form',values:Record<string,string>={}){const form=doc.querySelector<HTMLFormElement>(selector)!;for(const [key,value]of Object.entries(values))(form.elements.namedItem(key) as HTMLInputElement).value=value;await act(async()=>{form.dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));await flush();});},
  async settle(action:()=>void){await act(async()=>{action();await flush();});},
  async close(){await act(async()=>root.unmount());dom.window.close();globalThis.fetch=prev;if(env===undefined)delete process.env.NEXT_PUBLIC_API_URL;else process.env.NEXT_PUBLIC_API_URL=env;old.forEach((d,k)=>{if(d)Object.defineProperty(globalThis,k,d);else Reflect.deleteProperty(globalThis,k);});}

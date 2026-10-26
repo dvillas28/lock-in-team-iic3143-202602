@@ -1,4 +1,6 @@
 "use client";
+import { CourseNavigation } from "../courses/course-navigation.tsx";
+import { ClipboardList, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import {KnownAttemptLink} from "../attempts/attempt-start.tsx";
 import { useSession } from "../auth/session-provider.tsx";
@@ -20,9 +22,9 @@ export function QuizList({courseId}:{courseId:string}) {
   if(!context?.user) return <LoadingState/>;
   if(!result.data) return result.error ? <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/> : <LoadingState/>;
   const {course,sections,items}=result.data;
-  return <div className="stack"><Link href={`/courses/${courseId}`}>Volver al curso</Link><h1 className="serif">Quizzes · {course.name}</h1>
+  return <div className="stack"><Link href={`/courses/${courseId}`}>Volver al curso</Link><h1 className="serif">Quizzes · {course.name}</h1><CourseNavigation course={course} user={context.user} active="/quizzes" />
     {result.error && <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/>}
-    <ul className="stack">{items.map(q=><li className="panel stack" key={q.id}><Link href={`/courses/${courseId}/quizzes/${q.id}`}>{q.title}</Link><p>{q.status === "draft" ? "Borrador" : "Publicado"} · {q.sectionId ? `Sección ${sections.find(s=>s.id===q.sectionId)?.code}` : "Todo el curso"}</p></li>)}</ul>
+    <ul className="stack quiz-resource-list">{items.map(q=><li className="card quiz-resource-row" key={q.id}><ClipboardList size={20} aria-hidden="true" /><div><Link href={`/courses/${courseId}/quizzes/${q.id}`}>{q.title}</Link><p>{q.status === "draft" ? "Borrador" : "Publicado"} · {q.sectionId ? `Sección ${sections.find(s=>s.id===q.sectionId)?.code}` : "Todo el curso"}</p></div><ArrowUpRight size={16} aria-hidden="true" /></li>)}</ul>
     {!items.length && !result.error && <EmptyState/>}
     <KnownAttemptLink key={scope+":known"}/>
     <QuizCreate key={scope} session={session} slug={slug} user={context.user} course={course} sections={sections} onSaved={result.reload}/>

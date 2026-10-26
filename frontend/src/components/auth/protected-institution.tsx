@@ -40,7 +40,7 @@ export function ProtectedInstitution({ slug: legacySlug, children }: Readonly<{ 
   const context = state.context?.slug === slug ? state.context : undefined;
   if (context?.error) return <main className="content"><SessionActions /><ErrorState feedback={context.error} onRetry={() => void session.loadContext(slug!)} /></main>;
   if (!validHost || !slug || !context?.user) return <main className="content"><LoadingState /></main>;
-  return <InstitutionShell key={`${state.generation}:${slug}`} pathname={pathname} institutionSlug={slug} institutionName={context.user.institutionMembership.institution.name} actions={<SessionActions />}>
-    <p className="hint">{context.user.name} · {context.user.email}</p>{children}
+  return <InstitutionShell key={`${state.generation}:${slug}`} pathname={pathname} institutionSlug={slug} institutionName={context.user.institutionMembership.institution.name} user={context.user} actions={<SessionActions />}>
+    {children}
   </InstitutionShell>;
 }

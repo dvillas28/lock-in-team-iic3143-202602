@@ -115,13 +115,13 @@ test("not-found offers a working public destination without leaking a slug", () 
 test("course breadcrumbs reflect the real detail or section path without demo profiles",()=>{
  for(const suffix of ['abc','abc/sections']){
  const html=renderToStaticMarkup(createElement(InstitutionShell,{institutionSlug:'uc',pathname:'/courses/'+suffix}));
- assert.match(html,/aria-current="page"/);assert.match(html,suffix.endsWith('sections')?/Secciones/:/Detalle del curso/);assert.doesNotMatch(html,/profile=|role=teacher/);
+ assert.match(html,/aria-current="page"/);assert.match(html,suffix.endsWith('sections')?/Secciones/:/Resumen del curso/);assert.doesNotMatch(html,/profile=|role=teacher/);
  }
 });
 
 test('course breadcrumb labels cover every academic route',()=>{
  const c='/courses/10000000-0000-4000-8000-000000000010';
- for(const [suffix,label]of [['/grades','Mis notas'],['/gradebook','Libro de notas'],['/audit','Auditoría'],['/quizzes/q/attempts/a','Revisión de intento'],['/quizzes/q/attempts','Intentos'],['/quizzes/q/authoring','Autoría y pauta'],['/quizzes/q','Detalle del quiz'],['/quizzes','Quizzes'],['/modules/m/materials/x','Material'],['/modules','Módulos'],['/sections','Secciones'],['','Detalle del curso']]){
+ for(const [suffix,label]of [['/grades','Mis notas'],['/gradebook','Libro de notas'],['/audit','Auditoría'],['/quizzes/q/attempts/a','Revisión de intento'],['/quizzes/q/attempts','Intentos'],['/quizzes/q/authoring','Autoría y pauta'],['/quizzes/q','Detalle del quiz'],['/quizzes','Quizzes'],['/modules/m/materials/x','Material'],['/modules','Módulos'],['/sections','Secciones'],['','Resumen del curso']]){
  const html=renderToStaticMarkup(createElement(InstitutionShell,{institutionSlug:'uc',pathname:c+suffix}));assert.ok(html.includes('aria-current="page">'+label+'</span>'),label);
  }
 });

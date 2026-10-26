@@ -14,7 +14,7 @@ test("pending private read/write is discarded on logout, tenant, user, revocatio
  else if(change==='expiry'){clock+=1000000;await ui.settle(()=>ui.session.checkExpiry());}
  else await ui.actor(change==='revocation'?'student':change==='user'?'foreign':'teacher',change==='tenant'?'utfsm':'uc');
  await ui.settle(()=>pending.resolve(Response.json({...draft,title:'Privado',courseId:change==='tenant'?id(11):course.id})));
- assert.doesNotMatch(ui.doc.body.textContent!,/Privado|Cambio confirmado/,operation+":"+change);
+ assert.doesNotMatch(ui.doc.body.textContent!,/Privado|Quiz creado|Quiz actualizado|Publicación confirmada/,operation+":"+change);
  assert.equal(ui.dom.window.localStorage.length,0);assert.equal(ui.dom.window.sessionStorage.length,0);assert.doesNotMatch(ui.dom.window.location.href,/Privado|isCorrect/);
  }finally{await ui.close();Date.now=realNow;}
  }
