@@ -49,8 +49,8 @@ Nada de esto despliega; se puede hacer mientras la PR está en revisión.
 3. **Save, rebuild, and deploy** (o Save y luego **Manual Deploy → Deploy latest commit**).
 4. En **Logs** del backend debe aparecer `{"operation":"predeploy","outcome":"ok"}` y luego
    el servicio queda *Live*. Si aparece `"category":"config"`, revisar la URL;
-   si aparece un error de permisos al crear `academix_runtime`, detenerse y avisar:
-   el usuario de Render no tendría `CREATEROLE` y hay que replantear la base.
+   si aparece `"category":"schema"` con la demo activa, revisar que `main` incluya la
+   migración `operator_maintenance`.
 
 ### 3. Conectar Release con los servicios
 
