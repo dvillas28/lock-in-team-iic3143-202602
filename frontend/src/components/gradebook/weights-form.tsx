@@ -1,4 +1,5 @@
 "use client";
+import { useFeedbackState } from "../use-feedback.ts";
 import { useRef, useState } from 'react';
 import type { Session } from '../../lib/auth/session.ts';
 import type { GradeItem } from '../../lib/gradebook/validation.ts';
@@ -15,7 +16,7 @@ export function WeightsForm({ session, slug, courseId, items, locked, busy = fal
     busy?: boolean;
     onSaved: () => Promise<unknown>;
 }>) {
-    const [status, setStatus] = useState<'ready' | 'saving' | 'uncertain' | 'locked'>('ready'), [message, setMessage] = useState('');
+    const [status, setStatus] = useState<'ready' | 'saving' | 'uncertain' | 'locked'>('ready'), [message, setMessage] = useFeedbackState();
     const pending = useRef(false);
     const scan = useResource(session, `${session.getSnapshot().generation}:${slug}:${courseId}:freeze`, async (c) => {
         const freeze = await readFreeze(c, slug, courseId, items);
@@ -43,7 +44,7 @@ export function WeightsForm({ session, slug, courseId, items, locked, busy = fal
             if (context !== session.getSnapshot().context) {
                 return;
             }
-            setMessage('Pesos confirmados por backend.');
+            setMessage('Ponderaciones guardadas.');
             setStatus('ready');
             await scan.reload();
             await onSaved();
@@ -54,37 +55,37 @@ export function WeightsForm({ session, slug, courseId, items, locked, busy = fal
             }
             if (e instanceof ApiHttpError && e.problem.code === 'GRADE_WEIGHTS_LOCKED') {
                 setStatus('locked');
-                setMessage('Pesos bloqueados por publicación.');
+                setMessage({ message: 'Pesos bloqueados por publicación.', persistent: true });
             }
             else if (e instanceof TypeError || e instanceof ApiHttpError && e.status < 500) {
                 setStatus('ready');
-                setMessage(e instanceof TypeError ? e.message : getRouteFeedback(e).message);
+                setMessage({ message: e instanceof TypeError ? e.message : getRouteFeedback(e).message, persistent: true });
             }
             else {
                 setStatus('uncertain');
-                setMessage('Guardado incierto. Consulta los pesos actuales; una lectura no descarta una escritura aún en vuelo. No se reenviará automáticamente.');
+                setMessage({ message: 'Guardado incierto. Consulta los pesos actuales; una lectura no descarta una escritura aún en vuelo. No se reenviará automáticamente.', persistent: true });
             }
         }
         finally {
             pending.current = false;
         }
     }
-    let statusMessage = 'Libro global revisado. El backend resuelve publicaciones concurrentes.';
+    let statusMessage = 'Puedes ajustar las ponderaciones antes de publicar notas.';
     if (frozen) {
         statusMessage = 'Pesos bloqueados por publicación.';
     }
     else if (!scan.data || scan.error) {
-        statusMessage = 'Freeze desconocido: guardar bloqueado.';
+        statusMessage = 'Comprobando si las ponderaciones se pueden editar.';
     }
     else if (status === 'saving') {
         statusMessage = 'Guardando pesos…';
     }
     return <section className="panel stack"><h2 className="serif">Ponderaciones</h2><output aria-live="polite">{statusMessage}</output>
- {scan.error && <p role="alert">{scan.error.message}</p>}<p aria-live="polite">{message}</p>
+ {scan.error && <p role="alert">{scan.error.message}</p>}{message && <p aria-live="polite">{message}</p>}
  {!frozen && scan.data && !scan.error && status !== 'uncertain' && <form key={JSON.stringify(scan.data.current)} onSubmit={e => {
         e.preventDefault();
         void save(e.currentTarget);
-    }} className="stack"><fieldset disabled={busy || status === 'saving'}><legend>Todos los pesos, suma exacta 100 %</legend>{scan.data.current.items.map(i => <label className="field-label" key={i.id}>{i.title}<input className="field tnum" name={i.id} defaultValue={String(i.weightPercent)} inputMode="decimal" required/></label>)}</fieldset><button type="submit" data-weights className="btn btn-primary" disabled={busy || status === 'saving' || !scan.data.current.items.length}>Guardar pesos</button></form>}
+    }} className="stack"><fieldset className="selection-group" disabled={busy || status === 'saving'}><legend>La suma de las ponderaciones debe ser 100 %</legend>{scan.data.current.items.map(i => <label className="field-label" key={i.id}>{i.title}<input className="field tnum" name={i.id} defaultValue={String(i.weightPercent)} inputMode="decimal" required/></label>)}</fieldset><button type="submit" data-weights className="btn btn-primary" disabled={busy || status === 'saving' || !scan.data.current.items.length}>Guardar pesos</button></form>}
  {status === 'uncertain' && scan.data && <ul>{scan.data.current.items.map(i => <li className="tnum" key={i.id}>{i.title}: {i.weightPercent} % observado</li>)}</ul>}
  <button type="button" className="btn btn-ghost" disabled={busy || status === 'saving'} onClick={() => void scan.reload()}>Consultar pesos y bloqueo</button>{status === 'uncertain' && <button type="button" className="btn btn-ghost" onClick={() => {
                 if (window.confirm('La lectura no prueba que terminó la escritura anterior. ¿Revisaste el estado y deseas habilitar un nuevo guardado explícito?')) {

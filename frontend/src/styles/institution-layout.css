@@ -79,11 +79,8 @@ fieldset.stack { border: 0; padding: 0; min-width: 0; }
 .academic-app .participants-table { max-height: min(52dvh, 512px); overflow: auto; overscroll-behavior: contain; }
 .academic-app .participants-table thead th { position: sticky; top: 0; z-index: 1; background: var(--surface); }
 .academic-app .participants-table td { vertical-align: top; }
-.academic-app .participant-actions > summary { list-style: none; }
-.academic-app .participant-actions > summary::-webkit-details-marker { display: none; }
-.academic-app .participant-tools { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin-top: 12px; }
-.academic-app .participant-role-form { display: flex; align-items: end; flex-wrap: wrap; gap: 8px; }
-.academic-app .participant-role-form label { min-width: 160px; }
-.academic-app .participant-role-form select { margin-top: 6px; }
+.academic-app .participant-management { width: min(440px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; }
+.academic-app .participant-management :is(.participant-identity, .field-label, [role="alert"]) { overflow-wrap: anywhere; }
+.academic-app .participant-management select { margin-top: 6px; }
 .academic-app .participant-pagination { margin-top: 0; }
 @media (max-width: 760px) { .academic-app .section-picker-fields { grid-template-columns: minmax(0, 1fr); } }

@@ -37,6 +37,7 @@ test("history and sibling roles survive role successor, POST 200 and pagination 
  return Response.json(page(rows));
  });try{
  await ui.select('select[name="managedSection"]',section.id);assert.match(ui.doc.body.textContent!,/Histórica/);await ui.submit('form[aria-label="Asignar rol"]',{userId:person.id,role:'student'});
+ await ui.settle(()=>ui.doc.querySelector<HTMLButtonElement>(`[data-enrollment-id="${enrollment.id}"] button`)!.click());
  await ui.submit(`form[aria-label="Cambiar rol ${enrollment.id}"]`,{role:'teacher'});
  assert.match(ui.doc.body.textContent!,/Docente/);assert.equal(ui.doc.querySelectorAll('[data-enrollment-id]').length,3);
  assert.ok(ui.doc.querySelector(`[data-enrollment-id="${id(99)}"]`));
@@ -46,14 +47,14 @@ test("revoke last teacher requires confirmation; cancel sends nothing",async()=>
  const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>r.url.includes('/enrollments')?Response.json(r.method==='PATCH'?{...enrollment,role:'teacher',active:false}:page([{...enrollment,role:'teacher'}])):reply(r));try{
  await ui.select('select[name="managedSection"]',section.id);const dialog=ui.doc.querySelector('dialog') as HTMLDialogElement;
  dialog.showModal=()=>{dialog.setAttribute('open','');};dialog.close=()=>{dialog.removeAttribute('open');};
- await ui.click('Revocar Docente');assert.ok(dialog.hasAttribute('open'));
+ await ui.click('Gestionar');await ui.click('Revocar Docente');assert.ok(dialog.hasAttribute('open'));
  await ui.settle(()=>dialog.dispatchEvent(new ui.dom.window.KeyboardEvent('keydown',{key:'Tab',shiftKey:true,bubbles:true,cancelable:true})));assert.equal(ui.doc.activeElement?.textContent,'Confirmar revocación');await ui.click('Cancelar');assert.equal(ui.requests.filter(r=>r.method==='PATCH').length,0);
  await ui.click('Revocar Docente');await ui.click('Confirmar revocación');assert.equal(ui.requests.filter(r=>r.method==='PATCH').length,1);assert.deepEqual(await ui.requests.find(r=>r.method==='PATCH')!.json(),{active:false});
  }finally{await ui.close();}
 });
 test("search 404 is unavailable, not empty; stale searches and section completions discarded",async()=>{
  const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>r.url.includes('/users')?Response.json({},{status:404}):reply(r),'teacher');try{
- await ui.select('select[name="managedSection"]',section.id);await ui.submit('form[aria-label="Buscar participantes"]',{search:'María'});assert.doesNotMatch(ui.doc.body.textContent!,/Sin coincidencias/);assert.match(ui.doc.body.textContent!,/no disponible/);
+ await ui.select('select[name="managedSection"]',section.id);await ui.submit('form[aria-label="Buscar participantes"]',{search:'María'});assert.doesNotMatch(ui.doc.body.textContent!,/Sin coincidencias/);assert.match(ui.doc.body.textContent!,/no está disponible/);
  }finally{await ui.close();}
  const pending=deferred<Response>();const u=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>r.url.includes('/enrollments')?pending.promise:reply(r),'owner');try{
  await u.select('select[name="managedSection"]',section.id);await u.select('select[name="managedSection"]',otherSection.id);await u.settle(()=>pending.resolve(Response.json(page([enrollment]))));assert.doesNotMatch(u.doc.body.textContent!,/María/);
@@ -97,7 +98,7 @@ test("actual self revocation refreshes me and teacher loses participant surface"
  const self={...enrollment,user:{...person,id:id(1)},role:'teacher'};
  const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>{if(r.method==='PATCH'){ui.setActor('student');return Response.json({...self,active:false});}return r.url.includes('/enrollments')?Response.json(page([self])):reply(r);},'teacher');try{
  await ui.select('select[name="managedSection"]',section.id);const dialog=ui.doc.querySelector('dialog') as HTMLDialogElement;dialog.showModal=()=>dialog.setAttribute('open','');dialog.close=()=>dialog.removeAttribute('open');
- await ui.click('Revocar Docente');await ui.click('Confirmar revocación');assert.equal(ui.requests.filter(r=>r.url.endsWith('/me')).length,2);
+ await ui.click('Gestionar');await ui.click('Revocar Docente');await ui.click('Confirmar revocación');assert.equal(ui.requests.filter(r=>r.url.endsWith('/me')).length,2);
  assert.equal(ui.doc.querySelector('section[aria-label="Participantes"]'),null);
  }finally{await ui.close();}
 });
@@ -109,9 +110,20 @@ test("a change returning an existing target enrollment retains sibling roles and
  if(r.method==='PATCH'){changed=true;return Response.json(sibling);}
  return Response.json(page([{...enrollment,active:!changed},sibling,history]));
  });try{
- await ui.select('select[name="managedSection"]',section.id);await ui.submit(`form[aria-label="Cambiar rol ${enrollment.id}"]`,{role:'assistant'});
+ await ui.select('select[name="managedSection"]',section.id);await ui.settle(()=>ui.doc.querySelector<HTMLButtonElement>(`[data-enrollment-id="${enrollment.id}"] button`)!.click());await ui.submit(`form[aria-label="Cambiar rol ${enrollment.id}"]`,{role:'assistant'});
  assert.equal(ui.doc.querySelectorAll('[data-enrollment-id]').length,3);assert.equal(ui.doc.querySelectorAll(`[data-enrollment-id="${sibling.id}"]`).length,1);
  assert.match(ui.doc.querySelector(`[data-enrollment-id="${enrollment.id}"]`)!.textContent!,/Histórica/);
  assert.match(ui.doc.querySelector('section[aria-label="Participantes"] [role="status"]')!.textContent!,new RegExp(sibling.id));
+ }finally{await ui.close();}
+});
+
+test('search can repeat identical input, empty stays local and selection survives pagination',async()=>{
+ let calls=0;const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>r.url.includes('/users')?(calls++,Response.json(new URL(r.url).searchParams.has('cursor')?page([]):page([person],'next'))):reply(r),'teacher');
+ try{
+  await ui.submit('form[aria-label="Buscar participantes"]',{search:'   '});assert.equal(calls,0);assert.match(ui.doc.body.textContent!,/Escribe un nombre/);
+  await ui.submit('form[aria-label="Buscar participantes"]',{search:'María'});await ui.click('María Pérez · maria@example.test');
+  await ui.click('Más personas');assert.match(ui.doc.body.textContent!,/Persona seleccionada: María/);assert.match(ui.doc.body.textContent!,/Sin coincidencias/);
+  await ui.submit('form[aria-label="Buscar participantes"]',{search:'María'});assert.equal(calls,3);assert.doesNotMatch(ui.doc.body.textContent!,/Persona seleccionada: María/);
+  assert.equal(new URL(ui.requests.filter(r=>r.url.includes('/users')).at(-1)!.url).searchParams.has('cursor'),false);
  }finally{await ui.close();}
 });

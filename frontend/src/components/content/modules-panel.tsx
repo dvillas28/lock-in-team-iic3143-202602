@@ -100,7 +100,7 @@ function CourseContent({ courseId }: { courseId: string }) {
       await session.request(c => reorderCourseModules(c, slug, courseId, ids, items), current);
       if (!current()) return;
       const refreshed = await result.reload();
-      return refreshed ? "Orden de módulos actualizado." : "Orden de módulos actualizado. No se pudo actualizar la consulta; reintenta solo la lectura.";
+      return refreshed ? "Orden de módulos actualizado." : { message: "Orden de módulos actualizado. No se pudo actualizar la consulta; reintenta solo la lectura.", persistent: true };
     }, async current => {
       await session.request(c => listCourseModules(c, slug, courseId), current);
       return "Se consultó el orden actual. Revisa antes de repetir.";
