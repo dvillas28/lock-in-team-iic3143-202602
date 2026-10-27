@@ -142,19 +142,21 @@ test("unknown hosts block login and mismatched institution subdomains block cont
   const picker=await mount({url:"https://evil.test/institutions"});try{assert.match(picker.doc.body.textContent!,/Elige tu universidad para continuar/);}finally{await picker.close();}
 });
 
-test("context loading hides children; revocation, outage, retry and 401 fail closed",async()=>{
-  let status=200;let pending:ReturnType<typeof deferred<Response>>|undefined;
-  const ui=await mount({reply:r=>r.method==="POST"?Response.json(login()):r.url.endsWith("/me")?(pending?pending.promise:Response.json(status===200?user():{detail:"PRIVATE_INTERNAL"},{status})):Response.json({items:[institution()]})});try{
-    await ui.submit();pending=deferred<Response>();await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event("focus"));await flush();});
-    assert.match(ui.doc.body.textContent!,/Cargando contenido/);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
-    await act(async()=>{pending!.resolve(Response.json(user()));await flush();});pending=undefined;assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
-    for(const code of [404,503]){
-      status=code;await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event("focus"));await flush();});
-      assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT|PRIVATE_INTERNAL|persona@example.test/);
-      if(code===503){status=200;await ui.click("Reintentar");assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);}
-    }
-    status=401;await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event("pageshow"));await flush();});assert.equal(ui.path,"/login");
-  }finally{await ui.close();}
+test("background refresh preserves children, temporary failures block writes and revocation clears access",async()=>{
+  let status=200; let pending:ReturnType<typeof deferred<Response>>|undefined;
+  const ui=await mount({reply:r=>r.method==='POST'?Response.json(login()):r.url.endsWith('/me')?(pending?pending.promise:Response.json(status===200?user():{}, {status})):Response.json({items:[institution()]})});
+  try {
+    await ui.submit(); const content=ui.doc.querySelector('#main-content'); pending=deferred<Response>();
+    await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event('focus'));await flush();});
+    assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/); assert.equal(ui.doc.querySelector('#main-content'),content);
+    await act(async()=>{pending!.resolve(Response.json(user()));await flush();}); pending=undefined;
+    status=503; await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event('focus'));await flush();});
+    assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/); assert.ok(ui.doc.querySelector('fieldset.access-boundary[disabled]'));
+    status=200; await ui.click('Verificar acceso'); assert.equal(ui.doc.querySelector('fieldset.access-boundary')?.hasAttribute('disabled'),false);
+    status=404; await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event('focus'));await flush();});
+    assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/); assert.match(ui.doc.body.textContent!,/Recurso no disponible/);
+    status=401; await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event('pageshow'));await flush();}); assert.equal(ui.path,'/login');
+  } finally {await ui.close();}
 });
 
 test("directory verification outage prevents login and supports explicit resubmission",async()=>{
@@ -217,7 +219,7 @@ test("late context body and pageshow cannot restore DOM after pagehide",async()=
   const ui=await mount({reply:r=>r.method==="POST"?Response.json(login()):r.url.endsWith('/me')?(delayed?new Response(new ReadableStream({async start(c){c.enqueue(await body.promise);c.close();}})):Response.json(user())):Response.json({items:[institution()]})});
   try{await ui.submit();assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);delayed=true;
     await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event('focus'));await flush();});
-    assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+    assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
     await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event('pagehide'));await flush();body.resolve(new TextEncoder().encode(JSON.stringify(user())));await flush();ui.dom.window.dispatchEvent(new ui.dom.window.Event('pageshow'));await flush();});
     assert.equal(ui.path,'/login');assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT|persona@example.test/);
     assert.equal(ui.dom.window.localStorage.length,0);assert.equal(ui.dom.window.sessionStorage.length,0);assert.equal(ui.doc.cookie,'');
@@ -258,27 +260,27 @@ test("a fresh document after authenticated teardown has no shared identity",asyn
   const second=await mount({url:'https://uc.academix.dvillasc.me/courses'});try{assert.equal(second.path,'/login');assert.equal(second.requests.length,0);assert.doesNotMatch(second.doc.body.textContent!,/PRIVATE_CONTENT|persona@example.test/);}finally{await second.close();}
 });
 
-test("revocation revalidation wins over an older successful context body",async()=>{
-  const body=deferred<Uint8Array>();let mode="active";
-  const ui=await mount({reply:r=>r.method==="POST"?Response.json(login()):!r.url.endsWith('/me')?Response.json({items:[institution()]}):
-    mode==="active"?Response.json(user()):mode==="revoked"?Response.json({}, {status:404}):new Response(new ReadableStream({async start(c){c.enqueue(await body.promise);c.close();}}))});
-  try{await ui.submit();assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);mode="delayed";
-    await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event('focus'));await flush();});
-    assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);mode="revoked";
-    await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event('focus'));await flush();});
-    assert.match(ui.doc.body.textContent!,/Recurso no disponible/);
-    await act(async()=>{body.resolve(new TextEncoder().encode(JSON.stringify(user())));await flush();});
-    assert.match(ui.doc.body.textContent!,/Recurso no disponible/);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT|persona@example.test/);
-  }finally{await ui.close();}
+test("deduplicated context body preserves work; a later confirmed revocation clears it",async()=>{
+ const body=deferred<Uint8Array>();let mode='active';
+ const ui=await mount({reply:r=>r.method==='POST'?Response.json(login()):!r.url.endsWith('/me')?Response.json({items:[institution()]}):mode==='active'?Response.json(user()):mode==='revoked'?Response.json({}, {status:404}):new Response(new ReadableStream({async start(c){c.enqueue(await body.promise);c.close();}}))});
+ try {await ui.submit();mode='delayed';
+  await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event('focus'));await flush();});
+  const count=ui.requests.length;mode='revoked';
+  await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event('focus'));await flush();});
+  assert.equal(ui.requests.length,count);assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+  await act(async()=>{body.resolve(new TextEncoder().encode(JSON.stringify(user())));await flush();});
+  await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event('focus'));await flush();});
+  assert.match(ui.doc.body.textContent!,/Recurso no disponible/);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+ }finally{await ui.close();}
 });
 
-test("an unavailable resource context unmounts private content without revalidation loops",async()=>{
+test("an unavailable resource preserves valid institutional content without revalidation loops",async()=>{
  let session:ReturnType<typeof useSession>['session']|undefined;
  function ResourceProbe(){session=useSession().session;return null;}
  const ui=await mount({reply:r=>r.method==='POST'?Response.json(login()):r.url.endsWith('/me')?Response.json(user()):r.url.endsWith('/courses')?Response.json({},{status:403}):Response.json({items:[institution()]})});
  try{await ui.submit();await ui.custom(createElement(ProtectedInstitution,null,createElement(ResourceProbe),'PRIVATE_RESOURCE'));
  await act(async()=>{try{await session!.request(c=>c.GET('/api/v1/institution/{institutionSlug}/courses',{params:{path:{institutionSlug:'uc'}}}));}catch{}await flush();});
- assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_RESOURCE|persona@example.test/);assert.match(ui.doc.body.textContent!,/Permisos insuficientes/);assert.ok(ui.requests.filter(r=>r.url.endsWith('/me')).length<=3);
+ assert.match(ui.doc.body.textContent!,/PRIVATE_RESOURCE/);assert.doesNotMatch(ui.doc.body.textContent!,/Permisos insuficientes/);assert.ok(ui.requests.filter(r=>r.url.endsWith('/me')).length<=3);
  }finally{await ui.close();}
 });
 

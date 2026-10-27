@@ -12,3 +12,14 @@ test('owner without teacher sees escaped audit only; assistant/student/super den
  try{if(['owner','teacher'].includes(profile)){assert.match(ui.doc.body.textContent!,/grade.published/);assert.match(ui.doc.body.textContent!,/<img/);assert.equal(ui.doc.querySelector('img'),null);assert.ok(ui.doc.querySelector('caption'));assert.equal(ui.doc.querySelector('form button')?.getAttribute('type'),'submit');}else{assert.match(ui.doc.body.textContent!,/permisos/);assert.equal(ui.requests.filter(r=>r.url.includes('audit-events')).length,0);}assert.equal(ui.requests.filter(r=>/gradebook|grade-items|authoring/.test(r.url)).length,0);await ui.actor('student');assert.doesNotMatch(ui.doc.body.textContent!,/grade.published/);}finally{await ui.close();}
  }
 });
+
+test('audit invalid dates and UUID stay inline; clear resets controlled inputs and pagination',async()=>{
+ const ui=await mount(h(CourseAudit,{courseId:course.id}),r=>r.url.includes('audit-events')?Response.json(auditPage):reply(r),'owner');
+ try{
+  const initial=ui.requests.filter(r=>r.url.includes('audit-events')).length;
+  await ui.submit('form',{resourceId:'invalid'});assert.ok(ui.doc.querySelector('input[name="resourceId"][aria-invalid="true"]'));assert.equal(ui.requests.filter(r=>r.url.includes('audit-events')).length,initial);
+  await ui.click('Limpiar filtros');assert.equal(ui.doc.querySelector<HTMLInputElement>('input[name="resourceId"]')!.value,'');
+  await ui.submit('form',{from:'2026-10-26T12:00',to:'2026-10-25T12:00'});assert.match(ui.doc.body.textContent!,/Desde debe ser anterior/);
+  assert.ok(ui.doc.querySelector('nav[aria-label="Curso"]'));await ui.click('Limpiar filtros');assert.equal(ui.doc.querySelector<HTMLInputElement>('input[name="from"]')!.value,'');
+ }finally{await ui.close();}
+});

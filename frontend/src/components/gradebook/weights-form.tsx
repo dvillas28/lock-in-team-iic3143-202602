@@ -43,7 +43,7 @@ export function WeightsForm({ session, slug, courseId, items, locked, busy = fal
             if (context !== session.getSnapshot().context) {
                 return;
             }
-            setMessage('Pesos confirmados por backend.');
+            setMessage('Ponderaciones guardadas.');
             setStatus('ready');
             await scan.reload();
             await onSaved();
@@ -69,12 +69,12 @@ export function WeightsForm({ session, slug, courseId, items, locked, busy = fal
             pending.current = false;
         }
     }
-    let statusMessage = 'Libro global revisado. El backend resuelve publicaciones concurrentes.';
+    let statusMessage = 'Puedes ajustar las ponderaciones antes de publicar notas.';
     if (frozen) {
         statusMessage = 'Pesos bloqueados por publicación.';
     }
     else if (!scan.data || scan.error) {
-        statusMessage = 'Freeze desconocido: guardar bloqueado.';
+        statusMessage = 'Comprobando si las ponderaciones se pueden editar.';
     }
     else if (status === 'saving') {
         statusMessage = 'Guardando pesos…';
@@ -84,7 +84,7 @@ export function WeightsForm({ session, slug, courseId, items, locked, busy = fal
  {!frozen && scan.data && !scan.error && status !== 'uncertain' && <form key={JSON.stringify(scan.data.current)} onSubmit={e => {
         e.preventDefault();
         void save(e.currentTarget);
-    }} className="stack"><fieldset disabled={busy || status === 'saving'}><legend>Todos los pesos, suma exacta 100 %</legend>{scan.data.current.items.map(i => <label className="field-label" key={i.id}>{i.title}<input className="field tnum" name={i.id} defaultValue={String(i.weightPercent)} inputMode="decimal" required/></label>)}</fieldset><button type="submit" data-weights className="btn btn-primary" disabled={busy || status === 'saving' || !scan.data.current.items.length}>Guardar pesos</button></form>}
+    }} className="stack"><fieldset className="selection-group" disabled={busy || status === 'saving'}><legend>La suma de las ponderaciones debe ser 100 %</legend>{scan.data.current.items.map(i => <label className="field-label" key={i.id}>{i.title}<input className="field tnum" name={i.id} defaultValue={String(i.weightPercent)} inputMode="decimal" required/></label>)}</fieldset><button type="submit" data-weights className="btn btn-primary" disabled={busy || status === 'saving' || !scan.data.current.items.length}>Guardar pesos</button></form>}
  {status === 'uncertain' && scan.data && <ul>{scan.data.current.items.map(i => <li className="tnum" key={i.id}>{i.title}: {i.weightPercent} % observado</li>)}</ul>}
  <button type="button" className="btn btn-ghost" disabled={busy || status === 'saving'} onClick={() => void scan.reload()}>Consultar pesos y bloqueo</button>{status === 'uncertain' && <button type="button" className="btn btn-ghost" onClick={() => {
                 if (window.confirm('La lectura no prueba que terminó la escritura anterior. ¿Revisaste el estado y deseas habilitar un nuevo guardado explícito?')) {

@@ -1,0 +1,51 @@
+/* Record workspaces compose the shared shell, tables, forms and semantic tokens. */
+.academic-workspace { min-width: 0; }
+.academic-workspace h2 { font-family: var(--font-eb-garamond), serif; font-size: 24px; font-weight: 600; }
+.academic-toolbar, .academic-footer, .resource-feedback { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+.academic-toolbar > label { flex: 1 1 240px; max-width: 360px; }
+.academic-toolbar .field, .audit-filters .field { margin-top: 6px; }
+.academic-toolbar .actions, .academic-footer .actions { margin: 0; }
+.grade-summary { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 24px; background: var(--accent-soft); }
+.grade-summary .metric { color: var(--accent); font-family: var(--font-eb-garamond), serif; font-size: 46px; line-height: 1.2; margin-block: 12px; }
+.grade-weight { font-size: 24px; font-weight: 600; margin-block: 12px; }
+.grade-value { font-family: var(--font-eb-garamond), serif; font-size: 20px; font-weight: 600; color: var(--accent); }
+.gradebook-table { max-height: 60dvh; overflow: auto; }
+.gradebook-table thead th { position: sticky; top: 0; z-index: 2; background: var(--surface); }
+.gradebook-table tr > :first-child { position: sticky; left: 0; background: var(--surface); z-index: 1; min-width: 200px; border-right: 1px solid var(--border); }
+.gradebook-table thead tr > :first-child { z-index: 3; }
+.gradebook-table :is(th, td) { min-width: 128px; }
+.gradebook-table small, .audit-table small, .selection-group small { display: block; font-size: 12px; font-family: var(--font-inter), sans-serif; font-weight: 400; }
+.gradebook-table th { overflow-wrap: anywhere; }
+.grade-state { display: block; font-size: 12px; margin-top: 4px; }
+.grade-state.published { color: var(--success); }
+.grade-state.unpublished { color: var(--text-2); }
+.academic-dialog { width: min(680px, calc(100vw - 32px)); max-width: 680px; max-height: calc(100dvh - 32px); overflow: auto; padding: 24px; }
+.dialog-heading { display: flex; align-items: start; justify-content: space-between; gap: 16px; padding-bottom: 20px; }
+.dialog-actions { justify-content: end; padding-top: 20px; border-top: 1px solid var(--border); }
+.selection-group { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 8px; }
+.selection-group legend { font-weight: 600; padding: 0 0 8px; }
+.selection-group .option { overflow-wrap: anywhere; }
+.publication-control { max-width: 100%; }
+.publication-status { margin-top: 12px; }
+.audit-filters .form-grid { align-items: start; }
+.audit-filter-summary { margin: 0; overflow-wrap: anywhere; }
+.audit-filter-summary .chip { white-space: normal; }
+.audit-table :is(td, th) { vertical-align: top; }
+.audit-event-detail { min-width: 170px; max-width: 420px; }
+.audit-event-detail summary { cursor: pointer; color: var(--primary-ink); }
+.audit-event-detail dl { font-size: 12px; overflow-wrap: anywhere; margin-top: 12px; }
+.audit-event-detail dt { font-weight: 600; margin-top: 8px; }
+.audit-event-detail dd { margin: 0; }
+.audit-event-detail pre { max-width: 380px; max-height: 280px; overflow: auto; font-size: 12px; }
+.participant-assignment { max-width: 760px; padding-block: 8px; }
+.participant-search { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
+.participant-search > .stack { flex: 1 1 240px; }
+.search-result-list { list-style: none; padding: 0; display: grid; gap: 8px; }
+.search-result-list .btn { width: 100%; justify-content: start; text-align: left; overflow-wrap: anywhere; }
+.field-error { display: block; color: var(--danger); font-size: 12px; margin-top: 4px; }
+@media (max-width: 760px) {
+  .grade-summary { grid-template-columns: minmax(0,1fr); gap: 12px; }
+  .academic-toolbar, .academic-footer { align-items: stretch; }
+  .academic-toolbar > label { max-width: none; }
+  .academic-dialog { padding: 16px; }
+}

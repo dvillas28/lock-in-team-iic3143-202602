@@ -6,3 +6,7 @@ test('audit validates contractual filters, inclusive UTC range and context',asyn
  const c=createApiClient({baseUrl:'https://api.test',fetch:async r=>{assert.equal(new URL((r as Request).url).searchParams.get('action'),'grade.published');return Response.json(auditPage);}});assert.deepEqual(await listCourseAuditEvents(c,'uc',course.id,event.institutionId,{action:'grade.published'}),auditPage);
  for(const e of [{...event,courseId:id(99)},{...event,institutionId:id(5)}])assert.throws(()=>auditPageDto({...auditPage,items:[e]},course.id,event.institutionId));
 });
+
+test('audit rejects calendar rollover and impossible local dates',()=>{
+ for(const value of ['2026-02-30T12:00','2026-02-30T12:00:00Z','0000-01-01T00:00:00Z','2026-04-31T00:00:00Z']) assert.throws(()=>auditFilters({from:value}));
+});

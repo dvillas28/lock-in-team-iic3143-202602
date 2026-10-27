@@ -36,7 +36,7 @@ alcance funcional ni cambiar reglas académicas.
 ## Trazabilidad y dependencias
 
 CU-01–CU-16 y RF/RNF de Entrega 2 según docs/deliveries/2/03-use-cases-and-requirements.md.
-US2: CU-04, backlog FE-03–FE-06, DEP-FE-SEARCH-001.
+US2: CU-04, backlog FE-05–FE-07/20, DEP-FE-SEARCH-001.
 US3–US5: CU-10–CU-13/CU-16, RF21–26/29, RNF1–4/7/9, FE-15–FE-20.
 US1/US6: transversales a las misiones frontend existentes y sus contratos.
 Dependencias: identidad, cursos/roles, módulos, quizzes, intentos, notas y auditoría

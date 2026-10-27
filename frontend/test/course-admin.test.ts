@@ -59,9 +59,9 @@ test("invalid inputs announce associated errors and never send a mutation",async
  assert.equal(ui.requests.filter(r=>r.method==='POST'&&r.url.endsWith('/courses')).length,0);
  }finally{await ui.close();}
 });
-test("permission rejection during a mutation removes forms and revalidates once without loop",async()=>{
+test("permission rejection stays local, preserves authorized form and revalidates once",async()=>{
  const ui=await mount(h(CourseDirectory),r=>Response.json(r.method==='POST'?{}:{items:[]},{status:r.method==='POST'?403:200}));try{
- await ui.submit('form',values);assert.equal(ui.doc.querySelector('form'),null);assert.match(ui.doc.body.textContent!,/permisos/i);assert.equal(ui.requests.filter(r=>r.url.endsWith('/me')).length,2);
+ await ui.submit('form',values);assert.ok(ui.doc.querySelector('form'));assert.match(ui.doc.body.textContent!,/permisos/i);assert.equal(ui.requests.filter(r=>r.url.endsWith('/me')).length,2);
  }finally{await ui.close();}
 });
 test("late course creation cannot refresh a different resource or session",async()=>{
