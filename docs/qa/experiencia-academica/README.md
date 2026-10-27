@@ -63,8 +63,24 @@ integración: Nest reemplaza `dist` mientras los procesos de prueba lo importan.
 ## Resultados
 
 - Backend: 171/171; cobertura líneas 99,55 %, ramas 95,59 %.
-- Frontend: 324/324; cobertura líneas 94,44 %, ramas 87,96 % (gate ≥80 %).
+- Frontend: 332/332; cobertura líneas 94,72 %, ramas 88,12 % (gate ≥80 %).
 - Catálogo: 4/4, `/users` detectada como implementada.
 - OpenAPI válido; conserva tres advertencias preexistentes del catálogo.
 - La PR la crea el usuario. CI remoto y revisión humana quedan fuera de esta ejecución;
   una aprobación de PR no se infiere de estas pruebas.
+
+## Seguimiento: avisos y demo local
+
+Los éxitos de cursos, secciones, participantes, módulos, materiales, quizzes,
+respuestas y ponderaciones desaparecen a los cinco segundos, sin dejar párrafos
+vacíos. Las confirmaciones sucesivas renuevan su plazo y no toman el foco.
+Errores, fallos de actualización y resultados inciertos conservan su aviso y
+bloqueos. Publicación conserva el comprobante en un desplegable independiente.
+Ocho regresiones adicionales verifican temporizadores, foco, borradores,
+respuestas, pesos y recibos sin escrituras adicionales.
+
+El frontend Docker fue reconstruido; se comprobó publicar/ocultar módulo y
+material con API real y desaparición del aviso manteniendo el estado y el foco.
+La [captura posterior](avisos-temporales.png) muestra los materiales publicados
+sin confirmaciones acumuladas. El [inventario de demo](demo-data.md) detalla
+las cuentas y los cursos agregados al ambiente local del usuario.

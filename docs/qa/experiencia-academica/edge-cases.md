@@ -44,6 +44,8 @@ No representa una demostración de ausencia de cualquier defecto posible.
 | Auditoría | Docente | Falla la siguiente página | Conservar página autorizada; no reutilizar tras cambiar filtros | audit-ui | Corregido |
 | Auditoría | Docente/owner | Antes/después y dato sensible | Texto escapado; snapshots sanitizados; UTC disponible | audit-ui, gradebook-audit-read | Verificado |
 | Interacción | Todos | Botón deshabilitado | Cursor sin espera; indicador solo durante operación | Navegador, auth.css | Corregido |
+| Avisos | Todos | Éxitos acumulados, repetidos y error posterior | Éxito desaparece a los 5 s; preservar foco, borradores y errores | transient-feedback | Corregido |
+| Avisos | Docente/estudiante | Publicación, pesos y guardado de respuestas | Aviso temporal; recibos, bloqueos e incertidumbre persistentes | transient-feedback | Corregido |
 | Interacción | Docente | Revisión modal, Escape y cierre | Foco seguro en Volver; retorno al disparador | gradebook-publication-ui, navegador | Corregido |
 | Responsive | Todos | 375 px, ambos temas, tabla ancha | Sin desbordamiento global; scroll local de tabla | Navegador y capturas | Verificado |
 | Runtime | Operador | Otro servidor en otra base | Apagado comprueba solo conexiones de su base | readiness | Corregido en test |
@@ -51,4 +53,5 @@ No representa una demostración de ausencia de cualquier defecto posible.
 
 Escala académica vigente: nota 1–7; el cero válido aplica a puntaje/ponderación.
 Las pruebas de integración usan PostgreSQL 17 desechable y credenciales runtime sin
-bypass RLS. No se alteraron notas, permisos o datos de un entorno real.
+bypass RLS. No se alteraron datos de producción. Las adiciones autorizadas a
+Docker local se describen en [el inventario de demo](demo-data.md).

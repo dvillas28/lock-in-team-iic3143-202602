@@ -14,3 +14,5 @@
 - [x] T012 Ejecutar suites completas, contratos, lint, typecheck y builds.
 - [x] T013 Verificar UI con API real y guardar capturas/evidencia.
 - [x] T014 Revisar diff, registrar commits convencionales y preparar título/descripción; el usuario crea la PR.
+- [x] T015 Unificar avisos de éxito temporales y preservar errores, advertencias y recibos; agregar regresiones.
+- [x] T016 Poblar demo Docker con estudiantes disponibles, contenido y notas mediante API; verificar aislamiento y documentar inventario.
