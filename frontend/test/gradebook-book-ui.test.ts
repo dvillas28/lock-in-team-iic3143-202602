@@ -14,3 +14,12 @@ test('assistant reads historical rows without write controls; owner without teac
  await ui.actor('student');assert.doesNotMatch(ui.doc.body.textContent!,new RegExp(historical.student.name));
  }finally{await ui.close();}}
 });
+
+test('temporary refresh keeps authorized rows; denied read clears rows without blocking the institution',async()=>{
+ let status=200;
+ const ui=await mount(h(CourseGradebook,{courseId:course.id}),r=>new URL(r.url).pathname.endsWith('/gradebook')?Response.json(status===200?book:{},{status}):reply(r),'assistant');
+ try{
+  status=503;await ui.click('Consultar estado actual');assert.match(ui.doc.body.textContent!,new RegExp(row.student.name));
+  status=404;await ui.click('Consultar estado actual');assert.doesNotMatch(ui.doc.body.textContent!,new RegExp(row.student.name));assert.ok(ui.session.getSnapshot().context?.user);assert.ok(ui.doc.querySelector('nav[aria-label="Curso"]'));
+ }finally{await ui.close();}
+});

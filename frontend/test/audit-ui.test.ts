@@ -23,3 +23,17 @@ test('audit invalid dates and UUID stay inline; clear resets controlled inputs a
   assert.ok(ui.doc.querySelector('nav[aria-label="Curso"]'));await ui.click('Limpiar filtros');assert.equal(ui.doc.querySelector<HTMLInputElement>('input[name="from"]')!.value,'');
  }finally{await ui.close();}
 });
+
+test('failed next page retains the authorized page; changed filters never reuse its rows',async()=>{
+ const ui=await mount(h(CourseAudit,{courseId:course.id}),r=>r.url.includes('audit-events')?(new URL(r.url).searchParams.has('cursor')||new URL(r.url).searchParams.has('action')?Response.json({}, {status:503}):Response.json({...auditPage,hasMore:true,nextCursor:'next'})):reply(r),'owner');
+ try{
+  await ui.click('Siguiente');assert.match(ui.doc.body.textContent!,/Se conserva la última página/);assert.ok(ui.doc.querySelector('table'));
+  await ui.submit('form',{action:'grade.published'});assert.equal(ui.doc.querySelector('table'),null);assert.ok(ui.doc.querySelector('nav[aria-label="Curso"]'));
+ }finally{await ui.close();}
+});
+
+test('denied next page clears audit rows instead of retaining a formerly readable snapshot',async()=>{
+ let status=403;
+ const ui=await mount(h(CourseAudit,{courseId:course.id}),r=>r.url.includes('audit-events')?(new URL(r.url).searchParams.has('cursor')?Response.json({}, {status}):Response.json({...auditPage,hasMore:true,nextCursor:'next'})):reply(r),'owner');
+ try{await ui.click('Siguiente');assert.equal(ui.doc.querySelector('table'),null);assert.ok(ui.session.getSnapshot().context?.user);assert.ok(ui.doc.querySelector('nav[aria-label="Curso"]'));status=503;await ui.click('Reintentar');assert.equal(ui.doc.querySelector('table'),null);}finally{await ui.close();}
+});

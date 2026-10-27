@@ -92,7 +92,8 @@ export class Session {
   request = async <T>(operation: (client: ApiClient) => Promise<T>, current?: () => boolean): Promise<T> => {
     this.checkExpiry();
     if (this.state.status !== "authenticated" || !this.token) throw new StaleSessionError();
-    return this.perform(this.state.generation, this.token, operation, current);
+    const context = this.state.context;
+    return this.perform(this.state.generation, this.token, operation, () => context === this.state.context && (current?.() ?? true));
   };
   login = async (email: string, password: string): Promise<boolean> => {
     if (this.state.status === "authenticating" || this.now() < this.state.retryAt) return false;

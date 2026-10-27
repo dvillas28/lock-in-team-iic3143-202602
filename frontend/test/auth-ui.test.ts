@@ -422,3 +422,16 @@ test("recovery follows explicit local portal configuration and disappears if por
     }
   }finally{for(const [index,key]of ['NEXT_PUBLIC_PORTAL_ORIGIN','NEXT_PUBLIC_INSTITUTION_ORIGINS'].entries()){if(saved[index]===undefined)delete process.env[key];else process.env[key]=saved[index];}}
 });
+
+test('changed authorized identity remounts the private boundary while unchanged focus keeps its draft',async()=>{
+ let name='Persona';
+ const ui=await mount({reply:r=>r.method==='POST'?Response.json(login()):r.url.endsWith('/me')?Response.json({...user(),name}):Response.json({items:[institution()]})});
+ try{
+  await ui.submit();await ui.custom(createElement(ProtectedInstitution,null,createElement('input',{name:'private-draft',defaultValue:'original'})));
+  const input=ui.doc.querySelector<HTMLInputElement>('input[name="private-draft"]')!;input.value='sin guardar';
+  await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event('focus'));await flush();});
+  assert.equal(ui.doc.querySelector('input[name="private-draft"]'),input);assert.equal(input.value,'sin guardar');
+  name='Identidad actualizada';await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event('focus'));await flush();});
+  assert.equal(ui.doc.querySelector('input[name="private-draft"]')===input,false);assert.equal(ui.doc.querySelector<HTMLInputElement>('input[name="private-draft"]')!.value,'original');
+ }finally{await ui.close();}
+});

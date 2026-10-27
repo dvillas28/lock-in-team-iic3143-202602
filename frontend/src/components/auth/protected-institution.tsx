@@ -34,7 +34,7 @@ export function ProtectedInstitution({ slug: legacySlug, children }: Readonly<{ 
   const context = state.context?.slug === slug ? state.context : undefined;
   if (context?.error) return <main className="content"><SessionActions /><ErrorState feedback={context.error} onRetry={() => void session.loadContext(slug!)} /></main>;
   if (!validHost || !slug || !context?.user) return <main className="content"><LoadingState /></main>;
-  return <InstitutionShell key={`${state.generation}:${slug}`} pathname={pathname} institutionSlug={slug} institutionName={context.user.institutionMembership.institution.name} user={context.user} actions={<SessionActions />}>
+  return <InstitutionShell key={`${state.generation}:${slug}:${JSON.stringify(context.user)}`} pathname={pathname} institutionSlug={slug} institutionName={context.user.institutionMembership.institution.name} user={context.user} actions={<SessionActions />}>
     {state.contextWarning && <div className="notice" role="alert">
       <p>No se pudo verificar tu acceso. Puedes consultar el contenido; confirma la conexión antes de guardar cambios.</p>
       <button type="button" className="btn btn-ghost" onClick={() => void session.loadContext(slug)}>Verificar acceso</button>
