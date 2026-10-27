@@ -37,6 +37,7 @@ test("history and sibling roles survive role successor, POST 200 and pagination 
  return Response.json(page(rows));
  });try{
  await ui.select('select[name="managedSection"]',section.id);assert.match(ui.doc.body.textContent!,/Histórica/);await ui.submit('form[aria-label="Asignar rol"]',{userId:person.id,role:'student'});
+ await ui.settle(()=>ui.doc.querySelector<HTMLButtonElement>(`[data-enrollment-id="${enrollment.id}"] button`)!.click());
  await ui.submit(`form[aria-label="Cambiar rol ${enrollment.id}"]`,{role:'teacher'});
  assert.match(ui.doc.body.textContent!,/Docente/);assert.equal(ui.doc.querySelectorAll('[data-enrollment-id]').length,3);
  assert.ok(ui.doc.querySelector(`[data-enrollment-id="${id(99)}"]`));
@@ -46,7 +47,7 @@ test("revoke last teacher requires confirmation; cancel sends nothing",async()=>
  const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>r.url.includes('/enrollments')?Response.json(r.method==='PATCH'?{...enrollment,role:'teacher',active:false}:page([{...enrollment,role:'teacher'}])):reply(r));try{
  await ui.select('select[name="managedSection"]',section.id);const dialog=ui.doc.querySelector('dialog') as HTMLDialogElement;
  dialog.showModal=()=>{dialog.setAttribute('open','');};dialog.close=()=>{dialog.removeAttribute('open');};
- await ui.click('Revocar Docente');assert.ok(dialog.hasAttribute('open'));
+ await ui.click('Gestionar');await ui.click('Revocar Docente');assert.ok(dialog.hasAttribute('open'));
  await ui.settle(()=>dialog.dispatchEvent(new ui.dom.window.KeyboardEvent('keydown',{key:'Tab',shiftKey:true,bubbles:true,cancelable:true})));assert.equal(ui.doc.activeElement?.textContent,'Confirmar revocación');await ui.click('Cancelar');assert.equal(ui.requests.filter(r=>r.method==='PATCH').length,0);
  await ui.click('Revocar Docente');await ui.click('Confirmar revocación');assert.equal(ui.requests.filter(r=>r.method==='PATCH').length,1);assert.deepEqual(await ui.requests.find(r=>r.method==='PATCH')!.json(),{active:false});
  }finally{await ui.close();}
@@ -97,7 +98,7 @@ test("actual self revocation refreshes me and teacher loses participant surface"
  const self={...enrollment,user:{...person,id:id(1)},role:'teacher'};
  const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>{if(r.method==='PATCH'){ui.setActor('student');return Response.json({...self,active:false});}return r.url.includes('/enrollments')?Response.json(page([self])):reply(r);},'teacher');try{
  await ui.select('select[name="managedSection"]',section.id);const dialog=ui.doc.querySelector('dialog') as HTMLDialogElement;dialog.showModal=()=>dialog.setAttribute('open','');dialog.close=()=>dialog.removeAttribute('open');
- await ui.click('Revocar Docente');await ui.click('Confirmar revocación');assert.equal(ui.requests.filter(r=>r.url.endsWith('/me')).length,2);
+ await ui.click('Gestionar');await ui.click('Revocar Docente');await ui.click('Confirmar revocación');assert.equal(ui.requests.filter(r=>r.url.endsWith('/me')).length,2);
  assert.equal(ui.doc.querySelector('section[aria-label="Participantes"]'),null);
  }finally{await ui.close();}
 });
@@ -109,7 +110,7 @@ test("a change returning an existing target enrollment retains sibling roles and
  if(r.method==='PATCH'){changed=true;return Response.json(sibling);}
  return Response.json(page([{...enrollment,active:!changed},sibling,history]));
  });try{
- await ui.select('select[name="managedSection"]',section.id);await ui.submit(`form[aria-label="Cambiar rol ${enrollment.id}"]`,{role:'assistant'});
+ await ui.select('select[name="managedSection"]',section.id);await ui.settle(()=>ui.doc.querySelector<HTMLButtonElement>(`[data-enrollment-id="${enrollment.id}"] button`)!.click());await ui.submit(`form[aria-label="Cambiar rol ${enrollment.id}"]`,{role:'assistant'});
  assert.equal(ui.doc.querySelectorAll('[data-enrollment-id]').length,3);assert.equal(ui.doc.querySelectorAll(`[data-enrollment-id="${sibling.id}"]`).length,1);
  assert.match(ui.doc.querySelector(`[data-enrollment-id="${enrollment.id}"]`)!.textContent!,/Histórica/);
  assert.match(ui.doc.querySelector('section[aria-label="Participantes"] [role="status"]')!.textContent!,new RegExp(sibling.id));

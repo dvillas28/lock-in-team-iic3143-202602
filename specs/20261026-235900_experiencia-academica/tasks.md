@@ -16,3 +16,5 @@
 - [x] T014 Revisar diff, registrar commits convencionales y preparar título/descripción; el usuario crea la PR.
 - [x] T015 Unificar avisos de éxito temporales y preservar errores, advertencias y recibos; agregar regresiones.
 - [x] T016 Poblar demo Docker con estudiantes disponibles, contenido y notas mediante API; verificar aislamiento y documentar inventario.
+- [x] T017 Sustituir gestión expandida en filas por diálogo accesible; conservar foco, selección incierta y bloqueo; verificar ambos temas y móvil.
+- [x] T018 Simplificar identidad lateral a nombre y roles, sin correos partidos; actualizar regresiones y evidencia.

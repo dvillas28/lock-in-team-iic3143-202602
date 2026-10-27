@@ -63,7 +63,7 @@ integración: Nest reemplaza `dist` mientras los procesos de prueba lo importan.
 ## Resultados
 
 - Backend: 171/171; cobertura líneas 99,55 %, ramas 95,59 %.
-- Frontend: 332/332; cobertura líneas 94,72 %, ramas 88,12 % (gate ≥80 %).
+- Frontend: 333/333; cobertura líneas 94,91 %, ramas 88,19 % (gate ≥80 %).
 - Catálogo: 4/4, `/users` detectada como implementada.
 - OpenAPI válido; conserva tres advertencias preexistentes del catálogo.
 - La PR la crea el usuario. CI remoto y revisión humana quedan fuera de esta ejecución;
@@ -84,3 +84,20 @@ material con API real y desaparición del aviso manteniendo el estado y el foco.
 La [captura posterior](avisos-temporales.png) muestra los materiales publicados
 sin confirmaciones acumuladas. El [inventario de demo](demo-data.md) detalla
 las cuentas y los cursos agregados al ambiente local del usuario.
+
+## Gestión de participantes y lateral compacto
+
+Gestionar abre un diálogo nativo fuera de la tabla; cambiar rol y confirmar
+revocación conservan permisos, historial y bloqueo de operaciones inciertas.
+Cerrar y reabrir conserva el rol solicitado cuando el resultado es incierto.
+La lectura posterior a guardar conserva las filas durante la actualización.
+El lateral muestra nombre y roles; el diálogo identifica a la persona con correo completo.
+
+Pruebas: `sections-workspace`, `participants`, `academic-shell`, `auth-ui`.
+Verificación contra Docker: alto/ancho/scrollHeight de tabla y altos de todas
+las filas idénticos al abrir. Escape devuelve el foco a Gestionar; revocación
+abre una confirmación con foco en Cancelar. No se cambió ninguna matrícula en esta revisión visual.
+Móvil de 375 px: diálogo de 343 px, scrollWidth igual a clientWidth, ambos temas.
+
+Capturas: [diálogo](participantes-dialogo.png), [oscuro](participantes-dialogo-oscuro.png),
+[móvil claro](participantes-dialogo-movil-claro.png) y [móvil oscuro](participantes-dialogo-movil.png).

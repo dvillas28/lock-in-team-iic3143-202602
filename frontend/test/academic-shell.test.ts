@@ -12,7 +12,8 @@ test('shell exposes one identity, course scope and active navigation; theme and 
   const ui = await mount(h(InstitutionShell, {institutionSlug:'uc', user:user('multi'), pathname:path}, h('h1',null,'Contenido')),()=>Response.json({}),'multi');
   try {
     assert.equal(ui.doc.querySelectorAll('.institution-user .name').length,1);
-    assert.equal(ui.doc.querySelector('.institution-user .role')?.textContent,'ana@example.test');
+    assert.equal(ui.doc.querySelector('.institution-user .role')?.textContent,'Docente · Ayudante · Estudiante');
+    assert.doesNotMatch(ui.doc.querySelector('.institution-user')!.textContent!, /ana@example\.test/);
     assert.match(ui.doc.querySelector('.institution-user')!.textContent!,/Docente · Ayudante · Estudiante/);
     assert.equal(ui.doc.querySelector('.sidebar-nav [aria-current="page"]')?.getAttribute('href'),path);
     assert.equal(ui.doc.querySelector('.sidebar-nav a[href="/courses"]')?.classList.contains('active'),false);

@@ -1,6 +1,6 @@
 # Matriz de casos borde del MVP
 
-Fecha: 2026-10-26. Todos los escenarios enumerados están cubiertos por pruebas.
+Fecha: 2026-10-27. Todos los escenarios enumerados están cubiertos por pruebas.
 Las rutas de pruebas son relativas a frontend/test o backend/test/integration.
 No representa una demostración de ausencia de cualquier defecto posible.
 
@@ -47,6 +47,9 @@ No representa una demostración de ausencia de cualquier defecto posible.
 | Avisos | Todos | Éxitos acumulados, repetidos y error posterior | Éxito desaparece a los 5 s; preservar foco, borradores y errores | transient-feedback | Corregido |
 | Avisos | Docente/estudiante | Publicación, pesos y guardado de respuestas | Aviso temporal; recibos, bloqueos e incertidumbre persistentes | transient-feedback | Corregido |
 | Interacción | Docente | Revisión modal, Escape y cierre | Foco seguro en Volver; retorno al disparador | gradebook-publication-ui, navegador | Corregido |
+| Gestión | Docente/admin | Abrir, Escape, Tab, doble envío y error | Diálogo externo sin expandir filas; foco seguro; error local y un PATCH | sections-workspace, participants, navegador | Corregido |
+| Gestión | Docente/admin | Cerrar incertidumbre o cambiar sección durante PATCH | Mantener rol solicitado y bloqueo; descartar confirmaciones viejas | sections-workspace | Verificado |
+| Identidad | Todos | Correo largo en lateral | Mostrar nombre y rol; correo completo en gestión de participantes | academic-shell, auth-ui, navegador | Corregido |
 | Responsive | Todos | 375 px, ambos temas, tabla ancha | Sin desbordamiento global; scroll local de tabla | Navegador y capturas | Verificado |
 | Runtime | Operador | Otro servidor en otra base | Apagado comprueba solo conexiones de su base | readiness | Corregido en test |
 | Catálogo | Consumidores | Se implementa el último endpoint pendiente | Clasificar `/users` como implementada, sin exigir pendientes | scripts/api-catalog.test.mjs | Corregido |
