@@ -21,6 +21,8 @@ Esta decisión conserva selección por path y sustituye la exclusión RLS del [A
 - RLS ENABLE/FORCE con USING/WITH CHECK en todas las tablas tenant-owned, incluidas memberships.
 - Runtime no owner/superuser/BYPASSRLS ni miembro de roles privilegiados; sin DDL/TRUNCATE.
 - Migración/carga usa credencial operativa separada y no un pool privilegiado del servidor HTTP.
+  FORCE también obliga al owner: política `operator_maintenance` solo para el rol que migra
+  (2026-10-26, [ADR Render](deploy-on-render.md)); runtime-check rechaza que alcance runtime o PUBLIC.
 - Users/institutions siguen globales; excepción de SELECT memberships propias solo sin tenant y con actor local.
 - Ninguna excepción de lectura/escritura global para datos académicos; permisos de curso/sección no cambian.
 - Mantener filtros SQL existentes, FK compuestas, locks de revocación y auditoría transaccional.

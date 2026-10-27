@@ -44,7 +44,10 @@ Los únicos acoplamientos eran `railway.json`, el CLI de Railway en Release, el 
   sin respaldos. Antes de esa fecha: recrearla y redesplegar, o migrar a una base sin expiración.
 - La base nueva parte vacía. Predeploy aplica esquema y provisiona runtime; la demo es opt-in.
   Si se recupera un dump de Railway, restaurarlo antes del primer despliegue.
-- Hay que verificar que el usuario propietario de Render pueda crear `academix_runtime`.
+- El owner de Render crea `academix_runtime`, pero no es superusuario: con FORCE RLS no podía
+  insertar memberships (demo, onboarding, superadmin; `42501`, categoría `schema`). La migración
+  `operator_maintenance` (2026-10-26) le da una política explícita; CI la prueba con un owner
+  no superusuario, porque su `postgres` superusuario ignoraba RLS.
 - DNS de `uc.academix` y `utfsm.academix` debe apuntar a Render; TLS lo emite Render.
 - Specs, OpenAPI y guías históricas siguen nombrando `api.dvillasc.me`: es el destino previsto,
   no el desplegado. Recuperarlo cuesta US$0,25/mes por dominio extra. Un cuarto dominio
