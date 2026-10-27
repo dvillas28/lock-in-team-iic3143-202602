@@ -4,7 +4,7 @@ import type { ApiClient } from "../../lib/api/client.ts";
 import type { Session } from "../../lib/auth/session.ts";
 import { getRouteFeedback, type RouteFeedback } from "../../lib/route-feedback.ts";
 // Each mounted resource owns its sequence; Session alone cannot order requests within a tenant.
-export function useResource<T>(session: Session, resource: string, load: (client: ApiClient) => Promise<T>, preserve = false) {
+export function useResource<T>(session: Session, resource: string, load: (client: ApiClient) => Promise<T>, preserve = true) {
   const [state, setState] = useState<{
     key: string;
     data?: T;

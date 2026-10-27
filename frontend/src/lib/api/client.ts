@@ -1,6 +1,6 @@
 import createClient from "openapi-fetch";
 
-import { ApiNetworkError, toApiHttpError } from "./errors.ts";
+import { ApiHttpError, ApiNetworkError, toApiHttpError } from "./errors.ts";
 import type { paths } from "./schema";
 
 type ApiClientOptions = {
@@ -60,7 +60,7 @@ export function createApiClient({
       if (!response.ok) throw await toApiHttpError(response);
     },
     onError({ error }) {
-      return new ApiNetworkError(error);
+      return error instanceof ApiHttpError ? error : new ApiNetworkError(error);
     },
   });
 
