@@ -19,6 +19,8 @@ Errores 403/404 de recursos disparan revalidación sin convertir un `/me` exitos
 error institucional. El consumidor conserva el error del recurso. `/me` no inicia
 revalidaciones recursivas. Fallos transitorios conservan lectura y muestran aviso;
 la frontera HTTP bloquea nuevas escrituras hasta revalidar exitosamente.
+Un GET denegado elimina los datos de ese recurso y su página retenida; un fallo
+temporal posterior no puede recuperar una copia previamente denegada.
 Identidades malformadas fallan cerradas; no se reutiliza una identidad no validada.
 
 ## Consecuencias
