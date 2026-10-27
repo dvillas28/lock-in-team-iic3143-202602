@@ -75,16 +75,16 @@ test('Swagger loads local documentation read-only and rejects failed description
       Object.values(value).forEach(verifyResolved);
     };
     verifyResolved(doc);
-    let implemented = 0, planned = 0;
+    let implemented = 0;
     for (const item of Object.values(doc.paths)) for (const [method, op] of Object.entries(item)) {
       if (!['get','post','patch','put','delete','head','options','trace'].includes(method)) continue;
       assert(op.summary.includes(`[${op['x-availability']}]`));
       assert(op.description.includes('### Ejemplo de solicitud externa'));
       assert(op.description.includes('**Permisos:**'));
-      if (op['x-availability'] === 'implementada') implemented++; else planned++;
+      if (op['x-availability'] === 'implementada') implemented++; else assert.equal(op['x-availability'], 'planificada');
     }
     assert.equal(implemented, (await registeredRoutes()).length);
-    assert(planned > 0);
+    assert.equal(doc.paths['/api/v1/institution/{institutionSlug}/users'].get['x-availability'], 'implementada');
     assert(html.includes('download="openapi.json"'));
     assert(html.includes('swagger-ui-bundle.js'));
     assert(html.includes('swagger-ui.css'));
