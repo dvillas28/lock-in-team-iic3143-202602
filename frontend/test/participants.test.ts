@@ -53,7 +53,7 @@ test("revoke last teacher requires confirmation; cancel sends nothing",async()=>
 });
 test("search 404 is unavailable, not empty; stale searches and section completions discarded",async()=>{
  const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>r.url.includes('/users')?Response.json({},{status:404}):reply(r),'teacher');try{
- await ui.select('select[name="managedSection"]',section.id);await ui.submit('form[aria-label="Buscar participantes"]',{search:'María'});assert.doesNotMatch(ui.doc.body.textContent!,/Sin coincidencias/);assert.match(ui.doc.body.textContent!,/no disponible/);
+ await ui.select('select[name="managedSection"]',section.id);await ui.submit('form[aria-label="Buscar participantes"]',{search:'María'});assert.doesNotMatch(ui.doc.body.textContent!,/Sin coincidencias/);assert.match(ui.doc.body.textContent!,/no está disponible/);
  }finally{await ui.close();}
  const pending=deferred<Response>();const u=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>r.url.includes('/enrollments')?pending.promise:reply(r),'owner');try{
  await u.select('select[name="managedSection"]',section.id);await u.select('select[name="managedSection"]',otherSection.id);await u.settle(()=>pending.resolve(Response.json(page([enrollment]))));assert.doesNotMatch(u.doc.body.textContent!,/María/);
@@ -113,5 +113,16 @@ test("a change returning an existing target enrollment retains sibling roles and
  assert.equal(ui.doc.querySelectorAll('[data-enrollment-id]').length,3);assert.equal(ui.doc.querySelectorAll(`[data-enrollment-id="${sibling.id}"]`).length,1);
  assert.match(ui.doc.querySelector(`[data-enrollment-id="${enrollment.id}"]`)!.textContent!,/Histórica/);
  assert.match(ui.doc.querySelector('section[aria-label="Participantes"] [role="status"]')!.textContent!,new RegExp(sibling.id));
+ }finally{await ui.close();}
+});
+
+test('search can repeat identical input, empty stays local and selection survives pagination',async()=>{
+ let calls=0;const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>r.url.includes('/users')?(calls++,Response.json(new URL(r.url).searchParams.has('cursor')?page([]):page([person],'next'))):reply(r),'teacher');
+ try{
+  await ui.submit('form[aria-label="Buscar participantes"]',{search:'   '});assert.equal(calls,0);assert.match(ui.doc.body.textContent!,/Escribe un nombre/);
+  await ui.submit('form[aria-label="Buscar participantes"]',{search:'María'});await ui.click('María Pérez · maria@example.test');
+  await ui.click('Más personas');assert.match(ui.doc.body.textContent!,/Persona seleccionada: María/);assert.match(ui.doc.body.textContent!,/Sin coincidencias/);
+  await ui.submit('form[aria-label="Buscar participantes"]',{search:'María'});assert.equal(calls,3);assert.doesNotMatch(ui.doc.body.textContent!,/Persona seleccionada: María/);
+  assert.equal(new URL(ui.requests.filter(r=>r.url.includes('/users')).at(-1)!.url).searchParams.has('cursor'),false);
  }finally{await ui.close();}
 });

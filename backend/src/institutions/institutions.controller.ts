@@ -1,10 +1,17 @@
-import { BadRequestException, Controller, Get, Header, Param, Req } from "@nestjs/common";
+import { BadRequestException, Controller, Get, Header, Param, Req, Query } from "@nestjs/common";
+import { ParticipantSearchService } from "./participant-search.service";
+import { slug as institutionSlug } from "../courses/validation";
 import { InstitutionsService } from "./institutions.service";
 import type { IdentityRequest } from "../auth/auth.guard";
 
 @Controller("api/v1")
 export class InstitutionsController {
-  constructor(private readonly institutions: InstitutionsService) {}
+  constructor(private readonly institutions: InstitutionsService, private readonly participants: ParticipantSearchService) {}
+  @Get("institution/:institutionSlug/users")
+  @Header("Cache-Control", "no-store")
+  search(@Req() request: IdentityRequest, @Param("institutionSlug") slug: string, @Query() query: Record<string, unknown>) {
+    return this.participants.search(request.userId, institutionSlug(slug), query);
+  }
   @Get("institutions")
   @Header("Cache-Control", "no-store")
   list(@Req() request: IdentityRequest) { return this.institutions.list(request.userId); }
