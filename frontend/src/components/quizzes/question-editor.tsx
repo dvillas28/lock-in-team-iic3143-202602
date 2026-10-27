@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useFeedbackState } from "../use-feedback.ts";
+import { useEffect, useRef } from "react";
 import type { Question } from "../../lib/quizzes/validation.ts";
 import { Field } from "../courses/form-fields.tsx";
 type Row = Omit<Question,"alternatives"> & {key: number; alternatives: (Question["alternatives"][number] & {key: number})[]};
@@ -8,7 +9,7 @@ export function readQuestions(form: FormData, rows: Row[]): Question[] {
 }
 export function QuestionEditor({rows,onRows,field,message}:{rows:Row[];onRows:(rows:Row[])=>void;field?:string;message?:string}) {
   const sequence=useRef(1000000), container=useRef<HTMLDivElement>(null);
-  const [notice,setNotice]=useState("");
+  const [notice,setNotice]=useFeedbackState();
   const pendingFocus=useRef("");
   useEffect(()=>{if(pendingFocus.current){container.current?.querySelector<HTMLElement>(pendingFocus.current)?.focus();pendingFocus.current="";}},[rows]);
   function update(next: Row[], focus:string, notice:string) {
@@ -40,7 +41,7 @@ export function QuestionEditor({rows,onRows,field,message}:{rows:Row[];onRows:(r
     <button type="button" data-add-question className="btn btn-ghost" onClick={()=>{
       const key=sequence.current++;
       update([...rows,{key,prompt:"",position:rows.length+1,points:1,alternatives:[{key:sequence.current++,id:"a",text:"",isCorrect:false},{key:sequence.current++,id:"b",text:"",isCorrect:false}]}],`[name="questions.${rows.length}.prompt"]`,"Pregunta agregada.");
-    }}>Agregar pregunta</button><p role="status">{notice}</p>
+    }}>Agregar pregunta</button>{notice && <p role="status">{notice}</p>}
   </div>;
 }
 export function questionRows(initial: Question[]): Row[] {

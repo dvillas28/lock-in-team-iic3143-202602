@@ -17,7 +17,7 @@ export function PublicationToggle({session, slug, kind, id, parentId, title, pub
       if (!current()) return;
       const refreshed = await onSaved();
       const message = `${kind === "module" ? "Módulo" : "Material"} ${published ? "ocultado" : "publicado"}.`;
-      return refreshed ? message : `${message} No se pudo actualizar la consulta; reintenta solo la lectura.`;
+      return refreshed ? message : { message: `${message} No se pudo actualizar la consulta; reintenta solo la lectura.`, persistent: true };
     }, async current => {
       await session.request(async c => kind === "module" ? await getCourseModule(c, slug, id, parentId) : await getMaterial(c, slug, id, parentId), current);
       if (!current()) return "Contexto cambiado.";

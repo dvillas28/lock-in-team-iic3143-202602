@@ -1,4 +1,5 @@
 "use client";
+import { useFeedbackState } from "../use-feedback.ts";
 import { ChevronDown } from "lucide-react";
 import { roleLabel } from "../../lib/courses/role-label.ts";
 import { useRef, useState, type FormEvent } from "react";
@@ -37,7 +38,7 @@ function Participants({ session, slug, user, course, section }: {
   const cancel = useRef<HTMLButtonElement>(null);
   const trigger = useRef<HTMLElement | null>(null);
   const [target, setTarget] = useState<Enrollment>();
-  const [receipt, setReceipt] = useState('');
+  const [receipt, setReceipt] = useFeedbackState();
   async function saved(enrollment: Enrollment) {
     setReceipt(enrollment.id);
     setCursor(undefined);

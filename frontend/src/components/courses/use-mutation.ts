@@ -4,6 +4,7 @@ import { ApiHttpError } from "../../lib/api/errors.ts";
 import { FieldError } from "../../lib/courses/validation.ts";
 import { getRouteFeedback } from "../../lib/route-feedback.ts";
 import type { Session } from "../../lib/auth/session.ts";
+import { useTransientFeedback, type Feedback } from "../use-feedback.ts";
 export function useMutation(session: Session) {
   const [status, setStatus] = useState<{
     busy: boolean;
@@ -11,10 +12,12 @@ export function useMutation(session: Session) {
     message?: string;
     field?: string;
     uncertain?: boolean;
+    persistent?: boolean;
   }>({ busy: false });
+  const message = useTransientFeedback(status.message, !!status.confirmed && !status.persistent, status);
   const locked = useRef(false), alive = useRef(true);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
-  async function run(operation: (current: () => boolean) => Promise<void | string>, reconcile: (current: () => boolean) => Promise<string>) {
+  async function run(operation: (current: () => boolean) => Promise<void | Feedback>, reconcile: (current: () => boolean) => Promise<string>) {
     if (locked.current)
       return;
     locked.current = true;
@@ -22,9 +25,9 @@ export function useMutation(session: Session) {
     const current = () => alive.current && context === session.getSnapshot().context && generation === session.getSnapshot().generation;
     setStatus({ busy: true });
     try {
-      const message = await operation(current);
+      const feedback = await operation(current);
       if (current())
-        setStatus({ busy: false, confirmed: true, message: message || "Operación completada." });
+        setStatus({ busy: false, confirmed: true, ...(typeof feedback === "object" ? feedback : { message: feedback || "Operación completada." }) });
       locked.current = false;
     }
     catch (error) {
@@ -60,5 +63,5 @@ export function useMutation(session: Session) {
         setStatus({ busy: false, uncertain: true, message: `Resultado incierto. ${observed} Revisa el estado antes de realizar otra operación; este envío sigue bloqueado.` });
     }
   }
-  return { ...status, run };
+  return { ...status, message, run };
 }

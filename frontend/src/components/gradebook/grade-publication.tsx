@@ -13,6 +13,7 @@ import { PublicationOperation } from "../../lib/gradebook/publication.ts";
 import { publishGrades } from "../../lib/api/gradebook.ts";
 import { getRouteFeedback } from "../../lib/route-feedback.ts";
 import { AcademicDate } from "../academic/feedback.tsx";
+import { useTransientFeedback } from "../use-feedback.ts";
 const emptySelection = (): Selection => ({
   gradeItemIds: [],
   sectionIds: [],
@@ -46,6 +47,7 @@ export function GradePublication({
     state: PublicationOperation["state"];
     receipt: PublicationOperation["receipt"];
   }>();
+  const feedback = useTransientFeedback(message, snapshot?.state === "confirmed", snapshot);
   const operation = useRef<PublicationOperation | undefined>(undefined),
     dialog = useRef<HTMLDialogElement>(null),
     trigger = useRef<HTMLButtonElement>(null),
@@ -179,19 +181,13 @@ export function GradePublication({
           No hay notas pendientes de publicación en esta página.
         </p>
       )}
-      {snapshot && (
+      {snapshot && (snapshot.state !== "confirmed" || feedback) && (
         <div
           className="notice stack publication-status"
           aria-live="polite"
           aria-busy={snapshot.state === "sending"}
         >
-          <p>{snapshot.state === "sending" ? "Publicando notas…" : message}</p>
-          {snapshot.state === "confirmed" && (
-            <output>
-              Recibo confirmado: {snapshot.receipt?.publishedCount} notas ·{" "}
-              <AcademicDate value={snapshot.receipt!.publishedAt} />
-            </output>
-          )}
+          <p>{snapshot.state === "sending" ? "Publicando notas…" : feedback}</p>
           {snapshot.state === "uncertain" && (
             <button
               className="btn btn-ghost"
@@ -214,6 +210,15 @@ export function GradePublication({
             </button>
           )}
         </div>
+      )}
+      {snapshot?.state === "confirmed" && (
+        <details className="academic-disclosure">
+          <summary>Comprobante de última publicación</summary>
+          <output>
+            Recibo confirmado: {snapshot.receipt?.publishedCount} notas ·{" "}
+            <AcademicDate value={snapshot.receipt!.publishedAt} />
+          </output>
+        </details>
       )}
       <dialog
         className="modal native-dialog academic-dialog"

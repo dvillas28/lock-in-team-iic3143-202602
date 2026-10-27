@@ -1,4 +1,5 @@
 "use client";
+import { useFeedbackState } from "../use-feedback.ts";
 import { useRef, useState } from 'react';
 import type { Session } from '../../lib/auth/session.ts';
 import type { GradeItem } from '../../lib/gradebook/validation.ts';
@@ -15,7 +16,7 @@ export function WeightsForm({ session, slug, courseId, items, locked, busy = fal
     busy?: boolean;
     onSaved: () => Promise<unknown>;
 }>) {
-    const [status, setStatus] = useState<'ready' | 'saving' | 'uncertain' | 'locked'>('ready'), [message, setMessage] = useState('');
+    const [status, setStatus] = useState<'ready' | 'saving' | 'uncertain' | 'locked'>('ready'), [message, setMessage] = useFeedbackState();
     const pending = useRef(false);
     const scan = useResource(session, `${session.getSnapshot().generation}:${slug}:${courseId}:freeze`, async (c) => {
         const freeze = await readFreeze(c, slug, courseId, items);
@@ -54,15 +55,15 @@ export function WeightsForm({ session, slug, courseId, items, locked, busy = fal
             }
             if (e instanceof ApiHttpError && e.problem.code === 'GRADE_WEIGHTS_LOCKED') {
                 setStatus('locked');
-                setMessage('Pesos bloqueados por publicación.');
+                setMessage({ message: 'Pesos bloqueados por publicación.', persistent: true });
             }
             else if (e instanceof TypeError || e instanceof ApiHttpError && e.status < 500) {
                 setStatus('ready');
-                setMessage(e instanceof TypeError ? e.message : getRouteFeedback(e).message);
+                setMessage({ message: e instanceof TypeError ? e.message : getRouteFeedback(e).message, persistent: true });
             }
             else {
                 setStatus('uncertain');
-                setMessage('Guardado incierto. Consulta los pesos actuales; una lectura no descarta una escritura aún en vuelo. No se reenviará automáticamente.');
+                setMessage({ message: 'Guardado incierto. Consulta los pesos actuales; una lectura no descarta una escritura aún en vuelo. No se reenviará automáticamente.', persistent: true });
             }
         }
         finally {
@@ -80,7 +81,7 @@ export function WeightsForm({ session, slug, courseId, items, locked, busy = fal
         statusMessage = 'Guardando pesos…';
     }
     return <section className="panel stack"><h2 className="serif">Ponderaciones</h2><output aria-live="polite">{statusMessage}</output>
- {scan.error && <p role="alert">{scan.error.message}</p>}<p aria-live="polite">{message}</p>
+ {scan.error && <p role="alert">{scan.error.message}</p>}{message && <p aria-live="polite">{message}</p>}
  {!frozen && scan.data && !scan.error && status !== 'uncertain' && <form key={JSON.stringify(scan.data.current)} onSubmit={e => {
         e.preventDefault();
         void save(e.currentTarget);
