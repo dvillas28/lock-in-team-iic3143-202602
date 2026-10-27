@@ -17,8 +17,8 @@ test("migration repeat, constraints, tenant identity and restricted deletion", a
     try { summary = JSON.parse(repeat.output); }
     catch { throw new Error("invalid migration summary"); }
     assert.equal(summary.created, 0);
-    assert.equal(summary.existing, 10);
-    assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount, 10);
+    assert.equal(summary.existing, 11);
+    assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount, 11);
     const schema = await pool.query(`SELECT c.relname AS table_name,a.attname AS column_name,
       format_type(a.atttypid,a.atttypmod) AS type,a.attnotnull AS required,
       pg_get_expr(d.adbin,d.adrelid) AS default_value
@@ -97,7 +97,7 @@ test("failed pending batch rolls back DDL/history and migrator refuses competing
       else process.env.MIGRATION_DATABASE_URL = previous;
     }
     assert.equal((await pool.query("SELECT to_regclass('public.pending_fixture') AS t")).rows[0].t, null);
-    assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount, 10);
+    assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount, 11);
     const client = await pool.connect();
     try {
       await client.query("SELECT pg_advisory_lock(7241865325823964)");

@@ -48,7 +48,7 @@ test('attempt migration upgrades populated authoring data, repeats, restarts and
   const parentTables=['users','institutions','institution_memberships','courses','sections','enrollments','quizzes','grade_items','audit_events'];
   const snapshot=()=>Promise.all(parentTables.map(async table=>(await pool.query(`SELECT * FROM ${table} ORDER BY id`)).rows));
   const parent=await snapshot();
-  try{await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir:new URL('../../migrations/',import.meta.url).pathname,direction:'down',count:5,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});}finally{c.release();}
+  try{await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir:new URL('../../migrations/',import.meta.url).pathname,direction:'down',count:6,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});}finally{c.release();}
   assert.equal((await pool.query("SELECT to_regclass('public.quiz_attempts') AS table")).rows[0].table,null);
   assert.equal((await cli('commands/migrate').result).code,0);assert.deepEqual(await snapshot(),parent);
   const id=await f.create();

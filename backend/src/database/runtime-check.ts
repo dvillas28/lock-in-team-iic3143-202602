@@ -11,7 +11,11 @@ export async function checkRuntime(db:Pool|Client) {
   WHERE relnamespace='public'::regnamespace AND relname=ANY($1::text[])`,[tenantTables])).rows;
  if(tables.length!==12 || tables.some(r=>!r.relrowsecurity || !r.relforcerowsecurity))throw Error("Incomplete RLS");
  const policies=(await db.query(`SELECT tablename,policyname,permissive,roles::text[],cmd,qual,with_check FROM pg_policies WHERE schemaname='public' AND tablename=ANY($1::text[])`,[tenantTables])).rows;
- if(policies.length!==14)throw Error("Unexpected RLS policies");
+ // Operator policies (owner under FORCE RLS) may exist, but must never reach runtime or PUBLIC.
+ const operator=policies.filter(p=>p.policyname==="operator_maintenance");
+ if(operator.some(p=>p.cmd!=="ALL" || p.permissive!=="PERMISSIVE" || p.qual!=="true" || p.with_check!=="true"
+  || p.roles.some((r:string)=>r==="academix_runtime" || r==="public")))throw Error("Unsafe operator policy");
+ if(policies.length-operator.length!==14)throw Error("Unexpected RLS policies");
  for(const name of tenantTables) {
   const p=policies.find(p=>p.tablename===name && p.policyname==="tenant_boundary");
   if(!p || p.cmd!=="ALL" || p.permissive!=="PERMISSIVE" || JSON.stringify(p.roles)!=='["academix_runtime"]' || p.qual!=="(institution_id = (NULLIF(current_setting('academix.institution_id'::text, true), ''::text))::uuid)" || p.qual!==p.with_check)throw Error("Invalid tenant policy");
