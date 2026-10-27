@@ -19,9 +19,9 @@ test("pending private read/write is discarded on logout, tenant, user, revocatio
  }finally{await ui.close();Date.now=realNow;}
  }
 });
-test("403/404 in authoring clears private form and revalidates context; 401 expires session",async()=>{
+test("403/404 in authoring preserve authorized draft; 401 expires session",async()=>{
  for(const status of [401,403,404]) {
  const ui=await mount(view(),r=>r.method==='PATCH'?Response.json({detail:'SECRET'},{status}):reply(r),'teacher');
- try{await ui.submit('form',{title:'Privado'});assert.equal(ui.doc.querySelector('form'),null);assert.doesNotMatch(ui.doc.body.textContent!,/SECRET|Privado|Por institución/);if(status!==401)assert.ok(ui.requests.filter(r=>r.url.endsWith('/me')).length>1);}finally{await ui.close();}
+ try{await ui.submit('form',{title:'Privado'});assert.equal(!!ui.doc.querySelector('form'),status!==401);assert.doesNotMatch(ui.doc.body.textContent!,/SECRET/);if(status!==401){assert.equal(ui.doc.querySelector<HTMLInputElement>('input[name="title"]')?.value,'Privado');assert.ok(ui.requests.filter(r=>r.url.endsWith('/me')).length>1);}}finally{await ui.close();}
  }
 });

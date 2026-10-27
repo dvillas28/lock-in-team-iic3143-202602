@@ -12,10 +12,10 @@ import { QuizConfiguration, configuration } from "./quiz-configuration.tsx";
 export function QuizCreate({session,slug,user,course,sections,onSaved}:{session:Session;slug:string;user:CurrentUser;course:Course;sections:Section[];onSaved:()=>Promise<unknown>}) {
   const mutation=useMutation(session),formRef=useRef<HTMLFormElement>(null),feedback=useRef<HTMLParagraphElement>(null);
   useEffect(()=>{
-    if(!mutation.message)return;
+    if(!mutation.message || mutation.confirmed)return;
     const target=mutation.field && formRef.current?.elements.namedItem(mutation.field);
     if(target instanceof HTMLElement)target.focus();else feedback.current?.focus();
-  },[mutation.message,mutation.field]);
+  },[mutation.message,mutation.field,mutation.confirmed]);
   const [created,setCreated]=useState<Summary>();
   const [candidates,setCandidates]=useState<Summary[]>();
   const allowed=destinations(user,course,sections), wholeCourse=canAuthor(user,course,sections,null);
@@ -43,7 +43,7 @@ export function QuizCreate({session,slug,user,course,sections,onSaved}:{session:
     <h2 className="serif">Crear borrador</h2><fieldset className="stack" disabled={mutation.busy || mutation.uncertain || !!created}>
       <QuizConfiguration sections={allowed} wholeCourse={wholeCourse} field={mutation.field} message={mutation.message}/>
       <button type="submit" className="btn btn-primary">Crear borrador</button>
-    </fieldset><p ref={feedback} tabIndex={-1} role="status" aria-live="polite">{mutation.message}</p>
+    </fieldset>{mutation.message && <p ref={feedback} tabIndex={-1} role="status" aria-live="polite">{mutation.message}</p>}
     {created && <Link href={`/courses/${course.id}/quizzes/${created.id}`}>Quiz creado: abrir detalle</Link>}
   </form>{candidates && <div className="stack"><h3 className="serif">Quizzes para revisar</h3>{candidates.length ? candidates.map(q=><Link key={q.id} href={`/courses/${course.id}/quizzes/${q.id}`}>{q.title} · {q.id}</Link>):<p>No hay candidatos visibles. Esto no prueba que el envío haya fallado.</p>}</div>}</section>;
 }

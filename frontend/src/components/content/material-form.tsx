@@ -23,7 +23,7 @@ export function MaterialForm({session, slug, moduleId, item, onSaved, disabled =
       if (!item) element.reset();
       const refreshed = await onSaved();
       const message = item ? "Material actualizado." : "Material creado.";
-      return refreshed ? message : `${message} No se pudo actualizar la consulta; reintenta solo la lectura.`;
+      return refreshed ? message : { message: `${message} No se pudo actualizar la consulta; reintenta solo la lectura.`, persistent: true };
     }, async current => {
       if (item) await session.request(c => getMaterial(c, slug, item.id, moduleId), current);
       else await session.request(c => listModuleMaterials(c, slug, moduleId), current);

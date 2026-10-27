@@ -11,7 +11,7 @@ import { useResource } from "../courses/use-resource.ts";
 export function QuizPublish({session,slug,quiz,destination,disabled,onSaved,onLock}: {session:Session;slug:string;quiz:Authoring;destination:string;disabled:boolean;onSaved:(q:Authoring)=>void;onLock:(locked:boolean)=>void}) {
   const mutation=useMutation(session), dialog=useRef<HTMLDialogElement>(null),cancel=useRef<HTMLButtonElement>(null),trigger=useRef<HTMLButtonElement>(null),feedback=useRef<HTMLParagraphElement>(null), titleId=useId();
   useEffect(()=>{onLock(mutation.busy || !!mutation.uncertain);},[mutation.busy,mutation.uncertain,onLock]);
-  useEffect(()=>{if(mutation.message)feedback.current?.focus();},[mutation.message]);
+  useEffect(()=>{if(mutation.message && !mutation.confirmed)feedback.current?.focus();},[mutation.message,mutation.confirmed]);
   const alive=useRef(true);
   useEffect(()=>{alive.current=true;return ()=>{alive.current=false;};},[]);
   async function consult() {
@@ -41,7 +41,7 @@ export function QuizPublish({session,slug,quiz,destination,disabled,onSaved,onLo
     <p>Publicar usa únicamente los datos guardados. Un curso congelado por publicación de notas puede rechazar nuevos quizzes; guardar borradores sigue permitido.</p>
     {disabled && <p>Guarda los cambios y resuelve cualquier operación pendiente antes de publicar.</p>}
     <button ref={trigger} type="button" className="btn btn-ghost" disabled={disabled || mutation.busy || mutation.uncertain} onClick={()=>{dialog.current?.showModal();cancel.current?.focus();}}>Publicar quiz</button>
-    <p role="status" ref={feedback} tabIndex={-1}>{mutation.message}{mutation.message?.startsWith("Conflicto") && " El curso podría estar congelado o el quiz haber cambiado. No se confirmó publicación; guardar borradores sigue permitido."}</p>
+    {mutation.message && <p role="status" ref={feedback} tabIndex={-1}>{mutation.message}{mutation.message?.startsWith("Conflicto") && " El curso podría estar congelado o el quiz haber cambiado. No se confirmó publicación; guardar borradores sigue permitido."}</p>}
     {mutation.uncertain && <button type="button" className="btn btn-ghost" onClick={()=>void consult()}>Consultar estado de publicación</button>}
     <dialog ref={dialog} className="modal native-dialog panel" aria-labelledby={titleId} onKeyDown={event=>{
       if(event.key!=="Tab")return;

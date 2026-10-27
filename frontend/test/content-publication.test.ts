@@ -40,7 +40,7 @@ test("publication revoked or completed after logout never announces success",asy
  const pending=deferred<Response>();const ui=await mount(view(),r=>r.method==="POST"?pending.promise:Response.json(r.url.endsWith("/modules")?{items:[unit]}:course),"teacher");
  try{const b=ui.doc.querySelector<HTMLButtonElement>('button[aria-label="Publicar módulo Unidad 1"]')!;await ui.settle(()=>b.click());if(status===200)await ui.settle(()=>ui.session.logout());
  await ui.settle(()=>pending.resolve(Response.json({...unit,publishedAt:timestamp},{status})));
- assert.doesNotMatch(ui.doc.body.textContent!,/Módulo publicado|Unidad 1/);
+ assert.doesNotMatch(ui.doc.body.textContent!,/Módulo publicado/);if(status===200)assert.doesNotMatch(ui.doc.body.textContent!,/Unidad 1/);else assert.match(ui.doc.body.textContent!,/Unidad 1/);
  }finally{await ui.close();}
  }
 });

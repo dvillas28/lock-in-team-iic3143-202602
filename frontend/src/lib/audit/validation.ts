@@ -44,6 +44,15 @@ export function auditFilters(q: AuditFilters) {
         if (!/^\d{4}-\d\d-\d\dT\d\d:\d\d(?::\d\d(?:\.\d{1,6})?)?(?:Z|[+-]\d\d:\d\d)?$/.test(value) || !Number.isFinite(Date.parse(value))) {
             throw new TypeError('Fecha inválida.');
         }
+        const day = value.slice(0, 10), calendar = new Date(day + 'T00:00:00Z');
+        if (value.startsWith('0000') || !Number.isFinite(calendar.getTime()) || calendar.toISOString().slice(0,10) !== day) {
+            throw new TypeError('Fecha inválida.');
+        }
+        if (!/(?:Z|[+-]\d\d:\d\d)$/.test(value)) {
+            const local = new Date(value), pad = (n: number) => String(n).padStart(2, '0');
+            const actual = `${local.getFullYear()}-${pad(local.getMonth()+1)}-${pad(local.getDate())}T${pad(local.getHours())}:${pad(local.getMinutes())}`;
+            if (actual !== value.slice(0,16)) throw new TypeError('La hora local no existe en esta zona horaria.');
+        }
         result[k] = date(value) ? value : new Date(value).toISOString();
     });
     if (result.from && result.to && Date.parse(result.from) > Date.parse(result.to)) {

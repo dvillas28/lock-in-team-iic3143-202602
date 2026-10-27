@@ -101,7 +101,7 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, ch
             return <Link key={target} href={target} className={`nav-item${active ? ' active' : ''}`} aria-current={active ? 'page' : undefined} onClick={() => setMenuOpen(false)}><Glyph size={16} aria-hidden="true" />{label as string}</Link>;
           })}</>}
         </nav>
-        {user && <div className="sidebar-bottom institution-user"><div className="user-row"><span className="avatar" aria-hidden="true">{user.name.slice(0, 1)}</span><div><p className="name">{user.name}</p><p className="role">{user.email}</p><p className="role">{[...roles, ...(user.institutionMembership.isAdmin ? ['Administración institucional'] : []), ...(user.institutionMembership.isSuperAdmin ? ['Superadministración'] : [])].join(' · ') || 'Miembro institucional'}</p></div></div>{actions}</div>}
+        {user && <div className="sidebar-bottom institution-user"><div className="user-row"><span className="avatar" aria-hidden="true">{user.name.slice(0, 1)}</span><div><p className="name">{user.name}</p><p className="role">{[...roles, ...(user.institutionMembership.isAdmin ? ['Administración institucional'] : []), ...(user.institutionMembership.isSuperAdmin ? ['Superadministración'] : [])].join(' · ') || 'Miembro institucional'}</p></div></div>{actions}</div>}
       </aside>
       <div className="main">
         <header className="top-header">

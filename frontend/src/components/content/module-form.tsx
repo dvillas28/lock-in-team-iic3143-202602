@@ -23,7 +23,7 @@ export function ModuleForm({session, slug, courseId, item, items, onSaved, disab
       if (!item) element.reset();
       const refreshed = await onSaved();
       const message = item ? "Módulo actualizado." : "Módulo creado.";
-      return refreshed ? message : `${message} No se pudo actualizar la consulta; reintenta solo la lectura.`;
+      return refreshed ? message : { message: `${message} No se pudo actualizar la consulta; reintenta solo la lectura.`, persistent: true };
     }, async current => {
       if (item) await session.request(c => getCourseModule(c, slug, item.id, courseId), current);
       else await session.request(c => listCourseModules(c, slug, courseId), current);

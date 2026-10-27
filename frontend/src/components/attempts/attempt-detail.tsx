@@ -1,4 +1,5 @@
 "use client";
+import { useTransientFeedback } from "../use-feedback.ts";
 import { CourseNavigation } from "../courses/course-navigation.tsx";
 import Link from "next/link";
 import type {Session} from "../../lib/auth/session.ts";
@@ -49,6 +50,7 @@ export function AttemptDetail({attemptId}:{attemptId:string}){
 }
 function AttemptWork({session,slug,user,course,quiz,attempt}:{session:Session;slug:string;user:CurrentUser;course:Course;quiz:SafeQuiz;attempt:Attempt}){
  const {ops,state}=useAttemptOperations(session,slug,user,course,quiz,attempt),a=state.attempt??attempt,cap=attemptCapabilities(user,course,quiz,a);
+ const message=useTransientFeedback(state.phase==="dirty"?"Borrador con cambios sin guardar.":state.phase==="pristine"&&cap.edit?"Respuestas cargadas desde el servidor.":state.message,state.phase==="saved"&&!state.pending&&!state.cancelConfirmed,state);
  const locked=state.busy||!!state.pending||!!state.cancelConfirmed||!cap.edit;
  return <div className="stack quiz-authoring"><Link href={`/courses/${course.id}/quizzes`}>Volver a quizzes</Link><h1 className="serif">{quiz.title}</h1><CourseNavigation course={course} user={user} active="/quizzes" />
  <p className="tnum">Intento {a.attemptNumber} · ID: {a.id}</p><p>Sección histórica: {a.sectionId}</p><p>Estado: {state.cancelConfirmed?"cancelled":a.status}</p>
@@ -59,7 +61,7 @@ function AttemptWork({session,slug,user,course,quiz,attempt}:{session:Session;sl
  <div className="actions"><button className="btn btn-primary" type="submit" disabled={locked||!state.draft.length}>Guardar respuestas</button><button className="btn btn-ghost" type="button" disabled={locked||!state.draft.length} onClick={()=>ops.setDraft([])}>Quitar todas las selecciones</button>
  {!state.draft.length&&<AttemptConfirmation label="Guardar sin respuestas" title="Confirmar borrado de respuestas" disabled={locked} onConfirm={()=>void ops.save(true)}><p>Guardar sin respuestas borra el conjunto completo en el servidor.</p></AttemptConfirmation>}</div>
  </form></>}
- <p role="status" aria-live="polite">{state.phase==="dirty"?"Borrador con cambios sin guardar.":state.phase==="pristine"&&cap.edit?"Respuestas cargadas desde el servidor.":state.message}</p>
+ {message && <p role="status" aria-live="polite">{message}</p>}
  {state.pending==="save"&&<><p>Guardado incierto: nuevas escrituras, envío y cancelación permanecen bloqueados. Un GET aislado no prueba que el PUT tardío terminó. No recargues para intentar desbloquearlo: perder el estado local no demuestra su finalización.</p><button className="btn btn-ghost" disabled={state.busy} onClick={()=>void ops.consult()}>Consultar estado sin desbloquear</button></>}
  <AttemptSubmit ops={ops} state={state} quiz={quiz} allowed={cap.edit&&!state.cancelConfirmed}/><AttemptCancel ops={ops} state={state} allowed={cap.cancel}/>
  </div>;

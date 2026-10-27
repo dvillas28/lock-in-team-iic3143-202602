@@ -94,7 +94,7 @@ test("HTTP readiness, health, schema/DB loss, recovery and graceful shutdown", a
     app.child.kill("SIGTERM");
     const result = await app.result;
     sanitized(result.output);
-    assert.equal((await pool.query("SELECT * FROM pg_stat_activity WHERE application_name='academix-http'")).rowCount,0);
+    assert.equal((await pool.query("SELECT * FROM pg_stat_activity WHERE application_name='academix-http' AND datname=current_database()")).rowCount,0);
     const before = (await pool.query("SELECT count(*) FROM pgmigrations")).rows;
     app = cli("main", {PORT:"13982"});
     await waitReady(13982,app);

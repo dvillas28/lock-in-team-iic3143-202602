@@ -150,7 +150,7 @@ test("UC/UTFSM switching ignores out-of-order identity and old 404 responses",as
     assert.equal(h.session.getSnapshot().context?.user?.institutionMembership.institution.slug,"utfsm");h.session.logout();
   }
 });
-for(const status of [403,404,503]){
+for(const status of [403,404]){
   test(`context HTTP ${status} removes private identity and offers safe feedback`,async()=>{
     let fail=false;const h=harness(r=>r.method==="POST"?Response.json(login()):r.url.endsWith("/me")?(fail?Response.json({detail:"PRIVATE"},{status}):Response.json(user())):Response.json({items:[institution()]}));
     await signIn(h.session);await h.session.loadContext("uc");fail=true;await h.session.loadContext("uc");
@@ -258,11 +258,11 @@ test("a deferred operation cannot borrow credentials from a later generation",as
   await assert.rejects(pending,StaleSessionError);assert.equal(h.requests.length,count);h.session.logout();
 });
 
-test("resource rejection revalidates me once and retains an unavailable context even with valid membership",async()=>{
+test("resource rejection revalidates me once and preserves valid membership",async()=>{
  const h=harness(r=>Response.json(r.method==='POST'?login():r.url.endsWith('/me')?user():r.url.endsWith('/courses')?{}:{items:[institution()]},{status:r.url.endsWith('/courses')?403:200}));
  await signIn(h.session);await h.session.loadContext('uc');
  await assert.rejects(h.session.request(c=>c.GET('/api/v1/institution/{institutionSlug}/courses',{params:{path:{institutionSlug:'uc'}}})));
- await flush();assert.equal(h.session.getSnapshot().context?.user,undefined);assert.match(h.session.getSnapshot().context?.error?.message??'',/permisos/);
+ await flush();assert.ok(h.session.getSnapshot().context?.user);assert.equal(h.session.getSnapshot().context?.error,undefined);
  assert.equal(h.requests.filter(r=>r.url.endsWith('/me')).length,2);h.session.logout();
 });
 
@@ -277,3 +277,34 @@ test("only exact attempt UUID survives login return allowlist",()=>{
  const c='10000000-0000-4000-8000-000000000010',q='10000000-0000-4000-8000-000000000060',a='10000000-0000-4000-8000-000000000080';
  for(const path of [`/courses/${c}/grades`,`/courses/${c}/gradebook`,`/courses/${c}/audit`,`/courses/${c}/quizzes/${q}/attempts`,`/courses/${c}/quizzes/${q}/attempts/${a}`]){assert.equal(safeReturnPath(path),path);for(const suffix of [String.fromCharCode(10),String.fromCharCode(13),'?studentId=x','#x','/','\\','\n','%0A'])assert.equal(safeReturnPath(path+suffix),'/courses');}
  });
+
+
+test("background context failure preserves identity, blocks writes and recovers without replacing context", async () => {
+ let fail = false;
+ const h = harness(r => r.method === 'POST' ? Response.json(login()) : r.url.endsWith('/me')
+   ? fail ? Response.json({}, {status:503}) : Response.json(user()) : Response.json({items:[institution()]}));
+ await signIn(h.session); await h.session.loadContext('uc');
+ const context = h.session.getSnapshot().context;
+ fail = true; await h.session.loadContext('uc');
+ assert.equal(h.session.getSnapshot().context, context); assert.ok(h.session.getSnapshot().contextWarning);
+ const before = h.requests.length;
+ await assert.rejects(h.session.request(c => c.POST('/api/v1/institution/{institutionSlug}/courses', {
+   params:{path:{institutionSlug:'uc'}}, body:{code:'A', name:'A', term:'2026', initialSection:{code:'1'}}
+ })), error => error instanceof Error && 'status' in error && error.status === 409);
+ assert.equal(h.requests.length, before);
+ fail = false; await h.session.loadContext('uc');
+ assert.equal(h.session.getSnapshot().context, context); assert.equal(h.session.getSnapshot().contextWarning, undefined);
+ h.session.logout();
+});
+
+test("concurrent revalidation deduplicates and unchanged identity keeps operation boundary", async () => {
+ let wait = false; const gate = deferred<Response>();
+ const h = harness(r => r.method === 'POST' ? Response.json(login()) : r.url.endsWith('/me')
+   ? wait ? gate.promise : Response.json(user()) : Response.json({items:[institution()]}));
+ await signIn(h.session); await h.session.loadContext('uc'); const context = h.session.getSnapshot().context;
+ wait = true; const a = h.session.loadContext('uc'), b = h.session.loadContext('uc');
+ assert.equal(a,b); assert.equal(h.session.getSnapshot().context, context);
+ gate.resolve(Response.json(user())); await a;
+ assert.equal(h.session.getSnapshot().context, context);
+ assert.equal(h.requests.filter(r=>r.url.endsWith('/me')).length, 2); h.session.logout();
+});
