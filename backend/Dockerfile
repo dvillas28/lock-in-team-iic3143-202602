@@ -33,9 +33,10 @@ RUN rm -rf /usr/local/lib/node_modules /opt/yarn-* \
 
 COPY --from=production-dependencies /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/migrations ./migrations
 
 USER node
 
 EXPOSE 3001
 
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/commands/start.js"]

@@ -1,0 +1,393 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import type { FetchOptions } from "openapi-fetch";
+
+import { createApiClient, type ApiClient } from "../src/lib/api/client.ts";
+import { ApiHttpError, ApiNetworkError, ApiResponseError } from "../src/lib/api/errors.ts";
+import { getHealth, type HealthResponse } from "../src/lib/api/health.ts";
+import { getCurrentUser, listAccessibleInstitutions } from "../src/lib/api/institutions.ts";
+import type { components, operations } from "../src/lib/api/schema";
+
+const baseUrl = "https://api.example.test";
+const health: HealthResponse = {
+  status: "ok", version: "0.1.0", commit: null,
+  deployedAt: "2026-10-07T00:00:00.000Z", timestamp: "2026-10-07T00:01:00.000Z",
+};
+
+function mockClient(reply: (request: Request) => Response | Promise<Response>, getToken?: () => string | undefined | Promise<string | undefined>) {
+  return createApiClient({
+    baseUrl, getToken,
+    fetch: async (input) => reply(input instanceof Request ? input : new Request(input)),
+  });
+}
+
+test("public health is typed, validated, uncached and never sends a session token", async () => {
+  let tokenCalls = 0;
+  const client = mockClient((request) => {
+    assert.equal(request.url, `${baseUrl}/health`);
+    assert.equal(request.headers.has("Authorization"), false);
+    assert.equal(request.headers.has("Content-Type"), false);
+    assert.equal(request.cache, "no-store");
+    assert.equal(request.credentials, "omit");
+    assert.equal(request.redirect, "error");
+    assert.equal(request.headers.get("Accept"), "application/json, application/problem+json");
+    return Response.json(health);
+  }, () => { tokenCalls++; return "test-token"; });
+  assert.deepEqual(await getHealth(client), health);
+  await client.GET("/health", { headers: { Authorization: "Bearer explicit-token" } });
+  assert.equal(tokenCalls, 0);
+});
+
+test("protected institution operations use Bearer, the slug path and generated response types", async () => {
+  const institution: components["schemas"]["InstitutionSummary"] = {
+    id: "8dc9f252-bf1a-4b50-85c0-a2937484c429", slug: "uc", name: "UC", active: true,
+  };
+  const me: components["schemas"]["CurrentUser"] = {
+    id: "user-id", email: "user@example.test", name: "User",
+    institutionMembership: { id: "membership-id", institution, active: true, isAdmin: true, isSuperAdmin: false },
+    sectionMemberships: [{courseId:"course-id",sectionId:"section-id",role:"teacher"}],
+  };
+  const client = mockClient((request) => {
+    assert.equal(request.headers.get("Authorization"), "Bearer test-token");
+    assert.equal(request.headers.has("x-tenant"), false);
+    assert.equal(request.headers.has("institutionId"), false);
+    if (request.url === `${baseUrl}/api/v1/institutions`) return Response.json({ items: [institution] });
+    assert.equal(request.url, `${baseUrl}/api/v1/institution/uc/me`);
+    return Response.json(me);
+  }, async () => "test-token");
+  const { data: list } = await listAccessibleInstitutions(client);
+  assert.equal(list?.items[0].slug, "uc");
+  const { data: user } = await getCurrentUser(client, "uc");
+  assert.deepEqual(user, me);
+});
+
+test("tokens are read per request and never shared across client instances", async () => {
+  let token: string | undefined = "first";
+  const seen: (string | null)[] = [];
+  const reply = (request: Request) => {
+    seen.push(request.headers.get("Authorization"));
+    return Response.json({ items: [] });
+  };
+  const client = mockClient(reply, () => token);
+  await listAccessibleInstitutions(client);
+  token = "second";
+  await listAccessibleInstitutions(client);
+  token = undefined;
+  await listAccessibleInstitutions(client);
+  await listAccessibleInstitutions(mockClient(reply));
+  assert.deepEqual(seen, ["Bearer first", "Bearer second", null, null]);
+});
+
+for (const [status, kind] of [[401, "authentication"], [403, "authorization"], [404, "not-found"], [500, "http"]] as const) {
+  test(`HTTP ${status} preserves Problem diagnostics and exposes a safe ${kind} message`, async () => {
+    const problem: components["schemas"]["Problem"] = {
+      type: "https://api.example.test/errors/example", title: "Sensitive title",
+      status, detail: "Private resource information", code: "EXAMPLE",
+      instance: "/private-resource", traceId: "trace-example",
+      errors: [{ field: "name", message: "Sensitive validation", code: null }],
+    };
+    let calls = 0;
+    const client = mockClient(() => {
+      calls++;
+      return Response.json(problem, { status, headers: { "Content-Type": "application/problem+json; charset=utf-8" } });
+    });
+    await assert.rejects(listAccessibleInstitutions(client), (error: unknown) => {
+      assert.ok(error instanceof ApiHttpError);
+      assert.equal(error.kind, kind);
+      assert.equal(error.status, status);
+      assert.deepEqual(error.problem, problem);
+      assert.equal(error.message.includes("Sensitive"), false);
+      assert.equal(error.message.includes("Private"), false);
+      return true;
+    });
+    assert.equal(calls, 1);
+  });
+}
+
+test("HTTP status takes precedence; incomplete and malformed Problem fields are filtered", async () => {
+  const client = mockClient(() => Response.json({
+    status: 403, type: "about:blank", title: 12, detail: null, code: "NOT_VISIBLE",
+    traceId: "trace", instance: false, secret: "discard",
+    errors: [null, { field: "name", message: "Invalid", secret: "discard" }, { field: 5, message: "Invalid" }],
+  }, { status: 404, headers: { "Content-Type": "application/problem+json" } }));
+  await assert.rejects(listAccessibleInstitutions(client), (error: unknown) => {
+    assert.ok(error instanceof ApiHttpError);
+    assert.equal(error.kind, "not-found");
+    assert.deepEqual(error.problem, {
+      status: 404, type: "about:blank", detail: null, code: "NOT_VISIBLE", traceId: "trace",
+      errors: [{ field: "name", message: "Invalid" }],
+    });
+    return true;
+  });
+});
+
+for (const [body, contentType] of [
+  ["{invalid", "application/problem+json"], ["", "application/json"],
+  ["<html>Private</html>", "text/html"], ['{"detail":"Private"}', "text/plain"],
+  ["null", "application/problem+json"], ["[]", "application/json"],
+]) {
+  test(`malformed/unsupported error body (${contentType}: ${body}) preserves HTTP 401`, async () => {
+    const client = mockClient(() => new Response(body, { status: 401, headers: { "Content-Type": contentType } }));
+    await assert.rejects(listAccessibleInstitutions(client), (error: unknown) => {
+      assert.ok(error instanceof ApiHttpError);
+      assert.equal(error.kind, "authentication");
+      assert.deepEqual(error.problem, { status: 401 });
+      return true;
+    });
+  });
+}
+
+test("connection failures preserve the cause and are distinguishable from HTTP failures", async () => {
+  const cause = new TypeError("fetch failed");
+  const client = mockClient(() => { throw cause; });
+  await assert.rejects(getHealth(client), (error: unknown) => {
+    assert.ok(error instanceof ApiNetworkError);
+    assert.equal(error.kind, "network");
+    assert.equal(error.cause, cause);
+    assert.equal(error instanceof ApiHttpError, false);
+    return true;
+  });
+});
+
+test("successful responses without a body are supported", async () => {
+  for (const status of [200, 204]) {
+    const { data, response } = await listAccessibleInstitutions(mockClient(() => new Response(null, { status })));
+    assert.equal(data, undefined);
+    assert.equal(response.status, status);
+  }
+});
+
+test("health retains runtime validation for invalid contract payloads", async () => {
+  for (const body of [{ ...health, status: "down" }, { ...health, timestamp: "invalid" }, { ...health, extra: true }]) {
+    await assert.rejects(getHealth(mockClient(() => Response.json(body))), ApiResponseError);
+  }
+});
+
+test("typed query/path/body serialization uses the institutional route", async () => {
+  const client = mockClient(async (request) => {
+    assert.equal(request.url, `${baseUrl}/api/v1/institution/utfsm/courses/course-id`);
+    assert.equal(request.method, "PATCH");
+    assert.equal(request.headers.get("Content-Type"), "application/json");
+    assert.equal(request.headers.get("X-Request-Id"), "request-id");
+    assert.deepEqual(await request.json(), { name: "New name" });
+    return Response.json({ id: "course-id", code: "CODE", name: "New name", term: "2026-2", createdAt: health.timestamp });
+  });
+  await client.PATCH("/api/v1/institution/{institutionSlug}/courses/{courseId}", {
+    params: { path: { institutionSlug: "utfsm", courseId: "course-id" } },
+    headers: { "X-Request-Id": "request-id" }, body: { name: "New name" },
+  });
+  await mockClient((request) => {
+    assert.equal(request.url, `${baseUrl}/api/v1/institution/uc/users?search=Ana%20Maria&limit=10`);
+    return Response.json({ items: [], nextCursor: null, hasMore: false });
+  }).GET("/api/v1/institution/{institutionSlug}/users", {
+    params: { path: { institutionSlug: "uc" }, query: { search: "Ana Maria", limit: 10 } },
+  });
+});
+
+test("configuration distinguishes server/private URL from browser/public URL", async () => {
+  const saved = { API_URL: process.env.API_URL, NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL, NODE_ENV: process.env.NODE_ENV };
+  const fetcher: typeof fetch = async (input) => Response.json({ url: (input as Request).url });
+  try {
+    process.env.API_URL = "https://internal.example.test/";
+    process.env.NEXT_PUBLIC_API_URL = "https://public.example.test/";
+    Object.assign(process.env, { NODE_ENV: "production" });
+    const server = await createApiClient({ fetch: fetcher }).GET("/health", { parseAs: "text" });
+    assert.match(server.data ?? "", /internal.example.test/);
+    delete process.env.API_URL;
+    assert.throws(() => createApiClient(), /API_URL/);
+    Object.defineProperty(globalThis, "window", { value: {}, configurable: true });
+    const browser = await createApiClient({ fetch: fetcher }).GET("/health", { parseAs: "text" });
+    assert.match(browser.data ?? "", /public.example.test/);
+    delete process.env.NEXT_PUBLIC_API_URL;
+    process.env.API_URL = "https://private.example.test";
+    assert.throws(() => createApiClient(), /NEXT_PUBLIC_API_URL/);
+    Object.assign(process.env, { NODE_ENV: "development" });
+    const local = await createApiClient({ fetch: fetcher }).GET("/health", { parseAs: "text" });
+    assert.match(local.data ?? "", /localhost:3001/);
+  } finally {
+    delete (globalThis as { window?: unknown }).window;
+    for (const [key, value] of Object.entries(saved)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+});
+
+test("unsafe base URLs are rejected", () => {
+  for (const url of ["file:///tmp/api", "https://user:password@example.test", "https://example.test?secret=value", "https://example.test#fragment"]) {
+    assert.throws(() => createApiClient({ baseUrl: url }));
+  }
+});
+
+// Compile-time regression assertions, checked by pnpm typecheck; never executed.
+export function checkRequestTypes(client: ApiClient) {
+  // @ts-expect-error The institutional operation requires path parameters.
+  client.GET("/api/v1/institution/{institutionSlug}/me");
+  // @ts-expect-error institutionSlug must be a string.
+  client.GET("/api/v1/institution/{institutionSlug}/me", { params: { path: { institutionSlug: 37 } } });
+  // @ts-expect-error Only contract paths are accepted.
+  client.GET("/api/v1/tenants");
+  // @ts-expect-error The query limit is numeric.
+  client.GET("/api/v1/institution/{institutionSlug}/users", { params: { path: { institutionSlug: "uc" }, query: { search: "Ana", limit: "10" } } });
+  // @ts-expect-error CourseUpdate.name must be a string.
+  client.PATCH("/api/v1/institution/{institutionSlug}/courses/{courseId}", { params: { path: { institutionSlug: "uc", courseId: "id" } }, body: { name: 37 } });
+  // @ts-expect-error Institution context comes from the path, never the request body.
+  const courseRequest: FetchOptions<operations["updateCourse"]> = { params: { path: { institutionSlug: "uc", courseId: "id" } }, body: { institutionId: "other" } };
+  void courseRequest;
+  // @ts-expect-error CourseUpdate is required for PATCH.
+  client.PATCH("/api/v1/institution/{institutionSlug}/courses/{courseId}", { params: { path: { institutionSlug: "uc", courseId: "id" } } });
+  // @ts-expect-error ModuleCreate requires a title and position.
+  const moduleRequest: FetchOptions<operations["createCourseModule"]> = { params: { path: { institutionSlug: "uc", courseId: "id" } }, body: { title: "Module" } };
+  void moduleRequest;
+}
+
+test("all public operations remove explicit Authorization and skip getToken", async () => {
+  const client = mockClient((request) => {
+    assert.equal(request.headers.has("Authorization"), false);
+    return Response.json({status: "ok"});
+  }, () => { throw new Error("public operation read token"); });
+  const headers = {Authorization: "Bearer explicit"};
+  await client.GET("/health", {headers});
+  await client.GET("/ready", {headers});
+  await client.POST("/api/v1/auth/login", {headers, body: {email: "user@example.test", password: "fixture"}});
+});
+
+test("institutional delegation serializes only isAdmin with Bearer", async () => {
+ const client=mockClient(async request=>{
+  assert.equal(request.headers.get("Authorization"),"Bearer member-token");
+  assert.equal(request.method,"PUT");
+  assert.deepEqual(await request.json(),{isAdmin:false});
+  return Response.json({id:"member",user:{id:"user",name:"User",email:"u@example.test",active:true},isAdmin:false,isSuperAdmin:false,active:true});
+ },()=>"member-token");
+ const result=await client.PUT("/api/v1/institution/{institutionSlug}/memberships/{membershipId}/course-admin",{
+  params:{path:{institutionSlug:"uc",membershipId:"member"}},body:{isAdmin:false}});
+ assert.equal(result.data?.isAdmin,false);
+});
+
+test("course create and successor enrollment use generated contracts and Bearer",async()=>{
+ const client=mockClient(async req=>{
+  assert.equal(req.headers.get("Authorization"),"Bearer current");
+  if(req.method==="POST") {
+   assert.deepEqual(await req.json(),{code:"C",name:"Course",term:"2026-2",initialSection:{code:"1",capacity:0}});
+   return Response.json({id:"c",code:"C",name:"Course",term:"2026-2",createdBy:"actor",createdAt:health.timestamp},{status:201});
+  }
+  assert.deepEqual(await req.json(),{role:"assistant"});
+  return Response.json({id:"successor",sectionId:"s",user:{id:"u",name:"U",email:"u@example.test",active:true},role:"assistant",active:true,createdAt:health.timestamp});
+ },()=>"current");
+ const course=await client.POST("/api/v1/institution/{institutionSlug}/courses",{params:{path:{institutionSlug:"uc"}},body:{code:"C",name:"Course",term:"2026-2",initialSection:{code:"1",capacity:0}}});
+ assert.equal(course.data?.createdBy,"actor");
+ const changed=await client.PATCH("/api/v1/institution/{institutionSlug}/sections/{sectionId}/enrollments/{enrollmentId}",{params:{path:{institutionSlug:"uc",sectionId:"s",enrollmentId:"original"}},body:{role:"assistant"}});
+ assert.equal(changed.data?.id,"successor");
+});
+
+test("createCourse declares and preserves validation and access Problem errors",async()=>{
+ const statuses: (keyof operations["createCourse"]["responses"])[]=[400,401,403,404];
+ for(const status of statuses){
+  const client=mockClient(()=>Response.json({type:"https://academix/errors/test",title:"Rejected",status,detail:"Rejected",code:"REJECTED",instance:"/courses",traceId:"trace",errors:[]},
+   {status,headers:{"Content-Type":"application/problem+json"}}));
+  await assert.rejects(client.POST("/api/v1/institution/{institutionSlug}/courses",{
+   params:{path:{institutionSlug:"uc"}},body:{code:"C",name:"Course",term:"2026-2",initialSection:{code:"1"}},
+  }),error=>error instanceof ApiHttpError && error.status===status && error.problem.code==="REJECTED");
+ }
+});
+
+test("markdown-only consumer preserves inert strings and uses generated lists/detail/errors",async()=>{
+ const markdown='<script>alert(1)</script><img onerror="x"><iframe/><svg onload="x"/>[x](javascript:x) [d](data:text/html,x) &lt;b&gt;';
+ const material:components["schemas"]["MarkdownMaterial"]={id:"item",moduleId:"module",title:"Text",kind:"markdown",markdownBody:markdown,publishedAt:null,createdBy:"actor"};
+ let calls=0;
+ const client=mockClient(request=>{calls++;assert.equal(request.cache,"no-store");return Response.json(request.url.endsWith('/materials')?{items:[material]}:material);});
+ const list=await client.GET("/api/v1/institution/{institutionSlug}/modules/{moduleId}/materials",{params:{path:{institutionSlug:"uc",moduleId:"module"}}});
+ assert.equal(list.data?.items[0].kind,"markdown");assert.equal(list.data?.items[0].markdownBody,markdown);
+ const detail=await client.GET("/api/v1/institution/{institutionSlug}/materials/{materialId}",{params:{path:{institutionSlug:"uc",materialId:"item"}}});
+ assert.equal(detail.data?.markdownBody,markdown);assert.equal(typeof detail.data?.markdownBody,"string");assert.equal(calls,2);
+ const empty=mockClient(()=>Response.json({items:[]}));
+ assert.deepEqual((await empty.GET("/api/v1/institution/{institutionSlug}/courses/{courseId}/modules",{params:{path:{institutionSlug:"uc",courseId:"c"}}})).data?.items,[]);
+});
+export function checkMarkdownOnlyTypes(client:ApiClient) {
+ // @ts-expect-error Binary upload is outside the MVP contract.
+ client.POST("/api/v1/institution/{institutionSlug}/modules/{moduleId}/materials/files",{});
+ // @ts-expect-error Content downloads are outside the MVP contract.
+ client.GET("/api/v1/institution/{institutionSlug}/materials/{materialId}/content",{});
+ // @ts-expect-error Caller cannot choose kind or actor.
+ const input:components["schemas"]["MarkdownMaterialCreate"]={title:"T",markdownBody:"text",kind:"file",createdBy:"other"};
+ void input;
+}
+
+test("quiz consumer uses generated safe views and draft section reassignment without changing identities",async()=>{
+ const quiz:components["schemas"]["QuizStudentView"]={id:"q",courseId:"c",sectionId:"s",title:"Control",instructions:null,opensAt:null,closesAt:null,maxAttempts:null,status:"published",publishedAt:health.timestamp,
+  questions:[{id:"p",prompt:"2+2",position:1,points:2.5,alternatives:[{id:"a",text:"4"},{id:"b",text:"5"}]}]};
+ const client=mockClient(async request=>{
+  assert.equal(request.headers.get("Authorization"),"Bearer student");
+  if(request.method==="PATCH"){assert.deepEqual(await request.json(),{sectionId:"new-section"});return Response.json({...quiz,sectionId:"new-section",createdBy:"actor",questions:[]});}
+  return Response.json(request.url.includes("/courses/")?{items:[{...quiz,questions:undefined}]}:quiz);
+ },()=>"student");
+ const view=await client.GET("/api/v1/institution/{institutionSlug}/quizzes/{quizId}",{params:{path:{institutionSlug:"uc",quizId:"q"}}});
+ assert.equal("isCorrect" in view.data!.questions[0].alternatives[0],false);
+ const list=await client.GET("/api/v1/institution/{institutionSlug}/courses/{courseId}/quizzes",{params:{path:{institutionSlug:"uc",courseId:"c"},query:{sectionId:"s"}}});
+ assert.equal(list.data?.items[0].id,"q");
+ const changed=await client.PATCH("/api/v1/institution/{institutionSlug}/quizzes/{quizId}",{params:{path:{institutionSlug:"uc",quizId:"q"}},body:{sectionId:"new-section"}});
+ assert.equal(changed.data?.id,"q");assert.equal(changed.data?.sectionId,"new-section");
+});
+export function checkQuizTypes() {
+ const update:components["schemas"]["QuizUpdate"]={sectionId:null,questions:[{id:"retained",prompt:"p",position:1,points:1,alternatives:[{id:"a",text:"a",isCorrect:true},{id:"b",text:"b",isCorrect:false}]}]};
+ void update;
+ // @ts-expect-error Safe alternatives never contain the answer key.
+ const safe:components["schemas"]["AlternativeStudentView"]={id:"a",text:"a",isCorrect:true};
+ // @ts-expect-error Creation does not accept an existing question identity.
+ const create:components["schemas"]["QuestionCreate"]={id:"forged",prompt:"p",position:1,points:1,alternatives:[]};
+ void safe;void create;
+}
+
+
+test("attempt consumer uses generated student/assistant views and receipt without grade", async () => {
+  const attempt: components["schemas"]["QuizAttemptStudentView"] = {
+    id:"attempt",quizId:"quiz",sectionId:"section",studentId:"student",attemptNumber:1,
+    startedAt:health.timestamp,submittedAt:null,cancelledAt:null,status:"inProgress",answers:[],
+  };
+  const assistant: components["schemas"]["QuizAttemptAssistantView"] = {...attempt,scorePercent:null,grade:null};
+  const client=mockClient(()=>Response.json(assistant));
+  const result=await client.GET("/api/v1/institution/{institutionSlug}/quiz-attempts/{attemptId}",{
+    params:{path:{institutionSlug:"uc",attemptId:"attempt"}},
+  });
+  assert.deepEqual(result.data,assistant);
+  assert.ok(!JSON.stringify(result.data).includes("isCorrect"));
+});
+
+
+test("submit consumer sends original key and receives only stable receipt",async()=>{
+ const receipt: components["schemas"]["QuizAttemptSubmissionReceipt"]={id:"attempt",status:"graded",submittedAt:health.timestamp};
+ const client=mockClient(request=>{
+  assert.equal(request.headers.get("Idempotency-Key"),"original");return Response.json(receipt);
+ });
+ const response=await client.POST("/api/v1/institution/{institutionSlug}/quiz-attempts/{attemptId}/submit",{
+  params:{path:{institutionSlug:"uc",attemptId:"attempt"},header:{"Idempotency-Key":"original"}},
+ });
+ assert.deepEqual(response.data,receipt);assert.ok(!("grade" in receipt));
+});
+
+test("grade publication requires explicit students and preserves the original durable receipt",async()=>{
+ const body:components["schemas"]["PublishGradesRequest"]={gradeItemIds:["item"],sectionIds:["section"],studentIds:["student"]};
+ const receipt:components["schemas"]["PublishGradesResponse"]={publishedCount:1,publishedAt:health.timestamp};
+ const client=mockClient(async request=>{
+  assert.equal(request.headers.get("Idempotency-Key"),"original");assert.equal(request.cache,"no-store");assert.deepEqual(await request.json(),body);return Response.json(receipt);
+ },()=>"teacher");
+ const result=await client.POST("/api/v1/institution/{institutionSlug}/courses/{courseId}/gradebook/publications",{params:{path:{institutionSlug:"uc",courseId:"course"},header:{"Idempotency-Key":"original"}},body});
+ assert.deepEqual(result.data,receipt);
+});
+test("zero published weight keeps an absent average; assistant listing has no correction",async()=>{
+ const own:components["schemas"]["StudentGradesResponse"]={courseId:"course",items:[],partialAverage:null,publishedWeightPercent:0,isPartial:true};
+ const client=mockClient(()=>Response.json(own));
+ const result=await client.GET("/api/v1/institution/{institutionSlug}/courses/{courseId}/my-grades",{params:{path:{institutionSlug:"uc",courseId:"course"}}});assert.equal(result.data?.partialAverage,null);
+ const assistant:components["schemas"]["QuizAttemptAssistantView"]={id:"a",quizId:"q",sectionId:"s",studentId:"u",attemptNumber:1,status:"graded",startedAt:health.timestamp,submittedAt:health.timestamp,cancelledAt:null,answers:[],scorePercent:90,grade:6.5};
+ const listing=mockClient(()=>Response.json({items:[assistant],hasMore:false,nextCursor:null}));
+ const attempts=await listing.GET("/api/v1/institution/{institutionSlug}/quizzes/{quizId}/attempts",{params:{path:{institutionSlug:"uc",quizId:"q"},query:{status:"graded",limit:1}}});assert.deepEqual(attempts.data?.items[0],assistant);
+});
+export function checkPublicationTypes(){
+ // @ts-expect-error Every publication requires an explicit student selection.
+ const missing:components["schemas"]["PublishGradesRequest"]={gradeItemIds:["i"],sectionIds:["s"]};
+ void missing;
+}
+
+ test("API base must be an origin so generated paths cannot duplicate /api/v1",()=>{
+  for(const baseUrl of ["https://api.dvillasc.me/api/v1","https://api.dvillasc.me/backend"])assert.throws(()=>createApiClient({baseUrl}));
+ });

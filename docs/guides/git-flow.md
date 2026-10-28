@@ -36,7 +36,7 @@ docs/update-roadmap
 
 ```bash
 git switch -c feat/course-sections
-export SPECIFY_FEATURE_DIRECTORY=specs/<timestamp>-<short-name>
+export SPECIFY_FEATURE_DIRECTORY=specs/<timestamp>_<descripcion-mision>
 pnpm install
 git status
 git push -u origin HEAD
@@ -68,26 +68,25 @@ Ejemplo: con `v0.2.0` publicado, un `fix` en `dev` crea `v0.2.1-dev.1`; un
 ### Version desplegada
 
 Al publicar un release, el workflow fija `APP_VERSION` en los servicios
-`backend` y `frontend` de Railway sin redesplegar. Railway espera al workflow y
-solo redespliega el servicio cuyos archivos cambiaron (`watchPatterns`), asi que
+`backend` y `frontend` de Render mediante su API, sin redesplegar. Render espera a
+que pasen todos los checks del commit (`autoDeployTrigger: checksPass`) y solo
+redespliega el servicio cuyos archivos cambiaron (`buildFilter`), asi que
 cada servicio muestra **el release con el que se desplego por ultima vez**:
 
 - Release con cambios en ambos: los dos muestran la misma version.
 - Release con cambios solo en `frontend/`: el frontend muestra la nueva y el
   backend sigue con la anterior. Es correcto: es el codigo que esta corriendo.
 
-El frontend muestra su version en la home; el backend la expone en `/health`.
-En local, sin `APP_VERSION`, ambos muestran `dev`.
+La landing pública no muestra versiones ni estado del backend. El backend expone
+su versión en `/health`; en local, sin `APP_VERSION`, informa `dev`.
 
 ## Rollback
 
 Pendiente de definir como proceso. Lo que ya sabemos:
 
-- Un rollback en Railway (Deployments → menu del deployment sano → Rollback)
-  restaura la imagen **y las variables** de ese deployment, incluida
-  `APP_VERSION`, por lo que la version mostrada sigue siendo la real.
-- Solo esta disponible dentro de la retencion de imagenes del plan; despues hay
-  que usar Redeploy, que reconstruye desde el codigo original.
+- Render permite volver a un deploy anterior desde Events del servicio.
+  Pendiente verificar si restaura tambien `APP_VERSION`; si no, la version
+  mostrada puede no coincidir con el codigo hasta el siguiente release.
 - Si el release cambio el contrato de la API, revertir ambos servicios juntos:
   un frontend nuevo contra un backend viejo puede romperse.
 - El rollback no cambia git: `main` sigue con el codigo malo y el proximo deploy
@@ -110,6 +109,12 @@ Si un PR falla por Trivy:
    `pnpm.overrides` en el `package.json` de la app.
 3. Si no se puede corregir ahora, agregar el CVE a `.trivyignore` en la raiz
    con un comentario que diga por que y hasta cuando.
+
+El backend fuerza `body-parser >=2.4.0` y `multer >=2.5.0` mediante overrides,
+porque sus dependencias padre aún resuelven versiones vulnerables. Esto corrige
+[GHSA-27r3-jxmh-p828](https://github.com/expressjs/body-parser/security/advisories/GHSA-27r3-jxmh-p828)
+y [GHSA-q7qp-rjg7-q26m](https://github.com/expressjs/multer/security/advisories/GHSA-q7qp-rjg7-q26m).
+Mantener el lockfile sincronizado y comprobar fuentes e imagen al actualizar.
 
 Para reproducirlo local (requiere Docker):
 

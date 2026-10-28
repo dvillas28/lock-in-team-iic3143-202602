@@ -1,0 +1,76 @@
+# Render Blueprint for AcademiX. Decision and operating notes: docs/adr/deploy-on-render.md.
+# Values marked `sync: false` are asked once when the Blueprint is created and never stored here.
+# APP_VERSION is not declared: the Release workflow sets it through the Render API after each tag.
+services:
+  - type: web
+    name: academix-backend
+    runtime: docker
+    # Free instances spin down after 15 idle minutes and share 750 hours per month.
+    plan: free
+    region: virginia
+    branch: main
+    rootDir: ./backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    buildFilter:
+      paths: ["backend/**"]
+    # Deploy only after every GitHub check on the commit passes (CI and Release).
+    autoDeployTrigger: checksPass
+    # Free instances have no preDeployCommand: serve.js runs predeploy in its own process on each start.
+    dockerCommand: node dist/commands/serve.js
+    healthCheckPath: /ready
+    # No custom domain: the Hobby workspace includes two, both used by the frontend.
+    envVars:
+      - key: PORT
+        value: "3001"
+      # Owner credential: predeploy only; start.js removes it before serving HTTP.
+      - key: MIGRATION_DATABASE_URL
+        fromDatabase:
+          name: academix-db
+          property: connectionString
+      # academix_runtime on the same internal host and database as MIGRATION_DATABASE_URL.
+      - key: DATABASE_URL
+        sync: false
+      - key: AUTH_JWT_SECRET
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        value: '["https://uc.academix.dvillasc.me","https://utfsm.academix.dvillasc.me"]'
+      - key: DEMO_DATA_ENABLED
+        value: "false"
+
+  - type: web
+    name: academix-frontend
+    runtime: docker
+    plan: free
+    region: virginia
+    branch: main
+    rootDir: ./frontend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    buildFilter:
+      paths: ["frontend/**"]
+    autoDeployTrigger: checksPass
+    healthCheckPath: /
+    domains:
+      - uc.academix.dvillasc.me
+      - utfsm.academix.dvillasc.me
+    envVars:
+      - key: PORT
+        value: "3000"
+      # Backend public URL as assigned by Render (the bare service name was taken).
+      # Render passes service variables to Docker as build args; changing it requires a rebuild.
+      - key: NEXT_PUBLIC_API_URL
+        value: https://academix-backend-lr8x.onrender.com
+      - key: NEXT_PUBLIC_PORTAL_ORIGIN
+        value: https://academix-frontend-2ixy.onrender.com
+      - key: API_URL
+        value: https://academix-backend-lr8x.onrender.com
+
+databases:
+  - name: academix-db
+    databaseName: academix
+    user: academix_owner
+    # Free Postgres expires 30 days after creation (14-day grace to upgrade, then deleted).
+    plan: free
+    region: virginia
+    postgresMajorVersion: "17"

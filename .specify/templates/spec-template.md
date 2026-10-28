@@ -1,12 +1,16 @@
 # Feature Specification: [FEATURE NAME]
 
-**Feature Branch**: `[YYYYMMDD-HHMMSS-feature-name]`
+**Feature Branch**: `feat/[short-name]`
+
+**Feature Directory**: `specs/YYYYMMDD-HHMMSS_descripcion-mision`
 
 **Created**: [DATE]
 
 **Status**: Draft
 
 **Input**: User description: "$ARGUMENTS"
+
+<!-- Target <150 lines; 150–200 require length-exception; maximum 200. -->
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -16,7 +20,8 @@
   you should still have a viable MVP (Minimum Viable Product) that delivers value.
 
   Assign priorities (P1, P2, P3, etc.) to each story, where P1 is the most critical.
-  For LMS work, always call out tenant, role, course/section, and grade visibility assumptions when relevant.
+  For LMS work, call out tenant, role, course/section and grade visibility assumptions.
+  If onboarding/delegation applies, distinguish tenant superadmin, is_admin and ownership.
   Think of each story as a standalone slice of functionality that can be:
   - Developed independently
   - Tested independently
@@ -93,7 +98,7 @@
 - **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
 - **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]
-- **FR-006**: System MUST preserve tenant isolation for affected academic records.
+- **FR-006**: System MUST preserve tenant isolation from a validated institutional route and membership through persistence, even when a query omits its tenant predicate.
 - **FR-007**: System MUST define which roles can view or mutate the affected data.
 
 *Example of marking unclear requirements:*
@@ -132,3 +137,10 @@
 - [Assumption about scope boundaries, e.g., "Mobile support is out of scope for v1"]
 - [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
 - [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]
+
+## Sources & Traceability
+
+- CU / RF / RNF: [source IDs and links]
+- Backlog: [task IDs / issue links; preserve assigned owners]
+- Dependencies: [prerequisite specs]
+- Exclusions: [explicit boundaries and deferred requirements]

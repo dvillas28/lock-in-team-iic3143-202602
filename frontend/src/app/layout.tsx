@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
 import { EB_Garamond, Inter } from "next/font/google";
 import type { ReactNode } from "react";
+import { SessionProvider } from "../components/auth/session-provider.tsx";
 
 import "@/styles/tokens.css";
 import "@/styles/app.css";
+import "@/styles/institution-layout.css";
+import "@/styles/auth.css";
+import "@/styles/academic-records.css";
+import "@/styles/content.css";
+import "@/styles/quizzes.css";
+import "@/styles/landing.css";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -32,7 +39,7 @@ type RootLayoutProps = Readonly<{
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="es" className={`${inter.variable} ${ebGaramond.variable}`}>
-      <body>{children}</body>
+      <body><SessionProvider>{children}</SessionProvider></body>
     </html>
   );
 }

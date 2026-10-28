@@ -1,8 +1,52 @@
+/ready:
+  get:
+    tags:
+    - Platform
+    operationId: getReadiness
+    x-permissions: "Público; comprueba persistencia sin leer registros académicos."
+    summary: Confirmar disponibilidad de la persistencia
+    description: 'Público, sin datos institucionales ni credenciales. Responde en
+      un máximo de cinco segundos. Comprueba tablas y columnas requeridas sin leer
+      filas; no inspecciona tipos, defaults, índices ni constraints ni ejecuta migraciones
+      o seed.
+
+      '
+    security: []
+    responses:
+      '200':
+        description: Proceso inicializado y persistencia mínima disponible.
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+              - status
+              properties:
+                status:
+                  type: string
+                  enum:
+                  - ok
+      '503':
+        description: Persistencia inaccesible o estructura mínima ausente.
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+              - status
+              properties:
+                status:
+                  type: string
+                  enum:
+                  - unavailable
 /health:
   get:
     tags:
-      - Platform
+    - Platform
     operationId: getHealth
+    x-permissions: "Público; sin datos institucionales."
     summary: Consultar salud del servicio
     description: No consulta ni expone secretos o configuración interna sensible.
     security: []
@@ -12,72 +56,173 @@
         content:
           application/json:
             schema:
-              $ref: '../components/schemas/common.yaml#/HealthResponse'
-      '429':
-        $ref: '../components/responses.yaml#/TooManyRequests'
-
+              $ref: ../components/schemas/common.yaml#/HealthResponse
 /api/v1/institutions:
   get:
     tags:
-      - Institutions
+    - Institutions
     operationId: listAccessibleInstitutions
+    x-permissions: "JWT y User activo; retorna solo memberships e instituciones activas propias."
     summary: Listar instituciones accesibles para la identidad actual
-    description: Devuelve únicamente las instituciones con una membership activa para el User autenticado.
+    description: User, membership e Institution deben estar activos. Orden por slug;
+      sin pertenencias retorna items vacío.
     responses:
       '200':
         description: Instituciones accesibles.
+        headers:
+          Cache-Control:
+            schema:
+              type: string
+              const: no-store
         content:
           application/json:
             schema:
-              $ref: '../components/schemas/tenancy.yaml#/InstitutionListResponse'
+              $ref: ../components/schemas/tenancy.yaml#/InstitutionListResponse
       '401':
-        $ref: '../components/responses.yaml#/Unauthorized'
-
-/api/v1/institutions/{institutionSlug}/me:
+        $ref: ../components/responses.yaml#/Unauthorized
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+/api/v1/institution/{institutionSlug}/me:
   parameters:
-    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+  - $ref: ../components/parameters.yaml#/InstitutionSlug
   get:
     tags:
-      - Institutions
+    - Institutions
     operationId: getCurrentUser
+    x-permissions: "JWT, User e Institution activos y membership activa del actor en institutionSlug."
     summary: Consultar identidad y memberships del contexto institucional
     responses:
       '200':
-        description: Identidad autenticada y sus alcances dentro de la Institution seleccionada.
+        description: Identidad autenticada y sus alcances dentro de la Institution
+          seleccionada.
+        headers:
+          Cache-Control:
+            schema:
+              type: string
+              const: no-store
         content:
           application/json:
             schema:
-              $ref: '../components/schemas/tenancy.yaml#/CurrentUser'
+              $ref: ../components/schemas/tenancy.yaml#/CurrentUser
       '401':
-        $ref: '../components/responses.yaml#/Unauthorized'
+        $ref: ../components/responses.yaml#/Unauthorized
       '404':
-        $ref: '../components/responses.yaml#/NotFound'
-
-/api/v1/institutions/{institutionSlug}/users:
+        $ref: ../components/responses.yaml#/NotFound
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+/api/v1/institution/{institutionSlug}/users:
   parameters:
-    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+  - $ref: ../components/parameters.yaml#/InstitutionSlug
   get:
     tags:
-      - Enrollments
+    - Enrollments
     operationId: searchInstitutionUsers
     summary: Buscar participantes existentes de la institución
-    description: Reservado a teachers para seleccionar usuarios al gestionar memberships académicas.
+    description: Reservado a teachers para seleccionar usuarios al gestionar memberships
+      académicas.
     parameters:
-      - $ref: '../components/parameters.yaml#/Search'
-      - $ref: '../components/parameters.yaml#/Cursor'
-      - $ref: '../components/parameters.yaml#/Limit'
+    - $ref: ../components/parameters.yaml#/Search
+    - $ref: ../components/parameters.yaml#/Cursor
+    - $ref: ../components/parameters.yaml#/Limit
     responses:
       '200':
         description: Usuarios de la institución que coinciden con la búsqueda.
         content:
           application/json:
             schema:
-              $ref: '../components/schemas/tenancy.yaml#/UserListResponse'
+              $ref: ../components/schemas/tenancy.yaml#/UserListResponse
       '400':
-        $ref: '../components/responses.yaml#/BadRequest'
+        $ref: ../components/responses.yaml#/BadRequest
       '401':
-        $ref: '../components/responses.yaml#/Unauthorized'
+        $ref: ../components/responses.yaml#/Unauthorized
       '403':
-        $ref: '../components/responses.yaml#/Forbidden'
+        $ref: ../components/responses.yaml#/Forbidden
       '404':
-        $ref: '../components/responses.yaml#/NotFound'
+        $ref: ../components/responses.yaml#/NotFound
+/api/v1/institution/{institutionSlug}/memberships:
+  parameters:
+  - $ref: ../components/parameters.yaml#/InstitutionSlug
+  get:
+    tags:
+    - Institutions
+    operationId: listInstitutionMemberships
+    x-permissions: "Membership activa e isSuperAdmin vigente en esta institución. No concede acceso académico."
+    summary: Listar miembros activos
+    description: Exige superadmin vigente del tenant. Sin altas ni cambios de isSuperAdmin.
+      Mismo estado es no-op sin evento.
+    responses:
+      '200':
+        description: Resultado institucional.
+        headers:
+          Cache-Control:
+            schema:
+              type: string
+              const: no-store
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/tenancy.yaml#/MembershipAdminListResponse
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '403':
+        $ref: ../components/responses.yaml#/Forbidden
+      '404':
+        $ref: ../components/responses.yaml#/NotFound
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+    parameters:
+    - $ref: ../components/parameters.yaml#/Cursor
+    - $ref: ../components/parameters.yaml#/Limit
+/api/v1/institution/{institutionSlug}/memberships/{membershipId}/course-admin:
+  parameters:
+  - $ref: ../components/parameters.yaml#/InstitutionSlug
+  - name: membershipId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+  put:
+    tags:
+    - Institutions
+    operationId: setInstitutionCourseAdmin
+    x-permissions: "Membership activa e isSuperAdmin vigente; solo concede/revoca isAdmin dentro de su institución. No promueve superadmins."
+    summary: Conceder o revocar creación de cursos
+    description: Exige superadmin vigente del tenant. Sin altas ni cambios de isSuperAdmin.
+      Mismo estado es no-op sin evento.
+    responses:
+      '200':
+        description: Resultado institucional.
+        headers:
+          Cache-Control:
+            schema:
+              type: string
+              const: no-store
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/tenancy.yaml#/MembershipAdmin
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '403':
+        $ref: ../components/responses.yaml#/Forbidden
+      '404':
+        $ref: ../components/responses.yaml#/NotFound
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/tenancy.yaml#/MembershipAdminUpdate

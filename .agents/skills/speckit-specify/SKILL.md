@@ -85,7 +85,7 @@ Given that feature description, do this:
       - Check `.specify/init-options.json` for `branch_numbering`
       - If `"timestamp"`: prefix is `YYYYMMDD-HHMMSS` (current timestamp)
       - If `"sequential"` or absent: prefix is `NNN` (next available 3-digit number after scanning existing directories in `specs/`)
-      - Construct the directory name: `<prefix>-<short-name>` (e.g., `003-user-auth` or `20260319-143022-user-auth`)
+      - Construct timestamp directory names as `<prefix>_<short-name>` (e.g., `20260319-143022_user-auth`); retain `<prefix>-<short-name>` for sequential numbering
       - Set `SPECIFY_FEATURE_DIRECTORY` to `specs/<directory-name>`
 
    **Create the directory and spec file**:
@@ -106,6 +106,11 @@ Given that feature description, do this:
    - The spec directory and file are always created by this command, never by the hook
 
 4. Load the resolved active `spec-template` file to understand required sections.
+   - Authored project documents target <150 physical lines; 150–200 require a
+     `<!-- length-exception: reason -->` comment, and >200 must be split.
+   - Each spec records source CU/RF/RNF, backlog references, dependencies and exclusions.
+   - Use explicit `SPECIFY_FEATURE_DIRECTORY` with the new underscore naming.
+     Legacy branch-creation scripts retain their historical branch convention.
 
 5. **IF EXISTS**: Load `.specify/memory/constitution.md` for project principles and governance constraints.
 

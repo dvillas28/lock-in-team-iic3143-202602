@@ -2,8 +2,7 @@ name: CI
 
 on:
   pull_request:
-    branches: [main, dev]
-  # Railway "Wait for CI" only waits on workflows triggered by pushes to the deploy branch.
+  # Render "After CI checks pass" only sees checks reported on the pushed commit of the deploy branch.
   push:
     branches: [main]
   workflow_dispatch:
@@ -15,7 +14,56 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# On push to main the PR already ran documentation, contracts and checks on the same tree;
+# main only re-runs what feeds Sonar, the Security tab and the Render deploy gate.
 jobs:
+  documentation:
+    name: Documentation length
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Check authored documents in this change
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          python3 .github/scripts/check-doc-length.py --self-test
+          if [ -n "$BASE_SHA" ] && [ "$BASE_SHA" != "0000000000000000000000000000000000000000" ]; then
+            python3 .github/scripts/check-doc-length.py --base "$BASE_SHA"
+          else
+            python3 .github/scripts/check-doc-length.py --base HEAD~1
+          fi
+
+  contracts:
+    name: OpenAPI and generated client
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            frontend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir frontend install --frozen-lockfile
+      - run: pnpm docs:api:lint
+      - run: pnpm --dir backend install --frozen-lockfile
+      - run: pnpm docs:api:test
+      - run: pnpm docs:api:build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: api-catalog
+          path: dist/api-catalog/
+          if-no-files-found: error
+      - run: pnpm --dir frontend api:check
+      - run: pnpm --dir frontend typecheck
+
   changes:
     name: Detect changes
     runs-on: ubuntu-latest
@@ -58,7 +106,7 @@ jobs:
   checks:
     name: ${{ matrix.app }} (lint + ${{ matrix.app == 'backend' && 'test' || 'build' }})
     needs: changes
-    if: needs.changes.outputs.apps != '[]'
+    if: github.event_name != 'push' && needs.changes.outputs.apps != '[]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -141,15 +189,97 @@ jobs:
           sarif_file: trivy-image-${{ matrix.app }}.sarif
           category: trivy-image-${{ matrix.app }}
 
+  backend-coverage:
+    name: Backend integration + coverage
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: academix_test
+          # Disposable CI service only; no production credentials or existing database.
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d academix_test"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+      - run: pnpm --dir backend install --frozen-lockfile
+      # Integration exercises the generated frontend client against real HTTP.
+      - run: pnpm --dir frontend install --frozen-lockfile
+      - name: Configure exclusive test database
+        env:
+          PGUSER: postgres
+          PGPORT: 5432
+          PGDATABASE: academix_test
+        run: |
+          test_url="postgresql://${PGUSER}@127.0.0.1:${PGPORT}/${PGDATABASE}"
+          echo "::add-mask::$test_url"
+          echo "TEST_DATABASE_URL=$test_url" >> "$GITHUB_ENV"
+          runtime_url="postgresql://academix_runtime:ci_runtime@127.0.0.1:${PGPORT}/${PGDATABASE}"
+          echo "::add-mask::$runtime_url"
+          echo "TEST_RUNTIME_DATABASE_URL=$runtime_url" >> "$GITHUB_ENV"
+      - run: pnpm --dir backend test:coverage
+      - name: Validate backend image and isolated Compose
+        run: node backend/test/compose-smoke.mjs
+      - name: Prepare TypeScript coverage for Sonar
+        run: |
+          test -s backend/coverage/lcov.info
+          sed -i 's|^SF:src/|SF:backend/src/|' backend/coverage/lcov.info
+          grep -q '^SF:backend/src/seeds/demo.ts$' backend/coverage/lcov.info
+          grep -q '^SF:backend/src/main.ts$' backend/coverage/lcov.info
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage/lcov.info
+          if-no-files-found: error
+
   # Static analysis of our own code; the quality gate only judges the code changed by the PR.
   sonarqube:
     name: SonarQube (quality gate)
+    needs: backend-coverage
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
         with:
           # Full history so SonarQube can attribute issues to new code.
           fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        run: pnpm --dir frontend install --frozen-lockfile
+
+      # Generate LCOV in this job so the scanner can read it from the same checkout.
+      # Run from the repository root to keep source paths relative to Sonar's base.
+      - name: Run frontend tests with coverage
+        env:
+          TSX_TSCONFIG_PATH: frontend/tsconfig.json
+        run: |
+          mkdir -p frontend/coverage
+          frontend/node_modules/.bin/c8 --all --src frontend/src --check-coverage --lines 80 --branches 80 --reporter=text --reporter=lcov \
+            --reports-dir=frontend/coverage \
+            node --import ./frontend/node_modules/tsx/dist/loader.mjs --test \
+            frontend/test/*.test.ts
+          test -s frontend/coverage/lcov.info
+      - uses: actions/download-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage
 
       # The gate blocks PRs only; on main the analysis feeds the dashboard and must not block the deploy.
       - uses: SonarSource/sonarqube-scan-action@v8
@@ -163,7 +293,7 @@ jobs:
   result:
     name: CI result
     if: always()
-    needs: [changes, checks, docker, sonarqube]
+    needs: [documentation, contracts, changes, checks, docker, backend-coverage, sonarqube]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any job failed or was cancelled
