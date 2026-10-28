@@ -20,6 +20,7 @@ Base documental vigente para la segunda entrega de AcademiX. Las Entregas 0 y
 | 11 | [evidencia CI/CD](11-cicd-evidence/README.md) | Capturas de CI, CD Railway y release. |
 | 12 | [catálogo de datos](12-data-catalog.md) | Tablas, columnas, tipos, PK/FK y planilla XLSX/CSV adjunta. |
 | 13 | [guía de presentación](ppt/speaker-guide.md) | Punteo oral slide por slide y preguntas/respuestas probables. |
+| 14 | [feedback de E1](14-e1-feedback.md) | Comentarios de evaluación y acciones para responderlos en E2. |
 
 ## Paquete formal
 
