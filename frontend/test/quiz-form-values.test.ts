@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { spawnSync } from "node:child_process";
+import { createRequire } from "node:module";
+import { pathToFileURL } from "node:url";
 import { configuration, formNumber, formValue, localDate } from "../src/lib/quizzes/form-values.ts";
 import { draft } from "./fixtures/quizzes.ts";
 import { FieldError } from "../src/lib/courses/validation.ts";
@@ -29,10 +31,12 @@ test("configuration rejects impossible dates, timezone suffixes and incomplete l
 });
 
 test("nonexistent DST local time cannot silently normalize to another hour", () => {
-  const source = `import { configuration } from './src/lib/quizzes/form-values.ts';
+  const moduleUrl = new URL("../src/lib/quizzes/form-values.ts", import.meta.url).href;
+  const loaderUrl = pathToFileURL(createRequire(import.meta.url).resolve("tsx")).href;
+  const source = `import { configuration } from ${JSON.stringify(moduleUrl)};
     const form=new FormData();form.set('opensAt','2026-03-08T02:30');
     try { configuration(form); process.exit(1); } catch(error) { if(error.field!=='opensAt') throw error; }`;
-  const result = spawnSync(process.execPath, ["--import", "tsx", "--input-type=module", "-e", source], { env: { ...process.env, TZ: "America/New_York" }, encoding: "utf8" });
+  const result = spawnSync(process.execPath, ["--import", loaderUrl, "--input-type=module", "-e", source], { env: { ...process.env, TZ: "America/New_York" }, encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr);
 });
 
