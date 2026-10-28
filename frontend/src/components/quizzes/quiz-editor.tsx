@@ -1,5 +1,8 @@
 "use client";
-import { CourseNavigation } from "../courses/course-navigation.tsx";
+import { QuizWorkspace } from "./quiz-workspace.tsx";
+import { QuizStatus } from "./quiz-facts.tsx";
+import { Save } from "lucide-react";
+import { checkNativeInputs, focusQuizError } from "../../lib/quizzes/form-values.ts";
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useSession } from "../auth/session-provider.tsx";
@@ -41,8 +44,7 @@ function AuthoringForm({course,sections,quiz}:{course:Awaited<ReturnType<typeof 
   const blocked=immutable || mutation.busy || mutation.uncertain || publishing || !!observed;
   useEffect(()=>{
     if(!mutation.message || mutation.confirmed)return;
-    const target=mutation.field && formRef.current?.elements.namedItem(mutation.field);
-    if(target instanceof HTMLElement)target.focus();else feedback.current?.focus();
+    if(!focusQuizError(formRef.current,mutation.field))feedback.current?.focus();
   },[mutation.message,mutation.field,mutation.confirmed]);
   function accept(next:Authoring) {
     if(!permitted(next)) {void session.loadContext(slug);throw new ApiHttpError(403);}
@@ -50,8 +52,9 @@ function AuthoringForm({course,sections,quiz}:{course:Awaited<ReturnType<typeof 
   }
   async function submit(event:FormEvent<HTMLFormElement>) {
     event.preventDefault();if(blocked)return;
-    const data=new FormData(event.currentTarget);
+    const form=event.currentTarget, data=new FormData(form);
     await mutation.run(async current=>{
+      checkNativeInputs(form);
       const values={...configuration(data,saved),questions:readQuestions(data,rows)};
       if(!permitted(saved) || !canAuthor(user!,course,sections,values.sectionId ?? null)) throw new FieldError("sectionId","Origen o destino fuera de tu alcance docente.");
       const changed=Object.fromEntries(Object.entries(values).filter(([k,v])=>JSON.stringify(v)!==JSON.stringify(saved[k as keyof Authoring]))) as Update;
@@ -66,17 +69,20 @@ function AuthoringForm({course,sections,quiz}:{course:Awaited<ReturnType<typeof 
       return "Estado consultado. Revisa la versión recibida; tu texto local no fue reemplazado.";
     });
   }
-  return <div className="stack quiz-authoring"><Link href={`/courses/${course.id}/quizzes/${saved.id}`}>Volver al detalle seguro</Link><h1 className="serif">Autoría · {saved.title}</h1><CourseNavigation course={course} user={user!} active="/quizzes" />
-    <p className="notice">El acceso autorizado a pauta impide rendir este quiz, incluso con rol student.</p>
-    <p>{immutable ? "Publicado: inmutable." : "Borrador: guardado manual."}</p>
-    <form key={revision} ref={formRef} className="stack" aria-label="Editar quiz" onSubmit={submit} onInput={()=>setDirty(true)} onChange={()=>setDirty(true)} noValidate>
+  return <QuizWorkspace course={course} user={user!} title={saved.title} authoring>
+    <Link className="text-link" href={`/courses/${course.id}/quizzes/${saved.id}`}>Volver al detalle del quiz</Link>
+    <p className="notice">El acceso a la pauta impide rendir este quiz, aunque también participes como estudiante.</p>
+    <form key={revision} ref={formRef} className="stack" aria-label="Editar quiz" onSubmit={submit} onInput={()=>setDirty(true)} onChange={()=>setDirty(true)} noValidate aria-busy={mutation.busy}>
+      <div className="card quiz-save-bar"><div className="quiz-chips"><QuizStatus status={immutable ? "published" : "draft"}/><span className="hint" role="status">{immutable ? "Publicado: inmutable." : dirty ? "Cambios sin guardar" : "Guardado manual"}</span></div>
+        {!immutable && <button type="submit" className="btn btn-primary" disabled={blocked}><Save size={16} aria-hidden="true"/>{mutation.busy ? "Guardando…" : "Guardar borrador"}</button>}
+      </div>
+      {mutation.message && <p className="notice" role={mutation.confirmed ? "status" : "alert"} ref={feedback} tabIndex={-1}>{mutation.message}</p>}
       <fieldset className="stack" disabled={blocked}>
-        <QuizConfiguration item={saved} sections={destinations(user!,course,sections)} wholeCourse={canAuthor(user!,course,sections,null)} field={mutation.field} message={mutation.message}/>
+        <section className="card panel stack"><div><h2>Configuración del quiz</h2><p className="hint">Define quién puede rendirlo y en qué horario.</p></div><QuizConfiguration item={saved} sections={destinations(user!,course,sections)} wholeCourse={canAuthor(user!,course,sections,null)} field={mutation.field} message={mutation.message}/></section>
         <QuestionEditor rows={rows} onRows={next=>{setRows(next);setDirty(true);}} field={mutation.field} message={mutation.message}/>
-        {!immutable && <button type="submit" className="btn btn-primary">Guardar borrador</button>}
       </fieldset>
-    </form>{mutation.message && <p role="status" ref={feedback} tabIndex={-1}>{mutation.message}</p>}
+    </form>
     {observed && <section className="notice stack"><h2 className="serif">Estado recibido: {observed.status === "published" ? "Publicado" : "Borrador"}</h2><p>Hay una versión recibida tras conflicto o resultado incierto. Tu formulario permanece separado. No hay fusión automática.</p><button type="button" className="btn btn-ghost" onClick={()=>accept(observed)}>Descartar cambios locales y cargar versión recibida</button></section>}
     <QuizPublish key={saved.id + saved.status} session={session} slug={slug} quiz={saved} destination={saved.sectionId ? `Sección ${sections.find(s=>s.id===saved.sectionId)?.code}` : "Todo el curso"} disabled={dirty || !!mutation.uncertain || mutation.busy || !!observed} onSaved={accept} onLock={setPublishing}/>
-  </div>;
+  </QuizWorkspace>;
 }

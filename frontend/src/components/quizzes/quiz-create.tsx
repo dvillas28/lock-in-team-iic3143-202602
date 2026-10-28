@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { Plus } from "lucide-react";
+import { checkNativeInputs, focusQuizError } from "../../lib/quizzes/form-values.ts";
 import type { Session } from "../../lib/auth/session.ts";
 import type { CurrentUser } from "../../lib/auth/validation.ts";
 import { FieldError, type Course, type Section } from "../../lib/courses/validation.ts";
@@ -13,8 +15,7 @@ export function QuizCreate({session,slug,user,course,sections,onSaved}:{session:
   const mutation=useMutation(session),formRef=useRef<HTMLFormElement>(null),feedback=useRef<HTMLParagraphElement>(null);
   useEffect(()=>{
     if(!mutation.message || mutation.confirmed)return;
-    const target=mutation.field && formRef.current?.elements.namedItem(mutation.field);
-    if(target instanceof HTMLElement)target.focus();else feedback.current?.focus();
+    if(!focusQuizError(formRef.current,mutation.field))feedback.current?.focus();
   },[mutation.message,mutation.field,mutation.confirmed]);
   const [created,setCreated]=useState<Summary>();
   const [candidates,setCandidates]=useState<Summary[]>();
@@ -24,6 +25,7 @@ export function QuizCreate({session,slug,user,course,sections,onSaved}:{session:
     event.preventDefault();const form=event.currentTarget, data=new FormData(form);
     if (created) return;
     await mutation.run(async current=>{
+      checkNativeInputs(form);
       const values=configuration(data);
       if (!canAuthor(user,course,sections,values.sectionId ?? null)) throw new FieldError("sectionId","Destino fuera de tu alcance docente.");
       const saved=await session.request(c=>createQuiz(c,slug,course.id,{...values,title:values.title!,questions:[]}),current);
@@ -31,7 +33,8 @@ export function QuizCreate({session,slug,user,course,sections,onSaved}:{session:
       form.reset();
       // Creation returns authoring; retain only safe metadata for navigation.
       setCreated({id:saved.id,courseId:saved.courseId,sectionId:saved.sectionId,title:saved.title,instructions:saved.instructions,opensAt:saved.opensAt,closesAt:saved.closesAt,maxAttempts:saved.maxAttempts,status:saved.status,publishedAt:saved.publishedAt});
-      await onSaved();return "Quiz creado.";
+      try { await onSaved(); } catch { return "Quiz creado. No se pudo actualizar la lista; abre el detalle para continuar."; }
+      return "Quiz creado.";
     },async current=>{
       const items=await session.request(c=>listCourseQuizzes(c,slug,course.id),current);
       if(current()) setCandidates(items);
@@ -39,11 +42,11 @@ export function QuizCreate({session,slug,user,course,sections,onSaved}:{session:
     });
 
   }
-  return <section className="card panel stack"><form ref={formRef} aria-label="Crear quiz" className="stack" onSubmit={submit} noValidate>
-    <h2 className="serif">Crear borrador</h2><fieldset className="stack" disabled={mutation.busy || mutation.uncertain || !!created}>
+  return <details className="academic-disclosure card quiz-create"><summary><Plus size={16} aria-hidden="true"/>Crear quiz</summary><section className="panel stack"><form ref={formRef} aria-label="Crear quiz" className="stack" onSubmit={submit} noValidate aria-busy={mutation.busy}>
+    <div><h2 className="serif">Crear borrador</h2><p className="hint">Define el título, los destinatarios y las fechas del borrador.</p></div><fieldset className="stack" disabled={mutation.busy || mutation.uncertain || !!created}>
       <QuizConfiguration sections={allowed} wholeCourse={wholeCourse} field={mutation.field} message={mutation.message}/>
-      <button type="submit" className="btn btn-primary">Crear borrador</button>
+      <button type="submit" className="btn btn-primary">{mutation.busy ? "Creando…" : "Crear borrador"}</button>
     </fieldset>{mutation.message && <p ref={feedback} tabIndex={-1} role="status" aria-live="polite">{mutation.message}</p>}
-    {created && <Link href={`/courses/${course.id}/quizzes/${created.id}`}>Quiz creado: abrir detalle</Link>}
-  </form>{candidates && <div className="stack"><h3 className="serif">Quizzes para revisar</h3>{candidates.length ? candidates.map(q=><Link key={q.id} href={`/courses/${course.id}/quizzes/${q.id}`}>{q.title} · {q.id}</Link>):<p>No hay candidatos visibles. Esto no prueba que el envío haya fallado.</p>}</div>}</section>;
+    {created && <Link className="btn btn-primary" href={`/courses/${course.id}/quizzes/${created.id}`}>Quiz creado: abrir detalle</Link>}
+  </form>{candidates && <div className="stack"><h3 className="serif">Quizzes para revisar</h3>{candidates.length ? candidates.map(q=><Link key={q.id} href={`/courses/${course.id}/quizzes/${q.id}`}>{q.title} · {q.id}</Link>):<p>No hay candidatos visibles. Esto no prueba que el envío haya fallado.</p>}</div>}</section></details>;
 }
