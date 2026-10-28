@@ -11,6 +11,7 @@ import type { Summary } from "../../lib/quizzes/validation.ts";
 import { createQuiz, listCourseQuizzes } from "../../lib/api/quizzes.ts";
 import { useMutation } from "../courses/use-mutation.ts";
 import { QuizConfiguration, configuration } from "./quiz-configuration.tsx";
+import { QuestionEditor, questionRows, readQuestions } from "./question-editor.tsx";
 export function QuizCreate({session,slug,user,course,sections,onSaved}:{session:Session;slug:string;user:CurrentUser;course:Course;sections:Section[];onSaved:()=>Promise<unknown>}) {
   const mutation=useMutation(session),formRef=useRef<HTMLFormElement>(null),feedback=useRef<HTMLParagraphElement>(null);
   useEffect(()=>{
@@ -19,6 +20,7 @@ export function QuizCreate({session,slug,user,course,sections,onSaved}:{session:
   },[mutation.message,mutation.field,mutation.confirmed]);
   const [created,setCreated]=useState<Summary>();
   const [candidates,setCandidates]=useState<Summary[]>();
+  const [rows,setRows]=useState(()=>questionRows([]));
   const allowed=destinations(user,course,sections), wholeCourse=canAuthor(user,course,sections,null);
   if (!allowed.length && !wholeCourse) return null;
   async function submit(event:FormEvent<HTMLFormElement>) {
@@ -28,9 +30,11 @@ export function QuizCreate({session,slug,user,course,sections,onSaved}:{session:
       checkNativeInputs(form);
       const values=configuration(data);
       if (!canAuthor(user,course,sections,values.sectionId ?? null)) throw new FieldError("sectionId","Destino fuera de tu alcance docente.");
-      const saved=await session.request(c=>createQuiz(c,slug,course.id,{...values,title:values.title!,questions:[]}),current);
+      const questions=readQuestions(data,rows);
+      const saved=await session.request(c=>createQuiz(c,slug,course.id,{...values,title:values.title!,questions}),current);
       if (!current()) return;
       form.reset();
+      setRows(questionRows([]));
       // Creation returns authoring; retain only safe metadata for navigation.
       setCreated({id:saved.id,courseId:saved.courseId,sectionId:saved.sectionId,title:saved.title,instructions:saved.instructions,opensAt:saved.opensAt,closesAt:saved.closesAt,maxAttempts:saved.maxAttempts,status:saved.status,publishedAt:saved.publishedAt});
       try { await onSaved(); } catch { return "Quiz creado. No se pudo actualizar la lista; abre el detalle para continuar."; }
@@ -43,8 +47,9 @@ export function QuizCreate({session,slug,user,course,sections,onSaved}:{session:
 
   }
   return <details className="academic-disclosure card quiz-create"><summary><Plus size={16} aria-hidden="true"/>Crear quiz</summary><section className="panel stack"><form ref={formRef} aria-label="Crear quiz" className="stack" onSubmit={submit} noValidate aria-busy={mutation.busy}>
-    <div><h2 className="serif">Crear borrador</h2><p className="hint">Define el título, los destinatarios y las fechas del borrador.</p></div><fieldset className="stack" disabled={mutation.busy || mutation.uncertain || !!created}>
+    <div><h2 className="serif">Crear borrador</h2><p className="hint">Configura el quiz, agrega preguntas y marca sus respuestas correctas antes de guardar.</p></div><fieldset className="stack" disabled={mutation.busy || mutation.uncertain || !!created}>
       <QuizConfiguration sections={allowed} wholeCourse={wholeCourse} field={mutation.field} message={mutation.message}/>
+      {!created && <QuestionEditor rows={rows} onRows={setRows} field={mutation.field} message={mutation.message}/>}
       <button type="submit" className="btn btn-primary">{mutation.busy ? "Creando…" : "Crear borrador"}</button>
     </fieldset>{mutation.message && <p ref={feedback} tabIndex={-1} role="status" aria-live="polite">{mutation.message}</p>}
     {created && <Link className="btn btn-primary" href={`/courses/${course.id}/quizzes/${created.id}`}>Quiz creado: abrir detalle</Link>}

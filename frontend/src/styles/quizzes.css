@@ -35,7 +35,7 @@
 .quiz-preview-alternatives { list-style-type: upper-alpha; padding-left: 24px; }
 .quiz-preview-alternatives li { padding: 8px 0 8px 4px; border-top: 1px solid var(--border); }
 .quiz-preview-alternatives li:first-child { border-top: 0; }
-.quiz-authoring input[type="radio"] { accent-color: var(--primary); }
+.quiz-authoring input[type="radio"], .quiz-create input[type="radio"] { accent-color: var(--primary); }
 .quiz-authoring .native-dialog { width: min(560px, calc(100% - 24px)); max-height: calc(100dvh - 24px); overflow: auto; }
 .quiz-save-bar { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; background: var(--surface); }
 .academic-app .quiz-question { border: 1px solid var(--border); padding: 16px 20px 20px; gap: 16px; }
