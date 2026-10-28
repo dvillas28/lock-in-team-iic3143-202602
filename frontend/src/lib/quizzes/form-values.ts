@@ -42,7 +42,9 @@ function localInstant(value: string, field: string): string | null {
 export function configuration(form: FormData, original?: Authoring): Update {
   const date = (field: "opensAt" | "closesAt") => {
     const value = formValue(form, field);
-    return original && value === localDate(original[field]) ? original[field] : localInstant(value, field);
+    // Native datetime-local controls omit :00 seconds even when defaultValue includes them.
+    const comparable = value.length === 16 ? value + ":00" : value;
+    return original && comparable === localDate(original[field]) ? original[field] : localInstant(value, field);
   };
   const instructions = formValue(form, "instructions"), attempts = formValue(form, "maxAttempts");
   return {
