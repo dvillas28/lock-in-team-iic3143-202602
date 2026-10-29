@@ -80,8 +80,10 @@ UML/tabla completa explica opcionalidad y asociaciones omitidas en el resumen.
 Autocomprobación ZIP/XML: XLSX y tablas Markdown idénticos fila por fila,
 14/122/25; rangos de filtros/tablas y estilo wrap preservados. Mermaid tiene
 14 entidades/25 relaciones con ambos extremos y opcionales contrastados.
-Requisitos divididos en 22 partes <150 líneas, sin pérdida de CU/RF/RNF,
-con índice y anclas históricas conservadas. Links locales revisados al cierre: 299, 0 rotos.
+Requisitos consolidados posteriormente por petición del usuario en un solo
+03-use-cases-and-requirements.md <150 líneas, conservando CU/RF/RNF y anclas.
+Flujos detallados previos disponibles en Git (a60f0ff); se eliminaron los 22 anexos.
+Los enlaces se revalidan tras esta consolidación.
 Longitud y git diff --check PASS (repetidos al cierre).
 
 ## Contrato y consumidor
