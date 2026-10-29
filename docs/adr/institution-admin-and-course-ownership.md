@@ -21,8 +21,9 @@ listar sus cursos y sus secciones aunque ya no conserve Enrollment; ese acceso
 administrativo no habilita automáticamente contenido docente, pauta o notas.
 Teacher gestiona contenido compartido y participantes de sus secciones;
 assistant consulta seguimiento propio y student usa el recorrido propio.
-El dueño admin gestiona participantes de todas sus secciones y eventos del curso;
-en auditoría ese alcance prevalece aunque también tenga rol teacher.
+El dueño admin gestiona participantes de todas sus secciones y eventos administrativos
+del curso. Eventos grade requieren teacher activo según
+[privacidad de auditoría](grade-audit-visibility.md); owner+teacher amplía curso.
 Las funciones docentes de evaluación siguen exigiendo teacher activo; ownership
 solo amplía el alcance a las secciones del curso cuando admin sigue vigente.
 

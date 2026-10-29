@@ -1,0 +1,36 @@
+% Conceptual subset. Full tenant-aware FK/cardinality rules: 06-data-model-relations.md.
+\begin{tikzpicture}[
+ font=\sffamily\small,
+ box/.style={draw,rounded corners,align=center,minimum width=3.1cm,minimum height=.8cm},
+ rel/.style={thick},
+ every edge quotes/.style={font=\scriptsize,fill=white,inner sep=1pt}
+]
+\node[box] (u) at (0,0) {User};
+\node[box] (im) at (4.5,0) {InstitutionMembership};
+\node[box] (i) at (9,0) {Institution};
+\node[box] (e) at (0,-2) {Enrollment};
+\node[box] (s) at (4.5,-2) {Section};
+\node[box] (c) at (9,-2) {Course};
+\node[box] (m) at (4.5,-4) {CourseModule};
+\node[box] (mat) at (0,-4) {Material};
+\draw[rel] (u) -- node[above,pos=.22,font=\scriptsize,inner sep=1pt]{1} node[above,pos=.78,font=\scriptsize,inner sep=1pt]{0..*} (im);
+\draw[rel] (im) -- node[above,pos=.22,font=\scriptsize,inner sep=1pt]{0..*} node[above,pos=.78,font=\scriptsize,inner sep=1pt]{1} (i);
+\draw[rel] (i) -- node[right,pos=.15]{1} node[right,pos=.85]{0..*} (c);
+\draw[rel] (c) -- node[above,pos=.22,font=\scriptsize,inner sep=1pt]{1} node[above,pos=.78,font=\scriptsize,inner sep=1pt]{0..*} (s);
+\draw[rel] (s) -- node[above,pos=.22,font=\scriptsize,inner sep=1pt]{1} node[above,pos=.78,font=\scriptsize,inner sep=1pt]{0..*} (e);
+\draw[rel] (u) -- node[left,pos=.15]{1} node[left,pos=.85]{0..*} (e);
+\draw[rel] (c) -- node[above,pos=.2]{1} node[above,pos=.8]{0..*} (m);
+\draw[rel] (m) -- node[above,pos=.22,font=\scriptsize,inner sep=1pt]{1} node[above,pos=.78,font=\scriptsize,inner sep=1pt]{0..*} (mat);
+\node[box] (q) at (13.5,0) {Quiz};
+\node[box] (qa) at (18,0) {QuizAttempt};
+\node[box] (gi) at (13.5,-2) {GradeItem};
+\node[box] (g) at (18,-2) {Grade};
+\draw[rel] (c) -- node[above,pos=.2]{1} node[above,pos=.8]{0..*} (q);
+\draw[rel] (q) -- node[above,pos=.22,font=\scriptsize,inner sep=1pt]{1} node[above,pos=.78,font=\scriptsize,inner sep=1pt]{0..*} (qa);
+\draw[rel] (q) -- node[right,pos=.15]{1} node[right,pos=.85]{0..1} (gi);
+\draw[rel] (gi) -- node[above,pos=.22,font=\scriptsize,inner sep=1pt]{1} node[above,pos=.78,font=\scriptsize,inner sep=1pt]{0..*} (g);
+\draw[rel] (qa) -- node[right,pos=.15]{1} node[right,pos=.85]{0..1} (g);
+\node[box] (ac) at (13.5,-4) {Course};
+\node[box] (a) at (18,-4) {AuditEvent};
+\draw[rel] (ac) -- node[above,pos=.22,font=\scriptsize,inner sep=1pt]{0..1} node[above,pos=.78,font=\scriptsize,inner sep=1pt]{0..*} (a);
+\end{tikzpicture}

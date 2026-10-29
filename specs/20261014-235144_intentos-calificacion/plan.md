@@ -2,7 +2,7 @@
 
 **Branch**: `feat/intentos-calificacion` | **Base**: PR #94, `da8b59b`
 **Date**: 2026-10-19 | **Spec**: [spec.md](spec.md)
-**Status**: Implementado; cierre pendiente por hallazgo adicional de privacidad.
+**Status**: Implementado; AUD-PRIV corregido/validado localmente por polish E2; aceptación global de esta misión sigue pendiente (ver seguimiento al final).
 **Input**: `specs/20261014-235144_intentos-calificacion/spec.md`.
 
 ## Summary
@@ -135,3 +135,9 @@ PostgreSQL 17 exclusivo (2026-10-19). Esquema 20261019000100_quiz_authoring.sql,
 canAuthorQuiz compartido y requireDraft bloquea edición publicada antes del intento.
 Puntos hasta dos decimales y total ≤999999.99 validados; GradeItem único en SQL.
 Intentos usa prefijo posterior libre 20261019000200. DB efímera academix_attempts_test.
+
+## Seguimiento AUD-PRIV (2026-10-29)
+
+Corrección local posterior: [evidencia](../../docs/backend/audit-grade-privacy-validation.md).
+Owner sin teacher conserva administrativos, sin grade; docencia conserva historia.
+No cierra las tareas de aceptación pendientes ni atribuye este fix a la misión original.
