@@ -8,7 +8,8 @@ Fecha: 2026-10-19. Estado: implementado; aceptación registrada en
 Configurar pesos exige teacher activo y admin dueño del curso. Publicar exige
 teacher activo; ownership con admin amplía el alcance a todo el curso.
 Assistant lee seguimiento de sus secciones, sin corrección ni escritura.
-Auditoría conserva la excepción del admin dueño aun sin teacher.
+Auditoría conserva administrativos del admin dueño sin teacher; grade exige
+docencia vigente según [privacidad de auditoría](grade-audit-visibility.md).
 Se aplica el [ADR de permisos](institution-admin-and-course-ownership.md).
 
 Publicación recibe listas explícitas completas de ítems, secciones y estudiantes.

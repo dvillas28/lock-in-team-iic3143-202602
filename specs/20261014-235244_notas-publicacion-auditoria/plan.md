@@ -2,7 +2,7 @@
 
 **Branch actual**: `feat/notas-publicacion-auditoria` | **Base**: `cf7ef53`
 **Date**: 2026-10-19 | **Spec**: [spec.md](spec.md)
-**Status**: Implementado; cierre pendiente por bloqueo heredado #96; ver docs/backend/gradebook-validation.md.
+**Status**: Implementado; AUD-PRIV corregido/validado localmente por polish E2; aceptación global de esta misión sigue pendiente (ver seguimiento al final).
 **Input**: `specs/20261014-235244_notas-publicacion-auditoria/spec.md`.
 
 ## Summary
@@ -48,7 +48,8 @@ incluidas autoría `da8b59b` y módulos `e34499e`; aceptación ejecutada y docum
 | Complejidad | Un ledger de recibos para idempotencia persistida; lock Course ya existente |
 
 [ADR de permisos](../../docs/adr/institution-admin-and-course-ownership.md):
-auditoría conserva admin dueño aun sin teacher; teacher ordinario solo sus eventos
+auditoría conserva administrativos del admin dueño sin teacher; grade exige teacher;
+teacher ordinario solo sus eventos
 de sección. La configuración de pesos es evaluación: teacher activo + admin dueño.
 Los responsables del backlog se conservan. No quedan aclaraciones funcionales abiertas.
 
@@ -112,3 +113,9 @@ Migración adicional `20261019000400_validate_publication_history.sql`: valida
 publicaciones preexistentes (pesos, resultado graded, último intento y ausencia
 de activos), falla sin reparar historia inválida. Se añade después de 003 para
 conservar la migración ya ejecutada en la DB exclusiva durante desarrollo.
+
+## Seguimiento AUD-PRIV (2026-10-29)
+
+Corrección local posterior: [evidencia](../../docs/backend/audit-grade-privacy-validation.md).
+Owner sin teacher conserva administrativos, sin grade; docencia conserva historia.
+No cierra las tareas de aceptación pendientes ni atribuye este fix a la misión original.

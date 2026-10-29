@@ -16,17 +16,15 @@ No intenta replicar un LMS completo ni anticipar infraestructura de escala.
 - `Institution` como entidad raíz con UUID interno y slug único.
 - Dos Institutions demo: `uc` y `utfsm`, dentro de la misma base.
 - `User` global e `InstitutionMembership` para pertenencia institucional.
-- Contexto explícito mediante `/api/v1/institutions/{institutionSlug}/...`.
+- Contexto explícito mediante `/api/v1/institution/{institutionSlug}/...`.
 - El path identifica la Institution solicitada, pero no concede acceso.
 - Entidades académicas con `institution_id` y relaciones institution-aware.
 - Consultas institution-scoped y tests explícitos de acceso cruzado.
 - Portal común para elegir una Institution visible.
-- Dos experiencias UI: admin y no admin. El docente puede tener o no
-  administración; estudiante y ayudante comparten la experiencia no admin.
-  En la propuesta de UI, el docente no admin gestiona su sección y el admin
-  todas las secciones; ambos editan contenido compartido del curso.
-  Esta separación está representada en los mockups; la alineación de permisos
-  de dominio/API permanece como [dependencia de implementación](../../adr/ui-admin-non-admin-experiences.md).
+- Administración institucional implementada mediante flags independientes:
+  is_super_admin delega is_admin; is_admin crea cursos y administra los propios.
+  Teacher mantiene funciones académicas; ownership no las concede por sí solo.
+  [Matriz de actores](05-domain-model.md) y [cuentas](../../guides/demo-accounts.md).
 - Roles por sección: `teacher`, `student` y `assistant`.
 - Un User puede acumular roles, incluso varios en una misma sección.
 - Cursos, secciones, módulos y material académico.
@@ -38,19 +36,18 @@ No intenta replicar un LMS completo ni anticipar infraestructura de escala.
 - Cálculo automático, ponderaciones, publicación manual y promedio parcial.
 - JWT para autenticación global y memberships persistidas para autorización.
 - Auditoría inmutable de cambios académicos sensibles, scoped por Institution.
-- Railway como plataforma de despliegue.
+- Render como plataforma configurada; estado remoto no verificado en este polish.
+- RLS y runtime sin bypass como barrera adicional de aislamiento.
 
 ## Fuera del MVP
 
-- Administrador institucional separado y RBAC completo.
+- Administración general de usuarios, superadmin global y RBAC completo.
 - Creación dinámica de Institutions desde UI o API.
 - Jerarquías de facultad, departamento, campus u otra unidad organizacional.
-- Row-Level Security; queda como posible defensa en profundidad futura.
+- Alta general/invitaciones en institución existente; onboarding inicial es operativo.
 - Sharding, particionamiento y routing de bases.
 - Restore lógico de una Institution individual.
-- Implementación completa de carga/descarga de binarios; Railway Bucket queda
-  definido como object storage objetivo, pero el MVP académico parte con
-  material markdown.
+- Carga/descarga de binarios; proveedor por definir en otra misión.
 - Branding, SSO, locale, settings arbitrarios e integraciones por Institution.
 - Redis, workers, load balancer propio y microservicios.
 - Entregas manuales, corrección manual compleja y recorrecciones.
@@ -63,14 +60,14 @@ La demo es aceptable si prueba que:
 - UC y UTFSM coexisten en la misma PostgreSQL sin exponer datos cruzados;
 - una identidad global solo accede a Institutions con membership activa;
 - recursos e identificadores de otra Institution se tratan como no visibles;
-- un docente solo administra cursos y secciones donde tiene rol `teacher`;
+- admin crea cursos y administra los propios; teacher actúa en sus secciones;
 - un estudiante ve únicamente material y quizzes autorizados y sus propias
   notas publicadas;
 - un quiz produce una nota desde el último intento calificado y la refleja en el
   libro de notas;
 - cambios sensibles generan auditoría con scope institucional;
-- frontend y backend se despliegan en Railway y se ejecutan localmente con
-  Docker Compose.
+- frontend/backend tienen configuración Render y ejecución local Docker Compose;
+  disponibilidad remota requiere evidencia operativa separada.
 
 ## Evolución
 
