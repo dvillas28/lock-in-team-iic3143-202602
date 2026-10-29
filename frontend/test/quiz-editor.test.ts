@@ -68,3 +68,16 @@ test("reorder preserves typed values and correct radio associated with original 
  const body=await ui.requests.find(r=>r.method==='PATCH')!.clone().json();assert.equal(body.questions[0].id,second.id);assert.equal(body.questions[0].prompt,'Texto conservado');assert.equal(body.questions[0].alternatives.find((a:{isCorrect:boolean})=>a.isCorrect).id,'b');assert.equal(body.questions[1].alternatives.find((a:{isCorrect:boolean})=>a.isCorrect).id,'a');
  }finally{await ui.close();}
 });
+
+test("native datetime normalization does not add unchanged timestamps to a title PATCH",async()=>{
+ const initial={...draft,opensAt:"2026-10-28T12:00:00.123456Z",closesAt:"2026-10-29T12:00:00.654321Z"};
+ const ui=await mount(view(),async r=>r.method==='PATCH'?Response.json({...initial,...await r.clone().json()}):reply(r,initial),'teacher');
+ try{
+  const input=ui.doc.querySelector<HTMLInputElement>('[name="opensAt"]')!;
+  assert.equal(input.value.length,16);
+  await ui.submit('form',{title:'Solo cambia el título'});
+  const request=ui.requests.find(r=>r.method==='PATCH')!;
+  assert.ok(request);
+  assert.deepEqual(await request.clone().json(),{title:'Solo cambia el título'});
+ }finally{await ui.close();}
+});

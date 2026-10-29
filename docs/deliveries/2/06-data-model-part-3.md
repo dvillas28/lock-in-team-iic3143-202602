@@ -80,7 +80,7 @@ Reglas:
 
 ## Backup y recuperación
 
-Backup y point-in-time recovery cubren la PostgreSQL compartida completa.
+Backup/PITR son objetivo de recuperación completa, no acreditados en Render free.
 Export/import lógico de una Institution puede evaluarse en el futuro, pero
 restore independiente no es una capacidad del MVP.
 

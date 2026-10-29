@@ -1,38 +1,23 @@
 import { useId } from "react";
-import type { Authoring, Update } from "../../lib/quizzes/validation.ts";
+import type { Authoring } from "../../lib/quizzes/validation.ts";
 import type { Section } from "../../lib/courses/validation.ts";
-import { FieldError } from "../../lib/courses/validation.ts";
+import { localDate } from "../../lib/quizzes/form-values.ts";
 import { Field } from "../courses/form-fields.tsx";
-// Keep original timestamps byte-for-byte unless the local input changed.
-export function localDate(value?: string | null) {
-  if (!value) return "";
-  const d = new Date(value);
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0,19);
-}
-export function configuration(form: FormData, original?: Authoring): Update {
-  const date = (key: "opensAt" | "closesAt") => {
-    const value = String(form.get(key) ?? "");
-    if (original && value === localDate(original[key])) return original[key];
-    if (!value) return null;
-    if (!Number.isFinite(new Date(value).getTime())) throw new FieldError(key,"Ingresa una fecha válida.");
-    return new Date(value).toISOString();
-  };
-  const attempts = String(form.get("maxAttempts") ?? "");
-  return {title:String(form.get("title") ?? ""),sectionId:String(form.get("sectionId") ?? "") || null,instructions:original?.instructions === null && form.get("instructions") === "" ? null : String(form.get("instructions") ?? ""),opensAt:date("opensAt"),closesAt:date("closesAt"),maxAttempts:attempts === "" ? null : Number(attempts)};
-}
+export { configuration, localDate } from "../../lib/quizzes/form-values.ts";
 export function QuizConfiguration({item,sections,wholeCourse,field,message}:{item?: Authoring;sections: Section[];wholeCourse:boolean;field?:string;message?:string}) {
-  const destinationId=useId();
-  return <div className="stack">
-    <Field name="title" label="Título del quiz" value={item?.title} invalid={field === "title"} error={field === "title" ? message : undefined} />
-    <div className="stack"><label htmlFor={destinationId}>Destinatarios</label><select id={destinationId} className="field" name="sectionId" defaultValue={item?.sectionId ?? (wholeCourse ? "" : sections[0]?.id)} aria-invalid={field === "sectionId" || undefined}>
-      {wholeCourse && <option value="">Todo el curso</option>}{sections.map(s=><option key={s.id} value={s.id}>Sección {s.code}</option>)}
-    </select></div>
-    <Field name="instructions" label="Instrucciones" multiline required={false} value={item?.instructions ?? ""} invalid={field === "instructions"} error={field === "instructions" ? message : undefined}/>
-    <p className="hint">Fechas en zona local ({Intl.DateTimeFormat().resolvedOptions().timeZone}). Vacío: sin límite. Intentos vacíos: ilimitados. JSON completo: hasta 4096 bytes UTF-8.</p>
+  const destinationId=useId(), attemptsId=useId();
+  return <div className="stack quiz-configuration">
     <div className="form-grid">
+    <Field name="title" label="Título del quiz" value={item?.title} invalid={field === "title"} error={field === "title" ? message : undefined} />
+    <div className="stack"><label className="field-label" htmlFor={destinationId}>Destinatarios</label><select id={destinationId} className="field" name="sectionId" defaultValue={item?.sectionId ?? (wholeCourse ? "" : sections[0]?.id)} aria-invalid={field === "sectionId" || undefined} aria-describedby={field === "sectionId" ? `${destinationId}-error` : undefined}>
+      {wholeCourse && <option value="">Todo el curso</option>}{sections.map(s=><option key={s.id} value={s.id}>Sección {s.code}</option>)}
+    </select>{field === "sectionId" && <p className="hint" id={`${destinationId}-error`}>{message}</p>}</div></div>
+    <Field name="instructions" label="Instrucciones (opcional)" multiline required={false} value={item?.instructions ?? ""} invalid={field === "instructions"} error={field === "instructions" ? message : undefined}/>
+    <div className="form-grid quiz-date-fields">
       <Field name="opensAt" label="Apertura" type="datetime-local" required={false} value={localDate(item?.opensAt)} invalid={field === "opensAt"} error={field === "opensAt" ? message : undefined}/>
       <Field name="closesAt" label="Cierre" type="datetime-local" required={false} value={localDate(item?.closesAt)} invalid={field === "closesAt"} error={field === "closesAt" ? message : undefined}/>
-      <Field name="maxAttempts" label="Máximo de intentos" type="number" required={false} value={item?.maxAttempts?.toString()} invalid={field === "maxAttempts"} error={field === "maxAttempts" ? message : undefined}/>
+      <div className="stack"><label className="field-label" htmlFor={attemptsId}>Máximo de intentos (opcional)</label><input id={attemptsId} className="field tnum" name="maxAttempts" type="number" min="1" max="2147483647" step="1" defaultValue={item?.maxAttempts ?? ""} aria-invalid={field === "maxAttempts" || undefined} aria-describedby={field === "maxAttempts" ? `${attemptsId}-error` : undefined} />{field === "maxAttempts" && <p className="hint" id={`${attemptsId}-error`}>{message}</p>}</div>
     </div>
+    <p className="hint">Horarios en {Intl.DateTimeFormat().resolvedOptions().timeZone}. Deja las fechas vacías para no limitar el horario y los intentos vacíos para permitir intentos ilimitados. El cierre debe ser posterior a la apertura.</p>
   </div>;
 }

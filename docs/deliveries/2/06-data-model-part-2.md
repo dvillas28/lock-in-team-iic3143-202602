@@ -1,10 +1,21 @@
+# Persistencia: matrículas, contenido y evaluaciones
+
+### enrollments
+
+Tabla pivote académica. Una fila indica que un User pertenece a una Section de
+un Course de una Institution con un rol específico. No almacena `course_id`
+porque Section ya pertenece a Course; las consultas obtienen el Course mediante
+la FK de Section. Se conserva `institution_id` para scope, índices y FK
+institution-aware.
 
 Campos: `id uuid PK`, `institution_id uuid`, `section_id uuid`,
 `user_id uuid`, `role varchar(16)`, `active boolean`, `created_at timestamptz(6)`.
 
 Reglas:
 
-- `role in ('teacher', 'student', 'assistant')`;
+- Dominio enumerado cerrado teacher/student/assistant mediante varchar(16)+CHECK;
+  rechaza otros valores como un enum SQL, sin migración por apariencia.
+  Flags admin/superadmin son institucionales, no valores de role;
 - FK `(institution_id, section_id)` referencia Section;
 - FK `(institution_id, user_id)` referencia InstitutionMembership;
 - único parcial
@@ -31,25 +42,22 @@ Reglas:
 
 ### materials
 
-Markdown o metadatos de un archivo externo.
+Material Markdown del MVP. Binarios y sus metadatos quedan diferidos; no existen
+storage_key/mime_type/size_bytes en el DDL actual.
 
 Campos: `id uuid PK`, `institution_id uuid`, `module_id uuid`, `title varchar(200)`,
-`kind varchar(16)`, `markdown_body text nullable`, `storage_key varchar(1024) nullable`,
-`mime_type varchar(255) nullable`, `size_bytes bigint nullable`,
+`kind varchar(16) DEFAULT 'markdown'`, `markdown_body text NOT NULL`,
 `published_at timestamptz(6) nullable`, `created_by uuid`.
 
 Reglas:
 
 - FK `(institution_id, module_id)` referencia CourseModule;
 - FK `(institution_id, created_by)` referencia InstitutionMembership;
-- no tiene `section_id`: el material publicado es común para todas las secciones
-  del Course del módulo;
-- `kind in ('markdown', 'file')`;
-- markdown exige cuerpo y excluye campos de archivo;
-- file exige metadatos, MIME permitido y `size_bytes >= 0`;
-- el futuro `storage_key` usa namespace interno por Institution, no se expone a
-  clientes ni auditoría;
-- el backend valida InstitutionMembership y matrícula antes de servir contenido.
+- sin section_id: material publicado común a secciones del curso;
+- CHECK kind='markdown', cuerpo 1..10000 caracteres y no vacío tras btrim;
+- backend valida membership y matrícula antes de servir contenido;
+- archivo binario futuro exige spec/proveedor y namespace institucional, no se
+  presenta como persistencia ya implementada.
 
 ### quizzes
 

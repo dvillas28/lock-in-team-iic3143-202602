@@ -46,7 +46,8 @@ export function questionsInput(v: unknown, current?: Authoring): Question[] {
       if (typeof a.isCorrect !== "boolean") fail(f, "Selecciona una alternativa correcta.");
       return { id: string(a.id, f + `.alternatives.${j}.id`), text: string(a.text, f + `.alternatives.${j}.text`), isCorrect: a.isCorrect as boolean };
     });
-    if (alternatives.length < 2 || new Set(alternatives.map(a => a.id)).size !== alternatives.length || alternatives.filter(a => a.isCorrect).length !== 1) fail(f, "Se requieren al menos dos alternativas con ID único y exactamente una correcta.");
+    if (alternatives.length < 2 || new Set(alternatives.map(a => a.id)).size !== alternatives.length) fail(f + ".alternatives", "Agrega al menos dos alternativas distintas a esta pregunta.");
+    if (alternatives.filter(a => a.isCorrect).length !== 1) fail(f + ".correct", "Selecciona exactamente una correcta para esta pregunta.");
     return { ...(q.id === undefined ? {} : {id: q.id as string}), prompt: string(q.prompt, f + ".prompt"), position: integer(q.position, f + ".position"), points: points as number, alternatives };
   });
   const ids = questions.flatMap(q => q.id ? [q.id] : []);

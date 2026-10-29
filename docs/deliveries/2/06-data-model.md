@@ -19,3 +19,6 @@ Actor nulo se limita a onboarding/superadmin con evidencia operativa obligatoria
 Las descripciones históricas quedan subordinadas al modelo implementado y contratos:
 [modelo vigente](../../../specs/20261014-234844_cursos-roles/data-model.md) y
 [ADR](../../adr/institution-admin-and-course-ownership.md).
+
+Revisión polish 2026-10-29: [reglas de cardinalidad](06-data-model-relations.md),
+[cuentas/provisión](../../guides/demo-accounts.md) y [evidencia](../../backend/feedback-e2-validation.md).

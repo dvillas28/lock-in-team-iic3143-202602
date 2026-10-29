@@ -2,7 +2,8 @@
 
 Fecha: 2026-10-19. Rama: feat/intentos-calificacion, base PR #94 (da8b59b).
 Worktree: academix-intentos-calificacion, separado del checkout original.
-Estado: T001–T030 ejecutadas; T031 pendiente por hallazgo adicional de privacidad.
+Estado histórico (2026-10-19): T001–T030 ejecutadas; T031 pendiente.
+Actualización AUD-PRIV al final; aceptación global de esta misión aún no cerrada.
 
 ## Prerrequisito y alcance
 
@@ -141,3 +142,13 @@ otros eventos del admin. Presentado al usuario antes de resolver, según instruc
 SC-003 y T031 no se cierran hasta validar/corregir y repetir negativos/cobertura.
 speckit-analyze: 14/14 requisitos FR/SC mapeados a 31 tareas; sin tareas huérfanas.
 La brecha implementación/privacidad se registra como HIGH de revisión LMS.
+
+<!-- length-exception: conserva evidencia histórica completa y actualización localizada de AUD-PRIV -->
+
+## Actualización localizada AUD-PRIV — 2026-10-29
+
+[Privacidad de auditoría](audit-grade-privacy-validation.md) registra regresión
+previa y corrección local: grade exige teacher, administrativos owner se conservan.
+La excepción histórica de owner sin teacher queda acotada por el nuevo ADR.
+Esto resuelve solo AUD-PRIV; no cierra T031/T036 ni otros checks/pendientes de
+esta misión histórica. Sin aceptación remota ni despliegue.

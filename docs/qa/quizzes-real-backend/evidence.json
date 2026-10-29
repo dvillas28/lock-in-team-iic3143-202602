@@ -1,0 +1,81 @@
+{
+  "environment": {
+    "database": "academix_quizzes_dev",
+    "postgres": "17.10",
+    "backend": "http://localhost:3001",
+    "mocked": false
+  },
+  "courseId": "718f0c23-f6fa-4f2b-b282-848bdf5271f7",
+  "sectionId": "487763b5-62bc-49dd-b23b-331f41293368",
+  "checks": [
+    "Backend real ready with runtime RLS checks",
+    "CORS allows institutional frontend",
+    "Real authenticated teacher loads quiz list",
+    "Frontend blocks missing correct answer before POST",
+    "Single real POST creates quiz and two questions with server UUIDs",
+    "Safe detail persists questions without exposing answer key",
+    "Editing unchanged dates preserves timestamp and sends minimal PATCH",
+    "Question reorder persists original UUIDs and correct answers",
+    "Backend independently rejects seven malformed requests without creating rows",
+    "Cross-institution access rejected",
+    "Publication is immutable and repeat creates no duplicate grade item or audit event",
+    "Student sees published quiz, cannot create or access answer key",
+    "Student saves and submits real attempt; backend grades 100 percent without early grade disclosure",
+    "Assistant has read access to attempts without authoring or answer key"
+  ],
+  "negativeChecks": [
+    {
+      "case": "blank title",
+      "status": 422
+    },
+    {
+      "case": "zero attempts",
+      "status": 422
+    },
+    {
+      "case": "impossible date",
+      "status": 400
+    },
+    {
+      "case": "reversed dates",
+      "status": 422
+    },
+    {
+      "case": "missing correct answer",
+      "status": 422
+    },
+    {
+      "case": "fractional points beyond precision",
+      "status": 422
+    },
+    {
+      "case": "oversized JSON",
+      "status": 413
+    }
+  ],
+  "pageErrors": [],
+  "quizId": "ce059ea7-c760-4d16-b205-ffbacdaf7d19",
+  "publishedAt": "2026-10-28T12:15:46.723807Z",
+  "gradeItemId": "d867d084-ec40-46aa-8bea-fc7ddcd92be5",
+  "attemptId": "9e39969a-a373-4f92-9ef3-dca64931a4f6",
+  "staffScorePercent": 100,
+  "completed": true,
+  "completedAt": "2026-10-28T12:16:10.805Z",
+  "databaseVerification": {
+    "quiz": {
+      "id": "ce059ea7-c760-4d16-b205-ffbacdaf7d19",
+      "question_count": 2,
+      "published": true,
+      "grade_items": 1,
+      "publication_events": 1
+    },
+    "attempt": {
+      "status": "graded",
+      "score_percent": 100,
+      "grade": 7,
+      "grade_published": false
+    },
+    "rowsVisibleWithoutInstitutionContext": 0,
+    "postgres": "17.10"
+  }
+}

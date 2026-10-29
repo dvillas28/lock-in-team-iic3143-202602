@@ -88,3 +88,9 @@ La precisión submilisegundo de FR-004 queda diferida según el
 Permisos vigentes: [ADR de admin y ownership](../../docs/adr/institution-admin-and-course-ownership.md).
 Teacher activo habilita evaluación; admin dueño amplía alcance, sin reemplazar rol.
 Assistant conserva solo lectura de seguimiento; superadmin no concede docencia.
+
+## Seguimiento AUD-PRIV (2026-10-29)
+
+Corrección local posterior: [evidencia](../../docs/backend/audit-grade-privacy-validation.md).
+Owner sin teacher conserva administrativos, sin grade; docencia conserva historia.
+No cierra las tareas de aceptación pendientes ni atribuye este fix a la misión original.
