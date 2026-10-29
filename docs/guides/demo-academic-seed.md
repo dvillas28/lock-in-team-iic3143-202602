@@ -1,5 +1,9 @@
 # Demo con cursos: Docker y producción
 
+Para la presentación completa con las diez cuentas por rol existentes, usar
+[DEMO_SEED_RENDER](../DEMO_SEED_RENDER.md). Esta guía conserva la seed legacy
+con otras identidades; no es el procedimiento de la presentación actual.
+
 El seed manual puede añadir cursos y matrículas, además de las cinco cuentas básicas.
 La [ADR](../adr/demo-academic-seed.md) fija aislamiento, ownership e historia operativa.
 No se carga automáticamente al arrancar o desplegar.
