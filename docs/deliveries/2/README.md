@@ -20,6 +20,7 @@ Base documental vigente para la segunda entrega de AcademiX. Las Entregas 0 y
 | 11 | [evidencia CI/CD](11-cicd-evidence/README.md) | Capturas históricas de CI/Railway/release. |
 | 12 | [catálogo de datos](12-data-catalog.md) | Tablas, columnas, tipos, PK/FK y planilla XLSX adjunta. |
 | 13 | [guía de presentación](ppt/speaker-guide.md) | Punteo oral slide por slide y preguntas/respuestas probables. |
+| 14 | [feedback de E1](14-e1-feedback.md) | Comentarios de evaluación y acciones para responderlos en E2. |
 | 15 | [feedback E2 y polish](15-feedback-e2.md) | Línea base, respuestas existentes y cambios posteriores al feedback. |
 
 ## Paquete formal
@@ -61,7 +62,8 @@ calificación/publicación, auditoría, RLS/runtime y provisión ya existían al
 7f4334a. [Estado](10-status.md) distingue código, prueba local y operación remota.
 [ADR Render](../../adr/deploy-on-render.md): sin HAProxy/HA/PgBouncer externo;
 se difieren hasta necesidad medida. Binarios/object storage fuera del MVP.
-Sin despliegue, push, PR o comprobación remota durante el polish.
+La validación del polish es local; publicar su PR no acredita despliegue
+ni estado remoto.
 
 ## Roles y cuentas
 
