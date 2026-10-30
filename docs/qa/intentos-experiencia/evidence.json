@@ -1,0 +1,20 @@
+{
+  "attemptId": "92ac3c24-9875-42d4-9da1-f49430fe7b65",
+  "quizId": "ce059ea7-c760-4d16-b205-ffbacdaf7d19",
+  "courseId": "718f0c23-f6fa-4f2b-b282-848bdf5271f7",
+  "browser": "Chromium headless Linux",
+  "realBackend": true,
+  "desktop": "1440x1000",
+  "mobile": "375x812",
+  "pageErrors": [],
+  "checks": [
+    "student layout",
+    "progress updates",
+    "manual save persisted",
+    "submit dialog initial focus and Escape return",
+    "mobile no page overflow",
+    "mobile dark theme",
+    "teacher list and correction",
+    "assistant without correction or cancellation"
+  ]
+}

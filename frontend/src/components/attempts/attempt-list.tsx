@@ -1,6 +1,8 @@
 "use client";
 import { useState } from 'react';
-import { CourseNavigation } from "../courses/course-navigation.tsx";
+import { ArrowLeft, ArrowRight, Search } from "lucide-react";
+import { QuizWorkspace } from "../quizzes/quiz-workspace.tsx";
+import { AttemptStatus, attemptStatuses } from "./attempt-facts.tsx";
 import Link from 'next/link';
 import { useSession } from '../auth/session-provider.tsx';
 import { useResource } from '../courses/use-resource.ts';
@@ -49,19 +51,20 @@ function List({ courseId, quizId }: Readonly<{
         return <LoadingState />;
     }
     const { quiz, sections, cap, page } = r.data;
-    return <div className="stack"><Link href={`/courses/${courseId}/quizzes/${quizId}`}>Volver al quiz</Link><h1>Intentos: {quiz.title}</h1><CourseNavigation course={r.data.course} user={user} active="/quizzes" />
- <form className="form-grid" onSubmit={e => {
+    return <QuizWorkspace course={r.data.course} user={user} title={`Intentos · ${quiz.title}`}><div className="stack attempt-workspace"><Link className="text-link attempt-back" href={`/courses/${courseId}/quizzes/${quizId}`}><ArrowLeft size={16} aria-hidden="true"/>Volver al quiz</Link>
+ <section className="card panel stack attempt-filters" aria-labelledby="attempt-filters-heading"><div className="quiz-section-heading"><h2 className="serif" id="attempt-filters-heading">Buscar intentos</h2><Search size={20} aria-hidden="true"/></div><p className="hint">Consulta los intentos de tus secciones y abre uno para revisar sus respuestas.</p><form className="attempt-filter-grid" onSubmit={e => {
         e.preventDefault();
         setFilters(draft);
         setCursor(undefined);
         setPages([]);
-    }}><label>Sección histórica<select className="field" value={draft.sectionId} onChange={e => setDraft({ ...draft, sectionId: e.target.value })}><option value="">Todas las autorizadas</option>{sections.filter(s => cap.global || cap.readSections.includes(s.id)).map(s => <option key={s.id} value={s.id}>{s.code}</option>)}</select></label><label>UUID estudiante<input className="field" value={draft.studentId} onChange={e => setDraft({ ...draft, studentId: e.target.value })}/></label><label>Estado<select className="field" value={draft.status} onChange={e => setDraft({ ...draft, status: e.target.value })}><option value="">Todos</option>{['inProgress', 'submitted', 'graded', 'cancelled'].map(s => <option key={s}>{s}</option>)}</select></label><button type="submit" className="btn btn-primary">Aplicar filtros</button></form>
- {!page.items.length && <output>No hay intentos.</output>}<div className="table-scroll" role="region" aria-label="Tabla con desplazamiento horizontal" tabIndex={0}><table className="data-table"><caption>Intentos en secciones autorizadas</caption><thead><tr>{['Intento', 'Estudiante', 'Sección histórica', 'Estado', 'Nota autorizada'].map(x => <th scope="col" key={x}>{x}</th>)}</tr></thead><tbody>{page.items.map(a => <tr key={a.id}><th scope="row"><Link href={`/courses/${courseId}/quizzes/${quizId}/attempts/${a.id}`}>{a.attemptNumber}</Link></th><td>{a.studentId}</td><td>{sections.find(s => s.id === a.sectionId)?.code ?? a.sectionId}</td><td>{a.status}</td><td className="tnum">{a.grade ?? 'No disponible'}</td></tr>)}</tbody></table></div>
- <nav className="actions" aria-label="Páginas de intentos"><button type="button" className="btn btn-ghost" disabled={!pages.length} onClick={() => {
+    }}><label className="field-label">Sección histórica<select className="field" value={draft.sectionId} onChange={e => setDraft({ ...draft, sectionId: e.target.value })}><option value="">Todas las autorizadas</option>{sections.filter(s => cap.global || cap.readSections.includes(s.id)).map(s => <option key={s.id} value={s.id}>{s.code}</option>)}</select></label><label className="field-label">Identificador del estudiante<input className="field" value={draft.studentId} placeholder="ID completo (opcional)" onChange={e => setDraft({ ...draft, studentId: e.target.value })}/></label><label className="field-label">Estado<select className="field" value={draft.status} onChange={e => setDraft({ ...draft, status: e.target.value })}><option value="">Todos los estados</option>{(Object.keys(attemptStatuses) as Attempt['status'][]).map(s => <option key={s} value={s}>{attemptStatuses[s].label}</option>)}</select></label><button type="submit" className="btn btn-primary">Aplicar filtros</button></form></section>
+ <section className="stack" aria-labelledby="attempt-results-heading"><div className="quiz-section-heading"><h2 className="serif" id="attempt-results-heading">Intentos registrados</h2><span className="hint tnum">{page.items.length} en esta página</span></div>
+ {!page.items.length ? <p className="notice" role="status">No hay intentos que coincidan con los filtros. Prueba con otra sección o estado.</p> : <div className="table-scroll" role="region" aria-label="Tabla con desplazamiento horizontal" tabIndex={0}><table className="data-table attempt-table"><caption>Intentos en secciones autorizadas</caption><thead><tr>{['Intento', 'Estudiante', 'Sección histórica', 'Estado', 'Nota'].map(x => <th scope="col" key={x}>{x}</th>)}</tr></thead><tbody>{page.items.map(a => <tr className="row-hover" key={a.id}><th scope="row"><Link className="text-link attempt-back" href={`/courses/${courseId}/quizzes/${quizId}/attempts/${a.id}`}>Intento {a.attemptNumber}<ArrowRight size={14} aria-hidden="true"/></Link></th><td><span className="attempt-identifier">{a.studentId}</span></td><td>{sections.find(s => s.id === a.sectionId)?.code ?? a.sectionId}</td><td><AttemptStatus status={a.status}/></td><td className={a.grade == null ? 'hint' : 'grade-value tnum'}>{a.grade == null ? 'No disponible' : a.grade.toFixed(1)}</td></tr>)}</tbody></table></div>}
+ <nav className="academic-footer" aria-label="Páginas de intentos"><span className="hint tnum">Página {pages.length+1}</span><div className="actions"><button type="button" className="btn btn-ghost" disabled={!pages.length} onClick={() => {
         setCursor(pages.at(-1));
         setPages(p => p.slice(0, -1));
     }}>Anterior</button><button type="button" className="btn btn-ghost" disabled={!page.hasMore} onClick={() => {
         setPages(p => [...p, cursor]);
         setCursor(page.nextCursor!);
-    }}>Siguiente</button></nav></div>;
+    }}>Siguiente</button></div></nav></section></div></QuizWorkspace>;
 }
