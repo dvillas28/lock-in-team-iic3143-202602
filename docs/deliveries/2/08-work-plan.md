@@ -15,7 +15,7 @@ inamovibles para efectos de planificación.
 | Área | Responsable principal | Alcance |
 | --- | --- | --- |
 | Bot GitHub PR reviewer | Daniel Fierro | Integración del bot, revisión automática y evidencias asociadas. |
-| Backend e infraestructura | Sebastián Palma | API, persistencia, aislamiento multi-tenant, Docker y soporte Railway. |
+| Backend e infraestructura | Sebastián Palma | API, persistencia, aislamiento multi-tenant, Docker y soporte Render. |
 | Frontend | Julián Contreras y Matías | Experiencia Next.js, consumo de API, vistas de curso, quizzes y notas. |
 | CI/CD y gestión | Daniel Villaseñor | Pipelines, releases, coordinación Scrum, seguimiento, planillas y presentación de gestión. |
 
@@ -24,7 +24,7 @@ afectada antes de marcarse como cerrado.
 
 ## Orden de implementación
 
-1. Mantener frontend/backend, CI, Docker y deployment Railway.
+1. Mantener frontend/backend, CI, Docker y deployment Render.
 2. Incorporar una PostgreSQL compartida y elegir persistencia mediante Spec Kit.
 3. Modelar Institution, User global e InstitutionMembership.
 4. Resolver Institution desde path y construir el scope de aplicación.
@@ -58,7 +58,7 @@ testing y correcciones.
 
 | Actividad | Prioridad | Esfuerzo | Iteraciones | Responsable |
 | --- | --- | ---: | --- | --- |
-| Mantener CI/CD, Docker, Railway y release | Alta | 2 | 1-7 | Daniel Villaseñor |
+| Mantener CI/CD, Docker, Render y release | Alta | 2 | 1-7 | Daniel Villaseñor |
 | Catálogo OpenAPI y contrato frontend-backend | Alta | 2 | 1-3 | Sebastián Palma, Julián Contreras, Matías |
 | PostgreSQL compartida y migración inicial | Alta | 3 | 2 | Sebastián Palma |
 | Institution, User e InstitutionMembership | Alta | 3 | 2-3 | Sebastián Palma |
@@ -81,15 +81,15 @@ testing y correcciones.
 - endpoint de salud;
 - frontend conectado al backend;
 - CI y build Docker;
-- deployment Railway mediante configuración versionada;
+- deployment Render mediante configuración versionada;
 - release por tag.
 
 ### Multi-tenancy compartida
 
 - una PostgreSQL;
-- Institutions `uc` y `utfsm` creadas por bootstrap futuro, no por migración;
+- Institutions `uc` y `utfsm` bootstrap opt-in implementado, sin afirmar carga remota;
 - User global e InstitutionMembership;
-- contexto `/api/v1/institutions/{institutionSlug}`;
+- contexto `/api/v1/institution/{institutionSlug}`;
 - rechazo de Institution inexistente o no visible con `404`;
 - entidades tenant-owned con `institution_id`;
 - constraints y FK institution-aware;
@@ -108,10 +108,10 @@ testing y correcciones.
 
 ## No hacer antes del Spec Kit correspondiente
 
-- No elegir ORM ni herramienta de migraciones.
-- No implementar RLS.
+- Persistencia ya elegida: pg/node-pg-migrate; no agregar ORM sin plan.
+- RLS ya implementada; conservar barrera y negativos del runtime.
 - No agregar Redis, workers, Cassandra, MinIO ni emuladores cloud.
-- No implementar provisioning dinámico o UI administrativa.
+- Onboarding inicial controlado existente; no agregar altas generales sin spec.
 - No modelar facultades, departamentos ni campus.
 - No diseñar sharding futuro.
 - No agregar integración de archivos sin un consumidor real.
@@ -120,3 +120,8 @@ testing y correcciones.
 
 Cada iteración deja evidencia ejecutable o documental. Ningún flujo académico se
 considera listo sin pruebas negativas entre al menos dos Institutions.
+
+Seguimiento E2 G6 (2026-10-29): se conserva valoración positiva de backlog/semanas,
+fechas y responsables. La lista es planificación original, no estado ejecutado;
+[estado actual](10-status.md) y [evidencia posterior](../../backend/feedback-e2-validation.md).
+No se reasignan tareas ni se cierran iteraciones por este polish.

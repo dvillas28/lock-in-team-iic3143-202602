@@ -10,6 +10,15 @@ test("US2 enrollment scopes, successor history, multi-role idempotency/concurren
   const post=(p,role="student",userId=users.other)=>request(app,owner,p,"POST",{userId,role});
   assert.equal((await request(app,other,own)).status,200);
   assert.equal((await request(app,other,own,"POST",{userId:users.other,role:"student"})).status,403);
+  const unchanged=(await pool.query("SELECT * FROM enrollments ORDER BY id")).rows;
+  assert.equal((await post(path,"superadmin")).status,400);
+  await assert.rejects(pool.query("INSERT INTO enrollments(id,institution_id,section_id,user_id,role) VALUES(gen_random_uuid(),$1,$2,$3,'superadmin')",[f.tenants.uc,f.s3,users.other]),/Integration SQL failure \(23514\)/);
+  assert.deepEqual((await pool.query("SELECT * FROM enrollments ORDER BY id")).rows,unchanged);
+  await f.add(f.s4,users.foreign,"teacher",f.tenants.utfsm);const utfsm=await login(app,f.env,"UTFSM");
+  const utfsmBefore=(await pool.query("SELECT * FROM enrollments ORDER BY id")).rows;
+  assert.equal((await request(app,utfsm,`utfsm/sections/${f.s4}/enrollments`,"POST",{userId:users.foreign,role:"superadmin"})).status,400);
+  await assert.rejects(pool.query("INSERT INTO enrollments(id,institution_id,section_id,user_id,role) VALUES(gen_random_uuid(),$1,$2,$3,'superadmin')",[f.tenants.utfsm,f.s4,users.foreign]),/Integration SQL failure \(23514\)/);
+  assert.deepEqual((await pool.query("SELECT * FROM enrollments ORDER BY id")).rows,utfsmBefore);
   const races=await Promise.all([post(path),post(path)]);assert.deepEqual(races.map(r=>r.status).sort(),[200,201]);assert.equal(races[0].body.id,races[1].body.id);
   const student=races[0].body.id;
   const assistant=await post(path,"assistant");assert.equal(assistant.status,201);

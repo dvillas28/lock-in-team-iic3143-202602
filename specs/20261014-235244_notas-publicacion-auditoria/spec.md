@@ -3,7 +3,7 @@
 **Feature Branch**: `feat/notas-publicacion-auditoria`
 **Feature Directory**: `specs/20261014-235244_notas-publicacion-auditoria`
 **Created**: 2026-10-14
-**Status**: Implemented; aceptación pendiente por bloqueo heredado #96; ver docs/backend/gradebook-validation.md
+**Status**: Implementado; AUD-PRIV corregido/validado localmente por polish E2; aceptación global de esta misión sigue pendiente (ver seguimiento al final).
 **Input**: Backend MVP de Entrega 2: Libro de notas, publicación y auditoría.
 
 ## User Scenarios & Testing *(mandatory)*
@@ -83,3 +83,9 @@ Como participante, consulto únicamente los resultados/eventos que mi rol permit
 Permisos vigentes: [ADR de admin y ownership](../../docs/adr/institution-admin-and-course-ownership.md).
 Teacher activo habilita evaluación; admin dueño amplía alcance, sin reemplazar rol.
 Assistant conserva solo lectura de seguimiento; superadmin no concede docencia.
+
+## Seguimiento AUD-PRIV (2026-10-29)
+
+Corrección local posterior: [evidencia](../../docs/backend/audit-grade-privacy-validation.md).
+Owner sin teacher conserva administrativos, sin grade; docencia conserva historia.
+No cierra las tareas de aceptación pendientes ni atribuye este fix a la misión original.
