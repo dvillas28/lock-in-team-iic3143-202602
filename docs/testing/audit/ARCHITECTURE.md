@@ -65,6 +65,9 @@ No middleware Next de autenticación ni cookie SSR: componentes privados control
 No Playwright/Cypress/Webdriver ni scripts E2E de navegador encontrados en paquetes/config.
 QA en docs registra navegador real y SQL; no constituye harness automatizado reutilizable.
 No ejecutar helpers de integración junto a E2E: `reset` hace DROP SCHEMA y el proceso HTTP expira a 180 s.
+El catálogo Swagger UI 5.34.0 se genera desde scripts/api-catalog*.mjs y se sirve estáticamente
+por localhost8080; no usa App Router ni API/DB para lectura. Tiene tests Node y QA navegador histórica,
+pero sin script Playwright durable; se incorpora como superficie adicional CATALOG.
 
 ## CI/CD y entorno
 

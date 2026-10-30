@@ -1,6 +1,6 @@
 # Inventario de flujos funcionales
 
-33 familias: cada ficha desarrolla variantes y transiciones, sin equiparar pantalla con flujo completo.
+34 familias: cada ficha desarrolla variantes y transiciones, sin equiparar pantalla con flujo completo.
 Estados: I = implementada y aparentemente operativa por integración estática; P = parcial UI/API;
 D = documentada sin implementación; X = fuera de alcance vigente. No implica nueva ejecución runtime.
 Las API están vinculadas a controladores/contrato en [API](API.md); rutas completas en [ROUTES](ROUTES.md).
@@ -73,3 +73,5 @@ Las API están vinculadas a controladores/contrato en [API](API.md); rutas compl
 | FL-A11Y-01 | [Accesibilidad funcional y compatibilidad razonable](flows/A11Y.md) | I | [E2E-A11Y-001](../catalog/a11y-01.md#e2e-a11y-001)–[E2E-A11Y-008](../catalog/a11y-02.md#e2e-a11y-008) |
 <a id="fl-ops-01"></a>
 | FL-OPS-01 | [Salud entorno y garantías de persistencia](flows/OPS.md) | I | [E2E-OPS-001](../catalog/ops-01.md#e2e-ops-001)–[E2E-OPS-009](../catalog/ops-02.md#e2e-ops-009) |
+<a id="fl-catalog-01"></a>
+| FL-CATALOG-01 | [Portal público Swagger UI generado desde OpenAPI](flows/CATALOG.md) | I | [E2E-CATALOG-001](../catalog/catalog-01.md#e2e-catalog-001)–[E2E-CATALOG-004](../catalog/catalog-01.md#e2e-catalog-004) |

@@ -48,6 +48,7 @@ no simplemente mensaje de error. Estados UI de incertidumbre se distinguen del e
 | Sinpeso publicado | my-grades |partialAverage null, no0/NaN | GRADE-003/005 |
 | Peso publicado<100 / =100 | my-grades |Promedio normalizado parcial/completo | GRADE-004 |
 | Evento audit persistido | GET filtros/cursor |Solo proyección permitida, nunca muta | AUDIT-001–010 |
+| Release catálogo válida | Build contrato inválido |Entrada anterior intacta, stagingtemporal limpiado; consulta sinAPI/DB | CATALOG-004 |
 
 ## Estados locales de mutación y carreras
 

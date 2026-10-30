@@ -32,6 +32,7 @@ no afirmación de vulnerabilidad explotada. Un test bloqueado no equivale a PASS
 | D25 | API de [pesos](../../../backend/src/gradebook/gradebook.service.ts) no expone freeze directamente | UI recorre libro global paginado al abrir editor; test publicación en página oculta y carrera 409 |
 | D26 | No scheduler ni límite por duración de intento | Fecha de cierre bloquea start/save/submit, no cancela; cancelación explícita resuelve abandono |
 | D27 | Contrato histórico onboarding aún usa base plural `/institutions/{slug}` | Prevalece OpenAPI/controller singular `/institution/{slug}`; no copiar ruta histórica al runner |
+| D28 | FR-010 frontend-autoria menciona bloquear nuevos borradores tras freeze; servicio create no consulta freeze | ADR/contrato bloquean nuevos GradeItems al publicar, no draft. No exigir rechazo de create sin aclarar redacción; QUIZ-017 verifica bloqueo publish |
 
 ## Aclaraciones precisas antes de automatizar escenarios bloqueados
 

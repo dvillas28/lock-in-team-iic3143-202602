@@ -1,14 +1,15 @@
 # Catálogo maestro de pruebas
 
 Base y límites: [auditoría](audit/BASELINE.md). Todos los tests están propuestos, sin implementar.
-**244 fichas**: **219 E2E de navegador** (B/M) y
-**25 comprobaciones complementarias** HTTP/SQL/operación (H/O).
-Se identifican **33 familias de flujos** con operaciones y transiciones detalladas,
+**248 fichas**: **222 E2E de navegador** (B/M) y
+**26 comprobaciones complementarias** HTTP/SQL/operación (H/O).
+Se identifican **34 familias de flujos** con operaciones y transiciones detalladas,
 trazadas a las 18 páginas y 50 operaciones API; no contar variantes como funcionalidades nuevas.
 
 ## Convenciones de ejecución y conteo
 
-B ejecuta navegador → Next → Nest → PostgreSQL real. M agrega ataques HTTP y/o lectura SQL
+B ejecuta navegador real; académicos recorren Next → Nest → PostgreSQL. CATALOG consulta su portal estático sin API/DB.
+M agrega ataques HTTP y/o lectura SQL
 del mismo entorno a un recorrido UI. H prueba HTTP→DB sin navegador (integración).
 O prueba operación/SQL de infraestructura. H/O no se presentan como E2E de interfaz.
 Los IDs `E2E-*` son claves del plan; el prefijo no cambia el nivel indicado en la ficha.
@@ -36,18 +37,19 @@ el conteo ejecutado será mayor y se informará por separado. No afirmar hoy ese
 | [NETWORK](catalog/NETWORK.md) | 13 | 11 | 2 | 2 |
 | [A11Y](catalog/A11Y.md) | 8 | 8 | 0 | 1 |
 | [OPS](catalog/OPS.md) | 9 | 2 | 7 | 1 |
+| [CATALOG](catalog/CATALOG.md) | 4 | 3 | 1 | 1 |
 
 ## Distribución reproducible
 
 | Prioridad | Fichas | Nivel de riesgo |
 | --- | --- | --- |
 | P0 | 126 | Seguridad, aislamiento, integridad o operación esencial |
-| P1 | 88 | Flujo central y errores de impacto alto |
-| P2 | 29 | Límites y secundarios importantes |
+| P1 | 91 | Flujo central y errores de impacto alto |
+| P2 | 30 | Límites y secundarios importantes |
 | P3 | 1 | Complementarios de bajo impacto |
 
-Selección primaria: 22 smoke, 154 regression,
-68 extended. Regression ejecuta smoke+regression; extended ejecuta todas.
+Selección primaria: 22 smoke, 156 regression,
+70 extended. Regression ejecuta smoke+regression; extended ejecuta todas.
 P0 no significa automáticamente smoke: ataques exhaustivos/concurrencia van en regresión/extendida,
 pero ningún defecto P0 conocido se admite como verde de entrega aunque el smoke pase.
 

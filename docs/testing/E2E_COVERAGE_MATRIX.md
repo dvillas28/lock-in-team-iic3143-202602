@@ -1,6 +1,6 @@
 # Matrices de cobertura planificada
 
-Base: 18 páginas, 50 operaciones API y 33 familias de flujos en el commit auditado.
+Base: 18 páginas Next, 50 operaciones API y 34 familias de flujos, incluido catálogo estático fuera de App Router.
 La matriz acredita trazabilidad documental; hoy ningún caso nuevo tiene PASS de ejecución.
 
 | Matriz | Pregunta que resuelve |

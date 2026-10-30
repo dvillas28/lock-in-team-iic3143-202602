@@ -46,6 +46,7 @@ SA=isSuperAdmin solo; Admin=isAdmin sin rol académico; Coord no existe; Doc=tea
 | Audit no-grade GET | D | C | N/A | C | D | D | Owner todos administrativos; teacher section histórica; AUDIT-002 |
 | Audit grade GET | D | D | N/A | C | D | D | Teacher sección histórica; owner+teacher global; AUDIT-003/004 |
 | DELETE académico / manual grade / binarios | N/A | N/A | N/A | N/A | N/A | N/A | Sin endpoints vigentes; exclusión explícita |
+| CatálogoSwagger leer/descargar | A | A | N/A | A | A | A | Público sinJWT niAPI; CATALOG-001/002 |
 
 ## Ejecución exhaustiva de denegaciones por operación
 

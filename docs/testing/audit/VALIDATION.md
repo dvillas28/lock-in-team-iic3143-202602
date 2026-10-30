@@ -7,9 +7,9 @@ El checkout original continúa limpio en dev; la copia aislada contiene la rama 
 ## Controles de esta entrega
 
 - Inventario comparado con disco: 18 page.tsx, 50 operationIds OpenAPI y 50 handlers HTTP registrados.
-- Conteos desde encabezados de fichas: 244 IDs únicos, sin duplicados; 33 familias de flujos.
-- Niveles: 219 E2E navegador (B/M), 25 HTTP/SQL/operativos complementarios (H/O).
-- Prioridades: P0=126, P1=88, P2=29, P3=1. Suites primarias: smoke22, regression154, extended68.
+- Conteos desde encabezados de fichas: 248 IDs únicos, sin duplicados; 34 familias de flujos.
+- Niveles: 222 E2E navegador (B/M), 26 HTTP/SQL/operativos complementarios (H/O).
+- Prioridades: P0=126, P1=91, P2=30, P3=1. Suites primarias: smoke 22, regression 156, extended 70.
 - Asignación de todos los IDs a una fase primaria y referencias de cada operación a casos existentes.
 - Enlaces locales y anchors de fichas/flujos verificados; requisitos RF1–29/CU01–16/RNF1–10 trazados.
 - Longitud revisada con `.github/scripts/check-doc-length.py`; todos los nuevos Markdown <150 líneas.
@@ -23,10 +23,10 @@ Todos los casos nuevos están propuestos, no implementados; COURSE-013 requiere 
 
 ## Lectura de conteos
 
-Los244 son fichas con variantes parametrizadas: no afirmar244 instancias ejecutadas.
-Smoke22 incluye matrices expansibles por actor/recurso/tenant; no son22requests ni una estimación de runtime.
-Regression acumulada=176fichas (22+154); extended acumulada=244 (176+68).
-La separación por nivel evita presentar25 comprobaciones sin navegador como E2E de interfaz.
+Los 248 son fichas con variantes parametrizadas: no afirmar 248 instancias ejecutadas.
+Smoke 22 incluye matrices expansibles por actor/recurso/tenant; no son 22 requests ni una estimación de runtime.
+Regression acumulada=178 fichas (22+156); extended acumulada=248 (178+70).
+La separación por nivel evita presentar 26 comprobaciones sin navegador como E2E de interfaz.
 El catálogo es fuente de conteos y los reportes futuros deberán añadir resultados por variante.
 
 ## Git y transferencia

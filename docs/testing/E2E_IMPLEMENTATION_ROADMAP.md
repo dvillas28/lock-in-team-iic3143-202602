@@ -7,17 +7,17 @@ no ocultar cambios funcionales dentro de tests ni ampliar MVP para completar cat
 | Fase / backlog | Objetivo | Horas persona | Complejidad | Dependencia |
 | --- | --- | --- | --- | --- |
 | [F1 — Infraestructura y datos](roadmap/F1.md) | Entorno fail-closed, seed reproducible y harness que no modifique producción. | 48–72 | Alta | Ninguna; baseline auditado |
-| [F2 — Smoke de entrada](roadmap/F2.md) | Login/navegación reales y primer reporte; smoke académico se completa en F4/F5. | 20–32 | Media | F1 + fases anteriores pertinentes |
+| [F2 — Smoke de entrada](roadmap/F2.md) | Login/navegación reales, catálogo estático y primer reporte; smoke académico se completa en F4/F5. | 24–40 | Media | F1 + fases anteriores pertinentes |
 | [F3 — Seguridad funcional](roadmap/F3.md) | Permisos/tenant exhaustivos y revocación con token/cursor/key vigentes. | 48–72 | Alta | F1 + F2 |
 | [F4 — Cursos y contenido](roadmap/F4.md) | CRUD vigente, participantes y publicación Markdown con persistencia real. | 44–64 | Alta | F1 + fases anteriores pertinentes |
 | [F5 — Evaluaciones notas e historia](roadmap/F5.md) | Ciclo académico completo, cálculo independiente, terminales y publicación atómica. | 60–88 | Alta | F1 + fases anteriores pertinentes |
 | [F6 — Fallos bordes y compatibilidad](roadmap/F6.md) | Errores deterministas, concurrencia, combinaciones y accesibilidad funcional. | 36–56 | Alta | F1 + fases anteriores pertinentes |
 | [F7 — CI/CD y estabilización](roadmap/F7.md) | Gates revisables, presupuesto de ejecución, métricas y mantenimiento. | 24–40 | Media/Alta | F1 + fases anteriores pertinentes |
 
-Total **280–424h persona** (~35–53 jornadas de8h).
-Incluye harness, datos, 244 fichas con variantes, revisión y primera estabilización.
+Total **284–432h persona** (~35.5–54 jornadas de8h).
+Incluye harness, datos, 248 fichas con variantes, revisión y primera estabilización.
 No incluye corregir defectos del producto descubiertos, cambios de requerimientos o incidentes de proveedor.
-Con una persona a20h/semana son14–21.2semanas; no prometer terminar toda extended para próxima entrega.
+Con una persona a20h/semana son14.2–21.6semanas; no prometer terminar toda extended para próxima entrega.
 Priorizar slice estableP0/P1 y medir throughput tras primer paquete de10–15fichas; reestimar con evidencia.
 Trabajo entre personas puede dividirse por módulo después de acordar F1, sin compartir DB mutable.
 
@@ -37,7 +37,7 @@ pero algunas son parametrizadas en múltiples pruebas; no confundir con22request
 
 ## Asignación completa de fichas
 
-F1=OPS; F2=PUBLIC y AUTH básico; F3=TENANT/RBAC/ADMIN y seguridad AUTH/audit;
+F1=OPS; F2=PUBLIC/CATALOG y AUTH básico; F3=TENANT/RBAC/ADMIN y seguridad AUTH/audit;
 F4=COURSE/SECTION/ENROLL/CONTENT; F5=QUIZ/ATTEMPT/GRADE y restoAUDIT; F6=NETWORK/A11Y.
 Listados exactos deIDs por fase en anexosF1–F6, sin caso huérfano. F7 automatiza todos sin agregar casos nuevos.
 Fronteras ya definidas se implementan con su módulo, no se difiere seguridadP0 a F6.

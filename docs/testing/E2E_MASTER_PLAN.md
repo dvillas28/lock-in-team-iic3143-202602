@@ -11,8 +11,8 @@ JWT global y membresías activas. `isAdmin`+ownership y Enrollment son dimension
 No coordinador, almacenamiento binario, entregas manuales, corrección manual ni administración general.
 La implementación está integrada estáticamente; su operatividad completa queda por ejecutar en entorno aislado.
 
-Se inventariaron 18 páginas y 50 operaciones contractuales implementadas, 33 familias
-de flujos y 244 fichas: 219 E2E navegador y 25 complementarias.
+Se inventariaron 18 páginas y 50 operaciones contractuales implementadas, 34 familias
+de flujos y 248 fichas: 222 E2E navegador y 26 complementarias.
 Exhaustividad significa clasificar cada ruta/operación y frontera descubierta; no ausencia garantizada de errores.
 
 ## Mapa de entregables
@@ -85,7 +85,7 @@ Infra/preflight/seed → PUBLIC-001 → AUTH-001/002/010/011 → TENANT-001/008/
 RBAC-005/006/009 → CONTENT-008/009 → QUIZ-014 → ATTEMPT-001/018 →
 GRADE-003/021 → AUDIT-003. Cada test prepara sus datos; la flecha es orden de implementación.
 Detalle y aceptación por tarea en [roadmap](E2E_IMPLEMENTATION_ROADMAP.md).
-Estimación total: 280–424 horas persona, sin correcciones funcionales descubiertas; ver desglose.
+Estimación total: 284–432 horas persona, sin correcciones funcionales descubiertas; ver desglose.
 
 ## Fuentes de herramienta
 

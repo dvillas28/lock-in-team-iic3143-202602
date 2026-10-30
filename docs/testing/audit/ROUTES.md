@@ -37,3 +37,11 @@ Los componentes CourseWorkspace/QuizWorkspace y validadores comprueban padres; T
 Todas las rutas privadas reciben pruebas de URL directa anónima vía AUTH-012/014 y expansión de matriz de rutas.
 Cada ruta debe incluir variante anónima, permitida, invisible o prohibida según recursos, más reload explícito.
 La prueba frontend puede mostrar error en shell HTTP200; no exigir que todas las denegaciones UI cambien el status del documento.
+
+## Superficie adicional fuera de App Router
+
+CatálogoSwagger estático: `http://localhost:8080/` redirige a `releases/{revision}/index.html`, con
+`openapi.json` descargable y assets locales; build genera desde contrato/controller sin arrancar servicios.
+Clasificación implementada estáticamente; hosting externo pendiente, no inferir disponibilidad productiva.
+[Fuente](../../../scripts/api-catalog.mjs) y [guía](../../reference/api-catalog.md); casosCATALOG-001–004,
+[fichas](../catalog/CATALOG.md). No suma páginasNext ni endpointsNest. No ejecuta solicitudes académicas.

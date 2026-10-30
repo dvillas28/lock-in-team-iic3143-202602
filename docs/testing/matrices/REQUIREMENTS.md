@@ -71,3 +71,11 @@ Mapeo oficial agrupado: [backlog](../../deliveries/2/08-work-plan-detail/08-work
 D04: texto primer intento no prevalece sobre publicación irreversible del ADR; QUIZ-016 exige409 ya publicado.
 D15/16/17: API disponible sin pantalla no se cuenta como flujo de UI completo; H/M cubren sus efectos actuales.
 Q02: COURSE-013 requiere aclarar status normativo para NUL; no marcar requisito100% por ese caso pendiente.
+
+## Requisitos adicionales del catálogo estático
+
+[Spec catálogo](../../../specs/20261019-121536_catalogo-endpoints/spec.md), FR-001–013: CATALOG-001
+cubreconsulta/filtro/deeplink/permisos sinbackend; CATALOG-002 descarga/revisión/ejemplos sintéticos;
+CATALOG-003 errores/reflow/teclado; CATALOG-004 publicaciónatómica y rechazo con versión previa.
+PrioridadP1/P2 segúnficha, estadoPlanificado. SC de cincolectores requiere evaluaciónhumana complementaria,
+no automatizable como garantíaE2E. Hostingexterno queda pendiente y excluido de ejecuciónproductiva.

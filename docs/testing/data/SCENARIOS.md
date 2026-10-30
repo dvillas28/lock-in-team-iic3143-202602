@@ -1,6 +1,6 @@
 # Perfiles de fixture por ficha
 
-Todos incluyen BASE salvo ANON/GUARD/infra vacía. `+` compone modificadores sin compartir datos entre tests.
+Todos incluyen BASE salvo ANON/GUARD/STATIC-CATALOG/infra vacía. `+` compone modificadores sin compartir datos entre tests.
 Si alias choca (p. ej. ACTIVE y PUBLISHED), construir variantes separadas; no violar la regla de un activo
 ni activar otro intento después de publicar Grade. Validar precondiciones antes del primer paso UI.
 
@@ -50,6 +50,7 @@ ni activar otro intento después de publicar Grade. Validar precondiciones antes
 | FAULT-DB | Contenedor/PG exclusivo del caso; detener red/servicio solo propio y restaurar en finally; no matar DB de suite compartida |
 | FAULT-TX | Clon exclusivo para fallo conexión/constraint controlado; nunca desactivar trigger para obtener PASS; validar ambos resultados posibles |
 | GUARD | Configuración rechazada antes de I/O; inspeccionar que no se abrió conexión ni arrancó migrador; URLs solo cadenas de prueba |
+| STATIC-CATALOG | Build a salida temporal propia y servidorloopback8080; rutasrelease/OpenAPI reales; sin API/DB ni credenciales; fixture sinBASEacadémica |
 
 ## Reglas de construcción
 
