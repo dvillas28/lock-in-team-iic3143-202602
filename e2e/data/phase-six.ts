@@ -23,3 +23,7 @@ export const phaseSix:Record<string,readonly CaseVariant[]>={
  'E2E-A11Y-007':['uc','utfsm'].map(slug=>v(slug,slug==='uc'?'AO/ST1':'FAO/FST1','browser',slug as 'uc'|'utfsm',['chromium','firefox','webkit'])),
  'E2E-A11Y-008':[v('durable-feedback')],
 };
+
+phaseSix['E2E-NETWORK-003']=[...phaseSix['E2E-NETWORK-003'],v('revoked-recovery','T1/AO')];
+phaseSix['E2E-NETWORK-009']=[...phaseSix['E2E-NETWORK-009'],v('barrier-conflict','T1/T2'),v('locked-publication','AO/T1')];
+phaseSix['E2E-NETWORK-011']=[...phaseSix['E2E-NETWORK-011'],v('late-completion','T1')];

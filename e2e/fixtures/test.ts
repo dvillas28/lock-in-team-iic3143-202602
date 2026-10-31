@@ -21,7 +21,14 @@ export const test = base.extend<Fixtures>({
   e: [async ({}, use, info) => {
     const namespace = createHash('sha256').update(`${info.project.name}/${info.titlePath.join('/')}/${info.repeatEachIndex}/${info.retry}`).digest('hex').slice(0,16);
     const e = new Environment(namespace);
-    try {await e.start(); await use(e);} finally {await e.close();}
+    try {
+      const started=performance.now();
+      try {await e.start();} finally {info.annotations.push({type:'timing:setup-ms',description:String(Math.round(performance.now()-started))});}
+      await use(e);
+    } finally {
+      const started=performance.now();
+      try {await e.close();} finally {info.annotations.push({type:'timing:cleanup-ms',description:String(Math.round(performance.now()-started))});}
+    }
   }, {timeout: 60_000}],
   actorPage: async ({browser, e}, use, info) => {
     const contexts: BrowserContext[] = [];
@@ -34,7 +41,9 @@ export const test = base.extend<Fixtures>({
         if (url.protocol === 'data:' || url.protocol === 'about:' || ['localhost','127.0.0.1','uc.localhost','utfsm.localhost','desconocida.localhost'].includes(url.hostname) && [String(webPort),String(apiPort)].includes(url.port)) await route.continue();
         else await route.abort('blockedbyclient');
       });
-      const page = await context.newPage(); await login(page,e,actor,slug,next); return page;
+      const page = await context.newPage(),started=performance.now();
+      try {await login(page,e,actor,slug,next);} finally {info.annotations.push({type:'timing:login-ms',description:JSON.stringify({actor,ms:Math.round(performance.now()-started)})});}
+      return page;
     });
     for (const [index, context] of contexts.entries()) {
       if (info.status !== info.expectedStatus) {
