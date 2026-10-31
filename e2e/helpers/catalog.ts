@@ -11,8 +11,14 @@ export async function catalog() {
   const output=join(folder,'site');
   const build=async (source?:string)=>{
     const manifestPath=join(folder,'manifest.json');
-    await command(process.execPath,['--input-type=module','-e',
-      'try{const {buildCatalog}=await import("./scripts/api-catalog.mjs");const {writeFile}=await import("node:fs/promises");await writeFile(process.argv[2],JSON.stringify(await buildCatalog({output:process.argv[1],...(process.argv[3]?{source:process.argv[3]}:{})})));}catch(error){console.error(error.message);process.exitCode=1;}',output,manifestPath,...(source?[source]:[])]);
+    try {
+      await command(process.execPath,['--input-type=module','-e',
+        'const {writeFile}=await import("node:fs/promises");try{const {buildCatalog}=await import("./scripts/api-catalog.mjs");await writeFile(process.argv[2],JSON.stringify(await buildCatalog({output:process.argv[1],...(process.argv[3]?{source:process.argv[3]}:{})})));}catch(error){await writeFile(process.argv[2],JSON.stringify({error:error.message}));process.exitCode=1;}',output,manifestPath,...(source?[source]:[])]);
+    } catch(error) {
+      const result=JSON.parse(await readFile(manifestPath,'utf8').catch(()=>'{"error":null}'));
+      if(typeof result.error==='string')throw new Error(result.error);
+      throw error;
+    }
     return JSON.parse(await readFile(manifestPath,'utf8'));
   };
   try {

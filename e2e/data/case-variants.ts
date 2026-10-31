@@ -1,6 +1,6 @@
 export type TestLevel = 'browser' | 'companion';
 export type CaseVariant = {
-  name: string; actor: string; tenant: 'uc' | 'utfsm' | 'both';
+  name: string; actor: string; tenant: 'uc' | 'utfsm' | 'both' | 'none';
   projects: readonly string[]; level: TestLevel;
 };
 const variant = (name: string, actor: string, level: TestLevel = 'companion', tenant: CaseVariant['tenant'] = 'uc'): CaseVariant =>
@@ -35,11 +35,14 @@ Object.assign(caseDefinitions, {
   'E2E-AUTH-014': ['material','authoring'].map(n=>variant(n,'T1','browser')),
   'E2E-AUTH-015': [variant('active-login','ST1','browser')],
   'E2E-AUTH-022': ['unicode128','unicode132'].map(n=>variant(n,'ST1')),
-  'E2E-CATALOG-001': [variant('filter-deeplink','ANON','browser')],
-  'E2E-CATALOG-002': [variant('download','ANON','browser')],
-  'E2E-CATALOG-003': ['json500','invalid-json','bundle','keyboard-mobile'].map(n=>variant(n,'ANON','browser')),
-  'E2E-CATALOG-004': [variant('atomic-build','OPERATOR')],
+  'E2E-CATALOG-001': [variant('filter-deeplink','ANON','browser','none')],
+  'E2E-CATALOG-002': [variant('download','ANON','browser','none')],
+  'E2E-CATALOG-003': ['json500','invalid-json','bundle','keyboard-mobile'].map(n=>variant(n,'ANON','browser','none')),
+  'E2E-CATALOG-004': [variant('atomic-build','OPERATOR','companion','none')],
 });
+for (const id of ['E2E-AUTH-001','E2E-AUTH-010','E2E-PUBLIC-001']) {
+  caseDefinitions[id] = caseDefinitions[id].map(v=>({...v, projects:['chromium','firefox','webkit']}));
+}
 export const caseVariants: Record<string, readonly string[]> = Object.fromEntries(
   Object.entries(caseDefinitions).map(([id, variants]) => [id, variants.map(v => v.name)]),
 );

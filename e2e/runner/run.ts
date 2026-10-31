@@ -1,11 +1,14 @@
 import {randomBytes} from 'node:crypto';
-import {cp, mkdir, readFile, writeFile} from 'node:fs/promises';
+import {access, cp, mkdir, readFile, writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {command, launch, stop, ready, safe} from './process.ts';
 import {root, work, preflight, apiPort, webPort, buildEnv, reportDirectory} from './settings.ts';
 import {startPostgres} from './postgres.ts';
 
 preflight();
+if (!process.env.PLAYWRIGHT_BROWSERS_PATH && await access(resolve(work,'.cache/browsers')).then(()=>true,()=>false)) {
+  process.env.PLAYWRIGHT_BROWSERS_PATH = resolve(work,'.cache/browsers');
+}
 const startedAt = Date.now();
 const runId = randomBytes(8).toString('hex');
 const commit = (await command('git',['rev-parse','HEAD'])).trim();

@@ -1,7 +1,8 @@
 import {test,expect} from '../fixtures/test.ts';
 import {catalog} from '../helpers/catalog.ts';
-import {readFile,writeFile,readdir} from 'node:fs/promises';
+import {readFile,writeFile,readdir,cp} from 'node:fs/promises';
 import {join} from 'node:path';
+import {root} from '../runner/settings.ts';
 
 const catalogue=test.extend<{catalogue:Awaited<ReturnType<typeof catalog>>}>({
   catalogue:[async ({},use)=>{const c=await catalog();try{await use(c);}finally{await c.close();}},{timeout:120000}],
@@ -57,10 +58,11 @@ for(const fault of ['json500','invalid-json','bundle','keyboard-mobile'])catalog
 catalogue('E2E-CATALOG-004 failed build preserves published release / atomic-build @extended',async ({catalogue:c})=>{
   const entry=await readFile(join(c.output,'index.html'),'utf8');
   const releases=await readdir(join(c.output,'releases'));
-  const original=JSON.parse(await readFile(join(c.manifest.directory,'openapi.json'),'utf8'));
-  original.paths['/broken']={$ref:'./missing.json'};
-  const source=join(c.folder,'invalid.json');await writeFile(source,JSON.stringify(original));
-  await expect(c.build(source)).rejects.toThrow(/missing.json/);
+  const contract=join(c.folder,'contract');await cp(join(root,'docs/reference/openapi'),contract,{recursive:true});
+  const source=join(contract,'openapi.yaml');
+  const original=await readFile(source,'utf8');expect(original).toContain('paths:\n');
+  await writeFile(source,original.replace('paths:\n',"paths:\n  /broken:\n    $ref: ./missing.yaml\n"));
+  await expect(c.build(source)).rejects.toThrow(/missing.yaml/);
   expect(await readFile(join(c.output,'index.html'),'utf8')).toBe(entry);
   expect(await readdir(join(c.output,'releases'))).toEqual(releases);
   expect((await readdir(c.output)).filter(name=>name.startsWith('.staging-'))).toEqual([]);

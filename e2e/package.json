@@ -15,7 +15,9 @@
     "test:list": "playwright test --list --project=chromium --reporter=line",
     "lint": "eslint .",
     "report": "tsx runner/show-report.ts",
-    "coverage": "tsx runner/coverage.ts"
+    "coverage": "tsx runner/coverage.ts",
+    "test:f1": "tsx runner/run.ts ops.spec.ts auth.smoke.spec.ts",
+    "test:f2": "tsx runner/run.ts auth.entry.spec.ts auth.smoke.spec.ts public.spec.ts catalog.spec.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",

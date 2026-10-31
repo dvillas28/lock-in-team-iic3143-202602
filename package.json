@@ -14,7 +14,9 @@
     "dev:frontend": "pnpm --dir frontend dev",
     "dev:backend": "pnpm --dir backend start:dev",
     "docs:api:build": "pnpm --dir backend build && node scripts/api-catalog.mjs",
-    "docs:api:test": "pnpm --dir backend build && node --test scripts/api-catalog.test.mjs"
+    "docs:api:test": "pnpm --dir backend build && node --test scripts/api-catalog.test.mjs",
+    "test:e2e:f1": "pnpm --dir e2e run test:f1",
+    "test:e2e:f2": "pnpm --dir e2e run test:f2"
   },
   "devDependencies": {
     "@redocly/cli": "1.25.11",
