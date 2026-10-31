@@ -7,8 +7,17 @@ import {login, stopTrace} from '../helpers/browser.ts';
 import {command} from '../runner/process.ts';
 import {work, webPort, apiPort} from '../runner/settings.ts';
 
-type Fixtures = {e: Environment; actorPage: (actor?: string, slug?: string, next?: string) => Promise<Page>};
+type Fixtures = {caseMetadata: void; e: Environment; actorPage: (actor?: string, slug?: string, next?: string) => Promise<Page>};
 export const test = base.extend<Fixtures>({
+  caseMetadata: [async ({}, use, info) => {
+  const id = info.title.match(/E2E-[A-Z0-9]+-\d{3}/)?.[0];
+  const name = info.title.match(/ \/ (.+?) @/)?.[1];
+  const variant = id && caseDefinitions[id]?.find(v=>v.name===name);
+  if (!variant) throw new Error('Each test requires a declared catalogue variant');
+  info.annotations.push({type:'case',description:id},{type:'actor',description:variant.actor},
+    {type:'tenant',description:variant.tenant},{type:'level',description:variant.level});
+    await use();
+  }, {auto:true}],
   e: [async ({}, use, info) => {
     const namespace = createHash('sha256').update(`${info.project.name}/${info.titlePath.join('/')}/${info.repeatEachIndex}/${info.retry}`).digest('hex').slice(0,16);
     const e = new Environment(namespace);
@@ -41,13 +50,5 @@ export const test = base.extend<Fixtures>({
       await context.close();
     }
   },
-});
-test.beforeEach(async ({}, info) => {
-  const id = info.title.match(/E2E-[A-Z0-9]+-\d{3}/)?.[0];
-  const name = info.title.match(/ \/ (.+?) @/)?.[1];
-  const variant = id && caseDefinitions[id]?.find(v=>v.name===name);
-  if (!variant) throw new Error('Each test requires a declared catalogue variant');
-  info.annotations.push({type:'case',description:id},{type:'actor',description:variant.actor},
-    {type:'tenant',description:variant.tenant},{type:'level',description:variant.level});
 });
 export {expect};

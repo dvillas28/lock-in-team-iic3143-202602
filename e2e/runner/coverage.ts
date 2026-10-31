@@ -1,7 +1,7 @@
 import {readdir, readFile, mkdir, writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {root, work, reportDirectory} from './settings.ts';
-import {caseDefinitions} from '../data/case-variants.ts';
+import {caseDefinitions, assertCaseMetadata} from '../data/case-variants.ts';
 import {evaluateCase, type Observation} from './case-result.ts';
 
 const directory=resolve(root,'docs/testing/catalog');
@@ -36,6 +36,7 @@ try {
         // Collection (--list) and skipped tests are not executions or passes.
         const ran=(test.results??[]).some((r:any)=>['passed','failed','timedOut','interrupted'].includes(r.status));
         const variant=spec.title.match(/ \/ (.+?) @/)?.[1]??'default';
+        if(ran)assertCaseMetadata(id,variant,test.annotations??[]);
         observed.set(id,[...(observed.get(id)??[]),{variant,project:test.projectName??'unknown',ran,status:test.status}]);
       }
     }

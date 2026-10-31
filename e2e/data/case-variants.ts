@@ -46,3 +46,11 @@ for (const id of ['E2E-AUTH-001','E2E-AUTH-010','E2E-PUBLIC-001']) {
 export const caseVariants: Record<string, readonly string[]> = Object.fromEntries(
   Object.entries(caseDefinitions).map(([id, variants]) => [id, variants.map(v => v.name)]),
 );
+
+export function assertCaseMetadata(id: string, name: string, annotations: readonly {type:string;description?:string}[]) {
+  const variant=caseDefinitions[id]?.find(v=>v.name===name);
+  if(!variant)throw new Error('Report references an undeclared case variant');
+  for(const [type,description] of Object.entries({case:id,actor:variant.actor,tenant:variant.tenant,level:variant.level})) {
+    if(!annotations.some(a=>a.type===type && a.description===description))throw new Error(`Missing or inconsistent ${type} metadata for ${id}`);
+  }
+}

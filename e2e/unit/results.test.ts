@@ -1,5 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
+import {assertCaseMetadata} from '../data/case-variants.ts';
 import {caseResult, type Observation} from '../runner/case-result.ts';
 const observation=(variant: string, project='chromium', status='expected',ran=true): Observation=>({variant,project,status,ran});
 test('collection and skipped variants never count as executed or passed',()=>{
@@ -19,4 +20,11 @@ test('a case passes only with its complete actor set; failures and retries remai
 test('declared browser projects must run even when absent from the report',()=>{
   assert.equal(caseResult(['A'],[observation('A')],['chromium','webkit']).state,'implemented-partial-execution');
   assert.equal(caseResult(['A'],[observation('A'),observation('A','webkit')],['chromium','webkit']).state,'executed-passed');
+});
+
+test('reports reject missing or inconsistent actor tenant and level annotations',()=>{
+  const annotations=[{type:'case',description:'E2E-AUTH-001'},{type:'actor',description:'ST1'},{type:'tenant',description:'uc'},{type:'level',description:'browser'}];
+  assert.doesNotThrow(()=>assertCaseMetadata('E2E-AUTH-001','ST1',annotations));
+  for(const type of ['case','actor','tenant','level'])assert.throws(()=>assertCaseMetadata('E2E-AUTH-001','ST1',annotations.filter(a=>a.type!==type)),/metadata/);
+  assert.throws(()=>assertCaseMetadata('E2E-AUTH-001','ST1',annotations.map(a=>a.type==='tenant'?{...a,description:'utfsm'}:a)),/metadata/);
 });
