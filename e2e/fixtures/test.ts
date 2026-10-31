@@ -1,6 +1,7 @@
 import {test as base, expect, type Page, type BrowserContext} from '@playwright/test';
 import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
+import {caseDefinitions} from '../data/case-variants.ts';
 import {Environment} from './environment.ts';
 import {login, stopTrace} from '../helpers/browser.ts';
 import {command} from '../runner/process.ts';
@@ -40,5 +41,13 @@ export const test = base.extend<Fixtures>({
       await context.close();
     }
   },
+});
+test.beforeEach(async ({}, info) => {
+  const id = info.title.match(/E2E-[A-Z0-9]+-\d{3}/)?.[0];
+  const name = info.title.match(/ \/ (.+?) @/)?.[1];
+  const variant = id && caseDefinitions[id]?.find(v=>v.name===name);
+  if (!variant) throw new Error('Each test requires a declared catalogue variant');
+  info.annotations.push({type:'case',description:id},{type:'actor',description:variant.actor},
+    {type:'tenant',description:variant.tenant},{type:'level',description:variant.level});
 });
 export {expect};

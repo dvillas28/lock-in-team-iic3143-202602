@@ -23,6 +23,7 @@ export async function startPostgres(runId: string) {
     }
   }
   const container = `academix-e2e-${runId}`;
+  await writeFile(join(folder, 'control.json'), JSON.stringify({bin, container, port}), {mode:0o600});
   const close = async () => {
     if (await readFile(join(folder, 'owner'), 'utf8') !== runId) throw new Error('E2E ownership mismatch: refusing cleanup');
     if (started && docker) {
@@ -30,7 +31,10 @@ export async function startPostgres(runId: string) {
       if (label !== runId) throw new Error('E2E container ownership mismatch');
       await command('docker', ['rm', '-f', container]);
     } else if (started && bin) {
-      await command(join(bin, 'pg_ctl'), ['-D', join(folder, 'data'), '-m', 'fast', '-w', 'stop']);
+      let running = false;
+      try {execFileSync(join(bin,'pg_ctl'),['-D',join(folder,'data'),'status'],{stdio:'pipe'}); running = true;}
+      catch (error) {if ((error as {status?:number}).status !== 3) throw error;}
+      if (running) await command(join(bin, 'pg_ctl'), ['-D', join(folder, 'data'), '-m', 'fast', '-w', 'stop']);
     }
     await rm(folder, {recursive: true});
   };
@@ -59,5 +63,16 @@ export async function startPostgres(runId: string) {
   } catch (error) {
     try {await close();} catch { /* retain owned directory for diagnosis if start did not finish */ }
     throw error;
+  }
+}
+
+export async function controlPostgres(folder: string, runId: string, action: 'start' | 'stop') {
+  if (await readFile(join(folder, 'owner'), 'utf8') !== runId) throw new Error('PostgreSQL ownership mismatch');
+  const {bin, container, port} = JSON.parse(await readFile(join(folder,'control.json'),'utf8'));
+  if (bin) await command(join(bin,'pg_ctl'),['-D',join(folder,'data'),'-l',join(folder,'postgres.log'),...(action==='start'?['-o',`-h 127.0.0.1 -p ${port} -k ${folder}`]:['-m','fast']),'-w',action]);
+  else {
+    const label = execFileSync('docker',['inspect','--format','{{index .Config.Labels "academix.e2e.owner"}}',container],{encoding:'utf8'}).trim();
+    if (label !== runId) throw new Error('PostgreSQL container ownership mismatch');
+    await command('docker',[action,container]);
   }
 }

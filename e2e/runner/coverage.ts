@@ -1,8 +1,8 @@
 import {readdir, readFile, mkdir, writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {root, work, reportDirectory} from './settings.ts';
-import {caseVariants} from '../data/case-variants.ts';
-import {caseResult, type Observation} from './case-result.ts';
+import {caseDefinitions} from '../data/case-variants.ts';
+import {evaluateCase, type Observation} from './case-result.ts';
 
 const directory=resolve(root,'docs/testing/catalog');
 const catalogue = new Map<string,{name:string;module:string;level:string;file:string}>();
@@ -43,8 +43,8 @@ try {
   };
   for(const suite of report.suites??[])walk(suite);
 }catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
-const rows=[...catalogue].map(([id,item])=>({id,...item,files:definitions.get(id)??[],results:observed.get(id)??[],
-  state:definitions.has(id)?caseResult(caseVariants[id],observed.get(id)??[]).state:'pending-implementation'}));
+const rows=[...catalogue].map(([id,item])=>({id,...item,files:definitions.get(id)??[],required:caseDefinitions[id]??[],results:observed.get(id)??[],
+  state:definitions.has(id)?evaluateCase(caseDefinitions[id],observed.get(id)??[]).state:'pending-implementation'}));
 await mkdir(reports,{recursive:true});
 await writeFile(resolve(reports,'coverage.json'),JSON.stringify({catalogue:rows.length,defined:definitions.size,executed:[...observed.values()].filter(items=>items.some(i=>i.ran)).length,rows},null,2));
 console.log(JSON.stringify({catalogue:rows.length,defined:definitions.size,executed:[...observed.values()].filter(items=>items.some(i=>i.ran)).length,passed:rows.filter(r=>r.state==='executed-passed').length,pending:rows.filter(r=>r.state==='pending-implementation').length}));

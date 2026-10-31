@@ -13,5 +13,10 @@ test('one successful variant cannot approve a case with missing actors or browse
 test('a case passes only with its complete actor set; failures and retries remain visible',()=>{
   assert.equal(caseResult(['A','B'],[observation('A'),observation('B')]).state,'executed-passed');
   assert.equal(caseResult(['A'],[observation('A','chromium','unexpected')]).state,'executed-failed');
-  assert.equal(caseResult(['A'],[observation('A','chromium','flaky')]).state,'executed-failed');
+  assert.equal(caseResult(['A'],[observation('A','chromium','flaky')]).state,'executed-unstable');
+});
+
+test('declared browser projects must run even when absent from the report',()=>{
+  assert.equal(caseResult(['A'],[observation('A')],['chromium','webkit']).state,'implemented-partial-execution');
+  assert.equal(caseResult(['A'],[observation('A'),observation('A','webkit')],['chromium','webkit']).state,'executed-passed');
 });

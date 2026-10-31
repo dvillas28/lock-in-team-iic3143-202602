@@ -8,8 +8,11 @@ import {startPostgres} from './postgres.ts';
 preflight();
 const startedAt = Date.now();
 const runId = randomBytes(8).toString('hex');
+const commit = (await command('git',['rev-parse','HEAD'])).trim();
+const dirtyAtStart = Boolean((await command('git',['status','--porcelain'])).trim());
+const seedVersion = 'academix-e2e-v1';
 const env = {
-  E2E_RUN_ID: runId, E2E_PASSWORD: randomBytes(12).toString('hex'),
+  E2E_RUN_ID: runId, E2E_COMMIT: commit, E2E_SEED_VERSION: seedVersion, E2E_PASSWORD: randomBytes(12).toString('hex'),
   E2E_RUNTIME_PASSWORD: randomBytes(12).toString('hex'), E2E_JWT_SECRET: randomBytes(32).toString('base64'),
 };
 Object.assign(process.env, env);
@@ -49,7 +52,13 @@ try {
   process.exitCode = 1;
   console.error(failure);
 } finally {
-  if (frontend) await stop(frontend.child);
-  if (pg) await pg.close();
-  await writeFile(resolve(reportDirectory(runId), 'run.json'), JSON.stringify({runId, commit: (await command('git', ['rev-parse', 'HEAD'])).trim(), startedAt: new Date(startedAt).toISOString(), finishedAt: new Date().toISOString(), durationMs: Date.now()-startedAt, dirty: Boolean((await command('git', ['status', '--porcelain'])).trim()), exitCode: process.exitCode??0, phase, failure}, null, 2));
+  try {
+    if (frontend) await stop(frontend.child);
+    if (pg) await pg.close();
+  } catch (error) {
+    failure = safe(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+    console.error(`E2E cleanup failed: ${failure}`);
+  }
+  await writeFile(resolve(reportDirectory(runId), 'run.json'), JSON.stringify({runId, commit, seedVersion, dirtyAtStart, startedAt: new Date(startedAt).toISOString(), finishedAt: new Date().toISOString(), durationMs: Date.now()-startedAt, dirty: Boolean((await command('git', ['status', '--porcelain'])).trim()), exitCode: process.exitCode??0, phase, failure}, null, 2));
 }

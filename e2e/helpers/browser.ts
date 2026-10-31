@@ -49,6 +49,7 @@ export async function course(page: Page, id: string) {
     await page.locator(`a[href="/courses/${id}"]`).filter({has:page.getByRole('heading')}).click();
   }
   await expect(page).toHaveURL(new RegExp(`/courses/${id}(?:/|$)`));
+  await expect(page.getByRole('navigation',{name:'Curso',exact:true})).toBeVisible();
 }
 export async function go(page: Page, id: string, suffix = '') {
   const path = `/courses/${id}${suffix}`;

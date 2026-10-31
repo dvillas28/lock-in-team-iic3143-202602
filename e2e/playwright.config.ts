@@ -3,6 +3,7 @@ import {webPort, reportDirectory} from './runner/settings.ts';
 
 export default defineConfig({
   testDir: './specs',
+  metadata: {commit:process.env.E2E_COMMIT,seedVersion:process.env.E2E_SEED_VERSION},
   fullyParallel: false,
   workers: 1,
   forbidOnly: !!process.env.CI,
