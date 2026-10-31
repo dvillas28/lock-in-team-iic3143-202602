@@ -69,9 +69,12 @@ export async function go(page: Page, id: string, suffix = '') {
 /** Exercise compatibility/deep routes with Next's existing router when no UI link exposes them. */
 export async function compatibilityNavigate(page: Page, path: string) {
   if (!path.startsWith('/') || path.startsWith('//') || path.includes('://')) throw new Error('Compatibility navigation must stay on the current origin');
+  const target = new URL(path,page.url());
+  const arrived = page.waitForURL(url=>url.pathname===target.pathname && url.search===target.search);
   await page.evaluate(path => {
     const app = window as unknown as {next?: {router?: {push(path: string): void}}};
     if (!app.next?.router) throw new Error('Next router unavailable');
     app.next.router.push(path);
   },path);
+  await arrived;
 }

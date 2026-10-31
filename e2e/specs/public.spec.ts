@@ -62,7 +62,7 @@ for(const slug of ['uc','utfsm']) test(`E2E-PUBLIC-006 legacy slug host agreemen
   const page=await actorPage('ST1');const requests:string[]=[];
   page.on('request',r=>{if(r.url().includes('/institution/utfsm/'))requests.push(r.url());});
   await compatibilityNavigate(page,`/institutions/${slug}`);
-  if(slug==='uc') await expect(page).toHaveURL(origin()+'/courses');
+  if(slug==='uc') {await expect(page).toHaveURL(origin()+'/courses');await expect(page.getByRole('heading',{name:'Mis cursos',exact:true})).toBeVisible();}
   else await expect(page.getByRole('heading',{name:'Elige tu universidad para continuar',exact:true})).toBeVisible();
   expect(requests).toEqual([]);
 });
@@ -71,5 +71,7 @@ test('E2E-PUBLIC-007 legacy directory redirects without membership selector / le
   await expect(page).toHaveURL(origin()+'/courses');
   await expect(page.getByRole('heading',{name:'Mis cursos',exact:true})).toBeVisible();
   await page.goBack();await page.goForward();
+  await expect(page.getByRole('heading',{name:'Mis cursos',exact:true})).toBeVisible();
+  await expect(page.getByText('E2E ST1 José',{exact:true})).toBeVisible();
   await expect(page.getByText('Curso E2E F1',{exact:true})).toHaveCount(0);
 });

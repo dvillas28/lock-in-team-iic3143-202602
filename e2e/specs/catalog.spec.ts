@@ -13,11 +13,14 @@ const operations=async (page:import('@playwright/test').Page)=>{
 };
 catalogue('E2E-CATALOG-001 static catalogue filter and deep link / filter-deeplink @regression',async ({catalogue:c,page})=>{
   const foreign:string[]=[];
-  page.on('request',r=>{if(new URL(r.url()).origin!==c.base || r.url().includes('/api/v1/'))foreign.push(new URL(r.url()).pathname);});
+  page.context().on('request',r=>{if(new URL(r.url()).origin!==c.base || r.url().includes('/api/v1/'))foreign.push(new URL(r.url()).pathname);});
   await page.goto(c.base+'/');await expect(page).toHaveURL(c.url);await operations(page);
-  await page.getByPlaceholder('Filter by tag').fill('cursos');
+  await page.getByPlaceholder('Filter by tag').fill('/courses');
   await expect(page.locator('.opblock')).not.toHaveCount(50);
-  await page.getByPlaceholder('Filter by tag').fill('');await operations(page);
+  await expect(page.locator('.opblock')).not.toHaveCount(0);
+  expect((await page.locator('.opblock-summary-path').allTextContents()).every(path=>path.includes('/courses'))).toBe(true);
+  await page.getByPlaceholder('Filter by tag').fill('/auth/login');
+  await expect(page.locator('.opblock')).toHaveCount(1);
   const operation=page.locator('.opblock').filter({hasText:'login'}).first();
   await operation.locator('.opblock-summary-control').click();
   await expect(operation.locator('.opblock-body')).toBeVisible();
