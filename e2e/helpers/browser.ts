@@ -10,9 +10,9 @@ export async function stopTrace(context: BrowserContext, path?: string) {
   if (recording.has(context)) {recording.delete(context); await context.tracing.stop(path ? {path} : {}); return true;}
   return false;
 }
-export async function login(page: Page, e: Environment, actor = 'ST1', slug = 'uc', next = '/courses') {
+export async function login(page: Page, e: Environment, actor = 'ST1', slug = 'uc', next = '/courses', query?: string) {
   await stopTrace(page.context()); // No trace captures login bodies, passwords or token responses.
-  await page.goto(`${origin(slug)}/login?next=${encodeURIComponent(next)}`);
+  await page.goto(`${origin(slug)}/login?${query ?? 'next='+encodeURIComponent(next)}`);
   await page.getByLabel('Correo electrónico', {exact:true}).fill(e.data.actors[actor].email);
   await page.getByLabel('Contraseña', {exact:true}).fill(e.password);
   const [r, directory, me] = await Promise.all([
@@ -64,4 +64,14 @@ export async function go(page: Page, id: string, suffix = '') {
     await page.locator('nav[aria-label="Navegación institucional"]').locator(`a[href="${path}"]`).click();
   }
   await expect(page).toHaveURL(new RegExp(path.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$'));
+}
+
+/** Exercise compatibility/deep routes with Next's existing router when no UI link exposes them. */
+export async function compatibilityNavigate(page: Page, path: string) {
+  if (!path.startsWith('/') || path.startsWith('//') || path.includes('://')) throw new Error('Compatibility navigation must stay on the current origin');
+  await page.evaluate(path => {
+    const app = window as unknown as {next?: {router?: {push(path: string): void}}};
+    if (!app.next?.router) throw new Error('Next router unavailable');
+    app.next.router.push(path);
+  },path);
 }
