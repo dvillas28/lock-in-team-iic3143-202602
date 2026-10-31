@@ -27,3 +27,5 @@ export const phaseSix:Record<string,readonly CaseVariant[]>={
 phaseSix['E2E-NETWORK-003']=[...phaseSix['E2E-NETWORK-003'],v('revoked-recovery','T1/AO')];
 phaseSix['E2E-NETWORK-009']=[...phaseSix['E2E-NETWORK-009'],v('barrier-conflict','T1/T2'),v('locked-publication','AO/T1')];
 phaseSix['E2E-NETWORK-011']=[...phaseSix['E2E-NETWORK-011'],v('late-completion','T1')];
+
+phaseSix['E2E-A11Y-005']=phaseSix['E2E-A11Y-005'].map(v=>({...v,projects:['chromium','firefox','webkit']}));
