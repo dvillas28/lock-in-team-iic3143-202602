@@ -29,3 +29,16 @@ phaseSix['E2E-NETWORK-009']=[...phaseSix['E2E-NETWORK-009'],v('barrier-conflict'
 phaseSix['E2E-NETWORK-011']=[...phaseSix['E2E-NETWORK-011'],v('late-completion','T1')];
 
 phaseSix['E2E-A11Y-005']=phaseSix['E2E-A11Y-005'].map(v=>({...v,projects:['chromium','firefox','webkit']}));
+
+phaseSix['E2E-NETWORK-008']=phaseSix['E2E-NETWORK-008'].map(v=>({...v,projects:['chromium','webkit']}));
+phaseSix['E2E-A11Y-007']=[...phaseSix['E2E-A11Y-007'],
+ v('utfsm-teacher-dark','FT1','browser','utfsm',['chromium','firefox','webkit']),
+ v('portal-compact','ANON','browser','none',['chromium','firefox','webkit']),
+ v('foreign-mobile','FT1','browser','utfsm',['chromium','firefox','webkit']),
+ v('cross-role-mobile','TS-CROSS','browser','uc',['chromium','firefox','webkit']),
+ v('hidden-module-dark','ST1','browser','uc',['chromium','firefox','webkit']),
+ v('author-mobile','FT1/FST1','browser','utfsm',['chromium','firefox','webkit']),
+ v('lost-save','ST1','browser','uc',['chromium','firefox','webkit']),
+ v('lost-publication','FT1/FST1','browser','utfsm',['chromium','firefox','webkit']),
+ v('owner-student-dark','AO-ST','browser','uc',['chromium','firefox','webkit']),
+];

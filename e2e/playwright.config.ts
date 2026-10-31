@@ -33,7 +33,7 @@ export default defineConfig({
   projects: [
     {name: 'chromium', use: {...devices['Desktop Chrome']}},
     {name: 'firefox', grep: /@smoke|E2E-A11Y-00[57]/, use: {...devices['Desktop Firefox']}},
-    {name: 'webkit', grep: /@smoke|E2E-A11Y-00[57]/, use: {...devices['Desktop Safari']}},
+    {name: 'webkit', grep: /@smoke|E2E-A11Y-00[57]|E2E-NETWORK-008/, use: {...devices['Desktop Safari']}},
     {name: 'mobile', grep: /E2E-A11Y-|E2E-PUBLIC-/, use: {...devices['Desktop Chrome'], viewport: {width: 375, height: 812}}},
   ],
 });
