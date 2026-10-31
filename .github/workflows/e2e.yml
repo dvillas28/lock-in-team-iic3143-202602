@@ -1,0 +1,82 @@
+name: E2E
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev]
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  playwright:
+    name: Playwright (${{ matrix.project }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJSON(github.event_name == 'schedule' && '["chromium","firefox","webkit"]' || '["chromium"]') }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            backend/pnpm-lock.yaml
+            frontend/pnpm-lock.yaml
+            e2e/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir backend install --frozen-lockfile
+      - run: pnpm --dir frontend install --frozen-lockfile
+      - run: pnpm --dir e2e install --frozen-lockfile
+      - run: pnpm --dir e2e typecheck
+      - run: pnpm --dir e2e lint
+      - run: pnpm --dir e2e test:harness
+      - name: Install browser with system dependencies
+        run: pnpm --dir e2e exec playwright install --with-deps ${{ matrix.project == 'mobile' && 'chromium' || matrix.project }}
+      - name: Execute selected suite in runner-owned PostgreSQL and application stack
+        env:
+          PROJECT: ${{ matrix.project }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            pnpm --dir e2e run test:smoke --project="$PROJECT"
+          elif [ "$EVENT" = "push" ]; then
+            pnpm --dir e2e run test:regression --project="$PROJECT"
+          else
+            pnpm --dir e2e run test:extended --project="$PROJECT"
+          fi
+      - name: Catalogue execution ledger
+        if: always()
+        run: pnpm --dir e2e coverage
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-${{ matrix.project }}
+          path: |
+            e2e/reports/
+          retention-days: 14
+          if-no-files-found: warn
+
+  result:
+    name: E2E result
+    if: always()
+    needs: playwright
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require successful execution
+        env:
+          RESULT: ${{ needs.playwright.result }}
+        run: test "$RESULT" = success
