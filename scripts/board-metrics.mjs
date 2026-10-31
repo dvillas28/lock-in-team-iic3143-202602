@@ -32,6 +32,10 @@ const RECONCILED = new Set([
   'PVTI_lAHOB6xfyc4Bhx6Vzg-X7VY', // Vista de notas del estudiante
   'PVTI_lAHOB6xfyc4Bhx6Vzg-X7ZM', // Vista del libro de notas docente
   'PVTI_lAHOB6xfyc4Bhx6Vzg-X7aw', // Vista de auditoría del curso
+  // Unplanned Railway → Render work, logged after the fact.
+  'PVTI_lAHOB6xfyc4Bhx6VzhE6AWs', // #175 Migrar el deploy de Railway a Render
+  'PVTI_lAHOB6xfyc4Bhx6VzhE6Ahk', // #176 Corregir el primer deploy en Render
+  'PVTI_lAHOB6xfyc4Bhx6VzhE6Amg', // #177 Migraciones de operador con owner no superusuario
 ]);
 
 function parseCsv(text) {
@@ -157,7 +161,7 @@ function report(snapshots) {
   ]), ``);
   out.push(`El cycle time solo cuenta tarjetas que algún snapshot vio en In progress. Los drafts que ya estaban en Done en su primer snapshot no tienen fecha de término y quedan fuera.`, ``);
   if (reconciled.length) {
-    out.push(`Tarjetas conciliadas el 2026-10-30 (${reconciled.length}): cuentan en el avance, pero no en lead ni cycle time.`, ``);
+    out.push(`Tarjetas conciliadas o registradas después de hechas el 2026-10-30 (${reconciled.length}): cuentan en el avance, pero no en lead ni cycle time.`, ``);
   }
 
   out.push(`## Por semana`, ``);
