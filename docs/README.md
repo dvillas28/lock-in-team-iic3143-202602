@@ -33,6 +33,12 @@ plataforma de despliegue.
 
 - [OpenAPI de AcademiX](reference/openapi/README.md)
 
+## Backend y Pruebas
+
+- [Mapa de misiones backend](backend/README.md)
+- [Matriz de escenarios de aislamiento UC/UTFSM](backend/isolation-test-matrix.md)
+- [Guía del Test Harness de aislamiento (BE-07 / BE-08)](backend/isolation-test-harness.md)
+
 ## Misiones frontend
 
 - [Seis specs, dependencias y estado documental](frontend/README.md)
