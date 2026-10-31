@@ -3,6 +3,9 @@
   "private": true,
   "packageManager": "pnpm@9.15.9",
   "scripts": {
+    "test:e2e": "pnpm --dir e2e run test",
+    "test:e2e:smoke": "pnpm --dir e2e run test:smoke",
+    "test:e2e:harness": "pnpm --dir e2e run test:harness",
     "docs:api": "python3 -m http.server 8080 --bind 127.0.0.1 --directory dist/api-catalog",
     "docs:api:lint": "redocly lint docs/reference/openapi/openapi.yaml",
     "build": "pnpm --dir frontend build && pnpm --dir backend build",

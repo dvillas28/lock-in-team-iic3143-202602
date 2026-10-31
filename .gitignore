@@ -46,3 +46,8 @@ temp/
 
 # Local Spec Kit pointer
 .specify/feature.json
+
+# E2E artifacts and private local process state
+e2e/test-results/
+e2e/reports/
+e2e/.cache/
