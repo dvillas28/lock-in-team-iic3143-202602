@@ -151,6 +151,7 @@ for(const [id,variants] of Object.entries(caseDefinitions)) {
 for(const id of ['E2E-AUTH-011','E2E-TENANT-001','E2E-TENANT-002','E2E-TENANT-008','E2E-TENANT-009','E2E-RBAC-005','E2E-RBAC-006','E2E-RBAC-009','E2E-AUDIT-003']) {
  caseDefinitions[id]=caseDefinitions[id].map(v=>({...v,projects:['chromium','firefox','webkit']}));
 }
+caseDefinitions['E2E-TENANT-013']=[...caseDefinitions['E2E-TENANT-013'],variant('browser-recovery','T1','browser','both')];
 export const caseVariants: Record<string, readonly string[]> = Object.fromEntries(
   Object.entries(caseDefinitions).map(([id, variants]) => [id, variants.map(v => v.name)]),
 );

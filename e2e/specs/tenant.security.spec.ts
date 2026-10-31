@@ -145,3 +145,22 @@ for(const code of [200,401])test(`E2E-TENANT-015 stale response discarded after 
   await go(page,e.data.courses.C1,'/grades');await expect(page.getByRole('heading',{name:'Aún no hay notas publicadas',exact:true})).toBeVisible();
  }finally{release();}
 });
+
+test('E2E-TENANT-013 invalid cursor renders safe error and retry recovers / browser-recovery @extended',async ({e,actorPage})=>{
+ await e.graded();await e.graded('MULTI');
+ const c=e.data.courses.C1,owner=await e.api('AO'),first=status(await owner.get(`courses/${c}/gradebook?limit=1`),200).body;
+ expect(first.nextCursor).toBeTruthy();
+ const page=await actorPage('T1'),before=await securitySnapshot(e),pattern='**/api/v1/institution/uc/courses/*/gradebook**';
+ await page.route(pattern,async route=>{
+  const url=new URL(route.request().url());url.searchParams.set('cursor',first.nextCursor);
+  const response=await route.fetch({url:url.href});expect(response.status()).toBe(400);await route.fulfill({response});
+ });
+ await go(page,c,'/gradebook');
+ await expect(page.getByRole('alert').filter({hasText:'Solicitud o cursor inválido (400)'})).toBeVisible();
+ await expect(page.getByRole('table')).toHaveCount(0);
+ await page.unroute(pattern);await page.getByRole('button',{name:'Reintentar',exact:true}).click();
+ await expect(page.getByRole('table')).toBeVisible();
+ await expect(page.getByRole('rowheader',{name:e.data.actors.ST1.name+' '+e.data.actors.ST1.email,exact:true})).toBeVisible();
+ await expect(page.getByRole('rowheader').filter({hasText:e.data.actors.FST1.name})).toHaveCount(0);
+ expect(await securitySnapshot(e)).toEqual(before);
+});
