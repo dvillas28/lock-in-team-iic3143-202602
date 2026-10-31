@@ -1,7 +1,10 @@
 # Roadmap y backlog de implementación posterior
 
-Esta rama entrega documentación. Cada tarea se realizará después en rama `test/<tema>` independiente,
-basada en dev vigente y con commits pequeños. Correcciones del producto se separan en ramas fix/feat;
+Ejecución iniciada: F1 bloqueada; las fases restantes no se consideran completadas.
+Consultar [evidencia y ledger](execution/IMPLEMENTATION_STATUS.md), separado de estimaciones.
+
+El plan original se conserva. La implementación inicial vive en `test/e2e-implementation`,
+basada en `test/e2e-master-plan`; F1 todavía no supera su gate. Los siguientes paquetes serán pequeños. Correcciones del producto se separan en ramas fix/feat;
 no ocultar cambios funcionales dentro de tests ni ampliar MVP para completar catálogo.
 
 | Fase / backlog | Objetivo | Horas persona | Complejidad | Dependencia |

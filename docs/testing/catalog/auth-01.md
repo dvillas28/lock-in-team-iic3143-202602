@@ -29,7 +29,7 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
 - Dependencias: F1 entorno/seed listo; [fase F2](../roadmap/F2.md); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador real; smoke (regression incluye smoke; extended incluye regression).
-- Estado del test: Propuesto; sin implementar ni ejecutar.
+- Estado del test: Implementado, bloqueado por entorno; [ejecución](../execution/IMPLEMENTATION_STATUS.md).
 
 <a id="e2e-auth-002"></a>
 

@@ -3,6 +3,10 @@
 Fecha 2026-10-30 · `test/e2e-master-plan` · base `90463059015e5045d011eadd12b6403b7b492615`.
 Solo investigación/documentación. Sin tests nuevos, dependencias, cambios funcionales o despliegues.
 
+Actualización de implementación: [estado verificable](execution/IMPLEMENTATION_STATUS.md).
+Rama `test/e2e-implementation`: F1 iniciada, aceptación bloqueada por entorno; no hay E2E aprobados.
+El contenido siguiente conserva la estrategia original, no constituye evidencia de ejecución.
+
 ## Resumen ejecutivo y alcance
 
 El MVP real integra cursos/secciones/roles → módulos/Markdown → quizzes → intentos →

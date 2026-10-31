@@ -2,6 +2,7 @@
 
 Base: 18 páginas Next, 50 operaciones API y 34 familias de flujos, incluido catálogo estático fuera de App Router.
 La matriz acredita trazabilidad documental; hoy ningún caso nuevo tiene PASS de ejecución.
+La implementación iniciada y sus bloqueos se registran en [estado real](execution/IMPLEMENTATION_STATUS.md).
 
 | Matriz | Pregunta que resuelve |
 | --- | --- |

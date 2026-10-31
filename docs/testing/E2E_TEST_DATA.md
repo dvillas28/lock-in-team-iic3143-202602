@@ -1,6 +1,7 @@
 # Datos y seed E2E propuestos
 
-Diseño futuro, sin ejecutar seed ni cambiar datos en esta rama.
+Diseño original. La [implementación inicial de seed](../../e2e/data/seed.ts) existe,
+pero su ejecución contra PostgreSQL sigue bloqueada por entorno; no se declara validada.
 [Actores/entidades](data/ACTORS_ENTITIES.md) · [Perfiles por caso](data/SCENARIOS.md).
 Todas las variables de fichas se resuelven desde un manifest generado por preparación.
 
