@@ -21,6 +21,8 @@ La caché `e2e/.cache/browsers` se detecta automáticamente; PLAYWRIGHT_BROWSERS
 Reportes en `e2e/reports/`, ignorados por Git; no se requieren archivos de `/private/tmp`.
 El runner crea y limpia su stack local. F3–F7 quedan pendientes por revisión fase a fase del usuario.
 
+Guía viva por fase y demostración visual: [registro incremental](execution/E2E_EXECUTION_JOURNAL.md).
+
 ## Requisitos e instalación
 
 Node24, pnpm9, Python3 y PostgreSQL17 local o Docker operativo. El runner crea su propio cluster;

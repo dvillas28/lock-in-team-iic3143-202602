@@ -16,7 +16,11 @@
     "docs:api:build": "pnpm --dir backend build && node scripts/api-catalog.mjs",
     "docs:api:test": "pnpm --dir backend build && node --test scripts/api-catalog.test.mjs",
     "test:e2e:f1": "pnpm --dir e2e run test:f1",
-    "test:e2e:f2": "pnpm --dir e2e run test:f2"
+    "test:e2e:f2": "pnpm --dir e2e run test:f2",
+    "test:e2e:f3": "pnpm --dir e2e run test:f3",
+    "test:e2e:all": "pnpm --dir e2e run test --project=chromium --project=firefox --project=webkit",
+    "test:e2e:visual": "pnpm --dir e2e run test --headed",
+    "test:e2e:step": "pnpm --dir e2e run test --debug"
   },
   "devDependencies": {
     "@redocly/cli": "1.25.11",

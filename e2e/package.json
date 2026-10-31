@@ -17,7 +17,8 @@
     "report": "tsx runner/show-report.ts",
     "coverage": "tsx runner/coverage.ts",
     "test:f1": "tsx runner/run.ts ops.spec.ts auth.smoke.spec.ts",
-    "test:f2": "tsx runner/run.ts auth.entry.spec.ts auth.smoke.spec.ts public.spec.ts catalog.spec.ts"
+    "test:f2": "tsx runner/run.ts auth.entry.spec.ts auth.smoke.spec.ts public.spec.ts catalog.spec.ts",
+    "test:f3": "tsx runner/run.ts auth.security.spec.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",

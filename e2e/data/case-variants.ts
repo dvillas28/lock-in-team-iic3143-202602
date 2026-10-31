@@ -43,6 +43,17 @@ Object.assign(caseDefinitions, {
 for (const id of ['E2E-AUTH-001','E2E-AUTH-010','E2E-PUBLIC-001']) {
   caseDefinitions[id] = caseDefinitions[id].map(v=>({...v, projects:['chromium','firefox','webkit']}));
 }
+Object.assign(caseDefinitions, {
+ 'E2E-AUTH-003':[variant('inactive','ST1','browser')],
+ 'E2E-AUTH-008':[variant('no-membership','NONE','browser')],
+ 'E2E-AUTH-011':[variant('logout','ST1','browser')],
+ 'E2E-AUTH-016':[variant('expiration','ST1','browser')],
+ 'E2E-AUTH-017':['signature','none','expired','issuer','audience','future'].map(n=>variant(n,'ST1')),
+ 'E2E-AUTH-018':['duplicate','multiple','blank','oversized'].map(n=>variant(n,'ST1')),
+ 'E2E-AUTH-019':[variant('independent-tabs','ST1','browser')],
+ 'E2E-AUTH-021':['unavailable','malformed'].map(n=>variant(n,'ST1','browser')),
+});
+Object.assign(caseDefinitions, {'E2E-AUTH-007':[variant('rate-limit','ST1','browser')],'E2E-AUTH-009':[variant('public-headers','ST1','browser')],'E2E-AUTH-020':[variant('draft-focus','ST1','browser')]});
 export const caseVariants: Record<string, readonly string[]> = Object.fromEntries(
   Object.entries(caseDefinitions).map(([id, variants]) => [id, variants.map(v => v.name)]),
 );

@@ -1,12 +1,12 @@
 # Implementación E2E: estado verificable
 
-Corte local **2026-10-31**. **F1 y F2 aceptadas localmente; detenido antes de F3; suite incompleta.**
+Corte local **2026-10-31**. **F1 y F2 aceptadas localmente; F3 en implementación, sin aceptación; suite incompleta.**
 [Validación F2](F2_VALIDATION.md) · [Validación F1](F1_VALIDATION.md) · [Cobertura](COVERAGE.md) · [Ejecución](../E2E_README.md).
 
 ## Conservación y entorno
 
 - Checkout permanente: `/Users/julian/lock-in-team-iic3143-202602`.
-- Rama actual `test/e2e-f2`, desde F1 aceptada en `test/e2e-f1`; commits anteriores conservados.
+- Rama actual `test/e2e-f3`, desde F2 aceptada; commits anteriores conservados.
 - `dev` conserva90463059015e5045d011eadd12b6403b7b492615; sin push, merge ni producción.
 - La copia temporal inicial permanece como respaldo; ejecución y Chromium usan el checkout permanente.
 - PostgreSQL17/Chromium requieren ejecución local autorizada; ENV-01/02 resueltos en esa modalidad.
@@ -30,7 +30,7 @@ Código `23d7ebb6090be10403c2189c8e0ec7c8dc335185`, run c41540ab4f22ea26, checko
 F2 cubre PUBLIC/CATALOG y AUTH básico; comandos separados `pnpm test:e2e:f1` y `pnpm test:e2e:f2`.
 Typecheck/lint/once unitarios PASS; cleanup y reportes revisados. Detalle y repetición en F2_VALIDATION.
 F1 conserva su evidencia independiente; historial inicial y TEST-01 en [validación anterior](LOCAL_VALIDATION.md).
-La petición posterior del usuario cambió el avance autónomo por revisión de cada fase: **F3 no iniciada**.
+La petición posterior del usuario cambió el avance autónomo por revisión de cada fase: **F3 autorizada posteriormente y en implementación**; ver [avance](F3_PROGRESS.md).
 
 ## Pendiente
 
