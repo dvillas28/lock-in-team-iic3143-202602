@@ -30,7 +30,7 @@ test('E2E-AUTH-008 global login without institutional membership / no-membership
   await expect(page.getByRole('heading',{name:'Recurso no disponible',exact:true})).toBeVisible();
 });
 
-test('E2E-AUTH-011 logout discards actor state and requests / logout @regression',async ({e,actorPage})=>{
+test('E2E-AUTH-011 logout discards actor state and requests / logout @smoke',async ({e,actorPage})=>{
   const page=await actorPage('ST1');await go(page,e.data.courses.C1,'/grades');
   await expect(page.getByRole('heading',{name:'Mis notas',exact:true})).toBeVisible();
   const token=e.tokens.get('ST1');
