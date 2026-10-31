@@ -1,6 +1,6 @@
 # Estado por caso · 02
 
-[Evidencia y límites](IMPLEMENTATION_STATUS.md). Corte: 2026-10-30; ningún E2E aprobado.
+[Evidencia y límites](IMPLEMENTATION_STATUS.md). Corte: 2026-10-31; AUTH-001 aprobada, F1 sin aceptación.
 
 | Caso / ficha reproducible | Estado real | Archivo / bloqueo |
 | --- | --- | --- |

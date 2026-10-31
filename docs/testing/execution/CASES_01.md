@@ -1,6 +1,6 @@
 # Estado por caso · 01
 
-[Evidencia y límites](IMPLEMENTATION_STATUS.md). Corte: 2026-10-30; ningún E2E aprobado.
+[Evidencia y límites](IMPLEMENTATION_STATUS.md). Corte: 2026-10-31; AUTH-001 aprobada, F1 sin aceptación.
 
 | Caso / ficha reproducible | Estado real | Archivo / bloqueo |
 | --- | --- | --- |
@@ -65,4 +65,4 @@
 | [E2E-AUDIT-008](../catalog/audit-02.md#e2e-audit-008) | Pendiente de implementación | F1 sin aceptación; no existe test de esta ficha. |
 | [E2E-AUDIT-009](../catalog/audit-02.md#e2e-audit-009) | Pendiente de implementación | F1 sin aceptación; no existe test de esta ficha. |
 | [E2E-AUDIT-010](../catalog/audit-02.md#e2e-audit-010) | Pendiente de implementación | F1 sin aceptación; no existe test de esta ficha. |
-| [E2E-AUTH-001](../catalog/auth-01.md#e2e-auth-001) | Implementado, bloqueado por entorno | [auth.smoke.spec.ts](../../../e2e/specs/auth.smoke.spec.ts), 5 variantes; PG/navegador no arrancan. |
+| [E2E-AUTH-001](../catalog/auth-01.md#e2e-auth-001) | Ejecutado y aprobado | [auth.smoke.spec.ts](../../../e2e/specs/auth.smoke.spec.ts), 5 variantes Chromium; dos stacks nuevos, ver registro local. |

@@ -1,5 +1,5 @@
 import {randomBytes} from 'node:crypto';
-import {cp, mkdir, writeFile} from 'node:fs/promises';
+import {cp, mkdir, readFile, writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {command, launch, stop, ready, safe} from './process.ts';
 import {root, work, preflight, apiPort, webPort, buildEnv, reportDirectory} from './settings.ts';
@@ -25,9 +25,12 @@ try {
   phase = 'build';
   await command('pnpm', ['--dir', 'backend', 'build']);
   await command('pnpm', ['--dir', 'frontend', 'build'], buildEnv);
-  await cp(resolve(root, 'frontend/.next/static'), resolve(root, 'frontend/.next/standalone/.next/static'), {recursive: true});
-  frontend = launch(process.execPath, ['.next/standalone/server.js'], {...buildEnv, PORT: String(webPort), HOSTNAME: '127.0.0.1'}, resolve(root, 'frontend'));
-  await ready(`http://127.0.0.1:${webPort}`, frontend.child);
+  const {relativeAppDir} = JSON.parse(await readFile(resolve(root, 'frontend/.next/required-server-files.json'), 'utf8')) as {relativeAppDir: string};
+  const standalone = resolve(root, 'frontend/.next/standalone', relativeAppDir);
+  await cp(resolve(root, 'frontend/.next/static'), resolve(standalone, '.next/static'), {recursive: true});
+  frontend = launch(process.execPath, ['server.js'], {...buildEnv, PORT: String(webPort), HOSTNAME: '127.0.0.1'}, standalone);
+  try {await ready(`http://127.0.0.1:${webPort}`, frontend.child);}
+  catch (error) {throw new Error(`Frontend not ready: ${safe(frontend.output())}`, {cause: error});}
   phase = 'playwright';
   const args = process.argv.slice(2);
   if (!args.some(a => a.startsWith('--project')) && !args.includes('--ui')) args.push('--project=chromium');

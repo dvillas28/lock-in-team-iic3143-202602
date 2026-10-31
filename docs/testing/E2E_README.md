@@ -1,7 +1,7 @@
 # Ejecutar el harness E2E
 
 Estado actual: infraestructura inicial y un escenario de login escrito; **suite incompleta**.
-La aceptación F1 está bloqueada por restricciones del entorno de desarrollo. No hay E2E aprobados.
+AUTH-001 aprueba cinco variantes Chromium en ejecución local autorizada. F1 sigue sin aceptación OPS.
 [Evidencia y límites](execution/IMPLEMENTATION_STATUS.md) · [Catálogo original](E2E_TEST_CATALOG.md).
 
 ## Requisitos e instalación
@@ -43,7 +43,7 @@ Cada test crea una base*_test exclusiva, aplica predeploy/migraciones/provision-
 ejecuta seed E2E y arranca Nest con academix_runtime. No se desactiva RLS ni constraints.
 La seed contiene dos instituciones, perfiles institucionales/académicos, multirol, cursos,
 secciones, matrículas, módulos, Markdown y quizzes draft/publicados. Helpers preparan intentos/notas
-por API real; esa preparación todavía no se pudo validar contra PostgreSQL en este entorno.
+por API real; esos helpers todavía no se han validado. La inserción SQL sí pasó en PostgreSQL17.
 `ensure` no repone privilegios ni ediciones. No ejecutar manualmente la seed sobre una DB ajena.
 
 ## Comandos
@@ -66,7 +66,9 @@ Los filtros solo ejecutan tests que existan: COURSE y otros módulos siguen pend
 Smoke/regression/extended son selecciones disponibles, no evidencia de cobertura completa.
 Usar `run test` al pasar flags para que pnpm los entregue al runner.
 Proyectos adicionales: `--project=firefox`, `--project=webkit`, `--project=mobile`;
-instalar cada navegador antes. Solo Chromium fue descargado aquí; ninguno pudo arrancar en el sandbox.
+instalar cada navegador antes. Chromium ejecutó AUTH-001; los otros motores siguen sin validar.
+En esta copia local, usar `PLAYWRIGHT_BROWSERS_PATH=/private/tmp/academix-e2e-browsers`
+como prefijo del comando. Las ejecuciones requieren permisos para PG y procesos de navegador.
 
 ## Depuración y reportes
 

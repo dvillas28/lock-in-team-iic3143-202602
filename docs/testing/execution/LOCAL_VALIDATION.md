@@ -1,7 +1,47 @@
 # Validación local y defectos observados
 
-Corte: 2026-10-30, macOS, Node24.9.0; ejecución en copia aislada.
+Corte: 2026-10-31, macOS, Node24.9.0; ejecución en copia aislada.
 [Estado y cobertura](IMPLEMENTATION_STATUS.md) · [Instrucciones reproducibles](../E2E_README.md).
+
+## Reanudación autorizada · 31oct2026
+
+PostgreSQL17 y Chromium156.0.8078.4 arrancan al solicitar ejecución con permisos adicionales.
+El sandbox ordinario falló primero en el IPC de tsx (`listen EPERM`), sin ejecutar el runner.
+La caché predeterminada de Playwright no contenía el binario requerido; se usó el ya descargado:
+
+```bash
+PLAYWRIGHT_BROWSERS_PATH=/private/tmp/academix-e2e-browsers \
+  pnpm --dir e2e run test --grep E2E-AUTH-001
+```
+
+| Run / comprobación | Resultado | Límite |
+| --- | --- | --- |
+| Chromium independiente, lanzar/cerrar con API Playwright | PASS | Sin página externa |
+| afc3407c188ca3e5 | exit1, preparación8,409s | PG funciona; ruta standalone incorrecta del harness |
+| fca369872c1f358e | 5/5 PASS; tests14,013s; total21,614s | AUTH-001, Chromium, cinco roles UC |
+| 2d52bab34d20749d | 5/5 PASS; tests11,529s; total20,193s | Repetición con cluster/bases nuevos |
+| typecheck / lint / test:harness | PASS / PASS / 9 de9 PASS | Unitarios no cuentan como fichas E2E |
+| coverage, último run | 248 catálogo; definida1; ejecutada1; aprobada1; pendientes247 | No acepta F1 ni F2 |
+| Verificar puertos4320/4321 tras teardown | Ambos libres | No sustituye OPS-005/009 ante fallos |
+| Buscar directorios PG de los tres runIds | Ninguno retenido | No se tocaron recursos de otros runs |
+| Escanear JSON/XML/HTML de ambos runs por JWT y URL PostgreSQL | Sin coincidencias | Sin trazas de fallo reales para validar sanitización |
+
+Ambos runs verdes parten de e4679a6da952bd238103042803a8e5da04b45773 con `dirty=true`.
+Único cambio de código: `e2e/runner/run.ts`, ruta standalone basada en `relativeAppDir`,
+assets junto al servidor generado y diagnóstico de Next al fallar readiness.
+SHA256 del runner probado: `1c6325cac0fd9e9ca72da4a8624ada6621c9b6f89ebd5a05399e0c43ee34a3f2`.
+No cambió frontend/backend, contrato, migraciones ni aserciones del smoke.
+
+HTML, results.json, junit.xml y run.json en `e2e/reports/<runId>/` (ignorados por Git).
+Cobertura del último run en su coverage.json; latest.json apunta a 2d52bab34d20749d.
+Cinco variantes son una ficha; dos repeticiones no acreditan una ventana de estabilidad.
+Seed SQL, migraciones y login real comprobados; ensure/replay y helpers académicos pendientes.
+ENV-01/02 quedan resueltos para esta ejecución autorizada. F1 continúa sin aceptación OPS.
+
+## Histórico · 30oct2026
+
+Los siguientes resultados se conservan como evidencia del bloqueo anterior, ya resuelto
+para PG/Chromium en ejecución autorizada. Los checks de producto no se repitieron el 31oct.
 
 | Comando / comprobación real | Resultado | Límite |
 | --- | --- | --- |
@@ -25,12 +65,12 @@ Corte: 2026-10-30, macOS, Node24.9.0; ejecución en copia aislada.
 
 No se ejecutaron tests de integración existentes: requieren PostgreSQL y algunos helpers restablecen schema.
 No se dirigieron esos helpers a una base ajena para obtener resultados.
-No hay medición de flakiness ni tiempo de suite E2E; no hubo ejecución funcional que repetir.
+En este corte histórico no hubo ejecución funcional; las repeticiones del 31oct figuran arriba.
 No se puede afirmar ausencia de regresiones a partir de los checks estáticos/unitarios.
 
 ## Evidencia de entorno
 
-Último intento: run9900ff56afef226e, código1074cabe25a8ea96569553353c9332b4af302187,
+Intento histórico: run9900ff56afef226e, código1074cabe25a8ea96569553353c9332b4af302187,
 inicio2026-10-31T00:53:06.736Z, fin00:53:07.930Z (fecha local30oct).
 Se conserva run.json y coverage.json bajo `e2e/reports/9900ff56afef226e/` (ignorados por Git).
 La preparación falló antes de generar HTML/JUnit/JSON de tests; `report` informa esa ausencia.
@@ -43,7 +83,7 @@ bootstrap_check_in org.chromium.Chromium.MachPortRendezvousServer... Permission 
 ```
 
 No son defectos funcionales, de autorización ni multi-tenant demostrados del LMS.
-Se requiere permitir procesos PG/navegador; no cambiar reglas académicas ni desactivar RLS.
+El 31oct se autorizaron procesos PG/navegador; no se cambiaron reglas académicas ni RLS.
 El workflow puede aportar esa validación después de autorización de push/PR; no se lanzó remotamente.
 
 ## TEST-01 — Fallo en test existente de DST
@@ -63,8 +103,8 @@ No se eliminó ni relajó la aserción y no se modificó la utilidad productiva 
 ## Ambigüedades y pendientes
 
 - COURSE-013/Q02: el plan pide aclarar status de metadato NUL; sin aserción inventada.
-- La seed y sus helpers no están validados contra las migraciones en ejecución.
+- La seed SQL pasó contra migraciones reales; sus helpers académicos y ensure/replay siguen pendientes.
 - Falta verificar sanitización de trazas reales: solo existe prueba unitaria con ZIP sintético.
-- No existen resultados nuevos que certifiquen permisos, UC↔UTFSM, notas o intentos.
+- AUTH-001 acredita login inicial UC; no certifica la matriz de permisos, UC↔UTFSM, notas o intentos.
 - Bloqueos por funcionalidades inexistentes se clasificarán durante implementación según evidencia;
   no se inventaron funcionalidades ni se marcaron casos como no aplicables para reducir denominador.
