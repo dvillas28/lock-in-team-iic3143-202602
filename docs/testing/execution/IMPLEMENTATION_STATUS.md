@@ -6,9 +6,11 @@ Corte local: **2026-10-31**. **Trabajo parcial; AUTH-001 aprobada, F1 sin acepta
 ## Rama y conservación del trabajo
 
 - Base `test/e2e-master-plan`, SHA1978e2e; el plan no estaba integrado en dev9046305.
-- Rama `test/e2e-implementation` en `/private/tmp/academix-e2e-implementation`.
-- Se usó una copia Git aislada porque `.git` del checkout original está en solo lectura.
-- Checkout original `/Users/julian/lock-in-team-iic3143-202602`: dev, sin cambios del trabajo E2E.
+- Rama `test/e2e-implementation` en `/Users/julian/lock-in-team-iic3143-202602` (checkout permanente).
+- Se usó inicialmente `/private/tmp/academix-e2e-implementation` por restricciones de escritura en `.git`.
+  La rama se importó localmente al repositorio permanente con ejecución autorizada; copia temporal conservada.
+- Checkout permanente activo en `test/e2e-implementation`; `dev` sigue en
+  `90463059015e5045d011eadd12b6403b7b492615`. Commits anteriores y corrección70412b9 conservados.
 - Commits previos conservados; sin merge, push, PR, despliegue ni conexiones a DB existente/productiva.
 - Sin cambios en frontend, backend, contrato, migraciones ni workflows anteriores.
 
@@ -42,8 +44,9 @@ escalación; las ejecuciones autorizadas pudieron iniciar PostgreSQL17 y Chromiu
 
 - **ENV-01:** cluster PG17 nuevo, migraciones/provision-runtime y seed ejecutados por cada variante.
 - **ENV-02:** Chromium156.0.8078.4 arrancó y cerró en check independiente y ejecutó el LMS.
-- Binarios del navegador existentes en `/private/tmp/academix-e2e-browsers`; requieren
-  `PLAYWRIGHT_BROWSERS_PATH` al comprobar y ejecutar. La caché predeterminada tenía otra versión.
+- Chromium y reportes anteriores se copiaron a `e2e/.cache/browsers` y `e2e/reports` del checkout
+  permanente, ambos ignorados. Usar `PLAYWRIGHT_BROWSERS_PATH="$PWD/e2e/.cache/browsers"` desde su raíz.
+  La ejecución actual no depende de archivos temporales; la caché predeterminada tenía otra versión.
 - Primer run autorizado `afc3407c188ca3e5`: fallo de harness al buscar standalone en ruta incorrecta.
   Se corrigió exclusivamente el runner y se añadió diagnóstico del proceso Next en readiness.
 - Estos resultados no acreditan ejecución con permisos ordinarios ni soporte Firefox/WebKit/Docker.

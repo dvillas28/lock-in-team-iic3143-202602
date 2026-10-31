@@ -4,6 +4,22 @@ Estado actual: infraestructura inicial y un escenario de login escrito; **suite 
 AUTH-001 aprueba cinco variantes Chromium en ejecución local autorizada. F1 sigue sin aceptación OPS.
 [Evidencia y límites](execution/IMPLEMENTATION_STATUS.md) · [Catálogo original](E2E_TEST_CATALOG.md).
 
+## Checkout permanente y ejecución local
+
+Trabajo conservado en `/Users/julian/lock-in-team-iic3143-202602`, rama `test/e2e-implementation`.
+Los commits previos y la corrección standalone están incorporados; `dev` conserva su SHA original.
+No se hizo merge ni push. La copia temporal anterior se conserva como respaldo.
+
+```bash
+cd /Users/julian/lock-in-team-iic3143-202602
+PLAYWRIGHT_BROWSERS_PATH="$PWD/e2e/.cache/browsers" \
+  pnpm --dir e2e run test --grep E2E-AUTH-001
+```
+
+La caché local ignorada contiene Chromium; los reportes están en `e2e/reports/`.
+Para ejecutar todo lo implementado, quitar `--grep E2E-AUTH-001`: actualmente son las mismas cinco variantes.
+Estos comandos crean un stack local propio y no requieren la copia ni los binarios de `/private/tmp`.
+
 ## Requisitos e instalación
 
 Node24, pnpm9, Python3 y PostgreSQL17 local o Docker operativo. El runner crea su propio cluster;
@@ -15,7 +31,7 @@ pnpm install --frozen-lockfile
 pnpm --dir backend install --frozen-lockfile
 pnpm --dir frontend install --frozen-lockfile
 pnpm --dir e2e install --frozen-lockfile
-pnpm --dir e2e exec playwright install chromium
+PLAYWRIGHT_BROWSERS_PATH="$PWD/e2e/.cache/browsers" pnpm --dir e2e exec playwright install chromium
 pnpm --dir e2e typecheck
 pnpm --dir e2e lint
 pnpm --dir e2e test:harness
@@ -67,7 +83,7 @@ Smoke/regression/extended son selecciones disponibles, no evidencia de cobertura
 Usar `run test` al pasar flags para que pnpm los entregue al runner.
 Proyectos adicionales: `--project=firefox`, `--project=webkit`, `--project=mobile`;
 instalar cada navegador antes. Chromium ejecutó AUTH-001; los otros motores siguen sin validar.
-En esta copia local, usar `PLAYWRIGHT_BROWSERS_PATH=/private/tmp/academix-e2e-browsers`
+Desde la raíz del checkout permanente, usar `PLAYWRIGHT_BROWSERS_PATH="$PWD/e2e/.cache/browsers"`
 como prefijo del comando. Las ejecuciones requieren permisos para PG y procesos de navegador.
 
 ## Depuración y reportes
