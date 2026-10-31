@@ -1,6 +1,6 @@
 # Estado por caso · 03
 
-[Evidencia y límites](IMPLEMENTATION_STATUS.md). Corte: 2026-10-31; F1–F5 aceptadas por incrementos;227 fichas históricas, sin nueva regresión global.
+[Evidencia y límites](IMPLEMENTATION_STATUS.md). Corte: 2026-10-31; F1–F6 aceptadas por incrementos;248 fichas históricas, sin nueva regresión global.
 
 | Caso / ficha reproducible | Estado real | Archivo / bloqueo |
 | --- | --- | --- |
@@ -47,19 +47,19 @@
 | [E2E-GRADE-030](../catalog/grade-06.md#e2e-grade-030) | Aprobado localmente (F5) | [grades.spec.ts](../../../e2e/specs/grades.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
 | [E2E-GRADE-031](../catalog/grade-07.md#e2e-grade-031) | Aprobado localmente (F5) | [grades.spec.ts](../../../e2e/specs/grades.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
 | [E2E-GRADE-032](../catalog/grade-07.md#e2e-grade-032) | Aprobado localmente (F5) | [grades.spec.ts](../../../e2e/specs/grades.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
-| [E2E-NETWORK-001](../catalog/network-01.md#e2e-network-001) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-NETWORK-002](../catalog/network-01.md#e2e-network-002) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-NETWORK-003](../catalog/network-01.md#e2e-network-003) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-NETWORK-004](../catalog/network-01.md#e2e-network-004) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-NETWORK-005](../catalog/network-01.md#e2e-network-005) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-NETWORK-006](../catalog/network-02.md#e2e-network-006) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-NETWORK-007](../catalog/network-02.md#e2e-network-007) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-NETWORK-008](../catalog/network-02.md#e2e-network-008) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-NETWORK-009](../catalog/network-02.md#e2e-network-009) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-NETWORK-010](../catalog/network-02.md#e2e-network-010) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-NETWORK-011](../catalog/network-03.md#e2e-network-011) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-NETWORK-012](../catalog/network-03.md#e2e-network-012) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-NETWORK-013](../catalog/network-03.md#e2e-network-013) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
+| [E2E-NETWORK-001](../catalog/network-01.md#e2e-network-001) | Aprobado localmente (F6) | [network.spec.ts](../../../e2e/specs/network.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-NETWORK-002](../catalog/network-01.md#e2e-network-002) | Aprobado localmente (F6) | [network.spec.ts](../../../e2e/specs/network.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-NETWORK-003](../catalog/network-01.md#e2e-network-003) | Aprobado localmente (F6) | [network.spec.ts](../../../e2e/specs/network.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-NETWORK-004](../catalog/network-01.md#e2e-network-004) | Aprobado localmente (F6) | [network.spec.ts](../../../e2e/specs/network.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-NETWORK-005](../catalog/network-01.md#e2e-network-005) | Aprobado localmente (F6) | [network.spec.ts](../../../e2e/specs/network.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-NETWORK-006](../catalog/network-02.md#e2e-network-006) | Aprobado localmente (F6) | [network.spec.ts](../../../e2e/specs/network.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-NETWORK-007](../catalog/network-02.md#e2e-network-007) | Aprobado localmente (F6) | [network.spec.ts](../../../e2e/specs/network.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-NETWORK-008](../catalog/network-02.md#e2e-network-008) | Aprobado localmente (F6) | [network.spec.ts](../../../e2e/specs/network.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-NETWORK-009](../catalog/network-02.md#e2e-network-009) | Aprobado localmente (F6) | [network.spec.ts](../../../e2e/specs/network.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-NETWORK-010](../catalog/network-02.md#e2e-network-010) | Aprobado localmente (F6) | [network.spec.ts](../../../e2e/specs/network.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-NETWORK-011](../catalog/network-03.md#e2e-network-011) | Aprobado localmente (F6) | [network.spec.ts](../../../e2e/specs/network.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-NETWORK-012](../catalog/network-03.md#e2e-network-012) | Aprobado localmente (F6) | [network.spec.ts](../../../e2e/specs/network.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-NETWORK-013](../catalog/network-03.md#e2e-network-013) | Aprobado localmente (F6) | [network.spec.ts](../../../e2e/specs/network.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
 | [E2E-OPS-001](../catalog/ops-01.md#e2e-ops-001) | Aprobado localmente | [ops.spec.ts](../../../e2e/specs/ops.spec.ts); todas las variantes requeridas, run d014cf0385019d99. |
 | [E2E-OPS-002](../catalog/ops-01.md#e2e-ops-002) | Aprobado localmente | [ops.spec.ts](../../../e2e/specs/ops.spec.ts); todas las variantes requeridas, run d014cf0385019d99. |
 | [E2E-OPS-003](../catalog/ops-01.md#e2e-ops-003) | Aprobado localmente | [ops.spec.ts](../../../e2e/specs/ops.spec.ts); todas las variantes requeridas, run d014cf0385019d99. |

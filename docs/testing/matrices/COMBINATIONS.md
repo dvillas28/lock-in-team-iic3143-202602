@@ -54,6 +54,9 @@ No se afirma que la siguiente muestra sea una covering-array completa: es el con
 |AUDIT-003 |UC/ownerstudent |Activa/C1/S1 |GETauditgradefiltrado |Normal/Firefox/375/dark |
 |NETWORK-008 |UC/ST1→ST2 |Cambioactor |GET401viejo |Delayed401/WebKit/1440/light |
 
+Evidencia ejecutada y correspondencia de esta muestra:[ledger F6](../execution/F6_COMBINATIONS.md).
+Incluye40/40 pares visuales priorizados; distingue la evidencia histórica que no se repitió.
+
 ## Exclusiones justificadas
 
 - Coordinador, roladmin Enrollment, superadminglobal, DELETE y binarios: no existen en MVP.

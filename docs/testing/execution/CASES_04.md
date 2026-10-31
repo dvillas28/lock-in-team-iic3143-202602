@@ -1,6 +1,6 @@
 # Estado por caso · 04
 
-[Evidencia y límites](IMPLEMENTATION_STATUS.md). Corte: 2026-10-31; F1–F5 aceptadas por incrementos;227 fichas históricas, sin nueva regresión global.
+[Evidencia y límites](IMPLEMENTATION_STATUS.md). Corte: 2026-10-31; F1–F6 aceptadas por incrementos;248 fichas históricas, sin nueva regresión global.
 
 | Caso / ficha reproducible | Estado real | Archivo / bloqueo |
 | --- | --- | --- |

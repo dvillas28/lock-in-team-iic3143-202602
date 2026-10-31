@@ -1,17 +1,17 @@
 # Estado por caso · 01
 
-[Evidencia y límites](IMPLEMENTATION_STATUS.md). Corte: 2026-10-31; F1–F5 aceptadas por incrementos;227 fichas históricas, sin nueva regresión global.
+[Evidencia y límites](IMPLEMENTATION_STATUS.md). Corte: 2026-10-31; F1–F6 aceptadas por incrementos;248 fichas históricas, sin nueva regresión global.
 
 | Caso / ficha reproducible | Estado real | Archivo / bloqueo |
 | --- | --- | --- |
-| [E2E-A11Y-001](../catalog/a11y-01.md#e2e-a11y-001) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-A11Y-002](../catalog/a11y-01.md#e2e-a11y-002) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-A11Y-003](../catalog/a11y-01.md#e2e-a11y-003) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-A11Y-004](../catalog/a11y-01.md#e2e-a11y-004) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-A11Y-005](../catalog/a11y-01.md#e2e-a11y-005) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-A11Y-006](../catalog/a11y-02.md#e2e-a11y-006) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-A11Y-007](../catalog/a11y-02.md#e2e-a11y-007) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
-| [E2E-A11Y-008](../catalog/a11y-02.md#e2e-a11y-008) | Pendiente de implementación | Pendiente en F6; no existe test de esta ficha. |
+| [E2E-A11Y-001](../catalog/a11y-01.md#e2e-a11y-001) | Aprobado localmente (F6) | [accessibility.spec.ts](../../../e2e/specs/accessibility.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-A11Y-002](../catalog/a11y-01.md#e2e-a11y-002) | Aprobado localmente (F6) | [accessibility.spec.ts](../../../e2e/specs/accessibility.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-A11Y-003](../catalog/a11y-01.md#e2e-a11y-003) | Aprobado localmente (F6) | [accessibility.spec.ts](../../../e2e/specs/accessibility.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-A11Y-004](../catalog/a11y-01.md#e2e-a11y-004) | Aprobado localmente (F6) | [accessibility.spec.ts](../../../e2e/specs/accessibility.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-A11Y-005](../catalog/a11y-01.md#e2e-a11y-005) | Aprobado localmente (F6) | [accessibility.spec.ts](../../../e2e/specs/accessibility.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-A11Y-006](../catalog/a11y-02.md#e2e-a11y-006) | Aprobado localmente (F6) | [accessibility.spec.ts](../../../e2e/specs/accessibility.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-A11Y-007](../catalog/a11y-02.md#e2e-a11y-007) | Aprobado localmente (F6) | [accessibility.spec.ts](../../../e2e/specs/accessibility.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
+| [E2E-A11Y-008](../catalog/a11y-02.md#e2e-a11y-008) | Aprobado localmente (F6) | [accessibility.spec.ts](../../../e2e/specs/accessibility.spec.ts); variantes/motores acreditados por incrementos en [F6_VALIDATION](F6_VALIDATION.md). |
 | [E2E-ADMIN-001](../catalog/admin-01.md#e2e-admin-001) | Aprobado localmente | [admin.security.spec.ts](../../../e2e/specs/admin.security.spec.ts); todas las variantes requeridas, run d014cf0385019d99. |
 | [E2E-ADMIN-002](../catalog/admin-01.md#e2e-admin-002) | Aprobado localmente | [admin.security.spec.ts](../../../e2e/specs/admin.security.spec.ts); todas las variantes requeridas, run d014cf0385019d99. |
 | [E2E-ADMIN-003](../catalog/admin-01.md#e2e-admin-003) | Aprobado localmente | [admin.security.spec.ts](../../../e2e/specs/admin.security.spec.ts); todas las variantes requeridas, run d014cf0385019d99. |

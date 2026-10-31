@@ -2,7 +2,7 @@
 
 Documento vivo: actualizar al aceptar cada fase. Al terminar F7, consolidar estos comandos,
 requisitos y evidencias en E2E_README.md; conservar aquí el historial de resultados.
-Estado normativo por fase: IMPLEMENTATION_STATUS.md y F1_VALIDATION.md/F2_VALIDATION.md/F3_VALIDATION.md/F4_VALIDATION.md/F5_VALIDATION.md.
+Estado normativo por fase: IMPLEMENTATION_STATUS.md y F1_VALIDATION.md/F2_VALIDATION.md/F3_VALIDATION.md/F4_VALIDATION.md/F5_VALIDATION.md/F6_VALIDATION.md.
 
 ## Preparación en otro equipo
 
@@ -26,16 +26,16 @@ se aplican los permisos del usuario. El runner detecta automáticamente la cach�
 | Necesidad | Comando desde raíz |
 | --- | --- |
 | Todas las pruebas implementadas y motores configurados | `pnpm test:e2e:all` |
-| Una fase | `pnpm test:e2e:f1`, `pnpm test:e2e:f2`, `pnpm test:e2e:f3`, `pnpm test:e2e:f4` o `pnpm test:e2e:f5` |
+| Una fase | `pnpm test:e2e:f1`, `pnpm test:e2e:f2`, `pnpm test:e2e:f3`, `pnpm test:e2e:f4`, `pnpm test:e2e:f5` o `pnpm test:e2e:f6` |
 | Todas las implementadas en Chromium visible | `pnpm test:e2e:visual` |
-| Una fase con navegador visible | `pnpm test:e2e:f5 --headed` |
+| Una fase con navegador visible | `pnpm test:e2e:f6 --headed` |
 | Pausar y avanzar con el inspector | `pnpm test:e2e:step content.spec.ts --grep E2E-CONTENT-008` |
 | Un caso concreto | `pnpm test:e2e:f4 --grep E2E-CONTENT-008` |
 
 La ejecución normal es headless. La alternativa visual no cambia las aserciones.
 El inspector ofrece controles de pausa/avance; requiere interacción humana para continuar.
-El comando all incluye444 instancias configuradas de F1–F5; no fue ejecutado tras F5.
-Evidencia histórica:227/248 fichas; F5 se validó sola, repitiendo únicamente sus fallidas.
+El comando all incluye512 instancias configuradas de F1–F6; no fue ejecutado tras F6.
+Evidencia histórica:248/248 fichas; F5/F6 se validaron por incrementos, repitiendo solo fallidas.
 No ejecutar dos runners a la vez en el mismo checkout: comparten los puertos/builds locales.
 En macOS,opcionalmente:`caffeinate -i pnpm test:e2e:all` evita suspensión por inactividad durante el comando.
 
@@ -48,7 +48,8 @@ En macOS,opcionalmente:`caffeinate -i pnpm test:e2e:all` evita suspensión por i
 | F3 | `pnpm test:e2e:f3` | Aceptada:89 Chromium;129 con smoke Firefox/WebKit |
 | F4 | `pnpm test:e2e:f4` | Aceptada:92 Chromium;126 con smoke Firefox/WebKit |
 | F5 | `pnpm test:e2e:f5` | Aceptada por incrementos:103 Chromium;115 con smoke Firefox/WebKit |
-| F6–F7 | Pendiente | Añadir comandos/evidencias cuando se implementen |
+| F6 | `pnpm test:e2e:f6` | Aceptada por incrementos:41 Chromium;68 con Firefox/WebKit |
+| F7 | Pendiente | Automatización,estabilidad y consolidación |
 
 ```bash
 pnpm test:e2e:f2 --project=chromium --project=firefox --project=webkit
@@ -63,7 +64,7 @@ pnpm --dir e2e report
 
 Los filtros y comandos no crean tests faltantes. Una ficha solo aprueba sus variantes/proyectos
 obligatorios; una ejecución filtrada no acredita las fichas restantes.
-F5 terminó; detenerse para revisión del usuario antes de F6. No hacer push/merge automático.
+F6 terminó; detenerse para revisión del usuario antes de F7. No hacer push/merge automático.
 
 ## Demostración visual y evidencia para evaluación
 
@@ -110,3 +111,17 @@ Solo se ejecutaron los cuatro archivos nuevos:quizzes,attempts,grades,academic-a
 Run2e26783d10b0fd6b:114 PASS/1 FAIL; correctivo31cd7b0254fc4196:solo ATTEMPT-009,1 PASS.
 No hubo un único run115 PASS ni regresión completa de fases antiguas. Ver F5_VALIDATION.md.
 Para ahorrar ejecución al depurar:`pnpm test:e2e:f5 --grep E2E-ATTEMPT-009`.
+
+## F6: ejecución acotada y demostración
+
+```bash
+pnpm test:e2e:f6 --project=chromium --project=firefox --project=webkit
+pnpm test:e2e:f6 --headed --grep E2E-A11Y-004
+pnpm test:e2e:f6 --debug --grep E2E-A11Y-002
+pnpm test:e2e:f6 --grep E2E-NETWORK-003
+pnpm --dir e2e exec playwright show-report reports/600966c85750d479/html
+```
+
+F6_VALIDATION.md conserva siete runs:68 variantes/motores aprobados; no hubo un único run68 PASS.
+No se repitieron F1–F5. Reportes locales ignorados por Git; otro equipo debe copiarlos o recrearlos
+con los comandos de la rama permanente. La guía se consolidará al cerrar F7.

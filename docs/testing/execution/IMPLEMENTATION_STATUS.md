@@ -1,40 +1,40 @@
 # Implementación E2E: estado verificable
 
-Corte: **2026-10-31**. **F1–F5 aceptadas localmente; suite del catálogo incompleta.**
-[F5](F5_VALIDATION.md) · [F4](F4_VALIDATION.md) · [F3](F3_VALIDATION.md) · [F2](F2_VALIDATION.md) · [F1](F1_VALIDATION.md).
+Corte:**2026-10-31**. **F1–F6 aceptadas localmente por incrementos; F7 pendiente.**
+**248/248 fichas implementadas y aceptadas históricamente**, sin afirmar regresión global actual.
+[F6](F6_VALIDATION.md) · [F5](F5_VALIDATION.md) · [F4](F4_VALIDATION.md) · [F3](F3_VALIDATION.md).
 
 ## Conservación y entorno
 
-- Checkout permanente: `/Users/julian/lock-in-team-iic3143-202602`, rama `test/e2e-f5`.
-- F5: commits7c69020/aef4bbf/1e57418; correctivo del harness3c709a3. Historia anterior conservada.
+- Checkout permanente:`/Users/julian/lock-in-team-iic3143-202602`, rama `test/e2e-f6`.
+- Código final F6:`a1384ea`; commits77e3b56/efb5e26/c687c8b/96f704c/a1384ea, historia anterior conservada.
 - `dev`:90463059015e5045d011eadd12b6403b7b492615; `main`:294eb5b4642479772a921ce56ce860c2f329abb6.
-- Sin push, merge, despliegue ni producción; la ejecución no necesita la copia temporal inicial.
-- ENV-01/02 resueltos: PostgreSQL17 y navegadores locales autorizados.
-- Next/Nest/migraciones reales, DB por variante/retry, runtime con RLS y cleanup con ownership.
-- F5 agrega pruebas y documentación; no cambia el producto ni añade dependencias/APIs públicas.
+- Sin push, merge, despliegue ni producción; no depende de la copia temporal inicial.
+- PostgreSQL17, Next/Nest y migraciones reales; DB por variante/retry, runtime con RLS y cleanup owned.
+- F6 agrega pruebas, configuración de motores y anotaciones de tiempos; no modifica el producto.
 
-## Evidencia vigente por incremento
+## Evidencia por incremento
 
-| Alcance | Run / SHA | Resultado |
+| Alcance | Evidencia | Resultado |
 | --- | --- | --- |
 | F1–F4 histórico, no repetido | d014cf0385019d99 / 6db9541 | 329 PASS;139 fichas |
-| F5 completa | 2e26783d10b0fd6b / 1e57418 | 114 PASS/1 FAIL de transporte del harness |
-| Corrección solo ATTEMPT-009 | 31cd7b0254fc4196 / 3c709a3 | 1 PASS; otros114 tests sin cambios |
+| F5 | 2e26783d10b0fd6b +31cd7b0254fc4196 | 88 fichas/115 variantes aceptadas por corrección dirigida |
+| F6 | Siete runs listados en F6_VALIDATION | 21 fichas/68 variantes aceptadas;41 Chromium/13 Firefox/14 WebKit |
 
-Ambos runs finales F5: checkout limpio al inicio/final, seed `academix-e2e-v1`, cleanup confirmado.
-Aceptación F5:88 fichas y115 variantes/motores, por las dos evidencias explícitas; no un run único115 PASS.
-Incluye cinco fichas smoke nuevas en Chromium/Firefox/WebKit y el ciclo completo en UC/UTFSM.
-**227/248 fichas aceptadas históricamente**:203 navegador y24 complementarias; **21 pendientes**.
-Esto no acredita una regresión completa F1–F5 después del cambio. Se respetó la petición de ejecutar
-solo pruebas nuevas y repetir únicamente las fallidas; no se relajaron aserciones ni reintentos.
-El reporte automático refleja el último run; el ledger humano conserva las distintas evidencias.
+F6:74 ejecuciones,68 PASS distintos y6 fallos del harness corregidos; ningún skip/retry local.
+Cada run F6 empezó y terminó limpio. Los siete stacks propios se eliminaron; puertos locales cerrados.
+F1–F5 y las variantes aprobadas no se repitieron, conforme a la instrucción de ahorrar ejecución.
+El catálogo contiene222 fichas de navegador y26 complementarias; no confundir con512 instancias configuradas.
+No hubo un único run68 PASS de F6 ni regresión completa F1–F6 tras estos cambios.
+El ledger automático del último run sigue siendo parcial por selección; el ledger histórico cita cada evidencia.
+Los cruces obligatorios y40/40 pares visuales priorizados están trazados en[F6_COMBINATIONS](F6_COMBINATIONS.md).
 
 ## Continuidad
 
-- **Detenerse antes de F6 para revisión del usuario. F6 no iniciada.**
-- Retomar desde `test/e2e-f5`; crear `test/e2e-f6` solo con nueva autorización.
+- **F6 terminada; detenerse antes de F7 para revisión del usuario. F7 no iniciada.**
+- Retomar desde `test/e2e-f6`; crear `test/e2e-f7` solo con nueva autorización.
 - [Guía incremental](E2E_EXECUTION_JOURNAL.md): todas, por fase, navegador visible e inspector.
-- Pendientes: F6 NETWORK/A11Y; F7 automatización, validación remota y veinte ejecuciones elegibles.
-- Q02/NUL y CONTENT-016 mantienen los fixes funcionales separados y la evidencia histórica de F4.
-- CI remoto y protección de ramas no acreditados; no hay permiso de push/merge.
-- La suite no se declara completa; los fallos diagnósticos permanecen en los reportes de cada fase.
+- Pendientes F7:automatización/estabilidad, consolidación del manual y veinte ejecuciones elegibles.
+- CI remoto y protección de ramas no acreditados; push/merge continúan sin autorización.
+- No declarar la suite completamente estabilizada por tener las248 fichas implementadas.
+- Las limitaciones WCAG, combinatorias y de evidencia histórica permanecen explícitas.
