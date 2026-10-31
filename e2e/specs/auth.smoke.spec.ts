@@ -1,7 +1,8 @@
 import {test, expect} from '../fixtures/test.ts';
 import {course} from '../helpers/browser.ts';
+import {caseVariants} from '../data/case-variants.ts';
 
-for (const actor of ['SA','AO','T1','AS1','ST1']) {
+for (const actor of caseVariants['E2E-AUTH-001']) {
 test(`E2E-AUTH-001 login real / ${actor} @smoke`, async ({e, actorPage}) => {
   const page = await actorPage(actor);
   await expect(page.getByRole('heading',{name:'Mis cursos',exact:true})).toBeVisible();

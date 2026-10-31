@@ -1,6 +1,8 @@
 import {readdir, readFile, mkdir, writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {root, work, reportDirectory} from './settings.ts';
+import {caseVariants} from '../data/case-variants.ts';
+import {caseResult, type Observation} from './case-result.ts';
 
 const directory=resolve(root,'docs/testing/catalog');
 const catalogue = new Map<string,{name:string;module:string;level:string;file:string}>();
@@ -21,7 +23,7 @@ for (const file of (await readdir(resolve(work,'specs'))).filter(f=>f.endsWith('
     definitions.set(match[0],[...new Set([...(definitions.get(match[0])??[]),file])]);
   }
 }
-const observed = new Map<string,string[]>();
+const observed = new Map<string,Observation[]>();
 let reports=reportDirectory();
 try {
   const latest=JSON.parse(await readFile(resolve(work,'reports/latest.json'),'utf8'));
@@ -33,7 +35,8 @@ try {
       for(const test of spec.tests??[]) {
         // Collection (--list) and skipped tests are not executions or passes.
         const ran=(test.results??[]).some((r:any)=>['passed','failed','timedOut','interrupted'].includes(r.status));
-        if(ran)observed.set(id,[...(observed.get(id)??[]),test.status]);
+        const variant=spec.title.match(/ \/ (.+?) @/)?.[1]??'default';
+        observed.set(id,[...(observed.get(id)??[]),{variant,project:test.projectName??'unknown',ran,status:test.status}]);
       }
     }
     for(const child of suite.suites??[])walk(child);
@@ -41,7 +44,7 @@ try {
   for(const suite of report.suites??[])walk(suite);
 }catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
 const rows=[...catalogue].map(([id,item])=>({id,...item,files:definitions.get(id)??[],results:observed.get(id)??[],
-  state:observed.has(id)?observed.get(id)!.every(v=>v==='expected')?'executed-passed':'executed-failed':definitions.has(id)?'implemented-environment-blocked':'pending-implementation'}));
+  state:definitions.has(id)?caseResult(caseVariants[id],observed.get(id)??[]).state:'pending-implementation'}));
 await mkdir(reports,{recursive:true});
-await writeFile(resolve(reports,'coverage.json'),JSON.stringify({catalogue:rows.length,defined:definitions.size,executed:observed.size,rows},null,2));
-console.log(JSON.stringify({catalogue:rows.length,defined:definitions.size,executed:observed.size,passed:rows.filter(r=>r.state==='executed-passed').length,pending:rows.filter(r=>r.state==='pending-implementation').length}));
+await writeFile(resolve(reports,'coverage.json'),JSON.stringify({catalogue:rows.length,defined:definitions.size,executed:[...observed.values()].filter(items=>items.some(i=>i.ran)).length,rows},null,2));
+console.log(JSON.stringify({catalogue:rows.length,defined:definitions.size,executed:[...observed.values()].filter(items=>items.some(i=>i.ran)).length,passed:rows.filter(r=>r.state==='executed-passed').length,pending:rows.filter(r=>r.state==='pending-implementation').length}));
