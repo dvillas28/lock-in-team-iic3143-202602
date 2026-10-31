@@ -18,7 +18,8 @@
     "coverage": "tsx runner/coverage.ts",
     "test:f1": "tsx runner/run.ts ops.spec.ts auth.smoke.spec.ts",
     "test:f2": "tsx runner/run.ts auth.entry.spec.ts auth.smoke.spec.ts public.spec.ts catalog.spec.ts",
-    "test:f3": "tsx runner/run.ts auth.security.spec.ts tenant.security.spec.ts rbac.security.spec.ts admin.security.spec.ts audit.security.spec.ts"
+    "test:f3": "tsx runner/run.ts auth.security.spec.ts tenant.security.spec.ts rbac.security.spec.ts admin.security.spec.ts audit.security.spec.ts",
+    "test:f4": "tsx runner/run.ts courses.spec.ts sections.spec.ts enrollments.spec.ts content.spec.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",

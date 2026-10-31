@@ -76,11 +76,11 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 2. Consultar listado/SQL.
 3. Registrar respuesta sin datos sensibles.
 
-- Interfaz esperada: N/A navegador; verificación de estado API/SQL: No éxito ni texto truncado; código queda por aclarar Q02.
-- API esperada: Bloqueado: definir 400/422 normativo; no fijar error 500 como esperado.
+- Interfaz esperada: N/A navegador; verificación de estado API/SQL: No éxito ni texto truncado; HTTP400 acordado para Q02.
+- API esperada: HTTP400 para metadatos con NUL; nunca fijar500 como esperado.
 - Persistencia / consistencia: Sin fila parcial ni eventos.
 - Denegación: Entrada inválida no llega a estado persistido.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
 - Dependencias: F1 entorno/seed listo; [fase F4](../roadmap/F4.md); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: Complemento HTTP de integración; sin navegador; extended (regression incluye smoke; extended incluye regression).
-- Estado del test: Propuesto / aclaración Q02; sin implementar.
+- Estado del test: Implementado,reproducción fallida en1c94e7e20619fc8b (500); corrección separada pendiente.

@@ -1,11 +1,11 @@
 # Implementación E2E: estado verificable
 
-Corte local **2026-10-31**. **F1, F2 y F3 aceptadas localmente; suite del catálogo incompleta.**
+Corte local **2026-10-31**. **F1, F2 y F3 aceptadas localmente; F4 en implementación; suite del catálogo incompleta.**
 [Validación F3](F3_VALIDATION.md) · [F2](F2_VALIDATION.md) · [F1](F1_VALIDATION.md) · [Cobertura](COVERAGE.md).
 
 ## Conservación y entorno
 
-- Checkout permanente:`/Users/julian/lock-in-team-iic3143-202602`, rama `test/e2e-f3`.
+- Checkout permanente:`/Users/julian/lock-in-team-iic3143-202602`, rama `test/e2e-f4`.
 - Commits anteriores conservados; código validado `4d0da34409031ce0ffdab2d7b8deb66996fe0bc8`.
 - `dev` conserva90463059015e5045d011eadd12b6403b7b492615; `main` conserva294eb5b4642479772a921ce56ce860c2f329abb6.
 - Sin push, merge, despliegue ni producción; no se requieren archivos de la copia temporal inicial.
@@ -25,7 +25,7 @@ No se modificó producto ni se agregaron endpoints; no se conocen fronteras crí
 
 ## Continuidad y pendiente
 
-- **F4 autorizada como siguiente fase**,desde este estado validado.
+- **F4 en implementación**,desde F3 validada; ver[F4_PROGRESS](F4_PROGRESS.md).
 - Retomar desde `test/e2e-f3`, crear `test/e2e-f4` y seguir[roadmap F4](../roadmap/F4.md).
 - [Guía incremental de ejecución](E2E_EXECUTION_JOURNAL.md):comandos por fase,todas,visible e inspector.
 - F4 cursos/contenido; F5 ciclo académico y22 smoke; F6 errores/accesibilidad/compatibilidad; F7 CI/estabilidad.
