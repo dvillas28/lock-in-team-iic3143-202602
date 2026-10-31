@@ -1,6 +1,6 @@
 # Estado por caso · 04
 
-[Evidencia y límites](IMPLEMENTATION_STATUS.md). Corte: 2026-10-31; F1–F4 aceptadas localmente;139 fichas aprobadas.
+[Evidencia y límites](IMPLEMENTATION_STATUS.md). Corte: 2026-10-31; F1–F5 aceptadas por incrementos;227 fichas históricas, sin nueva regresión global.
 
 | Caso / ficha reproducible | Estado real | Archivo / bloqueo |
 | --- | --- | --- |
@@ -14,24 +14,24 @@
 | [E2E-PUBLIC-005](../catalog/public-01.md#e2e-public-005) | Aprobado localmente | [public.spec.ts](../../../e2e/specs/public.spec.ts); todas las variantes requeridas, run d014cf0385019d99. |
 | [E2E-PUBLIC-006](../catalog/public-02.md#e2e-public-006) | Aprobado localmente | [public.spec.ts](../../../e2e/specs/public.spec.ts); todas las variantes requeridas, run d014cf0385019d99. |
 | [E2E-PUBLIC-007](../catalog/public-02.md#e2e-public-007) | Aprobado localmente | [public.spec.ts](../../../e2e/specs/public.spec.ts); todas las variantes requeridas, run d014cf0385019d99. |
-| [E2E-QUIZ-001](../catalog/quiz-01.md#e2e-quiz-001) | Pendiente de implementación | Pendiente en F5–F6; no existe test de esta ficha. |
-| [E2E-QUIZ-002](../catalog/quiz-01.md#e2e-quiz-002) | Pendiente de implementación | Pendiente en F5–F6; no existe test de esta ficha. |
-| [E2E-QUIZ-003](../catalog/quiz-01.md#e2e-quiz-003) | Pendiente de implementación | Pendiente en F5–F6; no existe test de esta ficha. |
-| [E2E-QUIZ-004](../catalog/quiz-01.md#e2e-quiz-004) | Pendiente de implementación | Pendiente en F5–F6; no existe test de esta ficha. |
-| [E2E-QUIZ-005](../catalog/quiz-01.md#e2e-quiz-005) | Pendiente de implementación | Pendiente en F5–F6; no existe test de esta ficha. |
-| [E2E-QUIZ-006](../catalog/quiz-02.md#e2e-quiz-006) | Pendiente de implementación | Pendiente en F5–F6; no existe test de esta ficha. |
-| [E2E-QUIZ-007](../catalog/quiz-02.md#e2e-quiz-007) | Pendiente de implementación | Pendiente en F5–F6; no existe test de esta ficha. |
-| [E2E-QUIZ-008](../catalog/quiz-02.md#e2e-quiz-008) | Pendiente de implementación | Pendiente en F5–F6; no existe test de esta ficha. |
-| [E2E-QUIZ-009](../catalog/quiz-02.md#e2e-quiz-009) | Pendiente de implementación | Pendiente en F5–F6; no existe test de esta ficha. |
-| [E2E-QUIZ-010](../catalog/quiz-02.md#e2e-quiz-010) | Pendiente de implementación | Pendiente en F5–F6; no existe test de esta ficha. |
-| [E2E-QUIZ-011](../catalog/quiz-03.md#e2e-quiz-011) | Pendiente de implementación | Pendiente en F5–F6; no existe test de esta ficha. |
-| [E2E-QUIZ-012](../catalog/quiz-03.md#e2e-quiz-012) | Pendiente de implementación | Pendiente en F5–F6; no existe test de esta ficha. |
-| [E2E-QUIZ-013](../catalog/quiz-03.md#e2e-quiz-013) | Pendiente de implementación | Pendiente en F5–F6; no existe test de esta ficha. |
-| [E2E-QUIZ-014](../catalog/quiz-03.md#e2e-quiz-014) | Pendiente de implementación | Pendiente en F5–F6; no existe test de esta ficha. |
-| [E2E-QUIZ-015](../catalog/quiz-03.md#e2e-quiz-015) | Pendiente de implementación | Pendiente en F5–F6; no existe test de esta ficha. |
-| [E2E-QUIZ-016](../catalog/quiz-04.md#e2e-quiz-016) | Pendiente de implementación | Pendiente en F5–F6; no existe test de esta ficha. |
-| [E2E-QUIZ-017](../catalog/quiz-04.md#e2e-quiz-017) | Pendiente de implementación | Pendiente en F5–F6; no existe test de esta ficha. |
-| [E2E-QUIZ-018](../catalog/quiz-04.md#e2e-quiz-018) | Pendiente de implementación | Pendiente en F5–F6; no existe test de esta ficha. |
+| [E2E-QUIZ-001](../catalog/quiz-01.md#e2e-quiz-001) | Aprobado localmente (F5) | [quizzes.spec.ts](../../../e2e/specs/quizzes.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
+| [E2E-QUIZ-002](../catalog/quiz-01.md#e2e-quiz-002) | Aprobado localmente (F5) | [quizzes.spec.ts](../../../e2e/specs/quizzes.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
+| [E2E-QUIZ-003](../catalog/quiz-01.md#e2e-quiz-003) | Aprobado localmente (F5) | [quizzes.spec.ts](../../../e2e/specs/quizzes.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
+| [E2E-QUIZ-004](../catalog/quiz-01.md#e2e-quiz-004) | Aprobado localmente (F5) | [quizzes.spec.ts](../../../e2e/specs/quizzes.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
+| [E2E-QUIZ-005](../catalog/quiz-01.md#e2e-quiz-005) | Aprobado localmente (F5) | [quizzes.spec.ts](../../../e2e/specs/quizzes.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
+| [E2E-QUIZ-006](../catalog/quiz-02.md#e2e-quiz-006) | Aprobado localmente (F5) | [quizzes.spec.ts](../../../e2e/specs/quizzes.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
+| [E2E-QUIZ-007](../catalog/quiz-02.md#e2e-quiz-007) | Aprobado localmente (F5) | [quizzes.spec.ts](../../../e2e/specs/quizzes.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
+| [E2E-QUIZ-008](../catalog/quiz-02.md#e2e-quiz-008) | Aprobado localmente (F5) | [quizzes.spec.ts](../../../e2e/specs/quizzes.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
+| [E2E-QUIZ-009](../catalog/quiz-02.md#e2e-quiz-009) | Aprobado localmente (F5) | [quizzes.spec.ts](../../../e2e/specs/quizzes.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
+| [E2E-QUIZ-010](../catalog/quiz-02.md#e2e-quiz-010) | Aprobado localmente (F5) | [quizzes.spec.ts](../../../e2e/specs/quizzes.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
+| [E2E-QUIZ-011](../catalog/quiz-03.md#e2e-quiz-011) | Aprobado localmente (F5) | [quizzes.spec.ts](../../../e2e/specs/quizzes.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
+| [E2E-QUIZ-012](../catalog/quiz-03.md#e2e-quiz-012) | Aprobado localmente (F5) | [quizzes.spec.ts](../../../e2e/specs/quizzes.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
+| [E2E-QUIZ-013](../catalog/quiz-03.md#e2e-quiz-013) | Aprobado localmente (F5) | [quizzes.spec.ts](../../../e2e/specs/quizzes.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
+| [E2E-QUIZ-014](../catalog/quiz-03.md#e2e-quiz-014) | Aprobado localmente (F5) | [quizzes.spec.ts](../../../e2e/specs/quizzes.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
+| [E2E-QUIZ-015](../catalog/quiz-03.md#e2e-quiz-015) | Aprobado localmente (F5) | [quizzes.spec.ts](../../../e2e/specs/quizzes.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
+| [E2E-QUIZ-016](../catalog/quiz-04.md#e2e-quiz-016) | Aprobado localmente (F5) | [quizzes.spec.ts](../../../e2e/specs/quizzes.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
+| [E2E-QUIZ-017](../catalog/quiz-04.md#e2e-quiz-017) | Aprobado localmente (F5) | [quizzes.spec.ts](../../../e2e/specs/quizzes.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
+| [E2E-QUIZ-018](../catalog/quiz-04.md#e2e-quiz-018) | Aprobado localmente (F5) | [quizzes.spec.ts](../../../e2e/specs/quizzes.spec.ts); variantes requeridas, run 2e26783d10b0fd6b, SHA1e57418; ver F5_VALIDATION. |
 | [E2E-RBAC-001](../catalog/rbac-01.md#e2e-rbac-001) | Aprobado localmente | [rbac.security.spec.ts](../../../e2e/specs/rbac.security.spec.ts); todas las variantes requeridas, run d014cf0385019d99. |
 | [E2E-RBAC-002](../catalog/rbac-01.md#e2e-rbac-002) | Aprobado localmente | [rbac.security.spec.ts](../../../e2e/specs/rbac.security.spec.ts); todas las variantes requeridas, run d014cf0385019d99. |
 | [E2E-RBAC-003](../catalog/rbac-01.md#e2e-rbac-003) | Aprobado localmente | [rbac.security.spec.ts](../../../e2e/specs/rbac.security.spec.ts); todas las variantes requeridas, run d014cf0385019d99. |

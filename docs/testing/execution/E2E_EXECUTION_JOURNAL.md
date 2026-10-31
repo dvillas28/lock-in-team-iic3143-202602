@@ -2,7 +2,7 @@
 
 Documento vivo: actualizar al aceptar cada fase. Al terminar F7, consolidar estos comandos,
 requisitos y evidencias en E2E_README.md; conservar aquí el historial de resultados.
-Estado normativo por fase: IMPLEMENTATION_STATUS.md y F1_VALIDATION.md/F2_VALIDATION.md/F3_VALIDATION.md/F4_VALIDATION.md.
+Estado normativo por fase: IMPLEMENTATION_STATUS.md y F1_VALIDATION.md/F2_VALIDATION.md/F3_VALIDATION.md/F4_VALIDATION.md/F5_VALIDATION.md.
 
 ## Preparación en otro equipo
 
@@ -26,15 +26,16 @@ se aplican los permisos del usuario. El runner detecta automáticamente la cach�
 | Necesidad | Comando desde raíz |
 | --- | --- |
 | Todas las pruebas implementadas y motores configurados | `pnpm test:e2e:all` |
-| Una fase | `pnpm test:e2e:f1`, `pnpm test:e2e:f2`, `pnpm test:e2e:f3` o `pnpm test:e2e:f4` |
+| Una fase | `pnpm test:e2e:f1`, `pnpm test:e2e:f2`, `pnpm test:e2e:f3`, `pnpm test:e2e:f4` o `pnpm test:e2e:f5` |
 | Todas las implementadas en Chromium visible | `pnpm test:e2e:visual` |
-| Una fase con navegador visible | `pnpm test:e2e:f4 --headed` |
+| Una fase con navegador visible | `pnpm test:e2e:f5 --headed` |
 | Pausar y avanzar con el inspector | `pnpm test:e2e:step content.spec.ts --grep E2E-CONTENT-008` |
 | Un caso concreto | `pnpm test:e2e:f4 --grep E2E-CONTENT-008` |
 
 La ejecución normal es headless. La alternativa visual no cambia las aserciones.
 El inspector ofrece controles de pausa/avance; requiere interacción humana para continuar.
-El comando all incluye F1–F4:329 instancias;139/248 fichas. No acredita las fases pendientes.
+El comando all incluye444 instancias configuradas de F1–F5; no fue ejecutado tras F5.
+Evidencia histórica:227/248 fichas; F5 se validó sola, repitiendo únicamente sus fallidas.
 No ejecutar dos runners a la vez en el mismo checkout: comparten los puertos/builds locales.
 En macOS,opcionalmente:`caffeinate -i pnpm test:e2e:all` evita suspensión por inactividad durante el comando.
 
@@ -46,12 +47,14 @@ En macOS,opcionalmente:`caffeinate -i pnpm test:e2e:all` evita suspensión por i
 | F2 | `pnpm test:e2e:f2` | Aceptada:47 Chromium;63 con smoke actual (61 al cierre histórico) |
 | F3 | `pnpm test:e2e:f3` | Aceptada:89 Chromium;129 con smoke Firefox/WebKit |
 | F4 | `pnpm test:e2e:f4` | Aceptada:92 Chromium;126 con smoke Firefox/WebKit |
-| F5–F7 | Pendiente | Añadir comandos/evidencias cuando se implementen |
+| F5 | `pnpm test:e2e:f5` | Aceptada por incrementos:103 Chromium;115 con smoke Firefox/WebKit |
+| F6–F7 | Pendiente | Añadir comandos/evidencias cuando se implementen |
 
 ```bash
 pnpm test:e2e:f2 --project=chromium --project=firefox --project=webkit
 pnpm test:e2e:f3 --project=chromium --project=firefox --project=webkit
 pnpm test:e2e:f4 --project=chromium --project=firefox --project=webkit
+pnpm test:e2e:f5 --project=chromium --project=firefox --project=webkit
 pnpm test:e2e:f3 --grep E2E-AUTH-017
 pnpm test:e2e --project=chromium --project=firefox --project=webkit
 pnpm --dir e2e coverage
@@ -60,13 +63,13 @@ pnpm --dir e2e report
 
 Los filtros y comandos no crean tests faltantes. Una ficha solo aprueba sus variantes/proyectos
 obligatorios; una ejecución filtrada no acredita las fichas restantes.
-F4 terminó; detenerse para revisión del usuario antes de F5. No hacer push/merge automático.
+F5 terminó; detenerse para revisión del usuario antes de F6. No hacer push/merge automático.
 
 ## Demostración visual y evidencia para evaluación
 
 ```bash
-pnpm test:e2e:f4 --headed --grep E2E-CONTENT-008
-pnpm test:e2e:f3 --headed --grep E2E-AUTH-011
+pnpm test:e2e:f5 --headed --grep E2E-GRADE-021
+pnpm test:e2e:f5 --debug --grep E2E-ATTEMPT-018
 pnpm --dir e2e report
 ```
 
@@ -100,3 +103,10 @@ un compañero no recibe commits locales automáticamente. No hacer push sin auto
 Tras cada fase: registrar SHA/runId, casos/variantes, comando reproducible, requisitos nuevos,
 fallos conocidos y limpieza. Al cierre F7: reconciliar scripts reales con E2E_README.md,
 eliminar instrucciones obsoletas de la guía principal y enlazar este historial como evidencia.
+
+## Validación acotada de F5
+
+Solo se ejecutaron los cuatro archivos nuevos:quizzes,attempts,grades,academic-audit.
+Run2e26783d10b0fd6b:114 PASS/1 FAIL; correctivo31cd7b0254fc4196:solo ATTEMPT-009,1 PASS.
+No hubo un único run115 PASS ni regresión completa de fases antiguas. Ver F5_VALIDATION.md.
+Para ahorrar ejecución al depurar:`pnpm test:e2e:f5 --grep E2E-ATTEMPT-009`.

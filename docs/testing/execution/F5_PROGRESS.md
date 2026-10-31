@@ -17,7 +17,7 @@ contra un oráculo entero independiente. No se añaden APIs públicas de pruebas
 - Correcciones de quizzes + intentos: `0a6bb3a4ec3a9763`:35 PASS/2 FAIL del harness.
 - Los cinco quizzes fallidos quedaron aprobados; los dos intentos se revisan con nombre del evento
   correcto y consulta explícita tras 204 (la aplicación no hace GET automático).
-- Notas y auditoría: implementación/validación en curso; no declarar F5 aceptada aún.
+- Notas y auditoría implementadas; aceptación final en [F5_VALIDATION](F5_VALIDATION.md).
 
 ## Comandos
 
@@ -34,3 +34,12 @@ El comando de fase selecciona únicamente los cuatro archivos nuevos de F5.
 `--headed` permite observar el recorrido real; `--debug` abre el inspector paso a paso.
 El reporte de cobertura automático refleja el último run, no suma artificialmente runs históricos.
 No push, merge, producción ni inicio de F6. Cerrar F5 con evidencia y detenerse para revisión.
+
+## Cierre
+
+F5 aceptada por evidencia incremental:88 fichas y115 variantes/motores.
+Run completo2e26783d10b0fd6b (SHA1e57418):114 PASS/1 FAIL del transporte manual de ATTEMPT-009.
+Correctivo3c709a3, únicamente ese test modificado; run31cd7b0254fc4196:1 PASS.
+No se repitieron los114 aprobados ni F1–F4. Ambos runs finales tuvieron checkout limpio.
+Los22 smoke están declarados; los cinco nuevos se ejecutaron en los tres motores.
+Detenerse antes de F6. No declarar regresión completa ni estabilidad F7.
