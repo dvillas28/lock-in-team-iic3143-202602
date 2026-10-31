@@ -3,7 +3,7 @@
 Evidencia común: [health.controller.ts](../../../backend/src/health/health.controller.ts); [runtime-check.ts](../../../backend/src/database/runtime-check.ts); [predeploy.ts](../../../backend/src/commands/predeploy.ts); [presentation-data.ts](../../../backend/src/seeds/presentation-data.ts).
 
 B: navegador; M: navegador con API/SQL; H: HTTP integración; O: operación/SQL.
-Todas las fichas están propuestas; no implementadas. Las variantes enumeradas se parametrizan sin reducir aserciones.
+Estado efectivo por ficha en[el ledger](../execution/IMPLEMENTATION_STATUS.md). Las variantes enumeradas se parametrizan sin reducir aserciones.
 
 | Caso y ficha | Flujo | Prioridad | Suite | Nivel |
 | --- | --- | --- | --- | --- |

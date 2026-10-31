@@ -3,7 +3,7 @@
 Evidencia común: [session.ts](../../../frontend/src/lib/auth/session.ts); [auth.service.ts](../../../backend/src/auth/auth.service.ts); [auth.guard.ts](../../../backend/src/auth/auth.guard.ts).
 
 B: navegador; M: navegador con API/SQL; H: HTTP integración; O: operación/SQL.
-Todas las fichas están propuestas; no implementadas. Las variantes enumeradas se parametrizan sin reducir aserciones.
+Estado efectivo por ficha en[el ledger](../execution/IMPLEMENTATION_STATUS.md). Las variantes enumeradas se parametrizan sin reducir aserciones.
 
 | Caso y ficha | Flujo | Prioridad | Suite | Nivel |
 | --- | --- | --- | --- | --- |

@@ -3,7 +3,7 @@
 Evidencia común: [sections.service.ts](../../../backend/src/sections/sections.service.ts); [sections-panel.tsx](../../../frontend/src/components/courses/sections-panel.tsx); [section-form.tsx](../../../frontend/src/components/courses/section-form.tsx).
 
 B: navegador; M: navegador con API/SQL; H: HTTP integración; O: operación/SQL.
-Todas las fichas están propuestas; no implementadas. Las variantes enumeradas se parametrizan sin reducir aserciones.
+Estado efectivo por ficha en[el ledger](../execution/IMPLEMENTATION_STATUS.md). Las variantes enumeradas se parametrizan sin reducir aserciones.
 
 | Caso y ficha | Flujo | Prioridad | Suite | Nivel |
 | --- | --- | --- | --- | --- |

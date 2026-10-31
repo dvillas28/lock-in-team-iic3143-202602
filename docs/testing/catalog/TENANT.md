@@ -3,7 +3,7 @@
 Evidencia común: [database.service.ts](../../../backend/src/database/database.service.ts); [20261020000200_tenant_isolation.sql](../../../backend/migrations/20261020000200_tenant_isolation.sql); [protected-institution.tsx](../../../frontend/src/components/auth/protected-institution.tsx).
 
 B: navegador; M: navegador con API/SQL; H: HTTP integración; O: operación/SQL.
-Todas las fichas están propuestas; no implementadas. Las variantes enumeradas se parametrizan sin reducir aserciones.
+Estado efectivo por ficha en[el ledger](../execution/IMPLEMENTATION_STATUS.md). Las variantes enumeradas se parametrizan sin reducir aserciones.
 
 | Caso y ficha | Flujo | Prioridad | Suite | Nivel |
 | --- | --- | --- | --- | --- |

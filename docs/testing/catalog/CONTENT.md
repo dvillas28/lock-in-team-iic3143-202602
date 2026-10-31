@@ -3,7 +3,7 @@
 Evidencia común: [modules.service.ts](../../../backend/src/modules/modules.service.ts); [materials.service.ts](../../../backend/src/materials/materials.service.ts); [content-access.ts](../../../backend/src/content/content-access.ts); [modules-panel.tsx](../../../frontend/src/components/content/modules-panel.tsx); [academic-markdown.tsx](../../../frontend/src/components/content/academic-markdown.tsx).
 
 B: navegador; M: navegador con API/SQL; H: HTTP integración; O: operación/SQL.
-Todas las fichas están propuestas; no implementadas. Las variantes enumeradas se parametrizan sin reducir aserciones.
+Estado efectivo por ficha en[el ledger](../execution/IMPLEMENTATION_STATUS.md). Las variantes enumeradas se parametrizan sin reducir aserciones.
 
 | Caso y ficha | Flujo | Prioridad | Suite | Nivel |
 | --- | --- | --- | --- | --- |

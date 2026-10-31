@@ -3,7 +3,7 @@
 Evidencia común: [membership-admin.service.ts](../../../backend/src/institutions/membership-admin.service.ts); [onboard-institution.ts](../../../backend/src/data-migrations/onboard-institution.ts); [set-superadmin.ts](../../../backend/src/data-migrations/set-superadmin.ts).
 
 B: navegador; M: navegador con API/SQL; H: HTTP integración; O: operación/SQL.
-Todas las fichas están propuestas; no implementadas. Las variantes enumeradas se parametrizan sin reducir aserciones.
+Estado efectivo por ficha en[el ledger](../execution/IMPLEMENTATION_STATUS.md). Las variantes enumeradas se parametrizan sin reducir aserciones.
 
 | Caso y ficha | Flujo | Prioridad | Suite | Nivel |
 | --- | --- | --- | --- | --- |
