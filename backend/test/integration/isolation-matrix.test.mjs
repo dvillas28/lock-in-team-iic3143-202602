@@ -29,9 +29,10 @@ test("BE-07 / BE-08: matriz de escenarios de aislamiento institucional UC/UTFSM"
       [users.other]
     );
     await pool.query(
-      "UPDATE enrollments SET role='student' WHERE user_id=$1 AND section_id=$2",
-      [users.other, f.s1]
+      "UPDATE enrollments SET active=false WHERE user_id=$1",
+      [users.other]
     );
+    await f.add(f.s1, users.other, "student");
 
     const req = async (token, path, options = {}) => {
       const authHeaders = token ? authorized(token).headers : {};
