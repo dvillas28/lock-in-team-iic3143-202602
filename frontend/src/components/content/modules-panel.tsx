@@ -9,7 +9,7 @@ import { ErrorState, EmptyState, LoadingState } from "../route-states.tsx";
 import { getCourse } from "../../lib/api/courses.ts";
 import { listCourseModules } from "../../lib/api/modules.ts";
 import { listModuleMaterials } from "../../lib/api/materials.ts";
-import type { CourseModule } from "../../lib/content/validation.ts";
+import type { CourseModule, Material } from "../../lib/content/validation.ts";
 import { canAuthorContent } from "../../lib/content/capabilities.ts";
 import { PublicationToggle } from "./publication-toggle.tsx";
 import { ModuleForm } from "./module-form.tsx";
@@ -17,6 +17,18 @@ import { MaterialForm } from "./material-form.tsx";
 import { useMutation } from "../courses/use-mutation.ts";
 import { reorderCourseModules } from "../../lib/api/modules.ts";
 import type { Session } from "../../lib/auth/session.ts";
+function MaterialRow({session, slug, parent, item, author, unavailable, reload}: {
+  session: Session; slug: string; parent: CourseModule; item: Material; author: boolean;
+  unavailable: boolean; reload: () => Promise<boolean | undefined>;
+}) {
+  const [editBlocked, setEditBlocked] = useState(false);
+  return <div className="material-item"><div className="module-resource"><FileText aria-hidden="true" /><div className="module-resource-info">
+    <Link href={`/courses/${parent.courseId}/modules/${parent.id}/materials/${item.id}`}>{item.title}</Link>
+    <p className="hint">{item.publishedAt ? "Publicado" : "Borrador"} · {item.publishedAt && parent.publishedAt ? "Visible para estudiantes" : !parent.publishedAt ? "No visible: módulo sin publicar" : "No visible: material sin publicar"}</p>
+    </div>{author && <PublicationToggle session={session} slug={slug} kind="material" id={item.id} parentId={parent.id} title={item.title} published={item.publishedAt !== null} onSaved={reload} disabled={unavailable || editBlocked} />}</div>
+    {author && <details className="academic-disclosure resource-editor"><summary>Editar material {item.title}</summary><MaterialForm session={session} slug={slug} moduleId={parent.id} item={item} onSaved={reload} disabled={unavailable} onBlockedChange={setEditBlocked} /></details>}
+  </div>;
+}
 function ModuleMaterials({ session, slug, parent, author, disabled }: { session: Session; slug: string; parent: CourseModule; author: boolean; disabled: boolean }) {
   const result = useResource(session, `${session.getSnapshot().generation}:${slug}:${parent.courseId}:${parent.id}`, c => listModuleMaterials(c, slug, parent.id), true);
   if (result.error && !result.data) return <ErrorState feedback={result.error} onRetry={() => void result.reload()} />;
@@ -28,12 +40,7 @@ function ModuleMaterials({ session, slug, parent, author, disabled }: { session:
     <div className="resource-toolbar"><span className="section-label">Materiales del módulo</span><button className="btn btn-ghost" onClick={() => void result.reload()} disabled={result.refreshing}><RefreshCw size={14} aria-hidden="true" />Actualizar materiales</button></div>
     {author && <details className="academic-disclosure"><summary>Crear material</summary><MaterialForm session={session} slug={slug} moduleId={parent.id} onSaved={result.reload} disabled={unavailable} /></details>}
     {!result.error && !result.refreshing && !result.data.length && <EmptyState />}
-    {result.data.map(item => <div className="material-item" key={item.id}><div className="module-resource"><FileText aria-hidden="true" /><div className="module-resource-info">
-      <Link href={`/courses/${parent.courseId}/modules/${parent.id}/materials/${item.id}`}>{item.title}</Link>
-      <p className="hint">{item.publishedAt ? "Publicado" : "Borrador"} · {item.publishedAt && parent.publishedAt ? "Visible para estudiantes" : !parent.publishedAt ? "No visible: módulo sin publicar" : "No visible: material sin publicar"}</p>
-      </div>{author && <PublicationToggle session={session} slug={slug} kind="material" id={item.id} parentId={parent.id} title={item.title} published={item.publishedAt !== null} onSaved={result.reload} disabled={unavailable} />}</div>
-      {author && <details className="academic-disclosure resource-editor"><summary>Editar material {item.title}</summary><MaterialForm session={session} slug={slug} moduleId={parent.id} item={item} onSaved={result.reload} disabled={unavailable} /></details>}
-    </div>)}
+    {result.data.map(item => <MaterialRow key={item.id} session={session} slug={slug} parent={parent} item={item} author={author} unavailable={unavailable} reload={result.reload} />)}
   </div>;
 }
 function ModuleRow({ session, slug, parent, author, items, reload, disabled, move, busy, requested }: {
