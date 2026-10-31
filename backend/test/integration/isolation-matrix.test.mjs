@@ -34,6 +34,9 @@ test("BE-07 / BE-08: matriz de escenarios de aislamiento institucional UC/UTFSM"
     );
     await f.add(f.s1, users.other, "student");
 
+    // Enrolar al usuario multi-tenant (users.owner) en UTFSM (sección s4) para probar alternancia
+    await f.add(f.s4, users.owner, "student", f.tenants.utfsm);
+
     const req = async (token, path, options = {}) => {
       const authHeaders = token ? authorized(token).headers : {};
       const { headers = {}, method = "GET", body } = options;
