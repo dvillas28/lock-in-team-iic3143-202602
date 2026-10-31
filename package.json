@@ -18,12 +18,13 @@
     "test:e2e:f1": "pnpm --dir e2e run test:f1",
     "test:e2e:f2": "pnpm --dir e2e run test:f2",
     "test:e2e:f3": "pnpm --dir e2e run test:f3",
-    "test:e2e:all": "pnpm --dir e2e run test --project=chromium --project=firefox --project=webkit",
+    "test:e2e:all": "pnpm --dir e2e run test:extended --project=chromium --project=firefox --project=webkit",
     "test:e2e:visual": "pnpm --dir e2e run test --headed",
     "test:e2e:step": "pnpm --dir e2e run test --debug",
     "test:e2e:f4": "pnpm --dir e2e run test:f4",
     "test:e2e:f5": "pnpm --dir e2e run test:f5",
-    "test:e2e:f6": "pnpm --dir e2e run test:f6"
+    "test:e2e:f6": "pnpm --dir e2e run test:f6",
+    "test:e2e:stability": "pnpm --dir e2e run test:stability"
   },
   "devDependencies": {
     "@redocly/cli": "1.25.11",

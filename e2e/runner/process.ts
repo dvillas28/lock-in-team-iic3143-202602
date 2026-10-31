@@ -2,8 +2,11 @@ import {spawn, type ChildProcess} from 'node:child_process';
 import {setTimeout as delay} from 'node:timers/promises';
 import {isolatedEnv, root} from './settings.ts';
 
+const children=new Set<ChildProcess>();
+export async function stopChildren(){await Promise.all([...children].map(child=>stop(child,'SIGINT',20000)));}
 export function launch(command: string, args: string[], env: NodeJS.ProcessEnv = {}, cwd = root) {
   const child = spawn(command, args, {cwd, env: isolatedEnv(env), stdio: ['ignore', 'pipe', 'pipe']});
+  children.add(child);child.once('exit',()=>children.delete(child));
   let output = '';
   child.stdout?.on('data', chunk => {output = (output + chunk).slice(-32_000);});
   child.stderr?.on('data', chunk => {output = (output + chunk).slice(-32_000);});
@@ -26,11 +29,11 @@ export function safe(value: string) {
   }
   return text;
 }
-export async function stop(child: ChildProcess) {
+export async function stop(child: ChildProcess,signal:NodeJS.Signals='SIGTERM',grace=5000) {
   if (child.exitCode !== null || child.signalCode !== null) return;
   const done = new Promise<void>(resolve => child.once('exit', () => resolve()));
-  child.kill('SIGTERM');
-  const timer = setTimeout(() => child.kill('SIGKILL'), 5000);
+  child.kill(signal);
+  const timer = setTimeout(() => child.kill('SIGKILL'), grace);
   try {await done;} finally {clearTimeout(timer);}
 }
 export async function ready(url: string, child?: ChildProcess, ms = 30_000) {

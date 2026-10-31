@@ -26,14 +26,14 @@ export async function startPostgres(runId: string) {
   await writeFile(join(folder, 'control.json'), JSON.stringify({bin, container, port}), {mode:0o600});
   const close = async () => {
     if (await readFile(join(folder, 'owner'), 'utf8') !== runId) throw new Error('E2E ownership mismatch: refusing cleanup');
-    if (started && docker) {
-      const label = execFileSync('docker', ['inspect', '--format', '{{index .Config.Labels "academix.e2e.owner"}}', container], {encoding: 'utf8'}).trim();
-      if (label !== runId) throw new Error('E2E container ownership mismatch');
-      await command('docker', ['rm', '-f', container]);
-    } else if (started && bin) {
+    if (docker) {
+      let label:string;try{label=execFileSync('docker', ['inspect', '--format', '{{index .Config.Labels "academix.e2e.owner"}}', container], {encoding: 'utf8',stdio:['ignore','pipe','pipe']}).trim();}catch(error){if(!started&&/No such (object|container)/i.test(String((error as {stderr?:Buffer}).stderr)))label='absent';else throw error;}
+      if (label!== 'absent' && label !== runId) throw new Error('E2E container ownership mismatch');
+      if(label!=='absent')await command('docker', ['rm', '-f', container]);
+    } else if (bin) {
       let running = false;
       try {execFileSync(join(bin,'pg_ctl'),['-D',join(folder,'data'),'status'],{stdio:'pipe'}); running = true;}
-      catch (error) {if ((error as {status?:number}).status !== 3) throw error;}
+      catch (error) {if (![3,...(!started?[4]:[])].includes((error as {status:number}).status)) throw error;}
       if (running) await command(join(bin, 'pg_ctl'), ['-D', join(folder, 'data'), '-m', 'fast', '-w', 'stop']);
     }
     await rm(folder, {recursive: true});
@@ -59,7 +59,8 @@ export async function startPostgres(runId: string) {
         }
       }
     } finally {await db.end();}
-    return {url, port, folder, close};
+    const versionPool=new pg.Pool({connectionString:url});let version:string;try{version=(await versionPool.query('SHOW server_version')).rows[0].server_version;}finally{await versionPool.end();}
+    return {url, port, folder, close,version};
   } catch (error) {
     try {await close();} catch { /* retain owned directory for diagnosis if start did not finish */ }
     throw error;
