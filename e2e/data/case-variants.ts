@@ -1,3 +1,4 @@
+import {phaseFive} from './phase-five.ts';
 import {phaseFour} from './phase-four.ts';
 export type TestLevel = 'browser' | 'companion';
 export type CaseVariant = {
@@ -153,7 +154,7 @@ for(const id of ['E2E-AUTH-011','E2E-TENANT-001','E2E-TENANT-002','E2E-TENANT-00
  caseDefinitions[id]=caseDefinitions[id].map(v=>({...v,projects:['chromium','firefox','webkit']}));
 }
 caseDefinitions['E2E-TENANT-013']=[...caseDefinitions['E2E-TENANT-013'],variant('browser-recovery','T1','browser','both')];
-Object.assign(caseDefinitions,phaseFour);
+Object.assign(caseDefinitions,phaseFour,phaseFive);
 export const caseVariants: Record<string, readonly string[]> = Object.fromEntries(
   Object.entries(caseDefinitions).map(([id, variants]) => [id, variants.map(v => v.name)]),
 );

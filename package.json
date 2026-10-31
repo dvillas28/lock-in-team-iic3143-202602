@@ -21,7 +21,8 @@
     "test:e2e:all": "pnpm --dir e2e run test --project=chromium --project=firefox --project=webkit",
     "test:e2e:visual": "pnpm --dir e2e run test --headed",
     "test:e2e:step": "pnpm --dir e2e run test --debug",
-    "test:e2e:f4": "pnpm --dir e2e run test:f4"
+    "test:e2e:f4": "pnpm --dir e2e run test:f4",
+    "test:e2e:f5": "pnpm --dir e2e run test:f5"
   },
   "devDependencies": {
     "@redocly/cli": "1.25.11",
