@@ -2,11 +2,12 @@
 
 Fuente: [PDF del curso](../01b-Proyecto%20%28miercoles%2012%20de%20agosto%29%20%281%29.pdf), pp. 57–74.
 Marcar al incorporar respuesta y evidencia en E3. [Estado y brechas](reporte-brechas-entrega-3.md).
+«Borrador» enlaza diapositivas de trabajo aún no llevadas a la presentación consolidada.
 
 ## 1. Material y exposición
 
 - [ ] **E3-01.** PPT obligatorio; informe PDF opcional (p. 73).
-- [ ] **E3-02.** Estimaciones y plan de trabajo en tablas, integradas a la presentación/informe o entregadas aparte (pp. 73–74).
+- [ ] **E3-02.** Estimaciones y plan de trabajo en tablas, integradas a la presentación/informe o entregadas aparte (pp. 73–74). Borrador parcial, falta `Real (h)`: [métricas](ppt/dvillas28/02-metricas/preview.pdf).
 - [ ] **E3-03.** Aproximadamente 20 min de presentación y demo; 10–15 min de preguntas (p. 60).
 
 ## 2. Proceso de desarrollo
@@ -14,13 +15,13 @@ Marcar al incorporar respuesta y evidencia en E3. [Estado y brechas](reporte-bre
 - [ ] **E3-04.** Explicar el ciclo de desarrollo con evidencia (pp. 59, 62–63, 69).
 - [ ] **E3-05.** Mostrar PR, sus checks de CI/CD y cómo se realizan los merges (p. 69).
 - [ ] **E3-06.** Explicar prácticas utilizadas, resultados y beneficios (pp. 62–63, 69).
-- [ ] **E3-07.** Indicar prácticas abandonadas, si las hubo (p. 62).
-- [ ] **E3-08.** Explicar decisiones y sus motivos (p. 62).
+- [ ] **E3-07.** Indicar prácticas abandonadas, si las hubo (p. 62). Borrador: [prácticas abandonadas](ppt/dvillas28/04-practicas-abandonadas/preview.pdf).
+- [ ] **E3-08.** Explicar decisiones y sus motivos (p. 62). Borrador parcial, solo Render: [Render](ppt/dvillas28/03-render/preview.pdf).
 - [ ] **E3-09.** Explicar manejo de deuda técnica (p. 63).
-- [ ] **E3-10.** Explicar resolución de bugs (p. 63).
+- [ ] **E3-10.** Explicar resolución de bugs (p. 63). Borrador parcial, solo #177: [Render](ppt/dvillas28/03-render/preview.pdf).
 - [ ] **E3-11.** Mostrar cómo documentan; por ejemplo, ADR y diagramas (p. 63).
-- [ ] **E3-12.** Definir cuándo una tarjeta está Done (p. 63).
-- [ ] **E3-13.** Definir cuándo cambia de estado (p. 63).
+- [ ] **E3-12.** Definir cuándo una tarjeta está Done (p. 63). Borrador: [tablero](ppt/dvillas28/01-tablero/preview.pdf).
+- [ ] **E3-13.** Definir cuándo cambia de estado (p. 63). Borrador: [tablero](ppt/dvillas28/01-tablero/preview.pdf).
 
 ## 3. Calidad y testing
 
@@ -40,7 +41,7 @@ Marcar al incorporar respuesta y evidencia en E3. [Estado y brechas](reporte-bre
 
 ## 5. Métricas y viabilidad
 
-- [ ] **E3-24.** Presentar métricas objetivas y analizar el proceso (pp. 59, 64–65, 69).
+- [ ] **E3-24.** Presentar métricas objetivas y analizar el proceso (pp. 59, 64–65, 69). Borrador: [métricas](ppt/dvillas28/02-metricas/preview.pdf).
 - [ ] **E3-25.** Responder «¿alcanzamos a terminar?» con una proyección fundamentada (pp. 62, 64, 70).
 - [ ] **E3-26.** Si no alcanzan: explicar medidas tomadas y futuras (p. 62).
 - [ ] **E3-27.** Si no alcanzan: declarar qué priorizarán (p. 69).
@@ -51,12 +52,12 @@ Si no alcanzan, el PDF aconseja reducir alcance, mejorar productividad, replanif
 
 ## 6. Plan actualizado
 
-- [ ] **E3-29.** Explicar evolución del plan, cambios y motivos (p. 67).
-- [ ] **E3-30.** Explicar decisiones tomadas a partir del plan (p. 67).
+- [ ] **E3-29.** Explicar evolución del plan, cambios y motivos (p. 67). Borrador parcial, solo Render: [Render](ppt/dvillas28/03-render/preview.pdf).
+- [ ] **E3-30.** Explicar decisiones tomadas a partir del plan (p. 67). Borrador parcial, solo Render: [Render](ppt/dvillas28/03-render/preview.pdf).
 - [ ] **E3-31.** Incorporar feedback recibido (p. 67).
 - [ ] **E3-32.** Mostrar plan hacia el MVP (pp. 67, 69).
-- [ ] **E3-33.** Identificar trabajo completo (pp. 67, 69).
-- [ ] **E3-34.** Identificar trabajo pendiente (pp. 67, 69).
+- [ ] **E3-33.** Identificar trabajo completo (pp. 67, 69). Borrador: [completo y pendiente](ppt/dvillas28/05-completo-pendiente/preview.pdf).
+- [ ] **E3-34.** Identificar trabajo pendiente (pp. 67, 69). Borrador: [completo y pendiente](ppt/dvillas28/05-completo-pendiente/preview.pdf).
 
 ## 7. Demo y acceso
 
