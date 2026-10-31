@@ -1,7 +1,7 @@
 # Catálogo maestro de pruebas
 
 Base y límites: [auditoría](audit/BASELINE.md). Estado actual por ID en
-[ledger de implementación](execution/IMPLEMENTATION_STATUS.md); no hay E2E aprobados.
+[ledger de implementación](execution/IMPLEMENTATION_STATUS.md);31 fichas aprobadas al cierre F2.
 **248 fichas**: **222 E2E de navegador** (B/M) y
 **26 comprobaciones complementarias** HTTP/SQL/operación (H/O).
 Se identifican **34 familias de flujos** con operaciones y transiciones detalladas,

@@ -4,7 +4,7 @@ Fecha 2026-10-30 · `test/e2e-master-plan` · base `90463059015e5045d011eadd12b6
 Solo investigación/documentación. Sin tests nuevos, dependencias, cambios funcionales o despliegues.
 
 Actualización de implementación: [estado verificable](execution/IMPLEMENTATION_STATUS.md).
-Rama `test/e2e-implementation`: F1 aceptada localmente;10 fichas aprobadas, suite incompleta.
+Rama `test/e2e-implementation`: F1/F2 aceptadas localmente;31 fichas aprobadas, suite incompleta.
 El contenido siguiente conserva la estrategia original, no constituye evidencia de ejecución.
 
 ## Resumen ejecutivo y alcance

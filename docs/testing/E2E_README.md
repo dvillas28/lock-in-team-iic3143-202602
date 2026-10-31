@@ -1,24 +1,25 @@
 # Ejecutar el harness E2E
 
-Estado actual: infraestructura inicial y un escenario de login escrito; **suite incompleta**.
-AUTH-001 aprueba cinco variantes Chromium en ejecución local autorizada. F1 aceptada localmente con nueve fichas OPS; suite incompleta.
-[Evidencia y límites](execution/IMPLEMENTATION_STATUS.md) · [Catálogo original](E2E_TEST_CATALOG.md).
+Estado actual: **F1 y F2 aceptadas localmente;31 fichas de 248 aprobadas; suite incompleta**.
+[Evidencia F2](execution/F2_VALIDATION.md) · [Estado](execution/IMPLEMENTATION_STATUS.md).
 
-## Checkout permanente y ejecución local
+## Checkout permanente y ejecución por fase
 
-Trabajo conservado en `/Users/julian/lock-in-team-iic3143-202602`, rama `test/e2e-implementation`.
-Los commits previos y la corrección standalone están incorporados; `dev` conserva su SHA original.
-No se hizo merge ni push. La copia temporal anterior se conserva como respaldo.
+Ruta `/Users/julian/lock-in-team-iic3143-202602`, rama `test/e2e-f2`; `dev` y `main` intactas.
+Trabajo comprometido localmente, sin push ni merge. La copia temporal anterior queda de respaldo.
 
 ```bash
 cd /Users/julian/lock-in-team-iic3143-202602
-PLAYWRIGHT_BROWSERS_PATH="$PWD/e2e/.cache/browsers" \
-  pnpm --dir e2e run test --grep E2E-AUTH-001
+pnpm test:e2e:f2
+pnpm test:e2e:f2 --project=chromium --project=firefox --project=webkit
+pnpm --dir e2e report
 ```
 
-La caché local ignorada contiene Chromium; los reportes están en `e2e/reports/`.
-Para ejecutar todo lo implementado, quitar `--grep E2E-AUTH-001`: se incluyen AUTH-001 y las nueve fichas OPS (16 instancias en Chromium).
-Estos comandos crean un stack local propio y no requieren la copia ni los binarios de `/private/tmp`.
+F2: 47 instancias Chromium; 61 con smoke Firefox/WebKit. Para ver Chromium, añadir `--headed`.
+F1: `pnpm test:e2e:f1`; acumulado F1+F2: `pnpm test:e2e` (58 Chromium;72 con los tres proyectos).
+La caché `e2e/.cache/browsers` se detecta automáticamente; PLAYWRIGHT_BROWSERS_PATH explícita prevalece.
+Reportes en `e2e/reports/`, ignorados por Git; no se requieren archivos de `/private/tmp`.
+El runner crea y limpia su stack local. F3–F7 quedan pendientes por revisión fase a fase del usuario.
 
 ## Requisitos e instalación
 
@@ -31,7 +32,7 @@ pnpm install --frozen-lockfile
 pnpm --dir backend install --frozen-lockfile
 pnpm --dir frontend install --frozen-lockfile
 pnpm --dir e2e install --frozen-lockfile
-PLAYWRIGHT_BROWSERS_PATH="$PWD/e2e/.cache/browsers" pnpm --dir e2e exec playwright install chromium
+PLAYWRIGHT_BROWSERS_PATH="$PWD/e2e/.cache/browsers" pnpm --dir e2e exec playwright install chromium firefox webkit
 pnpm --dir e2e typecheck
 pnpm --dir e2e lint
 pnpm --dir e2e test:harness
@@ -82,7 +83,7 @@ Los filtros solo ejecutan tests que existan: COURSE y otros módulos siguen pend
 Smoke/regression/extended son selecciones disponibles, no evidencia de cobertura completa.
 Usar `run test` al pasar flags para que pnpm los entregue al runner.
 Proyectos adicionales: `--project=firefox`, `--project=webkit`, `--project=mobile`;
-instalar cada navegador antes. Chromium ejecutó AUTH-001; los otros motores siguen sin validar.
+instalar cada navegador antes. Chromium ejecutó F1/F2; Firefox/WebKit ejecutaron el smoke de entrada de F2.
 Desde la raíz del checkout permanente, usar `PLAYWRIGHT_BROWSERS_PATH="$PWD/e2e/.cache/browsers"`
 como prefijo del comando. Las ejecuciones requieren permisos para PG y procesos de navegador.
 
