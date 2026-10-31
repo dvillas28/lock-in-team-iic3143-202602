@@ -1,0 +1,75 @@
+% AcademiX - Entrega 3, diapositivas de dvillas28 (gestión, tablero y CI/CD).
+% Preámbulo compartido por las vistas previas; copia el estilo de docs/deliveries/2/ppt/main.tex.
+% Al consolidar, este bloque ya debería estar en el main.tex de E3: solo se agregan
+% pgfplots y \pgfplotsset.
+\documentclass[aspectratio=169,10pt]{beamer}
+
+\usetheme{Boadilla}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{array}
+\usepackage{pgfplots}
+
+\usetikzlibrary{arrows.meta,positioning,fit,calc,shapes.geometric}
+\pgfplotsset{compat=1.18}
+
+\definecolor{academixnavy}{HTML}{18324F}
+\definecolor{academixblue}{HTML}{2563EB}
+\definecolor{academixteal}{HTML}{0F766E}
+\definecolor{academixamber}{HTML}{B7791F}
+\definecolor{academixgreen}{HTML}{15803D}
+\definecolor{academixred}{HTML}{B91C1C}
+\definecolor{academixbg}{HTML}{F8FAFC}
+\definecolor{academixsoftblue}{HTML}{EFF6FF}
+\definecolor{academixsoftteal}{HTML}{F0FDFA}
+\definecolor{academixsoftamber}{HTML}{FFFBEB}
+\definecolor{academixline}{HTML}{CBD5E1}
+\definecolor{academixslate}{HTML}{475569}
+\definecolor{academixmuted}{HTML}{64748B}
+
+\setbeamercolor{structure}{fg=academixnavy}
+\setbeamercolor{frametitle}{fg=academixnavy,bg=academixbg}
+\setbeamercolor{title}{fg=academixnavy}
+\setbeamercolor{block title}{fg=white,bg=academixnavy}
+\setbeamercolor{block body}{fg=black,bg=academixbg}
+\setbeamercolor{alerted text}{fg=academixamber}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamerfont{frametitle}{size=\large,series=\bfseries}
+\setbeamerfont{title}{series=\bfseries}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcommand{\chip}[2]{\tikz[baseline=(n.base)]\node[rounded corners=2pt,fill=#1,inner xsep=5pt,inner ysep=2pt,text=white,font=\scriptsize\bfseries](n){#2};}
+\newcommand{\softchip}[3]{\tikz[baseline=(n.base)]\node[rounded corners=2pt,draw=#1,fill=#2,inner xsep=5pt,inner ysep=2pt,text=#1,font=\scriptsize\bfseries](n){#3};}
+\newcommand{\kpi}[3]{%
+\begin{tikzpicture}
+  \node[draw=#1,fill=#1!7,rounded corners=3pt,minimum width=0.28\textwidth,minimum height=1.15cm,align=center] {
+    {\Large\bfseries\color{#1}#2}\\[-1pt]
+    {\scriptsize #3}
+  };
+\end{tikzpicture}}
+
+% Estilo común de los gráficos del tablero.
+\pgfplotsset{academix/.style={
+  width=\linewidth, height=5.6cm,
+  font=\sffamily\scriptsize,
+  axis lines=left, axis line style={academixslate},
+  tick style={academixslate}, tick label style={academixslate},
+  grid=major, grid style={academixline!60},
+  legend style={draw=none,fill=none,font=\sffamily\scriptsize,legend columns=-1,
+    at={(0.5,-0.14)},anchor=north,/tikz/every even column/.append style={column sep=6pt}},
+  xmin=10.5, xmax=30.8,
+  xtick={11,14,17,20,23,26,29}, xticklabels={11/10,14/10,17/10,20/10,23/10,26/10,29/10},
+}}
+
+\title[AcademiX]{AcademiX}
+\subtitle{Entrega 3: gestión, tablero y CI/CD}
+\author[dvillas28]{Daniel Villaseñor}
+\institute[IIC3143]{IIC3143 Desarrollo de Software}
+\date{Octubre 2026}

@@ -1,0 +1,63 @@
+% E3-12, E3-13, E3-33/34: conciliación del tablero.
+% Fuente: docs/deliveries/3/conciliacion-tablero-e3.md.
+
+\begin{frame}{Tablero conciliado al 30/10}
+\centering
+\begin{tikzpicture}[
+  font=\sffamily\small,
+  col/.style={rounded corners=5pt,minimum width=4.6cm,minimum height=2.3cm,align=center,text width=4.2cm},
+  arr/.style={-{Latex[length=2.5mm]},draw=academixnavy,very thick}
+]
+\node[col,draw=academixslate,fill=academixbg] (a) at (0,0) {%
+  \textbf{\color{academixslate}Antes}\\[3pt]
+  {\Large\bfseries 64 / 123}\ tarjetas (52\,\%)\\
+  {\Large\bfseries 255 / 461}\ h (55\,\%)};
+\node[col,draw=academixnavy,fill=academixsoftblue] (b) at (7,0) {%
+  \textbf{\color{academixnavy}Después}\\[3pt]
+  {\Large\bfseries\color{academixnavy} 87 / 126}\ tarjetas (69\,\%)\\
+  {\Large\bfseries\color{academixnavy} 357 / 468}\ h (76\,\%)};
+\draw[arr] (a) -- node[above,font=\sffamily\scriptsize,text width=2cm,align=center]{evidencia\\en \texttt{dev}} (b);
+\end{tikzpicture}
+\vspace{0.35cm}
+
+\begin{block}{Problema}
+\small Funcionalidades de las semanas 5 y 6 ya estaban integradas en \texttt{dev}, pero sus tarjetas seguían en Todo. Sin conciliar, la proyección salía pesimista.
+\end{block}
+\vspace{0.1cm}
+\softchip{academixgreen}{green!8}{20 a Done con evidencia (93 h)}
+\softchip{academixred}{red!6}{\#57 fuera de alcance}
+\softchip{academixamber}{academixsoftamber}{3 tarjetas no planificadas}
+\softchip{academixblue}{academixsoftblue}{10 drafts → issues}
+\end{frame}
+
+\begin{frame}{Por qué el tablero no reflejaba el avance}
+\centering
+\begin{tikzpicture}[
+  font=\sffamily\scriptsize,
+  cause/.style={rounded corners=4pt,minimum width=4.3cm,minimum height=2.2cm,align=left,text width=4cm,inner sep=5pt},
+]
+\node[cause,draw=academixamber,fill=academixsoftamber] at (0,0) {%
+  \textbf{\small 56 drafts (46\,\%)}\\[2pt]
+  Una PR no puede cerrar un draft: \texttt{Closes \#N} no aplica. El merge de \#128–\#133, \#145 y \#158 no movió ninguna tarjeta.};
+\node[cause,draw=academixnavy,fill=academixsoftblue] at (4.7,0) {%
+  \textbf{\small Actualización por lotes}\\[2pt]
+  20 tarjetas en In progress durante una semana y 37 a Done el mismo día (21/10). El burnup muestra saltos, no ritmo.};
+\node[cause,draw=academixred,fill=red!5] at (9.4,0) {%
+  \textbf{\small Sin horas reales}\\[2pt]
+  77 de 87 tarjetas Done no tienen \texttt{Real (h)}. No se puede comparar estimado con real.};
+\end{tikzpicture}
+\vspace{0.3cm}
+
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.48\textwidth}
+\begin{block}{Done}
+\scriptsize La PR que resuelve la issue está integrada en \texttt{dev} y la tarjeta tiene \texttt{Real (h)}.
+\end{block}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{block}{Cambio de estado}
+\scriptsize Draft → issue al iniciar su semana; Todo → In progress al empezar a trabajarla, no al terminarla.
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
