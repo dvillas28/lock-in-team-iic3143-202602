@@ -1,35 +1,36 @@
 # F4 — Registro incremental
 
-F4 en implementación,sin aceptación. Rama `test/e2e-f4`,desde8bd5d8f (F3 aceptada).
-El usuario autorizó continuar al cerrar F3. F1–F3 conservan85 fichas y201 ejecuciones aprobadas.
+**F4 aceptada localmente.** Cierre y evidencia en [F4_VALIDATION](F4_VALIDATION.md).
+Rama `test/e2e-f4`, desde `8bd5d8f` (F3 aceptada). Detenerse antes de F5 para revisión.
 
-## Alcance y siguiente paso
+## Historial de los incrementos
 
-- T01:cursos/secciones,UI real y persistencia; COURSE-013 adopta HTTP400 para NUL según decisión Q02.
-- T02–T03:directorio,asignación,historia de roles,revocación y concurrencia.
-- T04–T05:módulos,Markdown,visibilidad y escrituras inciertas/concurrentes.
-- T06:repetición,regresión acumulada,reportes y limpieza.
+| Incremento | Evidencia |
+| --- | --- |
+| Cursos y secciones | 19 fichas, creación atómica, límites, ownership, capacidad, persistencia y carreras |
+| Directorio y matrículas | 19 fichas; run `472b2d09543d3d90`: 27 PASS |
+| Módulos y Markdown | 16 fichas, publicación independiente, lector seguro y escrituras inciertas |
+| Revisión y repetición | F4 completa y regresión F1–F4 desde el mismo commit limpio |
 
-Comando incremental:`pnpm test:e2e:f4`; visible:añadir `--headed`.
-Un comando filtrado o specs parciales no acredita la fase completa.
-No push/merge ni producción; correcciones funcionales en rama fix y commit separados.
+## Diagnósticos y correcciones
 
-## Hallazgo Q02
+- `1c94e7e20619fc8b`: 4 FAIL de Q02; NUL devolvía 500 en lugar del 400 acordado.
+- Fix `5b9c242`, rama `fix/e2e-metadata-nul`; unitario, build y lint backend PASS.
+- `ea8a85e3dec0f480`: cursos/secciones 22 PASS/10 FAIL por expectativas y selectores del harness.
+- `34cf4a46b02d882f`: 13 PASS tras corregir scope de T1, esperas de navegación y nombres accesibles.
+- `eebfa126f54397b6`: contenido 30 PASS/3 FAIL; dos problemas del harness y un defecto funcional.
+- `9049743a5fb712f5`: CONTENT-004/010 PASS y CONTENT-016 FAIL, antes del fix.
+- Fix `d5d85b2`, rama `fix/e2e-uncertain-material-publication`; typecheck, lint y 14 unitarios UI PASS.
+- Ambos fixes se incorporaron por cherry-pick local. No se relajaron aserciones ni aumentaron retries.
+- AUTH-002 se alineó con smoke del catálogo y ahora exige también Firefox/WebKit.
 
-Run1c94e7e20619fc8b:4 FAIL; code/name/term/sectionCode con NUL devuelven500,esperado400.
-Reproducción en courses.spec.ts; corrección funcional separada en fix/e2e-metadata-nul.
+## Cierre
 
-## Incrementos ejecutados
+Código `6db9541`, seed `academix-e2e-v1`, checkout limpio al inicio y final:
 
-- Fix Q02:5b9c242 en fix/e2e-metadata-nul e incorporado por cherry-pick local a F4.
-- Unitario de metadatos,build y lint backend PASS; las4 variantes NUL pasan en ea8a85e3dec0f480.
-- ea8a85e3dec0f480:cursos/secciones,22 PASS/10 FAIL; fallos de expectativa/selector del harness.
-- 34cf4a46b02d882f:13 PASS tras corregir scope de T1,espera de navegación y selectors accesibles.
-- 472b2d09543d3d90:27 PASS de ENROLL,sin relajación de permisos ni pérdida de historia.
-- eebfa126f54397b6:CONTENT,30 PASS/3 FAIL; dos problemas del harness y un defecto funcional.
-- CONTENT-016:repro9049743a5fb712f5;004/010 PASS y016 FAIL. Fixd5d85b2 en rama independiente e incorporado localmente.
-- UI:typecheck/lint y14 unitarios de edición/publicación PASS; falta prueba E2E del fix.
-- AUTH-002 se alinea con su etiqueta smoke del catálogo y requiere Firefox/WebKit además de Chromium.
+- `f6c3b12f15050a5c`: **126 PASS**, F4 completa con sus motores requeridos.
+- `d014cf0385019d99`: **329 PASS**, regresión F1–F4; 139 fichas aprobadas de 248.
+- Cero fail/skip/flaky en los runs finales; reportes y eliminación de recursos verificados.
 
-Estos diagnósticos no acreditan F4 completa. Faltan validar CONTENT-016,repetición limpia,
-smoke en motores requeridos,regresión acumulada,review,reportes y limpieza.
+Comandos y alternativas visuales en [la guía incremental](E2E_EXECUTION_JOURNAL.md).
+No push, merge ni producción. F5 no iniciada.

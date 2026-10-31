@@ -1,10 +1,10 @@
 # Roadmap y backlog de implementación posterior
 
-F1/F2/F3 aceptadas localmente; F4–F7 pendientes. F4 autorizada como próxima fase.
+F1–F4 aceptadas localmente; F5–F7 pendientes. Detenerse para revisión del usuario.
 Consultar [evidencia y ledger](execution/IMPLEMENTATION_STATUS.md), separado de estimaciones.
 
 El plan original se conserva. La implementación inicial vive en `test/e2e-implementation`,
-basada en `test/e2e-master-plan`; F1/F2/F3 superaron sus gates locales; ver evidencia vigente. Los siguientes paquetes serán pequeños. Correcciones del producto se separan en ramas fix/feat;
+basada en `test/e2e-master-plan`; F1–F4 superaron sus gates locales; ver evidencia vigente. Los siguientes paquetes serán pequeños. Correcciones del producto se separan en ramas fix/feat;
 no ocultar cambios funcionales dentro de tests ni ampliar MVP para completar catálogo.
 
 | Fase / backlog | Objetivo | Horas persona | Complejidad | Dependencia |

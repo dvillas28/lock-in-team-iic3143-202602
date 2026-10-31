@@ -29,7 +29,7 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
 - Dependencias: F1 entorno/seed listo; [fase F4](../roadmap/F4.md); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador + comprobación API/SQL; regression (regression incluye smoke; extended incluye regression).
-- Estado del test: Propuesto; sin implementar ni ejecutar.
+- Estado del test: Aprobado localmente; ver[estado y evidencia](../execution/IMPLEMENTATION_STATUS.md).
 
 <a id="e2e-enroll-017"></a>
 
@@ -56,7 +56,7 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
 - Dependencias: F1 entorno/seed listo; [fase F4](../roadmap/F4.md); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador + comprobación API/SQL; extended (regression incluye smoke; extended incluye regression).
-- Estado del test: Propuesto; sin implementar ni ejecutar.
+- Estado del test: Aprobado localmente; ver[estado y evidencia](../execution/IMPLEMENTATION_STATUS.md).
 
 <a id="e2e-enroll-018"></a>
 
@@ -83,7 +83,7 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
 - Dependencias: F1 entorno/seed listo; [fase F4](../roadmap/F4.md); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador + comprobación API/SQL; regression (regression incluye smoke; extended incluye regression).
-- Estado del test: Propuesto; sin implementar ni ejecutar.
+- Estado del test: Aprobado localmente; ver[estado y evidencia](../execution/IMPLEMENTATION_STATUS.md).
 
 <a id="e2e-enroll-019"></a>
 
@@ -110,4 +110,4 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
 - Dependencias: F1 entorno/seed listo; [fase F4](../roadmap/F4.md); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador real; extended (regression incluye smoke; extended incluye regression).
-- Estado del test: Propuesto; sin implementar ni ejecutar.
+- Estado del test: Aprobado localmente; ver[estado y evidencia](../execution/IMPLEMENTATION_STATUS.md).

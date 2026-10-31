@@ -35,7 +35,7 @@ Denominadores son los del commit actual, no una lista congelada si se añaden en
 4. Evidencia end-to-end material→quiz→graded→publicación→promedio enUC yUTFSM, por rol correcto.
 5. Chromiumregression y smokecrítico Firefox/WebKit/375px; a11y funcional por teclado/diálogos/tabla.
 6. CI requerido verificado, artifacts útiles sin credenciales, teardownowned, tiempos medidos y runbook.
-7. ExclusionesQ02/RNF5/binarios y deuda<1ms visibles; nada pendiente presentado comoPASS.
+7. ExclusionesRNF5/binarios y deuda<1ms visibles; nada pendiente presentado comoPASS.
 
 Si el calendario no permite todo catálogoextended, entregar sliceP0/P1 estable con denominador
 y huecos explícitos. No rebautizarlo suite completa ni bajar prioridades para aparentar cobertura.

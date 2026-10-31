@@ -1,26 +1,26 @@
 # Ejecutar el harness E2E
 
-Estado actual: **F1, F2 y F3 aceptadas localmente;85 fichas de 248 aprobadas; suite incompleta**.
-[Evidencia F3](execution/F3_VALIDATION.md) · [Estado](execution/IMPLEMENTATION_STATUS.md).
+Estado actual: **F1–F4 aceptadas localmente;139 fichas de 248 aprobadas; suite incompleta**.
+[Evidencia F4](execution/F4_VALIDATION.md) · [Estado](execution/IMPLEMENTATION_STATUS.md).
 
 ## Checkout permanente y ejecución por fase
 
-Ruta `/Users/julian/lock-in-team-iic3143-202602`, rama `test/e2e-f3`; `dev` y `main` intactas.
+Ruta `/Users/julian/lock-in-team-iic3143-202602`, rama `test/e2e-f4`; `dev` y `main` intactas.
 Trabajo comprometido localmente, sin push ni merge. La copia temporal anterior queda de respaldo.
 
 ```bash
 cd /Users/julian/lock-in-team-iic3143-202602
-pnpm test:e2e:f3
-pnpm test:e2e:f3 --project=chromium --project=firefox --project=webkit
+pnpm test:e2e:f4
+pnpm test:e2e:f4 --project=chromium --project=firefox --project=webkit
 pnpm --dir e2e report
 ```
 
-F2: 47 instancias Chromium; 61 con smoke Firefox/WebKit. Para ver Chromium, añadir `--headed`.
-F1:`pnpm test:e2e:f1`; F3:89 Chromium,129 con smoke Firefox/WebKit.
-Acumulado:`pnpm test:e2e:all` (201 instancias); visible:`pnpm test:e2e:visual`; paso a paso:`pnpm test:e2e:step`.
+F2:47 instancias Chromium;63 con smoke actual Firefox/WebKit (61 en su cierre histórico). Para ver Chromium, añadir `--headed`.
+F1:`pnpm test:e2e:f1`; F3:89/129; F4:92 Chromium/126 con smoke Firefox/WebKit.
+Acumulado:`pnpm test:e2e:all` (329 instancias); visible:`pnpm test:e2e:visual`; paso a paso:`pnpm test:e2e:step`.
 La caché `e2e/.cache/browsers` se detecta automáticamente; PLAYWRIGHT_BROWSERS_PATH explícita prevalece.
 Reportes en `e2e/reports/`, ignorados por Git; no se requieren archivos de `/private/tmp`.
-El runner crea y limpia su stack local. F4 autorizada como siguiente fase; F5–F7 quedan pendientes.
+El runner crea y limpia su stack local. F4 aceptada; F5–F7 quedan pendientes. Detenerse para revisión antes de F5.
 
 Guía viva por fase y demostración visual: [registro incremental](execution/E2E_EXECUTION_JOURNAL.md).
 
@@ -86,7 +86,7 @@ Los filtros solo ejecutan tests que existan: COURSE y otros módulos siguen pend
 Smoke/regression/extended son selecciones disponibles, no evidencia de cobertura completa.
 Usar `run test` al pasar flags para que pnpm los entregue al runner.
 Proyectos adicionales: `--project=firefox`, `--project=webkit`, `--project=mobile`;
-instalar cada navegador antes. Chromium ejecutó F1–F3; Firefox/WebKit ejecutaron smoke de entrada y seguridad.
+instalar cada navegador antes. Chromium ejecutó F1–F4; Firefox/WebKit ejecutaron smoke de entrada,seguridad,cursos y contenido.
 Desde la raíz del checkout permanente, usar `PLAYWRIGHT_BROWSERS_PATH="$PWD/e2e/.cache/browsers"`
 como prefijo del comando. Las ejecuciones requieren permisos para PG y procesos de navegador.
 

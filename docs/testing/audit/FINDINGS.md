@@ -39,13 +39,13 @@ no afirmación de vulnerabilidad explotada. Un test bloqueado no equivale a PASS
 | ID | Pregunta técnica | Responsable sugerido / salida |
 | --- | --- | --- |
 | Q01 | ¿Se exige precisión exacta inclusivo/exclusivo bajo ms? ADR acepta ms | Backend/PM; conservar deuda actual y no bloquear MVP por µs |
-| Q02 | ¿400/422 de NUL o valor gigante en metadatos es contrato estable? validadores `text` no excluyen NUL explícitamente | Backend/contrato; caracterizar en base efímera, no fijar 500 como correcto |
+| Q02 | Resuelta en F4:metadatos con NUL rechazan con HTTP400; validación antes de PostgreSQL | Decisión del usuario; fix5b9c242 y COURSE-013 con snapshot sin efectos parciales |
 | Q03 | ¿Se requiere navegador Firefox/WebKit sobre `*.localhost` o usar /etc/hosts CI? | Infra; probar resolución durante F1, fijar estrategia compatible |
 | Q04 | ¿Qué check requerido y presupuesto Actions tiene el repo? | Maintainer; propuesta concreta CI, sin cambiar protección remota aquí |
 | Q05 | ¿Qué prueba de restauración/backups existe operativamente? | Operador; RNF5 no puede acreditarse con E2E ni con Render free |
 
-Estas aclaraciones no impiden diseñar el resto de la suite. Casos que dependen de Q02
-se marcan «propuesto / aclaración» con requisito esperado y sin código HTTP inventado.
+Q02 está resuelta y validada en F4. Las demás preguntas conservan su alcance;
+ninguna exclusión pendiente se presenta como aprobada.
 No se detectó otro endpoint documentado ausente en el barrido de 50 operaciones;
 no equivale a verificación exhaustiva de conformidad runtime de todos los DTO/códigos.
 Los 413/415 transversales no están declarados en todas las operaciones OpenAPI.

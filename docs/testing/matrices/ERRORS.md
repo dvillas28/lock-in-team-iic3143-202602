@@ -40,7 +40,7 @@ No asumir422 para toda validación ni403 para toda invisibilidad. Usar body/UUID
 
 El inventario lista códigos declarados de cada operación;500/503 sí son parte de varios contratos,
 no significa que todos los fallos DB den el mismo código. SQL23505→409;23514/23503→422;
-fallos de conexión reconocidos→503; otros inesperados500. NUL metadatos Q02 requiere contrato explícito.
+fallos de conexión reconocidos→503; otros inesperados500. NUL en metadatos Q02 rechaza con HTTP400 según decisión acordada y validada en F4.
 413/415 son posibles por parser global pero no se declaran en cada path: D09/FINDINGS, sin editarOpenAPI.
 405 no es promesa del MVP: rutas DELETE inexistentes pueden devolver404 por framework; no fijar405.
 408/504 no se inventan para timeout cliente; proxy HTTP externo no forma parte baseline local.

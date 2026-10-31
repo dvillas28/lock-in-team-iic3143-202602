@@ -1,7 +1,7 @@
 # Catálogo maestro de pruebas
 
 Base y límites: [auditoría](audit/BASELINE.md). Estado actual por ID en
-[ledger de implementación](execution/IMPLEMENTATION_STATUS.md);85 fichas aprobadas al cierre F3.
+[ledger de implementación](execution/IMPLEMENTATION_STATUS.md);139 fichas aprobadas al cierre F4.
 **248 fichas**: **222 E2E de navegador** (B/M) y
 **26 comprobaciones complementarias** HTTP/SQL/operación (H/O).
 Se identifican **34 familias de flujos** con operaciones y transiciones detalladas,
@@ -69,4 +69,4 @@ pero ningún defecto P0 conocido se admite como verde de entrega aunque el smoke
 Las fichas incluyen requisito, evidencia, objetivo, criticidad, actor/tenant, precondiciones,
 datos, pasos, UI/API/persistencia/denegación, limpieza, dependencias, nivel/suite y estado.
 Los defaults se resuelven mediante el diccionario enlazado; no implican compartir estado mutable.
-Un escenario Q02 permanece bloqueado por aclaración, sin status inventado ni skip que dé cobertura.
+Q02 resuelto por decisión del usuario: NUL en metadatos rechaza con HTTP400 y sin persistencia parcial.

@@ -29,7 +29,7 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
 - Dependencias: F1 entorno/seed listo; [fase F4](../roadmap/F4.md); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador real; regression (regression incluye smoke; extended incluye regression).
-- Estado del test: Propuesto; sin implementar ni ejecutar.
+- Estado del test: Aprobado localmente; ver[estado y evidencia](../execution/IMPLEMENTATION_STATUS.md).
 
 <a id="e2e-course-012"></a>
 
@@ -56,7 +56,7 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
 - Dependencias: F1 entorno/seed listo; [fase F4](../roadmap/F4.md); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador + comprobación API/SQL; extended (regression incluye smoke; extended incluye regression).
-- Estado del test: Propuesto; sin implementar ni ejecutar.
+- Estado del test: Aprobado localmente; ver[estado y evidencia](../execution/IMPLEMENTATION_STATUS.md).
 
 <a id="e2e-course-013"></a>
 
@@ -83,4 +83,4 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
 - Dependencias: F1 entorno/seed listo; [fase F4](../roadmap/F4.md); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: Complemento HTTP de integración; sin navegador; extended (regression incluye smoke; extended incluye regression).
-- Estado del test: Implementado; fix5b9c242 y4 variantes HTTP400 verificadas; aceptación F4 pendiente.
+- Estado del test: Aprobado localmente; ver[estado y evidencia](../execution/IMPLEMENTATION_STATUS.md).

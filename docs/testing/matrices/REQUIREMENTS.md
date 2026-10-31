@@ -70,7 +70,7 @@ Mapeo oficial agrupado: [backlog](../../deliveries/2/08-work-plan-detail/08-work
 [frontend coverage](../../frontend/coverage.md) y [issues](../audit/BASELINE.md). Verificar tarjeta vigente al crear rama.
 D04: texto primer intento no prevalece sobre publicación irreversible del ADR; QUIZ-016 exige409 ya publicado.
 D15/16/17: API disponible sin pantalla no se cuenta como flujo de UI completo; H/M cubren sus efectos actuales.
-Q02: COURSE-013 requiere aclarar status normativo para NUL; no marcar requisito100% por ese caso pendiente.
+Q02 resuelto: COURSE-013 exige HTTP400 para NUL,sin persistencia parcial; evidencia en execution/F4_VALIDATION.md.
 
 ## Requisitos adicionales del catálogo estático
 
