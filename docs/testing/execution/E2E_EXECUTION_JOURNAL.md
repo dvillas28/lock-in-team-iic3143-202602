@@ -35,7 +35,7 @@ se aplican los permisos del usuario. El runner detecta automáticamente la cach�
 La ejecución normal es headless. La alternativa visual no cambia las aserciones.
 El inspector ofrece controles de pausa/avance; requiere interacción humana para continuar.
 El comando all incluye512 instancias configuradas de F1–F6; no fue ejecutado tras F6.
-Evidencia histórica:248/248 fichas; F5/F6 se validaron por incrementos, repitiendo solo fallidas.
+Evidencia histórica:248/248 fichas; F5/F6 se validaron por incrementos; NETWORK-008 tuvo además repetición por protección de trazas.
 No ejecutar dos runners a la vez en el mismo checkout: comparten los puertos/builds locales.
 En macOS,opcionalmente:`caffeinate -i pnpm test:e2e:all` evita suspensión por inactividad durante el comando.
 
@@ -122,6 +122,6 @@ pnpm test:e2e:f6 --grep E2E-NETWORK-003
 pnpm --dir e2e exec playwright show-report reports/600966c85750d479/html
 ```
 
-F6_VALIDATION.md conserva siete runs:68 variantes/motores aprobados; no hubo un único run68 PASS.
+F6_VALIDATION.md conserva ocho runs:68 variantes/motores aprobados; no hubo un único run68 PASS.
 No se repitieron F1–F5. Reportes locales ignorados por Git; otro equipo debe copiarlos o recrearlos
 con los comandos de la rama permanente. La guía se consolidará al cerrar F7.

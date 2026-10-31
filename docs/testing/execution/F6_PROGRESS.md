@@ -39,12 +39,13 @@ No producción, push, despliegue ni merge. F7 no iniciada.
 - a1384ea:cruces obligatorios;600966c85750d479:27 PASS;a8da79e3e69bd6aa:1 PASS.
 
 21 fichas/68 variantes-motores aceptadas,41 Chromium/13 Firefox/14 WebKit.
-74 ejecuciones totales,68 PASS distintos y seis fallos diagnósticos corregidos, todos conservados.
-Cada run inició y terminó limpio; no se repitieron aprobadas ni F1–F5. No hay un único run68 PASS.
-Siete stacks propios eliminados, puertos locales cerrados. F7 no iniciada; detenerse para revisión.
+76 ejecuciones totales:68 PASS distintos,seis fallos diagnósticos corregidos y dos repeticiones
+dirigidas de NETWORK-008 tras endurecer el registro de trazas.
+Cada run inició y terminó limpio; no se repitieron F1–F5 ni otras aprobadas. No hay un único run68 PASS.
+Ocho stacks propios eliminados, puertos locales cerrados. F7 no iniciada; detenerse para revisión.
 
-## Revisión final de artefactos
+## Revisión final de artefactos completada
 
 NETWORK-008 pausa la traza durante su segundo login SPA y la reinicia tras autenticar,
-para excluir credenciales también en ese recorrido. Se repetirá solo ese caso en Chromium/WebKit.
-El cierre de evidencia se actualizará después; el código funcional del flujo no cambia.
+para excluir credenciales también en ese recorrido. Fix7db63b0;run711e5956b8000d6f sobre8bb038b:
+2 PASS, Chromium/WebKit. Aceptación incremental verificada por manifest; no cambia el flujo funcional.

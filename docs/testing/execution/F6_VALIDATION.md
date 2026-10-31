@@ -1,8 +1,9 @@
 # F6 — Red, accesibilidad y compatibilidad validadas
 
 Corte:2026-10-31. **F6 aceptada localmente por incrementos. Detenerse antes de F7.**
-Rama acumulativa `test/e2e-f6`, desde `83d9fd7` (F5). Código final `a1384ea`.
-Solo se ejecutaron pruebas/variantes nuevas y correcciones de fallidas; F1–F5 no se repitieron.
+Rama acumulativa `test/e2e-f6`, desde `83d9fd7` (F5). Código final `7db63b0`; último run sobre `8bb038b` (incluye checkpoint documental).
+Solo se ejecutaron variantes nuevas, correcciones y el caso afectado por protección de trazas;
+F1–F5 no se repitieron.
 
 ## Evidencia por incremento
 
@@ -15,16 +16,18 @@ Solo se ejecutaron pruebas/variantes nuevas y correcciones de fallidas; F1–F5 
 | cfc1c51117db3bf8 | 96f704c | Cuatro variantes nuevas375px/temas en Firefox/WebKit | 4 PASS |
 | 600966c85750d479 | a1384ea | Nueve cruces nuevos en tres motores | 27 PASS |
 | a8da79e3e69bd6aa | a1384ea | 401 tardío en WebKit, variante nueva | 1 PASS |
+| 711e5956b8000d6f | 8bb038b | Solo NETWORK-008 Chromium/WebKit tras excluir el segundo login de trazas | 2 PASS |
 
 Todos los runs tuvieron dirtyAtStart=false y dirty=false, seed `academix-e2e-v1`, retries locales0.
 **21 fichas,68 combinaciones variante/motor aprobadas**:41 Chromium,13 Firefox y14 WebKit.
 Son66 instancias de navegador y2 complementarias HTTP (NETWORK-010/012).
-Hubo74 ejecuciones:68 PASS distintos y6 fallos diagnósticos corregidos; no se repitieron aprobadas.
+Hubo76 ejecuciones:68 PASS distintos,6 fallos diagnósticos corregidos y2 repeticiones dirigidas
+de NETWORK-008 por el cambio de protección de trazas. Las otras aprobadas no se repitieron.
 **No hubo un único run68 PASS ni regresión completa F1–F6.** Los resultados originales se conservan.
-El verificador local `e2e/reports/a8da79e3e69bd6aa/acceptance-F6.json` contrasta las observaciones
+El verificador local `e2e/reports/711e5956b8000d6f/acceptance-F6.json` contrasta las observaciones
 más recientes de cada variante/motor con el manifest y conserva también los seis fallos originales.
-`coverage` del último run solo observa NETWORK-008/WebKit y lo marca parcial porque falta Chromium
-en ese run; no contradice la aceptación por evidencias separadas ni acredita una regresión global.
+`coverage` del último run acredita solo NETWORK-008, con sus dos motores; no acredita las otras20
+fichas de F6 ni una regresión global. La aceptación completa requiere las ocho evidencias citadas.
 
 ## Tareas cerradas
 
@@ -35,7 +38,7 @@ en ese run; no contradice la aceptación por evidencias separadas ni acredita un
 | T03 | Login por teclado, radios, foco contenido/retorno, Escape, revocación,375px, temas, reflow200%, reduced-motion y expiración de avisos sin perder recibos/bloqueos |
 | T04 | Recorrido académico en tres motores;375px/temas por rol; cruces obligatorios y pares trazados en F6_COMBINATIONS |
 | T05 | Barrera en dos navegadores para crear módulo; barrera SQL con dos publicaciones esperando; revocación durante revalidación y respuesta tardía en otro curso |
-| T06 | Tiempos reales de fixture/login/cleanup, diagnósticos por causa y eliminación de los siete stacks propios verificada |
+| T06 | Tiempos reales de fixture/login/cleanup, diagnósticos por causa y eliminación de los ocho stacks propios verificada |
 
 Las barreras no asumen quién gana. La publicación exige un200, un409 y un solo recibo/evento.
 Los fallos sintéticos de UX se identifican en el código; no se presentan como errores reales del servidor.
@@ -54,16 +57,18 @@ La instrumentación de tiempos agrega anotaciones sin cambiar setup, cleanup, l�
   aserción explícita de expiración y navegación offline mediante historial con vista ya cargada.
 - Barrera fallida: contaba también una lectura de fondo del libro y observaba3 conexiones bloqueadas.
   Se aislaron los dos escritores antes de abrir el libro; no se relajó el requisito de dos esperas.
+- El segundo login SPA de NETWORK-008 se excluyó de las trazas mediante stopTrace/trace;
+  sus dos motores se repitieron con código actualizado y checkout limpio. No hubo un fallo de producto.
 - No se aumentaron timeouts/retries ni se ocultaron fallos con skip/quarantine.
 
 ## Mediciones locales
 
 | Medida | Muestras | p50 | p95 | Máximo |
 | --- | --- | --- | --- | --- |
-| Duración Playwright por variante | 68 | 1681ms | 5644ms | 16342ms |
-| Setup, anotación incorporada al final | 36 | 735ms | 1135ms | 1381ms |
-| Login UI real | 40 | 246ms | 713ms | 2264ms |
-| Cleanup DB/API | 36 | 33ms | 57ms | 60ms |
+| Duración Playwright por variante | 68 | 1683ms | 5644ms | 16342ms |
+| Setup, anotación incorporada al final | 37 | 742ms | 1135ms | 1381ms |
+| Login UI real | 41 | 247ms | 713ms | 2264ms |
+| Cleanup DB/API | 37 | 33ms | 57ms | 60ms |
 
 Los tamaños de muestra difieren: la instrumentación se añadió después de los primeros incrementos.
 El máximo incluye el timeout deliberado15s; no es un fallo de infraestructura. No son veinte runs

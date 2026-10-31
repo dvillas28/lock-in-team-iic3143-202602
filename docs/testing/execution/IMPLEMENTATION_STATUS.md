@@ -7,7 +7,7 @@ Corte:**2026-10-31**. **F1–F6 aceptadas localmente por incrementos; F7 pendien
 ## Conservación y entorno
 
 - Checkout permanente:`/Users/julian/lock-in-team-iic3143-202602`, rama `test/e2e-f6`.
-- Código final F6:`a1384ea`; commits77e3b56/efb5e26/c687c8b/96f704c/a1384ea, historia anterior conservada.
+- Código final F6:`7db63b0`; historia y commits de incrementos conservados; último run sobre8bb038b.
 - `dev`:90463059015e5045d011eadd12b6403b7b492615; `main`:294eb5b4642479772a921ce56ce860c2f329abb6.
 - Sin push, merge, despliegue ni producción; no depende de la copia temporal inicial.
 - PostgreSQL17, Next/Nest y migraciones reales; DB por variante/retry, runtime con RLS y cleanup owned.
@@ -19,10 +19,11 @@ Corte:**2026-10-31**. **F1–F6 aceptadas localmente por incrementos; F7 pendien
 | --- | --- | --- |
 | F1–F4 histórico, no repetido | d014cf0385019d99 / 6db9541 | 329 PASS;139 fichas |
 | F5 | 2e26783d10b0fd6b +31cd7b0254fc4196 | 88 fichas/115 variantes aceptadas por corrección dirigida |
-| F6 | Siete runs listados en F6_VALIDATION | 21 fichas/68 variantes aceptadas;41 Chromium/13 Firefox/14 WebKit |
+| F6 | Ocho runs listados en F6_VALIDATION | 21 fichas/68 variantes aceptadas;41 Chromium/13 Firefox/14 WebKit |
 
-F6:74 ejecuciones,68 PASS distintos y6 fallos del harness corregidos; ningún skip/retry local.
-Cada run F6 empezó y terminó limpio. Los siete stacks propios se eliminaron; puertos locales cerrados.
+F6:76 ejecuciones,68 PASS distintos,6 fallos corregidos y2 repeticiones por protección de trazas;
+ningún skip/retry local. Solo NETWORK-008 se repitió tras ese cambio de instrumentación.
+Cada run F6 empezó y terminó limpio. Los ocho stacks propios se eliminaron; puertos locales cerrados.
 F1–F5 y las variantes aprobadas no se repitieron, conforme a la instrucción de ahorrar ejecución.
 El catálogo contiene222 fichas de navegador y26 complementarias; no confundir con512 instancias configuradas.
 No hubo un único run68 PASS de F6 ni regresión completa F1–F6 tras estos cambios.

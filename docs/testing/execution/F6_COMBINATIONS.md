@@ -39,7 +39,7 @@ No se afirma cobertura del producto cartesiano de todos los estados ni de todos 
 | ATTEMPT-016, UCstudent/WebKit/1440/light | A11Y-007/lost-save, commit real y respuesta descartada |
 | GRADE-029, UTFSMteacher/Chromium/375/dark | A11Y-007/lost-publication, replay exacto y recibo único |
 | AUDIT-003, UCownerstudent/Firefox/375/dark | A11Y-007/owner-student-dark; Grade ausente y dos eventos reales conservados |
-| NETWORK-008, ST1→ST2/WebKit/1440/light | a8da79e3e69bd6aa, login SPA y401 tardío |
+| NETWORK-008, ST1→ST2/WebKit/1440/light | 711e5956b8000d6f, login SPA sin captura de credenciales y401 tardío |
 
 Las nueve variantes adicionales de A11Y-007 se ejecutaron en los tres motores en600966c85750d479.
 No se renombran fichas históricas ni se suman estas variantes como casos nuevos del catálogo.

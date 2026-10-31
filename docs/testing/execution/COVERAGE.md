@@ -29,13 +29,14 @@ Se cuentan fichas únicas aceptadas históricamente; no es cobertura de código 
 - F5:88 fichas nuevas,86 navegador y2 complementarias;115 variantes/motores.
 - Run completo2e26783d10b0fd6b, SHA1e57418:114 PASS/1 FAIL del harness.
 - Solo ATTEMPT-009 cambió después; correctivo31cd7b0254fc4196, SHA3c709a3:1 PASS.
-- Por petición del usuario no se repitieron variantes aprobadas ni fases antiguas.
+- Por petición del usuario no se repitieron fases antiguas ni aprobadas salvo NETWORK-008 tras el cambio de trazas.
 - Ambos runs finales F5 tuvieron checkout limpio y cleanup; no hubo un único run115 PASS.
-- F6:21 fichas/68 variantes-motores, siete runs;68 PASS distintos y6 fallos diagnósticos corregidos.
+- F6:21 fichas/68 variantes-motores, ocho runs;68 PASS distintos y6 fallos diagnósticos corregidos.
+- Solo NETWORK-008 se repitió además en dos motores tras excluir el segundo login de trazas.
 - Configuradas512 instancias acumuladas; no se afirma haberlas ejecutado juntas después de F6.
 - Declaradas las22 fichas smoke en tres motores; F6 agrega compatibilidad sin repetir el smoke antiguo.
 - Reportes de diagnóstico y el timeout histórico de F3 permanecen visibles; estabilidad F7 pendiente.
 
 Estado individual:[01](CASES_01.md),[02](CASES_02.md),[03](CASES_03.md),[04](CASES_04.md).
-`pnpm --dir e2e coverage` muestra solo el último run:NETWORK-008/WebKit queda parcial en ese run.
+`pnpm --dir e2e coverage` muestra solo el último run:NETWORK-008 aprobado en sus dos motores; no las248 fichas.
 La aceptación histórica de248 requiere las fuentes citadas; no se fusionan los reportes originales.
