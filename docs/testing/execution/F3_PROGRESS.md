@@ -17,6 +17,12 @@ Run diagnóstico a02f540a225ed672:11 PASS/6 FAIL, problemas de fixture/expectati
 Tras corregirlos, eec5df6864bca3a2:17 PASS/0 FAIL (checkout con cambios locales).
 AUTH-007/009/020 se añadieron después de ese run; no atribuirles esos17 resultados.
 
+Run `8108476f612f48ed`, commit `c4ffa102cd25c2e37c6c5ec2ff664acf71ee690a`: **20 PASS**, exit0,
+dirtyAtStart=false y dirty=false. AUTH-007/009/020 pasan también en34e712e53c5288b0.
+AUTH-020 se reforzó para esperar GET me200 y exigir exactamente una revalidación: run08f752880ad15431,
+1 PASS (cambio local posterior al commit del run de20). Typecheck/lint y11 unitarios PASS.
+Esto valida un incremento de11 fichas AUTH, no las54 fichas asignadas a F3 ni la regresión acumulada.
+
 ## Ejecución y demostración
 
 Consultar E2E_EXECUTION_JOURNAL.md: guía incremental, comandos por fase, navegador visible,

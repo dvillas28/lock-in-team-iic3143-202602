@@ -43,7 +43,7 @@ No ejecutar dos runners a la vez en el mismo checkout: comparten los puertos/bui
 | --- | --- | --- |
 | F1 | `pnpm test:e2e:f1` | Aceptada:16 instancias Chromium al cierre original |
 | F2 | `pnpm test:e2e:f2` | Aceptada:47 Chromium;61 incluyendo smoke de otros motores |
-| F3 | `pnpm test:e2e:f3` | En implementación; el comando ejecuta solo lo escrito hasta ahora |
+| F3 | `pnpm test:e2e:f3` | Parcial:20 variantes AUTH aprobadas; matrices F3 restantes pendientes |
 | F4–F7 | Pendiente | Añadir comandos/evidencias cuando se implementen |
 
 ```bash

@@ -135,10 +135,12 @@ test('E2E-AUTH-020 focus revalidation preserves unsaved answer / draft-focus @re
   const answer=page.getByRole('radio',{name:'Respuesta correcta 1',exact:true});
   await answer.check();let saves=0;let revalidations=0;
   page.on('request',r=>{if(r.method()==='PUT')saves++;if(r.url().endsWith('/me'))revalidations++;});
+  const refreshed=page.waitForResponse(r=>r.url().endsWith('/me'));
   await page.evaluate(()=>{window.dispatchEvent(new Event('focus'));window.dispatchEvent(new Event('pageshow'));document.dispatchEvent(new Event('visibilitychange'));});
+  expect((await refreshed).status()).toBe(200);
   await expect(answer).toBeChecked();
   expect((await e.pool.query('SELECT answers FROM quiz_attempts WHERE id=$1',[attempt.id])).rows[0].answers).toEqual([]);
-  expect(saves).toBe(0);expect(revalidations).toBeLessThanOrEqual(1);
+  expect(saves).toBe(0);expect(revalidations).toBe(1);
   const saved=page.waitForResponse(r=>r.request().method()==='PUT' && r.url().endsWith('/answers'));
   await page.getByRole('button',{name:'Guardar respuestas',exact:true}).click();expect((await saved).status()).toBe(200);
   expect((await e.pool.query('SELECT answers FROM quiz_attempts WHERE id=$1',[attempt.id])).rows[0].answers).toHaveLength(1);
