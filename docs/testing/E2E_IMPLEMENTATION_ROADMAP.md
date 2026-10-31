@@ -1,10 +1,10 @@
 # Roadmap y backlog de implementación posterior
 
-Ejecución iniciada: F1 bloqueada; las fases restantes no se consideran completadas.
+Ejecución iniciada: F1 aceptada localmente; las fases restantes no se consideran completadas.
 Consultar [evidencia y ledger](execution/IMPLEMENTATION_STATUS.md), separado de estimaciones.
 
 El plan original se conserva. La implementación inicial vive en `test/e2e-implementation`,
-basada en `test/e2e-master-plan`; F1 todavía no supera su gate. Los siguientes paquetes serán pequeños. Correcciones del producto se separan en ramas fix/feat;
+basada en `test/e2e-master-plan`; F1 superó su gate local; ver evidencia vigente. Los siguientes paquetes serán pequeños. Correcciones del producto se separan en ramas fix/feat;
 no ocultar cambios funcionales dentro de tests ni ampliar MVP para completar catálogo.
 
 | Fase / backlog | Objetivo | Horas persona | Complejidad | Dependencia |

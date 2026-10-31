@@ -1,7 +1,7 @@
 # Ejecutar el harness E2E
 
 Estado actual: infraestructura inicial y un escenario de login escrito; **suite incompleta**.
-AUTH-001 aprueba cinco variantes Chromium en ejecución local autorizada. F1 sigue sin aceptación OPS.
+AUTH-001 aprueba cinco variantes Chromium en ejecución local autorizada. F1 aceptada localmente con nueve fichas OPS; suite incompleta.
 [Evidencia y límites](execution/IMPLEMENTATION_STATUS.md) · [Catálogo original](E2E_TEST_CATALOG.md).
 
 ## Checkout permanente y ejecución local
@@ -17,7 +17,7 @@ PLAYWRIGHT_BROWSERS_PATH="$PWD/e2e/.cache/browsers" \
 ```
 
 La caché local ignorada contiene Chromium; los reportes están en `e2e/reports/`.
-Para ejecutar todo lo implementado, quitar `--grep E2E-AUTH-001`: actualmente son las mismas cinco variantes.
+Para ejecutar todo lo implementado, quitar `--grep E2E-AUTH-001`: se incluyen AUTH-001 y las nueve fichas OPS (16 instancias en Chromium).
 Estos comandos crean un stack local propio y no requieren la copia ni los binarios de `/private/tmp`.
 
 ## Requisitos e instalación
@@ -59,7 +59,7 @@ Cada test crea una base*_test exclusiva, aplica predeploy/migraciones/provision-
 ejecuta seed E2E y arranca Nest con academix_runtime. No se desactiva RLS ni constraints.
 La seed contiene dos instituciones, perfiles institucionales/académicos, multirol, cursos,
 secciones, matrículas, módulos, Markdown y quizzes draft/publicados. Helpers preparan intentos/notas
-por API real; esos helpers todavía no se han validado. La inserción SQL sí pasó en PostgreSQL17.
+por API real; los perfiles ACTIVE/PUBLISHABLE/HISTORY y ensure se validaron en F1 con PostgreSQL17.
 `ensure` no repone privilegios ni ediciones. No ejecutar manualmente la seed sobre una DB ajena.
 
 ## Comandos

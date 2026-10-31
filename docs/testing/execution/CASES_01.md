@@ -1,6 +1,6 @@
 # Estado por caso · 01
 
-[Evidencia y límites](IMPLEMENTATION_STATUS.md). Corte: 2026-10-31; AUTH-001 aprobada, F1 sin aceptación.
+[Evidencia y límites](IMPLEMENTATION_STATUS.md). Corte: 2026-10-31; F1 aceptada localmente;10 fichas aprobadas.
 
 | Caso / ficha reproducible | Estado real | Archivo / bloqueo |
 | --- | --- | --- |

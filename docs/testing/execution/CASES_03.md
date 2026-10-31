@@ -1,6 +1,6 @@
 # Estado por caso · 03
 
-[Evidencia y límites](IMPLEMENTATION_STATUS.md). Corte: 2026-10-31; AUTH-001 aprobada, F1 sin aceptación.
+[Evidencia y límites](IMPLEMENTATION_STATUS.md). Corte: 2026-10-31; F1 aceptada localmente;10 fichas aprobadas.
 
 | Caso / ficha reproducible | Estado real | Archivo / bloqueo |
 | --- | --- | --- |
@@ -60,9 +60,9 @@
 | [E2E-NETWORK-011](../catalog/network-03.md#e2e-network-011) | Pendiente de implementación | F1 sin aceptación; no existe test de esta ficha. |
 | [E2E-NETWORK-012](../catalog/network-03.md#e2e-network-012) | Pendiente de implementación | F1 sin aceptación; no existe test de esta ficha. |
 | [E2E-NETWORK-013](../catalog/network-03.md#e2e-network-013) | Pendiente de implementación | F1 sin aceptación; no existe test de esta ficha. |
-| [E2E-OPS-001](../catalog/ops-01.md#e2e-ops-001) | Pendiente de implementación | F1 sin aceptación; no existe test de esta ficha. |
-| [E2E-OPS-002](../catalog/ops-01.md#e2e-ops-002) | Pendiente de implementación | F1 sin aceptación; no existe test de esta ficha. |
-| [E2E-OPS-003](../catalog/ops-01.md#e2e-ops-003) | Pendiente de implementación | F1 sin aceptación; no existe test de esta ficha. |
-| [E2E-OPS-004](../catalog/ops-01.md#e2e-ops-004) | Pendiente de implementación | F1 sin aceptación; no existe test de esta ficha. |
-| [E2E-OPS-005](../catalog/ops-01.md#e2e-ops-005) | Pendiente de implementación | F1 sin aceptación; no existe test de esta ficha. |
-| [E2E-OPS-006](../catalog/ops-02.md#e2e-ops-006) | Pendiente de implementación | F1 sin aceptación; no existe test de esta ficha. |
+| [E2E-OPS-001](../catalog/ops-01.md#e2e-ops-001) | Ejecutado y aprobado | [F1_VALIDATION](F1_VALIDATION.md), dos runs limpios; ver variantes. |
+| [E2E-OPS-002](../catalog/ops-01.md#e2e-ops-002) | Ejecutado y aprobado | [F1_VALIDATION](F1_VALIDATION.md), dos runs limpios; ver variantes. |
+| [E2E-OPS-003](../catalog/ops-01.md#e2e-ops-003) | Ejecutado y aprobado | [F1_VALIDATION](F1_VALIDATION.md), dos runs limpios; ver variantes. |
+| [E2E-OPS-004](../catalog/ops-01.md#e2e-ops-004) | Ejecutado y aprobado | [F1_VALIDATION](F1_VALIDATION.md), dos runs limpios; ver variantes. |
+| [E2E-OPS-005](../catalog/ops-01.md#e2e-ops-005) | Ejecutado y aprobado | [F1_VALIDATION](F1_VALIDATION.md), dos runs limpios; ver variantes. |
+| [E2E-OPS-006](../catalog/ops-02.md#e2e-ops-006) | Ejecutado y aprobado | [F1_VALIDATION](F1_VALIDATION.md), dos runs limpios; ver variantes. |

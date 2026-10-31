@@ -1,12 +1,12 @@
 # Estado por caso · 04
 
-[Evidencia y límites](IMPLEMENTATION_STATUS.md). Corte: 2026-10-31; AUTH-001 aprobada, F1 sin aceptación.
+[Evidencia y límites](IMPLEMENTATION_STATUS.md). Corte: 2026-10-31; F1 aceptada localmente;10 fichas aprobadas.
 
 | Caso / ficha reproducible | Estado real | Archivo / bloqueo |
 | --- | --- | --- |
-| [E2E-OPS-007](../catalog/ops-02.md#e2e-ops-007) | Pendiente de implementación | F1 sin aceptación; no existe test de esta ficha. |
-| [E2E-OPS-008](../catalog/ops-02.md#e2e-ops-008) | Implementación parcial | [guard.test.ts](../../../e2e/unit/guard.test.ts): 5 checks pasan; falta camino permitido real con DB. |
-| [E2E-OPS-009](../catalog/ops-02.md#e2e-ops-009) | Pendiente de implementación | F1 sin aceptación; no existe test de esta ficha. |
+| [E2E-OPS-007](../catalog/ops-02.md#e2e-ops-007) | Ejecutado y aprobado | [F1_VALIDATION](F1_VALIDATION.md), dos runs limpios; ver variantes. |
+| [E2E-OPS-008](../catalog/ops-02.md#e2e-ops-008) | Ejecutado y aprobado | [F1_VALIDATION](F1_VALIDATION.md), dos runs limpios; ver variantes. |
+| [E2E-OPS-009](../catalog/ops-02.md#e2e-ops-009) | Ejecutado y aprobado | [F1_VALIDATION](F1_VALIDATION.md), dos runs limpios; ver variantes. |
 | [E2E-PUBLIC-001](../catalog/public-01.md#e2e-public-001) | Pendiente de implementación | F1 sin aceptación; no existe test de esta ficha. |
 | [E2E-PUBLIC-002](../catalog/public-01.md#e2e-public-002) | Pendiente de implementación | F1 sin aceptación; no existe test de esta ficha. |
 | [E2E-PUBLIC-003](../catalog/public-01.md#e2e-public-003) | Pendiente de implementación | F1 sin aceptación; no existe test de esta ficha. |

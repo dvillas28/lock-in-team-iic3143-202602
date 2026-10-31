@@ -1,87 +1,43 @@
 # Implementación E2E: estado verificable
 
-Corte local: **2026-10-31**. **Trabajo parcial; AUTH-001 aprobada, F1 sin aceptación.**
-[Una ficha de 248 aprobada](COVERAGE.md) · [Cómo ejecutar](../E2E_README.md).
+Corte local **2026-10-31**. **F1 aceptada localmente; F2 en implementación; suite incompleta.**
+[Validación F1](F1_VALIDATION.md) · [Cobertura](COVERAGE.md) · [Ejecución](../E2E_README.md).
 
-## Rama y conservación del trabajo
+## Conservación y entorno
 
-- Base `test/e2e-master-plan`, SHA1978e2e; el plan no estaba integrado en dev9046305.
-- Rama `test/e2e-implementation` en `/Users/julian/lock-in-team-iic3143-202602` (checkout permanente).
-- Se usó inicialmente `/private/tmp/academix-e2e-implementation` por restricciones de escritura en `.git`.
-  La rama se importó localmente al repositorio permanente con ejecución autorizada; copia temporal conservada.
-- Checkout permanente activo en `test/e2e-implementation`; `dev` sigue en
-  `90463059015e5045d011eadd12b6403b7b492615`. Commits anteriores y corrección70412b9 conservados.
-- Commits previos conservados; sin merge, push, PR, despliegue ni conexiones a DB existente/productiva.
-- Sin cambios en frontend, backend, contrato, migraciones ni workflows anteriores.
+- Checkout permanente: `/Users/julian/lock-in-team-iic3143-202602`.
+- Rama F1 `test/e2e-f1`, desde `test/e2e-implementation`; commits anteriores conservados.
+- `dev` conserva90463059015e5045d011eadd12b6403b7b492615; sin push, merge ni producción.
+- La copia temporal inicial permanece como respaldo; ejecución y Chromium usan el checkout permanente.
+- PostgreSQL17/Chromium requieren ejecución local autorizada; ENV-01/02 resueltos en esa modalidad.
+- No se modificaron frontend, backend, migraciones ni contrato durante F1.
 
-## Implementación existente
+## Implementado y ejecutado
 
-- [Paquete Playwright/TypeScript](../../../e2e/package.json), lockfile separado, lint y typecheck.
-- [Configuración](../../../e2e/playwright.config.ts): Chromium inicial, motores alternativos,
-  un worker/stack, retries0 local/1 CI, timeout90s y esperas por estado/respuesta.
-- [Runner](../../../e2e/runner/run.ts): PG17 nuevo, build Next/Nest, Next standalone,
-  orígenes UC/UTFSM locales; Nest real por caso, sin mocks del backend ni token inyectado en React.
-  La ruta standalone usa `relativeAppDir` del build; los assets se copian junto al servidor generado.
-- [Fixture](../../../e2e/fixtures/environment.ts): DB exclusiva por caso/retry, predeploy existente,
-  rol academix_runtime sin desactivar RLS, ownership antes de limpiar; ejecutada por AUTH-001.
-- [Seed](../../../e2e/data/seed.ts): 2 instituciones, 23 actores, membresías multirol/contexto,
-  7 cursos, 9 secciones, matrículas, 4 módulos, 3 Markdown, 8 quizzes y GradeItems.
-  Inserción validada contra PG17; helpers de intentos/notas/publicaciones aún sin validar.
-- [Guard y sanitización](../../../e2e/unit/guard.test.ts): destinos construidos por runner,
-  URLs ajenas rechazadas, credenciales heredadas eliminadas, comprobación previa de ownership.
-- [Reportes](../../../e2e/runner/coverage.ts): HTML/JSON/JUnit por runId; trazas postlogin,
-  redacción de credenciales antes de adjuntar y screenshots enmascaradas. Sin videos de credenciales.
-- [AUTH-001](../../../e2e/specs/auth.smoke.spec.ts): 5 variantes SA/AO/T1/AS1/ST1 aprobadas,
-  login UI real, contrato login, me/directorio autorizados, identidad, cursos y sesión solo RAM.
-- [Workflow nuevo](../../../.github/workflows/e2e.yml): smoke PR, regression dev, extended programado,
-  artifacts14d. **No ejecutado en GitHub**; protección de ramas sin configurar.
+- Runner propio: PostgreSQL17, build Next/Nest, standalone con `relativeAppDir` y static correctos.
+- DB por caso/retry, migraciones reales, `academix_runtime` sin bypass RLS y cleanup con ownership.
+- Seed: 2 instituciones, 23 actores, 7 cursos, 9 secciones, contenido y quizzes sintéticos.
+- Perfiles ACTIVE/PUBLISHABLE/HISTORY por API real; helpers de calificación/publicación validados.
+- Manifest tipado: actor, tenant, proyecto y nivel; ficha exige todas sus variantes declaradas.
+- Reportes SHA/seedversion/dirty al inicio y final, HTML/JSON/JUnit, flaky separado y errores sanitizados.
+- AUTH-001: SA/AO/T1/AS1/ST1; OPS-001…009 con pruebas positivas/negativas de infraestructura e integridad.
 
-## Entorno: ENV-01 y ENV-02 resueltos para ejecución autorizada
+## Evidencia vigente
 
-El sandbox ordinario sigue restringiendo procesos: el primer intento del 31oct falló al crear
-el socket IPC de tsx (`listen EPERM`), antes de iniciar el runner. La sesión actual permite solicitar
-escalación; las ejecuciones autorizadas pudieron iniciar PostgreSQL17 y Chromium.
+Código `05fb1af5326226276d98df8cdce3d66d5bef71e9`, dos ejecuciones con checkout limpio:
+882298137195cca0 y c76306a0e684865a. Ambas **16 PASS, 0 FAIL/skip/flaky**.
+Son **10 fichas aprobadas de248**, distribuidas en3 de navegador y7 complementarias.
+Typecheck/lint/diez unitarios PASS. Ningún directorio PG retenido por los dos runs aprobados.
+Los reportes están en `e2e/reports/<runId>/` (ignorados); el detalle durable está en F1_VALIDATION.
+El historial inicial y TEST-01 se conservan en [validación anterior](LOCAL_VALIDATION.md).
 
-- **ENV-01:** cluster PG17 nuevo, migraciones/provision-runtime y seed ejecutados por cada variante.
-- **ENV-02:** Chromium156.0.8078.4 arrancó y cerró en check independiente y ejecutó el LMS.
-- Chromium y reportes anteriores se copiaron a `e2e/.cache/browsers` y `e2e/reports` del checkout
-  permanente, ambos ignorados. Usar `PLAYWRIGHT_BROWSERS_PATH="$PWD/e2e/.cache/browsers"` desde su raíz.
-  La ejecución actual no depende de archivos temporales; la caché predeterminada tenía otra versión.
-- Primer run autorizado `afc3407c188ca3e5`: fallo de harness al buscar standalone en ruta incorrecta.
-  Se corrigió exclusivamente el runner y se añadió diagnóstico del proceso Next en readiness.
-- Estos resultados no acreditan ejecución con permisos ordinarios ni soporte Firefox/WebKit/Docker.
+## Pendiente
 
-## Revalidación en ubicación permanente
+- F2: PUBLIC/CATALOG y AUTH básico; luego F3 seguridad, F4 contenido, F5 ciclo académico,
+  F6 fallos/accesibilidad/compatibilidad, F7 CI/estabilidad, según roadmap e IDs originales.
+- Completar matrices UC↔UTFSM/roles por operación, cálculos independientes y carreras académicas.
+- Q02 adoptará HTTP400 para NUL, con corrección funcional separada si hace falta.
+- Workflow preparado, sin ejecución remota ni branch protection; sin permiso de push/merge.
+- 238 fichas aún pendientes; ninguna se declara aprobada por tener documentación o helpers.
 
-Run `e69505966733f428`, commit `094c455447fa8c2225421bda7efbc405ae214a82`, **dirty=false, exit0**.
-AUTH-001: **5/5 PASS** desde el checkout permanente, tests16,314s y total32,999s.
-Typecheck/lint/nueve unitarios: PASS. Chromium y dependencias E2E no tienen symlinks hacia `/private/tmp`.
-Reportes anteriores conservados; reporte nuevo en `e2e/reports/e69505966733f428/`.
-Las correcciones están comprometidas; los resultados ya no dependen de cambios locales sin commit.
-
-## Ejecución y métricas
-
-[Registro de comandos y resultados](LOCAL_VALIDATION.md).
-AUTH-001 aprueba sus cinco variantes en dos stacks nuevos; HTML/JSON/JUnit conservados localmente.
-Ambos runs parten de e4679a6 con corrección local del runner (`dirty=true`):
-`fca369872c1f358e` y `2d52bab34d20749d`. No se atribuye el resultado al commit sin esa corrección.
-
-**Por run: E2E ejecutados5; aprobados5; fallidos0; omitidos0; flaky0.**
-Son cinco variantes de **una ficha**, no cinco fichas. Typecheck, lint y nueve unitarios pasan.
-Los unitarios del harness no se suman a E2E ni completan OPS-008.
-
-Estado exhaustivo: [casos01](CASES_01.md), [02](CASES_02.md), [03](CASES_03.md), [04](CASES_04.md).
-Una ficha aprobada; OPS-008 parcial; Q02 sin aclarar; 245 fichas restantes pendientes.
-Login/visibilidad inicial comprobados para cinco roles UC; aislamiento adversarial UC↔UTFSM pendiente.
-
-## Qué falta para reanudar
-
-1. Completar OPS-001…009 y perfiles ACTIVE/PUBLISHABLE/HISTORY; verificar ensure/replay.
-2. Probar escenario negativo representativo, ownership adversarial y limpieza ante fallos;
-   las dos repeticiones positivas no sustituyen esos criterios de aceptación F1.
-3. Validar helpers de intentos/notas/publicaciones contra API/runtime reales.
-4. Aceptar F1 antes de implementar F2–F6, conservando IDs y defectos funcionales visibles.
-5. Ejecutar workflow y estabilizar F7. El YAML preparado no equivale a CI validado.
-
-Se cumplió el paso de desbloquear y ejecutar AUTH-001; **no se avanzó a F2**.
-La estimación284–432h del plan sigue como referencia histórica; no se afirma avance por horas.
+Las estimaciones del plan son históricas, no porcentajes de avance ni promesa de duración.
