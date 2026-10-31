@@ -3,6 +3,27 @@
 Corte: 2026-10-31, macOS, Node24.9.0; ejecución en copia aislada.
 [Estado y cobertura](IMPLEMENTATION_STATUS.md) · [Instrucciones reproducibles](../E2E_README.md).
 
+## Revalidación en checkout permanente · 31oct2026
+
+Ruta `/Users/julian/lock-in-team-iic3143-202602`, rama `test/e2e-implementation`.
+La rama conserva todos los commits anteriores; `dev` sigue en90463059015e5045d011eadd12b6403b7b492615.
+Chromium está en `e2e/.cache/browsers`; dependencias instaladas localmente con lockfile congelado.
+No hay symlinks a `/private/tmp` en `e2e/node_modules` ni en la caché Chromium.
+
+```bash
+cd /Users/julian/lock-in-team-iic3143-202602
+PLAYWRIGHT_BROWSERS_PATH="$PWD/e2e/.cache/browsers" \
+  pnpm --dir e2e run test --grep E2E-AUTH-001
+```
+
+Run `e69505966733f428`, commit `094c455447fa8c2225421bda7efbc405ae214a82`, **dirty=false, exit0**.
+SA/AO/T1/AS1/ST1: **5/5 PASS**, fallidos0, omitidos0, flaky0; tests16,314s, total32,999s.
+Typecheck, lint y nueve unitarios: PASS. Coverage: una ficha aprobada de248, pendientes247.
+HTML/JSON/JUnit/run.json guardados en `e2e/reports/e69505966733f428/`; latest.json apunta a este run.
+Escaneo JSON/XML/HTML sin coincidencias de patrones JWT ni URL PostgreSQL; sin traza real de fallo.
+El runner terminó con exit0; se verificó limpieza de puertos y directorio PG de este run.
+No se utilizó producción, no hubo merge ni push. F1 sigue pendiente OPS; no se inició F2.
+
 ## Reanudación autorizada · 31oct2026
 
 PostgreSQL17 y Chromium156.0.8078.4 arrancan al solicitar ejecución con permisos adicionales.
@@ -33,7 +54,7 @@ SHA256 del runner probado: `1c6325cac0fd9e9ca72da4a8624ada6621c9b6f89ebd5a05399e
 No cambió frontend/backend, contrato, migraciones ni aserciones del smoke.
 
 HTML, results.json, junit.xml y run.json en `e2e/reports/<runId>/` (ignorados por Git).
-Cobertura del último run en su coverage.json; latest.json apunta a 2d52bab34d20749d.
+En ese corte, coverage.json y latest.json correspondían a 2d52bab34d20749d; hoy rige el run permanente.
 Cinco variantes son una ficha; dos repeticiones no acreditan una ventana de estabilidad.
 Seed SQL, migraciones y login real comprobados; ensure/replay y helpers académicos pendientes.
 ENV-01/02 quedan resueltos para esta ejecución autorizada. F1 continúa sin aceptación OPS.

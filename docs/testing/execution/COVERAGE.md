@@ -27,7 +27,7 @@ No equivalen a cobertura de código ni a funcionalidades validadas.
 | **Total** | **248** | **1** | **1** | **1** |
 
 - Definición inicial: 1/248 = 0,40%; navegador: 1/222 = 0,45%. No son porcentajes de aprobación.
-- Cobertura efectiva: 1/248 aprobadas = 0,40%; AUTH-001 pasó en dos stacks nuevos el 31oct2026.
+- Cobertura efectiva: 1/248 aprobadas = 0,40%; AUTH-001 pasó en tres stacks nuevos el 31oct2026, incluido el checkout permanente.
 - 247 fichas sin spec completo incluyen OPS-008 parcial y COURSE-013 pendiente Q02.
 - Login/visibilidad inicial validados: SA, AO, T1, AS1, ST1 en UC; sin acreditar su matriz completa de permisos.
 - UC/UTFSM: seed insertada en PG17; ninguna frontera adversarial ejecutada. Pendientes los P0 de aislamiento.

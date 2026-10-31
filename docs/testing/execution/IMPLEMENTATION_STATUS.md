@@ -51,6 +51,14 @@ escalación; las ejecuciones autorizadas pudieron iniciar PostgreSQL17 y Chromiu
   Se corrigió exclusivamente el runner y se añadió diagnóstico del proceso Next en readiness.
 - Estos resultados no acreditan ejecución con permisos ordinarios ni soporte Firefox/WebKit/Docker.
 
+## Revalidación en ubicación permanente
+
+Run `e69505966733f428`, commit `094c455447fa8c2225421bda7efbc405ae214a82`, **dirty=false, exit0**.
+AUTH-001: **5/5 PASS** desde el checkout permanente, tests16,314s y total32,999s.
+Typecheck/lint/nueve unitarios: PASS. Chromium y dependencias E2E no tienen symlinks hacia `/private/tmp`.
+Reportes anteriores conservados; reporte nuevo en `e2e/reports/e69505966733f428/`.
+Las correcciones están comprometidas; los resultados ya no dependen de cambios locales sin commit.
+
 ## Ejecución y métricas
 
 [Registro de comandos y resultados](LOCAL_VALIDATION.md).
