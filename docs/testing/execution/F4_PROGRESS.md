@@ -18,3 +18,16 @@ No push/merge ni producción; correcciones funcionales en rama fix y commit sepa
 
 Run1c94e7e20619fc8b:4 FAIL; code/name/term/sectionCode con NUL devuelven500,esperado400.
 Reproducción en courses.spec.ts; corrección funcional separada en fix/e2e-metadata-nul.
+
+## Incrementos ejecutados
+
+- Fix Q02:5b9c242 en fix/e2e-metadata-nul e incorporado por cherry-pick local a F4.
+- Unitario de metadatos,build y lint backend PASS; las4 variantes NUL pasan en ea8a85e3dec0f480.
+- ea8a85e3dec0f480:cursos/secciones,22 PASS/10 FAIL; fallos de expectativa/selector del harness.
+- 34cf4a46b02d882f:13 PASS tras corregir scope de T1,espera de navegación y selectors accesibles.
+- 472b2d09543d3d90:27 PASS de ENROLL,sin relajación de permisos ni pérdida de historia.
+- eebfa126f54397b6:CONTENT,30 PASS/3 FAIL; dos problemas del harness y un defecto funcional.
+- CONTENT-016:la edición incierta bloquea Guardar pero deja publicación habilitada; requiere fix separado.
+
+Estos diagnósticos no acreditan F4 completa. Faltan corregir CONTENT-016,repetición limpia,
+smoke en motores requeridos,regresión acumulada,review,reportes y limpieza.

@@ -5,13 +5,13 @@ import {fillCourse,submit,focus} from '../helpers/management.ts';
 import {courseInput,securitySnapshot,deniedUI} from '../helpers/security.ts';
 
 for(const actor of ['ST1','T1','AO'])test(`E2E-COURSE-001 catalogue follows current actor and tenant / ${actor} @smoke`,async ({e,actorPage})=>{
- const page=await actorPage(actor),api=await e.api(actor),expected=actor==='ST1'?['C1','CEMPTY']:['C1','C2','CEMPTY'];
+ const page=await actorPage(actor),api=await e.api(actor),expected=actor==='ST1'?['C1','CEMPTY']:actor==='T1'?['C1','C2','CEMPTY','COWNERST']:['C1','C2','CEMPTY'];
  const cards=page.locator('a.course-card');await expect(cards).toHaveCount(expected.length);
  expect(status(await api.get('courses'),200).body.items.map((c:any)=>c.id).sort()).toEqual(expected.map(a=>e.data.courses[a]).sort());
  for(const key of expected){const card=cards.filter({has:page.getByRole('heading',{name:'Curso E2E '+key,exact:true})});await expect(card).toContainText('E2E-'+key);await expect(card).toContainText('2026-2');}
  await course(page,e.data.courses.C1);await expect(page.getByRole('heading',{name:'Resumen del curso',exact:true})).toBeVisible();
  expect(status(await api.get(`courses/${e.data.courses.C1}`),200).body.createdBy).toBe(e.data.actors.AO.id);
- await page.getByRole('link',{name:'Mis cursos',exact:true}).click();await course(page,e.data.courses.C1);
+ await page.getByRole('link',{name:'Mis cursos',exact:true}).click();await expect(page).toHaveURL(url=>url.pathname==='/courses');await course(page,e.data.courses.C1);
  await expect(page.locator('main')).toContainText(actor==='ST1'?'Estudiante':'Docente');
 });
 test('E2E-COURSE-002 empty directory remains empty after revalidation / empty @regression',async ({e,actorPage})=>{
@@ -23,7 +23,7 @@ for(const variant of ['malformed','missing'])test(`E2E-COURSE-003 invalid identi
  const page=await actorPage('ST1'),id=variant==='malformed'?'abc':e.id('absent-course');await course(page,e.data.courses.C1);
  status(await (await e.api('ST1')).get(`courses/${id}`),variant==='malformed'?400:404);
  await compatibilityNavigate(page,`/courses/${id}`);await expect(page.getByRole('alert')).toBeVisible();await expect(page.getByRole('heading',{name:'Curso E2E C1',exact:true})).toHaveCount(0);
- await page.getByRole('link',{name:'Mis cursos',exact:true}).click();await course(page,e.data.courses.C1);
+ await page.getByRole('link',{name:'Mis cursos',exact:true}).click();await expect(page).toHaveURL(url=>url.pathname==='/courses');await course(page,e.data.courses.C1);
 });
 test('E2E-COURSE-004 last course enrollment revocation removes its card / revoked @regression',async ({e,actorPage})=>{
  const graded=await e.graded(),page=await actorPage('ST1'),api=await e.api('ST1'),teacher=await e.api('T1');await course(page,e.data.courses.C1);
@@ -63,7 +63,7 @@ test('E2E-COURSE-008 editor sends only changed metadata and fresh session sees i
 });
 test('E2E-COURSE-009 identical metadata preserves history / no-op @regression',async ({e,actorPage})=>{
  const api=await e.api('AO'),c=e.data.courses.C1,page=await actorPage('AO'),before=await securitySnapshot(e);status(await api.patch(`courses/${c}`,{name:'Curso E2E C1'}),200);expect(await securitySnapshot(e)).toEqual(before);
- await go(page,c,'/sections');await fillCourse(page,{code:'E2E-C1',name:'Curso E2E C1',term:'2026-2'},true);await page.getByRole('form',{name:'Configurar curso',exact:true}).getByRole('button',{name:'Guardar curso',exact:true}).click();await expect(page.getByRole('form',{name:'Configurar curso',exact:true}).getByRole('status')).toContainText('actualizado');expect(await securitySnapshot(e)).toEqual(before);
+ await go(page,c,'/sections');await fillCourse(page,{code:'E2E-C1',name:'Curso E2E C1',term:'2026-2'},true);await page.getByRole('form',{name:'Configurar curso',exact:true}).getByRole('button',{name:'Guardar curso',exact:true}).click();await expect(page.getByRole('form',{name:'Configurar curso',exact:true}).getByRole('alert')).toHaveText('No hay cambios para guardar.');expect(await securitySnapshot(e)).toEqual(before);
 });
 for(const field of ['code','name','term','shape','bytes'])test(`E2E-COURSE-010 metadata and body boundaries preserve confirmed data / ${field} @extended`,async ({e,actorPage})=>{
  const page=await actorPage('AO'),api=await e.api('AO'),c=e.data.courses.C1,form=await fillCourse(page);const before=await securitySnapshot(e);

@@ -83,4 +83,4 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
 - Dependencias: F1 entorno/seed listo; [fase F4](../roadmap/F4.md); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: Complemento HTTP de integración; sin navegador; extended (regression incluye smoke; extended incluye regression).
-- Estado del test: Implementado,reproducción fallida en1c94e7e20619fc8b (500); corrección separada pendiente.
+- Estado del test: Implementado; fix5b9c242 y4 variantes HTTP400 verificadas; aceptación F4 pendiente.
