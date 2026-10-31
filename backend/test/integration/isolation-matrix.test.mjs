@@ -99,6 +99,8 @@ test("BE-07 / BE-08: matriz de escenarios de aislamiento institucional UC/UTFSM"
     await t.test("TEN-01: Actor sin membresía en UTFSM recibe 404 estricto (anti-enumeración) al consultar rutas UTFSM", async () => {
       const res = await req(studentToken, "/api/v1/institution/utfsm/courses");
       assert.equal(res.status, 404);
+      const resCross = await req(utfsmToken, "/api/v1/institution/uc/courses");
+      assert.equal(resCross.status, 404);
     });
 
     await t.test("TEN-02: Membresía inactiva (active=false) recibe 404 indistinguible en el contexto institucional", async () => {
