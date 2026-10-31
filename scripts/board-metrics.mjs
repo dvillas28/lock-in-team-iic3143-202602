@@ -7,6 +7,37 @@ import { join } from 'node:path';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+// Cards moved to Done on 2026-10-30 because their work was already merged
+// (docs/deliveries/3/conciliacion-tablero-e3.md). Their Done date is the
+// reconciliation, not the end of the work, so they count toward progress but
+// not toward lead or cycle time.
+const RECONCILED = new Set([
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-Xg3k', // #23 Bot PR reviewer: proveedor, token y criterios
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-XkHs', // #56 PostgreSQL en CI y migraciones antes de los tests
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-X0JM', // #78 Bot PR reviewer: workflow base
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-X0Gk', // #84 Integración y aislamiento como check obligatorio
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-X5Rs', // Bot PR reviewer: criterios de lms-reviewer
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-X5O4', // Migraciones previas al deploy en Render
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-X6K4', // Organizador de módulos
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-X6M0', // Editor de material markdown
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-X6Pc', // Vista estudiantil de módulos y material
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-X6R0', // Editor de quiz
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-X6VA', // Rendir quiz sin exponer la pauta
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-X6WQ', // Cancelar intento
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-X7DE', // Libro de notas docente (BE)
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-X7EY', // Consulta de auditoría con filtros
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-X7J8', // Envío del intento
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-X7Ng', // Configuración de ponderaciones
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-X7Q8', // Publicación de notas
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-X7VY', // Vista de notas del estudiante
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-X7ZM', // Vista del libro de notas docente
+  'PVTI_lAHOB6xfyc4Bhx6Vzg-X7aw', // Vista de auditoría del curso
+  // Unplanned Railway → Render work, logged after the fact.
+  'PVTI_lAHOB6xfyc4Bhx6VzhE6AWs', // #175 Migrar el deploy de Railway a Render
+  'PVTI_lAHOB6xfyc4Bhx6VzhE6Ahk', // #176 Corregir el primer deploy en Render
+  'PVTI_lAHOB6xfyc4Bhx6VzhE6Amg', // #177 Migraciones de operador con owner no superusuario
+]);
+
 function parseCsv(text) {
   const rows = [];
   let row = [];
@@ -108,7 +139,8 @@ function byWeek(cards) {
 function report(snapshots) {
   const cards = cardHistory(snapshots);
   const done = cards.filter(isDone);
-  const dated = done.filter(doneAt);
+  const reconciled = done.filter((c) => RECONCILED.has(c.latest.item_id));
+  const dated = done.filter((c) => doneAt(c) && !RECONCILED.has(c.latest.item_id));
   const lead = dated.map((c) => days(c.latest.created_at, doneAt(c)));
   const cycle = dated.filter((c) => c.firstSeen['In progress']).map((c) => days(c.firstSeen['In progress'], doneAt(c)));
   const last = burnup(snapshots).at(-1);
@@ -128,6 +160,9 @@ function report(snapshots) {
     ['Cycle time (In progress → Done)', cycle.length, fmt(median(cycle)), fmt(sum(cycle) / cycle.length), fmt(Math.max(...cycle))],
   ]), ``);
   out.push(`El cycle time solo cuenta tarjetas que algún snapshot vio en In progress. Los drafts que ya estaban en Done en su primer snapshot no tienen fecha de término y quedan fuera.`, ``);
+  if (reconciled.length) {
+    out.push(`Tarjetas conciliadas o registradas después de hechas el 2026-10-30 (${reconciled.length}): cuentan en el avance, pero no en lead ni cycle time.`, ``);
+  }
 
   out.push(`## Por semana`, ``);
   out.push(table(['Semana', 'Tarjetas', 'Terminadas', 'Estimado (h)', 'Real (h)', 'Real / estimado'], byWeek(cards).map(([week, cs]) => {

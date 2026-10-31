@@ -1,0 +1,69 @@
+% E3-08, E3-10, E3-29/30: migración de Railway a Render.
+% Fuentes: docs/adr/deploy-on-render.md, issues #175–#178.
+
+\begin{frame}{Decisión: de Railway a Render (22/10)}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.48\textwidth}
+\begin{block}{Contexto}
+\small Railway cayó junto con su PostgreSQL. Esperar dejaba la demo caída sin plazo; no hay presupuesto para instancias pagadas.
+\end{block}
+\begin{block}{Decisión}
+\small
+\begin{itemize}
+  \item Blueprint \texttt{render.yaml}: backend, frontend y PostgreSQL 17.
+  \item Deploy de \texttt{main} solo si pasan todos los checks.
+  \item Plan free: migraciones al arrancar.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{block}{Qué no cambió}
+\small
+\begin{itemize}
+  \item Dockerfiles, CI, Trivy, Sonar y Release.
+  \item RLS, rol runtime sin bypass y retiro de secretos.
+\end{itemize}
+\end{block}
+\begin{block}{Costos aceptados}
+\small
+\begin{itemize}
+  \item Arranque en frío de \textasciitilde 1 min tras 15 min sin tráfico.
+  \item 750 h/mes compartidas entre servicios.
+  \item La base expira a los 30 días, sin respaldos.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Trabajo no planificado y un bug que CI no veía}
+\centering
+\begin{tikzpicture}[
+  font=\sffamily\scriptsize,
+  stage/.style={rounded corners=4pt,minimum width=3.6cm,minimum height=1.35cm,align=center,text width=3.3cm},
+  arr/.style={-{Latex[length=2mm]},draw=academixnavy,thick}
+]
+\node[stage,draw=academixnavy,fill=academixsoftblue] (a) at (0,0) {\textbf{\#175 Migrar} (4 h)\\Blueprint, Release y ADR\\PR \#134};
+\node[stage,draw=academixteal,fill=academixsoftteal] (b) at (4.3,0) {\textbf{\#176 Primer deploy} (2 h)\\rutas Docker y URLs\\PR \#136, \#138, \#140};
+\node[stage,draw=academixred,fill=red!5] (c) at (8.6,0) {\textbf{\#177 Bug de RLS} (3 h)\\owner no superusuario\\PR \#149};
+\draw[arr] (a) -- (b);
+\draw[arr] (b) -- (c);
+\end{tikzpicture}
+\vspace{0.3cm}
+
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.56\textwidth}
+\begin{block}{\#177: por qué CI no lo detectó}
+\scriptsize En Render el owner de la base no es superusuario; con FORCE RLS no podía insertar memberships (\texttt{42501}) y rompía demo, onboarding y superadmin. CI migraba con \texttt{postgres}, que ignora RLS.\\[2pt]
+\textbf{Corrección:} política explícita para el operador y CI con un owner no superusuario.
+\end{block}
+\end{column}
+\begin{column}{0.4\textwidth}
+\begin{block}{Riesgo abierto: \#178 (P0)}
+\scriptsize La base vence cerca del \textbf{21/11}, la víspera de E4. Semana 5: \texttt{pg\_dump}, restauración probada y recrear la base.
+\end{block}
+\end{column}
+\end{columns}
+\vspace{0.1cm}
+\centering\scriptsize Registradas en el tablero después de hechas: cuentan en el avance, no en lead time.
+\end{frame}

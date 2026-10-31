@@ -1,0 +1,21 @@
+% E3-07: prácticas abandonadas o no cumplidas.
+% Fuentes: conciliacion-tablero-e3.md (bloques C, D y F), ADR de Render.
+
+\begin{frame}{Prácticas abandonadas o no cumplidas}
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.3cm}YY}
+\toprule
+\textbf{Práctica} & \textbf{Qué pasó} & \textbf{Qué hacemos ahora} \\
+\midrule
+Reporte de seguridad con Semgrep (\#57) & SonarQube y Trivy ya cubrían el análisis en cada PR. & Cerrada como \emph{not planned}. \\
+Convertir drafts en issue al iniciar la semana & No se aplicó desde la semana 4: las PR no podían cerrar sus tarjetas. & Drafts de semanas 4–5 convertidos (\#165–\#174); el resto, en la gestión semanal. \\
+Registrar \texttt{Real (h)} al cerrar & 77 de 87 tarjetas Done sin horas reales. & Se piden al equipo; sin ellas no hay estimado vs.\ real. \\
+Railway como plataforma & Caído el 22/10 con su base de datos. & Render, con ADR y tarjetas \#175–\#177. \\
+Backup y PITR en Railway & Render free no ofrece PITR. & \texttt{pg\_dump} y restauración probada (\#178). \\
+\bottomrule
+\end{tabularx}
+\vspace{0.3cm}
+
+\centering
+\large\textbf{\color{academixnavy}Las reglas del tablero existían; faltó revisarlas cada semana.}
+\end{frame}

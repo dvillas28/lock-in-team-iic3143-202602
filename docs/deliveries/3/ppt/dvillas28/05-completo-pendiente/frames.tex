@@ -1,0 +1,43 @@
+% E3-33/34: trabajo completo y pendiente al 30/10.
+% Fuente: snapshot del Project tras la conciliación (39 tarjetas abiertas, 111 h).
+% La proyección y el plan hacia el MVP (E3-25 a E3-32) van en una iteración posterior.
+
+\begin{frame}{Completo y pendiente al 30/10}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.4\textwidth}
+\begin{block}{Completo}
+\small
+\begin{itemize}
+  \item 47 de 49 funcionalidades.
+  \item Cursos, módulos, material, quizzes, notas y auditoría.
+  \item CI/CD, bot reviewer y deploy en Render.
+\end{itemize}
+\end{block}
+\centering
+\kpi{academixgreen}{357 h}{87 tarjetas terminadas}
+\end{column}
+\begin{column}{0.56\textwidth}
+\centering
+\textbf{\small Pendiente: 111 h en 39 tarjetas}\\[0.1cm]
+\begin{tikzpicture}
+\begin{axis}[
+  xbar, scale only axis, width=4.9cm, height=3.3cm, font=\sffamily\scriptsize,
+  xmin=0, xmax=62, bar width=10pt, enlarge y limits=0.18, axis x line=none,
+  axis y line=left, axis line style={academixslate}, y tick style={draw=none},
+  symbolic y coords={Operación y CI,Tests de aislamiento,Producto,Entregas y gestión},
+  ytick=data, y tick label style={align=right,text width=2.6cm},
+  nodes near coords, nodes near coords style={font=\sffamily\scriptsize\bfseries},
+]
+\addplot[fill=academixnavy!75,draw=academixnavy] coordinates {
+  (14,Operación y CI) (17,Tests de aislamiento) (25,Producto) (55,Entregas y gestión)};
+\end{axis}
+\end{tikzpicture}
+\vspace{0.05cm}
+
+\scriptsize Producto: 21 h de material en archivos (P2) y 4 h de accesibilidad. Tests de aislamiento: 5 tarjetas por confirmar.
+\end{column}
+\end{columns}
+\vspace{0.15cm}
+\centering
+\softchip{academixamber}{academixsoftamber}{P2 material en archivos: candidato a salir del MVP}
+\end{frame}
