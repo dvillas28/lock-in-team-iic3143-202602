@@ -9,7 +9,7 @@ const fill = async (page: import('@playwright/test').Page,email:string,password:
   await page.getByLabel('Contraseña',{exact:true}).fill(password);
 };
 
-test('E2E-AUTH-002 credential failures indistinguishable / indistinguishable @regression',async ({e,page})=>{
+test('E2E-AUTH-002 credential failures indistinguishable / indistinguishable @smoke',async ({e,page})=>{
   await page.goto(origin()+'/login');const messages:string[]=[];const responses:unknown[]=[];
   for(const email of [e.data.actors.ST1.email,'nobody@example.test']) {
     await fill(page,email,'wrong-password');

@@ -27,7 +27,9 @@ Reproducción en courses.spec.ts; corrección funcional separada en fix/e2e-meta
 - 34cf4a46b02d882f:13 PASS tras corregir scope de T1,espera de navegación y selectors accesibles.
 - 472b2d09543d3d90:27 PASS de ENROLL,sin relajación de permisos ni pérdida de historia.
 - eebfa126f54397b6:CONTENT,30 PASS/3 FAIL; dos problemas del harness y un defecto funcional.
-- CONTENT-016:la edición incierta bloquea Guardar pero deja publicación habilitada; requiere fix separado.
+- CONTENT-016:repro9049743a5fb712f5;004/010 PASS y016 FAIL. Fixd5d85b2 en rama independiente e incorporado localmente.
+- UI:typecheck/lint y14 unitarios de edición/publicación PASS; falta prueba E2E del fix.
+- AUTH-002 se alinea con su etiqueta smoke del catálogo y requiere Firefox/WebKit además de Chromium.
 
-Estos diagnósticos no acreditan F4 completa. Faltan corregir CONTENT-016,repetición limpia,
+Estos diagnósticos no acreditan F4 completa. Faltan validar CONTENT-016,repetición limpia,
 smoke en motores requeridos,regresión acumulada,review,reportes y limpieza.

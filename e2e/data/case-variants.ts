@@ -41,7 +41,7 @@ Object.assign(caseDefinitions, {
   'E2E-CATALOG-003': ['json500','invalid-json','bundle','keyboard-mobile'].map(n=>variant(n,'ANON','browser','none')),
   'E2E-CATALOG-004': [variant('atomic-build','OPERATOR','companion','none')],
 });
-for (const id of ['E2E-AUTH-001',
+for (const id of ['E2E-AUTH-001','E2E-AUTH-002',
  'E2E-AUTH-010',
  'E2E-PUBLIC-001']) {
   caseDefinitions[id] = caseDefinitions[id].map(v=>({...v, projects:['chromium','firefox','webkit']}));
