@@ -14,8 +14,10 @@ export function classifyChanges(files:string[]){
  const documentation=(file:string)=>{
   // These Markdown files are executable selection input, not narrative documentation.
   if(file.startsWith('docs/testing/catalog/'))return false;
-  if(/(^|\/)README(?:\.[^/]*)?$/i.test(file))return true;
-  if(/^(docs|specs|mockups)\//.test(file))return true;
+  if(/(^|\/)(?:package(?:-lock)?\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|yarn\.lock|bun\.lockb?)$/.test(file))return false;
+  if(/(^|\/)README(?:\.(?:md|mdx|rst|txt))?$/i.test(file))return true;
+  if(/^(docs|specs)\//.test(file))return /\.(?:md|mdx|rst|txt|pdf|png|jpe?g|gif|svg|webp|drawio|csv|json|ya?ml)$/i.test(file);
+  if(file.startsWith('mockups/'))return /\.(?:md|html?|css|js|mjs|json|svg|png|jpe?g|gif|webp|woff2?)$/i.test(file);
   return !file.includes('/')&&/\.md$/i.test(file);
  };
  return {required:!files.every(documentation),reason:files.every(documentation)?'documentation-only':'code-runtime-or-unknown',files:files.length};

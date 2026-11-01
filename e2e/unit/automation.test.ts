@@ -26,6 +26,7 @@ test('metadata duplicates and undeclared engines cannot certify execution',()=>{
 });
 test('aggregate rejects missing duplicate changed-SHA failed or incomplete jobs',()=>{
  const summaries=['chromium','firefox','webkit'].map(project=>assess({...meta,suite:'smoke',projects:[project]},report(expectedKeys('smoke',[project]))));assert.equal(aggregate(summaries,'smoke',['chromium','firefox','webkit'],meta.commit).passed,true);
+ assert.equal(aggregate([summaries[0]],'smoke',['chromium'],meta.commit).passed,true);assert.equal(aggregate(summaries,'smoke',['chromium'],meta.commit).passed,false);
  assert.equal(aggregate(summaries.slice(1),'smoke',['chromium','firefox','webkit'],meta.commit).passed,false);assert.equal(aggregate([summaries[0],summaries[0],summaries[2]],'smoke',['chromium','firefox','webkit'],meta.commit).passed,false);assert.equal(aggregate(summaries,'smoke',['chromium','firefox','webkit'],'b'.repeat(40)).passed,false);assert.equal(aggregate([{...summaries[0],passed:false},...summaries.slice(1)],'smoke',['chromium','firefox','webkit'],meta.commit).passed,false);
 });
 test('twenty unique comparable clean smoke executions are required and one bad run invalidates the window',()=>{

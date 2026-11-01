@@ -8,7 +8,7 @@ import {classifyChanges,changedFiles,detectChanges,eventSelection,resultDecision
 
 test('documentation-only skips; code, mixed, runtime inputs and unknown files execute',()=>{
  assert.equal(classifyChanges(['docs/testing/E2E_README.md','specs/feature/plan.md','README.md','backend/README.md','mockups/assets/app.css']).required,false);
- for(const path of ['frontend/src/app/page.tsx','backend/src/main.ts','e2e/specs/auth.smoke.spec.ts','package.json','pnpm-lock.yaml','backend/migrations/001.sql','.github/workflows/e2e.yml','.npmrc','unknown-file','docs/testing/catalog/AUTH.md']){
+ for(const path of ['frontend/src/app/page.tsx','backend/src/main.ts','e2e/specs/auth.smoke.spec.ts','package.json','pnpm-lock.yaml','backend/migrations/001.sql','.github/workflows/e2e.yml','.npmrc','unknown-file','docs/testing/catalog/AUTH.md','docs/tool.py','specs/unknown.bin','mockups/package.json','mockups/unknown.bin']){
   assert.equal(classifyChanges([path]).required,true,path);
   assert.equal(classifyChanges(['docs/guide.md',path]).required,true,path);
  }
