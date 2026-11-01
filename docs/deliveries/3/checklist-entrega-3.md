@@ -7,7 +7,7 @@ Marcar al incorporar respuesta y evidencia en E3. [Estado y brechas](reporte-bre
 ## 1. Material y exposición
 
 - [ ] **E3-01.** PPT obligatorio; informe PDF opcional (p. 73).
-- [ ] **E3-02.** Estimaciones y plan de trabajo en tablas, integradas a la presentación/informe o entregadas aparte (pp. 73–74). Borrador parcial, falta `Real (h)`: [métricas](ppt/dvillas28/02-metricas/preview.pdf).
+- [ ] **E3-02.** Estimaciones y plan de trabajo en tablas, integradas a la presentación/informe o entregadas aparte (pp. 73–74). Borrador parcial, solo 30 de 89 tarjetas Done con `Real (h)`: [métricas](ppt/dvillas28/02-metricas/preview.pdf).
 - [ ] **E3-03.** Aproximadamente 20 min de presentación y demo; 10–15 min de preguntas (p. 60).
 
 ## 2. Proceso de desarrollo

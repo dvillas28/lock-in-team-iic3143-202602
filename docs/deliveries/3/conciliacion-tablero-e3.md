@@ -1,7 +1,7 @@
 # Entrega 3 — Conciliación del tablero
 
 Corte: **2026-10-30**, snapshot del [Project lock-in-LMS](https://github.com/users/dvillas28/projects/3)
-y código en `origin/dev` (`9046305`). **A, C, D y F aplicados el 30/10**; B pendiente de confirmación.
+y código en `origin/dev` (`9046305`). **A, C, D y F aplicados el 30/10**; de B, #49 y #76 cerradas el 01/11.
 Base para E3-02, E3-12, E3-24 y E3-33/34 del [checklist](checklist-entrega-3.md).
 
 ## Por qué conciliar
@@ -146,4 +146,4 @@ re-estimaciones de D; las cifras de B dependen de las confirmaciones.
 - **D:** #60 y ensayos pasan a Render; PITR archivada. #175–#177 registran la migración
   no planificada y #178 (P0, sem. 5) renueva la base; draft de cuota free en sem. 6.
 - **Métricas:** 23 tarjetas fuera de lead/cycle time; 87/126 (69 %) y 357/468 h (76 %).
-- **Pendiente:** `Real (h)`, bloque B y merge a `main` para el reporte diario.
+- **01/11:** 40 drafts más convertidos (#181–#220), #60 archivada, 30 de 89 Done con `Real (h)`. Pendiente: resto de B y merge a `main`.
