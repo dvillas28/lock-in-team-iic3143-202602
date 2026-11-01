@@ -11,7 +11,8 @@ test('US2 standalone SQL fixtures enforce published recipients and explicit answ
   for(const token of [t.student,t.assistant,t.teacher,t.owner]){
    const id=token===t.assistant?f.quizzes.second:f.quizzes.section;
    const got=await request(app,token,'uc/quizzes/'+id);assert.equal(got.status,200);
-   assert.deepEqual(Object.keys(got.body.questions[0].alternatives[0]).sort(),['id','text']);
+   if(token===t.student)assert.deepEqual(got.body.questions,[]);
+   else assert.deepEqual(Object.keys(got.body.questions[0].alternatives[0]).sort(),['id','text']);
    assert.equal(JSON.stringify(got.body).includes('isCorrect'),false);
    assert.equal('createdBy' in got.body,false);
   }

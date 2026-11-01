@@ -11,7 +11,7 @@ import type {Course} from "../../lib/courses/validation.ts";
 import type {SafeQuiz} from "../../lib/quizzes/validation.ts";
 import {receiptFromAttempt,type Attempt} from "../../lib/attempts/validation.ts";
 import {attemptCapabilities} from "../../lib/attempts/capabilities.ts";
-import {getAttempt} from "../../lib/api/attempts.ts";
+import {getAttempt,getAttemptQuestions} from "../../lib/api/attempts.ts";
 import {getQuiz} from "../../lib/api/quizzes.ts";
 import {getCourse} from "../../lib/api/courses.ts";
 import {ApiHttpError} from "../../lib/api/errors.ts";
@@ -39,7 +39,7 @@ export function AttemptDetail({attemptId}:{attemptId:string}){
   if(!context?.user)throw new ApiHttpError(403);
   const cap=attemptCapabilities(context.user,course,quiz,a);
   const current=cap.student?await getAttempt(c,slug,attemptId,{studentId:context.user.id,quizId:a.quizId,sectionId:a.sectionId}):a;
-  const detail=attemptCapabilities(context.user,course,quiz,current).edit?await getQuiz(c,slug,course.id,a.quizId):quiz;
+  const detail=attemptCapabilities(context.user,course,quiz,current).edit?await getAttemptQuestions(c,slug,current,course.id):quiz;
   return {attempt:current,quiz:detail,course};
  });
  if(!context?.user)return <LoadingState/>;
@@ -90,7 +90,7 @@ function AttemptWork({session,slug,user,course,quiz,attempt}:{session:Session;sl
    {state.pending==="save"&&<section className="notice warning stack"><h2 className="serif">Guardado incierto</h2><p>No se pudo confirmar el guardado. La edición, el envío y la cancelación siguen bloqueados. Consultar el estado no confirma que el guardado haya terminado. Mantén esta página abierta para conservar la recuperación.</p><button className="btn btn-ghost" disabled={state.busy} onClick={()=>void ops.consult()}>Consultar estado sin desbloquear</button></section>}
    <AttemptSubmit ops={ops} state={state} quiz={quiz} allowed={editing}/>
    <AttemptCancel ops={ops} state={state} allowed={cap.cancel}/>
-   {editing&&<details className="academic-disclosure card"><summary>Guardar y retomar después</summary><div className="stack"><p className="hint">Conserva este enlace para reanudar el intento. Guarda antes de salir: recargar descarta los cambios sin guardar y la recuperación pendiente.</p><p className="hint">Cerrar la página no envía ni cancela el intento. Trabaja en una sola pestaña para evitar cambios en paralelo.</p></div></details>}
+   {editing&&<details className="academic-disclosure card"><summary>Guardar y retomar después</summary><div className="stack"><p className="hint">Puedes retomarlo desde «Mis intentos» en el detalle del quiz. Guarda antes de salir: recargar descarta los cambios sin guardar y la recuperación pendiente.</p><p className="hint">Cerrar la página no envía ni cancela el intento. Trabaja en una sola pestaña para evitar cambios en paralelo.</p></div></details>}
  </aside>
  </div></div>
  </QuizWorkspace>;

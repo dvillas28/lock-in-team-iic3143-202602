@@ -4,7 +4,6 @@ import { QuizWorkspace } from "./quiz-workspace.tsx";
 import { QuizStatus, quizDate } from "./quiz-facts.tsx";
 import { ClipboardList, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
-import {KnownAttemptLink} from "../attempts/attempt-start.tsx";
 import { useSession } from "../auth/session-provider.tsx";
 import { useResource } from "../courses/use-resource.ts";
 import { getCourse } from "../../lib/api/courses.ts";
@@ -55,6 +54,6 @@ function QuizDirectory({courseId,scope,slug}:{courseId:string;scope:string;slug:
     </li>)}</ul>
     {!items.length && !result.error && <><EmptyState/><p className="hint">Aún no hay quizzes disponibles para tu participación en este curso.</p></>}
     {items.length>0 && !visible.length && <section className="empty-zone panel stack"><h2 className="serif">No hay quizzes que coincidan</h2><p className="hint">Prueba otro título, estado o destinatario.</p><button type="button" className="btn btn-ghost" onClick={clearFilters}>Mostrar todos los quizzes</button></section>}
-    {student && <KnownAttemptLink key={scope+":known"}/>}
+    {student && <p className="hint">Abre un quiz para consultar tus intentos y continuar uno pendiente.</p>}
   </QuizWorkspace>;
 }

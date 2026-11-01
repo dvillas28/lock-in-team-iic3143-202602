@@ -14,8 +14,12 @@ export class AttemptsController {
  }
  @Get("quizzes/:quizId/attempts")
  list(@Req() r:IdentityRequest,@Param("institutionSlug") s:string,@Param("quizId") id:string,@Query() q:Record<string,unknown>) {return this.attempts.list(r.userId,slug(s),uuid(id),q);}
+ @Get("quizzes/:quizId/my-attempts")
+ mine(@Req() r:IdentityRequest,@Param("institutionSlug") s:string,@Param("quizId") id:string,@Query() q:Record<string,unknown>) {return this.attempts.mine(r.userId,slug(s),uuid(id),q);}
  @Get("quiz-attempts/:attemptId")
  get(@Req() r:IdentityRequest,@Param("institutionSlug") s:string,@Param("attemptId") id:string) {return this.attempts.get(r.userId,slug(s),uuid(id));}
+ @Get("quiz-attempts/:attemptId/questions")
+ questions(@Req() r:IdentityRequest,@Param("institutionSlug") s:string,@Param("attemptId") id:string) {return this.attempts.questions(r.userId,slug(s),uuid(id));}
  @Put("quiz-attempts/:attemptId/answers")
  save(@Req() r:IdentityRequest,@Param("institutionSlug") s:string,@Param("attemptId") id:string,@Body() body:unknown) {return this.attempts.save(r.userId,slug(s),uuid(id),body);}
  @Post("quiz-attempts/:attemptId/cancel") @HttpCode(204)

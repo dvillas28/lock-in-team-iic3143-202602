@@ -9,6 +9,7 @@ import {attemptScope,attemptView,requireStudent,studentEligible,requireWindow,va
 import {attemptDto,attemptSnapshot,submissionReceipt,type AttemptRow} from "./attempt-dto";
 import {page,paginated,uuid} from "../courses/validation";
 import {academicScope,selectedSections} from "../gradebook/gradebook-access";
+import {studentDto} from "../quizzes/quiz-dto";
 import {calculateGrade} from "./grading";
 import {answersInput,emptyBody} from "./attempt-validation";
 @Injectable()
@@ -42,6 +43,29 @@ export class AttemptsService {
    await this.event(c,s,"attempt.started",null,a);return attemptDto(a,"student");
   });
  }
+ async mine(actor:string,slug:string,quiz:string,query:Record<string,unknown>) {
+  return this.db.withInstitution(actor,slug,async c=>{
+   const s=await attemptScope(c,actor,slug,quiz,"quiz");
+   requirePermission(studentEligible(s) && s.roles.some(e=>e.role==="student" && (s.q.section_id===null || e.section_id===s.q.section_id)));
+   const p=page(query,JSON.stringify(["my-attempts",s.member.institution_id,quiz,actor]));
+   const summary=(await c.query(`SELECT COALESCE(MAX(attempt_number),0) AS used,
+    MIN(id::text) FILTER (WHERE status='in_progress') AS active
+    FROM public.quiz_attempts WHERE institution_id=$1 AND quiz_id=$2 AND student_id=$3`,[s.member.institution_id,quiz,actor])).rows[0];
+   const grade=await this.grade(c,s,actor);
+   const window=(await c.query(`SELECT ($1::timestamptz IS NULL OR $1<=t.now) AS opened,
+    ($2::timestamptz IS NULL OR t.now<$2) AS unclosed FROM (SELECT clock_timestamp() AS now) t`,[s.q.opens_at,s.q.closes_at])).rows[0];
+   const remainingAttempts=s.q.max_attempts===null?null:Math.max(0,s.q.max_attempts-Number(summary.used));
+   const reason=!s.q.published_at?"unpublished":grade?.published_at?"gradesPublished":summary.active?"activeAttempt":!window.opened?"notOpen":!window.unclosed?"closed":remainingAttempts===0?"limitReached":null;
+   const rows=(await c.query<AttemptRow & {cursor_date:string}>(`SELECT a.*,
+    to_char(a.started_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS cursor_date
+    FROM public.quiz_attempts a WHERE a.institution_id=$1 AND a.quiz_id=$2 AND a.student_id=$3
+    AND ($4::timestamptz IS NULL OR (a.started_at,a.id)<($4::timestamptz,$5::uuid))
+    ORDER BY a.started_at DESC,a.id DESC LIMIT $6`,[s.member.institution_id,quiz,actor,p.date,p.id,p.limit+1])).rows;
+   const result=paginated(rows,p,r=>r.cursor_date);
+   return {...result,items:result.items.map(a=>attemptDto(a,"student")),
+    availability:{canStart:reason===null,reason,remainingAttempts,activeAttemptId:summary.active}};
+  });
+ }
  async list(actor:string,slug:string,quiz:string,query:Record<string,unknown>) {
   return this.db.withInstitution(actor,slug,async c=>{
    const s=await attemptScope(c,actor,slug,quiz,"quiz"),book={...s,courseId:s.q.course_id},scope=academicScope(book);
@@ -61,6 +85,14 @@ export class AttemptsService {
     // This staff route projects accumulated assistant/student roles as staff, including own attempts.
     return attemptDto(a,view==="student"?"assistant":view);
    })};
+  });
+ }
+ async questions(actor:string,slug:string,id:string) {
+  return this.db.withInstitution(actor,slug,async c=>{
+   const s=await attemptScope(c,actor,slug,id,"attempt");
+   requireStudent(s);
+   if(s.a!.status!=="in_progress")throw new ConflictException();
+   return studentDto(s.q);
   });
  }
  async get(actor:string,slug:string,id:string) {

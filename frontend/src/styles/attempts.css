@@ -48,6 +48,10 @@
 .attempt-table caption { text-align: left; padding: 16px 20px; font-size: 13px; color: var(--text-2); }
 .attempt-table :is(th, td) { vertical-align: top; }
 .attempt-identifier { font-size: 12px; color: var(--text-2); overflow-wrap: anywhere; }
+.student-attempt-list { list-style: none; padding: 0; }
+.student-attempt-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding-block: 16px; border-top: 1px solid var(--border); }
+.student-attempt-row > .stack { min-width: 0; gap: 8px; }
+.student-attempt-row .hint { overflow-wrap: anywhere; }
 @media (max-width: 1100px) {
   .attempt-layout { grid-template-columns: minmax(0, 1fr) 248px; gap: 16px; }
   .attempt-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

@@ -636,6 +636,8 @@ export interface paths {
         /**
          * Consultar la vista segura de un quiz
          * @description Esta representación nunca contiene `isCorrect` ni otra pauta de respuestas.
+         *     Para estudiantes elegibles devuelve questions vacío; las preguntas solo se
+         *     consultan mediante el endpoint de un intento propio en progreso.
          */
         get: operations["getQuiz"];
         put?: never;
@@ -775,6 +777,38 @@ export interface paths {
          *     anyOf permite solapamiento entre las vistas académicas sin corrección.
          */
         get: operations["getQuizAttempt"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/quiz-attempts/{attemptId}/questions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                attemptId: components["parameters"]["AttemptId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Consultar preguntas dentro de un intento propio en progreso
+         * @description Revalida institución, matrícula y elegibilidad de estudiante. Solo el dueño
+         *     del intento puede consultar las preguntas mientras esté en progreso.
+         *     No entrega pauta, puntajes obtenidos ni notas. El detalle general del quiz
+         *     devuelve questions vacío al estudiante, incluso si tiene un intento activo.
+         *     La lectura no inicia intentos ni modifica registros o auditoría.
+         */
+        get: operations["getAttemptQuestions"];
         put?: never;
         post?: never;
         delete?: never;
@@ -937,6 +971,42 @@ export interface paths {
          *     cada página revalida permisos. Destinatarios revocados conservan historia.
          */
         get: operations["listQuizAttempts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/quizzes/{quizId}/my-attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                quizId: components["parameters"]["QuizId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Consultar mis intentos y disponibilidad de un nuevo intento
+         * @description Solo estudiantes elegibles con matrícula activa en el destino del quiz.
+         *     El usuario se deriva de la sesión; no admite studentId ni sectionId.
+         *     Devuelve únicamente intentos propios en la institución solicitada, del más
+         *     reciente al más antiguo, sin notas, puntajes ni corrección de respuestas.
+         *     El cursor está ligado a institución, usuario y quiz. Cada página revalida
+         *     los permisos actuales; acceso docente a pauta impide usar esta consulta.
+         *     Disponibilidad y restante consideran todo el historial, no solo la página.
+         *     La consulta no escribe ni cambia registros académicos. El inicio mantiene
+         *     sus validaciones transaccionales y puede rechazar cambios concurrentes.
+         */
+        get: operations["listMyQuizAttempts"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1774,6 +1844,22 @@ export interface components {
         };
         QuizAttemptListResponse: components["schemas"]["PageInfo"] & {
             items: (components["schemas"]["QuizAttemptAcademicView"] | components["schemas"]["QuizAttemptAssistantView"])[];
+        };
+        AttemptAvailability: {
+            canStart: boolean;
+            /** @enum {string|null} */
+            reason: "unpublished" | "gradesPublished" | "activeAttempt" | "notOpen" | "closed" | "limitReached" | null;
+            /** @description Intentos nuevos restantes; null indica máximo ilimitado. */
+            remainingAttempts: number | null;
+            /**
+             * Format: uuid
+             * @description Intento propio en progreso, incluso si está fuera de la página.
+             */
+            activeAttemptId: string | null;
+        };
+        MyQuizAttempts: components["schemas"]["PageInfo"] & {
+            items: components["schemas"]["QuizAttemptStudentView"][];
+            availability: components["schemas"]["AttemptAvailability"];
         };
         GradeItem: {
             /** Format: uuid */
@@ -3590,6 +3676,39 @@ export interface operations {
             503: components["responses"]["ServiceUnavailable"];
         };
     };
+    getAttemptQuestions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                attemptId: components["parameters"]["AttemptId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Quiz con las preguntas y alternativas del intento autorizado. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizStudentView"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
     saveQuizAttemptAnswers: {
         parameters: {
             query?: never;
@@ -3743,6 +3862,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["QuizAttemptListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listMyQuizAttempts: {
+        parameters: {
+            query?: {
+                /** @description Cursor base64url JSON con fecha/UUID, actor y scope/filtros; no concede acceso. Cursor opaco retornado por la página anterior. */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Cantidad máxima de elementos a retornar. */
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                quizId: components["parameters"]["QuizId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Historial propio y disponibilidad actual. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyQuizAttempts"];
                 };
             };
             400: components["responses"]["BadRequest"];

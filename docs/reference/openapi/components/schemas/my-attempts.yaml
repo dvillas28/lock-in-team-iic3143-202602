@@ -1,0 +1,32 @@
+MyQuizAttempts:
+  unevaluatedProperties: false
+  allOf:
+    - $ref: './common.yaml#/PageInfo'
+    - type: object
+      required: [items, availability]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: './quizzes.yaml#/QuizAttemptStudentView'
+        availability:
+          $ref: '#/AttemptAvailability'
+
+AttemptAvailability:
+  type: object
+  additionalProperties: false
+  required: [canStart, reason, remainingAttempts, activeAttemptId]
+  properties:
+    canStart:
+      type: boolean
+    reason:
+      type: [string, 'null']
+      enum: [unpublished, gradesPublished, activeAttempt, notOpen, closed, limitReached, null]
+    remainingAttempts:
+      type: [integer, 'null']
+      minimum: 0
+      description: Intentos nuevos restantes; null indica máximo ilimitado.
+    activeAttemptId:
+      type: [string, 'null']
+      format: uuid
+      description: Intento propio en progreso, incluso si está fuera de la página.

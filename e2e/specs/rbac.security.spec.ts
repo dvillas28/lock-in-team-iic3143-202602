@@ -85,7 +85,7 @@ for(const {id,actor} of [{id:'E2E-RBAC-009',actor:'TS-SAME'},{id:'E2E-RBAC-010',
  if(actor==='TS-SAME')expect(await securitySnapshot(e)).toEqual(before);
  if(actor==='TS-CROSS')status(await api.put(`quiz-attempts/${r.body.id}/answers`,{answers:e.answers()}),200);
  await compatibilityNavigate(page,`/courses/${e.data.courses.C1}/quizzes/${e.data.quizzes.Q1}`);
- await expect(page.getByRole('button',{name:'Iniciar intento',exact:true})).toHaveCount(actor==='TS-SAME'?0:1);
+ await expect(page.getByRole('button',{name:'Iniciar nuevo intento',exact:true})).toHaveCount(actor==='TS-SAME'?0:1);
 });
 test('E2E-RBAC-011 assistant-student uses different own and staff projections / assistant-student @regression',async ({e,actorPage})=>{
  const a=await e.graded('AS-ST'),other=await e.attempt('ST1'),page=await actorPage('AS-ST'),api=await e.api('AS-ST');

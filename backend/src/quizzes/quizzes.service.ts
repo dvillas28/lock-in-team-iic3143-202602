@@ -64,7 +64,8 @@ export class QuizzesService {
   return this.db.withInstitution(actor,slug,async c=>{
    const s=await quizScope(c,actor,slug,id,"quiz"),row=await visibleQuiz(c,s,id);
    if(authoring){requirePermission(canAuthorQuiz(s,row.section_id));return authoringDto(row);}
-   return studentDto(row);
+   const student=s.roles.some(e=>e.role==="student") && !canAuthorQuiz(s,row.section_id);
+   return studentDto(row,!student);
   });
  }
  async list(actor:string,slug:string,course:string,query:Record<string,unknown>) {
