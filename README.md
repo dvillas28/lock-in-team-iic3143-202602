@@ -1,13 +1,13 @@
 # Métricas del tablero
 
-Snapshots: 21 (2026-10-11 a 2026-10-31).
+Snapshots: 22 (2026-10-11 a 2026-11-01).
 
 ## Avance
 
 |  | Alcance | Terminado | % |
 | --- | --- | --- | --- |
 | Tarjetas | 124 | 87 | 70 |
-| Horas estimadas | 464.0 | 357.0 | 77 |
+| Horas estimadas | 468.0 | 361.0 | 77 |
 
 ## Tiempos (días)
 
@@ -22,23 +22,23 @@ El cycle time solo cuenta tarjetas que algún snapshot vio en In progress. Los d
 
 | Semana | Tarjetas | Terminadas | Estimado (h) | Real (h) | Real / estimado |
 | --- | --- | --- | --- | --- | --- |
-| Semana 1 E3 | 15 | 15 | 37.0 | 10.0 | 0.63 |
-| Semana 2 E3 | 14 | 10 | 43.0 | — | — |
-| Semana 3 E3 | 31 | 29 | 132.0 | 4.0 | 0.50 |
-| Semana 4 E3 | 14 | 6 | 42.0 | 2.0 | 1.00 |
+| Semana 1 E3 | 15 | 15 | 37.0 | 22.0 | 0.79 |
+| Semana 2 E3 | 14 | 10 | 43.0 | 5.0 | 1.25 |
+| Semana 3 E3 | 31 | 29 | 132.0 | 16.0 | 0.70 |
+| Semana 4 E3 | 14 | 6 | 46.0 | 7.0 | 1.17 |
 | Semana 5 E4 | 18 | 13 | 82.0 | — | — |
 | Semana 6 E4 | 19 | 13 | 80.0 | — | — |
 | Semana 7 E4 | 17 | 1 | 56.0 | — | — |
 
 Real / estimado usa solo tarjetas terminadas con ambos campos; sobre 1 significa que se subestimó.
 
-Tarjetas en Done sin Real (h): 75.
+Tarjetas en Done sin Real (h): 66.
 
 ## Por tipo
 
 | Tipo | Tarjetas | Terminadas | Estimado (h) |
 | --- | --- | --- | --- |
-| feat | 49 | 47 | 263.0 |
+| feat | 49 | 47 | 267.0 |
 | docs | 32 | 16 | 86.0 |
 | ci | 18 | 13 | 44.0 |
 | chore | 16 | 4 | 34.0 |
@@ -51,7 +51,7 @@ Tarjetas en Done sin Real (h): 75.
 | Área | Tarjetas | Terminadas | Estimado (h) |
 | --- | --- | --- | --- |
 | BE | 34 | 29 | 183.0 |
-| FE | 24 | 22 | 116.0 |
+| FE | 24 | 22 | 120.0 |
 | DOC | 22 | 7 | 51.0 |
 | PREP | 18 | 10 | 52.0 |
 | CI | 17 | 11 | 40.0 |
