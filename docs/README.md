@@ -40,6 +40,7 @@ plataforma de despliegue.
 
 ## Guías
 
+- E2E: [qué probamos y fases](testing/E2E_MASTER_PLAN.md) · [ejecución y navegador visible](testing/E2E_README.md).
 - [Spec Kit](guides/speckit-flow.md)
 - [CodeGraph](guides/codegraph-flow.md)
 - [Git Flow](guides/git-flow.md)

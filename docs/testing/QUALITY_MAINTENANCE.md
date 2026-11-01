@@ -1,7 +1,8 @@
 # Calidad, métricas y mantenimiento
 
 Las métricas distinguen inventario planificado, test implementado y ejecución estable por variante.
-Baseline de este trabajo: cobertura documental definida; tests nuevos implementados0/ejecutados0.
+Estado local:248 casos implementados y corrida completa512 PASS; veinte smoke comparables aprobados.
+La evidencia y los límites remotos están en [VALIDATION](execution/VALIDATION.md).
 No sumar tests existentes c8/jsdom/integración al numerador E2E navegador.
 
 | Indicador | Cálculo verificable | Meta inicial / entrega |
@@ -69,10 +70,9 @@ Quarantine excepcional<=7d con owner/issue/alternativa;P0 no puede excluirse del
 Fallo500/timeout en write se analiza con estado persistido; no asumir rollback porque browser no recibió200.
 Nunca aceptar dump de Authorization/passwords como costo inevitable de diagnóstico.
 
-## Verificación documental futura
+## Verificación documental
 
 Comprobar IDs únicos, enlaces locales, ficha completa, todos los50operationIds trazados y18rutas;
 verificar conteos por módulo/prioridad/nivel y que ninguna ficha quede sin fase.
 Usar check-doc-length delrepo para cadaMarkdown (<150líneas), gitdiffcheck y revisión de permisos.
-El script generador usado para redactar esta documentación no es un runner ni test versionado;
-las fichasMarkdown son fuente revisable. Un validador de catálogo puede proponerse en F1 sin código de producto.
+El runner valida selección y variantes contra el catálogo; coleccionar tests no acredita ejecución.

@@ -27,9 +27,9 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Persistencia / consistencia: Sin truncar ni normalizar peso inválido.
 - Denegación: No aceptar NaN por cuerpo JSON no válido.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
-- Dependencias: F1 entorno/seed listo; [fase F5](../roadmap/F5.md); fixture independiente, sin depender de ejecutar otro caso.
+- Dependencias: F1 entorno/seed listo; [fase F5](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador + comprobación API/SQL; extended (regression incluye smoke; extended incluye regression).
-- Estado del test: Propuesto; sin implementar ni ejecutar.
+- Estado del test: Validado localmente; ver [evidencia](../execution/VALIDATION.md).
 
 <a id="e2e-grade-017"></a>
 
@@ -54,9 +54,9 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Persistencia / consistencia: Freeze monotónico; un evento solo por cambio real.
 - Denegación: No usar no-op para sortear bloqueo.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
-- Dependencias: F1 entorno/seed listo; [fase F5](../roadmap/F5.md); fixture independiente, sin depender de ejecutar otro caso.
+- Dependencias: F1 entorno/seed listo; [fase F5](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador + comprobación API/SQL; regression (regression incluye smoke; extended incluye regression).
-- Estado del test: Propuesto; sin implementar ni ejecutar.
+- Estado del test: Validado localmente; ver [evidencia](../execution/VALIDATION.md).
 
 <a id="e2e-grade-018"></a>
 
@@ -81,9 +81,9 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Persistencia / consistencia: Ningún cambio de pesos.
 - Denegación: No asumir freeze desde una única página.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
-- Dependencias: F1 entorno/seed listo; [fase F5](../roadmap/F5.md); fixture independiente, sin depender de ejecutar otro caso.
+- Dependencias: F1 entorno/seed listo; [fase F5](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador real; regression (regression incluye smoke; extended incluye regression).
-- Estado del test: Propuesto; sin implementar ni ejecutar.
+- Estado del test: Validado localmente; ver [evidencia](../execution/VALIDATION.md).
 
 <a id="e2e-grade-019"></a>
 
@@ -108,9 +108,9 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Persistencia / consistencia: Orden serial, nunca cambio posterior a freeze.
 - Denegación: No éxito UI de borrador viejo.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
-- Dependencias: F1 entorno/seed listo; [fase F5](../roadmap/F5.md); fixture independiente, sin depender de ejecutar otro caso.
+- Dependencias: F1 entorno/seed listo; [fase F5](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador + comprobación API/SQL; extended (regression incluye smoke; extended incluye regression).
-- Estado del test: Propuesto; sin implementar ni ejecutar.
+- Estado del test: Validado localmente; ver [evidencia](../execution/VALIDATION.md).
 
 <a id="e2e-grade-020"></a>
 
@@ -135,6 +135,6 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Persistencia / consistencia: Un cambio de pesos auditado.
 - Denegación: No ocultar incertidumbre con aviso éxito temporal.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
-- Dependencias: F1 entorno/seed listo; [fase F5](../roadmap/F5.md); fixture independiente, sin depender de ejecutar otro caso.
+- Dependencias: F1 entorno/seed listo; [fase F5](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador real; regression (regression incluye smoke; extended incluye regression).
-- Estado del test: Propuesto; sin implementar ni ejecutar.
+- Estado del test: Validado localmente; ver [evidencia](../execution/VALIDATION.md).

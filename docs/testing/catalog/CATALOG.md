@@ -3,7 +3,7 @@
 Evidencia común: [api-catalog.mjs](../../../scripts/api-catalog.mjs); [api-catalog-render.mjs](../../../scripts/api-catalog-render.mjs); [api-catalog-init.js](../../../scripts/api-catalog-init.js); [api-catalog.md](../../../docs/reference/api-catalog.md).
 
 B: navegador; M: navegador con API/SQL; H: HTTP integración; O: operación/SQL.
-Estado efectivo por ficha en[el ledger](../execution/IMPLEMENTATION_STATUS.md). Las variantes enumeradas se parametrizan sin reducir aserciones.
+Estado efectivo por ficha en[el ledger](../execution/VALIDATION.md). Las variantes enumeradas se parametrizan sin reducir aserciones.
 
 | Caso y ficha | Flujo | Prioridad | Suite | Nivel |
 | --- | --- | --- | --- | --- |

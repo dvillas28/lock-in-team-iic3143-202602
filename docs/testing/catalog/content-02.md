@@ -27,9 +27,9 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Persistencia / consistencia: Solo evento por transición real.
 - Denegación: Revalidar acceso aun en no-op.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
-- Dependencias: F1 entorno/seed listo; [fase F4](../roadmap/F4.md); fixture independiente, sin depender de ejecutar otro caso.
+- Dependencias: F1 entorno/seed listo; [fase F4](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador + comprobación API/SQL; regression (regression incluye smoke; extended incluye regression).
-- Estado del test: Aprobado localmente; ver[estado y evidencia](../execution/IMPLEMENTATION_STATUS.md).
+- Estado del test: Validado localmente; ver [evidencia](../execution/VALIDATION.md).
 
 <a id="e2e-content-007"></a>
 
@@ -54,9 +54,9 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Persistencia / consistencia: Sin escritura del lector.
 - Denegación: Assistant no equivale teacher.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
-- Dependencias: F1 entorno/seed listo; [fase F4](../roadmap/F4.md); fixture independiente, sin depender de ejecutar otro caso.
+- Dependencias: F1 entorno/seed listo; [fase F4](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador real; regression (regression incluye smoke; extended incluye regression).
-- Estado del test: Aprobado localmente; ver[estado y evidencia](../execution/IMPLEMENTATION_STATUS.md).
+- Estado del test: Validado localmente; ver [evidencia](../execution/VALIDATION.md).
 
 <a id="e2e-content-008"></a>
 
@@ -81,9 +81,9 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Persistencia / consistencia: Un material kind markdown con createdBy actor; eventos before/after.
 - Denegación: No publicar solo en UI.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
-- Dependencias: F1 entorno/seed listo; [fase F4](../roadmap/F4.md); fixture independiente, sin depender de ejecutar otro caso.
+- Dependencias: F1 entorno/seed listo; [fase F4](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador real; smoke (regression incluye smoke; extended incluye regression).
-- Estado del test: Aprobado localmente; ver[estado y evidencia](../execution/IMPLEMENTATION_STATUS.md).
+- Estado del test: Validado localmente; ver [evidencia](../execution/VALIDATION.md).
 
 <a id="e2e-content-009"></a>
 
@@ -108,9 +108,9 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Persistencia / consistencia: Flags independientes, sin cascada de borrado.
 - Denegación: No filtrar borradores después de recibirlos.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
-- Dependencias: F1 entorno/seed listo; [fase F4](../roadmap/F4.md); fixture independiente, sin depender de ejecutar otro caso.
+- Dependencias: F1 entorno/seed listo; [fase F4](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador + comprobación API/SQL; smoke (regression incluye smoke; extended incluye regression).
-- Estado del test: Aprobado localmente; ver[estado y evidencia](../execution/IMPLEMENTATION_STATUS.md).
+- Estado del test: Validado localmente; ver [evidencia](../execution/VALIDATION.md).
 
 <a id="e2e-content-010"></a>
 
@@ -135,6 +135,6 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Persistencia / consistencia: Cuerpo/historia intactos; eventos únicos.
 - Denegación: No conservar contenido tras 403/404 de recurso.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
-- Dependencias: F1 entorno/seed listo; [fase F4](../roadmap/F4.md); fixture independiente, sin depender de ejecutar otro caso.
+- Dependencias: F1 entorno/seed listo; [fase F4](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador + comprobación API/SQL; regression (regression incluye smoke; extended incluye regression).
-- Estado del test: Aprobado localmente; ver[estado y evidencia](../execution/IMPLEMENTATION_STATUS.md).
+- Estado del test: Validado localmente; ver [evidencia](../execution/VALIDATION.md).

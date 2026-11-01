@@ -27,9 +27,9 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Persistencia / consistencia: Solo intento propio puede cambiar.
 - Denegación: No filtrar notas staff como si solo existiera student.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
-- Dependencias: F1 entorno/seed listo; [fase F3](../roadmap/F3.md); fixture independiente, sin depender de ejecutar otro caso.
+- Dependencias: F1 entorno/seed listo; [fase F3](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador + comprobación API/SQL; regression (regression incluye smoke; extended incluye regression).
-- Estado del test: Aprobado localmente; ver[estado y evidencia](../execution/IMPLEMENTATION_STATUS.md).
+- Estado del test: Validado localmente; ver [evidencia](../execution/VALIDATION.md).
 
 <a id="e2e-rbac-012"></a>
 
@@ -54,9 +54,9 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Persistencia / consistencia: Historial conservado; ningún cambio posterior del actor.
 - Denegación: No acceso heredado por cursor.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
-- Dependencias: F1 entorno/seed listo; [fase F3](../roadmap/F3.md); fixture independiente, sin depender de ejecutar otro caso.
+- Dependencias: F1 entorno/seed listo; [fase F3](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador + comprobación API/SQL; regression (regression incluye smoke; extended incluye regression).
-- Estado del test: Aprobado localmente; ver[estado y evidencia](../execution/IMPLEMENTATION_STATUS.md).
+- Estado del test: Validado localmente; ver [evidencia](../execution/VALIDATION.md).
 
 <a id="e2e-rbac-013"></a>
 
@@ -81,6 +81,6 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Persistencia / consistencia: Sin cambios.
 - Denegación: No usar mockup role como identidad.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
-- Dependencias: F1 entorno/seed listo; [fase F3](../roadmap/F3.md); fixture independiente, sin depender de ejecutar otro caso.
+- Dependencias: F1 entorno/seed listo; [fase F3](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador + comprobación API/SQL; regression (regression incluye smoke; extended incluye regression).
-- Estado del test: Aprobado localmente; ver[estado y evidencia](../execution/IMPLEMENTATION_STATUS.md).
+- Estado del test: Validado localmente; ver [evidencia](../execution/VALIDATION.md).

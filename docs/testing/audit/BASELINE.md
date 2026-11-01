@@ -6,6 +6,9 @@ El checkout original estaba limpio en `dev`, en el mismo commit.
 No se actualizaron archivos ni referencias de ese checkout: `.git` es de solo lectura en este entorno.
 La rama y los commits están en `/private/tmp/academix-e2e-master-plan`; no hubo merge ni push.
 
+Este directorio conserva el inventario previo a implementar. El estado vigente está en
+[la evidencia local](../execution/VALIDATION.md); la ejecución actual no depende de la copia temporal.
+
 ## Método reproducible y límites
 
 Se inventariaron páginas App Router, controladores, servicios, capacidades UI, validadores,

@@ -1,97 +1,56 @@
-# Datos y seed E2E propuestos
+# Datos y seed E2E
 
-Diseño original. La [implementación inicial de seed](../../e2e/data/seed.ts) existe,
-pero su ejecución contra PostgreSQL sigue bloqueada por entorno; no se declara validada.
-[Actores/entidades](data/ACTORS_ENTITIES.md) · [Perfiles por caso](data/SCENARIOS.md).
-Todas las variables de fichas se resuelven desde un manifest generado por preparación.
+[Seed](../../e2e/data/seed.ts) y helpers validados contra PostgreSQL 17 real.
+[Actores y entidades](data/ACTORS_ENTITIES.md) · [Perfiles por caso](data/SCENARIOS.md).
+La [evidencia](execution/VALIDATION.md) registra las ejecuciones; no quedan bloqueos históricos de PG/Chromium activos.
 
-## Destino aislado obligatorio
+## Entorno aislado
 
-Baseline: PostgreSQL17 efímera por job/shard; Next y Nest locales; ningún recurso productivo.
-Hosts: PORTAL=`http://localhost:3000`, UC=`http://uc.localhost:3000`,
-UTFSM=`http://utfsm.localhost:3000`; API=`http://127.0.0.1:3001` del stack propio.
-HOST-UNKNOWN usa desconocida.localhost. Validar resolución en tres motores durante F1;
-si requiere /etc/hosts, aprovisionarlo solo en runner efímero. No asumir DNS externo.
-`NEXT_PUBLIC_INSTITUTION_ORIGINS` y portal se fijan antes del build; CORS exacto UC/UTFSM.
-No portal en CORS institucional. Backend usa `NODE_ENV=test`, frontend compilado producción.
-No NODE_ENV production backend local sin ajustar política CORS: exige dominios HTTPS productivos.
+El runner crea su cluster PostgreSQL 17 y DB exclusiva por caso, variante y retry.
+Por defecto usa portal `localhost:4320`, instituciones `uc.localhost:4320` y `utfsm.localhost:4320`,
+y API `127.0.0.1:4321`. Los origins de Next se fijan antes del build.
+Nest usa configuración de test y credenciales runtime restringidas; no se desactivan RLS ni constraints.
 
-Preflight futuro debe rechazar antes de conectar o arrancar:
+Preflight rechaza URLs E2E de servicios/bases existentes y elimina credenciales operacionales heredadas.
+Las operaciones sobre DB exigen destino local, ownership del run y nombre de prueba.
+El marker del directorio o label Docker debe coincidir antes de limpiar recursos.
+Un sufijo `_test` por sí solo no autoriza tocar otra base. No se usa producción ni cuentas demo.
 
-- URL de frontend/API distinta a allowlist loopback local; resolver también IP y puertos propiedad runId.
-- Cualquier dominio `academix.dvillasc.me`, `onrender.com`, Railway o URL externa en modo escritura.
-- Base sin nombre `academix_e2e_<run>_<shard>_test`, o host no propio/URL runtime y operador discordantes.
-- `DATABASE_URL` ambiente heredada como fallback; variables E2E deben ser explícitas.
-- Manifest runId/ownership/sentinel que no corresponda al contenedor/base creada para ese job.
+## Preparación
 
-Tres barreras acumulativas: allowlist destino + ownership de infraestructura + DB *_test.
-Un boolean `E2E=true` o sufijo `_test` por sí solo no autoriza tocar una base existente.
-No se propone smoke productivo: queda excluido hasta autorización explícita separada de solo lectura.
+1. Registrar el runId y crear la base vacía propia.
+2. Aplicar migraciones y provision-runtime del backend existente.
+3. Crear instituciones UC/UTFSM, usuarios sintéticos, memberships y relaciones válidas.
+4. Preparar el perfil necesario y verificar tenant, relaciones, estados, pesos e invariantes.
+5. Realizar publicación, rendición, envío y otras transiciones académicas mediante APIs reales cuando corresponde.
+6. Devolver un manifest de IDs para la prueba; las credenciales y tokens no se publican.
 
-## Seed propia, no demo
+Directorio/identidades o estados no construibles por API usan SQL operador controlado.
+El runtime HTTP no recibe la credencial operador. Las conexiones SQL de verificación son oráculos, no sustitutos de la acción UI.
+Los datos inválidos se envían como payload; no se fabrican filas que incumplan constraints.
 
-`backend/src/seeds/demo*` y presentación son referencia de restricciones, no fixtures mutables.
-Bootstrap demo tiene IDs globales y flags, ensure preserva cambios; presentación añade cursos
-ya frozen y estudiantes ficticios con preimagen password inutilizable. No resuelve E2E independientes.
-Proponer `e2e/data/seed.ts` fuera del código de producto, ejecutado solo con credencial operador efímera.
-No usar funciones de integración `reset` que hacen DROP SCHEMA sobre una DB ambiental.
+## Namespaces y repetibilidad
 
-1. Crear recurso infra/base nueva y registrar runId fuera de datos académicos; verificar ownership.
-2. Compilar backend, ejecutar migraciones existentes y provision-runtime sobre esa base vacía.
-3. Crear UC/UTFSM e identidades por inserción controlada en fixture, con passwords argon2id efímeras.
-4. Crear memberships y relaciones válidas por actor. No desactivar constraints/triggers/RLS.
-5. Entidades de ciclos críticos preferentemente por API real: publish, start, save, submit, weights, publication.
-   Directorio/identidades y estados no construibles por API se preparan por operador, auditando procedencia.
-6. Generar manifest y verificar tenant/parents/roles, conteos, últimos intentos, pesos y publishedAt.
-7. Separar servidor HTTP de credencial operacional: start.js ya elimina MIGRATION/DEMO/ONBOARD/SUPERADMIN env.
-8. Ejecutar cada test con namespace propio; al final destruir solo infraestructura propiedad runId.
+Cada ejecución tiene runId aleatorio; el namespace incluye proyecto, test, variante y retry.
+Los UUID se derivan de versión, namespace y alias; las respuestas API resuelven IDs creados dinámicamente.
+Correos, cursos y claves sintéticas son propios del caso; las operaciones usan claves diferentes salvo replay explícito.
+La seed contiene roles institucionales/académicos, multirol, cursos, secciones, matrículas, módulos,
+Markdown y quizzes draft/publicados. Los helpers preparan ACTIVE, PUBLISHABLE, HISTORY y escenarios de cada fase.
 
-## Identificadores, colisiones y repetición
+`ensure` valida versión, identidad y ownership. No restaura progreso, passwords, flags ni privilegios modificados.
+Una nueva variante/retry usa otra base; no se borra historial para recuperar la fixture inicial.
+Los tiempos académicos se anclan al reloj DB. Las fronteras exactas se prueban en el nivel que permite controlarlas.
 
-runId aleatorio por ejecución; namespace=`runId/shard/project/testId/variant/retry`.
-UUID determinista por hash(version+namespace+entidad+alias), manteniendo formato UUID válido.
-Slug `uc`/`utfsm` fijos dentro de DB de job; users/courses de cada caso usan IDs y correos únicos
-`e2e.<hash>.<actor>@example.test`. Code<=32, term<=16; no incrustar UUID completo en campo corto.
-Manifest: IDs de institución, usuario, membership, course, section, módulos, materiales, quizzes,
-question/alternative IDs, gradeItem, attempts, Grades y claves sintéticas por test; no passwords/tokens.
-Question IDs creados por API se descubren de respuesta; no enviar UUID inventado como pregunta nueva.
-Las claves de operación viven en runner/memoria y cada operación usa una diferente salvo replay explícito.
+## Limpieza y credenciales
 
-Seed modo `ensure` valida versión/identidad/ownership, crea lo ausente del namespace inicial y
-rechaza colisión de IDs/clave natural no administrada. No reescribe progreso, Grade, flags o passwords.
-Repetir ensure sobre un namespace ya usado no restaura baseline: nueva variante/retry usa namespace nuevo.
-Reseeding parcial que produciría historia incoherente debe fallar y pedir stack nuevo, no «reparar» filas.
+Un worker por stack. No compartir la DB con tests de integración que reinician schemas.
+Se reinicia Nest entre casos para aislar su cuota; el escenario de rate-limit conserva el proceso deliberadamente.
+Una carrera dentro de un caso comparte los recursos necesarios y verifica integridad después.
 
-## Mínimos, extendidos y preparación
+Teardown cierra conexiones/contextos/procesos y elimina solo DB, cluster o contenedor/volúmenes propios.
+No hace DELETE/TRUNCATE de historia académica. Si falla, conserva diagnóstico de ownership para recuperación.
+No barrer recursos por prefijo ni terminar procesos ajenos.
 
-BASE contiene dos tenants, todos los actores implementados, dos secciones C1, cursoC2 compartido
-y C3 ajeno, Markdown en cuatro combinaciones, quizzes draft/publicados con GradeItems, notas de
-lectura publicadas/no publicadas y al menos dos estudiantes para fronteras de identidad.
-Para tests de escritura, usar copias limpias COPEN/CNEW y actores propios, no mutar baseline de lectura.
-Extendido agrega 21+ resultados por colección paginada, historial de secciones, multirol,
-valores límite, quizzes temporales y concurrencia. Crear solo el perfil que el test necesita.
-Datos inválidos son payloads, no filas persistidas que incumplen constraints.
-Time anchor T se registra desde reloj DB al preparar; escenarios largos usan márgenes minutos,
-tests de frontera exacta se separan de navegador; no modificar clocks de la DB global.
-
-## Workers y limpieza
-
-Inicialmente un worker por stack; DB/API/frontend exclusivos de shard. Más shards duplican stack.
-No ejecutar node:test integración junto al navegador en la misma DB: borra schema e inicia otros servidores.
-Dentro de shard, namespace por caso/variante/retry. Reiniciar API entre casos resetea cuota login,
-sin tocar DB o cambiar throttler. Máximo cinco login/proceso salvo test RATE explícito.
-Dos actores concurrentes del mismo test usan mismo stack y curso intencionalmente para probar carrera.
-No rollback transaccional externo alrededor de UI: las conexiones API tienen sus propias transacciones.
-
-Teardown cierra browser/context/process y elimina solo contenedor/DB/volumen guardados en manifest infra.
-No DELETE/TRUNCATE sobre tablas de historia. Si teardown falla, marcar recurso propiedad runId para
-recolección posterior con TTL y verificación; no barrer por prefijo sin comprobar ownership.
-Restaurar significa crear una base nueva migrada/seed, no reactivar privilegios silenciosamente.
-
-## Credenciales y evidencia
-
-Generar passwords y AUTH_JWT_SECRET por ejecución (base64 canónico>=32bytes), solo memoria/env privado.
-No credenciales productivas, cuentas demo modificables, valores reales en Git ni comandos con secretos literales.
-Operador solo en preparación/teardown y oráculo SQL controlado; navegador nunca conoce DATABASE_URL.
-Enmascarar env en CI; no registrar login bodies, Authorization, hashes, storage dumps o HAR sin redacción.
-Trazas login deshabilitadas; ver tratamiento específico en [arquitectura](TEST_ARCHITECTURE.md).
+Passwords y JWT secret son efímeros; no se incorporan a Git, comandos literales ni artifacts públicos.
+No publicar Authorization, cuerpos de login, hashes, dumps de entorno o HAR.
+El tratamiento del diagnóstico está en [arquitectura](TEST_ARCHITECTURE.md).

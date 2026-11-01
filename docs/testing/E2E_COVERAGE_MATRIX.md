@@ -1,8 +1,8 @@
-# Matrices de cobertura planificada
+# Matrices de cobertura
 
 Base: 18 páginas Next, 50 operaciones API y 34 familias de flujos, incluido catálogo estático fuera de App Router.
-La matriz acredita trazabilidad documental; hoy ningún caso nuevo tiene PASS de ejecución.
-La implementación iniciada y sus bloqueos se registran en [estado real](execution/IMPLEMENTATION_STATUS.md).
+Las matrices trazan los requisitos; la ejecución real está en [evidencia](execution/VALIDATION.md).
+Los248 casos pasaron en F7; los conteos no son cobertura de código.
 
 | Matriz | Pregunta que resuelve |
 | --- | --- |
@@ -27,7 +27,7 @@ No reducir `TENANT-008/009` a un único UUID porque haya una sola ficha en el ca
 ## Estados de seguimiento
 
 - Planificado: ficha definida y evidencia enlazada; estado inicial de este plan.
-- Implementado: test versionado en rama posterior, fixtures y selector revisados.
+- Implementado: test versionado, fixtures y selector revisados.
 - Ejecutado estable: evidencia real en entorno identificado, sin reintento que esconda defecto.
 - Bloqueado: falta regla o infraestructura; registrar responsable, plazo e impacto; no computa cubierto.
 - Excluido justificado: fuera MVP o nivel alternativo apropiado; revisar cuando cambie alcance.

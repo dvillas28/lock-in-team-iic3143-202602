@@ -19,7 +19,7 @@ El checkout original continúa limpio en dev; la copia aislada contiene la rama 
 Los comandos y comprobaciones anteriores son verificaciones documentales, no tests E2E nuevos.
 No se ejecutó navegador, backend, migraciones, seed ni consultas a una base de datos durante la auditoría.
 No hubo conexiones a producción. La evidencia QA anterior está citada con su fecha, sin atribuirla a esta tarea.
-Registro del diseño inicial; estado efectivo en[el ledger](../execution/IMPLEMENTATION_STATUS.md). Q02 se resolvió con HTTP400 en F4.
+Registro del diseño inicial; estado efectivo en[el ledger](../execution/VALIDATION.md). Q02 se resolvió con HTTP400 en F4.
 
 ## Lectura de conteos
 

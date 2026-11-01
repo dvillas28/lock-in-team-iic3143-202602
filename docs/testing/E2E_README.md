@@ -1,34 +1,12 @@
-# Ejecutar el harness E2E
+# Cómo ejecutar las pruebas E2E
 
-Estado actual: **F1–F6 aceptadas por incrementos;248 fichas implementadas; estabilidad/automatización F7 pendiente**.
-[Evidencia F6](execution/F6_VALIDATION.md) · [Estado](execution/IMPLEMENTATION_STATUS.md).
+[Qué probamos y fases](E2E_MASTER_PLAN.md) · [Resultados y tiempos medidos](execution/VALIDATION.md).
+Ejecutar desde la raíz del repositorio, en la rama acumulativa `test/e2e-f7`.
 
-## Checkout permanente y ejecución por fase
+## Preparación
 
-Ruta `/Users/julian/lock-in-team-iic3143-202602`, rama `test/e2e-f6`; `dev` y `main` intactas.
-Trabajo comprometido localmente, sin push ni merge. La copia temporal anterior queda de respaldo.
-
-```bash
-cd /Users/julian/lock-in-team-iic3143-202602
-pnpm test:e2e:f6
-pnpm test:e2e:f6 --project=chromium --project=firefox --project=webkit
-pnpm --dir e2e report
-```
-
-F2:47 instancias Chromium;63 con smoke actual Firefox/WebKit (61 en su cierre histórico). Para ver Chromium, añadir `--headed`.
-F1:`pnpm test:e2e:f1`; F3:89/129; F4:92 Chromium/126 con smoke Firefox/WebKit.
-Acumulado:`pnpm test:e2e:all` (512 instancias configuradas; sin regresión global posterior a F6); visible:`pnpm test:e2e:visual`; paso a paso:`pnpm test:e2e:step`.
-La caché `e2e/.cache/browsers` se detecta automáticamente; PLAYWRIGHT_BROWSERS_PATH explícita prevalece.
-Reportes en `e2e/reports/`, ignorados por Git; no se requieren archivos de `/private/tmp`.
-El runner crea y limpia su stack local. F6 aceptada por incrementos; F7 pendiente. Detenerse para revisión antes de F7.
-
-Guía viva por fase y demostración visual: [registro incremental](execution/E2E_EXECUTION_JOURNAL.md).
-
-## Requisitos e instalación
-
-Node24, pnpm9, Python3 y PostgreSQL17 local o Docker operativo. El runner crea su propio cluster;
-no acepta una URL de base existente ni credenciales demo. Linux/macOS, usuario no root para initdb.
-En Windows usar un entorno Linux con Docker. No necesita secretos de producción.
+Requisitos: Node 24, pnpm 9, Python3 y PostgreSQL 17 local o Docker con daemon operativo.
+Para PostgreSQL nativo, ejecutar como usuario normal; `initdb` no admite root.
 
 ```bash
 pnpm install --frozen-lockfile
@@ -36,92 +14,95 @@ pnpm --dir backend install --frozen-lockfile
 pnpm --dir frontend install --frozen-lockfile
 pnpm --dir e2e install --frozen-lockfile
 PLAYWRIGHT_BROWSERS_PATH="$PWD/e2e/.cache/browsers" pnpm --dir e2e exec playwright install chromium firefox webkit
+```
+
+En Linux puede ser necesario instalar también las dependencias del sistema:
+`pnpm --dir e2e exec playwright install --with-deps chromium firefox webkit`.
+La caché local de navegadores se detecta automáticamente.
+
+## Todas, smoke o por fase
+
+| Qué ejecutar | Comando |
+| --- | --- |
+| Todas, con los motores requeridos | `pnpm test:e2e:all` |
+| Smoke en Chromium | `pnpm test:e2e:smoke` |
+| Smoke en los tres motores | `pnpm test:e2e:smoke --project=chromium --project=firefox --project=webkit` |
+| Regression en Chromium | `pnpm --dir e2e run test:regression` |
+| F1: infraestructura y datos | `pnpm test:e2e:f1` |
+| F2: entrada y navegación | `pnpm test:e2e:f2` |
+| F3: permisos y universidades | `pnpm test:e2e:f3` |
+| F4: cursos y contenido | `pnpm test:e2e:f4` |
+| F5: ciclo académico | `pnpm test:e2e:f5` |
+| F6: errores y compatibilidad | `pnpm test:e2e:f6` |
+| F7: veinte rondas smoke locales | `pnpm test:e2e:stability` |
+
+Los comandos por fase usan Chromium por defecto. Para incluir sus variantes Firefox/WebKit:
+
+```bash
+pnpm test:e2e:f6 --project=chromium --project=firefox --project=webkit
+```
+
+F7 no añade casos funcionales: mide veinte smoke completos en tres motores, con código limpio y comprometido.
+Se detiene ante una ronda fallida o no comparable. Es una ejecución larga y siempre local.
+En macOS, `caffeinate -i pnpm test:e2e:stability` evita suspensión por inactividad.
+
+## Un caso, navegador visible o paso a paso
+
+```bash
+pnpm test:e2e:f6 --grep E2E-A11Y-004
+pnpm test:e2e:f6 --headed --grep E2E-A11Y-004
+pnpm test:e2e:f5 --headed --grep E2E-GRADE-021
+pnpm test:e2e:f6 --debug --grep E2E-A11Y-002
+pnpm test:e2e:f4 --headed
+pnpm test:e2e:visual
+```
+
+`--grep` selecciona el caso y sus variantes del proyecto elegido; puede generar más de una instancia.
+`--headed` muestra el navegador; `--debug` abre el inspector para pausar y avanzar manualmente.
+`test:e2e:visual` ejecuta todo en Chromium visible. El navegador se cierra al finalizar.
+Para selección libre usar `pnpm test:e2e --grep ID`; no combinar suites nombradas con grep/shard/repeat.
+Los filtros no cambian las aserciones ni acreditan los casos excluidos.
+
+## Servicios y limpieza
+
+El comando levanta PostgreSQL 17 propio, compila backend/frontend y sirve Next en 4320.
+Cada prueba recibe una base nueva con migraciones y seed, y Nest en 4321; al terminar limpia sus recursos.
+No hace falta levantar backend, frontend o DB manualmente. Ejecutar un solo runner por checkout.
+No cargar credenciales productivas ni apuntar a servicios o bases existentes.
+Ctrl+C cancela y limpia; un resultado cancelado no aprueba.
+
+Opcionales: `E2E_PG_BIN`, `E2E_WEB_PORT`, `E2E_API_PORT` y `PLAYWRIGHT_BROWSERS_PATH`.
+Si un puerto está ocupado, elegir otro; si falta un navegador, instalar su versión fijada.
+Un bloqueo del sandbox al arrancar PG/navegadores es un problema de ejecución del entorno.
+Un lease existente requiere comprobar el PID/owner antes de retirarlo; no borrar el de un proceso activo.
+
+## Reportes y demostración
+
+```bash
+pnpm --dir e2e report
+pnpm --dir e2e exec playwright show-report reports/4582dbc70e312524/html
+pnpm --dir e2e coverage
+pnpm --dir e2e metrics 4582dbc70e312524
+pnpm --dir e2e metrics reports/windows/f9a9cd53a93ee726/window.json
+```
+
+`report` abre el último HTML; el segundo comando abre la corrida completa validada si está en ese equipo.
+Los archivos están en `e2e/reports/<runId>/`, ignorados por Git. Otro equipo debe copiarlos o repetir las pruebas.
+`coverage` lee únicamente el último run; si fue parcial, no mostrará todo el catálogo aprobado.
+Los reportes registran SHA, seed, navegador, variantes, resultados y duración.
+CI solo publica el resumen seguro; HTML nativo, capturas y trazas detalladas permanecen privados.
+
+Para mostrar que son pruebas reales: abrir un caso con `--headed`, mostrar su aserción y luego el HTML.
+Playwright controla formularios y navegación; una diferencia en UI, HTTP o SQL hace fallar la prueba.
+Los logs describen la ejecución. Las comprobaciones exclusivamente HTTP/SQL no muestran navegador.
+
+## Verificar cambios del harness
+
+```bash
 pnpm --dir e2e typecheck
 pnpm --dir e2e lint
 pnpm --dir e2e test:harness
 ```
 
-En CI Linux, usar `playwright install --with-deps chromium` para dependencias del navegador.
-Playwright y sus binarios deben tener la misma versión. Los lockfiles siguen separados.
-
-## Variables y aislamiento
-
-- `E2E_PG_BIN`: directorio opcional de binarios PostgreSQL17 (`initdb`, `postgres`, `pg_ctl`).
-- `E2E_WEB_PORT`/`E2E_API_PORT`: puertos locales libres, por defecto4320/4321.
-- `PLAYWRIGHT_BROWSERS_PATH`: ubicación opcional de binarios; usar el mismo valor al instalar y ejecutar.
-- `CI`: retries1 y prohibición de `.only`; local retries0.
-- `E2E_BASE_URL`, `E2E_API_URL`, `E2E_DATABASE_URL`, `E2E_RUNTIME_DATABASE_URL`: **prohibidas**.
-
-No cargar `.env` productivo. El runner elimina credenciales heredadas y genera passwords/JWT efímeros.
-UC/UTFSM se sirven como uc.localhost/utfsm.localhost. El portal usa localhost; API127.0.0.1.
-Configura orígenes públicos antes de compilar Next; no usar un build configurado para producción.
-
-## Preparación, seed y servicios
-
-El comando de ejecución hace preflight, cluster nuevo, build backend/frontend y servidor Next.
-Cada test crea una base*_test exclusiva, aplica predeploy/migraciones/provision-runtime existentes,
-ejecuta seed E2E y arranca Nest con academix_runtime. No se desactiva RLS ni constraints.
-La seed contiene dos instituciones, perfiles institucionales/académicos, multirol, cursos,
-secciones, matrículas, módulos, Markdown y quizzes draft/publicados. Helpers preparan intentos/notas
-por API real; los perfiles ACTIVE/PUBLISHABLE/HISTORY y ensure se validaron en F1 con PostgreSQL17.
-`ensure` no repone privilegios ni ediciones. No ejecutar manualmente la seed sobre una DB ajena.
-
-## Comandos
-
-```bash
-pnpm --dir e2e run test
-pnpm --dir e2e run test:smoke
-pnpm --dir e2e run test:regression
-pnpm --dir e2e run test:extended
-pnpm --dir e2e run test --grep E2E-AUTH-001
-pnpm --dir e2e run test --grep E2E-COURSE-
-pnpm --dir e2e run test:headed
-pnpm --dir e2e run test:ui
-pnpm --dir e2e test:list
-pnpm --dir e2e coverage
-pnpm --dir e2e report
-```
-
-Los248 IDs del catálogo están implementados; los filtros no acreditan los casos no seleccionados.
-Smoke/regression/extended son selecciones disponibles, no evidencia de cobertura completa.
-Usar `run test` al pasar flags para que pnpm los entregue al runner.
-Proyectos adicionales: `--project=firefox`, `--project=webkit`, `--project=mobile`;
-instalar cada navegador antes. F6 sola tiene41 instancias Chromium/68 con sus variantes Firefox/WebKit.
-F1–F5 conservan su evidencia histórica; no se repitieron al aceptar F6.
-Desde la raíz del checkout permanente, usar `PLAYWRIGHT_BROWSERS_PATH="$PWD/e2e/.cache/browsers"`
-como prefijo del comando. Las ejecuciones requieren permisos para PG y procesos de navegador.
-
-## Depuración y reportes
-
-HTML/JUnit/JSON en e2e/reports/<runId>; latest.json identifica la última ejecución.
-No reutiliza resultados de ejecuciones anteriores. En el directorio del run, screenshots enmascaradas y trazas sanitizadas adjuntas al fallo.
-La traza privada empieza después de login para no capturar password/token de respuesta.
-`coverage` genera un ledger de los248 IDs del catálogo, distinguiendo definición y resultado real.
-Declarar variantes en e2e/data/case-variants.ts y conservar el sufijo ` / variante @suite`;
-una ficha sin todas las variantes ejecutadas no se aprueba. Una variante flaky permanece visible.
-No compartir raw HAR, dump de env, tokens ni trazas sin sanitizar.
-No usar `page.goto` tras login para navegación SPA: recargar pierde Session en memoria.
-El helper sigue enlaces reales; no inyecta tokens en React/storage.
-
-## CI y limpieza
-
-[e2e.yml](../../.github/workflows/e2e.yml) prepara paquetes, navegador, validaciones y runner local.
-PR selecciona smoke; pushdev regression; schedule extended/motores; dispatch permite ejecución manual.
-Es configuración preparada, sin ejecución remota verificada ni cambio de branch protection.
-El resultado actual no acredita las22 fichas smoke ni la suite del catálogo; faltan implementaciones.
-Un worker por stack evita reiniciosAPI cruzados. Los jobs de motores tienen stacks independientes.
-La paralelización de una misma instancia sigue deshabilitada:solo un worker por stack.
-
-Al terminar, cerrar contextos/Nest y borrar solo la base registrada para runId; finalmente parar
-el cluster propio. Un marker o label incorrecto impide limpieza. No DELETE/TRUNCATE de historia.
-Si se mata el runner externamente y queda un recurso, verificar su owner/runId antes de retirarlo.
-
-## Problemas frecuentes
-
-- `shmget Operation not permitted`: sandbox impide arrancar PostgreSQL. Habilitar entorno apropiado;
-  no conectar otra base como fallback. Docker es alternativa solo si está disponible.
-- `bootstrap_check_in Permission denied`: sandbox impide arrancar Chromium; no es un fallo del LMS.
-- Browser executable ausente: instalar los binarios de la versión fijada y revisar BROWSERS_PATH.
-- Puerto ocupado: elegir E2E_WEB_PORT/API_PORT libres antes del build; no terminar procesos ajenos.
-- 429: no compartir el procesoAPI entre tests; máximo5 logins/IP/min. No desactivar throttler.
-- Error de tipos/schema/seed: conservar error y diagnosticar fixture; no relajar permisos/RLS.
+Estos checks no reemplazan ejecutar los casos funcionales afectados.
+La política de GitHub Actions y sus límites están en [EXECUTION_CI](EXECUTION_CI.md).

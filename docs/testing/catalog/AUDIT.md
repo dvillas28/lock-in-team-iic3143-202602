@@ -3,7 +3,7 @@
 Evidencia común: [audit.service.ts](../../../backend/src/audit/audit.service.ts); [course-audit.tsx](../../../frontend/src/components/audit/course-audit.tsx); [grade-audit-visibility.md](../../../docs/adr/grade-audit-visibility.md).
 
 B: navegador; M: navegador con API/SQL; H: HTTP integración; O: operación/SQL.
-Estado efectivo por ficha en[el ledger](../execution/IMPLEMENTATION_STATUS.md). Las variantes enumeradas se parametrizan sin reducir aserciones.
+Estado efectivo por ficha en[el ledger](../execution/VALIDATION.md). Las variantes enumeradas se parametrizan sin reducir aserciones.
 
 | Caso y ficha | Flujo | Prioridad | Suite | Nivel |
 | --- | --- | --- | --- | --- |

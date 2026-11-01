@@ -1,7 +1,7 @@
 # Catálogo maestro de pruebas
 
 Base y límites: [auditoría](audit/BASELINE.md). Estado actual por ID en
-[ledger de implementación](execution/IMPLEMENTATION_STATUS.md);139 fichas aprobadas al cierre F4.
+[ledger de implementación](execution/VALIDATION.md);248 fichas aprobadas en la corrida completa F7.
 **248 fichas**: **222 E2E de navegador** (B/M) y
 **26 comprobaciones complementarias** HTTP/SQL/operación (H/O).
 Se identifican **34 familias de flujos** con operaciones y transiciones detalladas,
@@ -16,7 +16,7 @@ O prueba operación/SQL de infraestructura. H/O no se presentan como E2E de inte
 Los IDs `E2E-*` son claves del plan; el prefijo no cambia el nivel indicado en la ficha.
 Cada fila es una ficha estable. Roles/valores/recursos enumerados son variantes parametrizadas
 del mismo caso. Al implementar, usar sufijos de reporte actor/tenant/recurso/navegador;
-el conteo ejecutado será mayor y se informará por separado. No afirmar hoy ese número expandido.
+la corrida completa ejecutó512 instancias, con variantes y motores declarados.
 
 ## Índice por módulo
 
@@ -54,7 +54,7 @@ Selección primaria: 22 smoke, 156 regression,
 P0 no significa automáticamente smoke: ataques exhaustivos/concurrencia van en regresión/extendida,
 pero ningún defecto P0 conocido se admite como verde de entrega aunque el smoke pase.
 
-## Cómo implementar una ficha sin rediseñarla
+## Cómo mantener o ampliar una ficha
 
 1. Leer [datos](E2E_TEST_DATA.md) y resolver manifest por run/shard/test/retry.
 2. Preparar fixture exacta, verificar sus invariantes y login real. Si hay varios perfiles,

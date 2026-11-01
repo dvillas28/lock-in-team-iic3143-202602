@@ -39,6 +39,7 @@ Fuentes canónicas: `mockups/assets/tokens.css` y `mockups/assets/app.css`.
 ## Documentación
 
 - [Índice](docs/README.md): estructura viva del repositorio.
+- Pruebas E2E: [qué probamos y fases](docs/testing/E2E_MASTER_PLAN.md) · [cómo ejecutarlas](docs/testing/E2E_README.md).
 - [Misiones backend](docs/backend/README.md): cobertura CU/RF/RNF y dependencias.
 - [Entrega 2](docs/deliveries/2/README.md): arquitectura vigente.
 - [PostgreSQL compartida](docs/adr/adopt-shared-postgresql-multitenancy.md).

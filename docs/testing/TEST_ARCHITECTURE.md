@@ -1,112 +1,74 @@
-# Arquitectura propuesta para automatización
+# Arquitectura de la suite E2E
 
-Propuesta para ramas posteriores; no archivos ejecutables añadidos ahora.
-Playwright Test+TypeScript se ajusta a Next/Nest y permite navegador, contextos múltiples y HTTP
-del mismo entorno. Mantener node:test/jsdom/c8 actuales; no migrarlos ni llamar E2E a sus mocks.
-No existe infraestructura de navegador automatizada que debamos conservar.
+Paquete independiente Playwright Test + TypeScript en `e2e/`, con lockfile propio.
+El producto usa Next, Nest y PostgreSQL 17 reales; las pruebas unitarias e integración existentes se conservan.
+[Comandos](E2E_README.md) · [Datos](E2E_TEST_DATA.md) · [CI](EXECUTION_CI.md).
 
-## Organización futura
+## Código relevante
 
-```text
-e2e/
-  package.json / pnpm-lock.yaml / playwright.config.ts
-  specs/{public,auth,tenant,rbac,courses,content,quizzes,attempts,grades,audit}/
-  fixtures/{test,environment,actors,manifest,network}.ts
-  data/{seed,profiles,verify}.ts
-  helpers/{login,navigate,api,assert-persistence,barrier}.ts
-  pages/{course-workspace,quiz-editor,grade-publication}.ts
-  runner/{preflight,start,stop,run,report}.ts
-  reports/ / test-results/ (ignorados)
-docs/testing/ (este plan, matrices y fichas)
-```
+| Ubicación | Responsabilidad |
+| --- | --- |
+| `e2e/specs/` | Escenarios y aserciones observables por ID de catálogo. |
+| `e2e/data/case-variants.ts` | Actor, universidad, nivel y proyectos obligatorios por variante. |
+| `e2e/data/seed.ts`, `profiles.ts`, `phase-*.ts` | Datos iniciales y preparación académica específica. |
+| `e2e/fixtures/environment.ts`, `test.ts` | DB/API por test, contextos y limpieza. |
+| `e2e/helpers/` | Navegación, API, SQL operador, contenido, seguridad, notas y concurrencia. |
+| `e2e/runner/run.ts`, `postgres.ts`, `process.ts` | Preflight, servicios, señales y teardown. |
+| `e2e/runner/suites.ts`, `assessment.ts` | Selección autoritativa y gates de ejecución. |
+| `e2e/runner/artifacts.ts`, `safe-reporter.ts` | Reportes públicos verificados y diagnóstico privado. |
+| `e2e/runner/ci-policy.ts`, `ci-result.ts` | Detección de cambios y resultado agregado por evento. |
+| `e2e/runner/stability.ts`, `metrics.ts` | Ventana local de veinte rondas y percentiles. |
 
-Paquete independiente porque repo no tiene workspace. Nueva dependencia principal @playwright/test
-con versión fijada al implementar; browser binaries de la misma versión. tsx/pg solo si los scripts
-de runner/seed lo necesitan; reutilizar capacidades existentes antes de introducir otra dependencia.
-No monorepo framework, servicio remoto de pruebas, BDD ni PageObjectbase genérico.
-Page helpers pequeños para editor, selección publicación y navegación; las aserciones permanecen
-legibles en el test. Métodos representan acción de negocio, no cientos de wrappers click/fill.
+Los helpers representan acciones pequeñas; las aserciones permanecen en los tests.
+No hay servicios externos de testing, APIs públicas de preparación ni un framework de Page Objects genérico.
 
-## Entorno y ciclo de vida
+## Ciclo de ejecución
 
-1. Preflight fail-closed de [datos](E2E_TEST_DATA.md), crear PG17 exclusivo, migrar/provisionar runtime.
-2. Fijar API y origins de NEXT_PUBLIC antes de compilar frontend; backend compilado una sola vez/job.
-3. Arrancar Next standalone con sus static/public según Dockerfile existente; / y assets listos.
-4. Por test/variante: namespace propio, seedperfil, arrancar/reiniciar API con mismo puerto/secreto del job,
-   esperar /ready200 y verificar build SHA/manifest antes de abrir contexto nuevo.
-5. Login UI, navegar con Next Link/controles en el documento vivo. `page.goto` posterior equivale a
-   navegación de documento y borra Session; usarlo solo donde el caso espera relogin.
-6. Comparar persistencia por API de actor autorizado o SQL operador controlado; cerrar contextos.
-7. Teardown final elimina exclusivamente infraestructura propia. Retry usa namespace nuevo.
+1. Preflight rechaza destinos externos y credenciales heredadas; toma un lease exclusivo.
+2. Crea PostgreSQL 17 propio, fija origins locales y compila backend/frontend.
+3. Sirve Next standalone. Cada caso/variante/retry obtiene DB migrada, seed y Nest propios.
+4. Verifica invariantes de fixture, abre contexto limpio y realiza login UI real cuando corresponde.
+5. Ejecuta acciones y comprueba UI/HTTP/persistencia; otra lectura confirma las escrituras pertinentes.
+6. Cierra contextos/Nest y elimina exclusivamente la base registrada. Finalmente limpia el cluster y lease.
+7. Evalúa el JSON real de Playwright y exporta resultados; ausencia o selección incompleta no aprueba.
 
-Un worker por stack, fullyParallel false inicialmente; otros shards tienen DB/API/frontend propios.
-Rate limit memoria por instancia: reiniciar API **entre** tests, no dentro del flujo salvo prueba reinicio.
-Máximo cinco logins/proceso; parametrizar matrices por actor para no agotar cuota. API probes usan
-token del login real capturado solo en RAM del runner, no realizan login adicional ni lo imprimen.
-RATE conserva proceso y prueba cuota real. No usar spoof de X-Forwarded-For ni desactivar throttler.
-Si se aumenta workers, duplicar también frontend/config API por stack y medir costo de build; no
-compartir un API global reiniciado mientras otro test trabaja. Shard aislado es primera vía de paralelismo.
-Esto es una adaptación propia al código AcademiX, no una exigencia de Playwright.
+Un worker por stack y `fullyParallel:false`. Los jobs remotos de motores tienen stacks separados.
+Reiniciar Nest entre casos restablece su cuota de login; no se desactiva el throttler ni RLS.
+Las carreras de un mismo caso comparten deliberadamente su stack y usan barreras controladas.
 
-## Fixtures y autenticación
+## Autenticación y selectores
 
-Fixture test-scoped retorna entorno/manifest/actores y factory de BrowserContext limpio por actor.
-MULTI conserva UserUUID entre dos tenants de su namespace; sesiones de documentos separadas.
-Ningún storageState de usuario real ni inyección de JWT a ventana/React; memoria Session no se restaura
-con cookies/localStorage. Helpers login rellenan labels y esperan Mis cursos o error esperado de contexto.
-Staff y estudiante del mismo caso usan contextos separados. Cada test autentica, sin depender de setup
-de otro test; la cuenta no comparte curso mutable con tests vecinos.
-Tokens sintéticos inválidos/vencidos solo companionHTTP; autenticar navegador siempre con backend real.
+Session vive en memoria React: recargar exige autenticarse otra vez.
+Después del login, la navegación habitual usa enlaces/controles SPA; `page.goto` se reserva para escenarios de recarga.
+`storageState` no restaura esa sesión. No se inyectan JWT en React, cookies o localStorage.
+Cada actor tiene contexto separado; los probes HTTP reutilizan el token del login real solo en RAM.
+JWT inválidos o vencidos se usan únicamente en las comprobaciones que prueban ese rechazo.
 
-## Selectores y esperas
+Se prefieren `getByRole` y `getByLabel`, acotados por formulario, diálogo o recurso.
+Las respuestas se esperan desde antes del click; las lecturas SQL usan polling acotado de invariantes.
+Los IDs proceden del manifest o de respuestas reales. No se depende del orden aleatorio de filas.
+Las carreras comprueban un resultado legal y serialización, sin imponer un ganador del scheduler.
 
-- Preferir getByRole/getByLabel con nombre accesible; scoped por formulario/dialog/fila del recurso.
-- Ejemplos: botón Continuar, heading Mis cursos, form Crear material, dialog Confirmar publicación,
-  radio por alternativa dentro del fieldset de pregunta, Gestionar nombre+rol del fixture.
-- Resolver UUID por manifest/respuesta; no indexar `nth(0)` sobre orden aleatorio ni clases de estilo.
-- Si falta selector estable, documentar hallazgo y proponer cambio mínimo en rama funcional posterior;
-  no modificar componentes en esta rama. Usar data-testid solo para ambigüedad real e inmutable.
-- Autoespera con expect visible/enabled/URL y waitForResponse registrado antes del click; DB polling
-  acotado de invariant. No waitForTimeout/networkidle como señal de consistencia.
-- Barreras para concurrencia/retener respuesta real; validar precondición antes de liberar. No exigir
-  ganador específico por scheduling; afirmar serialización y resultado legal.
-- Presupuesto inicial test60s, acción10s, expect10s; RATE120s; entorno/fault120s. Setup global5min.
-  Ventanas con margen no sustituyen pruebas de frontera exacta a nivel SQL/HTTP controlado.
+## Fallos inyectados y navegadores
 
-## Red y mocks justificados individualmente
+Los flujos críticos mantienen auth, backend, cálculo y DB reales.
+Las pruebas de red interceptan únicamente la petición afectada; una respuesta perdida tras commit usa `route.fetch` real.
+Los modos simulados quedan identificados en el escenario. No se crean servicios externos ficticios.
 
-Backend, DB, auth, permisos, cálculo y persistencia siempre reales en E2E crítico.
-Inyectar solo request específico para timeout/offline/200malformado/500UX y pérdida de respuesta
-**después** de route.fetch real cuando se prueba commit incierto. Identificar la modalidad en reporte.
-Sin servicios externos de storage/SSO implementados: no crear mocks ficticios de ellos.
-HTMLMarkdown usa host sentinel controlado por runner para detectar request prohibido, sin visitar terceros.
-CaídaDB y atomicidad se ejecutan en clonstack exclusivo; nunca sobre stack compartido concurrente.
+Proyectos: `chromium`, `firefox`, `webkit` y el perfil opcional `mobile`.
+El manifest define qué variantes de los tres motores son obligatorias; F6 también configura viewport/tema dentro del caso.
+El catálogo completo acredita383 Chromium,64 Firefox y65 WebKit; no todas las fichas se triplican.
+Timeout general90s, acciones/expect10s y navegación20s, con excepciones explícitas por escenario.
+Los presupuestos globales por suite están en la política de CI.
 
-## Proyectos, evidencia y diagnóstico
+## Evidencia y seguridad
 
-Proyectos propuestos: chromium-regression, chromium-mobile, firefox-smoke, webkit-smoke;
-un mismo ID se expande por proyecto/actor/tenant con sufijo, sin duplicar ID de catálogo.
-Reporters line+JUnit+HTML/blob cuando haya shards; manifest de ejecución incluye SHA, versión
-browser, esquema, seedversion y IDs/estado, no env completos ni URLs con passwords.
-Screenshot al fallo con datos sintéticos y máscaras de login; video off por defecto, opt-in sintético
-para diagnosticar flake tras evaluación de secretos. Conservar timeline de pasos con campos allowlist.
+JSON, JUnit y HTML nativo se guardan localmente por runId, con SHA, seed y navegador.
+Las trazas privadas empiezan tras login, excluyen nuevos logins y se sanitizan antes de adjuntarse al fallo.
+Las capturas enmascaran credenciales; video permanece deshabilitado.
+El bundle público excluye trazas, capturas, HTML nativo, cuerpos HTTP y logs internos.
+El escáner y los checksums se verifican antes de publicar y al agregar resultados.
 
-Trazas Playwright pueden incluir headers Bearer y cuerpos login. Configurar trace off en privados
-hasta disponer de redacción validada. Públicos sin credenciales pueden usar retain-on-failure.
-No subir trace/HAR/raw network de privados. Una tarea posterior puede producir trace sanitizada
-eliminando Authorization, login bodies, tokens de respuestas y snapshots de credenciales antes de
-publicar; si no garantiza sanitización, mantener deshabilitado y usar screenshots+timeline seguro.
-No afirmar que screenshot masking también limpia la red de una traza.
-
-Clasificar fallo: setup/infra, producto, contrato, fixture, selector, tiempo o flake. Adjuntar último
-estado autorizado y comparación de invariantes, evitando volcar filas completas/secretos.
-Retries local0, CI máximo1 con nuevo namespace; falla en primer intento y pasa en segundo se reporta
-inestable, no verde estable. P0 flakey bloquea madurez y requiere resolución; no retry infinito.
-
-## Soporte oficial consultado
-
-[Best practices](https://playwright.dev/docs/best-practices): contextos aislados y locators observables.
-[Authentication](https://playwright.dev/docs/auth): storageState y sensibilidad del estado autenticado.
-[Retries](https://playwright.dev/docs/test-retries): distinguir passed/flaky/failed; política del plan más estricta para P0.
-[Sharding](https://playwright.dev/docs/test-sharding): reparto y fusión de reportes; aislamiento DB es decisión de este plan.
-[Trace Viewer](https://playwright.dev/docs/trace-viewer-intro): diagnóstico interactivo; política de secretos propia arriba.
+Retries: cero locales, uno en CI solo para diagnóstico; un resultado flaky no pasa el gate.
+El resumen distingue cancelación, infraestructura, limpieza y fallos de tests/harness.
+El diagnóstico específico de producto, contrato, fixture o selector requiere revisar la aserción y evidencia privada.
