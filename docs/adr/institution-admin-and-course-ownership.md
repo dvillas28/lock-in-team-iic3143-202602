@@ -24,6 +24,8 @@ assistant consulta seguimiento propio y student usa el recorrido propio.
 El dueño admin gestiona participantes de todas sus secciones y eventos administrativos
 del curso. Eventos grade requieren teacher activo según
 [privacidad de auditoría](grade-audit-visibility.md); owner+teacher amplía curso.
+Las ponderaciones comunes pueden editarlas todos los docentes activos, según
+[la decisión de ponderaciones](teacher-course-grade-weights.md).
 Las funciones docentes de evaluación siguen exigiendo teacher activo; ownership
 solo amplía el alcance a las secciones del curso cuando admin sigue vigente.
 

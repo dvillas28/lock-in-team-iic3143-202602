@@ -6,7 +6,7 @@ test("academic permissions require current academic roles; ownership only expand
  for(const role of ['owner','super','student','assistant','teacher','ownerTeacher','multi']){
   const c=gradebookCapabilities(user(role),course);
   assert.equal(c.book,['assistant','teacher','ownerTeacher','multi'].includes(role));
-  assert.equal(c.weights,role==='ownerTeacher');
+  assert.equal(c.weights,['teacher','ownerTeacher','multi'].includes(role));
   assert.equal(c.audit,['owner','teacher','ownerTeacher','multi'].includes(role));
   assert.equal(c.student,['student','multi'].includes(role));
  }

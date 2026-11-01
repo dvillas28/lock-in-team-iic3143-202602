@@ -19,11 +19,11 @@ export function WeightsForm({ session, slug, courseId, items, locked, busy = fal
     const [status, setStatus] = useState<'ready' | 'saving' | 'uncertain' | 'locked'>('ready'), [message, setMessage] = useFeedbackState();
     const pending = useRef(false);
     const scan = useResource(session, `${session.getSnapshot().generation}:${slug}:${courseId}:freeze`, async (c) => {
-        const freeze = await readFreeze(c, slug, courseId, items);
+        const current = await listCourseGradeItems(c, slug, courseId);
+        const freeze = current.weightsLocked === undefined ? await readFreeze(c, slug, courseId, items) : current.weightsLocked ? 'locked' : 'unlocked';
         if (freeze === 'locked') {
             setStatus('locked');
         }
-        const current = await listCourseGradeItems(c, slug, courseId);
         return { freeze, current };
     });
     const frozen = locked || status === 'locked' || scan.data?.freeze === 'locked';
@@ -80,7 +80,7 @@ export function WeightsForm({ session, slug, courseId, items, locked, busy = fal
     else if (status === 'saving') {
         statusMessage = 'Guardando pesos…';
     }
-    return <section className="panel stack"><h2 className="serif">Ponderaciones</h2><output aria-live="polite">{statusMessage}</output>
+    return <section className="panel stack"><h2 className="serif">Ponderaciones</h2><p className="hint">Estos porcentajes son comunes a todas las secciones del curso. Cualquier docente activo del curso puede modificarlos antes de publicar notas.</p><output aria-live="polite">{statusMessage}</output>
  {scan.error && <p role="alert">{scan.error.message}</p>}{message && <p aria-live="polite">{message}</p>}
  {!frozen && scan.data && !scan.error && status !== 'uncertain' && <form key={JSON.stringify(scan.data.current)} onSubmit={e => {
         e.preventDefault();

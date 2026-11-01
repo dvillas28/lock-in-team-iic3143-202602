@@ -29,6 +29,7 @@ export function studentGrades(v: unknown, courseId: string): StudentGrades {
 export function gradeItems(v: unknown, courseId: string): {
     items: GradeItem[];
     totalWeightPercent: number;
+    weightsLocked?: boolean;
 } {
     if (!isRecord(v) || !Array.isArray(v.items) || !number(v.totalWeightPercent, 0, Number.MAX_SAFE_INTEGER)) {
         throw new ApiResponseError();
@@ -41,9 +42,11 @@ export function gradeItems(v: unknown, courseId: string): {
     if (!unique(v.items.map(i => i.id)) || !unique(v.items.map(i => i.quizId))) {
         throw new ApiResponseError();
     }
+    if (v.weightsLocked !== undefined && typeof v.weightsLocked !== 'boolean') throw new ApiResponseError();
     return v as {
         items: GradeItem[];
         totalWeightPercent: number;
+        weightsLocked?: boolean;
     };
 }
 export function pageInfo(v: unknown) {

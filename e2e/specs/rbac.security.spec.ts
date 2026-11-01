@@ -1,5 +1,6 @@
 import {test,expect} from '../fixtures/test.ts';
 import {status} from '../helpers/api.ts';
+import {weights as currentCourseWeights} from '../helpers/academic.ts';
 import {course,go,compatibilityNavigate} from '../helpers/browser.ts';
 import {academic,securitySnapshot,deniedUI,courseInput,rejectNonStaffWrites} from '../helpers/security.ts';
 
@@ -33,7 +34,7 @@ test('E2E-RBAC-004 teacher writes own academia without global administration / t
  status(await api.post(`courses/${c}/modules`,{title:'Teacher module',position:3}),201);
  status(await api.post(`modules/${e.data.modules.M1}/materials`,{title:'Teacher material',markdownBody:'Evidence'}),201);
  status(await api.post(`courses/${c}/quizzes`,{title:'Teacher quiz',sectionId:e.data.sections.S1}),201);
- const before=await securitySnapshot(e);status(await api.patch(`courses/${c}`,{name:'attack'}),403);status(await api.post(`courses/${c}/sections`,{code:'attack'}),403);status(await api.put(`courses/${c}/gradebook/weights`,weights(e)),403);status(await api.post(`courses/${c}/quizzes`,{title:'Global',sectionId:null}),403);
+ const before=await securitySnapshot(e);status(await api.patch(`courses/${c}`,{name:'attack'}),403);status(await api.post(`courses/${c}/sections`,{code:'attack'}),403);status(await api.put(`courses/${c}/gradebook/weights`,{items:await currentCourseWeights(e,c,'T1')}),200);status(await api.post(`courses/${c}/quizzes`,{title:'Global',sectionId:null}),403);
  expect(await securitySnapshot(e)).toEqual(before);await go(page,c,'/modules');await expect(page.locator('summary').filter({hasText:/^Crear módulo$/})).toBeVisible();
 });
 for(const {id,actor} of [{id:'E2E-RBAC-005',actor:'AS1'},{id:'E2E-RBAC-006',actor:'ST1'}])test(`${id} projections and writes obey contextual role / ${actor} @smoke`,async ({e,actorPage})=>{
@@ -64,7 +65,7 @@ test('E2E-RBAC-007 revoking admin preserves teaching / admin-revocation @regress
  status(await sa.put(`memberships/${e.data.actors.AO.membership.uc}/course-admin`,{isAdmin:false}),200);
  const refresh=page.waitForResponse(r=>r.url().endsWith('/me'));await page.evaluate(()=>window.dispatchEvent(new Event('focus')));await refresh;
  expect(status(await owner.get('me'),200).body.institutionMembership.isAdmin).toBe(false);
- status(await owner.patch(`courses/${e.data.courses.C1}`,{name:'attack'}),403);status(await owner.put(`courses/${e.data.courses.C1}/gradebook/weights`,weights(e)),403);
+ status(await owner.patch(`courses/${e.data.courses.C1}`,{name:'attack'}),403);status(await owner.put(`courses/${e.data.courses.C1}/gradebook/weights`,{items:await currentCourseWeights(e,e.data.courses.C1,'AO')}),200);
  status(await owner.patch(`materials/${e.data.materials.R1}`,{title:'Still teacher'}),200);
  await expect(page.getByText('Configurar curso',{exact:true})).toHaveCount(0);
 });

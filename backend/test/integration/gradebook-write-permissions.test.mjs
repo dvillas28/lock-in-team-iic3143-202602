@@ -4,12 +4,12 @@ import {randomUUID} from 'node:crypto';
 import {database,http} from './helpers.mjs';
 import {gradebookFixture,request,tokens,users,selection,coursePath,snapshot} from './gradebook-fixtures.mjs';
 
-test('writes revalidate tenant, teacher plus owner, historical sections and revoked recipients',async()=>{
+test('writes revalidate tenant, active teacher, historical sections and revoked recipients',async()=>{
  const pool=await database();let app;try{
  const f=await gradebookFixture(pool);app=await http();const t=await tokens(app,f),path=coursePath(f),body=selection(f),before=await snapshot(pool);
  for(const token of [t.student,t.assistant,t.admin])assert.ok([403,404].includes((await request(app,token,path+'/gradebook/publications','POST',body,randomUUID())).status));
  const weights={items:[{gradeItemId:f.items.section,weightPercent:40},{gradeItemId:f.items.global,weightPercent:30},{gradeItemId:f.items.second,weightPercent:30}]};
- assert.equal((await request(app,t.teacher,path+'/gradebook/weights','PUT',weights)).status,403);
+ assert.equal((await request(app,t.teacher,path+'/gradebook/weights','PUT',weights)).status,200);
  assert.equal((await request(app,t.owner,`utfsm/courses/${f.own}/gradebook/publications`,'POST',body,'cross')).status,404);
  assert.equal((await request(app,t.teacher,path+'/gradebook/publications','POST',{...body,sectionIds:[f.s4]},'foreign')).status,404);
  assert.deepEqual(await snapshot(pool),before);

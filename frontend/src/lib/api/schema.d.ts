@@ -1061,7 +1061,8 @@ export interface paths {
         get?: never;
         /**
          * Reemplazar ponderaciones del curso de forma atómica
-         * @description Teacher activo más is_admin institucional y createdBy=actor. Colección completa, única, pesos
+         * @description Cualquier teacher activo del curso, sin exigir is_admin ni ownership. Ponderaciones comunes
+         *     a todas las secciones; esto no amplía acceso a notas o participantes. Colección completa, única, pesos
          *     de hasta dos decimales, suma exacta 100. Primera publicación congela pesos e ítems; 409
          *     GRADE_WEIGHTS_LOCKED incluso en no-op. Antes de freeze no-op no emite evento.
          */
@@ -1876,6 +1877,8 @@ export interface components {
         GradeItemListResponse: {
             items: components["schemas"]["GradeItem"][];
             totalWeightPercent: number;
+            /** @description Bloqueo común del curso por publicación; no revela notas de otras secciones. */
+            weightsLocked?: boolean;
         };
         GradeWeightInput: {
             /** Format: uuid */
