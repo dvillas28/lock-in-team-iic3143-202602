@@ -32,6 +32,13 @@ test('twenty unique comparable clean smoke executions are required and one bad r
  const base=assess({...meta,suite:'smoke',projects:['chromium','firefox','webkit']},report(expectedKeys('smoke',['chromium','firefox','webkit']))),runs=Array.from({length:20},(_,i)=>({...base,runId:i.toString(16).padStart(16,'0')}));assert.equal(stabilityWindow(runs).passed,true);assert.equal(stabilityWindow(runs.slice(1)).passed,false);assert.equal(stabilityWindow([...runs.slice(0,19),runs[0]]).passed,false);
  for(const patch of [{passed:false},{dirty:true},{commit:'other'},{environmentHash:'other'},{suite:'extended' as const}])assert.equal(stabilityWindow([...runs.slice(0,19),{...runs[19],...patch}]).passed,false);assert.throws(()=>stabilityWindow(runs,19));
 });
+test('changed source cannot certify a run or window and cross-job seed/environment drift is rejected',()=>{
+ assert.equal(assess({...meta,endCommit:'other'},report([key])).passed,false);
+ const jobs=['chromium','firefox','webkit'].map(project=>assess({...meta,suite:'smoke',projects:[project]},report(expectedKeys('smoke',[project]))));
+ for(const patch of [{seedVersion:'other'},{environmentHash:'other'},{endCommit:'other'}])assert.equal(aggregate([{...jobs[0],...patch},...jobs.slice(1)],'smoke',['chromium','firefox','webkit'],meta.commit).passed,false);
+ const base=assess({...meta,suite:'smoke',projects:['chromium','firefox','webkit']},report(expectedKeys('smoke',['chromium','firefox','webkit'])));
+ assert(stabilityWindow([base,{...base,runId:'b'.repeat(16),commit:'other'}]).reasons.includes('mixed-commit'));
+});
 test('public bundle is allowlisted escaped checksum verified and excludes credential/trace bodies',async()=>{
  const dir=await mkdtemp(resolve(tmpdir(),'academix-public-test-'));try{const summary=assess(meta,report([key]));summary.tests[0].variant='<script>alert(1)</script>';const folder=await publishArtifacts(dir,summary,['known-secret']);assert.equal((await verifyBundle(folder)).runId,meta.runId);const html=await readFile(resolve(folder,'index.html'),'utf8');assert(!html.includes('<script>'));assert(html.includes('&lt;script&gt;'));await writeFile(resolve(folder,'extra.zip'),'private');await assert.rejects(verifyBundle(folder));await rm(resolve(folder,'extra.zip'));await writeFile(resolve(folder,'index.html'),'tampered');await assert.rejects(verifyBundle(folder));}finally{await rm(dir,{recursive:true,force:true});}
  for(const value of ['known-secret','eyJhbGciOiJIUzI1NiJ9.e30.signature','postgresql://user:password@host/db','-----BEGIN PRIVATE KEY-----'])assert.throws(()=>assertSafeArtifact(Buffer.from(value),['known-secret']));

@@ -5,7 +5,7 @@ on:
   push:
     branches: [dev]
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '0 3 * * 1'
   workflow_dispatch:
     inputs:
       suite:
@@ -19,14 +19,33 @@ concurrency:
   group: e2e-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
+  changes:
+    name: Detect E2E changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      required: ${{ steps.detect.outputs.required }}
+      reason: ${{ steps.detect.outputs.reason }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - id: detect
+        run: node e2e/runner/ci-policy.ts detect
   playwright:
     name: Playwright (${{ matrix.project }})
     runs-on: ubuntu-24.04
+    needs: changes
+    if: ${{ always() && !(needs.changes.result == 'success' && needs.changes.outputs.required == 'false' && needs.changes.outputs.reason == 'documentation-only') }}
     timeout-minutes: ${{ github.event_name == 'schedule' && 90 || github.event_name == 'workflow_dispatch' && 90 || github.event_name == 'push' && 45 || 25 }}
     strategy:
       fail-fast: false
       matrix:
-        project: ${{ fromJSON(github.event_name == 'push' && '["chromium"]' || '["chromium","firefox","webkit"]') }}
+        project: ${{ fromJSON((github.event_name == 'push' || github.event_name == 'pull_request') && '["chromium"]' || '["chromium","firefox","webkit"]') }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -53,20 +72,17 @@ jobs:
         with:
           path: frontend/.next/cache
           key: e2e-next-${{ runner.os }}-node24-${{ github.sha }}-local4320-4321
+      - name: Select the event suite
+        id: selection
+        env:
+          DISPATCH_SUITE: ${{ inputs.suite }}
+        run: node e2e/runner/ci-policy.ts selection
       - name: Execute catalogued selection in an owned stack
         env:
           PROJECT: ${{ matrix.project }}
-          EVENT: ${{ github.event_name }}
-          DISPATCH_SUITE: ${{ inputs.suite }}
+          SUITE: ${{ steps.selection.outputs.suite }}
         shell: bash
         run: |
-          case "$EVENT" in
-            pull_request) SUITE=smoke ;;
-            push) SUITE=regression ;;
-            schedule) SUITE=extended ;;
-            workflow_dispatch) SUITE="$DISPATCH_SUITE" ;;
-            *) exit 1 ;;
-          esac
           case "$SUITE" in smoke|regression|extended) ;; *) exit 1 ;; esac
           pnpm --dir e2e run "test:$SUITE" --project="$PROJECT"
       - name: Verify and stage public artifacts
@@ -86,37 +102,34 @@ jobs:
   result:
     name: E2E result
     if: always()
-    needs: playwright
+    needs: [changes, playwright]
     runs-on: ubuntu-24.04
     steps:
-      - name: Reject failed cancelled skipped or absent execution
-        env:
-          RESULT: ${{ needs.playwright.result }}
-        run: test "$RESULT" = success
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v5
         with:
           node-version: 24
+      - name: Require execution or a confirmed documentation-only decision
+        id: gate
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: node e2e/runner/ci-policy.ts gate
+      - uses: pnpm/action-setup@v4
+        if: steps.gate.outputs.skip == 'false'
       - run: pnpm --dir e2e install --frozen-lockfile
+        if: steps.gate.outputs.skip == 'false'
       - uses: actions/download-artifact@v4
+        if: steps.gate.outputs.skip == 'false'
         with:
           pattern: e2e-public-*
           path: e2e/.cache/downloaded
       - name: Require every expected variant and project at this SHA
+        if: steps.gate.outputs.skip == 'false'
         env:
-          EVENT: ${{ github.event_name }}
           DISPATCH_SUITE: ${{ inputs.suite }}
           COMMIT: ${{ github.sha }}
         shell: bash
         run: |
-          case "$EVENT" in
-            pull_request) SUITE=smoke; PROJECTS=chromium,firefox,webkit ;;
-            push) SUITE=regression; PROJECTS=chromium ;;
-            schedule) SUITE=extended; PROJECTS=chromium,firefox,webkit ;;
-            workflow_dispatch) SUITE="$DISPATCH_SUITE"; PROJECTS=chromium,firefox,webkit ;;
-            *) exit 1 ;;
-          esac
-          pnpm --dir e2e exec node --import tsx runner/ci-result.ts "$SUITE" "$PROJECTS" "$COMMIT" .cache/downloaded
+          pnpm --dir e2e exec node --import tsx runner/ci-result.ts --event "$COMMIT" .cache/downloaded

@@ -23,7 +23,8 @@
     "test:f5": "tsx runner/run.ts quizzes.spec.ts attempts.spec.ts grades.spec.ts academic-audit.spec.ts",
     "test:f6": "tsx runner/run.ts network.spec.ts accessibility.spec.ts",
     "test:stability": "node --import tsx runner/stability.ts",
-    "artifacts:stage": "node --import tsx runner/stage-artifacts.ts"
+    "artifacts:stage": "node --import tsx runner/stage-artifacts.ts",
+    "metrics": "node --import tsx runner/metrics.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",

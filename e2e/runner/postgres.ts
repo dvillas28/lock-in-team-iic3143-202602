@@ -29,7 +29,7 @@ export async function startPostgres(runId: string) {
     if (docker) {
       let label:string;try{label=execFileSync('docker', ['inspect', '--format', '{{index .Config.Labels "academix.e2e.owner"}}', container], {encoding: 'utf8',stdio:['ignore','pipe','pipe']}).trim();}catch(error){if(!started&&/No such (object|container)/i.test(String((error as {stderr?:Buffer}).stderr)))label='absent';else throw error;}
       if (label!== 'absent' && label !== runId) throw new Error('E2E container ownership mismatch');
-      if(label!=='absent')await command('docker', ['rm', '-f', container]);
+      if(label!=='absent')await command('docker', ['rm', '-f', '-v', container]);
     } else if (bin) {
       let running = false;
       try {execFileSync(join(bin,'pg_ctl'),['-D',join(folder,'data'),'status'],{stdio:'pipe'}); running = true;}
