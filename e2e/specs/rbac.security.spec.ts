@@ -1,5 +1,6 @@
 import {test,expect} from '../fixtures/test.ts';
 import {status} from '../helpers/api.ts';
+import {weights as currentCourseWeights} from '../helpers/academic.ts';
 import {course,go,compatibilityNavigate} from '../helpers/browser.ts';
 import {academic,securitySnapshot,deniedUI,courseInput,rejectNonStaffWrites} from '../helpers/security.ts';
 
@@ -33,7 +34,7 @@ test('E2E-RBAC-004 teacher writes own academia without global administration / t
  status(await api.post(`courses/${c}/modules`,{title:'Teacher module',position:3}),201);
  status(await api.post(`modules/${e.data.modules.M1}/materials`,{title:'Teacher material',markdownBody:'Evidence'}),201);
  status(await api.post(`courses/${c}/quizzes`,{title:'Teacher quiz',sectionId:e.data.sections.S1}),201);
- const before=await securitySnapshot(e);status(await api.patch(`courses/${c}`,{name:'attack'}),403);status(await api.post(`courses/${c}/sections`,{code:'attack'}),403);status(await api.put(`courses/${c}/gradebook/weights`,weights(e)),403);status(await api.post(`courses/${c}/quizzes`,{title:'Global',sectionId:null}),403);
+ const before=await securitySnapshot(e);status(await api.patch(`courses/${c}`,{name:'attack'}),403);status(await api.post(`courses/${c}/sections`,{code:'attack'}),403);status(await api.put(`courses/${c}/gradebook/weights`,{items:await currentCourseWeights(e,c,'T1')}),200);status(await api.post(`courses/${c}/quizzes`,{title:'Global',sectionId:null}),403);
  expect(await securitySnapshot(e)).toEqual(before);await go(page,c,'/modules');await expect(page.locator('summary').filter({hasText:/^Crear módulo$/})).toBeVisible();
 });
 for(const {id,actor} of [{id:'E2E-RBAC-005',actor:'AS1'},{id:'E2E-RBAC-006',actor:'ST1'}])test(`${id} projections and writes obey contextual role / ${actor} @smoke`,async ({e,actorPage})=>{
@@ -64,7 +65,7 @@ test('E2E-RBAC-007 revoking admin preserves teaching / admin-revocation @regress
  status(await sa.put(`memberships/${e.data.actors.AO.membership.uc}/course-admin`,{isAdmin:false}),200);
  const refresh=page.waitForResponse(r=>r.url().endsWith('/me'));await page.evaluate(()=>window.dispatchEvent(new Event('focus')));await refresh;
  expect(status(await owner.get('me'),200).body.institutionMembership.isAdmin).toBe(false);
- status(await owner.patch(`courses/${e.data.courses.C1}`,{name:'attack'}),403);status(await owner.put(`courses/${e.data.courses.C1}/gradebook/weights`,weights(e)),403);
+ status(await owner.patch(`courses/${e.data.courses.C1}`,{name:'attack'}),403);status(await owner.put(`courses/${e.data.courses.C1}/gradebook/weights`,{items:await currentCourseWeights(e,e.data.courses.C1,'AO')}),200);
  status(await owner.patch(`materials/${e.data.materials.R1}`,{title:'Still teacher'}),200);
  await expect(page.getByText('Configurar curso',{exact:true})).toHaveCount(0);
 });
@@ -85,7 +86,9 @@ for(const {id,actor} of [{id:'E2E-RBAC-009',actor:'TS-SAME'},{id:'E2E-RBAC-010',
  if(actor==='TS-SAME')expect(await securitySnapshot(e)).toEqual(before);
  if(actor==='TS-CROSS')status(await api.put(`quiz-attempts/${r.body.id}/answers`,{answers:e.answers()}),200);
  await compatibilityNavigate(page,`/courses/${e.data.courses.C1}/quizzes/${e.data.quizzes.Q1}`);
- await expect(page.getByRole('button',{name:'Iniciar intento',exact:true})).toHaveCount(actor==='TS-SAME'?0:1);
+ // An active own attempt replaces the start action with a link to continue it.
+ await expect(page.getByRole('link',{name:'Continuar intento',exact:true})).toHaveCount(actor==='TS-SAME'?0:1);
+ await expect(page.getByRole('button',{name:'Iniciar nuevo intento',exact:true})).toHaveCount(0);
 });
 test('E2E-RBAC-011 assistant-student uses different own and staff projections / assistant-student @regression',async ({e,actorPage})=>{
  const a=await e.graded('AS-ST'),other=await e.attempt('ST1'),page=await actorPage('AS-ST'),api=await e.api('AS-ST');

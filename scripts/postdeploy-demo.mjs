@@ -59,9 +59,11 @@ async function academicWorkflow(slug,accounts,call,env) {
  const item=(await op('admin',`/courses/${course.id}/grade-items`)).items[0].id;
  await op('admin',`/courses/${course.id}/gradebook/weights`,{method:'PUT',body:{items:[{gradeItemId:item,weightPercent:100}]}});
  const safe=await op('student',`/quizzes/${quiz.id}`);
- check(!('isCorrect' in safe.questions[0].alternatives[0]),'Correction exposed');
+ check(safe.questions.length===0,'Questions exposed before attempt');
  const attempt=await op('student',`/sections/${section}/quizzes/${quiz.id}/attempts`,{method:'POST',status:201,key:randomUUID(),body:{}});
- await op('student',`/quiz-attempts/${attempt.id}/answers`,{method:'PUT',body:{answers:[{questionId:safe.questions[0].id,alternativeId:'a'}]}});
+ const own=await op('student',`/quiz-attempts/${attempt.id}/questions`);
+ check(!('isCorrect' in own.questions[0].alternatives[0]),'Correction exposed');
+ await op('student',`/quiz-attempts/${attempt.id}/answers`,{method:'PUT',body:{answers:[{questionId:own.questions[0].id,alternativeId:'a'}]}});
  await op('student',`/quiz-attempts/${attempt.id}/submit`,{method:'POST',key:randomUUID(),body:{}});
  check((await op('student',`/courses/${course.id}/my-grades`)).items.length===0,'Unpublished grade exposed');
  await op('assistant',`/courses/${course.id}/gradebook/publications`,{method:'POST',status:403,key:randomUUID(),body:{gradeItemIds:[item],sectionIds:[section],studentIds:[accounts.student.me.id]}});

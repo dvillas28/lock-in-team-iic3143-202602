@@ -5,12 +5,17 @@ import { FieldError } from "../../lib/courses/validation.ts";
 import { getRouteFeedback } from "../../lib/route-feedback.ts";
 import type { Session } from "../../lib/auth/session.ts";
 import { useTransientFeedback, type Feedback } from "../use-feedback.ts";
-export function useMutation(session: Session) {
+type MutationMessages = {
+  conflict?: {message: string; errors: Record<string,string>};
+  fields?: Record<string,string>;
+};
+export function useMutation(session: Session, messages: MutationMessages = {}) {
   const [status, setStatus] = useState<{
     busy: boolean;
     confirmed?: boolean;
     message?: string;
     field?: string;
+    errors?: Record<string,string>;
     uncertain?: boolean;
     persistent?: boolean;
   }>({ busy: false });
@@ -49,7 +54,12 @@ export function useMutation(session: Session) {
           return;
         const rejectedField = error.problem.errors?.[0]?.field;
         const field = rejectedField === 'initialSection.code' ? 'sectionCode' : rejectedField === 'initialSection.capacity' ? 'capacity' : rejectedField;
-        setStatus({ busy: false, field, message: error.status === 409 ? "Conflicto: revisa el estado antes de cambiar los datos." : error.status === 413 ? "Revisa el tamaño total: JSON máximo 4096 bytes UTF-8. El formulario autorizado se conserva." : error.status === 400 || error.status === 422 ? "Revisa los campos y sus límites. El servidor rechazó los valores." : getRouteFeedback(error).message });
+        const errors = Object.fromEntries((error.problem.errors ?? []).flatMap(e=>{
+          const name=e.field==='initialSection.code'?'sectionCode':e.field==='initialSection.capacity'?'capacity':e.field;
+          return messages.fields?.[name] ? [[name,messages.fields[name]]] : [];
+        }));
+        const conflict=error.status===409 && (!error.problem.code || ['CONFLICT','COURSE_ALREADY_EXISTS'].includes(error.problem.code)) ? messages.conflict : undefined;
+        setStatus({ busy: false, field: conflict ? Object.keys(conflict.errors)[0] : field, errors: conflict?.errors ?? errors, message: conflict?.message ?? (error.status === 409 ? "Conflicto: revisa el estado antes de cambiar los datos." : error.status === 413 ? "Revisa el tamaño total: JSON máximo 4096 bytes UTF-8. El formulario autorizado se conserva." : error.status === 400 || error.status === 422 ? "Revisa los campos y sus límites. El servidor rechazó los valores." : getRouteFeedback(error).message) });
         locked.current = false;
         return;
       }
@@ -63,5 +73,8 @@ export function useMutation(session: Session) {
         setStatus({ busy: false, uncertain: true, message: `Resultado incierto. ${observed} Revisa el estado antes de realizar otra operación; este envío sigue bloqueado.` });
     }
   }
-  return { ...status, message, run };
+  function clearErrors() {
+    if (!locked.current) setStatus(previous=>previous.uncertain || previous.confirmed ? previous : {...previous,field:undefined,errors:undefined,message:undefined});
+  }
+  return { ...status, message, run, clearErrors };
 }

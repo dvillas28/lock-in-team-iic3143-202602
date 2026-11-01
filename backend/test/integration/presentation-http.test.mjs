@@ -53,7 +53,7 @@ test('presentation data works with real frontend adapters and five roles, UC/UTF
       assert.equal((await request(app, tokens.assistant, `${slug}/materials/${materials[0].id}`, 'PATCH', { title: 'Forbidden' })).status, 403);
       assert.equal((await listCourseQuizzes(clients.student, slug, courseId)).length, 5);
       const quiz = await getQuiz(clients.student, slug, courseId, quizId);
-      assert.ok(!('isCorrect' in quiz.questions[0].alternatives[0]));
+      assert.deepEqual(quiz.questions, []);
       assert.ok((await getQuizAuthoringView(clients.teacher, slug, courseId, quizId)).questions[0].alternatives[0].isCorrect);
       assert.equal((await request(app, tokens.assistant, `${slug}/quizzes/${quizId}/authoring`)).status, 403);
       const items = await listCourseGradeItems(clients.teacher, slug, courseId);
@@ -88,13 +88,13 @@ test('presentation data works with real frontend adapters and five roles, UC/UTF
       const start = await request(app, tokens.student, `${slug}/sections/${workshopSection}/quizzes/${practice}/attempts`, 'POST', {}, 'demo-practice');
       assert.equal(start.status, 201);
       const path = `${slug}/quiz-attempts/${start.body.id}`;
-      const safe = await getQuiz(clients.student, slug, workshop, practice);
+      const safe = (await request(app, tokens.student, `${path}/questions`)).body;
       assert.equal((await request(app, tokens.student, `${path}/answers`, 'PUT', { answers: safe.questions.map(q => ({ questionId: q.id, alternativeId: 'a' })) })).status, 200);
       assert.equal((await request(app, tokens.student, `${path}/submit`, 'POST', {}, 'demo-submit')).status, 200);
       assert.equal((await getStudentGrades(clients.student, slug, workshop)).items.length, 0);
       const workshopItems = await listCourseGradeItems(clients.admin, slug, workshop);
       const weights = { items: workshopItems.items.map(i => ({ gradeItemId: i.id, weightPercent: i.weightPercent })) };
-      assert.equal((await request(app, tokens.teacher, `${slug}/courses/${workshop}/gradebook/weights`, 'PUT', weights)).status, 403);
+      assert.equal((await request(app, tokens.teacher, `${slug}/courses/${workshop}/gradebook/weights`, 'PUT', weights)).status, 200);
       assert.equal((await request(app, tokens.admin, `${slug}/courses/${workshop}/gradebook/weights`, 'PUT', weights)).status, 200);
       const selection = { gradeItemIds: workshopItems.items.map(i => i.id), sectionIds: [workshopSection], studentIds: [f.tenants[slug].accounts.student.id] };
       const publicationPath = `${slug}/courses/${workshop}/gradebook/publications`;

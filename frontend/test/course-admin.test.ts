@@ -5,12 +5,12 @@ import { CourseDirectory } from "../src/components/courses/course-directory.tsx"
 import { CourseDetail } from "../src/components/courses/course-detail.tsx";
 import { mount } from "./fixtures/course-ui.ts";
 import { course,section,deferred } from "./fixtures/courses.ts";
-const values={code:"IIC3143",name:"Desarrollo",term:"2026-2",sectionCode:"1",capacity:"0"};
+const values={code:"IIC3143",name:"Desarrollo",term:"2026-2",sectionCode:"1",capacity:"30"};
 test("admin creates exact payload once, reads sections and refreshes me after Course response",async()=>{
  const d=deferred<Response>();const ui=await mount(h(CourseDirectory),r=>r.method==='POST'?d.promise:Response.json(r.url.endsWith('/sections')?{items:[section]}:{items:[course]}));try{
  await ui.submit('form',values);await ui.submit('form',values);assert.equal(ui.requests.filter(r=>r.method==='POST'&&r.url.endsWith('/courses')).length,1);
  const post=ui.requests.find(r=>r.method==='POST'&&r.url.endsWith('/courses'))!;
- assert.deepEqual(await post.json(),{code:values.code,name:values.name,term:values.term,initialSection:{code:"1",capacity:0}});
+ assert.deepEqual(await post.json(),{code:values.code,name:values.name,term:values.term,initialSection:{code:"1",capacity:30}});
  await ui.settle(()=>d.resolve(Response.json(course,{status:201})));
  assert.ok(ui.requests.some(r=>r.url.endsWith(`/${course.id}/sections`)));assert.ok(ui.requests.filter(r=>r.url.endsWith('/me')).length>=2);
  }finally{await ui.close();}

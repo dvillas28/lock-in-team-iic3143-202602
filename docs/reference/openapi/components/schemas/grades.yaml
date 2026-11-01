@@ -58,6 +58,9 @@ GradeItemListResponse:
     totalWeightPercent:
       type: number
       minimum: 0
+    weightsLocked:
+      type: boolean
+      description: Bloqueo común del curso por publicación; no revela notas de otras secciones.
 
 GradeWeightInput:
   type: object

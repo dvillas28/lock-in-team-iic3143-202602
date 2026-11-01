@@ -1,0 +1,31 @@
+/api/v1/institution/{institutionSlug}/quiz-attempts/{attemptId}/questions:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/AttemptId'
+  get:
+    tags: [Attempts]
+    operationId: getAttemptQuestions
+    summary: Consultar preguntas dentro de un intento propio en progreso
+    description: |
+      Revalida institución, matrícula y elegibilidad de estudiante. Solo el dueño
+      del intento puede consultar las preguntas mientras esté en progreso.
+      No entrega pauta, puntajes obtenidos ni notas. El detalle general del quiz
+      devuelve questions vacío al estudiante, incluso si tiene un intento activo.
+      La lectura no inicia intentos ni modifica registros o auditoría.
+    responses:
+      '200':
+        description: Quiz con las preguntas y alternativas del intento autorizado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/quizzes.yaml#/QuizStudentView'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'

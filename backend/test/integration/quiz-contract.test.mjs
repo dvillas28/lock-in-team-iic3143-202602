@@ -16,10 +16,10 @@ test('US2 generated client against real HTTP sees safe DTO, protected headers an
   const list=await client.GET('/api/v1/institution/{institutionSlug}/courses/{courseId}/quizzes',{params:{path:{institutionSlug:'uc',courseId:f.own}}});
   assert.equal(list.data.items.length,2);
   const detail=await client.GET('/api/v1/institution/{institutionSlug}/quizzes/{quizId}',{params:{path:{institutionSlug:'uc',quizId:f.quizzes.section}}});
-  assert.equal('isCorrect' in detail.data.questions[0].alternatives[0],false);
+  assert.deepEqual(detail.data.questions,[]);
   const author=quizDto.authoringDto((await pool.query('SELECT * FROM quizzes WHERE id=$1',[f.quizzes.section])).rows[0]);
   assert.equal(author.questions[0].alternatives[0].isCorrect,true);
-  assert.deepEqual(detail.data.questions.map(q=>q.alternatives.map(a=>Object.keys(a))),[[['id','text'],['id','text']]]);
+  assert.equal(JSON.stringify(detail.data).includes(question.prompt),false);
   for(const [body,type,status] of [[JSON.stringify({instructions:'x'.repeat(4096)}),'application/json',413],['{bad','application/json',400],['bad','text/plain',415]]){
    const response=await fetch(app.base+'/api/v1/institution/uc/quizzes/'+f.quizzes.draft,{method:'PATCH',headers:{Authorization:'Bearer '+t.teacher,'Content-Type':type},body});
    assert.equal(response.status,status);assert.equal(response.headers.get('x-content-type-options'),'nosniff');

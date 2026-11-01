@@ -18,12 +18,12 @@ export class GradebookService {
  }
  async listItems(actor:string,slug:string,course:string) {
   return this.db.withInstitution(actor,slug,async c=>{const s=await gradebookScope(c,actor,slug,course);academicScope(s);const rows=await this.items(c,s);
-   return {items:rows.map(itemDto),totalWeightPercent:Number(rows[0]?.total??0)};});
+   return {items:rows.map(itemDto),totalWeightPercent:Number(rows[0]?.total??0),weightsLocked:s.course.grade_items_locked_at!==null};});
  }
  async weights(actor:string,slug:string,course:string,body:unknown) {
   const input=weightsInput(body);
   return this.db.withInstitution(actor,slug,async c=>{
-   const s=await gradebookScope(c,actor,slug,course);academicScope(s,true);requirePermission(s.owner);
+   const s=await gradebookScope(c,actor,slug,course);academicScope(s,true);
    if(s.course.grade_items_locked_at!==null)throw conflict("GRADE_WEIGHTS_LOCKED");
    const rows=await this.items(c,s);
    if(rows.length!==input.length || rows.some((r,i)=>r.id!==input[i].gradeItemId))throw new UnprocessableEntityException();
