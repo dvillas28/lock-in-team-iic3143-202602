@@ -12,10 +12,10 @@ Estilo: el mismo de [Entrega 2](../../../2/ppt/main.tex) (Beamer, Boadilla, 16:9
 | Directorio | Diapositivas | Ítems del [checklist](../../checklist-entrega-3.md) |
 | --- | --- | --- |
 | [`01-tablero`](01-tablero/preview.pdf) | Tablero conciliado; por qué no reflejaba el avance; Done y cambio de estado | E3-12, E3-13, E3-33 |
-| [`02-metricas`](02-metricas/preview.pdf) | Burnup en horas, CFD, lead y cycle time, falta de `Real (h)` | E3-24, E3-02 |
+| [`02-metricas`](02-metricas/preview.pdf) | Burnup en horas, CFD, lead y cycle time, estimado vs. real | E3-24, E3-02 |
 | [`03-render`](03-render/preview.pdf) | Decisión Railway → Render; trabajo no planificado y bug #177 | E3-08, E3-10, E3-29, E3-30 |
 | [`04-practicas-abandonadas`](04-practicas-abandonadas/preview.pdf) | Semgrep, drafts, `Real (h)`, Railway y PITR | E3-07 |
-| [`05-completo-pendiente`](05-completo-pendiente/preview.pdf) | 357 h hechas; 111 h pendientes por categoría | E3-33, E3-34 |
+| [`05-completo-pendiente`](05-completo-pendiente/preview.pdf) | 367 h hechas; 99 h pendientes por categoría | E3-33, E3-34 |
 
 Faltan la proyección y el plan hacia el MVP (E3-25 a E3-28, E3-32): se agregan como
 nuevos subdirectorios cuando esté listo el plan actualizado.
@@ -29,7 +29,7 @@ Cada subdirectorio contiene:
 
 ## Fuentes de los datos
 
-Corte: 30/10/2026, tras la conciliación del tablero.
+Corte: 01/11/2026, snapshot manual de la rama `metrics` (incluye la conciliación del 30/10).
 
 - [Conciliación del tablero](../../conciliacion-tablero-e3.md): antes y después, drafts y bloques A–F.
 - Snapshots diarios de la rama `metrics` procesados con
