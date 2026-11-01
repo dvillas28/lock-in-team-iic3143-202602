@@ -1,6 +1,6 @@
 # Catálogo de datos
 
-Catálogo del modelo de AcademiX: 13 tablas y 111 columnas, con tipos PostgreSQL
+Catálogo del modelo de AcademiX: 14 tablas académicas (incluido el ledger de publicación), con tipos PostgreSQL
 y límites de cadenas acordados. Las reglas descritas no sustituyen DDL ejecutable.
 
 ## Archivos
@@ -24,12 +24,13 @@ y decisiones pendientes se conservan en este documento, fuera del XLSX.
 | sections | Secciones de un curso. | Sí |
 | enrollments | Roles por usuario en una sección. | Sí |
 | course_modules | Organización de contenidos por curso. | Sí |
-| materials | Material markdown o archivo externo. | Sí |
+| materials | Material Markdown; archivos binarios diferidos. | Sí |
 | quizzes | Evaluaciones autocorregidas. | Sí |
 | quiz_attempts | Intentos de estudiantes. | Sí |
 | grade_items | Ítems ponderados del libro de notas. | Sí |
 | grades | Nota vigente por estudiante e ítem. | Sí |
 | audit_events | Historial académico inmutable. | Sí |
+| grade_publications | Recibos privados e inmutables de publicación. | Sí |
 
 ## Columnas
 
@@ -62,6 +63,7 @@ y decisiones pendientes se conservan en este documento, fuera del XLSX.
 | courses | name | varchar(200) | Sí | — | Nombre del curso. |
 | courses | term | varchar(16) | Sí | — | Periodo académico. Máximo aprobado de 16 caracteres para periodo académico; formato pendiente. |
 | courses | created_by | uuid | Sí | FK | Dueño único inmutable; creación exige is_admin institucional vigente. |
+| courses | grade_items_locked_at | timestamptz(6) | No | — | Primera publicación; bloqueo monotónico de pesos/ítems. |
 | courses | created_at | timestamptz(6) | Sí | — | Fecha de creación. |
 | sections | id | uuid | Sí | PK | Identificador de sección. |
 | sections | institution_id | uuid | Sí | FK | Tenant lógico. |
@@ -86,11 +88,8 @@ y decisiones pendientes se conservan en este documento, fuera del XLSX.
 | materials | institution_id | uuid | Sí | FK | Tenant lógico. |
 | materials | module_id | uuid | Sí | FK | Módulo contenedor. |
 | materials | title | varchar(200) | Sí | — | Título del recurso. |
-| materials | kind | varchar(16) | Sí | — | Tipo de material: markdown o file; máximo 16 caracteres y valores restringidos por CHECK. |
-| materials | markdown_body | text | No | — | Contenido Markdown de extensión variable; único campo text del modelo. |
-| materials | storage_key | varchar(1024) | No | — | Clave interna del archivo externo, máximo 1024 caracteres; namespace por institución y validación en bytes según el proveedor futuro. |
-| materials | mime_type | varchar(255) | No | — | Tipo MIME del archivo, máximo 255 caracteres; lista de tipos permitidos pendiente. |
-| materials | size_bytes | bigint | No | — | Tamaño del archivo futuro. Tamaño entero en bytes de 64 bits; evita el límite de integer; máximo de archivo pendiente. |
+| materials | kind | varchar(16) | Sí | — | Solo markdown; varchar(16) y CHECK kind=markdown. Binarios diferidos. |
+| materials | markdown_body | text | Sí | — | Markdown requerido, 1..10000 caracteres; no vacío tras btrim. |
 | materials | published_at | timestamptz(6) | No | — | Fecha de publicación. |
 | materials | created_by | uuid | Sí | FK | Usuario autor validado por membership institucional. |
 | quizzes | id | uuid | Sí | PK | Identificador del quiz. |

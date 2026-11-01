@@ -34,6 +34,17 @@ test("US3 delegation active members only, exact body, no-op, foreign IDs and ato
   await pool.query("UPDATE users SET active=false WHERE id=$1",[users.other]);
   assert.equal((await request(app,owner,path,"PUT",{isAdmin:true})).status,404);
   await pool.query("UPDATE users SET active=true WHERE id=$1",[users.other]);
+  await pool.query("UPDATE institution_memberships SET is_super_admin=true WHERE institution_id=$1 AND user_id=$2",[f.tenants.utfsm,users.foreign]);
+  const utfsm=await login(app,f.env,"UTFSM"),utfsmTarget=(await pool.query("SELECT id FROM institution_memberships WHERE institution_id=$1 AND user_id=$2",[f.tenants.utfsm,users.owner])).rows[0].id;
+  const utfsmPath=`utfsm/memberships/${utfsmTarget}/course-admin`,course={code:"UTFSM",name:"Delegated",term:"2026-2",initialSection:{code:"1"}};
+  assert.equal((await request(app,owner,"utfsm/courses","POST",course)).status,403);
+  assert.equal((await request(app,utfsm,"utfsm/courses","POST",course)).status,403,"superadmin alone cannot create courses");
+  assert.equal((await request(app,utfsm,utfsmPath,"PUT",{isAdmin:true})).status,200);
+  const created=await request(app,owner,"utfsm/courses","POST",course);assert.equal(created.status,201);assert.equal(created.body.createdBy,users.owner);
+  assert.equal((await request(app,utfsm,`utfsm/memberships/${target}/course-admin`,"PUT",{isAdmin:true})).status,404);
+  assert.equal((await request(app,utfsm,utfsmPath,"PUT",{isAdmin:false})).status,200);
+  assert.equal((await request(app,owner,`utfsm/courses/${created.body.id}`,"PATCH",{name:"revoked"})).status,403);
+  assert.equal((await pool.query("SELECT is_admin FROM institution_memberships WHERE id=$1",[target])).rows[0].is_admin,false);
   await failAudit(pool);assert.equal((await request(app,owner,path,"PUT",{isAdmin:true})).status,500);
   assert.equal((await pool.query("SELECT is_admin FROM institution_memberships WHERE id=$1",[target])).rows[0].is_admin,false);
   await pool.query("UPDATE institution_memberships SET is_super_admin=false WHERE user_id=$1",[users.owner]);

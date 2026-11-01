@@ -27,16 +27,17 @@ La respuesta al feedback E2 y el fix de privacidad se referencian al commit del 
 
 | ID / requisito | Estado | Qué tenemos | Qué falta |
 | --- | --- | --- | --- |
-| E3-04 · Ciclo de desarrollo | Cubierto | [Flujo Git](../../guides/git-flow.md), specs, PRs y [borrador Beamer](ppt/dfierro/01-ciclo-desarrollo/frames.tex). | Integrar en presentación consolidada. |
-| E3-05 · PR, checks y merges | Cubierto | PRs reales #125, #91, #151, #49/#76 y [borrador Beamer](ppt/dfierro/01-ciclo-desarrollo/frames.tex). | Integrar en presentación consolidada. |
-| E3-06 · Prácticas y beneficios | Cubierto | Testing Detroit, Contract-First, doc brevity, bot IA y [borrador Beamer](ppt/dfierro/02-practicas-decisiones/frames.tex). | Integrar en presentación consolidada. |
+| E3-04 · Ciclo de desarrollo | Parcial | [Flujo Git](../../guides/git-flow.md), specs, PR y pruebas. | Explicar el ciclo real con un ejemplo completo. |
+| E3-05 · PR, checks y merges | Parcial | PR integradas #142, #145, #151, #158; flujo documentado. | Capturas de PR/checks y evidencia del merge. |
+| E3-06 · Prácticas y beneficios | Parcial | Revisión por PR, ADR, pruebas y controles CI. | Relacionar cada práctica con resultados observados. |
 | E3-07 · Prácticas abandonadas | Por verificar | Sin declaración consolidada encontrada. | Confirmar cuáles dejaron o que no hubo. |
-| E3-08 · Decisiones y motivos | Cubierto | [ADR](../../adr/) (persistencia, bot, catálogo, Render) y [borrador Beamer](ppt/dfierro/02-practicas-decisiones/frames.tex). | Integrar en presentación consolidada. |
-| E3-09 · Deuda técnica | Cubierto | Registro en ADRs, SonarQube Cloud y [borrador Beamer](ppt/dfierro/03-deuda-y-bugs/frames.tex). | Integrar en presentación consolidada. |
-| E3-10 · Resolución de bugs | Cubierto | Bug Render #177, bug PostgreSQL trigger 23514 y [borrador Beamer](ppt/dfierro/03-deuda-y-bugs/frames.tex). | Integrar en presentación consolidada. |
-| E3-11 · Documentación | Cubierto | ADR, specs, contratos, BPMN/TikZ y [borrador Beamer](ppt/dfierro/02-practicas-decisiones/frames.tex). | Integrar en presentación consolidada. |
-| E3-12 · Criterio Done | Cubierto | 6 pilares de DoD conciliados al 01/11 y [borrador Beamer](ppt/dfierro/04-definicion-done/frames.tex). | Integrar en presentación consolidada. |
-| E3-13 · Cambio de estado | Cubierto | Reglas de transición de 5 estados y [borrador Beamer](ppt/dfierro/04-definicion-done/frames.tex). | Integrar en presentación consolidada. |
+| E3-08 · Decisiones y motivos | Cubierto | [ADR](../../adr/) de persistencia, aislamiento, permisos, publicación y despliegue. | Seleccionar las decisiones relevantes para exponer. |
+| E3-09 · Deuda técnica | Parcial | Límites y decisiones diferidas en ADR y [estado técnico](../2/10-status.md). | Explicar registro, priorización y tratamiento de deuda. |
+| E3-10 · Resolución de bugs | Parcial | [Bug de fechas](../../qa/quizzes-real-backend/README.md): causa, corrección y regresiones. | Explicar el proceso general desde detección hasta cierre. |
+| E3-11 · Documentación | Cubierto | ADR, specs, contratos, diagramas y reportes de validación. | Seleccionar ejemplos para mostrar. |
+| E3-12 · Criterio Done | Parcial | [Reglas del tablero](../../guides/board-metrics.md): horas reales obligatorias; validaciones técnicas documentadas. | Consolidar criterio Done; 42 Done sin horas reales en el corte de métricas. |
+| E3-13 · Cambio de estado | Cubierto | [Reglas](../../guides/board-metrics.md): In progress al comenzar, horas reales antes de Done. | Mostrar aplicación con una tarjeta real. |
+
 
 ## 3. Calidad y testing
 
@@ -55,8 +56,8 @@ La respuesta al feedback E2 y el fix de privacidad se referencian al commit del 
 
 | ID / requisito | Estado | Qué tenemos | Qué falta |
 | --- | --- | --- | --- |
-| E3-22 · Pipeline y captura | Cubierto | 8 jobs diagramados en CI, Sonar, Trivy y [borrador Beamer](ppt/dfierro/05-pipeline-cicd/frames.tex). | Integrar en presentación consolidada. |
-| E3-23 · CI/CD en vivo | Cubierto | Guion de muestra en vivo de 2 min, plan de contingencia y [borrador Beamer](ppt/dfierro/05-pipeline-cicd/frames.tex). | Ensayar en ensayo de presentación. |
+| E3-22 · Pipeline y captura | Parcial | [CI](../../../.github/workflows/ci.yml), [release](../../../.github/workflows/release.yml), Render y [capturas E2](../2/11-cicd-evidence/README.md). | Captura vigente; acreditar CI → release → despliegue actual. |
+| E3-23 · CI/CD en vivo | Pendiente | Workflows ejecutables; demo Render histórica documentada solo en local con autodeploy desactivado. | Preparar muestra en vivo y distinguir despliegue manual de CD automático. |
 
 ## 5. Métricas y viabilidad
 

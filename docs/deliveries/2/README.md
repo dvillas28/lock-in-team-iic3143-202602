@@ -10,17 +10,18 @@ Base documental vigente para la segunda entrega de AcademiX. Las Entregas 0 y
 | 01 | [requisitos de entrega](01-delivery-requirements.md) | Trazabilidad contra pauta y evidencia. |
 | 02 | [alcance](02-scope.md) | Qué entra, qué queda fuera y por qué. |
 | 03 | [casos de uso y requerimientos](03-use-cases-and-requirements.md) | Casos de uso, RF, RNF y reglas. |
-| 04 | [arquitectura](04-architecture.md) | PostgreSQL compartida, aislamiento lógico y despliegue Railway. |
+| 04 | [arquitectura](04-architecture.md) | PostgreSQL compartida, aislamiento lógico y configuración Render. |
 | 05 | [modelo de dominio](05-domain-model.md) y [diagrama UML](05-domain-model-uml.md) | Conceptos, relaciones y reglas del dominio. |
 | 06 | [modelo de datos](06-data-model.md) | Tablas, constraints, transacciones, índices y ERD. |
 | 07 | [riesgos](07-risks.md) | Riesgos actualizados y mitigaciones. |
 | 08 | [plan de trabajo](08-work-plan.md) | Orden de desarrollo. |
-| 09 | [plan de walking skeleton](09-walking-skeleton-plan.md) | CI/CD, Railway y persistencia local. |
+| 09 | [plan de walking skeleton](09-walking-skeleton-plan.md) | CI/CD, Render y persistencia local. |
 | 10 | [estado](10-status.md) | Qué está completo y qué falta. |
-| 11 | [evidencia CI/CD](11-cicd-evidence/README.md) | Capturas de CI, CD Railway y release. |
-| 12 | [catálogo de datos](12-data-catalog.md) | Tablas, columnas, tipos, PK/FK y planilla XLSX/CSV adjunta. |
+| 11 | [evidencia CI/CD](11-cicd-evidence/README.md) | Capturas históricas de CI/Railway/release. |
+| 12 | [catálogo de datos](12-data-catalog.md) | Tablas, columnas, tipos, PK/FK y planilla XLSX adjunta. |
 | 13 | [guía de presentación](ppt/speaker-guide.md) | Punteo oral slide por slide y preguntas/respuestas probables. |
 | 14 | [feedback de E1](14-e1-feedback.md) | Comentarios de evaluación y acciones para responderlos en E2. |
+| 15 | [feedback E2 y polish](15-feedback-e2.md) | Línea base, respuestas existentes y cambios posteriores al feedback. |
 
 ## Paquete formal
 
@@ -38,7 +39,7 @@ reemplaza el diseño database-per-tenant:
 
 ```txt
 Cliente autenticado
--> /api/v1/institutions/{institutionSlug}/...
+-> /api/v1/institution/{institutionSlug}/...
 -> Backend API
 -> InstitutionMembership + autorización contextual
 -> lógica institution-scoped
@@ -53,39 +54,30 @@ las relaciones usan constraints y FK institution-aware para impedir cruces.
 UC y UTFSM siguen siendo Institutions demo, pero coexisten en la misma base.
 El path identifica el contexto solicitado; nunca autoriza por sí solo.
 
-## Plataforma
+## Plataforma y capacidades existentes
 
-Railway es la plataforma de despliegue elegida para AcademiX. El repositorio
-contiene configuraciones independientes para frontend y backend. PostgreSQL es
-la persistencia compartida del MVP; el walking skeleton aún no implementa la
-capa de persistencia.
+Render configura frontend/API/PostgreSQL en [Blueprint](../../../render.yaml).
+Persistencia pg/migraciones, JWT, memberships, cursos/roles, contenido, quizzes,
+calificación/publicación, auditoría, RLS/runtime y provisión ya existían al corte
+7f4334a. [Estado](10-status.md) distingue código, prueba local y operación remota.
+[ADR Render](../../adr/deploy-on-render.md): sin HAProxy/HA/PgBouncer externo;
+se difieren hasta necesidad medida. Binarios/object storage fuera del MVP.
+La validación del polish es local; publicar su PR no acredita despliegue
+ni estado remoto.
 
-No existe una migración planificada a Google Cloud. El dominio permanece
-independiente de Railway y usa contenedores, HTTP y PostgreSQL estándar.
+## Roles y cuentas
 
-## Alcance académico conservado
+Seis actores y límites en [dominio](05-domain-model.md). Superadmin institucional
+delega is_admin; admin crea cursos y administra propios; roles académicos por
+Enrollment. Sin superadmin global ni permisos académicos implícitos por flags.
+[Cuentas/provisión](../../guides/demo-accounts.md): dataset institucional y seed
+académico separados; onboarding inicial no equivale a alta general/invitaciones.
 
-- experiencias docente y estudiante;
-- roles por sección: docente, ayudante y estudiante;
-- cursos, secciones, módulos y material;
-- quizzes de alternativas autocorregidos;
-- libro de notas y publicación explícita;
-- JWT, memberships persistidas y auditoría inmutable;
-- sin administrador institucional, entregas manuales, IA, chat, calendario,
-  workers, Redis ni microservicios en el MVP;
-- réplicas de aplicación, PgBouncer, PostgreSQL HA y object storage como
-  topología objetivo de despliegue, no como complejidad de dominio.
+## Respuesta posterior a E2
 
-## Siguiente paso
-
-El siguiente Spec Kit debe implementar solo lo respaldado por estos documentos:
-
-- conectar el backend a una PostgreSQL compartida;
-- modelar Institution, User global e InstitutionMembership;
-- crear el contexto institution-scoped y tests de acceso cruzado;
-- modelar Enrollment como fuente de permisos académicos;
-- preparar bootstrap idempotente futuro para UC y UTFSM;
-- mantener CI, CD Railway y desarrollo local reproducible.
-
-No debe elegir ORM, implementar RLS ni agregar infraestructura no utilizada sin
-un plan posterior que lo justifique.
+[Fuente y corte](15-feedback-e2.md) preservados; cardinalidades, roles/cuentas,
+arquitectura y formatos alineados. Solo auditoría grade cambia funcionalmente;
+resto documenta/valida capacidades previas. F6/G6 positivos y dueños conservados.
+[Evidencia local](../../backend/feedback-e2-validation.md) y
+[privacidad](../../backend/audit-grade-privacy-validation.md) registran alcance real.
+No se cierran tareas operativas o de otras misiones por este polish.

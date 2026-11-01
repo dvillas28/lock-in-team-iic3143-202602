@@ -4,7 +4,7 @@ import {randomUUID} from 'node:crypto';
 import {database,http} from './helpers.mjs';
 import {gradebookFixture,request,tokens,users,coursePath} from './gradebook-fixtures.mjs';
 
-test('history sanitizes legacy payloads, filters and preserves admin-owner exception',async()=>{
+test('history sanitizes legacy payloads, filters and preserves administrative owner access',async()=>{
  const pool=await database();let app;try{
  const f=await gradebookFixture(pool);app=await http();const t=await tokens(app,f),path=coursePath(f)+'/audit-events';
  for(const section of [f.s1,null])await pool.query(`INSERT INTO audit_events(id,institution_id,actor_user_id,action,resource_type,resource_id,course_id,section_id,changes)
@@ -14,6 +14,7 @@ test('history sanitizes legacy payloads, filters and preserves admin-owner excep
  for(const token of [t.student,t.assistant])assert.equal((await request(app,token,path)).status,403);
  const teacher=await request(app,t.teacher,path+'?action=grade.published');assert.ok(teacher.body.items.every(e=>e.sectionId!==null));
  await pool.query("UPDATE enrollments SET active=false WHERE user_id=$1 AND role='teacher'",[users.owner]);
- assert.equal((await request(app,t.owner,path)).status,200);
+ const admin=await request(app,t.owner,path);assert.equal(admin.status,200);assert.ok(admin.body.items.every(e=>e.resourceType!=='grade'));
+ assert.deepEqual((await request(app,t.owner,path+'?resourceType=grade')).body,{items:[],hasMore:false,nextCursor:null});
  }finally{if(app)await app.close();await pool.end();}
 });

@@ -1,72 +1,41 @@
 # Estado Entrega 2
 
-## Completo en documentación
+Actualización documental 2026-10-29. [Corte y fuente E2](15-feedback-e2.md)
+inmutables; no representa la fecha de entrega ni recepción de comentarios.
 
-- Decisión de PostgreSQL compartida registrada en un ADR.
-- Institution definida como tenant lógico con `institution_id`.
-- User global e InstitutionMembership modelados conceptualmente.
-- Scope, requisitos y arquitectura alineados a rutas institucionales.
-- Modelo de dominio, UML y modelo lógico institution-aware.
-- Catálogo de datos con tablas, columnas, tipos, PK/FK y descripciones.
-- FK compuestas, unicidades e índices conceptuales documentados.
-- Riesgos en formato de planilla con responsables, probabilidad, impacto,
-  estado, mitigación y contingencia.
-- Plan de siete semanas con responsables, prioridades y esfuerzo grueso.
-- Railway definido como plataforma de despliegue vigente.
-- Contrato OpenAPI institucional y política 401/403/404 documentados.
-- Informe, presentación PDF y guía oral generados desde LaTeX/Markdown.
+## Existente antes del polish
 
-## Completo en el walking skeleton
+En commit 7f4334a: Next.js/NestJS, PostgreSQL compartida y migraciones SQL pg,
+identidad JWT, memberships, flags institucionales y ownership, cursos/secciones,
+Enrollment por rol, contenido markdown, quizzes, intentos/calificación automática,
+publicación y libro de notas, auditoría inmutable, RLS/runtime y provisión demo.
+Presencia en código no equivale a prueba ejecutada ni despliegue acreditado.
+Render ya estaba configurado: dos servicios y PostgreSQL 17 sin HA propia.
 
-- frontend Next.js;
-- backend NestJS con `GET /health`;
-- frontend conectado al health del backend;
-- Dockerfiles de frontend y backend;
-- Docker Compose con una PostgreSQL compartida para ejecución local;
-- CI de aplicaciones e imágenes;
-- configuración Railway versionada;
-- workflow de release por tag.
+## Respuesta posterior
 
-## Falta para persistencia y multi-tenancy ejecutable
+- Documentación: cardinalidades y opcionalidad, catálogo, dominio cerrado de role,
+  seis actores, cuentas/provisión y límites de altas; arquitectura mínima Render.
+- Validación nueva: suites HTTP/SQL existentes de creación, delegación y replay,
+  nuevo rechazo de role inválido; resultados en [evidencia](../../backend/feedback-e2-validation.md).
+- Funcional: lectura de auditoría excluye grade sin teacher antes de paginar;
+  conserva administrativos owner e historia docente. [Evidencia](../../backend/audit-grade-privacy-validation.md).
+- Fuentes y exportaciones: estado y revisión registrados en la evidencia, sin
+  deducir aprobación por presencia del PDF.
 
-- Spec Kit que elija ORM o capa SQL y herramienta de migraciones;
-- conexión backend a la PostgreSQL compartida;
-- migración inicial de Institution, User e InstitutionMembership;
-- bootstrap idempotente de UC y UTFSM;
-- JWT global;
-- resolución de `institutionSlug` y autorización por membership;
-- repositorios/servicios institution-scoped;
-- constraints y FK institution-aware ejecutables;
-- tests de aislamiento entre Institutions.
+## Límites y pendientes
 
-## Falta para cierre operativo de la entrega
+Sin alta general/invitaciones, superadmin global, administración general,
+binarios, jerarquías, sharding, restore individual, Redis, workers, IA o chat.
+HAProxy/HA/PgBouncer externo diferidos hasta necesidad medida.
+Onboarding inicial es operativo, no signup ni gestión general de personas.
+No se hizo push, PR, merge ni despliegue; DNS/TLS, settings y disponibilidad
+remota necesitan validación del operador. Ensayo y confirmación con responsables
+no se infieren de pruebas locales. No se cierran tareas de otras misiones.
 
-- Ensayo del relato de 10 a 15 minutos.
-- Validación final de riesgos con cada responsable.
-- Confirmación de links públicos o capturas finales antes del envío.
+## Riesgos y planificación
 
-## Falta para el MVP académico
-
-- Courses, Sections y Enrollments;
-- material markdown y, posteriormente, archivos;
-- quizzes con pauta protegida e intentos;
-- cálculo y publicación de Grades;
-- libro de notas y promedio;
-- AuditEvents inmutables.
-
-## Fuera del MVP
-
-- administrador institucional separado;
-- jerarquía de facultades/departamentos;
-- provisioning dinámico de Institutions;
-- RLS;
-- sharding;
-- restore lógico por Institution;
-- Redis, workers y microservicios;
-- IA, chat, calendario, entregas manuales y recorrecciones.
-
-## Documentación histórica
-
-Entregas 0 y 1 conservan las decisiones presentadas en su momento, incluida la
-arquitectura database-per-tenant y referencias cloud anteriores. No son la
-fuente vigente. Entrega 2 y los ADR aceptados actuales guían la implementación.
+F6/G6 valoran matriz y organización: se conservan responsables y backlog,
+sin atribuir su creación al polish. [Riesgos](07-risks.md), [plan](08-work-plan.md).
+Historia de otras entregas permanece fuera del alcance; ADR vigentes guían
+implementación y este estado distingue configuración, prueba local y operación.

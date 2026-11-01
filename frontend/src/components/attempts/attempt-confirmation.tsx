@@ -1,9 +1,9 @@
 "use client";
 import {useId,useRef,type ReactNode} from "react";
-export function AttemptConfirmation({label,title,disabled,onConfirm,children,danger=false}:{label:string;title:string;disabled:boolean;onConfirm:()=>void;children:ReactNode;danger?:boolean}) {
+export function AttemptConfirmation({label,title,disabled,onConfirm,children,danger=false,primary=false}:{label:string;title:string;disabled:boolean;onConfirm:()=>void;children:ReactNode;danger?:boolean;primary?:boolean}) {
  const dialog=useRef<HTMLDialogElement>(null),trigger=useRef<HTMLButtonElement>(null),back=useRef<HTMLButtonElement>(null),titleId=useId();
  function close(){dialog.current?.close();trigger.current?.focus();}
- return <><button ref={trigger} type="button" className={`btn ${danger?"btn-danger":"btn-ghost"}`} disabled={disabled} onClick={()=>{dialog.current?.showModal();back.current?.focus();}}>{label}</button>
+ return <><button ref={trigger} type="button" className={`btn ${danger?"btn-danger":primary?"btn-primary":"btn-ghost"}`} disabled={disabled} onClick={()=>{dialog.current?.showModal();back.current?.focus();}}>{label}</button>
  <dialog ref={dialog} className="modal native-dialog panel" aria-labelledby={titleId} onCancel={e=>{e.preventDefault();close();}} onKeyDown={e=>{
   if(e.key!=="Tab")return;
   const first=back.current,last=e.currentTarget.querySelector<HTMLButtonElement>("button:last-child");

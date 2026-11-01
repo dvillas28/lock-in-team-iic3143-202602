@@ -1,0 +1,137 @@
+name: E2E
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev]
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Isolated suite at the selected workflow ref
+        type: choice
+        default: smoke
+        options: [smoke, regression, extended]
+permissions:
+  contents: read
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  changes:
+    name: Detect E2E changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      required: ${{ steps.detect.outputs.required }}
+      reason: ${{ steps.detect.outputs.reason }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - id: detect
+        run: node e2e/runner/ci-policy.ts detect
+  playwright:
+    name: Playwright (${{ matrix.project }})
+    runs-on: ubuntu-24.04
+    needs: changes
+    if: ${{ !cancelled() && !(needs.changes.result == 'success' && needs.changes.outputs.required == 'false' && needs.changes.outputs.reason == 'documentation-only') }}
+    timeout-minutes: ${{ github.event_name == 'schedule' && 90 || github.event_name == 'workflow_dispatch' && 90 || github.event_name == 'push' && 45 || 25 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJSON((github.event_name == 'push' || github.event_name == 'pull_request') && '["chromium"]' || '["chromium","firefox","webkit"]') }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            backend/pnpm-lock.yaml
+            frontend/pnpm-lock.yaml
+            e2e/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir backend install --frozen-lockfile
+      - run: pnpm --dir frontend install --frozen-lockfile
+      - run: pnpm --dir e2e install --frozen-lockfile
+      - run: pnpm --dir e2e typecheck
+      - run: pnpm --dir e2e lint
+      - run: pnpm --dir e2e test:harness
+      - run: pnpm --dir e2e exec playwright install --with-deps ${{ matrix.project }}
+      - uses: actions/cache@v4
+        with:
+          path: frontend/.next/cache
+          key: e2e-next-${{ runner.os }}-node24-${{ github.sha }}-local4320-4321
+      - name: Select the event suite
+        id: selection
+        env:
+          DISPATCH_SUITE: ${{ inputs.suite }}
+        run: node e2e/runner/ci-policy.ts selection
+      - name: Execute catalogued selection in an owned stack
+        env:
+          PROJECT: ${{ matrix.project }}
+          SUITE: ${{ steps.selection.outputs.suite }}
+        shell: bash
+        run: |
+          case "$SUITE" in smoke|regression|extended) ;; *) exit 1 ;; esac
+          pnpm --dir e2e run "test:$SUITE" --project="$PROJECT"
+      - name: Verify and stage public artifacts
+        if: always()
+        run: pnpm --dir e2e artifacts:stage
+      - name: Job summary
+        if: always()
+        shell: bash
+        run: cat e2e/.cache/ci-public/summary.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-public-${{ matrix.project }}
+          path: e2e/.cache/ci-public/
+          retention-days: ${{ job.status == 'success' && 7 || 14 }}
+          if-no-files-found: error
+  result:
+    name: E2E result
+    if: always()
+    needs: [changes, playwright]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Require execution or a confirmed documentation-only decision
+        id: gate
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: node e2e/runner/ci-policy.ts gate
+      - uses: pnpm/action-setup@v4
+        if: steps.gate.outputs.skip == 'false'
+      - run: pnpm --dir e2e install --frozen-lockfile
+        if: steps.gate.outputs.skip == 'false'
+      - uses: actions/download-artifact@v4
+        if: steps.gate.outputs.skip == 'false'
+        with:
+          pattern: e2e-public-*
+          path: e2e/.cache/downloaded
+      - name: Require every expected variant and project at this SHA
+        if: steps.gate.outputs.skip == 'false'
+        env:
+          DISPATCH_SUITE: ${{ inputs.suite }}
+          COMMIT: ${{ github.sha }}
+        shell: bash
+        run: |
+          pnpm --dir e2e exec node --import tsx runner/ci-result.ts --event "$COMMIT" .cache/downloaded

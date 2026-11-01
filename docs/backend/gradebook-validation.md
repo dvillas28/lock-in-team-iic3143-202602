@@ -125,3 +125,11 @@ de desarrollo previa, sin versión reparada ofrecida por el registro. No se supr
 el advisory ni se cambió el stack fuera del plan; no se presenta como aprobado.
 Lock por Course conserva la limitación deliberada de concurrencia del ADR.
 Hooks git opcionales no ejecutados; commits/push/PR autorizados después por el usuario.
+
+## Actualización localizada AUD-PRIV — 2026-10-29
+
+[Privacidad de auditoría](audit-grade-privacy-validation.md) registra regresión
+previa y corrección local: grade exige teacher, administrativos owner se conservan.
+La excepción histórica de owner sin teacher queda acotada por el nuevo ADR.
+Esto resuelve solo AUD-PRIV; no cierra T031/T036 ni otros checks/pendientes de
+esta misión histórica. Sin aceptación remota ni despliegue.

@@ -18,6 +18,9 @@ erDiagram
     jsonb answers "NOT NULL"
     numeric(8,2) score_points "NULL"
     numeric(5,2) score_percent "NULL"
+    numeric(3,1) grade_value "NULL"
+    text start_key "NOT NULL 1..200"
+    text submit_key "NULL 1..200"
   }
 
   GRADE_ITEMS {
@@ -45,6 +48,17 @@ erDiagram
     timestamptz(6) updated_at "NOT NULL"
   }
 
+  GRADE_PUBLICATIONS {
+    uuid id PK "NOT NULL"
+    uuid institution_id FK "NOT NULL"
+    uuid course_id FK "NOT NULL"
+    uuid actor_user_id FK "NOT NULL"
+    text idempotency_key "NOT NULL 1..200"
+    jsonb request "NOT NULL privado"
+    integer published_count "NOT NULL positivo"
+    timestamptz(6) published_at "NOT NULL"
+  }
+
   AUDIT_EVENTS {
     uuid id PK "NOT NULL"
     uuid institution_id FK "NOT NULL"
@@ -59,16 +73,8 @@ erDiagram
   }
 
   INSTITUTIONS ||--o{ INSTITUTION_MEMBERSHIPS : "institution_id"
-  INSTITUTIONS ||--o{ COURSES : "institution_id"
-  INSTITUTIONS ||--o{ SECTIONS : "institution_id"
-  INSTITUTIONS ||--o{ ENROLLMENTS : "institution_id"
-  INSTITUTIONS ||--o{ COURSE_MODULES : "institution_id"
-  INSTITUTIONS ||--o{ MATERIALS : "institution_id"
-  INSTITUTIONS ||--o{ QUIZZES : "institution_id"
-  INSTITUTIONS ||--o{ QUIZ_ATTEMPTS : "institution_id"
-  INSTITUTIONS ||--o{ GRADE_ITEMS : "institution_id"
-  INSTITUTIONS ||--o{ GRADES : "institution_id"
-  INSTITUTIONS ||--o{ AUDIT_EVENTS : "institution_id"
+  COURSES ||--o{ GRADE_PUBLICATIONS : "institution_id+course_id"
+  INSTITUTION_MEMBERSHIPS ||--o{ GRADE_PUBLICATIONS : "institution_id+actor_user_id"
   USERS ||--o{ INSTITUTION_MEMBERSHIPS : "user_id"
   INSTITUTION_MEMBERSHIPS ||--o{ COURSES : "institution_id+created_by"
   INSTITUTION_MEMBERSHIPS ||--o{ ENROLLMENTS : "institution_id+user_id"
@@ -76,12 +82,12 @@ erDiagram
   INSTITUTION_MEMBERSHIPS ||--o{ QUIZZES : "institution_id+created_by"
   INSTITUTION_MEMBERSHIPS ||--o{ QUIZ_ATTEMPTS : "institution_id+student_id"
   INSTITUTION_MEMBERSHIPS ||--o{ GRADES : "institution_id+student_id"
-  INSTITUTION_MEMBERSHIPS ||--o{ AUDIT_EVENTS : "institution_id+actor_user_id"
+  INSTITUTION_MEMBERSHIPS |o--o{ AUDIT_EVENTS : "institution_id+actor_user_id"
   COURSES ||--o{ SECTIONS : "institution_id+course_id"
   COURSES ||--o{ COURSE_MODULES : "institution_id+course_id"
   COURSES ||--o{ QUIZZES : "institution_id+course_id"
   COURSES ||--o{ GRADE_ITEMS : "institution_id+course_id"
-  COURSES ||--o{ AUDIT_EVENTS : "institution_id+course_id"
+  COURSES |o--o{ AUDIT_EVENTS : "institution_id+course_id"
   SECTIONS ||--o{ ENROLLMENTS : "institution_id+section_id"
   COURSE_MODULES ||--o{ MATERIALS : "institution_id+module_id"
   SECTIONS |o--o{ QUIZZES : "institution_id+section_id+course_id"

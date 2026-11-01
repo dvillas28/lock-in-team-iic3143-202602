@@ -41,6 +41,7 @@ erDiagram
     varchar(16) term "NOT NULL"
     uuid created_by FK "NOT NULL"
     timestamptz(6) created_at "NOT NULL"
+    timestamptz(6) grade_items_locked_at "NULL monotono"
   }
 
   SECTIONS {
@@ -76,11 +77,8 @@ erDiagram
     uuid institution_id FK "NOT NULL"
     uuid module_id FK "NOT NULL"
     varchar(200) title "NOT NULL"
-    varchar(16) kind "NOT NULL"
-    text markdown_body "NULL"
-    varchar(1024) storage_key "NULL"
-    varchar(255) mime_type "NULL"
-    bigint size_bytes "NULL"
+    varchar(16) kind "NOT NULL markdown"
+    text markdown_body "NOT NULL 1..10000"
     timestamptz(6) published_at "NULL"
     uuid created_by FK "NOT NULL"
   }

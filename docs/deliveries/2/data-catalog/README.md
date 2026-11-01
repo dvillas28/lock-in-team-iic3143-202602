@@ -1,6 +1,6 @@
 # Catálogo y ER de AcademiX
 
-13 tablas, 111 columnas y 33 relaciones. Tipos PostgreSQL y límites de cadenas
+14 tablas, 122 columnas y 25 relaciones. Tipos PostgreSQL y límites de cadenas
 acordados; el modelo documental no sustituye migraciones ni DDL ejecutable.
 
 ## Archivos
@@ -17,7 +17,7 @@ se mantienen en [12-data-catalog.md](../12-data-catalog.md). El ER solo marca PK
 `NULL`/`NOT NULL` indica nulabilidad; `varchar(n)` cuenta caracteres y
 `timestamptz(6)` expresa precisión de seis decimales.
 
-Solo `materials.markdown_body` conserva `text`. Los demás campos textuales usan
+Las claves privadas de idempotencia también usan `text` con límite CHECK 1..200. Los demás campos textuales usan
 límites de producto: email 254, role/kind/status 16, MIME 255, storage key 1024,
 instrucciones 10000, action 64 y resource type 32 caracteres. Los CHECK de roles,
 tipos de material y estados se mantienen; el tamaño no sustituye esos dominios.

@@ -1,15 +1,16 @@
 "use client";
-import type { FormEvent } from "react";
+import { useEffect, type FormEvent } from "react";
 import type { Session } from "../../lib/auth/session.ts";
 import { title, markdown, type Material } from "../../lib/content/validation.ts";
 import { changed } from "../../lib/courses/validation.ts";
 import { createMarkdownMaterial, updateMaterial, getMaterial, listModuleMaterials } from "../../lib/api/materials.ts";
 import { Field } from "../courses/form-fields.tsx";
 import { useMutation } from "../courses/use-mutation.ts";
-export function MaterialForm({session, slug, moduleId, item, onSaved, disabled = false}: {
-  session: Session; slug: string; moduleId: string; item?: Material; onSaved: () => Promise<boolean | undefined>; disabled?: boolean;
+export function MaterialForm({session, slug, moduleId, item, onSaved, disabled = false, onBlockedChange}: {
+  session: Session; slug: string; moduleId: string; item?: Material; onSaved: () => Promise<boolean | undefined>; disabled?: boolean; onBlockedChange?: (blocked: boolean) => void;
 }) {
   const mutation = useMutation(session);
+  useEffect(() => { onBlockedChange?.(mutation.busy || !!mutation.uncertain); }, [mutation.busy, mutation.uncertain, onBlockedChange]);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (disabled) return;

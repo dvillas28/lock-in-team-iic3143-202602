@@ -68,10 +68,11 @@ compartida, \texttt{Institution} como tenant lógico e
 \texttt{institution\_id} como frontera
 de datos.
 
-La arquitectura objetivo conserva robustez operacional: Railway como plataforma
-de despliegue, réplicas de frontend/backend, PgBouncer, PostgreSQL HA y Railway
-Bucket S3-compatible para material académico. El walking skeleton demuestra la
-ruta de integración: frontend, backend, Docker, CI, Railway y release por tag.
+Actualización de polish, 29 de octubre de 2026: Render declara app, API y
+PostgreSQL compartida, sin HA propia. Roles, creación, delegación, RLS y provisión
+ya existían en el corte 7f4334a; aquí se documentan y validan. La corrección nueva
+es privacidad de auditoría grade sin teacher, hallazgo técnico propio. El corte,
+hash de fuente y estado previo se conservan en 15-feedback-e2.md. Sin despliegue.
 
 \sectionbar{Trazabilidad contra pauta}
 
@@ -84,7 +85,7 @@ Casos de uso actualizados & \tagbox{green}{Cubierto} & \texttt{03-use-cases-and-
 Documento de diseño preliminar & \tagbox{green}{Cubierto} & Arquitectura, dominio, datos, walking skeleton y decisiones documentadas. \\
 Arquitectura y demo/POC & \tagbox{green}{Cubierto} & \texttt{04-architecture.md}, \texttt{09-walking-skeleton-plan.md}, \texttt{11-cicd-evidence}. \\
 Modelo de dominio & \tagbox{green}{Cubierto} & \texttt{05-domain-model.md} y \texttt{05-domain-model-uml.md}. \\
-Modelo de datos & \tagbox{green}{Cubierto} & \texttt{06-data-model.md} y catálogo XLSX/CSV en \texttt{12-data-catalog.md}. \\
+Modelo de datos & \tagbox{green}{Cubierto} & \texttt{06-data-model.md} y catálogo XLSX en \texttt{12-data-catalog.md}. \\
 Plan de desarrollo & \tagbox{green}{Cubierto} & \texttt{08-work-plan.md}: siete semanas desde el lunes 5 de octubre de 2026. \\
 Riesgos actualizados & \tagbox{green}{Cubierto} & \texttt{07-risks.md}: probabilidad, impacto, responsable, mitigación y contingencia. \\
 PPT, informe y anexos & \tagbox{green}{Cerrado} & Informe, presentación Beamer, guía oral y anexos generados desde \texttt{docs/deliveries/2}. \\
@@ -93,12 +94,12 @@ PPT, informe y anexos & \tagbox{green}{Cerrado} & Informe, presentación Beamer,
 
 \sectionbar{Alcance funcional}
 
-El MVP considera dos flujos principales: docente y estudiante. El docente
-administra cursos, secciones, roles por \texttt{Enrollment}, módulos, material, quizzes
+El MVP considera dos flujos principales: docente y estudiante. Admin crea cursos y administra los propios; teacher gestiona
+roles por \texttt{Enrollment}, módulos, material, quizzes
 y libro de notas. El estudiante elige institución, accede a cursos autorizados,
 consulta material publicado, responde quizzes y revisa notas publicadas.
 
-Quedan fuera del MVP: administrador institucional, RBAC completo, rol
+Quedan fuera del MVP: altas generales/invitaciones, superadmin global, RBAC completo, rol
 coordinador, IA, chat, calendario, workers, Redis, microservicios y entregas
 manuales. La decisión evita que el diseño académico crezca más rápido que la
 capacidad de implementación.
@@ -117,127 +118,74 @@ Auditoría & CU-13 consultar historial académico. \\
 \bottomrule
 \end{tabularx}}
 
-\sectionbar{Arquitectura preliminar}
-
+\sectionbar{Arquitectura configurada y límites}
 \begin{center}
-\resizebox{0.95\textwidth}{!}{%
-\begin{tikzpicture}[
-  font=\sffamily\footnotesize,
-  base/.style={draw=navy,thick,fill=softblue,rounded corners=3pt,align=center,inner sep=4pt,text width=2.7cm},
-  ops/.style={draw=teal,thick,fill=softteal,rounded corners=3pt,align=center,inner sep=4pt,text width=2.8cm},
-  data/.style={draw=amber,thick,fill=softamber,rounded corners=3pt,align=center,inner sep=4pt,text width=3cm},
-  tenant/.style={draw=slate,thick,fill=white,rounded corners=2pt,align=center,inner sep=3pt,text width=2.3cm},
-  fl/.style={-{Latex[length=1.8mm]},draw=navy,thick},
-  repl/.style={-{Latex[length=1.8mm]},draw=amber,thick,dashed}
-]
-\node[base] (u) at (0,0) {\textbf{Usuarios}\\docente · estudiante\\ayudante};
-\node[ops] (edge) at (3.5,0) {\textbf{Railway edge}\\load balancing};
-\node[base] (fe) at (7,0.9) {\textbf{Next.js}\\frontend réplicas};
-\node[base] (be) at (7,-0.9) {\textbf{NestJS}\\backend réplicas\\stateless};
-\node[ops] (pool) at (10.6,-0.9) {\textbf{PgBouncer}\\connection pool};
-\node[ops] (hap) at (14.1,-0.9) {\textbf{HAProxy}\\PostgreSQL HA};
-\node[data] (dbp) at (17.8,-0.25) {\textbf{Primary}\\schema compartido};
-\node[data] (dbr) at (17.8,-1.75) {\textbf{Replica}\\failover};
-\node[data] (bucket) at (10.6,-3.05) {\textbf{Railway Bucket}\\PDF · presentaciones\\adjuntos};
-\node[tenant] (uc) at (14.6,1.65) {Institution UC};
-\node[tenant] (utfsm) at (17.6,1.65) {Institution UTFSM};
-\node[tenant] (other) at (20.6,1.65) {Institution ...};
-\coordinate (split) at (17.8,0.85);
-\draw[fl] (u) -- (edge);
-\draw[fl] (edge) -- (fe);
-\draw[fl] (edge) -- (be);
-\draw[fl] (fe) -- (be);
-\draw[fl] (be) -- (pool);
-\draw[fl] (pool) -- (hap);
-\draw[fl] (hap) -- (dbp);
-\draw[repl] (dbp) -- node[right,font=\scriptsize]{streaming} (dbr);
-\draw[fl] (be) |- (bucket);
-\draw[fl] (dbp.north) -- (split);
-\draw[fl] (split) -| (uc.south);
-\draw[fl] (split) -- (utfsm.south);
-\draw[fl] (split) -| (other.south);
+\resizebox{0.9\textwidth}{!}{%
+\begin{tikzpicture}[font=\sffamily\small,
+ box/.style={draw,rounded corners,align=center,minimum width=3cm,minimum height=1cm},
+ arr/.style={-{Latex[length=2mm]},thick}]
+\node[box] (u) at (0,0) {Navegador};
+\node[box] (fe) at (4.5,1) {Render: Next.js\\puerto 3000};
+\node[box] (be) at (9,0) {Render: NestJS\\puerto 3001};
+\node[box] (db) at (13.5,0) {PostgreSQL 17\\UC / UTFSM compartida};
+\draw[arr] (u) -- (fe);\draw[arr] (u) -- (be);\draw[arr] (fe) -- (be);\draw[arr] (be) -- (db);
 \end{tikzpicture}}
-
-\footnotesize Figura 1. Arquitectura objetivo: Railway, réplicas de aplicación,
-pooling, PostgreSQL HA, object storage y separación lógica por
-\texttt{institution\_id}.
 \end{center}
+Dos servicios Docker y una PostgreSQL según render.yaml. Pool pg interno;
+HAProxy, PgBouncer externo, réplicas y HA se difieren hasta necesidad medida.
+Render free no acredita backups/PITR ni disponibilidad continua; expiración,
+arranque en frío y respaldo requieren atención operativa. No se validó DNS/TLS
+ni despliegue remoto en esta misión. Binarios/object storage fuera del MVP markdown.
+JWT, membership activa, Enrollment, FK compuestas y RLS/runtime sin bypass
+protegen el contexto institucional. El path solicita tenant, no concede acceso.
 
-La decisión central separa dos preocupaciones. La continuidad operacional se
-aborda con réplicas, healthchecks, PgBouncer, PostgreSQL HA, backups y PITR. El
-aislamiento de datos se aborda con \texttt{Institution}, autorización
-contextual, queries scopeadas, \texttt{institution\_id}, FK compuestas,
-constraints y auditoría.
-
-{\small
-\begin{tabularx}{\textwidth}{p{3.1cm}YY}
-\toprule
-\textbf{Falla} & \textbf{Respuesta esperada} & \textbf{Límite} \\
-\midrule
-Réplica frontend/backend & Railway balancea hacia réplicas sanas. & Requiere más de una réplica. \\
-Backend completo & Restart policy y rollback si corresponde. & Un bug global requiere corrección. \\
-Primary PostgreSQL & PostgreSQL HA promueve una réplica y HAProxy redirige. & Conexiones en vuelo deben reintentar. \\
-Mala migración/corrupción & Backups y PITR. & HA no corrige errores lógicos replicados. \\
-Object storage & Core sin archivos puede seguir. & Cargas/descargas fallan temporalmente. \\
-Proveedor/región & Riesgo aceptado del MVP. & No se implementa multi-cloud. \\
-\bottomrule
-\end{tabularx}}
-
+\newpage
 \sectionbar{Modelo de dominio}
 
 \begin{center}
-\resizebox{0.95\textwidth}{!}{%
-\begin{tikzpicture}[
-  font=\sffamily\scriptsize,
-  entity/.style={draw=navy,fill=soft,rounded corners=3pt,minimum width=2.45cm,minimum height=0.8cm,align=center},
-  core/.style={draw=teal,fill=softteal,rounded corners=3pt,minimum width=2.45cm,minimum height=0.8cm,align=center},
-  grade/.style={draw=amber,fill=softamber,rounded corners=3pt,minimum width=2.45cm,minimum height=0.8cm,align=center},
-  arr/.style={-{Latex[length=1.5mm]},draw=slate,thick}
-]
-\node[entity] (u) at (0,1.6) {User};
-\node[entity] (im) at (3.4,1.6) {InstitutionMembership};
-\node[entity] (i) at (6.8,1.6) {Institution};
-\node[core] (c) at (10.2,1.6) {Course};
-\node[core] (s) at (13.6,1.6) {Section};
-\node[core] (e) at (13.6,0.25) {Enrollment};
-
-\node[core] (m) at (10.2,-1.1) {CourseModule};
-\node[core] (mat) at (6.8,-1.1) {Material};
-\node[grade] (q) at (13.6,-1.1) {Quiz};
-\node[grade] (qa) at (17.0,-1.1) {QuizAttempt};
-
-\node[grade] (gi) at (10.2,-2.45) {GradeItem};
-\node[grade] (g) at (13.6,-2.45) {Grade};
-\node[entity] (a) at (17.0,-2.45) {AuditEvent};
-\draw[arr] (u) -- (im);
-\draw[arr] (im) -- (i);
-\draw[arr] (i) -- (c);
-\draw[arr] (c) -- (s);
-\draw[arr] (s) -- (e);
-\draw[arr] (c) -- (m);
-\draw[arr] (m) -- (mat);
-\draw[arr] (m) -- (q);
-\draw[arr] (q) -- (qa);
-\draw[arr] (q.south) -- ++(0,-0.38) -| (gi.north);
-\draw[arr] (gi) -- (g);
-\draw[arr] (g) -- (a);
-\end{tikzpicture}}
-
-\footnotesize Figura 2. Dominio resumido del MVP.
+\resizebox{\textwidth}{!}{\input{../domain-overview.tex}}
 \end{center}
+Modelo conceptual resumido; reglas completas en UML y catálogo.
+Quiz pertenece a Course, con Section opcional (0..1 sección por quiz; 0..* quizzes
+por sección). CourseModule contiene Material, no Quiz. Cada evento tiene una
+Institution; Course y actor son opcionales solo en operaciones institucionales
+controladas. Un actor puede tener 0..* eventos y cada evento 0..1 actor.
+Crear Course incorpora sección y teacher inicial; la persistencia admite después
+0..* secciones/matrículas activas. GradeItem es una columna; Grade la nota vigente.
 
-\texttt{Enrollment} es el pivote académico: indica quién pertenece a qué curso
-y sección, en qué institución y con qué rol (\texttt{teacher},
-\texttt{assistant}, \texttt{student}). No se modela coordinador ni RBAC
-completo. \texttt{GradeItem} representa una columna del libro de notas;
-\texttt{Grade} representa la nota concreta de un estudiante para
-ese ítem.
+
+\sectionbar{Administración y cuentas existentes}
+{\small
+\begin{tabularx}{\textwidth}{p{3cm}YY}
+\toprule
+Actor & Capacidad & Límite \\
+\midrule
+Operador/PM & Onboarding institución/identidad inicial & Operación controlada auditada, sin HTTP global \\
+Superadmin institucional & Delega is\_admin & Solo su institución; no concede docencia \\
+Admin propietario & Crea cursos y administra propios & is\_admin + created\_by; teacher aparte \\
+Teacher & Docencia y seguimiento & Secciones; owner+teacher amplía curso \\
+Assistant & Seguimiento & Sin autoría, publicación ni auditoría por ese rol \\
+Student & Material, quizzes y notas propias publicadas & Sin pauta ni auditoría por ese rol \\
+\bottomrule
+\end{tabularx}
+}
+Enrollment.role es dominio enumerado teacher/student/assistant, implementado
+con varchar(16)+CHECK: rechaza valores externos sin necesitar enum SQL nuevo.
+Membership contiene is\_admin e is\_super\_admin independientes, default false.
+Bootstrap opt-in: UC/UTFSM y diez cuentas (superadmin/admin/teacher/assistant/student
+por institución). Solo superadmin recibe ambos flags inicialmente; las etiquetas
+no crean matrículas. Seed académico manual separado crea cursos y Enrollment
+legacy, sin restituir privilegios. Replay conserva identidades, hashes y revocaciones.
+Onboarding inicial no es alta general en institución existente; esa capacidad
+requiere otra misión. Secretos se entregan por canal operativo, no en el informe.
+Auditoría: owner sin teacher conserva administrativos; grade exige docencia
+incluso publicado. Estudiante ve solo nota propia publicada por my-grades.
 
 \sectionbar{Modelo de datos}
 
 El modelo usa una sola PostgreSQL compartida y un schema evolutivo. Las tablas
-globales son \texttt{institutions}, \texttt{users} e
-\texttt{institution\_memberships}. Las entidades académicas son tenant-owned y
+globales son \texttt{institutions} y \texttt{users};
+\texttt{institution\_memberships} es institucional. Las entidades académicas son tenant-owned y
 llevan \texttt{institution\_id}.
 
 {\small
@@ -257,14 +205,14 @@ Auditoría & \texttt{audit\_events} & Historial inmutable de cambios sensibles. 
 \bottomrule
 \end{tabularx}}
 
-El catálogo de datos se adjunta como XLSX/CSV e incluye tablas, columnas,
-tipos, PK/FK, nulabilidad y descripciones.
+El catálogo XLSX incluye 14 tablas académicas, 122 columnas y 25 relaciones,
+tipos, PK/FK, nulabilidad y descripciones; incluye grade\_publications privado.
 
 \sectionbar{Walking skeleton y CI/CD}
 
 El walking skeleton valida riesgos técnicos de integración antes de construir
 el flujo académico completo. La evidencia incluye frontend Next.js, backend
-NestJS, \texttt{GET /health}, Dockerfiles, GitHub Actions, configuraciones Railway y
+NestJS, \texttt{GET /health}, Dockerfiles y GitHub Actions. Capturas históricas de Railway y
 release por tag.
 
 \begin{center}
@@ -272,7 +220,7 @@ release por tag.
 \includegraphics[width=0.29\textwidth]{../11-cicd-evidence/img/03-ci-run.png} &
 \includegraphics[width=0.29\textwidth]{../11-cicd-evidence/img/06-railway-project.png} &
 \includegraphics[width=0.29\textwidth]{../11-cicd-evidence/img/11-github-release.png} \\
-\footnotesize CI ejecutado & \footnotesize Railway & \footnotesize GitHub release \\
+\footnotesize CI histórico & \footnotesize Railway histórico & \footnotesize Release histórico \\
 \end{tabular}
 \end{center}
 
@@ -312,7 +260,7 @@ demasiado densa.
 \textbf{ID} & \textbf{Riesgo} & \textbf{Responsable} & \textbf{Mitigación} \\
 \midrule
 R-01/R-02 & Fuga o query sin scope institucional & Sebastián Palma & Contexto centralizado, FK institution-aware y tests UC/UTFSM. \\
-R-09/R-10 & Railway o CI/CD mal configurado & Daniel Villaseñor & Healthchecks, Docker reproducible, pipelines y release por tag. \\
+R-09/R-10 & Render o CI/CD mal configurado & Daniel Villaseñor & Healthchecks, Docker reproducible, pipelines y release por tag. \\
 R-12 & Sobrealcance funcional & Daniel Villaseñor & Recorte al flujo curso-material-quiz-notas. \\
 R-13 & Auditoría incompleta & Sebastián Palma & AuditEvent en misma transacción y tests de cambios sensibles. \\
 R-15 & Frontend permite acciones fuera de rol & Julián Contreras, Matías & UI derivada de permisos; backend conserva autorización final. \\
@@ -327,12 +275,13 @@ arquitectura defendible, modelo de dominio, modelo de datos, plan de trabajo,
 riesgos y walking skeleton. La simplificación frente a Entrega 1 no elimina
 garantías críticas; elimina complejidad prematura y conserva las defensas que
 importan: aislamiento tenant-aware, autorización contextual, auditoría,
-CI/CD reproducible y operación con HA/pooling/storage.
+CI/CD reproducible y arquitectura actual mínima. F6/G6 valoran riesgos y planificación
+preexistentes; responsables y siete semanas se conservan sin atribución al polish.
 
 \sectionbar{Anexos declarados}
 
 Los anexos de la carpeta \texttt{docs/deliveries/2} incluyen catálogo de datos XLSX,
-CSV de tablas/columnas/constraints, OpenAPI, capturas CI/CD, evidencia Railway,
+ER Mermaid/SVG/PDF, OpenAPI, capturas CI/CD históricas, evidencia local posterior,
 riesgos completos y plan de desarrollo detallado.
 
 \end{document}

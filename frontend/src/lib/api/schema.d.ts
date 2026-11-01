@@ -1121,7 +1121,7 @@ export interface paths {
         };
         /**
          * Consultar historial de auditoría del curso
-         * @description Admin dueño ve todos los eventos del curso, incluidos sectionId=null, aunque también sea teacher. Solo en ausencia de ese permiso aplica scope de secciones teacher activas. Eventos institucionales excluidos. Inmutable y sanitizado. Admin dueño conserva acceso sin teacher; assistant/student no acceden. Se filtran también snapshots históricos al leer; pesos globales solo owner y publicaciones con sección histórica.
+         * @description Owner admin sin teacher conserva eventos distintos de grade. Owner admin con teacher activo en el curso ve todas sus secciones, incluido sectionId=null. Teacher ordinario solo ve eventos de sus secciones docentes históricas. Student, assistant y superadmin no obtienen auditoría por esos roles o flags. Eventos institucionales excluidos. Historia inmutable y snapshots sanitizados. Autorización antes de ORDER/LIMIT; filtros y continuación describen solo filas visibles. ResourceType grade sin docencia devuelve colección vacía autorizada. Cada petición y cursor revalidan permisos; publicar no concede auditoría estudiantil.
          */
         get: operations["listCourseAuditEvents"];
         put?: never;

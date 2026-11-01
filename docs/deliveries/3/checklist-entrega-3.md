@@ -25,6 +25,7 @@ Documento de evidencia: [evidencia-proceso-cicd.md](evidencia-proceso-cicd.md) (
 - [ ] **E3-12.** Definir cuándo una tarjeta está Done (p. 63). Borrador: [definición de Done](ppt/dfierro/04-definicion-done/frames.tex), [tablero](ppt/dvillas28/01-tablero/preview.pdf).
 - [ ] **E3-13.** Definir cuándo cambia de estado (p. 63). Borrador: [transiciones](ppt/dfierro/04-definicion-done/frames.tex), [tablero](ppt/dvillas28/01-tablero/preview.pdf).
 
+
 ## 3. Calidad y testing
 
 - [ ] **E3-14.** Explicar cómo mantienen la calidad del producto y código (pp. 62, 66).
@@ -42,6 +43,7 @@ Documento de evidencia: [evidencia-proceso-cicd.md](evidencia-proceso-cicd.md) (
 
 - [ ] **E3-22.** Mostrar captura del pipeline y sus etapas (pp. 66, 69). Borrador: [pipeline CI/CD](ppt/dfierro/05-pipeline-cicd/frames.tex).
 - [ ] **E3-23.** Mostrar CI/CD en vivo (p. 69). Borrador: [guion demo en vivo](ppt/dfierro/05-pipeline-cicd/frames.tex).
+
 
 ## 5. Métricas y viabilidad
 

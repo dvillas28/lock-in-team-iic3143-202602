@@ -86,8 +86,8 @@ tienen alcance de curso: todas las secciones de ese curso ven el mismo contenido
 publicado. La Section solo determina si el usuario pertenece al Course mediante
 Enrollment.
 
-Cuando existan binarios, usarán Railway Bucket o storage S3-compatible
-equivalente, con namespace por Institution y acceso mediado por el backend.
+Binarios fuera del MVP: proveedor por decidir en otra misión; namespace por
+Institution y acceso mediado por backend serán requisitos de esa extensión.
 
 Solo el contenido publicado es visible para estudiantes autorizados.
 
@@ -137,30 +137,30 @@ cuando apliquen, fecha y valores anterior/posterior sanitizados. Solo onboarding
 privilegios institucionales admiten Course nulo; cambios académicos requieren Course. Se escribe en la misma
 transacción que el cambio y nunca incluye secretos, claves internas ni pautas.
 
-## Relaciones principales
+## Relaciones y capacidades
 
-```txt
-User 1 -> N InstitutionMembership <- N Institution
-Institution 1 -> N Course
-Course 1 -> N Section
-Section 1 -> N Enrollment <- N User
-Course 1 -> N CourseModule -> N Material
-Course 1 -> N Quiz; Section 0..1 -> N Quiz
-Quiz 1 -> questions jsonb
-Quiz 1 -> N QuizAttempt <- N User
-Section 1 -> N QuizAttempt
-Quiz 1 -> 0..1 GradeItem -> N Grade
-QuizAttempt 1 -> 0..1 Grade vigente
-Section 1 -> N Grade
-Course 1 -> N AuditEvent
-```
+Multiplicidades y reglas: [UML](05-domain-model-uml.md),
+[relaciones contrastadas](06-data-model-relations.md) y [ER](06-data-model-erd-2.md).
+Los mínimos persistidos no exigen secciones o docentes activos permanentemente;
+crear un curso sí incorpora sección y teacher inicial en la misma transacción.
 
-Cada relación tenant-owned incluye la Institution de ambos extremos en su
-invariante de persistencia.
+| Actor | Capacidad vigente | Límite |
+| --- | --- | --- |
+| Operador del producto | Provisiona institución/identidad inicial y recupera superadmin | Operación controlada auditada; sin superadmin global HTTP |
+| Superadmin institucional | Delega/revoca is_admin en su institución | No delega is_super_admin ni obtiene acceso académico ajeno |
+| Admin propietario | Crea cursos; administra configuración, secciones y participantes propios | is_admin vigente + created_by; evaluación requiere teacher aparte |
+| Teacher | Autoría y seguimiento de secciones docentes | Admin dueño amplía curso solo en operaciones autorizadas |
+| Assistant | Seguimiento de sus secciones | Sin autoría, publicación ni auditoría por ese rol |
+| Student | Material y quizzes autorizados; notas propias publicadas | Sin pauta ni auditoría por ese rol |
+
+Flags institucionales independientes; Enrollment no contiene admin/superadmin.
+[ADR de permisos](../../adr/institution-admin-and-course-ownership.md).
+[Cuentas y provisión](../../guides/demo-accounts.md): altas generales e invitaciones
+no están soportadas en institución existente; requieren otra misión.
 
 ## Resolución y autorización
 
-Para `/api/v1/institutions/{institutionSlug}/...`:
+Para `/api/v1/institution/{institutionSlug}/...`:
 
 1. validar JWT y resolver User global;
 2. resolver Institution por slug;
@@ -187,4 +187,4 @@ recurso visible sobre el cual falta permiso produce `403`.
 - Las vistas estudiantiles muestran solo notas propias publicadas y omiten pauta.
 - Los índices siguen accesos reales y comienzan por `institution_id` cuando el
   scope institucional forma parte del filtro.
-- RLS queda fuera del MVP; puede evaluarse como defensa futura.
+- RLS implementada protege omisiones de filtro con runtime sin bypass.

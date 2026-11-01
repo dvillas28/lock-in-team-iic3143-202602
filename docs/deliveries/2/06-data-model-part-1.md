@@ -27,7 +27,7 @@ informe.
   pueden reutilizar el mismo valor.
 - Los índices comienzan por `institution_id` cuando el acceso real está scoped
   por Institution o respalda una FK/constraint compuesta.
-- RLS no forma parte del MVP.
+- RLS implementada protege omisiones de filtro; runtime sin bypass.
 
 ## Entidades globales e institucionales
 
@@ -117,10 +117,7 @@ Reglas:
 - `(institution_id, id, course_id)` es único para relaciones que también
   comprueban el Course.
 
-### enrollments
 
-Tabla pivote académica. Una fila indica que un User pertenece a una Section de
-un Course de una Institution con un rol específico. No almacena `course_id`
-porque Section ya pertenece a Course; las consultas obtienen el Course mediante
-la FK de Section. Se conserva `institution_id` para scope, índices y FK
-institution-aware.
+Enrollment.role es dominio cerrado teacher/student/assistant, varchar(16)+CHECK.
+Se conserva frente a enum SQL: mismo rechazo, sin migración por formato.
+[Reglas de matrícula](06-data-model-part-2.md).

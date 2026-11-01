@@ -111,6 +111,11 @@ No aprovisionar infraestructura para completar esta fase documental.
 
 [Runbook de bootstrap, RLS y entrega pendiente](demo-tenant-bootstrap.md).
 
+## Aislamiento y Testing
+
+- [Matriz de escenarios de aislamiento UC/UTFSM](isolation-test-matrix.md).
+- [Guía del Test Harness de Aislamiento (BE-07 / BE-08)](isolation-test-harness.md).
+
 ## Fuentes
 
 - [Alcance](../deliveries/2/02-scope.md), [CU y RF/RNF](../deliveries/2/03-use-cases-and-requirements.md).

@@ -33,6 +33,8 @@ pnpm --dir backend db:predeploy
 pnpm --dir backend start
 ```
 
+Cuentas entregables, flags y límites de altas: [guía](../guides/demo-accounts.md).
+
 ## Bootstrap demo
 
 Para crear cursos y matrículas con las cuentas legacy existentes, usar el

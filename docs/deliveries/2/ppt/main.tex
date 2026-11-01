@@ -110,7 +110,7 @@
 \begin{block}{Docente}
 \small
 \begin{itemize}
-  \item Crear cursos, secciones y roles.
+  \item Admin crea cursos/secciones; teacher gestiona roles.
   \item Organizar módulos y material.
   \item Crear quizzes autocorregidos.
   \item Configurar y publicar notas.
@@ -131,7 +131,7 @@
 \end{columns}
 \vspace{0.25cm}
 \centering
-\softchip{academixred}{red!6}{Fuera: admin institucional}
+\softchip{academixred}{red!6}{Fuera: altas generales}
 \softchip{academixred}{red!6}{IA}
 \softchip{academixred}{red!6}{chat}
 \softchip{academixred}{red!6}{calendario}
@@ -156,11 +156,11 @@
 \begin{block}{Ahora}
 \small
 \begin{itemize}
-  \item Railway como despliegue inmediato.
+  \item Render configurado; remoto sin comprobar.
   \item PostgreSQL compartida.
   \item \texttt{institution\_id} como frontera lógica.
-  \item PgBouncer compartido.
-  \item HA y Bucket para operación.
+  \item RLS y runtime sin bypass.
+  \item HA y binarios diferidos.
 \end{itemize}
 \end{block}
 \end{column}
@@ -207,7 +207,7 @@
 \node[tile,draw=academixblue,fill=academixblue!8] at (3.4,1.5) {\textbf{Seguridad}\\JWT + membership};
 \node[tile,draw=academixgreen,fill=academixgreen!8] at (6.8,1.5) {\textbf{Integridad}\\FK + constraints};
 \node[tile,draw=academixamber,fill=academixamber!8] at (1.7,0) {\textbf{Auditoría}\\cambios sensibles};
-\node[tile,draw=academixteal,fill=academixteal!8] at (5.1,0) {\textbf{Operación}\\Docker + CI/CD + HA};
+\node[tile,draw=academixteal,fill=academixteal!8] at (5.1,0) {\textbf{Operación}\\Docker + CI/CD + health};
 \end{tikzpicture}
 \vspace{0.45cm}
 
@@ -216,154 +216,82 @@
 \end{block}
 \end{frame}
 
-\begin{frame}{Arquitectura objetivo}
-\centering
-\resizebox{0.95\textwidth}{!}{%
-\begin{tikzpicture}[
-  font=\sffamily\footnotesize,
-  base/.style={draw=academixnavy,thick,fill=academixsoftblue,rounded corners=3pt,align=center,inner sep=4pt,text width=2.6cm},
-  ops/.style={draw=academixteal,thick,fill=academixsoftteal,rounded corners=3pt,align=center,inner sep=4pt,text width=2.6cm},
-  data/.style={draw=academixamber,thick,fill=academixsoftamber,rounded corners=3pt,align=center,inner sep=4pt,text width=2.8cm},
-  tenant/.style={draw=academixslate,thick,fill=white,rounded corners=2pt,align=center,inner sep=3pt,text width=2.2cm},
-  fl/.style={-{Latex[length=1.8mm]},draw=academixnavy,thick},
-  repl/.style={-{Latex[length=1.8mm]},draw=academixamber,thick,dashed}
-]
-\node[base] (u) at (0,0) {\textbf{Usuarios}\\docente · estudiante\\ayudante};
-\node[ops] (edge) at (3.4,0) {\textbf{Railway edge}\\load balancing};
-\node[base] (fe) at (6.8,0.9) {\textbf{Next.js}\\frontend réplicas};
-\node[base] (be) at (6.8,-0.9) {\textbf{NestJS}\\backend réplicas\\stateless};
-\node[ops] (pool) at (10.2,-0.9) {\textbf{PgBouncer}\\connection pool};
-\node[ops] (hap) at (13.6,-0.9) {\textbf{HAProxy}\\PostgreSQL HA};
-\node[data] (dbp) at (17.0,-0.25) {\textbf{Primary}\\schema compartido};
-\node[data] (dbr) at (17.0,-1.75) {\textbf{Replica}\\failover};
-\node[data] (bucket) at (10.2,-3.0) {\textbf{Railway Bucket}\\PDF · presentaciones\\adjuntos};
-\node[tenant] (uc) at (14.0,1.65) {Institution UC};
-\node[tenant] (utfsm) at (16.8,1.65) {Institution UTFSM};
-\node[tenant] (other) at (19.6,1.65) {Institution ...};
-\coordinate (split) at (17.0,0.85);
-
-\draw[fl] (u) -- (edge);
-\draw[fl] (edge) -- (fe);
-\draw[fl] (edge) -- (be);
-\draw[fl] (fe) -- (be);
-\draw[fl] (be) -- (pool);
-\draw[fl] (pool) -- (hap);
-\draw[fl] (hap) -- (dbp);
-\draw[repl] (dbp) -- node[right,font=\scriptsize]{streaming} (dbr);
-\draw[fl] (be) |- (bucket);
-\draw[fl] (dbp.north) -- (split);
-\draw[fl] (split) -| (uc.south);
-\draw[fl] (split) -- (utfsm.south);
-\draw[fl] (split) -| (other.south);
-\node[align=left,font=\sffamily\scriptsize] at (3.5,-3.05) {%
-\textcolor{academixnavy}{\rule{0.32cm}{0.6pt}} base del despliegue\\
-\textcolor{academixamber}{\rule{0.32cm}{0.6pt}} disponibilidad/failover\\
-\textbf{HA:} High Availability\\
-\textbf{Tenant lógico:} \texttt{institution\_id} + autorización + FK};
+\begin{frame}{Arquitectura configurada: respuesta a C6}
+\begin{center}
+\resizebox{0.9\textwidth}{!}{%
+\begin{tikzpicture}[font=\sffamily\small,
+ box/.style={draw,rounded corners,align=center,minimum width=3cm,minimum height=1cm},
+ arr/.style={-{Latex[length=2mm]},thick}]
+\node[box] (u) at (0,0) {Navegador};
+\node[box] (fe) at (4.5,1) {Render: Next.js\\puerto 3000};
+\node[box] (be) at (9,0) {Render: NestJS\\puerto 3001};
+\node[box] (db) at (13.5,0) {PostgreSQL 17\\UC / UTFSM compartida};
+\draw[arr] (u) -- (fe);\draw[arr] (u) -- (be);\draw[arr] (fe) -- (be);\draw[arr] (be) -- (db);
 \end{tikzpicture}}
+\end{center}
+\small Render: app/API/PostgreSQL, según Blueprint existente al corte.
+Pool pg interno; HAProxy/HA/PgBouncer externo diferidos por falta de necesidad medida.
+\begin{itemize}
+\item Free: arranque en frío, cuota y expiración de DB; sin promesa de backups/PITR.
+\item Binarios/object storage fuera del MVP markdown.
+\item Configuración no acredita despliegue: sin verificación remota en el polish.
+\end{itemize}
 \end{frame}
-
-\begin{frame}{Preguntas de falla}
+\begin{frame}{Preguntas de falla: límites actuales}
 \small
-\begin{tabularx}{\textwidth}{lYY}
+\begin{itemize}
+\item Sin réplicas declaradas: caída de app/API interrumpe servicio; revisar readiness y corregir.
+\item Sin HA de PostgreSQL: recuperación requiere operación y respaldo comprobado.
+\item Free tiene suspensión/cuota/expiración: no se promete continuidad ni PITR.
+\item HAProxy, pooling externo y failover requieren métricas, presupuesto y otra misión.
+\item RLS y permisos protegen aislamiento; no resuelven disponibilidad.
+\end{itemize}
+\end{frame}
+\begin{frame}{Multi-tenancy lógico}
+\begin{itemize}
+\item User global; Membership activa habilita institución.
+\item is\_admin e is\_super\_admin independientes de Enrollment.
+\item Enrollment.role: teacher, student o assistant por sección (varchar+CHECK).
+\item Ruta singular /api/v1/institution/\{slug\}/... solicita contexto, no autoriza.
+\item FK compuestas, permisos y RLS con runtime sin bypass; sin base por tenant.
+\end{itemize}
+\end{frame}
+\begin{frame}{Modelo de dominio: cardinalidades (D6)}
+\centering
+\resizebox{0.96\textwidth}{!}{\input{../domain-overview.tex}}
+\par\vspace{.1cm}\scriptsize
+Quiz de Course; Section opcional: 0..1 por quiz y 0..* quizzes por sección.
+AuditEvent: actor 0..1 y curso 0..1 solo en operaciones institucionales controladas.
+Figura resumida; todas las FK, reglas y extremos están en UML/catálogo.
+\end{frame}
+\begin{frame}{Administración existente: seis actores (E6)}
+\scriptsize
+\begin{tabularx}{\textwidth}{p{3cm}YY}
 \toprule
-\textbf{Si cae...} & \textbf{Respuesta} & \textbf{Límite} \\
+Actor & Capacidad & Límite \\
 \midrule
-Frontend/backend réplica & Railway envía tráfico a réplicas sanas. & Requiere más de una réplica. \\
-Backend completo & Healthcheck y restart policy. & Si es bug, rollback o fix. \\
-PgBouncer & Se pierde endpoint pooleado. & Escalar réplicas y conservar URL no pooleada. \\
-Primary DB & Patroni promueve réplica; HAProxy redirige. & Conexiones en vuelo deben reintentar. \\
-Datos corruptos & Backups y PITR. & HA también propaga errores lógicos. \\
-Object storage & Core sin archivos puede seguir. & Cargas/descargas fallan temporalmente. \\
-Proveedor/región & Riesgo aceptado MVP. & No hay multi-cloud. \\
+Operador/PM & Onboarding institución/identidad inicial & Operación controlada auditada, sin HTTP global \\
+Superadmin institucional & Delega is\_admin & Solo su institución; no concede docencia \\
+Admin propietario & Crea cursos y administra propios & is\_admin + created\_by; teacher aparte \\
+Teacher & Docencia y seguimiento & Secciones; owner+teacher amplía curso \\
+Assistant & Seguimiento & Sin autoría, publicación ni auditoría por ese rol \\
+Student & Material, quizzes y notas propias publicadas & Sin pauta ni auditoría por ese rol \\
 \bottomrule
 \end{tabularx}
+
 \end{frame}
-
-\begin{frame}{Multi-tenancy lógico}
-\centering
-\vspace{-0.1cm}
-\resizebox{0.92\textwidth}{!}{%
-\begin{tikzpicture}[
-  font=\sffamily\scriptsize,
-  box/.style={rounded corners=3pt,minimum width=3cm,minimum height=0.85cm,align=center,inner sep=3pt},
-  wide/.style={rounded corners=3pt,minimum width=4cm,minimum height=0.9cm,align=center,inner sep=3pt},
-  arr/.style={-{Latex[length=1.7mm]},draw=academixnavy,thick},
-  scope/.style={draw=academixslate,dashed,rounded corners=5pt,inner sep=8pt}
-]
-\node[box,draw=academixnavy,fill=academixnavy!7] (user) at (0,2.75) {\textbf{User}\\global};
-\node[box,draw=academixteal,fill=academixteal!7] (mem) at (4.0,2.75) {\textbf{InstitutionMembership}\\acceso institucional};
-\node[box,draw=academixamber,fill=academixamber!8] (inst) at (8.0,2.75) {\textbf{Institution}\\tenant lógico};
-
-\node[box,draw=academixblue,fill=academixblue!7] (course) at (8.0,1.3) {\textbf{Course}\\curso};
-\node[box,draw=academixblue,fill=academixblue!7] (section) at (4.0,1.3) {\textbf{Section}\\sala lógica};
-\node[box,draw=academixgreen,fill=academixgreen!7] (enroll) at (0,1.3) {\textbf{Enrollment}\\rol académico};
-
-\node[wide,draw=academixslate,fill=white] (owned) at (8.0,-0.25) {\textbf{Tenant-owned}\\Material · Quiz · Grade · AuditEvent};
-
-\node[wide,draw=academixnavy,fill=academixsoftblue,text width=4.2cm] (rule) at (12.5,1.6) {\textbf{Regla central}\\El path selecciona contexto;\\no autentica ni autoriza.};
-\node[wide,draw=academixteal,fill=academixsoftteal,text width=4.2cm] (guard) at (12.5,0.1) {\textbf{Defensa}\\membership + enrollment +\\\texttt{institution\_id} + FK};
-
-\draw[arr] (user) -- (mem);
-\draw[arr] (mem) -- (inst);
-\draw[arr] (inst) -- (course);
-\draw[arr] (course) -- (section);
-\draw[arr] (section) -- (enroll);
-\draw[arr] (user) -- (enroll);
-\draw[arr] (course) -- (owned);
-\draw[arr] (inst) -- (rule);
-\draw[arr] (owned.east) -- (guard.west);
-\end{tikzpicture}}
-\vspace{0.2cm}
-
-\small \texttt{Enrollment} une usuario, institución, curso, sección y rol; las entidades académicas se filtran y validan por \texttt{institution\_id}.
+\begin{frame}{Cuentas y atribución (E6)}
+\small
+\begin{itemize}
+\item Bootstrap: UC/UTFSM, diez cuentas; solo superadmins reciben ambos flags.
+\item Etiquetas teacher/assistant/student no crean Enrollment; seed académico separado.
+\item Operador provisiona institución/identidad inicial. No hay alta general/invitaciones.
+\item Replay conserva IDs, hashes, estados y revocaciones; secretos fuera de entregables.
+\item Corte 2026-10-29, 7f4334a: roles/creación/delegación/RLS/provisión ya existían.
+\item Polish documenta/valida; fix funcional nuevo: privacidad de auditoría grade.
+\item F6/G6 positivos conservados; sin atribución retroactiva ni despliegue nuevo.
+\end{itemize}
 \end{frame}
-
-\begin{frame}{Modelo de dominio}
-\centering
-\vspace{-0.1cm}
-\resizebox{0.95\textwidth}{!}{%
-\begin{tikzpicture}[
-  font=\sffamily\scriptsize,
-  entity/.style={draw=academixnavy,fill=academixbg,rounded corners=3pt,minimum width=2.45cm,minimum height=0.8cm,align=center},
-  core/.style={draw=academixteal,fill=academixsoftteal,rounded corners=3pt,minimum width=2.45cm,minimum height=0.8cm,align=center},
-  grade/.style={draw=academixamber,fill=academixsoftamber,rounded corners=3pt,minimum width=2.45cm,minimum height=0.8cm,align=center},
-  arr/.style={-{Latex[length=1.5mm]},draw=academixslate,thick}
-]
-\node[entity] (u) at (0,1.6) {User};
-\node[entity] (im) at (3.4,1.6) {InstitutionMembership};
-\node[entity] (i) at (6.8,1.6) {Institution};
-\node[core] (c) at (10.2,1.6) {Course};
-\node[core] (s) at (13.6,1.6) {Section};
-\node[core] (e) at (13.6,0.25) {Enrollment};
-
-\node[core] (m) at (10.2,-1.1) {CourseModule};
-\node[core] (mat) at (6.8,-1.1) {Material};
-\node[grade] (q) at (13.6,-1.1) {Quiz};
-\node[grade] (qa) at (17.0,-1.1) {QuizAttempt};
-
-\node[grade] (gi) at (10.2,-2.45) {GradeItem};
-\node[grade] (g) at (13.6,-2.45) {Grade};
-\node[entity] (a) at (17.0,-2.45) {AuditEvent};
-
-\draw[arr] (u) -- (im);
-\draw[arr] (im) -- (i);
-\draw[arr] (i) -- (c);
-\draw[arr] (c) -- (s);
-\draw[arr] (s) -- (e);
-\draw[arr] (c) -- (m);
-\draw[arr] (m) -- (mat);
-\draw[arr] (m) -- (q);
-\draw[arr] (q) -- (qa);
-\draw[arr] (q.south) -- ++(0,-0.38) -| (gi.north);
-\draw[arr] (gi) -- (g);
-\draw[arr] (g) -- (a);
-\end{tikzpicture}}
-\vspace{0.15cm}
-
-\small Dominio acotado: no hay coordinador ni RBAC completo; docente con rol \texttt{teacher} administra su curso/secciones.
-\end{frame}
-
 \begin{frame}{Modelo de datos}
 \scriptsize
 \begin{tabularx}{\textwidth}{p{2.1cm}p{3.5cm}Y}
@@ -383,7 +311,7 @@ Auditoría & \texttt{audit\_events} & Historial inmutable de cambios sensibles. 
 \end{tabularx}
 \vspace{0.2cm}
 
-\small Catálogo completo adjunto en XLSX/CSV con columnas, tipos, PK/FK, nulabilidad y descripciones.
+\small Catálogo completo adjunto en XLSX con columnas, tipos, PK/FK, nulabilidad y descripciones.
 \end{frame}
 
 \begin{frame}{Walking skeleton y evidencia}
@@ -394,7 +322,7 @@ Auditoría & \texttt{audit\_events} & Historial inmutable de cambios sensibles. 
 \end{column}
 \begin{column}{0.32\textwidth}
 \includegraphics[width=\textwidth,height=0.48\textheight,keepaspectratio]{../11-cicd-evidence/img/06-railway-project.png}
-\centering\scriptsize Railway
+\centering\scriptsize Railway histórico
 \end{column}
 \begin{column}{0.32\textwidth}
 \includegraphics[width=\textwidth,height=0.48\textheight,keepaspectratio]{../11-cicd-evidence/img/11-github-release.png}
@@ -403,7 +331,7 @@ Auditoría & \texttt{audit\_events} & Historial inmutable de cambios sensibles. 
 \end{columns}
 \vspace{0.25cm}
 \begin{block}{Riesgo mitigado}
-\small Integración frontend/backend, Docker, CI, despliegue Railway y release por tag.
+\small Integración frontend/backend, Docker, CI, capturas históricas Railway y release por tag; Render configurado ahora.
 \end{block}
 \end{frame}
 
@@ -463,12 +391,12 @@ Auditoría & \texttt{audit\_events} & Historial inmutable de cambios sensibles. 
   msg/.style={rounded corners=6pt,minimum width=3.8cm,minimum height=1.6cm,align=center,text width=3.3cm}
 ]
 \node[msg,draw=academixnavy,fill=academixnavy!8] at (0,0) {\textbf{Diseño estable}\\MVP acotado y trazable};
-\node[msg,draw=academixteal,fill=academixteal!8] at (4.4,0) {\textbf{Arquitectura defendible}\\HA, pooling, storage y fallas};
+\node[msg,draw=academixteal,fill=academixteal!8] at (4.4,0) {\textbf{Arquitectura defendible}\\Render simple y límites explícitos};
 \node[msg,draw=academixamber,fill=academixamber!8] at (8.8,0) {\textbf{Ejecución lista}\\7 semanas, dueños y riesgos};
 \end{tikzpicture}
 \vspace{0.5cm}
 
-\Large\textbf{\color{academixnavy}La siguiente fase es implementar, no rediseñar.}
+\Large\textbf{\color{academixnavy}Siguiente fase: comprobar operación y pendientes.}
 \end{frame}
 
 \appendix
@@ -480,7 +408,7 @@ Auditoría & \texttt{audit\_events} & Historial inmutable de cambios sensibles. 
 \textbf{Área} & \textbf{Responsable y alcance} \\
 \midrule
 Bot PR reviewer & Daniel Fierro: integración, reglas y evidencia. \\
-Backend e infraestructura & Sebastián Palma: API, persistencia, aislamiento, Docker y Railway. \\
+Backend e infraestructura & Sebastián Palma: API, persistencia, aislamiento, Docker y plataforma Render. \\
 Frontend & Julián Contreras y Matías: vistas, consumo API, cursos, quizzes y notas. \\
 CI/CD y gestión & Daniel Villaseñor: pipelines, releases, Scrum, planillas y presentación. \\
 \bottomrule
@@ -499,8 +427,8 @@ CI/CD y gestión & Daniel Villaseñor: pipelines, releases, Scrum, planillas y p
 06 & Modelo de datos, constraints y ERD. \\
 07 & Riesgos actualizados. \\
 08 & Plan de trabajo de 7 semanas. \\
-11 & Evidencia CI/CD y Railway. \\
-13 & Catálogo de datos XLSX/CSV. \\
+11 & Evidencia CI/CD histórica y validación local. \\
+13 & Catálogo de datos XLSX. \\
 \bottomrule
 \end{tabularx}
 \end{frame}

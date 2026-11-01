@@ -12,16 +12,22 @@ classDiagram
 
   class Institution
   class User
-  class InstitutionMembership
+  class InstitutionMembership {
+    boolean is_admin
+    boolean is_super_admin
+  }
   class Course
   class Section
-  class Enrollment
+  class Enrollment {
+    role teacher_student_assistant
+  }
   class CourseModule
   class Material
 
   Institution "1" -- "0..*" InstitutionMembership : habilita
   User "1" -- "0..*" InstitutionMembership : pertenece
   Institution "1" -- "0..*" Course : ofrece
+  InstitutionMembership "1" -- "0..*" Course : propietario
   Course "1" -- "0..*" Section : contiene
   Section "1" -- "0..*" Enrollment : tiene
   User "1" -- "0..*" Enrollment : participa
@@ -67,11 +73,16 @@ classDiagram
   User "1" -- "0..*" Grade : recibe
   Section "1" -- "0..*" Grade : contextualiza
 
-  Course "1" -- "0..*" AuditEvent : registra
-  User "1" -- "0..*" AuditEvent : realiza
+  Course "0..1" -- "0..*" AuditEvent : registra
+  User "0..1" -- "0..*" AuditEvent : realiza
 ```
 
 Quiz, QuizAttempt, GradeItem, Grade y AuditEvent conservan `institution_id`. Las
 FK compuestas comprueban que las relaciones del diagrama pertenecen a la misma
 Institution. Las preguntas y alternativas son conceptos anidados dentro del JSON
 de Quiz, no tablas independientes en el MVP.
+
+Auditoría opcional refleja eventos institucionales y operaciones sin actor HTTP.
+QuestionJson es pauta conceptual validada al publicar; borradores incompletos
+son posibles. No hay tabla de preguntas. Reglas físicas y conceptuales:
+[relaciones contrastadas](06-data-model-relations.md).

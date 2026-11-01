@@ -10,6 +10,7 @@ import "@/styles/auth.css";
 import "@/styles/academic-records.css";
 import "@/styles/content.css";
 import "@/styles/quizzes.css";
+import "@/styles/attempts.css";
 import "@/styles/landing.css";
 
 const inter = Inter({
