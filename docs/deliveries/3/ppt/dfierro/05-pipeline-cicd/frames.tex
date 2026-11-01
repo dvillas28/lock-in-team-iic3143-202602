@@ -1,0 +1,109 @@
+% E3-22, E3-23: Pipeline de CI/CD, captura de etapas y muestra en vivo.
+% Fuentes: .github/workflows/ci.yml, SonarQube, Trivy.
+
+\begin{frame}{Pipeline de CI/CD: etapas y controles (E3-22)}
+\centering
+\begin{tikzpicture}[
+  font=\sffamily\tiny,
+  job/.style={rounded corners=3pt,draw=academixnavy,fill=academixsoftblue,minimum width=1.55cm,minimum height=1.1cm,align=center,text width=1.45cm},
+  dbjob/.style={rounded corners=3pt,draw=academixteal,fill=academixsoftteal,minimum width=1.55cm,minimum height=1.1cm,align=center,text width=1.45cm},
+  iajob/.style={rounded corners=3pt,draw=academixamber,fill=academixsoftamber,minimum width=1.55cm,minimum height=1.1cm,align=center,text width=1.45cm},
+  gatejob/.style={rounded corners=3pt,draw=academixgreen,fill=green!8,minimum width=1.55cm,minimum height=1.1cm,align=center,text width=1.45cm},
+  arr/.style={-{Latex[length=1.5mm]},draw=academixnavy,thick}
+]
+\node[job] (j1) at (0,0) {\textbf{1. Doc Length}\\[1pt]$<$150 líneas};
+\node[job] (j2) at (1.8,0) {\textbf{2. Contracts}\\[1pt]OpenAPI lint};
+\node[job] (j3) at (3.6,0) {\textbf{3. Changes}\\[1pt]Path filter};
+\node[job] (j4) at (5.4,0) {\textbf{4. Checks}\\[1pt]Lint + build};
+\node[job] (j5) at (7.2,0) {\textbf{5. Docker}\\[1pt]Trivy scan};
+\node[dbjob] (j6) at (9.0,0) {\textbf{6. Coverage}\\[1pt]Postgres 17 real};
+\node[gatejob] (j7) at (10.8,0) {\textbf{7. SonarQube}\\[1pt]Quality Gate};
+\node[iajob] (j8) at (12.6,0) {\textbf{8. Reviewer}\\[1pt]Gemini 3.8};
+
+\draw[arr] (j1) -- (j2);
+\draw[arr] (j2) -- (j3);
+\draw[arr] (j3) -- (j4);
+\draw[arr] (j4) -- (j5);
+\draw[arr] (j5) -- (j6);
+\draw[arr] (j6) -- (j7);
+\draw[arr] (j7) -- (j8);
+\end{tikzpicture}
+\vspace{0.3cm}
+
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.48\textwidth}
+\begin{block}{Seguridad y Aislamiento en CI}
+\scriptsize
+\begin{itemize}
+  \item \textbf{PostgreSQL desechable:} Servicio real en cada PR; ejecuta migraciones, seeds y la suite completa de integración backend.
+  \item \textbf{Trivy:} Escaneo continuo de vulnerabilidades en dependencias e imágenes Docker.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{block}{Calidad y Automatización IA}
+\scriptsize
+\begin{itemize}
+  \item \textbf{SonarQube Cloud:} Maintainability A, duplicación $<$3\,\% y cobertura reportada en el Quality Gate.
+  \item \textbf{Bot PR Reviewer:} Análisis contextual de diffs validando seguridad, tenencia y reglas arquitectónicas.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Guion para la muestra de CI/CD en vivo (E3-23)}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.58\textwidth}
+\begin{block}{Guion de demostración durante la exposición (2 min)}
+\scriptsize
+\begin{enumerate}
+  \item \textbf{Paso 1 — Pull Request del Equipo:} Abrir en GitHub un PR de funcionalidad hacia \texttt{dev} (ej. experiencia académica \#151 o notas).
+  \item \textbf{Paso 2 — Ejecución en Vivo:} Mostrar la pestaña \textit{Checks} con los 8 jobs de \texttt{ci.yml} validando frontend, backend y contratos.
+  \item \textbf{Paso 3 — Base de Datos Real:} Inspeccionar el job \texttt{backend-coverage} demostrando que corre contra PostgreSQL 17 real sin mocks.
+  \item \textbf{Paso 4 — Quality Gate:} Mostrar el dictamen verde de SonarQube Cloud y el comentario de apoyo arquitectónico del bot.
+\end{enumerate}
+\end{block}
+\end{column}
+\begin{column}{0.38\textwidth}
+\begin{block}{Plan de contingencia}
+\scriptsize
+Si GitHub Actions presenta latencia o la red del aula falla:
+\begin{itemize}
+  \item Enlace permanente (\textit{permalink}) al run exitoso de CI (\texttt{b369474}).
+  \item Capturas locales de alta fidelidad con el pipeline verde y reporte de SonarQube.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Pendientes y mejoras de Proceso y CI/CD hacia E4 (\#173)}
+\centering
+\begin{tikzpicture}[
+  font=\sffamily\scriptsize,
+  box/.style={rounded corners=4pt,minimum width=4.3cm,minimum height=2.2cm,align=left,text width=4cm,inner sep=5pt}
+]
+\node[box,draw=academixnavy,fill=academixsoftblue] at (0,0) {%
+  \textbf{\small 1. Despliegue Continuo (CD)}\\[2pt]
+  Smoke tests automáticos post-deploy en Render para verificar en vivo la comunicación FE-BE tras merge a \texttt{main}.};
+
+\node[box,draw=academixteal,fill=academixsoftteal] at (4.7,0) {%
+  \textbf{\small 2. Pruebas E2E en CI}\\[2pt]
+  Integrar pruebas Playwright automatizadas en GitHub Actions para el flujo crítico: rendir quiz $\rightarrow$ corregir $\rightarrow$ publicar notas.};
+
+\node[box,draw=academixgreen,fill=green!6] at (9.4,0) {%
+  \textbf{\small 3. Optimización Runner CI}\\[2pt]
+  Caching agresivo de dependencias \texttt{pnpm} y capas Docker para estabilizar el tiempo total de CI por debajo de 3 minutos.};
+\end{tikzpicture}
+\vspace{0.3cm}
+
+\begin{block}{Compromiso del equipo para Entrega 4}
+\scriptsize
+\begin{itemize}
+  \item \textbf{Afinamiento de feedback automático}: Ajustar filtros de diffs en el bot para evitar comentarios en cambios puramente de UI/documentación.
+  \item \textbf{Disciplina de entrega}: Mantener tasa de merges con 100\,\% de checks verdes y trazabilidad completa hacia el cierre del MVP.
+\end{itemize}
+\end{block}
+\end{frame}
+

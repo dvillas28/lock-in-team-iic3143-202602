@@ -1,0 +1,71 @@
+% E3-09, E3-10: Manejo de deuda técnica y resolución de bugs.
+% Fuentes: SonarQube, issues #177, #149, trigger 23514.
+
+\begin{frame}{Manejo de deuda técnica (E3-09)}
+\centering
+\begin{tikzpicture}[
+  font=\sffamily\scriptsize,
+  node/.style={rounded corners=4pt,minimum width=4.3cm,minimum height=2.2cm,align=left,text width=4cm,inner sep=5pt}
+]
+\node[node,draw=academixnavy,fill=academixsoftblue] at (0,0) {%
+  \textbf{\small 1. Registro Explícito}\\[2pt]
+  La deuda técnica no se oculta en comentarios \texttt{TODO}: se formaliza en la sección de Consecuencias de los ADRs o como tarjetas del backlog.};
+
+\node[node,draw=academixamber,fill=academixsoftamber] at (4.7,0) {%
+  \textbf{\small 2. Monitoreo Automatizado}\\[2pt]
+  SonarQube Cloud evalúa Maintainability Rating (A), duplicación ($<$3\,\%) y deuda técnica en horas en cada PR antes del merge.};
+
+\node[node,draw=academixgreen,fill=green!6] at (9.4,0) {%
+  \textbf{\small 3. Política de Pago Previo}\\[2pt]
+  No se avanza a módulos complejos sin pagar deuda de infraestructura. Ejemplo: tipado OpenAPI antes de vistas de notas.};
+\end{tikzpicture}
+\vspace{0.3cm}
+
+\begin{block}{Ejemplos concretos de gestión de deuda en E3}
+\scriptsize
+\begin{itemize}
+  \item \textbf{Deuda asumida}: Carga demo y RLS inicial sin subdominios dinámicos (mitigado con soporte multidominio en \#128).
+  \item \textbf{Deuda pagada}: Tipado manual en frontend reemplazado por cliente OpenAPI generado automáticamente (\#37).
+  \item \textbf{Deuda priorizada para E4}: Virtualización de la tabla del libro de calificaciones (gradebook) para cursos masivos.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{Proceso de resolución de bugs (E3-10)}
+\centering
+\begin{tikzpicture}[
+  font=\sffamily\scriptsize,
+  step/.style={rounded corners=3pt,draw=academixnavy,fill=academixbg,minimum width=2.4cm,minimum height=0.9cm,align=center,text width=2.2cm},
+  fixstep/.style={rounded corners=3pt,draw=academixteal,fill=academixsoftteal,minimum width=2.4cm,minimum height=0.9cm,align=center,text width=2.2cm},
+  arr/.style={-{Latex[length=2mm]},draw=academixnavy,thick}
+]
+\node[step] (b1) at (0,0) {\textbf{Detección}\\[1pt]Test CI / QA real};
+\node[step] (b2) at (3.2,0) {\textbf{Aislamiento}\\[1pt]Causa raíz};
+\node[fixstep] (b3) at (6.4,0) {\textbf{Test Regresión}\\[1pt]Reproducción previa};
+\node[fixstep] (b4) at (9.6,0) {\textbf{Fix \& PR}\\[1pt]Rama \texttt{fix/*}};
+\draw[arr] (b1) -- (b2);
+\draw[arr] (b2) -- (b3);
+\draw[arr] (b3) -- (b4);
+\end{tikzpicture}
+\vspace{0.25cm}
+
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.48\textwidth}
+\begin{block}{Caso Real 1: Fechas en Quizzes (QA Real)}
+\scriptsize
+\textbf{Síntoma:} Desfase horario al cerrar y responder cuestionarios.\\
+\textbf{Causa:} Serialización UTC sin normalización de zona horaria local en frontend.\\
+\textbf{Solución:} Normalización estandarizada de timestamps y tests de regresión en backend.
+\end{block}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{block}{Caso Real 2: URLs de Render (\#177 / \#178)}
+\scriptsize
+\textbf{Síntoma:} Frontend llamando a URL backend desactualizada tras recreación.\\
+\textbf{Causa:} Nombre aleatorio asignado por Render en el plan cloud.\\
+\textbf{Solución:} Inyección dinámica de variables de entorno y smoke test post-deploy.
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+

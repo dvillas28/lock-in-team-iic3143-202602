@@ -1,0 +1,54 @@
+% AcademiX - Entrega 3, diapositivas de dfierro (Proceso de Desarrollo y CI/CD).
+% Preámbulo compatible con Entrega 2 y dvillas28; aspecto 16:9 con paleta AcademiX.
+\documentclass[aspectratio=169,10pt]{beamer}
+
+\usetheme{Boadilla}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{array}
+\usepackage{pgfplots}
+
+\usetikzlibrary{arrows.meta,positioning,fit,calc,shapes.geometric}
+\pgfplotsset{compat=1.18}
+
+\definecolor{academixnavy}{HTML}{18324F}
+\definecolor{academixblue}{HTML}{2563EB}
+\definecolor{academixteal}{HTML}{0F766E}
+\definecolor{academixamber}{HTML}{B7791F}
+\definecolor{academixgreen}{HTML}{15803D}
+\definecolor{academixred}{HTML}{B91C1C}
+\definecolor{academixbg}{HTML}{F8FAFC}
+\definecolor{academixsoftblue}{HTML}{EFF6FF}
+\definecolor{academixsoftteal}{HTML}{F0FDFA}
+\definecolor{academixsoftamber}{HTML}{FFFBEB}
+\definecolor{academixline}{HTML}{CBD5E1}
+\definecolor{academixslate}{HTML}{475569}
+\definecolor{academixmuted}{HTML}{64748B}
+
+\setbeamercolor{structure}{fg=academixnavy}
+\setbeamercolor{frametitle}{fg=academixnavy,bg=academixbg}
+\setbeamercolor{title}{fg=academixnavy}
+\setbeamercolor{block title}{fg=white,bg=academixnavy}
+\setbeamercolor{block body}{fg=black,bg=academixbg}
+\setbeamercolor{alerted text}{fg=academixamber}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamerfont{frametitle}{size=\large,series=\bfseries}
+\setbeamerfont{title}{series=\bfseries}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcommand{\chip}[2]{\tikz[baseline=(n.base)]\node[rounded corners=2pt,fill=#1,inner xsep=5pt,inner ysep=2pt,text=white,font=\scriptsize\bfseries](n){#2};}
+\newcommand{\softchip}[3]{\tikz[baseline=(n.base)]\node[rounded corners=2pt,draw=#1,fill=#2,inner xsep=5pt,inner ysep=2pt,text=#1,font=\scriptsize\bfseries](n){#3};}
+
+\title[AcademiX]{AcademiX}
+\subtitle{Entrega 3: Proceso de Desarrollo y CI/CD}
+\author[dfierro]{Daniel Fierro}
+\institute[IIC3143]{IIC3143 Desarrollo de Software}
+\date{Noviembre 2026}
+

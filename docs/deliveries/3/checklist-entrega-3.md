@@ -12,16 +12,18 @@ Marcar al incorporar respuesta y evidencia en E3. [Estado y brechas](reporte-bre
 
 ## 2. Proceso de desarrollo
 
-- [ ] **E3-04.** Explicar el ciclo de desarrollo con evidencia (pp. 59, 62–63, 69).
-- [ ] **E3-05.** Mostrar PR, sus checks de CI/CD y cómo se realizan los merges (p. 69).
-- [ ] **E3-06.** Explicar prácticas utilizadas, resultados y beneficios (pp. 62–63, 69).
+Documento de evidencia: [evidencia-proceso-cicd.md](evidencia-proceso-cicd.md) (DF, #167, #168, #173).
+
+- [ ] **E3-04.** Explicar el ciclo de desarrollo con evidencia (pp. 59, 62–63, 69). Borrador: [ciclo de desarrollo](ppt/dfierro/01-ciclo-desarrollo/frames.tex).
+- [ ] **E3-05.** Mostrar PR, sus checks de CI/CD y cómo se realizan los merges (p. 69). Borrador: [PRs y checks](ppt/dfierro/01-ciclo-desarrollo/frames.tex).
+- [ ] **E3-06.** Explicar prácticas utilizadas, resultados y beneficios (pp. 62–63, 69). Borrador: [prácticas y beneficios](ppt/dfierro/02-practicas-decisiones/frames.tex).
 - [ ] **E3-07.** Indicar prácticas abandonadas, si las hubo (p. 62). Borrador: [prácticas abandonadas](ppt/dvillas28/04-practicas-abandonadas/preview.pdf).
-- [ ] **E3-08.** Explicar decisiones y sus motivos (p. 62). Borrador parcial, solo Render: [Render](ppt/dvillas28/03-render/preview.pdf).
-- [ ] **E3-09.** Explicar manejo de deuda técnica (p. 63).
-- [ ] **E3-10.** Explicar resolución de bugs (p. 63). Borrador parcial, solo #177: [Render](ppt/dvillas28/03-render/preview.pdf).
-- [ ] **E3-11.** Mostrar cómo documentan; por ejemplo, ADR y diagramas (p. 63).
-- [ ] **E3-12.** Definir cuándo una tarjeta está Done (p. 63). Borrador: [tablero](ppt/dvillas28/01-tablero/preview.pdf).
-- [ ] **E3-13.** Definir cuándo cambia de estado (p. 63). Borrador: [tablero](ppt/dvillas28/01-tablero/preview.pdf).
+- [ ] **E3-08.** Explicar decisiones y sus motivos (p. 62). Borrador: [decisiones y ADRs](ppt/dfierro/02-practicas-decisiones/frames.tex), [Render](ppt/dvillas28/03-render/preview.pdf).
+- [ ] **E3-09.** Explicar manejo de deuda técnica (p. 63). Borrador: [deuda técnica](ppt/dfierro/03-deuda-y-bugs/frames.tex).
+- [ ] **E3-10.** Explicar resolución de bugs (p. 63). Borrador: [resolución de bugs](ppt/dfierro/03-deuda-y-bugs/frames.tex), [Render](ppt/dvillas28/03-render/preview.pdf).
+- [ ] **E3-11.** Mostrar cómo documentan; por ejemplo, ADR y diagramas (p. 63). Borrador: [documentación y ADRs](ppt/dfierro/02-practicas-decisiones/frames.tex).
+- [ ] **E3-12.** Definir cuándo una tarjeta está Done (p. 63). Borrador: [definición de Done](ppt/dfierro/04-definicion-done/frames.tex), [tablero](ppt/dvillas28/01-tablero/preview.pdf).
+- [ ] **E3-13.** Definir cuándo cambia de estado (p. 63). Borrador: [transiciones](ppt/dfierro/04-definicion-done/frames.tex), [tablero](ppt/dvillas28/01-tablero/preview.pdf).
 
 ## 3. Calidad y testing
 
@@ -36,8 +38,10 @@ Marcar al incorporar respuesta y evidencia en E3. [Estado y brechas](reporte-bre
 
 ## 4. CI/CD
 
-- [ ] **E3-22.** Mostrar captura del pipeline y sus etapas (pp. 66, 69).
-- [ ] **E3-23.** Mostrar CI/CD en vivo (p. 69).
+Documento de evidencia: [evidencia-proceso-cicd.md](evidencia-proceso-cicd.md) (DF, #167, #168, #173).
+
+- [ ] **E3-22.** Mostrar captura del pipeline y sus etapas (pp. 66, 69). Borrador: [pipeline CI/CD](ppt/dfierro/05-pipeline-cicd/frames.tex).
+- [ ] **E3-23.** Mostrar CI/CD en vivo (p. 69). Borrador: [guion demo en vivo](ppt/dfierro/05-pipeline-cicd/frames.tex).
 
 ## 5. Métricas y viabilidad
 

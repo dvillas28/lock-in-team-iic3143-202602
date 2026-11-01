@@ -1,0 +1,78 @@
+% E3-04, E3-05: Ciclo de desarrollo, PRs, checks de CI/CD y merges.
+% Fuentes: .github/workflows/ci.yml, PR #91, #125, #145, #151.
+
+\begin{frame}{Ciclo de desarrollo real con evidencia (E3-04)}
+\centering
+\begin{tikzpicture}[
+  font=\sffamily\scriptsize,
+  node distance=0.45cm,
+  stepnode/.style={rounded corners=4pt,draw=academixnavy,fill=academixbg,minimum width=2.5cm,minimum height=1.1cm,align=center,text width=2.3cm},
+  cinode/.style={rounded corners=4pt,draw=academixblue,fill=academixsoftblue,minimum width=2.5cm,minimum height=1.1cm,align=center,text width=2.3cm},
+  oknode/.style={rounded corners=4pt,draw=academixgreen,fill=green!8,minimum width=2.5cm,minimum height=1.1cm,align=center,text width=2.3cm},
+  arr/.style={-{Latex[length=2mm]},draw=academixnavy,thick}
+]
+\node[stepnode] (s1) at (0,1.2) {\textbf{1. Backlog / Issue}\\[1pt]Tarea asignada (\#123, \#151, \#160)};
+\node[stepnode] (s2) at (3.3,1.2) {\textbf{2. Rama Atómica}\\[1pt]\texttt{feat/*}, \texttt{fix/*}, \texttt{test/*}};
+\node[stepnode] (s3) at (6.6,1.2) {\textbf{3. Spec Kit / TDD}\\[1pt]Plan de diseño y tests primero};
+\node[stepnode] (s4) at (9.9,1.2) {\textbf{4. Commits Conv.}\\[1pt]\texttt{feat(core): ... (\#N)}};
+
+\node[cinode] (s5) at (9.9,-0.6) {\textbf{5. Pull Request}\\[1pt]Apertura hacia rama \texttt{dev}};
+\node[cinode] (s6) at (6.6,-0.6) {\textbf{6. CI + Checks}\\[1pt]8 jobs + Sonar + Bot IA};
+\node[cinode] (s7) at (3.3,-0.6) {\textbf{7. Peer Review}\\[1pt]Aprobación humana cruzada};
+\node[oknode] (s8) at (0,-0.6) {\textbf{8. Merge en dev}\\[1pt]Squash \& merge + cierre issue};
+
+\draw[arr] (s1) -- (s2);
+\draw[arr] (s2) -- (s3);
+\draw[arr] (s3) -- (s4);
+\draw[arr] (s4) -- (s5);
+\draw[arr] (s5) -- (s6);
+\draw[arr] (s6) -- (s7);
+\draw[arr] (s7) -- (s8);
+\end{tikzpicture}
+\vspace{0.25cm}
+
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.48\textwidth}
+\begin{block}{Disciplina en Ramas y Commits}
+\scriptsize Ramas independientes por feature vinculadas al issue; commits atómicos con Conventional Commits (\texttt{feat}, \texttt{fix}, \texttt{test}, \texttt{docs}).
+\end{block}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{block}{Trazabilidad Garantizada}
+\scriptsize Ningún commit ingresa a \texttt{dev} de forma directa: todo cambio pasa por PR, validación de pipeline y revisión de pares.
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Pull Requests, checks automáticos y merges (E3-05)}
+\centering
+\begin{tikzpicture}[
+  font=\sffamily\scriptsize,
+  col/.style={rounded corners=4pt,minimum width=4.3cm,minimum height=2.1cm,align=left,text width=4cm,inner sep=5pt}
+]
+\node[col,draw=academixnavy,fill=academixsoftblue] (p1) at (0,0) {%
+  \textbf{\small Gating de CI/CD}\\[2pt]
+  8 jobs en \texttt{ci.yml}: lint, contratos OpenAPI, doc length, tests reales en PostgreSQL y Quality Gate en SonarQube Cloud.};
+
+\node[col,draw=academixteal,fill=academixsoftteal] (p2) at (4.7,0) {%
+  \textbf{\small Revisión de Pares + IA}\\[2pt]
+  Revisión humana obligatoria entre miembros del equipo, asistida por el Bot PR Reviewer (Gemini Flash) para validación de arquitectura.};
+
+\node[col,draw=academixgreen,fill=green!6] (p3) at (9.4,0) {%
+  \textbf{\small Merge hacia dev}\\[2pt]
+  Squash merge tras checks en verde y aprobación par. Cierre automático de issues y trazabilidad directa en el tablero.};
+\end{tikzpicture}
+\vspace{0.25cm}
+
+\begin{block}{Evidencia de PRs reales integradas en E3}
+\scriptsize
+\begin{itemize}
+  \item \textbf{PR \#125} (\texttt{feat/demo-tenant-isolation}): Aislamiento PostgreSQL RLS y carga demo multitenant UC/UTFSM (Backend).
+  \item \textbf{PR \#151} (\texttt{fix/academic-experience}): Corrección de sesión y gestión de participantes con QA en vivo (Frontend).
+  \item \textbf{PR \#177} (\texttt{fix/deploy}): Corrección de variables de entorno dinámicas del backend en Render (Infraestructura).
+  \item \textbf{PR \#76} (\texttt{test/isolation-matrix}): Matriz de 23 tests de aislamiento y prevención de escalamiento de roles (Testing).
+\end{itemize}
+\end{block}
+\end{frame}
+

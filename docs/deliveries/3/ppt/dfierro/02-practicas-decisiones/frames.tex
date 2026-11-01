@@ -1,0 +1,60 @@
+% E3-06, E3-08, E3-11: Prácticas adoptadas, decisiones y documentación (ADR).
+% Fuentes: docs/adr/, .github/scripts/check-doc-length.py.
+
+\begin{frame}{Prácticas adoptadas y beneficios observados (E3-06)}
+\small
+\begin{table}[h]
+\centering
+\begin{tabularx}{\textwidth}{l p{5.2cm} Y}
+\toprule
+\textbf{Práctica} & \textbf{Implementación en AcademiX} & \textbf{Beneficio / Resultado} \\
+\midrule
+\textbf{Contract-First} & Especificación OpenAPI en YAML y autogeneración de tipos TypeScript en frontend. & Desacopla frontend y backend; elimina discrepancias de endpoints en CI. \\
+\addlinespace
+\textbf{Testing Real BD} & Tests de integración ejecutados contra PostgreSQL 17 real y rol \texttt{academix\_runtime}. & Validación real de RLS multi-tenant y triggers de auditoría sin mocks ficticios. \\
+\addlinespace
+\textbf{Revisión Par + IA} & Aprobación obligatoria entre miembros del equipo asistida por bot analizador en CI. & Mayor calidad de código y prevención de brechas de permisos antes del merge. \\
+\addlinespace
+\textbf{Doc Brevity Gate} & Script en CI que restringe documentación a $<$150 líneas (falla si $>$200). & Documentación técnica concisa, mantenible y sin deuda de obsolescencia. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\vspace{0.1cm}
+\softchip{academixnavy}{academixsoftblue}{Sin dependencias SaaS innecesarias}
+\softchip{academixgreen}{green!8}{Trazabilidad extremo a extremo}
+\softchip{academixteal}{academixsoftteal}{Stack-light respetado}
+\end{frame}
+
+\begin{frame}{Decisiones de arquitectura y documentación ADR (E3-08, E3-11)}
+\centering
+\begin{tikzpicture}[
+  font=\sffamily\scriptsize,
+  col/.style={rounded corners=4pt,minimum width=4.3cm,minimum height=2.2cm,align=left,text width=4cm,inner sep=5pt}
+]
+\node[col,draw=academixnavy,fill=academixsoftblue] at (0,0) {%
+  \textbf{\small PostgreSQL Multi-tenant}\\[2pt]
+  \textit{adopt-shared-postgresql-multitenancy.md}\\[2pt]
+  Base compartida con RLS obligatoria y rol restringido. Aislamiento institucional seguro (UC vs UTFSM) sin duplicar bases de datos.};
+
+\node[col,draw=academixteal,fill=academixsoftteal] at (4.7,0) {%
+  \textbf{\small Contratos OpenAPI y Catálogo}\\[2pt]
+  \textit{static-api-catalog.md}\\[2pt]
+  Contrato formal YAML con Swagger UI versionado; frontend genera su cliente TypeScript desacoplado del backend.};
+
+\node[col,draw=academixamber,fill=academixsoftamber] at (9.4,0) {%
+  \textbf{\small Despliegue en Render}\\[2pt]
+  \textit{deploy-on-render.md}\\[2pt]
+  Migración ágil ante el fin del free tier de Railway: Web Service Node.js, Frontend Static Site y PostgreSQL administrado.};
+\end{tikzpicture}
+\vspace{0.3cm}
+
+\begin{block}{Cómo documentamos en AcademiX (E3-11)}
+\scriptsize
+\begin{itemize}
+  \item \textbf{Decisiones duraderas en \texttt{docs/adr/}}: Formato estándar (Contexto, Decisión, Consecuencias) vinculado en \texttt{docs/README.md}.
+  \item \textbf{Diagramas formales}: BPMN para flujos de usuario, ERD relacional para modelo de datos y diagramas Beamer TikZ.
+  \item \textbf{Garantía constitucional}: Gate automatizado en CI (\texttt{check-doc-length.py}) para asegurar que toda documentación sea digerible ($<$150 líneas).
+\end{itemize}
+\end{block}
+\end{frame}
+

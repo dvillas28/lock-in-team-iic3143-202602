@@ -1,0 +1,71 @@
+% E3-12, E3-13: Definición de terminado (Done) y reglas de transición de estado.
+% Fuentes: docs/deliveries/3/conciliacion-tablero-e3.md, guides/board-metrics.md.
+
+\begin{frame}{Definición de Terminado — Definition of Done (E3-12)}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.55\textwidth}
+\begin{block}{Checklist innegociable para marcar Done}
+\scriptsize
+Una tarjeta pasa a \textbf{Done} solo cuando cumple los 6 criterios:
+\begin{enumerate}
+  \item \textbf{Funcionalidad:} Cumple el alcance acordado en el Spec Kit o issue.
+  \item \textbf{Testing:} Tests de integración con PostgreSQL real pasando en verde; cobertura backend $\ge$90\,\% (actual: 99.5\,\%).
+  \item \textbf{Pipeline CI/CD:} 8 jobs en verde (ESLint, build, contratos OpenAPI, doc-length $<$150 líneas y escaneo Trivy).
+  \item \textbf{Quality Gate:} Aprobado en SonarQube Cloud.
+  \item \textbf{Revisión de Pares:} Aprobación humana con apoyo del bot PR reviewer.
+  \item \textbf{Imputación de Horas:} \texttt{Real (h)} registrado obligatoriamente en el tablero antes de cerrar.
+\end{enumerate}
+\end{block}
+\end{column}
+\begin{column}{0.42\textwidth}
+\centering
+\begin{tikzpicture}[
+  font=\sffamily\scriptsize,
+  box/.style={rounded corners=4pt,draw=academixgreen,fill=green!6,minimum width=3.8cm,minimum height=3.6cm,align=left,text width=3.5cm,inner sep=6pt}
+]
+\node[box] at (0,0) {%
+  \textbf{\color{academixgreen}\normalsize Garantía de Calidad}\\[4pt]
+  Evita que funcionalidades ``a medio terminar'' o sin pruebas contaminen la rama \texttt{dev}.\\[4pt]
+  Alineado con el criterio de conciliación del tablero al 01/11.};
+\end{tikzpicture}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Transiciones de estado en el tablero (E3-13)}
+\centering
+\begin{tikzpicture}[
+  font=\sffamily\scriptsize,
+  col/.style={rounded corners=4pt,draw=academixnavy,fill=academixbg,minimum width=2.4cm,minimum height=1.6cm,align=center,text width=2.2cm},
+  act/.style={rounded corners=4pt,draw=academixblue,fill=academixsoftblue,minimum width=2.4cm,minimum height=1.6cm,align=center,text width=2.2cm},
+  done/.style={rounded corners=4pt,draw=academixgreen,fill=green!8,minimum width=2.4cm,minimum height=1.6cm,align=center,text width=2.2cm},
+  arr/.style={-{Latex[length=2.5mm]},draw=academixnavy,thick}
+]
+\node[col] (t1) at (0,0) {\textbf{1. Backlog}\\[2pt]Borrador / Draft conversion};
+\node[col] (t2) at (3.2,0) {\textbf{2. Todo}\\[2pt]Planificada para la semana};
+\node[act] (t3) at (6.4,0) {\textbf{3. In Progress}\\[2pt]Rama creada y trabajo activo};
+\node[act] (t4) at (9.6,0) {\textbf{4. In Review}\\[2pt]PR abierta con checks CI};
+\node[done] (t5) at (12.8,0) {\textbf{5. Done}\\[2pt]Merge a \texttt{dev} + \texttt{Real (h)}};
+
+\draw[arr] (t1) -- (t2);
+\draw[arr] (t2) -- (t3);
+\draw[arr] (t3) -- (t4);
+\draw[arr] (t4) -- (t5);
+\end{tikzpicture}
+\vspace{0.35cm}
+
+\begin{table}[h]
+\scriptsize\centering
+\begin{tabularx}{\textwidth}{l Y}
+\toprule
+\textbf{Transición} & \textbf{Criterio y Regla de Negocio} \\
+\midrule
+\textbf{Backlog $\rightarrow$ Todo} & Conversión de draft a issue formal al inicio del sprint/iteración semanal. \\
+\textbf{Todo $\rightarrow$ In Progress} & Al momento exacto de crear la rama y comenzar el código (prohibido mover al terminar). \\
+\textbf{In Progress $\rightarrow$ In Review} & Al abrir el PR hacia \texttt{dev}; se ejecutan automáticamente los checks de CI/CD. \\
+\textbf{In Review $\rightarrow$ Done} & Tras aprobación par, checks verdes, merge a \texttt{dev} e ingreso de horas reales. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\end{frame}
+
