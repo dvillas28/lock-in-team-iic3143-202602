@@ -40,7 +40,7 @@ jobs:
     name: Playwright (${{ matrix.project }})
     runs-on: ubuntu-24.04
     needs: changes
-    if: ${{ always() && !(needs.changes.result == 'success' && needs.changes.outputs.required == 'false' && needs.changes.outputs.reason == 'documentation-only') }}
+    if: ${{ !cancelled() && !(needs.changes.result == 'success' && needs.changes.outputs.required == 'false' && needs.changes.outputs.reason == 'documentation-only') }}
     timeout-minutes: ${{ github.event_name == 'schedule' && 90 || github.event_name == 'workflow_dispatch' && 90 || github.event_name == 'push' && 45 || 25 }}
     strategy:
       fail-fast: false
