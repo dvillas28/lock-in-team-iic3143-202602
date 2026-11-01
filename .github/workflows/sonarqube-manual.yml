@@ -1,0 +1,309 @@
+# Course audit (sonarqube-manual.spec.md): throwaway SonarQube on the runner, no secrets.
+# CI's sonarqube job (SonarQube Cloud) is the PR gate; this one exports issues and metrics as JSON.
+name: SonarQube - Issues y calidad local
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sonarqube:
+    # Seleccionar la rama predeterminada al ejecutar el workflow.
+    if: github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    env:
+      SONAR_HOST_URL: http://127.0.0.1:9000
+      SONAR_PROJECT_KEY: ci-project
+      SONAR_IMAGE: sonarqube:26.10.0.133078-community
+
+    # Backend integration tests need Postgres to produce full coverage, as in CI.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: academix_test
+          # Disposable CI service only; no production credentials or existing database.
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d academix_test"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Iniciar SonarQube local
+        shell: bash
+        run: |
+          sudo sysctl -w vm.max_map_count=524288
+          sudo sysctl -w fs.file-max=131072
+          docker run --detach --name sonarqube-ci \
+            --publish 127.0.0.1:9000:9000 \
+            --ulimit nofile=131072:131072 \
+            --ulimit nproc=8192:8192 \
+            "$SONAR_IMAGE"
+
+      # Coverage runs while SonarQube boots; the bootstrap step waits for it afterwards.
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: |
+            backend/pnpm-lock.yaml
+            frontend/pnpm-lock.yaml
+      - run: pnpm --dir backend install --frozen-lockfile
+      # Integration exercises the generated frontend client against real HTTP.
+      - run: pnpm --dir frontend install --frozen-lockfile
+
+      - name: Configure exclusive test database
+        env:
+          PGUSER: postgres
+          PGPORT: 5432
+          PGDATABASE: academix_test
+        run: |
+          test_url="postgresql://${PGUSER}@127.0.0.1:${PGPORT}/${PGDATABASE}"
+          echo "::add-mask::$test_url"
+          echo "TEST_DATABASE_URL=$test_url" >> "$GITHUB_ENV"
+          runtime_url="postgresql://academix_runtime:ci_runtime@127.0.0.1:${PGPORT}/${PGDATABASE}"
+          echo "::add-mask::$runtime_url"
+          echo "TEST_RUNTIME_DATABASE_URL=$runtime_url" >> "$GITHUB_ENV"
+
+      - name: Run backend tests with coverage
+        run: |
+          pnpm --dir backend test:coverage
+          test -s backend/coverage/lcov.info
+          sed -i 's|^SF:src/|SF:backend/src/|' backend/coverage/lcov.info
+
+      # Run from the repository root to keep source paths relative to Sonar's base.
+      - name: Run frontend tests with coverage
+        env:
+          TSX_TSCONFIG_PATH: frontend/tsconfig.json
+        run: |
+          mkdir -p frontend/coverage
+          frontend/node_modules/.bin/c8 --all --src frontend/src --reporter=text --reporter=lcov \
+            --reports-dir=frontend/coverage \
+            node --import ./frontend/node_modules/tsx/dist/loader.mjs --test \
+            frontend/test/*.test.ts
+          test -s frontend/coverage/lcov.info
+
+      - name: Esperar servidor y crear proyecto y token temporales
+        shell: bash
+        run: |
+          python3 - <<'PYBOOT'
+          import base64
+          import json
+          import os
+          import secrets
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          base = os.environ["SONAR_HOST_URL"]
+
+          def request(endpoint, password=None, data=None):
+              headers = {}
+              if password is not None:
+                  credentials = base64.b64encode(f"admin:{password}".encode()).decode()
+                  headers["Authorization"] = f"Basic {credentials}"
+              body = None
+              if data is not None:
+                  body = urllib.parse.urlencode(data).encode()
+                  headers["Content-Type"] = "application/x-www-form-urlencoded"
+              req = urllib.request.Request(f"{base}/api/{endpoint}", data=body, headers=headers)
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  content = response.read()
+                  return json.loads(content) if content else None
+
+          deadline = time.monotonic() + 900
+          while time.monotonic() < deadline:
+              try:
+                  if request("system/status")["status"] == "UP":
+                      break
+              except (urllib.error.URLError, TimeoutError, ConnectionError):
+                  pass
+              time.sleep(5)
+          else:
+              raise SystemExit("SonarQube no inició dentro de 15 minutos")
+
+          password = "Ci1!" + secrets.token_hex(24)
+          print(f"::add-mask::{password}", flush=True)
+          request("users/change_password", password="admin", data={
+              "login": "admin", "previousPassword": "admin", "password": password,
+          })
+          request("projects/create", password=password, data={
+              "project": os.environ["SONAR_PROJECT_KEY"],
+              "name": os.environ["GITHUB_REPOSITORY"],
+              "visibility": "private",
+          })
+          token = request("user_tokens/generate", password=password, data={
+              "name": "ci-ephemeral", "type": "USER_TOKEN",
+          })["token"]
+          print(f"::add-mask::{token}", flush=True)
+          with open(os.environ["GITHUB_ENV"], "a") as environment:
+              environment.write(f"SONAR_TOKEN={token}\n")
+          PYBOOT
+
+      # Sources, tests, tsconfigs and LCOV paths come from sonar-project.properties, shared with CI;
+      # only the server and project key differ.
+      - name: Ejecutar análisis SonarQube
+        uses: SonarSource/sonarqube-scan-action@v8.3.0
+        with:
+          args: >
+            -Dsonar.projectKey=ci-project
+            -Dsonar.host.url=http://127.0.0.1:9000
+            -Dsonar.scanner.metadataFilePath=${{ runner.temp }}/sonar-report-task.txt
+
+      - name: Esperar análisis y generar reportes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import pathlib
+          import time
+          import urllib.parse
+          import urllib.request
+
+          base = os.environ["SONAR_HOST_URL"].rstrip("/")
+          project = os.environ["SONAR_PROJECT_KEY"]
+          token = os.environ["SONAR_TOKEN"]
+          output = pathlib.Path(os.environ["RUNNER_TEMP"]) / "sonar-reports"
+          output.mkdir(exist_ok=True)
+
+          def get(endpoint, **params):
+              url = f"{base}/api/{endpoint}"
+              if params:
+                  url += "?" + urllib.parse.urlencode(params)
+              request = urllib.request.Request(
+                  url, headers={"Authorization": f"Bearer {token}"}
+              )
+              with urllib.request.urlopen(request, timeout=60) as response:
+                  return json.load(response)
+
+          def save(name, data):
+              (output / name).write_text(
+                  json.dumps(data, indent=2, ensure_ascii=False),
+                  encoding="utf-8",
+              )
+
+          task_properties = dict(
+              line.split("=", 1)
+              for line in pathlib.Path(
+                  os.path.join(os.environ["RUNNER_TEMP"], "sonar-report-task.txt")
+              ).read_text().splitlines()
+              if "=" in line
+          )
+
+          deadline = time.monotonic() + 1800
+          while time.monotonic() < deadline:
+              task = get("ce/task", id=task_properties["ceTaskId"])["task"]
+              status = task["status"]
+              if status == "SUCCESS":
+                  break
+              if status in ("FAILED", "CANCELED"):
+                  raise SystemExit(f"El análisis terminó con estado {status}")
+              time.sleep(5)
+          else:
+              raise SystemExit("Tiempo de espera del análisis agotado (30 minutos)")
+
+          save("analysis-task.json", task)
+          save("run.json", {
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "ref": os.environ["GITHUB_REF"],
+              "sha": os.environ["GITHUB_SHA"],
+              "run_id": os.environ["GITHUB_RUN_ID"],
+              "image": os.environ["SONAR_IMAGE"],
+              "server": get("system/status"),
+              "ephemeral": True,
+          })
+
+          gate = get(
+              "qualitygates/project_status",
+              analysisId=task["analysisId"],
+          )
+          save("quality-gate.json", gate)
+
+          measures = get(
+              "measures/component",
+              component=project,
+              metricKeys="ncloc,coverage,duplicated_lines_density",
+          )
+          save("metrics.json", measures)
+
+          issues = []
+          page = 1
+          while True:
+              result = get(
+                  "issues/search",
+                  componentKeys=project,
+                  resolved="false",
+                  ps=500,
+                  p=page,
+              )
+              issues.extend(result["issues"])
+              total = result["paging"]["total"]
+              if total > 10000:
+                  save("issues-partial.json", {"total": total, "complete": False, "issues": issues})
+                  raise SystemExit("Más de 10000 issues: adaptar la consulta con particiones")
+              if len(issues) >= total:
+                  break
+              if not result["issues"]:
+                  raise SystemExit("La API devolvió una página vacía inesperada")
+              page += 1
+
+          save("issues.json", {"total": total, "issues": issues})
+
+          gate_status = gate["projectStatus"]["status"]
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+              summary.write("## Reporte SonarQube\n\n")
+              summary.write(f"- Quality Gate: **{gate_status}**\n")
+              summary.write(f"- Issues abiertos: **{total}**\n")
+              summary.write("- Instancia local temporal: el dashboard se elimina al finalizar.\n")
+              summary.write("- Reportes descargables: artifact `sonarqube-reports`.\n\n")
+              summary.write("| Métrica | Valor |\n|---|---:|\n")
+              for measure in measures["component"]["measures"]:
+                  summary.write(
+                      f"| {measure['metric']} | {measure.get('value', '-')} |\n"
+                  )
+
+          if gate_status != "OK":
+              raise SystemExit(f"Quality Gate no aprobado: {gate_status}")
+          PY
+
+      - name: Recopilar diagnóstico del servidor
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/sonar-reports"
+          if docker container inspect sonarqube-ci >/dev/null 2>&1; then
+            docker logs sonarqube-ci > "$RUNNER_TEMP/sonar-reports/server.log" 2>&1
+            docker inspect --format '{{json .State}}' sonarqube-ci > "$RUNNER_TEMP/sonar-reports/container-state.json"
+          fi
+
+      - name: Publicar reportes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonarqube-reports
+          path: ${{ runner.temp }}/sonar-reports/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Eliminar instancia temporal
+        if: always()
+        shell: bash
+        run: |
+          if docker container inspect sonarqube-ci >/dev/null 2>&1; then
+            docker rm --force --volumes sonarqube-ci
+          fi

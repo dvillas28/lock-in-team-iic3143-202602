@@ -1,0 +1,77 @@
+# Course audit (trivy-manual.spec.md): full dependency report, on demand.
+# CI's docker job is the PR gate; this one reports every severity for the whole repo.
+name: Trivy - Dependencias y vulnerabilidades
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trivy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      # Same DB cache key as CI, so a run on the same day reuses its download.
+      - id: trivy-db
+        run: echo "date=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/trivy
+          key: trivy-db-${{ steps.trivy-db.outputs.date }}
+          restore-keys: trivy-db-
+
+      # Uses the digest-pinned image from CI instead of trivy-action's mutable tags.
+      # Findings never fail this step; they are evaluated after the report is published.
+      - name: Analizar dependencias
+        run: |
+          .github/scripts/trivy.sh fs --scanners vuln --exit-code 0 \
+            --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL \
+            --format json --output trivy-report.json .
+
+      - name: Publicar reporte
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-report
+          path: trivy-report.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Resumir resultados y evaluar vulnerabilidades
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import collections
+          import json
+          import os
+
+          with open("trivy-report.json") as report:
+              data = json.load(report)
+
+          vulnerabilities = [
+              vulnerability
+              for result in (data.get("Results") or [])
+              for vulnerability in (result.get("Vulnerabilities") or [])
+          ]
+          counts = collections.Counter(
+              vulnerability.get("Severity", "UNKNOWN")
+              for vulnerability in vulnerabilities
+          )
+
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+              summary.write("## Vulnerabilidades en dependencias\n\n")
+              summary.write("| Severidad | Hallazgos |\n|---|---:|\n")
+              for severity in ("CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"):
+                  summary.write(f"| {severity} | {counts[severity]} |\n")
+              summary.write("\nReporte completo: artifact `trivy-report`.\n")
+
+          if counts["HIGH"] or counts["CRITICAL"]:
+              raise SystemExit("Se encontraron vulnerabilidades HIGH o CRITICAL.")
+          PY

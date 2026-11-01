@@ -140,3 +140,6 @@ Si un PR falla por SonarQube:
 2. Corregir los issues marcados en el codigo nuevo.
 3. Si es un falso positivo o un hotspot seguro, marcarlo en SonarQube
    ("Accept" o "Safe") con un comentario que diga por que.
+
+Para la demo del curso hay versiones manuales de Trivy y SonarQube que exportan
+reportes JSON: ver [security-audit-workflows](security-audit-workflows.md).
