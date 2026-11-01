@@ -9,7 +9,7 @@ export async function academic(e:Environment,slug='uc',graded=false) {
  const t=topology(e,slug),api=await e.api(t.student,slug);
  const a=status(await api.post(`sections/${t.section}/quizzes/${t.quiz}/attempts`,undefined,e.key()),201).body;
  if(graded) {
-  const qs=status(await api.get(`quizzes/${t.quiz}`),200).body.questions;
+  const qs=status(await api.get(`quiz-attempts/${a.id}/questions`),200).body.questions;
   status(await api.put(`quiz-attempts/${a.id}/answers`,{answers:qs.map((q:{id:string})=>({questionId:q.id,alternativeId:'a'}))}),200);
   status(await api.post(`quiz-attempts/${a.id}/submit`,undefined,e.key()),200);
  }

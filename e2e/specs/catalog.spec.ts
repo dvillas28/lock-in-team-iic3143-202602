@@ -4,11 +4,14 @@ import {readFile,writeFile,readdir,cp} from 'node:fs/promises';
 import {join} from 'node:path';
 import {root} from '../runner/settings.ts';
 
+// Published OpenAPI operations; update when docs/reference/openapi adds or removes one.
+const OPERATIONS=52;
+
 const catalogue=test.extend<{catalogue:Awaited<ReturnType<typeof catalog>>}>({
   catalogue:[async ({},use)=>{const c=await catalog();try{await use(c);}finally{await c.close();}},{timeout:120000}],
 });
 const operations=async (page:import('@playwright/test').Page)=>{
-  await expect(page.locator('.opblock')).toHaveCount(50);
+  await expect(page.locator('.opblock')).toHaveCount(OPERATIONS);
   await expect(page.getByRole('button',{name:/Try it out/i})).toHaveCount(0);
 };
 catalogue('E2E-CATALOG-001 static catalogue filter and deep link / filter-deeplink @regression',async ({catalogue:c,page})=>{
@@ -16,7 +19,7 @@ catalogue('E2E-CATALOG-001 static catalogue filter and deep link / filter-deepli
   page.context().on('request',r=>{if(new URL(r.url()).origin!==c.base || r.url().includes('/api/v1/'))foreign.push(new URL(r.url()).pathname);});
   await page.goto(c.base+'/');await expect(page).toHaveURL(c.url);await operations(page);
   await page.getByPlaceholder('Filter by tag').fill('/courses');
-  await expect(page.locator('.opblock')).not.toHaveCount(50);
+  await expect(page.locator('.opblock')).not.toHaveCount(OPERATIONS);
   await expect(page.locator('.opblock')).not.toHaveCount(0);
   expect((await page.locator('.opblock-summary-path').allTextContents()).every(path=>path.includes('/courses'))).toBe(true);
   await page.getByPlaceholder('Filter by tag').fill('/auth/login');
@@ -35,7 +38,7 @@ catalogue('E2E-CATALOG-002 OpenAPI download revision and operations / download @
   expect(doc.openapi).toBe('3.1.0');expect(doc.info['x-source-revision']).toBe(c.manifest.revision);
   await expect(page.locator('header code')).toHaveText(c.manifest.revision);
   const ops=Object.values(doc.paths).flatMap((item:any)=>Object.values(item).filter((op:any)=>op?.operationId)) as any[];
-  expect(ops).toHaveLength(50);expect(new Set(ops.map(op=>op.operationId)).size).toBe(50);
+  expect(ops).toHaveLength(OPERATIONS);expect(new Set(ops.map(op=>op.operationId)).size).toBe(OPERATIONS);
   expect(ops.every(op=>op['x-availability']==='implementada')).toBe(true);
   expect(JSON.stringify(doc)).not.toMatch(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/);
   const noJs=await page.context().browser()!.newContext({javaScriptEnabled:false});
