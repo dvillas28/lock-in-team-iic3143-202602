@@ -9,9 +9,9 @@
 \textbf{Feedback de E2} & \textbf{Qué hicimos} \\
 \midrule
 Faltan cardinalidades en el modelo de dominio & Cardinalidades en UML y ER. El modelo coincide con el DDL: 14 tablas, 122 columnas y 25 FK. \\
-\texttt{Enrollment.role} podría ser enum & Ya era un dominio cerrado con \texttt{CHECK} (teacher, student, assistant). Lo documentamos y validamos el rechazo, sin migración nueva. \\
+\texttt{Enrollment.role} podría ser enum & Los roles ya estaban restringidos mediante \texttt{CHECK}; los documentamos y agregamos pruebas para verificar que se rechacen los valores no permitidos. \\
 No se entiende admin y superadmin, ni quién crea cursos & Seis actores documentados: el admin crea cursos y el superadmin delega ese permiso dentro de su institución. \\
-Declarar las cuentas demo y cómo se crearán más & Dataset demo y provisión declarados. \\
+Declarar las cuentas demo y cómo se crearán más & Documentamos las cuentas para demo y cómo crear nuevas. \\
 \bottomrule
 \end{tabularx}
 \vspace{0.25cm}

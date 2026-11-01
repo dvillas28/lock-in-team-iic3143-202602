@@ -57,8 +57,8 @@ Si el ensayo se pasa de tiempo, se recortan primero la 13 (repite cifras de la 1
 
 ## Calidad y testing
 
-**9. Estrategia de testing (0:45).** El riesgo del dominio es una fuga entre instituciones o una nota visible antes de tiempo.
-- Por eso el backend se prueba contra PostgreSQL real con RLS: 207 tests.
+**9. Estrategia de testing (0:45).** Lo más importante es que una institución no acceda a los datos de otra y que las notas no se vean antes de publicarlas.
+- Por eso, además de las pruebas con mocks, el backend se prueba contra PostgreSQL real con RLS: 207 tests.
 - Frontend: 350 tests. E2E: Playwright con API y base reales.
 
 **10. Qué probamos (1:00).** Seis flujos de usuario, de entrar a la institución a publicar notas.
