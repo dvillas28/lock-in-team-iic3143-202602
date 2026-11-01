@@ -1,0 +1,53 @@
+% E3-17 a E3-19: estrategia de testing y flujos de usuario probados.
+% Fuente: logs de la auditoría SonarQube del 01/11 (conteo de tests de BE y FE),
+% e2e.yml (run 41338806749), docs/testing (catálogo E2E y corrida F7 del 31/10),
+% backend/test/integration y frontend/test.
+
+\begin{frame}{Estrategia de testing}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.5\textwidth}
+\centering
+\begin{tikzpicture}[lvl/.style={align=center,font=\scriptsize,text=white}]
+\fill[academixnavy] (-3.0,0) -- (3.0,0) -- (2.2,1.2) -- (-2.2,1.2) -- cycle;
+\fill[academixteal] (-2.2,1.2) -- (2.2,1.2) -- (1.4,2.4) -- (-1.4,2.4) -- cycle;
+\fill[academixamber] (-1.4,2.4) -- (1.4,2.4) -- (0.55,3.5) -- (-0.55,3.5) -- cycle;
+\node[lvl] at (0,0.6) {\textbf{Unitarias y DOM}\\350 frontend};
+\node[lvl] at (0,1.8) {\textbf{Integración}\\207 backend, PostgreSQL real};
+\node[lvl] at (0,2.85) {\textbf{E2E}\\248 casos};
+\end{tikzpicture}
+\end{column}
+\begin{column}{0.48\textwidth}
+\scriptsize
+\begin{itemize}
+  \item \textbf{Backend:} \texttt{node:test} contra PostgreSQL con RLS y el rol de runtime real; HTTP, roles y aislamiento UC/UTFSM.
+  \item \textbf{Frontend:} \texttt{node:test} con DOM simulado; componentes, sesión y cliente de API.
+  \item \textbf{E2E:} Playwright con API y base reales; 20 specs, 5 de seguridad (tenant, RBAC, auth, admin, auditoría). 13 min en CI.
+\end{itemize}
+\textbf{Por qué así:} el riesgo del dominio es una fuga entre instituciones o una nota visible antes de tiempo. Eso solo se prueba con base real, no con mocks.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Qué probamos: flujos de usuario}
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.6cm}rrrY}
+\toprule
+\textbf{Flujo} & \textbf{E2E} & \textbf{Integ. BE} & \textbf{Unit. FE} & \textbf{Qué asegura} \\
+\midrule
+Entrar a mi institución & 44 & 7 & 5 & Login global, sesión en memoria y una cuenta de UC que no ve UTFSM \\
+Docente arma su curso & 38 & 8 & 6 & Creación atómica, secciones y asignar, revocar y reactivar roles \\
+Docente publica material & 16 & 7 & 9 & Módulos ordenados, visibilidad y Markdown seguro \\
+Docente crea y publica un quiz & 18 & 7 & 11 & Borrador validado, publicación irreversible y pauta protegida \\
+Estudiante rinde el quiz & 32 & 7 & 10 & Guardar respuestas, envío atómico con autocorrección y cancelación \\
+Notas: ponderar, publicar y consultar & 42 & 12 & 11 & Cálculo decimal, pesos congelados, nota visible solo al publicar y auditoría \\
+\midrule
+\textbf{Total} & \textbf{248} & \textbf{66} & \textbf{55} & \\
+\bottomrule
+\end{tabularx}
+\vspace{0.2cm}
+
+E2E: fichas del catálogo; los totales suman además permisos (13), administración (11), red (13), accesibilidad (8), operación (9) y catálogo de API (4). Integración y unitarias: archivos de test; el resto es operación, seed y componentes compartidos.\\[0.15cm]
+\centering
+\softchip{academixgreen}{green!8}{Corrida completa del 31/10: 248 fichas, 512 ejecuciones en Chromium, Firefox y WebKit, 0 fallos}
+\end{frame}
