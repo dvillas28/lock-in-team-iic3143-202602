@@ -12,7 +12,7 @@ export async function ownerStudentHistory(e:Environment) {
  status(await owner.post(`sections/${s}/enrollments`,{userId:e.data.actors.MEMBER.id,role:'student'}),201);
  for(const actor of ['AO-ST','MEMBER']) {
   const api=await e.api(actor),a=status(await api.post(`sections/${s}/quizzes/${q.id}/attempts`,undefined,e.key()),201).body;
-  const quiz=status(await api.get(`quizzes/${q.id}`),200).body;
+  const quiz=status(await api.get(`quiz-attempts/${a.id}/questions`),200).body;
   status(await api.put(`quiz-attempts/${a.id}/answers`,{answers:[{questionId:quiz.questions[0].id,alternativeId:'a'}]}),200);
   status(await api.post(`quiz-attempts/${a.id}/submit`,undefined,e.key()),200);
  }

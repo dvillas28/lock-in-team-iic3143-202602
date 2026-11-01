@@ -7,12 +7,12 @@ test('student history returns only own tenant records; pagination, availability 
  const pool=await database();let app;
  try{
   const f=await attemptFixture(pool);
-  const first=await f.create({status:'graded'}),active=await f.create({number:2});
-  await f.create({student:users.owner,status:'graded'});
-  await f.create({quiz:f.quizzes.foreign,student:users.foreign,section:f.s4});
+  // max_attempts freezes once a quiz has attempts, so configure it first.
   await pool.query('UPDATE quizzes SET max_attempts=3 WHERE id=$1',[f.quizzes.section]);
   // Explicit timestamps make ordering independent of clock precision.
-  await pool.query("UPDATE quiz_attempts SET started_at=now()-interval '1 day' WHERE id=$1",[first]);
+  const first=await f.create({status:'graded',started:new Date(Date.now()-86400000)}),active=await f.create({number:2});
+  await f.create({student:users.owner,status:'graded'});
+  await f.create({quiz:f.quizzes.foreign,student:users.foreign,section:f.s4});
   app=await http();const t=await tokens(app,f),url=path(f.quizzes.section),before=await state(pool);
   const page=await request(app,t.student,url+'?limit=1');
   assert.equal(page.status,200);assert.equal(page.body.items[0].id,active);assert.equal(page.body.hasMore,true);
@@ -39,12 +39,14 @@ test('remaining attempts and windows use all history, including cancelled attemp
  const pool=await database();let app;
  try{
   const f=await attemptFixture(pool),url=path(f.quizzes.section);
-  app=await http();const t=await tokens(app,f);
-  assert.equal((await request(app,t.student,url)).body.availability.canStart,true);
-  await f.create({status:'cancelled'});
+  // max_attempts freezes once a quiz has attempts; window columns stay editable.
   await pool.query('UPDATE quizzes SET max_attempts=1 WHERE id=$1',[f.quizzes.section]);
+  app=await http();const t=await tokens(app,f);
+  assert.deepEqual((await request(app,t.student,url)).body.availability,{canStart:true,reason:null,remainingAttempts:1,activeAttemptId:null});
+  await f.create({status:'cancelled'});
   assert.equal((await request(app,t.student,url)).body.availability.reason,'limitReached');
-  await pool.query("UPDATE quizzes SET max_attempts=null,opens_at=now()+interval '1 day' WHERE id=$1",[f.quizzes.section]);
+  // Window reasons take precedence over the exhausted attempt limit.
+  await pool.query("UPDATE quizzes SET opens_at=now()+interval '1 day' WHERE id=$1",[f.quizzes.section]);
   assert.equal((await request(app,t.student,url)).body.availability.reason,'notOpen');
   await pool.query("UPDATE quizzes SET opens_at=null,closes_at=now()-interval '1 day' WHERE id=$1",[f.quizzes.section]);
   assert.equal((await request(app,t.student,url)).body.availability.reason,'closed');
