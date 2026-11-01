@@ -31,6 +31,7 @@ Usa nombres separados por NUL y desactiva detección de renombres para incluir t
 - Schedule y dispatch siempre ejecutan su selección, aunque no haya cambios recientes.
 
 La razón queda en el summary. El detector no necesita instalar pnpm ni navegadores.
+Detector y agregador desactivan la caché automática de setup-node; pnpm aún no está instalado en ese paso.
 Si falla el detector, `!cancelled()` permite ejecutar Playwright y respeta la cancelación de una PR anterior.
 
 ## Check E2E result

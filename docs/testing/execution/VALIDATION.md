@@ -87,7 +87,8 @@ La corrida completa F7 reemplaza la anterior limitación de aceptación solo por
 
 Los reportes completos permanecen en `e2e/reports/<runId>/`, ignorados por Git; copiarlos o reproducirlos.
 Métricas: `reports/f7-full-metrics.json` y `reports/f7-stability-metrics.json`, relativas a e2e.
-CI remoto, protección requerida, caché/retención efectiva y Docker de GitHub no están acreditados.
+El primer run remoto `41261462330` falló en setup-node del detector: caché automática de pnpm sin pnpm instalado.
+Se desactivó esa caché en detector/agregador; revalidación remota, protección y retención efectiva pendientes.
 No se repitieron todos los unitarios históricos del producto. El diagnóstico antiguo TEST-01 del subprocess DST
 permanece en el historial de LOCAL_VALIDATION.md; no se afirma resuelto por pasar E2E.
 `dev` sigue en90463059015e5045d011eadd12b6403b7b492615; `main` en294eb5b4642479772a921ce56ce860c2f329abb6.
