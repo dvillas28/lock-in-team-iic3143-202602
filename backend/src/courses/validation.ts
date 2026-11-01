@@ -14,7 +14,7 @@ export function object(body: unknown, allowed: string[], required: string[] = []
   return dto;
 }
 export function text(value: unknown, max: number) {
-  if(typeof value!=="string" || !value.trim() || [...value.trim()].length>max) throw new BadRequestException();
+  if(typeof value!=="string" || value.includes("\u0000") || !value.trim() || [...value.trim()].length>max) throw new BadRequestException();
   return value.trim();
 }
 export function capacity(value: unknown) {

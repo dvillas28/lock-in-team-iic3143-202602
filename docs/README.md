@@ -33,6 +33,12 @@ plataforma de despliegue.
 
 - [OpenAPI de AcademiX](reference/openapi/README.md)
 
+## Backend y Pruebas
+
+- [Mapa de misiones backend](backend/README.md)
+- [Matriz de escenarios de aislamiento UC/UTFSM](backend/isolation-test-matrix.md)
+- [Guía del Test Harness de aislamiento (BE-07 / BE-08)](backend/isolation-test-harness.md)
+
 ## Misiones frontend
 
 - [Seis specs, dependencias y estado documental](frontend/README.md)
@@ -40,6 +46,7 @@ plataforma de despliegue.
 
 ## Guías
 
+- E2E: [qué probamos y fases](testing/E2E_MASTER_PLAN.md) · [ejecución y navegador visible](testing/E2E_README.md).
 - [Spec Kit](guides/speckit-flow.md)
 - [CodeGraph](guides/codegraph-flow.md)
 - [Git Flow](guides/git-flow.md)

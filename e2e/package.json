@@ -1,0 +1,39 @@
+{
+  "name": "academix-e2e",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "test": "tsx runner/run.ts",
+    "test:smoke": "node --import tsx runner/run.ts --suite=smoke",
+    "test:regression": "node --import tsx runner/run.ts --suite=regression",
+    "test:extended": "node --import tsx runner/run.ts --suite=extended",
+    "test:headed": "tsx runner/run.ts --headed",
+    "test:ui": "tsx runner/run.ts --ui",
+    "typecheck": "tsc --noEmit",
+    "test:harness": "node --import tsx --test unit/*.test.ts",
+    "test:list": "playwright test --list --project=chromium --reporter=line",
+    "lint": "eslint .",
+    "report": "tsx runner/show-report.ts",
+    "coverage": "tsx runner/coverage.ts",
+    "test:f1": "tsx runner/run.ts ops.spec.ts auth.smoke.spec.ts",
+    "test:f2": "tsx runner/run.ts auth.entry.spec.ts auth.smoke.spec.ts public.spec.ts catalog.spec.ts",
+    "test:f3": "tsx runner/run.ts auth.security.spec.ts tenant.security.spec.ts rbac.security.spec.ts admin.security.spec.ts audit.security.spec.ts",
+    "test:f4": "tsx runner/run.ts courses.spec.ts sections.spec.ts enrollments.spec.ts content.spec.ts",
+    "test:f5": "tsx runner/run.ts quizzes.spec.ts attempts.spec.ts grades.spec.ts academic-audit.spec.ts",
+    "test:f6": "tsx runner/run.ts network.spec.ts accessibility.spec.ts",
+    "test:stability": "node --import tsx runner/stability.ts",
+    "artifacts:stage": "node --import tsx runner/stage-artifacts.ts",
+    "metrics": "node --import tsx runner/metrics.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@types/node": "^24.0.0",
+    "@types/pg": "8.23.1",
+    "eslint": "9.39.5",
+    "pg": "8.23.1",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.70.1"
+  }
+}

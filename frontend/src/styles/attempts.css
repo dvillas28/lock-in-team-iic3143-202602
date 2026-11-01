@@ -1,0 +1,67 @@
+/* Attempts compose the same cards, controls and semantic tokens as courses/quizzes. */
+.attempt-workspace, .attempt-form, .attempt-sidebar { min-width: 0; }
+.attempt-workspace { color-scheme: light; }
+[data-theme="dark"] .attempt-workspace { color-scheme: dark; }
+.attempt-back { display: inline-flex; align-items: center; gap: 8px; align-self: start; }
+.attempt-summary .section-label { margin-bottom: 4px; }
+.attempt-summary .quiz-facts { padding-block: 16px; border-block: 1px solid var(--border); }
+.attempt-reference { font-size: 13px; }
+.attempt-reference > summary { padding: 0; font-weight: 500; }
+.attempt-reference[open] > summary { padding-bottom: 12px; margin-bottom: 12px; }
+.attempt-reference-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.attempt-reference-fields dt { color: var(--text-2); font-size: 12px; margin-bottom: 4px; }
+.attempt-reference-fields dd { margin: 0; overflow-wrap: anywhere; }
+.attempt-layout { display: grid; grid-template-columns: minmax(0, 1fr) 288px; align-items: start; gap: 24px; }
+.academic-app .attempt-sidebar { gap: 16px; }
+.academic-app .attempt-workspace .panel h2 { margin-bottom: 0; }
+.academic-app .attempt-sidebar .panel { padding: 20px; gap: 16px; }
+.attempt-sidebar .hint, .attempt-save-bar .hint { font-size: 12px; }
+.academic-app fieldset.attempt-question { min-width: 0; margin: 0; padding: 24px; border: 1px solid var(--border); scroll-margin-block: 24px; }
+.attempt-question legend { float: left; display: flex; align-items: start; gap: 12px; width: 100%; padding: 0; margin-bottom: 16px; font-size: 15px; font-weight: 600; line-height: 1.6; }
+.attempt-question-number { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: var(--radius-sm); background: var(--primary-soft); color: var(--primary-ink); font-size: 13px; }
+.attempt-options { clear: both; display: grid; gap: 10px; }
+.attempt-option { align-items: start; min-height: 48px; font-size: 14px; line-height: 1.5; }
+.attempt-option input { flex-shrink: 0; margin-top: 3px; width: 16px; height: 16px; }
+.attempt-option-letter { color: var(--text-3); font-size: 12px; font-weight: 600; padding-top: 2px; }
+.attempt-option:has(input:checked) .attempt-option-letter { color: var(--primary-ink); }
+.attempt-option:has(input:focus-visible) { outline: 2px solid var(--primary-ink); outline-offset: 2px; }
+.attempt-question:disabled .attempt-option { cursor: default; }
+.attempt-progress > p strong { color: var(--primary-ink); font-size: 24px; font-weight: 600; }
+.attempt-progress progress { appearance: none; width: 100%; height: 6px; border: 0; border-radius: var(--radius-sm); overflow: hidden; background: var(--muted); color: var(--primary-ink); }
+.attempt-progress progress::-webkit-progress-bar { background: var(--muted); }
+.attempt-progress progress::-webkit-progress-value { background: var(--primary-ink); }
+.attempt-progress progress::-moz-progress-bar { background: var(--primary-ink); }
+.attempt-question-nav { display: flex; flex-wrap: wrap; gap: 8px; }
+.attempt-question-link { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 48px; min-height: 36px; padding: 6px 8px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); text-decoration: none; color: var(--text-2); font-size: 13px; }
+.attempt-question-link.answered { color: var(--primary-ink); background: var(--primary-soft); border-color: var(--primary-ink); }
+.attempt-question-link:hover { background: var(--hover); }
+.attempt-save-bar { position: sticky; bottom: 0; z-index: 2; padding: 16px; display: grid; gap: 12px; }
+.attempt-save-bar .actions, .attempt-sidebar .actions { margin-top: 0; }
+.attempt-workspace .native-dialog { width: min(560px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow: auto; }
+.attempt-confirmation-answers { padding-left: 24px; display: grid; gap: 16px; font-size: 13px; }
+.attempt-confirmation-answers p { margin-top: 4px; color: var(--text-2); }
+.attempt-receipt > .quiz-section-heading svg { color: var(--success); }
+.attempt-receipt .quiz-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.attempt-summary .quiz-facts .grade-value { font-size: 26px; }
+.attempt-filter-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr) auto; gap: 16px; align-items: end; }
+.attempt-filters .field { margin-top: 6px; }
+.attempt-table caption { text-align: left; padding: 16px 20px; font-size: 13px; color: var(--text-2); }
+.attempt-table :is(th, td) { vertical-align: top; }
+.attempt-identifier { font-size: 12px; color: var(--text-2); overflow-wrap: anywhere; }
+@media (max-width: 1100px) {
+  .attempt-layout { grid-template-columns: minmax(0, 1fr) 248px; gap: 16px; }
+  .attempt-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .attempt-layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  .attempt-reference-fields, .attempt-filter-grid, .attempt-receipt .quiz-facts { grid-template-columns: minmax(0, 1fr); }
+  .academic-app fieldset.attempt-question { padding: 16px; }
+  .attempt-question legend { font-size: 14px; }
+  .attempt-summary .quiz-schedule .quiz-facts > div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+  .attempt-summary .quiz-schedule .quiz-facts dd { min-width: 0; text-align: right; }
+  .attempt-save-bar .actions { flex-direction: column; align-items: stretch; }
+  .attempt-save-bar .btn { justify-content: center; }
+  .attempt-save-bar { position: static; }
+}

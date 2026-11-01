@@ -128,3 +128,30 @@ test("collapsing an uncertain material editor cannot unlock the same creation",a
  assert.equal(ui.requests.filter(r=>r.method==="POST"&&!r.url.endsWith("/login")).length,1);
  }finally{await ui.close();}
 });
+
+test('material publication stays blocked after an uncertain edit even when reconciliation reads the applied body',async()=>{
+ for(const mode of ['uncertain','confirmed','rejected']){
+  let item={...material,publishedAt:'2026-10-31T00:00:00Z' as string|null},publications=0;
+  const ui=await mount(view(),async r=>{
+   if(r.method==='PATCH'){
+    if(mode==='rejected')return Response.json({},{status:422});
+    item={...item,...await r.clone().json()};
+    if(mode==='uncertain')throw new Error('response lost after commit');
+    return Response.json(item);
+   }
+   if(r.method==='POST'){publications++;item={...item,publishedAt:null};return Response.json(item);}
+   return Response.json(r.url.endsWith('/materials')?{items:[item]}:r.url.endsWith('/modules')?{items:[unit]}:r.url.endsWith(item.id)?item:course);
+  },'teacher');
+  try{
+   await ui.click('Unidad 1');await ui.submit('form[aria-label="Editar material Lectura"]',{title:'Lectura',markdownBody:'Texto persistido'});
+   const button=ui.doc.querySelector<HTMLButtonElement>('button[aria-label="Ocultar material Lectura"]')!;
+   assert.equal(button.getAttribute('aria-disabled'),mode==='uncertain'?'true':'false');
+   if(mode==='uncertain'){
+    assert.equal(item.markdownBody,'Texto persistido');assert.match(ui.doc.body.textContent!,/este envío sigue bloqueado/);
+    assert.equal(ui.doc.querySelector<HTMLTextAreaElement>('form[aria-label="Editar material Lectura"] textarea')!.value,'Texto persistido');
+   }
+   await ui.settle(()=>button.click());assert.equal(publications,mode==='uncertain'?0:1);
+   assert.equal(ui.requests.filter(r=>r.method==='PATCH').length,1);
+  }finally{await ui.close();}
+ }
+});

@@ -3,6 +3,9 @@
   "private": true,
   "packageManager": "pnpm@9.15.9",
   "scripts": {
+    "test:e2e": "pnpm --dir e2e run test",
+    "test:e2e:smoke": "pnpm --dir e2e run test:smoke",
+    "test:e2e:harness": "pnpm --dir e2e run test:harness",
     "docs:api": "python3 -m http.server 8080 --bind 127.0.0.1 --directory dist/api-catalog",
     "docs:api:lint": "redocly lint docs/reference/openapi/openapi.yaml",
     "build": "pnpm --dir frontend build && pnpm --dir backend build",
@@ -11,7 +14,17 @@
     "dev:frontend": "pnpm --dir frontend dev",
     "dev:backend": "pnpm --dir backend start:dev",
     "docs:api:build": "pnpm --dir backend build && node scripts/api-catalog.mjs",
-    "docs:api:test": "pnpm --dir backend build && node --test scripts/api-catalog.test.mjs"
+    "docs:api:test": "pnpm --dir backend build && node --test scripts/api-catalog.test.mjs",
+    "test:e2e:f1": "pnpm --dir e2e run test:f1",
+    "test:e2e:f2": "pnpm --dir e2e run test:f2",
+    "test:e2e:f3": "pnpm --dir e2e run test:f3",
+    "test:e2e:all": "pnpm --dir e2e run test:extended --project=chromium --project=firefox --project=webkit",
+    "test:e2e:visual": "pnpm --dir e2e run test --headed",
+    "test:e2e:step": "pnpm --dir e2e run test --debug",
+    "test:e2e:f4": "pnpm --dir e2e run test:f4",
+    "test:e2e:f5": "pnpm --dir e2e run test:f5",
+    "test:e2e:f6": "pnpm --dir e2e run test:f6",
+    "test:e2e:stability": "pnpm --dir e2e run test:stability"
   },
   "devDependencies": {
     "@redocly/cli": "1.25.11",

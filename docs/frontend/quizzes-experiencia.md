@@ -2,6 +2,7 @@
 
 Fecha: 2026-10-28. Rama: `feat/quizzes-experiencia-usuario`.
 Alcance: listado, creación, detalle, autoría y presentación de publicación.
+La [continuación de intentos](intentos-experiencia.md) cubre rendición y revisión.
 Continúa la misión `20261021-141351_frontend-autoria-quizzes` (CU-07,
 RF17–18/25–27), con acceso a rendición existente (CU-08/09).
 
