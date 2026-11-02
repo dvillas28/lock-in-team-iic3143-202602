@@ -1,6 +1,6 @@
 # Métricas del tablero
 
-Snapshots: 22 (2026-10-11 a 2026-11-01).
+Snapshots: 23 (2026-10-11 a 2026-11-02).
 
 ## Avance
 
@@ -13,10 +13,12 @@ Snapshots: 22 (2026-10-11 a 2026-11-01).
 
 | Métrica | n | Mediana | Promedio | Máximo |
 | --- | --- | --- | --- | --- |
-| Lead time (creada → Done) | 96 | 1.9 | 5.2 | 27.0 |
-| Cycle time (In progress → Done) | 23 | 4.6 | 4.7 | 15.0 |
+| Lead time (creada → Done) | 70 | 3.3 | 5.5 | 23.0 |
+| Cycle time (In progress → Done) | 21 | 3.9 | 3.8 | 5.9 |
 
 El cycle time solo cuenta tarjetas que algún snapshot vio en In progress. Los drafts que ya estaban en Done en su primer snapshot no tienen fecha de término y quedan fuera.
+
+Tarjetas conciliadas o registradas después de hechas (26): cuentan en el avance, pero no en lead ni cycle time.
 
 ## Por semana
 
