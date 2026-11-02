@@ -14,5 +14,5 @@ export const tenants = ["uc","utfsm"];
 export const staffReview={...graded,scorePercent:80,grade:5.5};
 export const teacherReview={...staffReview,answers:answers.map(a=>({...a,isCorrect:true,pointsAwarded:2}))};
 export function reply(r:Request, value:unknown=attempt) {
- return Response.json(r.url.includes("/quiz-attempts/")?value:r.url.endsWith("/sections")?{items:[section,otherSection]}:r.url.endsWith("/quizzes")?{items:[quiz]}:r.url.includes("/quizzes/")?quiz:course);
+ return Response.json(r.url.endsWith("/questions")?quiz:r.url.includes("/my-attempts")?{items:[],hasMore:false,nextCursor:null,availability:{canStart:true,reason:null,remainingAttempts:null,activeAttemptId:null}}:r.url.includes("/quiz-attempts/")?value:r.url.endsWith("/sections")?{items:[section,otherSection]}:r.url.endsWith("/quizzes")?{items:[quiz]}:r.url.includes("/quizzes/")?quiz:course);
 }

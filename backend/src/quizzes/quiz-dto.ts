@@ -6,8 +6,8 @@ export const quizColumns=`q.*,to_char(q.opens_at AT TIME ZONE 'UTC','YYYY-MM-DD"
 export function summaryDto(q:QuizRow) {
  return {id:q.id,courseId:q.course_id,sectionId:q.section_id,title:q.title,instructions:q.instructions,opensAt:q.opens_at,closesAt:q.closes_at,maxAttempts:q.max_attempts,status:q.published_at===null?"draft" as const:"published" as const,publishedAt:q.published_at};
 }
-export function studentDto(q:QuizRow) {
- return {...summaryDto(q),questions:[...q.questions].sort((a,b)=>a.position-b.position).map(p=>({
+export function studentDto(q:QuizRow,includeQuestions=true) {
+ return {...summaryDto(q),questions:(includeQuestions?[...q.questions]:[]).sort((a,b)=>a.position-b.position).map(p=>({
   id:p.id,prompt:p.prompt,position:p.position,points:p.points,alternatives:p.alternatives.map(a=>({id:a.id,text:a.text})),
  }))};
 }

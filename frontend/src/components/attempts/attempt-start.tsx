@@ -2,31 +2,72 @@
 import { useTransientFeedback } from "../use-feedback.ts";
 import Link from "next/link";
 import {useId,useState} from "react";
+import {Play, RotateCcw} from "lucide-react";
 import type {Session} from "../../lib/auth/session.ts";
 import type {CurrentUser} from "../../lib/auth/validation.ts";
 import type {Course,Section} from "../../lib/courses/validation.ts";
-import {isId} from "../../lib/courses/validation.ts";
 import type {SafeQuiz} from "../../lib/quizzes/validation.ts";
+import {listMyQuizAttempts, type MyAttemptPage} from "../../lib/api/attempts.ts";
 import {startSections} from "../../lib/attempts/capabilities.ts";
 import {useAttemptOperations} from "./use-attempt-operations.ts";
-export function KnownAttemptLink(){
- const [id,setId]=useState(""),errorId=useId(),normalized=id.trim(),invalid=!!normalized&&!isId(normalized);
- return <details className="academic-disclosure card"><summary>Reanudar intento conocido</summary><section className="panel stack"><p className="hint">Si conservas el identificador de tu intento, puedes volver a abrirlo aquí.</p><label className="field-label">ID del intento<input className="field" value={id} onChange={e=>setId(e.target.value)} autoComplete="off" aria-invalid={invalid || undefined} aria-describedby={invalid ? errorId : undefined}/></label>
- {invalid && <p id={errorId} className="hint">Ingresa el identificador completo del intento, con sus guiones.</p>}
- {isId(normalized)&&<Link className="btn btn-ghost" href={`/attempts/${normalized}`}>Abrir intento conocido</Link>}</section></details>;
+import {useResource} from "../courses/use-resource.ts";
+import {ErrorState} from "../route-states.tsx";
+import {AttemptStatus} from "./attempt-facts.tsx";
+import {quizDate} from "../quizzes/quiz-facts.tsx";
+const reasons: Record<NonNullable<MyAttemptPage['availability']['reason']>, string> = {
+ unpublished: "El quiz todavía no está publicado.",
+ gradesPublished: "Las notas de este quiz ya están publicadas. No se admiten nuevos intentos.",
+ activeAttempt: "Tienes un intento en progreso. Continúalo antes de iniciar otro.",
+ notOpen: "El quiz todavía no abre. Revisa la fecha de apertura.",
+ closed: "El plazo para rendir este quiz terminó.",
+ limitReached: "Ya utilizaste todos los intentos permitidos.",
+};
+export function AttemptStart(props:{session:Session;slug:string;user:CurrentUser;course:Course;quiz:SafeQuiz;sections:Section[]}) {
+ const destinations=startSections(props.user,props.course,props.quiz,props.sections);
+ return destinations.length ? <StudentAttempts {...props} destinations={destinations}/> : null;
 }
-export function AttemptStart({session,slug,user,course,quiz,sections}:{session:Session;slug:string;user:CurrentUser;course:Course;quiz:SafeQuiz;sections:Section[]}){
- const destinations=startSections(user,course,quiz,sections),[sectionId,setSectionId]=useState(destinations.length===1?destinations[0].id:"");
+function StudentAttempts({session,slug,user,course,quiz,sections,destinations}:{session:Session;slug:string;user:CurrentUser;course:Course;quiz:SafeQuiz;sections:Section[];destinations:Section[]}) {
+ const titleId=useId(), [sectionId,setSectionId]=useState(destinations.length===1?destinations[0].id:"");
+ const [cursor,setCursor]=useState<string>(), [pages,setPages]=useState<(string|undefined)[]>([]);
  const {ops,state}=useAttemptOperations(session,slug,user,course,quiz);
+ const history=useResource(session,`${session.getSnapshot().generation}:${slug}:${user.id}:${course.id}:${quiz.id}:mine:${cursor??""}`,
+  c=>listMyQuizAttempts(c,slug,quiz.id,user.id,{cursor}),false);
  const message=useTransientFeedback(state.message,state.phase==="saved"&&!state.pending,state);
- if(!destinations.length)return null;
+ const availability=history.data?.availability;
  const locked=state.busy||!!state.pending||!!state.attempt;
- return <section className="card panel stack quiz-attempt-start"><h2 className="serif">Rendir quiz</h2>
- <p className="hint">Selecciona tu sección para comenzar. Al iniciar se comprobarán el horario y tus intentos disponibles. Conserva el enlace del intento para poder retomarlo.</p>
- <label className="field-label">Sección para este intento<select className="field" value={sectionId} disabled={locked||state.phase!=="pristine"} onChange={e=>setSectionId(e.target.value)}><option value="">Selecciona una sección</option>{destinations.map(s=><option key={s.id} value={s.id}>{s.code}</option>)}</select></label>
- <button type="button" className="btn btn-primary" disabled={locked||!sectionId} onClick={()=>void ops.start(sectionId)}>Iniciar intento</button>
- {message && <p role="status" aria-live="polite">{message}</p>}
- {state.pending==="start"&&<button type="button" className="btn btn-ghost" disabled={state.busy} onClick={()=>void ops.replay()}>Recuperar inicio con la misma clave</button>}
- {(state.attempt||state.knownId)&&<Link href={`/attempts/${state.attempt?.id??state.knownId}`}>Abrir intento</Link>}
+ const activeId=state.attempt?.status==="inProgress"?state.attempt.id:availability?.activeAttemptId;
+ async function start(){await ops.start(sectionId);await history.reload();}
+ return <section className="card panel stack quiz-attempt-start" aria-labelledby={titleId}>
+  <div className="quiz-section-heading"><h2 className="serif" id={titleId}>Mis intentos</h2>
+   <button type="button" className="btn btn-ghost" disabled={history.refreshing||state.busy} onClick={()=>void history.reload()}><RotateCcw size={16} aria-hidden="true"/>Actualizar intentos</button>
+  </div>
+  <p className="hint">Revisa tus intentos anteriores o continúa el que dejaste pendiente.</p>
+  {history.error && <ErrorState feedback={history.error} onRetry={()=>void history.reload()}/>}
+  {history.refreshing && <p role="status">Consultando tus intentos…</p>}
+  {message && <p role="status" aria-live="polite">{message}</p>}
+  {state.pending==="start" && <button type="button" className="btn btn-ghost" disabled={state.busy} onClick={()=>void ops.replay()}>Recuperar intento</button>}
+  {(activeId||state.knownId) && <Link className="btn btn-primary" href={`/attempts/${activeId??state.knownId}`}><Play size={16} aria-hidden="true"/>{activeId?"Continuar intento":"Ver intento"}</Link>}
+  {availability && <>
+   <p className="hint tnum">{availability.remainingAttempts===null?"Intentos ilimitados":`Intentos nuevos disponibles: ${availability.remainingAttempts}`}</p>
+   {availability.reason && <p className="notice" role="status">{reasons[availability.reason]}</p>}
+   {availability.canStart && !state.attempt && <div className="stack">
+    {destinations.length>1 && <label className="field-label">Sección para este intento<select className="field" value={sectionId} disabled={locked||state.phase!=="pristine"} onChange={e=>setSectionId(e.target.value)}><option value="">Selecciona una sección</option>{destinations.map(s=><option key={s.id} value={s.id}>{s.code}</option>)}</select></label>}
+    <button type="button" className="btn btn-primary" disabled={locked||!sectionId} onClick={()=>void start()}>Iniciar nuevo intento</button>
+   </div>}
+  </>}
+  {history.data && <>
+   {!history.data.items.length ? <p className="notice">Todavía no tienes intentos registrados.</p> : <ul className="stack student-attempt-list" aria-label="Historial de mis intentos">{history.data.items.map(a=><li className="student-attempt-row" key={a.id}>
+    <div className="stack"><div className="quiz-chips"><h3 className="serif tnum">Intento {a.attemptNumber}</h3><AttemptStatus status={a.status}/></div>
+     <p className="hint tnum">Inicio: {quizDate(a.startedAt)} · Sección {sections.find(s=>s.id===a.sectionId)?.code??"anterior"}</p>
+     {a.submittedAt && <p className="hint tnum">Envío: {quizDate(a.submittedAt)}</p>}
+     {a.cancelledAt && <p className="hint tnum">Cancelación: {quizDate(a.cancelledAt)}</p>}
+    </div>
+    <Link className="btn btn-ghost" href={`/attempts/${a.id}`} aria-label={`${a.status==="inProgress"?"Continuar":"Ver detalle del"} intento ${a.attemptNumber}`}>{a.status==="inProgress"?"Continuar":"Ver detalle"}</Link>
+   </li>)}</ul>}
+   {(pages.length>0||history.data.hasMore) && <nav className="academic-footer" aria-label="Páginas de mis intentos"><span className="hint tnum" role="status">Página {pages.length+1}</span><div className="actions">
+    <button type="button" className="btn btn-ghost" disabled={!pages.length} onClick={()=>{setCursor(pages.at(-1));setPages(p=>p.slice(0,-1));}}>Anterior</button>
+    <button type="button" className="btn btn-ghost" disabled={!history.data.hasMore} onClick={()=>{setPages(p=>[...p,cursor]);setCursor(history.data!.nextCursor!);}}>Siguiente</button>
+   </div></nav>}
+  </>}
  </section>;
 }

@@ -1,0 +1,36 @@
+/api/v1/institution/{institutionSlug}/quizzes/{quizId}/my-attempts:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/QuizId'
+  get:
+    tags: [Attempts]
+    operationId: listMyQuizAttempts
+    summary: Consultar mis intentos y disponibilidad de un nuevo intento
+    description: |
+      Solo estudiantes elegibles con matrícula activa en el destino del quiz.
+      El usuario se deriva de la sesión; no admite studentId ni sectionId.
+      Devuelve únicamente intentos propios en la institución solicitada, del más
+      reciente al más antiguo, sin notas, puntajes ni corrección de respuestas.
+      El cursor está ligado a institución, usuario y quiz. Cada página revalida
+      los permisos actuales; acceso docente a pauta impide usar esta consulta.
+      Disponibilidad y restante consideran todo el historial, no solo la página.
+      La consulta no escribe ni cambia registros académicos. El inicio mantiene
+      sus validaciones transaccionales y puede rechazar cambios concurrentes.
+    parameters:
+      - $ref: '../components/parameters.yaml#/Cursor'
+      - $ref: '../components/parameters.yaml#/Limit'
+    responses:
+      '200':
+        description: Historial propio y disponibilidad actual.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/my-attempts.yaml#/MyQuizAttempts'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'

@@ -85,7 +85,10 @@
       - Quizzes
     operationId: getQuiz
     summary: Consultar la vista segura de un quiz
-    description: Esta representación nunca contiene `isCorrect` ni otra pauta de respuestas.
+    description: |
+      Esta representación nunca contiene `isCorrect` ni otra pauta de respuestas.
+      Para estudiantes elegibles devuelve questions vacío; las preguntas solo se
+      consultan mediante el endpoint de un intento propio en progreso.
     responses:
       '200':
         description: Quiz visible sin pauta.

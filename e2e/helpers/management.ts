@@ -15,9 +15,14 @@ export async function sections(page:Page,e:Environment,section=e.data.sections.S
 export async function fillCourse(page:Page,input={code:'E2E-NEW',name:'Curso E2E nuevo',term:'2026-2'},edit=false) {
  await disclose(page,edit?'Configurar curso':'Crear curso');
  const form=page.getByRole('form',{name:edit?'Configurar curso':'Crear curso',exact:true});
- for(const [label,value] of [['Código',input.code],['Nombre',input.name],['Período',input.term]])await form.getByLabel(label,{exact:true}).fill(value);
- if(!edit){await form.getByLabel('Código de sección inicial',{exact:true}).fill('1');await form.getByLabel('Capacidad inicial (vacío: sin límite)',{exact:true}).fill('0');}
+ for(const [label,value] of [['Código',input.code],['Nombre',input.name]])await form.getByLabel(label,{exact:true}).fill(value);
+ await period(form,input.term);
+ if(!edit){await form.getByLabel('Código de sección inicial',{exact:true}).fill('1');await form.getByLabel('Capacidad inicial',{exact:true}).fill('30');}
  return form;
+}
+export async function period(form:Locator,term:string) {
+ const [year,semester]=term.split('-');
+ await form.getByLabel('Año',{exact:true}).selectOption(year);await form.getByLabel('Semestre',{exact:true}).selectOption(semester);
 }
 export async function search(page:Page,query:string) {
  await disclose(page,'Asignar participante');const form=page.getByRole('form',{name:'Buscar participantes',exact:true});

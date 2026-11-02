@@ -107,7 +107,7 @@ export class Environment {
   answers(correct: boolean[] = [true,true]) {return this.data.questions.filter((_,i)=>i<correct.length).map((q,i)=>({questionId:q.id,alternativeId:correct[i] ? 'a':'b'}));}
   async graded(actor = 'ST1', correct: boolean[] = [true,false], quiz = this.data.quizzes.Q1, section = this.data.sections.S1) {
     const api = await this.api(actor), a = await this.attempt(actor,quiz,section);
-    const questions = status(await api.get(`quizzes/${quiz}`),200).body.questions;
+    const questions = status(await api.get(`quiz-attempts/${a.id}/questions`),200).body.questions;
     const answers = questions.slice(0,correct.length).map((q: {id:string},i: number)=>({questionId:q.id,alternativeId:correct[i] ? 'a':'b'}));
     status(await api.put(`quiz-attempts/${a.id}/answers`,{answers}),200);
     const key = this.key(); status(await api.post(`quiz-attempts/${a.id}/submit`,undefined,key),200);

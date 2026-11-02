@@ -6,10 +6,10 @@ import {QuizDetail} from "../src/components/quizzes/quiz-detail.tsx";
 import {QuizList} from "../src/components/quizzes/quiz-list.tsx";
 import {mount,reply,attempt,quiz,course,answers,receipt,cancelled,graded} from "./fixtures/attempts.ts";
 const view=()=>h(AttemptDetail,{attemptId:attempt.id});
-test("US1 start link GET current; known link only for UUID; no pauta",async()=>{
+test("US1 start link GET current; history replaces manual attempt codes; no pauta",async()=>{
  const ui=await mount(h(QuizDetail,{courseId:course.id,quizId:quiz.id}),r=>r.method==="POST"?Response.json(attempt,{status:201}):reply(r),"student");
- try{await ui.click("Iniciar intento");assert.equal(ui.doc.querySelector('a[href^="/attempts/"]')?.getAttribute("href"),`/attempts/${attempt.id}`);assert.ok(ui.requests.some(r=>r.url.endsWith(`/quiz-attempts/${attempt.id}`)));
- await ui.render(h(QuizList,{courseId:course.id}));assert.match(ui.doc.body.textContent!,/Reanudar intento conocido/);
+ try{await ui.click("Iniciar nuevo intento");assert.equal(ui.doc.querySelector('a[href^="/attempts/"]')?.getAttribute("href"),`/attempts/${attempt.id}`);assert.ok(ui.requests.some(r=>r.url.endsWith(`/quiz-attempts/${attempt.id}`)));
+ await ui.render(h(QuizList,{courseId:course.id}));assert.match(ui.doc.body.textContent!,/consultar tus intentos/);assert.equal(ui.doc.querySelector('input[autocomplete="off"]'),null);
  }finally{await ui.close();}
 });
 test("US1 save, dirty announcement, explicit clearing and empty submission confirmation",async()=>{

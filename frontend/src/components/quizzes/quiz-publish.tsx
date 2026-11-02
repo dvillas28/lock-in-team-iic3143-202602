@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
+import { Send } from "lucide-react";
 import type { Authoring } from "../../lib/quizzes/validation.ts";
 import type { Session } from "../../lib/auth/session.ts";
 import { ApiResponseError } from "../../lib/api/errors.ts";
@@ -9,7 +10,7 @@ import { getQuizAuthoringView, publishQuiz, listCourseGradeItems } from "../../l
 import { useMutation } from "../courses/use-mutation.ts";
 import { useResource } from "../courses/use-resource.ts";
 import { QuizFacts, quizDate } from "./quiz-facts.tsx";
-export function QuizPublish({session,slug,quiz,destination,disabled,onSaved,onLock}: {session:Session;slug:string;quiz:Authoring;destination:string;disabled:boolean;onSaved:(q:Authoring)=>void;onLock:(locked:boolean)=>void}) {
+export function QuizPublish({session,slug,quiz,destination,disabled,onSaved,onLock,status,saveAction}: {session:Session;slug:string;quiz:Authoring;destination:string;disabled:boolean;onSaved:(q:Authoring)=>void;onLock:(locked:boolean)=>void;status:ReactNode;saveAction:ReactNode}) {
   const mutation=useMutation(session), dialog=useRef<HTMLDialogElement>(null),cancel=useRef<HTMLButtonElement>(null),trigger=useRef<HTMLButtonElement>(null),feedback=useRef<HTMLParagraphElement>(null), titleId=useId();
   useEffect(()=>{onLock(mutation.busy || !!mutation.uncertain);},[mutation.busy,mutation.uncertain,onLock]);
   useEffect(()=>{if(mutation.message && !mutation.confirmed)feedback.current?.focus();},[mutation.message,mutation.confirmed]);
@@ -37,14 +38,19 @@ export function QuizPublish({session,slug,quiz,destination,disabled,onSaved,onLo
       return "Publicación confirmada.";
     },reconcile);
   }
-  if(quiz.status === "published")return <PublishedItem session={session} slug={slug} quiz={quiz}/>;
-  return <section className="card panel stack quiz-publication"><h2 className="serif">Publicación</h2>
+  if(quiz.status === "published")return <><div className="card quiz-save-bar" role="region" aria-label="Estado del quiz">{status}</div><PublishedItem session={session} slug={slug} quiz={quiz}/></>;
+  return <>
+    <div className="card quiz-save-bar" role="region" aria-label="Guardar y publicar quiz">{status}<div className="actions">
+      {saveAction}
+      <button ref={trigger} type="button" className="btn btn-primary" aria-describedby={titleId+"-help"} disabled={disabled || mutation.busy || mutation.uncertain || !quiz.questions.length} onClick={()=>{dialog.current?.showModal();cancel.current?.focus();}}><Send size={16} aria-hidden="true"/>Publicar quiz</button>
+    </div></div>
+    <div className="stack quiz-publication" id={titleId+"-help"}>
     <p className="hint">Publica cuando hayas revisado las preguntas, la respuesta correcta y los destinatarios. Se publicará la última versión guardada; después no podrás editarla.</p>
     {!quiz.questions.length && <p className="notice">Agrega y guarda al menos una pregunta antes de publicar.</p>}
     {disabled && <p>Guarda los cambios y resuelve cualquier operación pendiente antes de publicar.</p>}
-    <button ref={trigger} type="button" className="btn btn-ghost" disabled={disabled || mutation.busy || mutation.uncertain || !quiz.questions.length} onClick={()=>{dialog.current?.showModal();cancel.current?.focus();}}>Publicar quiz</button>
     {mutation.message && <p role="status" ref={feedback} tabIndex={-1}>{mutation.message}{mutation.message?.startsWith("Conflicto") && " El curso podría estar congelado o el quiz haber cambiado. No se confirmó publicación; guardar borradores sigue permitido."}</p>}
     {mutation.uncertain && <button type="button" className="btn btn-ghost" onClick={()=>void consult()}>Consultar estado de publicación</button>}
+    </div>
     <dialog ref={dialog} className="modal native-dialog panel" aria-labelledby={titleId} onKeyDown={event=>{
       if(event.key!=="Tab")return;
       const first=cancel.current,last=event.currentTarget.querySelector<HTMLButtonElement>("button:last-child");
@@ -58,7 +64,7 @@ export function QuizPublish({session,slug,quiz,destination,disabled,onSaved,onLo
         <div className="actions"><button ref={cancel} type="button" className="btn btn-ghost" onClick={close}>Volver</button><button type="button" className="btn btn-primary" onClick={()=>void confirm()}>Confirmar publicación</button></div>
       </div>
     </dialog>
-  </section>;
+  </>;
 }
 function PublishedItem({session,slug,quiz}:{session:Session;slug:string;quiz:Authoring}) {
   const result=useResource(session,`${session.getSnapshot().generation}:${slug}:${quiz.courseId}:${quiz.id}:${quiz.publishedAt}:grade-item`,async c=>{

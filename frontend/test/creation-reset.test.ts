@@ -13,6 +13,7 @@ import { mount } from './fixtures/course-ui.ts';
 import { course, section, otherSection, person, enrollment, deferred } from './fixtures/courses.ts';
 import { unit, material } from './fixtures/content.ts';
 import { emptyDraft } from './fixtures/quizzes.ts';
+import { academicYears } from '../src/lib/courses/creation.ts';
 
 type Kind = 'module' | 'material' | 'course' | 'section' | 'enrollment' | 'quiz';
 function FormView({ kind, refresh = true, search = false, edit = false }: { kind: Kind; refresh?: boolean; search?: boolean; edit?: boolean }) {
@@ -48,7 +49,7 @@ for (const entry of cases) test(`${entry.label} clears confirmed input and repor
     const form = ui.doc.querySelector<HTMLFormElement>(selector)!;
     for (const name of Object.keys(entry.values)) {
       const control = form.elements.namedItem(name) as HTMLInputElement;
-      assert.equal(control.value, name === 'role' ? 'teacher' : '', name);
+      assert.equal(control.value, name === 'role' ? 'teacher' : entry.kind === 'course' && name === 'term' ? `${academicYears()[0]}-1` : '', name);
     }
     assert.equal(ui.requests.filter(r => r.method === 'POST' && !r.url.endsWith('/login')).length, 1);
     if (entry.kind !== 'course') assert.match(ui.doc.querySelector('[role="status"]')!.textContent!, new RegExp(entry.message.replace('.', '\\.')));

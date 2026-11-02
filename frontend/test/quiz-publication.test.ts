@@ -42,3 +42,26 @@ test("dirty local state blocks publishing saved older version",async()=>{
  assert.match(ui.doc.body.textContent!,/Guarda los cambios/);
  }finally{await ui.close();}
 });
+
+test('top toolbar publishes saved content and submits the associated editor form',async()=>{
+ let quiz=draft;
+ const ui=await mount(view(),async r=>{
+  if(r.method==='PATCH'){quiz={...quiz,...await r.clone().json()};return Response.json(quiz);}
+  return reply(r,quiz);
+ },'teacher');
+ try{
+  const bar=ui.doc.querySelector('.quiz-save-bar')!;
+  const form=ui.doc.querySelector('form')!;
+  const publish=Array.from(bar.querySelectorAll('button')).find(b=>b.textContent==='Publicar quiz')!;
+  const save=Array.from(bar.querySelectorAll('button')).find(b=>b.textContent==='Guardar borrador')!;
+  assert.ok(bar.compareDocumentPosition(form)&ui.dom.window.Node.DOCUMENT_POSITION_FOLLOWING);
+  assert.ok(publish.classList.contains('btn-primary'));
+  assert.equal(save.form,form);
+  await ui.settle(()=>{const title=ui.doc.querySelector<HTMLInputElement>('[name="title"]')!;title.value='Título revisado';title.dispatchEvent(new ui.dom.window.Event('input',{bubbles:true}));});
+  assert.equal(publish.disabled,true);
+  await ui.click('Guardar borrador');
+  assert.equal(quiz.title,'Título revisado');
+  assert.equal(publish.disabled,false);
+  assert.equal(ui.requests.filter(r=>r.method==='PATCH').length,1);
+ }finally{await ui.close();}
+});

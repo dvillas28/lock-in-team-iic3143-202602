@@ -1,6 +1,9 @@
 import type { ApiClient } from "./client.ts";
 import { ApiResponseError } from "./errors.ts";
-import { path } from "../courses/validation.ts";
+import { path, isId } from "../courses/validation.ts";
+import { isRecord } from "../auth/validation.ts";
+import { quizDto } from "../quizzes/validation.ts";
+import type { operations } from "./schema";
 import type { SafeQuiz, Summary } from "../quizzes/validation.ts";
 import { attemptDto, answersInput, sameAnswers, submissionReceipt, type Attempt, type Answer, type Expected } from "../attempts/validation.ts";
 import { reviewDto } from '../attempts/review.ts';
@@ -9,6 +12,28 @@ import { attemptCapabilities } from '../attempts/capabilities.ts';
 import { gradebookCapabilities } from '../gradebook/capabilities.ts';
 import type { CurrentUser } from '../auth/validation.ts';
 import type { Course } from '../courses/validation.ts';
+export type MyAttemptPage = operations['listMyQuizAttempts']['responses'][200]['content']['application/json'];
+export async function getAttemptQuestions(c: ApiClient, slug: string, attempt: Attempt, courseId: string): Promise<SafeQuiz> {
+    if (attempt.status !== 'inProgress') throw new TypeError('El intento ya finalizó.');
+    const r = await c.GET('/api/v1/institution/{institutionSlug}/quiz-attempts/{attemptId}/questions', {
+        params: {path: {...path(slug, {attemptId: attempt.id}), attemptId: attempt.id}},
+    });
+    return quizDto(r.data, courseId, attempt.quizId);
+}
+export async function listMyQuizAttempts(c: ApiClient, slug: string, quizId: string, studentId: string, q: {cursor?: string; limit?: number} = {}): Promise<MyAttemptPage> {
+    path(slug, {quizId, studentId});
+    const r = await c.GET('/api/v1/institution/{institutionSlug}/quizzes/{quizId}/my-attempts', {
+        params: {path: {institutionSlug: slug, quizId}, query: queryPage(q.cursor, q.limit)},
+    });
+    const p = pageInfo(r.data), items = p.items.map(v => attemptDto(v, {quizId, studentId}));
+    const a = isRecord(r.data) ? r.data.availability : undefined;
+    if (!unique(items.map(x => x.id)) || !isRecord(a) || Object.keys(a).some(k => !['canStart','reason','remainingAttempts','activeAttemptId'].includes(k)) ||
+        typeof a.canStart !== 'boolean' || ![null,'unpublished','gradesPublished','activeAttempt','notOpen','closed','limitReached'].some(reason => reason === a.reason) ||
+        a.canStart !== (a.reason === null) || (a.remainingAttempts !== null && (!Number.isSafeInteger(a.remainingAttempts) || (a.remainingAttempts as number) < 0)) ||
+        (a.activeAttemptId !== null && !isId(a.activeAttemptId)) || (a.reason === 'activeAttempt' && a.activeAttemptId === null) ||
+        (a.canStart && (a.activeAttemptId !== null || a.remainingAttempts === 0))) throw new ApiResponseError();
+    return {...p, items, availability: a as MyAttemptPage['availability']};
+}
 function review(v: unknown, user: CurrentUser, course: Course, quiz: Summary, list = false) {
     if (quiz.courseId !== course.id) {
         throw new ApiResponseError();

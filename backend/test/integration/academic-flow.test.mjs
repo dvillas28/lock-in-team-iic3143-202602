@@ -22,13 +22,14 @@ test('complete HTTP academic workflow in UC and UTFSM, publication and own read 
   assert.equal((await request(app,teacher,`${slug}/quizzes/${quiz.body.id}/publish`,'POST')).status,200);
   const items=await request(app,teacher,`${slug}/courses/${courseId}/grade-items`),item=items.body.items[0].id;
   assert.equal((await request(app,teacher,`${slug}/courses/${courseId}/gradebook/weights`,'PUT',{items:[{gradeItemId:item,weightPercent:100}]})).status,200);
-  const safe=await request(app,student,`${slug}/quizzes/${quiz.body.id}`);assert.equal(safe.status,200);assert.ok(!('isCorrect'in safe.body.questions[0].alternatives[0]));
+  const safe=await request(app,student,`${slug}/quizzes/${quiz.body.id}`);assert.equal(safe.status,200);assert.deepEqual(safe.body.questions,[]);
   const startPath=`${slug}/sections/${section}/quizzes/${quiz.body.id}/attempts`;
   const abandoned=await request(app,student,startPath,'POST',{},'abandoned');assert.equal(abandoned.status,201);
   assert.equal((await request(app,student,`${slug}/quiz-attempts/${abandoned.body.id}/cancel`,'POST')).status,204);
   const attempt=await request(app,student,startPath,'POST',{},'attempt');assert.equal(attempt.status,201);
   const path=`${slug}/quiz-attempts/${attempt.body.id}`;
-  assert.equal((await request(app,student,path+'/answers','PUT',{answers:[{questionId:safe.body.questions[0].id,alternativeId:'a'}]})).status,200);
+  const asked=await request(app,student,path+'/questions');assert.equal(asked.status,200);assert.ok(!('isCorrect'in asked.body.questions[0].alternatives[0]));
+  assert.equal((await request(app,student,path+'/answers','PUT',{answers:[{questionId:asked.body.questions[0].id,alternativeId:'a'}]})).status,200);
   assert.equal((await request(app,student,path+'/submit','POST',{},'submission')).status,200);
   const own=`${slug}/courses/${courseId}/my-grades`;assert.deepEqual((await request(app,student,own)).body.items,[]);
   const pub=`${slug}/courses/${courseId}/gradebook/publications`,body={gradeItemIds:[item],sectionIds:[section],studentIds:[studentId]};

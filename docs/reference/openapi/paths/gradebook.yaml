@@ -39,7 +39,8 @@
     operationId: updateGradebookWeights
     summary: Reemplazar ponderaciones del curso de forma atómica
     description: |
-      Teacher activo más is_admin institucional y createdBy=actor. Colección completa, única, pesos
+      Cualquier teacher activo del curso, sin exigir is_admin ni ownership. Ponderaciones comunes
+      a todas las secciones; esto no amplía acceso a notas o participantes. Colección completa, única, pesos
       de hasta dos decimales, suma exacta 100. Primera publicación congela pesos e ítems; 409
       GRADE_WEIGHTS_LOCKED incluso en no-op. Antes de freeze no-op no emite evento.
     requestBody:
