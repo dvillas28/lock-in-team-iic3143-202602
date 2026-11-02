@@ -1,5 +1,6 @@
 % E3-24: métricas del tablero. Datos: snapshots diarios de la rama metrics
-% (11/10 a 01/11) procesados con scripts/board-metrics.mjs --csv.
+% (11/10 a 01/11) procesados con scripts/board-metrics.mjs --csv. El 01/11 se
+% volvió a tomar tras cargar las horas reales.
 % Eje x: día de octubre; 32 = 01/11. El snapshot del 31/10 ya incluye la conciliación del 30/10.
 
 \begin{frame}{Burnup: horas estimadas}
@@ -8,13 +9,13 @@
 \begin{tikzpicture}
 \begin{axis}[academix, ymin=0, ymax=520, ylabel={horas}]
 \addplot[academixslate,thick,dashed,const plot] coordinates {
-  (11,457) (25,457) (26,461) (30,461) (31,464) (32,466)};
+  (11,457) (25,457) (26,461) (30,461) (31,464) (32,465)};
 \addlegendentry{alcance}
 \addplot[academixnavy,very thick,const plot,mark=*,mark size=1pt] coordinates {
   (11,25) (12,25) (13,25) (14,25) (15,25) (16,29) (17,26) (18,26) (19,26) (20,28)
   (21,179) (22,185) (23,185) (24,185) (25,185) (26,207) (27,255) (28,255) (29,255) (30,255)};
 \addlegendentry{terminado}
-\addplot[academixamber,very thick,const plot,mark=*,mark size=1.5pt] coordinates {(30,255) (31,357) (32,367)};
+\addplot[academixamber,very thick,const plot,mark=*,mark size=1.5pt] coordinates {(30,255) (31,357) (32,386)};
 \addlegendentry{tras conciliación}
 \node[font=\sffamily\tiny,academixnavy,anchor=west,align=left] at (axis cs:21.4,100) {21/10: +151 h\\en un día};
 \node[font=\sffamily\tiny,academixamber,anchor=east,align=right] at (axis cs:30.7,330) {31/10: +102 h\\ya integradas};
@@ -23,46 +24,32 @@
 \end{column}
 \begin{column}{0.31\textwidth}
 \vspace{0.1cm}
-\kpi{academixnavy}{79\,\%}{367 de 466 h}\\[0.2cm]
-\kpi{academixteal}{72\,\%}{89 de 123 tarjetas}\\[0.2cm]
-\scriptsize Los saltos no son días productivos: el tablero se actualizó por lotes.
+\kpi{academixnavy}{83\,\%}{386 de 465 h}\\[0.2cm]
+\kpi{academixteal}{78\,\%}{96 de 123 tarjetas}\\[0.2cm]
+\scriptsize Los saltos del 21/10 y del 31/10 corresponden a actualizaciones del tablero por lotes.
 \end{column}
 \end{columns}
 \end{frame}
 
 \begin{frame}{Flujo acumulado (CFD)}
-\begin{columns}[T,onlytextwidth]
-\begin{column}{0.66\textwidth}
+\centering
 \begin{tikzpicture}
-\begin{axis}[academix, ymin=0, ymax=130, ylabel={tarjetas}, stack plots=y,
+\begin{axis}[academix, width=0.85\linewidth, height=6cm, ymin=0, ymax=130, ylabel={tarjetas}, stack plots=y,
   area style, reverse legend]
 \addplot[fill=academixgreen!35,draw=academixgreen] coordinates {
   (11,11) (12,11) (13,11) (14,11) (15,11) (16,12) (17,11) (18,11) (19,11) (20,12)
-  (21,49) (22,50) (23,50) (24,50) (25,50) (26,55) (27,64) (28,64) (29,64) (30,64) (31,87) (32,89)} \closedcycle;
+  (21,49) (22,50) (23,50) (24,50) (25,50) (26,55) (27,64) (28,64) (29,64) (30,64) (31,87) (32,96)} \closedcycle;
 \addlegendentry{Done}
 \addplot[fill=academixamber!45,draw=academixamber] coordinates {
   (11,1) (12,1) (13,1) (14,1) (15,10) (16,11) (17,19) (18,20) (19,20) (20,20)
-  (21,4) (22,3) (23,3) (24,3) (25,3) (26,4) (27,2) (28,2) (29,2) (30,2) (31,0) (32,5)} \closedcycle;
+  (21,4) (22,3) (23,3) (24,3) (25,3) (26,4) (27,2) (28,2) (29,2) (30,2) (31,0) (32,0)} \closedcycle;
 \addlegendentry{In progress}
 \addplot[fill=academixblue!12,draw=academixblue!60] coordinates {
   (11,108) (12,108) (13,108) (14,108) (15,99) (16,97) (17,90) (18,89) (19,89) (20,88)
-  (21,67) (22,67) (23,67) (24,67) (25,67) (26,63) (27,57) (28,57) (29,57) (30,57) (31,37) (32,29)} \closedcycle;
+  (21,67) (22,67) (23,67) (24,67) (25,67) (26,63) (27,57) (28,57) (29,57) (30,57) (31,37) (32,27)} \closedcycle;
 \addlegendentry{Todo}
 \end{axis}
 \end{tikzpicture}
-\end{column}
-\begin{column}{0.31\textwidth}
-\begin{block}{Lectura}
-\scriptsize
-\begin{itemize}
-  \item 15–20/10: 20 tarjetas en curso a la vez.
-  \item 21/10: 37 pasan a Done juntas.
-  \item 22–30/10: casi nada en In progress; el trabajo avanzó sin mover el tablero.
-  \item 01/11: las 5 tarjetas de E3 en curso ya se ven.
-\end{itemize}
-\end{block}
-\end{column}
-\end{columns}
 \end{frame}
 
 \begin{frame}{Tiempos y estimado vs.\ real}
@@ -71,15 +58,15 @@
 \small
 \begin{tabularx}{\textwidth}{Yrrr}
 \toprule
-\textbf{Días} & \textbf{n} & \textbf{Mediana} & \textbf{Máx.} \\
+\textbf{En días} & \textbf{Tarjetas} & \textbf{Mediana} & \textbf{Máx.} \\
 \midrule
-Lead time & 63 & 4,4 & 23,0 \\
+Lead time & 70 & 3,3 & 23,0 \\
 Cycle time & 21 & 3,9 & 5,9 \\
 \bottomrule
 \end{tabularx}
 \vspace{0.25cm}
 
-\scriptsize Lead time: creada → Done. Cycle time: In progress → Done. Excluye 26 tarjetas conciliadas o registradas después de hechas: su fecha de Done es la de la conciliación, no la del trabajo.
+\scriptsize Tarjetas: cuántas entran al cálculo. Lead time: creada → Done. Cycle time: In progress → Done. Excluye 26 tarjetas conciliadas o registradas después de hechas: su fecha de Done es la de la conciliación, no la del trabajo.
 \end{column}
 \begin{column}{0.48\textwidth}
 \small
@@ -88,16 +75,16 @@ Cycle time & 21 & 3,9 & 5,9 \\
 \textbf{Semana} & \textbf{Est.} & \textbf{Real} & \textbf{Real/est.} \\
 \midrule
 1 & 37 & 25 & 0,68 \\
-2 & 15 & 14 & 0,93 \\
-3 & 28 & 23 & 0,82 \\
-4 & 9 & 9 & 1,00 \\
+2 & 37 & 26 & 0,70 \\
+3 & 130 & 45,6 & 0,35 \\
+4 & 33 & 22 & 0,67 \\
 \midrule
-\textbf{Total} & \textbf{89} & \textbf{71} & \textbf{0,80} \\
+\textbf{Total} & \textbf{237} & \textbf{118,6} & \textbf{0,50} \\
 \bottomrule
 \end{tabularx}
 \vspace{0.15cm}
 
-\scriptsize Solo 30 de 89 tarjetas Done tienen \texttt{Real (h)}. En ellas sobrestimamos cerca de un 20\,\%: 16 bajo lo estimado, 11 iguales y 3 sobre.
+\scriptsize 68 de 96 tarjetas Done tienen \texttt{Real (h)}. En ellas el real fue la mitad de lo estimado: 47 bajo lo estimado, 18 iguales y 3 sobre. Las 28 sin horas son casi todas funcionalidades de las semanas 5 y 6, registradas al conciliar.
 \end{column}
 \end{columns}
 \end{frame}

@@ -1,0 +1,57 @@
+% E3-26/27/28/32: plan hacia el MVP, prioridades, responsables y fechas. Propuesta para
+% validar con el equipo. Fuente: tarjetas abiertas del Project al 01/11 (27 tarjetas, 79 h).
+
+\begin{frame}{Plan hacia el MVP: responsables y fechas}
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{1.9cm}r>{\raggedright\arraybackslash}p{5.2cm}Y}
+\toprule
+\textbf{Semana} & \textbf{h} & \textbf{Foco y tarjetas} & \textbf{Responsables} \\
+\midrule
+5 · 02–08/11 & 14 & Renovar la base de Render (\#178); tests de material y quizzes (\#185); smoke test post-deploy (\#172); falsos positivos del bot (\#173) & \texttt{dvillas28}, \texttt{spmasabeu} (\#178); \texttt{FierroD} (\#185, \#173) \\
+6 · 09–15/11 & 15 & Tests de notas y publicación (\#194); bot en todas las PR (\#203); arquitectura final (\#204); feedback E1–E3 (\#205) & \texttt{FierroD}; \texttt{dvillas28} y \texttt{spmasabeu} (\#204); equipo (\#205) \\
+7 · 16–22/11 & 48 & E4: informe, ensayo, retro y riesgos; accesibilidad (\#210); release a \texttt{main} (\#211); material en archivos (P2, 21 h) & Equipo; \texttt{matiaraos}, \texttt{Jbcleon} (\#210); \texttt{dvillas28} (\#211); \texttt{spmasabeu}, \texttt{Jbcleon} (P2) \\
+\midrule
+\textbf{Total} & \textbf{77} & 26 tarjetas: P0 48 h, P1 8 h, P2 21 h & \\
+\bottomrule
+\end{tabularx}
+\vspace{0.2cm}
+
+\centering
+\softchip{academixamber}{academixsoftamber}{Nuevo en semana 5: bug crítico de SonarQube y 3 dependencias MEDIUM}
+\end{frame}
+
+\begin{frame}{Prioridades, medidas y compromiso para E4}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.48\textwidth}
+\begin{block}{En caso de atraso}
+\scriptsize
+\begin{enumerate}
+  \item \textbf{Sale primero:} material en archivos (P2, 21 h). Si el 15/11 no hay ADR de storage (\#215), queda fuera del MVP.
+  \item \textbf{Se reduce:} bot y smoke test (P1, 8 h).
+  \item \textbf{No se corta:} tests de aislamiento y permisos, base de Render, release y E4.
+\end{enumerate}
+\end{block}
+\begin{block}{Medidas ya tomadas}
+\scriptsize
+Tablero conciliado (30/10), drafts convertidos en issues, horas reales al cerrar y snapshot diario de métricas.
+\end{block}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{block}{Compromiso para E4}
+\scriptsize
+\begin{itemize}
+  \item Cursos, secciones, módulos y material markdown.
+  \item Quizzes con corrección automática.
+  \item Notas, publicación, libro de notas y auditoría.
+  \item Aislamiento UC/UTFSM probado en BE, FE y E2E.
+  \item Desplegado en Render desde \texttt{main}, con release.
+\end{itemize}
+\end{block}
+\begin{block}{Revisión semanal}
+\scriptsize
+Cada lunes: burnup, tarjetas sin horas reales y carga por persona.
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}

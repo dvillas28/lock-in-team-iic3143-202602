@@ -1,0 +1,66 @@
+% E3-25/26: ¿alcanzamos? Proyección del pendiente en horas estimadas.
+% Datos: snapshot del Project del 01/11 (465 h de alcance, 386 h Done, 79 h abiertas).
+% Ritmo promedio: 386 h en 4 semanas (05/10 a 01/11) = 96,5 h/sem = 13,8 h/día.
+% Eje x: día de octubre; 32 = 01/11, 53 = 22/11 (fin de la semana 7 del plan).
+
+\begin{frame}{¿Alcanzamos? Sí, con margen para el MVP comprometido}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.64\textwidth}
+\begin{tikzpicture}
+\begin{axis}[academix, height=5.4cm, ymin=0, ymax=520, ylabel={horas estimadas},
+  xmin=10.5, xmax=54, xtick={11,18,25,32,39,46,53},
+  xticklabels={11/10,18/10,25/10,1/11,8/11,15/11,22/11}]
+\addplot[academixslate,thick,dashed] coordinates {(11,457) (25,457) (26,461) (31,464) (32,465) (53,465)};
+\addlegendentry{alcance}
+\addplot[academixnavy,very thick,const plot] coordinates {
+  (11,25) (20,28) (21,179) (26,207) (27,255) (30,255) (31,357) (32,386)};
+\addlegendentry{terminado}
+\addplot[academixgreen,thick] coordinates {(32,386) (37.7,465)};
+\addlegendentry{ritmo promedio}
+\addplot[academixamber,thick] coordinates {(32,386) (43.5,465)};
+\addlegendentry{mitad del ritmo}
+\addplot[academixmuted,thick,dotted] coordinates {(32,386) (53,465)};
+\addlegendentry{ritmo necesario}
+\draw[academixred,thick] (axis cs:53,0) -- (axis cs:53,500);
+\node[font=\sffamily\tiny,academixred,anchor=east] at (axis cs:52.6,40) {fin del plan};
+\node[font=\sffamily\tiny,academixgreen,anchor=south east] at (axis cs:37.7,470) {07/11};
+\node[font=\sffamily\tiny,academixamber,anchor=south] at (axis cs:43.5,470) {13/11};
+\end{axis}
+\end{tikzpicture}
+\end{column}
+\begin{column}{0.33\textwidth}
+\kpi{academixmuted}{26 h/sem}{necesarias para 79 h en 3 semanas}\\[0.15cm]
+\kpi{academixgreen}{97 h/sem}{promedio observado (386 h en 4 sem.)}\\[0.15cm]
+\scriptsize Aun a la mitad del ritmo terminamos el 13/11, nueve días antes del cierre.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Supuestos y riesgos de la proyección}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.48\textwidth}
+\begin{block}{¿Por qué creemos que alcanzamos?}
+\scriptsize
+\begin{itemize}
+  \item El producto va adelantado: 133 h planificadas para las semanas 5 y 6 ya están en Done.
+  \item Lo pendiente es poco código: 34 h de entregas y gestión, 21 h de material en archivos (P2) y 8 h de tests de aislamiento.
+  \item Hasta ahora hemos estimado más horas de las que realmente usamos: en las 68 tarjetas con horas reales, el real fue la mitad de lo estimado (0,50).
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{block}{Qué puede fallar}
+\scriptsize
+\begin{itemize}
+  \item \textbf{Calendario:} 48 h son de la semana 7 (ensayo, retro, release) y no se pueden adelantar.
+  \item \textbf{Render:} la base free vence cerca del 21/11, en plena semana 7 (\#178).
+  \item \textbf{Medición:} 68 de 96 tarjetas Done tienen horas reales; faltan casi todas las funcionalidades conciliadas de las semanas 5 y 6.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+\vspace{0.2cm}
+\centering
+\softchip{academixgreen}{green!8}{P0 + P1: 58 h, alcanzamos}
+\softchip{academixamber}{academixsoftamber}{P2 material en archivos: 21 h, condicionado al storage}
+\end{frame}

@@ -1,0 +1,78 @@
+% E3-04/05/06: ciclo de desarrollo, PR y merges, prácticas y beneficios.
+% Fuente: gh pr list (merged), rulesets de dev y main, git-flow.md. Corte 01/11.
+% Capturas de la PR #86 en img/, tomadas por dvillas28 el 01/11.
+
+\begin{frame}{Ciclo de desarrollo: de la tarjeta a producción}
+\centering
+\begin{tikzpicture}[
+  stage/.style={draw=academixnavy,fill=academixsoftblue,rounded corners=3pt,font=\scriptsize\bfseries,
+    text=academixnavy,minimum height=0.95cm,text width=1.45cm,inner xsep=2pt,align=center},
+  gate/.style={draw=academixamber,fill=academixsoftamber,rounded corners=3pt,font=\scriptsize\bfseries,
+    text=academixamber,minimum height=0.95cm,text width=1.45cm,inner xsep=2pt,align=center},
+  note/.style={font=\tiny,text=academixslate,text width=1.65cm,align=center},
+  arr/.style={-{Stealth[length=2mm]},academixslate,thick},
+  node distance=0.3cm]
+\node[stage] (a) {Issue o spec};
+\node[stage,right=of a] (b) {Rama\\\texttt{tipo/nombre}};
+\node[stage,right=of b] (c) {PR a \texttt{dev}};
+\node[gate,right=of c] (d) {CI result + bot IA};
+\node[stage,right=of d] (e) {Squash a \texttt{dev}};
+\node[stage,right=of e] (f) {Merge a \texttt{main}};
+\node[gate,right=of f] (g) {Release + Render};
+\foreach \x/\y in {a/b,b/c,c/d,d/e,e/f,f/g} \draw[arr] (\x) -- (\y);
+\node[note,below=0.15cm of a] {Tarjeta en el tablero con horas estimadas};
+\node[note,below=0.15cm of b] {In progress al crear la rama};
+\node[note,below=0.15cm of c] {Revisión de un par: no obligatoria};
+\node[note,below=0.15cm of d] {Sin CI verde no hay merge};
+\node[note,below=0.15cm of e] {Tag \texttt{vX.Y.Z-dev.N}};
+\node[note,below=0.15cm of f] {Merge commit, sin squash};
+\node[note,below=0.15cm of g] {Deploy tras pasar CI};
+\end{tikzpicture}
+\vspace{0.45cm}
+
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.31\textwidth}\centering\kpi{academixnavy}{68}{PR integradas desde el 11/10}\end{column}
+\begin{column}{0.31\textwidth}\centering\kpi{academixteal}{54 / 13}{a \texttt{dev} / a \texttt{main}}\end{column}
+\begin{column}{0.31\textwidth}\centering\kpi{academixamber}{23 de 68}{con revisión de un par}\end{column}
+\end{columns}
+\vspace{0.2cm}
+\scriptsize Reglas en GitHub: \texttt{dev} solo acepta squash; \texttt{main} solo merge commit. Ambas exigen el check \texttt{CI result} y bloquean force push y borrado.
+\end{frame}
+
+\begin{frame}{Una PR real: \#86, cursos y roles}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.6\textwidth}
+\centering
+\includegraphics[height=6.6cm]{pr-86-full}
+\end{column}
+\begin{column}{0.37\textwidth}
+\small
+\begin{itemize}
+  \item Título en conventional commits: define la versión del release.
+  \item De \texttt{feat/cursos-roles-backend} a \texttt{dev}.
+  \item Enlaza el spec y la evidencia de validación, y cierra 4 issues del backlog.
+  \item 12 checks en verde: CI, SonarQube y Trivy.
+  \item \texttt{CI result} habilita el merge.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Prácticas que usamos y qué nos dieron}
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.1cm}YY}
+\toprule
+\textbf{Práctica} & \textbf{Evidencia} & \textbf{Beneficio observado} \\
+\midrule
+Spec Kit antes de codificar & \texttt{specs/} por funcionalidad, con CU y RF & El alcance de cada PR está escrito antes del código \\
+ADR & 22 decisiones en \texttt{docs/adr/} & El cambio de Railway a Render quedó trazado con contexto y costos \\
+Conventional commits & 67 tags y releases automáticos & Cada versión en Render se identifica en \texttt{/health} \\
+CI como gate & \texttt{CI result} obligatorio en \texttt{dev} y \texttt{main} & 35 ejecuciones fallidas en PR detuvieron el merge hasta corregir \\
+Tests de aislamiento & UC y UTFSM, RLS y E2E de tenant & El aislamiento se prueba en cada PR, no solo antes de la demo \\
+Tablero con horas & Backlog GitHub Projects & Proyección del pendiente en horas \\
+\bottomrule
+\end{tabularx}
+\vspace{0.2cm}
+
+\scriptsize Pendiente de mejora: la revisión de un par no es obligatoria (34\,\% de las PR la tuvieron) y la etiqueta \texttt{bug} no se usa.
+\end{frame}

@@ -1,0 +1,116 @@
+% E3-22: pipeline y etapas; requisitos de la pauta: SCA, SAST y code review con IA.
+% Fuente: .github/workflows/*.yml; ejecuciones desde el 11/10; auditorías manuales
+% del 01/11 (runs 41338835122 Trivy y 41338849373 SonarQube); capturas en img/.
+
+\begin{frame}{Pipeline de CI/CD}
+\centering
+\begin{tikzpicture}[
+  job/.style={draw=academixnavy,fill=academixsoftblue,rounded corners=3pt,font=\scriptsize,
+    text=academixnavy,minimum height=0.62cm,text width=2.7cm,align=center},
+  sec/.style={draw=academixamber,fill=academixsoftamber,rounded corners=3pt,font=\scriptsize,
+    text=academixamber,minimum height=0.62cm,text width=2.7cm,align=center},
+  okjob/.style={draw=academixgreen,fill=green!6,rounded corners=3pt,font=\scriptsize\bfseries,
+    text=academixgreen,minimum height=0.62cm,text width=2.2cm,align=center},
+  lane/.style={font=\scriptsize\bfseries,text=academixslate,anchor=east},
+  arr/.style={-{Stealth[length=1.8mm]},academixslate}]
+% PR
+\node[job] (doc) at (0,0) {Largo de documentos};
+\node[job] (api) at (0,-0.75) {OpenAPI y cliente generado};
+\node[job] (lint) at (0,-1.5) {Lint + test / build\\[-1pt]\tiny por app, solo si cambió};
+\node[sec] (dock) at (3.2,0) {Docker build + Trivy\\[-1pt]\tiny imagen y dependencias};
+\node[job] (cov) at (3.2,-0.75) {Integración PostgreSQL + cobertura};
+\node[sec] (sonar) at (3.2,-1.5) {SonarQube\\[-1pt]\tiny quality gate};
+\node[okjob] (ci) at (6.3,-0.75) {CI result\\[-1pt]\tiny check obligatorio};
+\node[sec] (bot) at (3.2,-2.55) {Bot reviewer IA\\[-1pt]\tiny comenta el diff};
+\node[job] (e2e) at (0,-2.55) {E2E Playwright\\[-1pt]\tiny 20 specs};
+\draw[arr] (cov) -- (sonar);
+\node[draw=academixgreen,dashed,rounded corners=4pt,inner sep=4pt,fit=(doc)(lint)(dock)(sonar)] (gate) {};
+\draw[arr] (gate.east |- ci.west) -- (ci.west);
+\node[font=\tiny,text=academixslate,anchor=west] at (bot.east) {corren en la PR, no bloquean};
+% merge
+\node[okjob] (dev) at (9.0,0) {Squash a \texttt{dev}};
+\node[job,text width=2.2cm] (tag) at (9.0,-0.75) {Tag \texttt{-dev.N}};
+\node[okjob] (main) at (9.0,-1.5) {Merge a \texttt{main}};
+\node[job,text width=2.2cm] (rel) at (11.6,-1.5) {Release \texttt{vX.Y.Z}};
+\node[sec,text width=2.2cm] (render) at (11.6,-0.75) {Deploy Render};
+\draw[arr] (ci.east) -- (dev.west);
+\draw[arr] (dev) -- (tag);
+\draw[arr] (tag) -- (main);
+\draw[arr] (main) -- (rel);
+\draw[arr] (main.north east) -- (render.south west);
+\node[font=\tiny,text=academixslate,align=center] at (11.6,0) {Auto-deploy:\\after CI checks pass};
+\node[lane] at (-1.6,0.55) {PR};
+\node[lane,anchor=west] at (8.0,0.55) {Integración};
+\end{tikzpicture}
+\vspace{0.3cm}
+
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.23\textwidth}\centering\kpi{academixnavy}{137 / 181}{CI exitosas desde 11/10}\end{column}
+\begin{column}{0.23\textwidth}\centering\kpi{academixgreen}{67 / 67}{releases y tags}\end{column}
+\begin{column}{0.23\textwidth}\centering\kpi{academixteal}{8 / 9}{E2E exitosas}\end{column}
+\begin{column}{0.23\textwidth}\centering\kpi{academixamber}{16 / 18}{revisiones del bot}\end{column}
+\end{columns}
+\vspace{0.1cm}
+\centering\scriptsize Las 36 ejecuciones fallidas de CI son casi todas de PR (35): el gate cumplió su función. E2E corre en PR, pero aún no es check obligatorio.
+\end{frame}
+
+\begin{frame}{Seguridad y calidad: SCA, SAST y revisión con IA}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.32\textwidth}
+\begin{block}{SCA: Trivy}
+\scriptsize
+\textbf{En CI:} \texttt{fs} e imagen Docker; falla con HIGH o CRITICAL con corrección.\\[0.15cm]
+\textbf{Auditoría 01/11}, repo completo:
+\begin{itemize}
+  \item 0 CRITICAL, 0 HIGH.
+  \item 3 MEDIUM en el backend: \texttt{glob}, \texttt{minimatch} y \texttt{qs}, todas con versión corregida.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.32\textwidth}
+\begin{block}{SAST: SonarQube}
+\scriptsize
+\textbf{En CI:} quality gate que bloquea la PR.\\[0.15cm]
+\textbf{Auditoría 01/11}, 9\,465 líneas:
+\begin{itemize}
+  \item Quality gate \textbf{OK}; cobertura 94,1\,\%; duplicación 0,0\,\%.
+  \item 11 issues: 1 bug crítico (\texttt{sort} sin comparador en el libro de notas) y 10 code smells, 8 de ellos \texttt{tabIndex}.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.32\textwidth}
+\begin{block}{Code review con IA}
+\scriptsize
+\textbf{Bot propio:} GitHub Actions + Gemini; lee el diff de cada PR a \texttt{dev} o \texttt{main} y comenta.\\[0.15cm]
+Criterios del dominio: aislamiento, roles, notas y tests (ADR \texttt{define-bot-pr-reviewer}).
+\begin{itemize}
+  \item No bloquea: evita el riesgo R-16 de frenar el flujo.
+  \item Pendiente: ajustar falsos positivos (\#173).
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+\vspace{0.2cm}
+\centering
+\softchip{academixamber}{academixsoftamber}{El bug crítico y la actualización de dependencias se resuelven esta semana}
+\end{frame}
+
+\begin{frame}{Evidencia: auditorías del 01/11 sobre \texttt{main}}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.36\textwidth}
+\centering\includegraphics[width=\linewidth]{trivy-manual}
+\end{column}
+\begin{column}{0.36\textwidth}
+\centering\includegraphics[width=\linewidth]{sonarqube-manual}
+\end{column}
+\begin{column}{0.24\textwidth}
+\scriptsize
+\textbf{Trivy (SCA)}\\
+0 críticas y 0 altas. Las 3 medias tienen versión corregida.\\[0.25cm]
+\textbf{SonarQube (SAST)}\\
+Quality gate OK, cobertura 94,1\,\% y 0\,\% de duplicación en 9\,465 líneas.\\[0.25cm]
+\textbf{Cómo se usan}\\
+Se lanzan a pedido desde Actions y dejan el reporte como artifact. Los gates de cada PR siguen activos en CI.
+\end{column}
+\end{columns}
+\end{frame}
