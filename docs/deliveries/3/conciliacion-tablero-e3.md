@@ -146,4 +146,4 @@ re-estimaciones de D; las cifras de B dependen de las confirmaciones.
 - **D:** #60 y ensayos pasan a Render; PITR archivada. #175–#177 registran la migración
   no planificada y #178 (P0, sem. 5) renueva la base; draft de cuota free en sem. 6.
 - **Métricas:** 23 tarjetas fuera de lead/cycle time; 87/126 (69 %) y 357/468 h (76 %).
-- **01/11:** 40 drafts más convertidos (#181–#220), #60 archivada, 30 de 89 Done con `Real (h)`. Pendiente: resto de B y merge a `main`.
+- **01/11:** 40 drafts más convertidos (#181–#220), #60 archivada; horas reales cargadas: 68 de 96 Done con `Real (h)`. Pendiente: resto de B y merge a `main`.

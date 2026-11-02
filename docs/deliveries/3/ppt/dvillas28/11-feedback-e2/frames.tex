@@ -1,0 +1,21 @@
+% E3-31: cambios tras el feedback de E2.
+% Fuentes: PR #160 (integrada en dev el 29/10) y docs/deliveries/2/15-feedback-e2.md.
+
+\begin{frame}{Qué cambiamos tras el feedback de E2}
+\scriptsize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{4.2cm}Y}
+\toprule
+\textbf{Feedback de E2} & \textbf{Qué hicimos} \\
+\midrule
+Faltan cardinalidades en el modelo de dominio & Cardinalidades en UML y ER. El modelo coincide con el DDL: 14 tablas, 122 columnas y 25 FK. \\
+\texttt{Enrollment.role} podría ser enum & Los roles ya estaban restringidos mediante \texttt{CHECK}; los documentamos y agregamos pruebas para verificar que se rechacen los valores no permitidos. \\
+No se entiende admin y superadmin, ni quién crea cursos & Seis actores documentados: el admin crea cursos y el superadmin delega ese permiso dentro de su institución. \\
+Declarar las cuentas demo y cómo se crearán más & Documentamos las cuentas para demo y cómo crear nuevas. \\
+\bottomrule
+\end{tabularx}
+\vspace{0.25cm}
+
+\centering
+\softchip{academixnavy}{academixsoftblue}{Todo en la PR \#160 (29/10)}
+\end{frame}
