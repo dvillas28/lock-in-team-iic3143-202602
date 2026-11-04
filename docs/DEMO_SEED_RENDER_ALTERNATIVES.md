@@ -3,6 +3,10 @@
 Procedimiento principal: [ejecutar y guardar la seed](DEMO_SEED_RENDER.md).
 Los ejemplos son para terminal bash/zsh en macOS o Linux; no contienen secretos reales.
 
+> Con la base en Neon ([ADR](adr/neon-database.md)) estos mismos `pg_dump`/`pg_restore` sirven para
+> migrar los datos de Render a Neon: respaldar la base de Render y restaurar en Neon con la URL
+> directa del owner, antes de cambiar las variables del backend.
+
 ## Respaldo previo en Render Free
 
 Render Free requiere un respaldo propio ([documentación oficial](https://render.com/docs/postgresql-backups)).

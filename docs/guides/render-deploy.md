@@ -4,6 +4,12 @@ Pasos manuales en Render, GitHub y DNS para la migración desde Railway.
 La decisión está en el [ADR](../adr/deploy-on-render.md); los servicios, en `render.yaml`.
 Esta guía no acredita un despliegue ejecutado.
 
+> Desde 2026-11-04 la base de datos está en Neon ([ADR](../adr/neon-database.md)): ignorar los pasos de
+> `academix-db`, `dpg-…` y la URL interna; las URLs de base se ingresan a mano. Los datos existentes
+> en Render se migran con `pg_dump`/`pg_restore` (comandos en
+> [respaldo previo](../DEMO_SEED_RENDER_ALTERNATIVES.md#respaldo-previo-en-render-free)) antes del corte.
+
+
 ## Antes de mergear
 
 Nada de esto despliega; se puede hacer mientras la PR está en revisión.
