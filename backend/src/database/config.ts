@@ -7,28 +7,43 @@ export class OperationError extends Error {
   }
 }
 
+function ensure(valid: boolean): asserts valid {
+  if (!valid) throw new Error("invalid database url");
+}
+
+function isPrivateHost(hostname: string) {
+  if (["localhost", "127.0.0.1", "[::1]", "postgres"].includes(hostname)) return true;
+  return isIP(hostname) === 4 && (/^10\./.test(hostname) || /^192\.168\./.test(hostname)
+    || /^172\.(1[6-9]|2[0-9]|3[01])\./.test(hostname));
+}
+
+// libpq URL options can override TLS verification and connection timeouts.
+function ensureAllowedParams(url: URL) {
+  for (const key of url.searchParams.keys()) {
+    ensure(["sslmode", "sslrootcert", "channel_binding"].includes(key));
+    ensure(url.searchParams.getAll(key).length === 1);
+  }
+  // Neon adds channel_binding=require to its URLs; it only strengthens SCRAM, so that value alone is accepted.
+  ensure(!url.searchParams.has("channel_binding") || url.searchParams.get("channel_binding") === "require");
+}
+
+function ensureNoTlsOverrides(env: NodeJS.ProcessEnv) {
+  ensure(env.NODE_TLS_REJECT_UNAUTHORIZED !== "0" && process.env.NODE_TLS_REJECT_UNAUTHORIZED !== "0");
+  ensure(env.PGSSLMODE !== "no-verify" && process.env.PGSSLMODE !== "no-verify");
+}
+
 export function connectionConfig(env: NodeJS.ProcessEnv = process.env): PoolConfig {
   try {
     const url = new URL(env.DATABASE_URL ?? "");
-    if (!["postgres:", "postgresql:"].includes(url.protocol) || !url.hostname || url.pathname.length < 2 || url.hash) throw new Error();
-    // libpq URL options can override TLS verification and connection timeouts.
-    for (const key of url.searchParams.keys()) {
-      if (!["sslmode", "sslrootcert", "channel_binding"].includes(key)) throw new Error();
-      if (url.searchParams.getAll(key).length !== 1) throw new Error();
-    }
-    // Neon adds channel_binding=require to its URLs; it only strengthens SCRAM, so that value alone is accepted.
-    if (url.searchParams.has("channel_binding") && url.searchParams.get("channel_binding") !== "require") throw new Error();
+    ensure(["postgres:", "postgresql:"].includes(url.protocol) && !!url.hostname && url.pathname.length >= 2 && !url.hash);
+    ensureAllowedParams(url);
+    ensureNoTlsOverrides(env);
     // Neon's pooled (PgBouncer) endpoints reject the startup `options` that migrations and pools send.
-    if (/-pooler(\.|$)/.test(url.hostname)) throw new Error();
+    ensure(!/-pooler(\.|$)/.test(url.hostname));
     const mode = url.searchParams.get("sslmode");
-    if (env.NODE_TLS_REJECT_UNAUTHORIZED === "0" || process.env.NODE_TLS_REJECT_UNAUTHORIZED === "0"
-      || env.PGSSLMODE === "no-verify" || process.env.PGSSLMODE === "no-verify") throw new Error();
-    const privateHost = ["localhost", "127.0.0.1", "[::1]", "postgres"].includes(url.hostname)
-      || (isIP(url.hostname) === 4 && (/^10\./.test(url.hostname) || /^192\.168\./.test(url.hostname)
-        || /^172\.(1[6-9]|2[0-9]|3[01])\./.test(url.hostname)));
-    if (mode && !["disable", "verify-full"].includes(mode)) throw new Error();
-    if (!privateHost && mode !== "verify-full") throw new Error();
-    if (url.searchParams.has("sslrootcert") && mode !== "verify-full") throw new Error();
+    ensure(!mode || ["disable", "verify-full"].includes(mode));
+    ensure(isPrivateHost(url.hostname) || mode === "verify-full");
+    ensure(!url.searchParams.has("sslrootcert") || mode === "verify-full");
     // Pin the URL policy so pg cannot inherit a different SSL mode from the process.
     url.searchParams.set("sslmode", mode ?? "disable");
     return { connectionString: url.href };
