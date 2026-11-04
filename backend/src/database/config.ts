@@ -13,8 +13,8 @@ function ensure(valid: boolean): asserts valid {
 
 function isPrivateHost(hostname: string) {
   if (["localhost", "127.0.0.1", "[::1]", "postgres"].includes(hostname)) return true;
-  return isIP(hostname) === 4 && (/^10\./.test(hostname) || /^192\.168\./.test(hostname)
-    || /^172\.(1[6-9]|2[0-9]|3[01])\./.test(hostname));
+  return isIP(hostname) === 4 && (hostname.startsWith("10.") || hostname.startsWith("192.168.")
+    || /^172\.(1[6-9]|2\d|3[01])\./.test(hostname));
 }
 
 // libpq URL options can override TLS verification and connection timeouts.
