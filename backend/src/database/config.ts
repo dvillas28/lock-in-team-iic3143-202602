@@ -13,15 +13,17 @@ export function connectionConfig(env: NodeJS.ProcessEnv = process.env): PoolConf
     if (!["postgres:", "postgresql:"].includes(url.protocol) || !url.hostname || url.pathname.length < 2 || url.hash) throw new Error();
     // libpq URL options can override TLS verification and connection timeouts.
     for (const key of url.searchParams.keys()) {
-      if (!["sslmode", "sslrootcert"].includes(key)) throw new Error();
+      if (!["sslmode", "sslrootcert", "channel_binding"].includes(key)) throw new Error();
       if (url.searchParams.getAll(key).length !== 1) throw new Error();
     }
+    // Neon adds channel_binding=require to its URLs; it only strengthens SCRAM, so that value alone is accepted.
+    if (url.searchParams.has("channel_binding") && url.searchParams.get("channel_binding") !== "require") throw new Error();
+    // Neon's pooled (PgBouncer) endpoints reject the startup `options` that migrations and pools send.
+    if (/-pooler(\.|$)/.test(url.hostname)) throw new Error();
     const mode = url.searchParams.get("sslmode");
     if (env.NODE_TLS_REJECT_UNAUTHORIZED === "0" || process.env.NODE_TLS_REJECT_UNAUTHORIZED === "0"
       || env.PGSSLMODE === "no-verify" || process.env.PGSSLMODE === "no-verify") throw new Error();
     const privateHost = ["localhost", "127.0.0.1", "[::1]", "postgres"].includes(url.hostname)
-      // Render Postgres internal hosts (dpg-<id>-a) only resolve inside Render's private network.
-      || /^dpg-[a-z0-9]+-a$/.test(url.hostname)
       || (isIP(url.hostname) === 4 && (/^10\./.test(url.hostname) || /^192\.168\./.test(url.hostname)
         || /^172\.(1[6-9]|2[0-9]|3[01])\./.test(url.hostname)));
     if (mode && !["disable", "verify-full"].includes(mode)) throw new Error();
