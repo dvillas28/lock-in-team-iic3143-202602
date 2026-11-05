@@ -1,19 +1,19 @@
 # Métricas del tablero
 
-Snapshots: 25 (2026-10-11 a 2026-11-04).
+Snapshots: 26 (2026-10-11 a 2026-11-05).
 
 ## Avance
 
 |  | Alcance | Terminado | % |
 | --- | --- | --- | --- |
-| Tarjetas | 123 | 96 | 78 |
-| Horas estimadas | 465.0 | 386.0 | 83 |
+| Tarjetas | 124 | 98 | 79 |
+| Horas estimadas | 466.0 | 390.0 | 84 |
 
 ## Tiempos (días)
 
 | Métrica | n | Mediana | Promedio | Máximo |
 | --- | --- | --- | --- | --- |
-| Lead time (creada → Done) | 70 | 3.3 | 5.5 | 23.0 |
+| Lead time (creada → Done) | 72 | 3.3 | 5.4 | 23.0 |
 | Cycle time (In progress → Done) | 21 | 3.9 | 3.8 | 5.9 |
 
 El cycle time solo cuenta tarjetas que algún snapshot vio en In progress. Los drafts que ya estaban en Done en su primer snapshot no tienen fecha de término y quedan fuera.
@@ -28,7 +28,7 @@ Tarjetas conciliadas o registradas después de hechas (26): cuentan en el avance
 | Semana 2 E3 | 14 | 11 | 43.0 | 26.0 | 0.70 |
 | Semana 3 E3 | 31 | 30 | 132.0 | 45.6 | 0.35 |
 | Semana 4 E3 | 15 | 13 | 48.0 | 22.0 | 0.67 |
-| Semana 5 E4 | 18 | 13 | 82.0 | — | — |
+| Semana 5 E4 | 19 | 15 | 83.0 | 6.0 | 1.50 |
 | Semana 6 E4 | 19 | 13 | 80.0 | — | — |
 | Semana 7 E4 | 17 | 1 | 56.0 | — | — |
 
@@ -43,7 +43,7 @@ Tarjetas en Done sin Real (h): 28.
 | feat | 49 | 47 | 267.0 |
 | docs | 32 | 22 | 86.0 |
 | ci | 19 | 14 | 46.0 |
-| chore | 16 | 5 | 34.0 |
+| chore | 17 | 7 | 35.0 |
 | test | 5 | 2 | 19.0 |
 | build | 4 | 3 | 11.0 |
 | fix | 4 | 3 | 15.0 |
@@ -57,6 +57,6 @@ Tarjetas en Done sin Real (h): 28.
 | DOC | 22 | 12 | 51.0 |
 | PREP | 18 | 12 | 52.0 |
 | CI | 18 | 12 | 42.0 |
-| INF | 7 | 3 | 15.0 |
+| INF | 8 | 5 | 16.0 |
 | INST | 6 | 5 | 15.0 |
 
