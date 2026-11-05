@@ -35,8 +35,8 @@ respaldos. El backend y el frontend siguen en Render; solo cambia dónde vive Po
 ## Plan de corte
 
 1. Crear proyecto/base en Neon y copiar la URL directa del owner.
-2. Si los datos importan: `pg_dump` desde Render y restaurar en Neon antes del corte.
-   Si no, predeploy aplica el esquema y el seed de presentación repuebla.
+2. Si los datos importan, migrarlos con la [guía](../guides/render-to-neon-data-migration.md):
+   esquema por migraciones y solo datos desde el dump. Si no, predeploy aplica el esquema y el seed repuebla.
 3. En Render, editar `MIGRATION_DATABASE_URL` y `DATABASE_URL` y redesplegar el backend.
    Buscar `{"operation":"predeploy","outcome":"ok"}` en los logs.
 4. Verificar `/ready`, iniciar sesión y, solo después, borrar `academix-db` en Render.
