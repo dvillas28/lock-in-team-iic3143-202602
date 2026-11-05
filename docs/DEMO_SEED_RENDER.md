@@ -7,6 +7,11 @@ El backend usa Render Free, sin Shell/SSH/jobs; por eso se conecta desde tu comp
 remota indicada en `MIGRATION_DATABASE_URL`, aunque el comando se ejecute localmente.
 Esta guía no acredita una ejecución en producción.
 
+> **Base en Neon desde 2026-11-04** ([ADR](adr/neon-database.md)). Los pasos y comandos son los
+> mismos; cambian solo la fuente de la URL (paso 2: Neon → **Connection string**, host **directo**
+> sin `-pooler`, con `sslmode=verify-full`), el host y la base esperados (ver `DEMO_SEED_EXPECTED_*`)
+> y que no hay lista de IPs que autorizar. Los datos de Render se migran antes con `pg_dump`/`pg_restore`.
+
 ## 1. Confirmar que el código correcto está desplegado
 
 1. Entrar a [Render](https://dashboard.render.com) → servicio **academix-backend**.

@@ -23,12 +23,12 @@ services:
     envVars:
       - key: PORT
         value: "3001"
+      # Database is Neon (docs/adr/neon-database.md): direct endpoint, not -pooler,
+      # with ?sslmode=verify-full&channel_binding=require.
       # Owner credential: predeploy only; start.js removes it before serving HTTP.
       - key: MIGRATION_DATABASE_URL
-        fromDatabase:
-          name: academix-db
-          property: connectionString
-      # academix_runtime on the same internal host and database as MIGRATION_DATABASE_URL.
+        sync: false
+      # academix_runtime on the same Neon host and database as MIGRATION_DATABASE_URL.
       - key: DATABASE_URL
         sync: false
       - key: AUTH_JWT_SECRET
@@ -65,12 +65,3 @@ services:
         value: https://academix-frontend-2ixy.onrender.com
       - key: API_URL
         value: https://academix-backend-lr8x.onrender.com
-
-databases:
-  - name: academix-db
-    databaseName: academix
-    user: academix_owner
-    # Free Postgres expires 30 days after creation (14-day grace to upgrade, then deleted).
-    plan: free
-    region: virginia
-    postgresMajorVersion: "17"

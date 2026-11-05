@@ -1,6 +1,7 @@
 # ADR: Desplegar en Render en lugar de Railway
 
 Fecha: 2026-10-22. Estado: configuración en repositorio; despliegue y DNS pendientes del operador.
+Actualización 2026-11-04: la base de datos pasó a Neon, ver [ADR de Neon](neon-database.md).
 Reemplaza la plataforma de despliegue supuesta por la [Entrega 2](../deliveries/2/README.md)
 y por [persistencia y migraciones](choose-backend-persistence-and-migrations.md).
 Pasos del operador: [guía de despliegue en Render](../guides/render-deploy.md).
