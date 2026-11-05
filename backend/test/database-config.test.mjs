@@ -30,11 +30,22 @@ test("TLS policy is explicit in pg and rejects unsafe environment overrides", ()
   }
 });
 
-test("only Render's private Postgres host may skip TLS", () => {
-  assert.ok(config.connectionConfig({DATABASE_URL:"postgres://u:p@dpg-d1abc234def567-a/academix"}));
-  for(const host of ["dpg-d1abc234def567-a.oregon-postgres.render.com","dpg-d1abc234def567-a.attacker.example","xdpg-d1abc234def567-a"]) {
+test("only private hosts may skip TLS; managed hosts need verify-full", () => {
+  for(const host of ["localhost","127.0.0.1","10.0.0.5","192.168.1.9","172.16.0.1"]) {
+    assert.ok(config.connectionConfig({DATABASE_URL:`postgres://u:p@${host}/academix`}));
+  }
+  for(const host of ["dpg-d1abc234def567-a","ep-cool-123456.us-east-2.aws.neon.tech","dpg-d1abc234def567-a.attacker.example"]) {
     assert.throws(()=>config.connectionConfig({DATABASE_URL:`postgres://u:p@${host}/academix`}),{category:"config"});
   }
+});
+
+test("Neon direct URLs are accepted; pooled hosts and weaker options are not", () => {
+  const host="ep-cool-123456.us-east-2.aws.neon.tech";
+  assert.ok(config.connectionConfig({DATABASE_URL:`postgres://u:p@${host}/academix?sslmode=verify-full&channel_binding=require`}));
+  for(const query of ["sslmode=require&channel_binding=require","sslmode=verify-full&channel_binding=disable","sslmode=verify-full&channel_binding=require&channel_binding=require"]) {
+    assert.throws(()=>config.connectionConfig({DATABASE_URL:`postgres://u:p@${host}/academix?${query}`}),{category:"config"});
+  }
+  assert.throws(()=>config.connectionConfig({DATABASE_URL:"postgres://u:p@ep-cool-123456-pooler.us-east-2.aws.neon.tech/academix?sslmode=verify-full"}),{category:"config"});
 });
 
 test("sanitization assertions never report the sensitive actual output", () => {
