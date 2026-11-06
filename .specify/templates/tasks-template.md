@@ -14,6 +14,7 @@ length-exception comment; split above 200 and link child task files here.
 - Each task references a spec requirement or acceptance scenario.
 - Tests are required for non-trivial behavior, isolation, permissions and integrity.
 - Cover route-context tampering, runtime DB role without bypass, missing predicates, connection reuse and bounded global exceptions.
+- Account stories cover own-profile scope, admin OR superadmin invitations, existing-user acceptance, ephemeral CSV and unresolved sender/cleanup gates; neither administrative flag grants academic access.
 - Use actual repository paths: `backend/src/`, `frontend/src/`, applicable tests.
 - Replace examples with feature-specific tasks; do not retain sample scaffolding.
 

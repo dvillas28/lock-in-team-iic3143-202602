@@ -42,12 +42,13 @@
 
 - Tenant isolation is explicit for all affected reads, writes, and background work.
 - Institutional route-context resolution, DB omission barrier, runtime privileges and bounded global exceptions are defined.
-- Role permissions cover student, assistant, teacher and explicit course administration capability; tenant superadmin only delegates is_admin within its Institution.
+- Role permissions distinguish academic roles/ownership, own global profile and institutional invitations (active is_admin OR is_super_admin); only tenant superadmin delegates is_admin, neither flag grants academic access.
 - Attempts, grades, role changes and publication have an auditable state/history decision.
 - User stories remain independently implementable and testable.
 - Authored documents target <150 lines; justify 150–200, split above 200.
 - CU/RF/RNF coverage and dependent permission clarifications are resolved.
 - Complexity beyond the simplest deployable shape is justified below.
+- Account extensions define ephemeral memory-only CSV, private-photo limits and unresolved sender/derived-data cleanup gates; specification is not runtime authorization.
 
 ## Project Structure
 

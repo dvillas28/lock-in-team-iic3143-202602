@@ -1,5 +1,10 @@
 # Plan de trabajo actualizado
 
+Ampliación registrada el 2026-11-06, sin implementación ni issues remotas:
+[perfiles y altas formulario/CSV con Resend: cinco issues agrupadas](../../planning/perfiles/backlog.md).
+Filas añadidas al TSV general; requisitos y modelo propuesto enlazados en ese registro.
+Objetivo: semana 2–8 noviembre de 2026; Matías implementa, Daniel prepara DNS y S3.
+
 ## Enfoque
 
 Primero se mantiene el walking skeleton desplegable. Después se incorpora una
