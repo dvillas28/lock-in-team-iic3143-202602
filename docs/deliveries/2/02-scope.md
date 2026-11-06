@@ -71,6 +71,12 @@ La demo es aceptable si prueba que:
 
 ## Evolución
 
+Ampliación registrada el 2026-11-06, especificada y pendiente de implementación:
+[perfil propio, contraseña, foto y altas por admin/superadmin con formulario/CSV](../../planning/perfiles/requisitos.md).
+Las exclusiones anteriores describen el MVP entregado; no niegan el alcance nuevo
+del [backlog](../../planning/perfiles/backlog.md). Constitución 1.6.0 registra la extensión;
+el [spec formal](../../../specs/20261106-170457_perfiles-altas-usuarios/spec.md) registra remitente elegido y limpieza aprobada; falta ejecución técnica.
+
 La arquitectura utiliza una PostgreSQL compartida con aislamiento lógico por
 Institution. Estrategias de particionamiento o sharding podrán evaluarse en el
 futuro únicamente si métricas reales de volumen, latencia o carga operacional

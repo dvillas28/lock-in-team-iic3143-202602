@@ -22,3 +22,9 @@ Las descripciones históricas quedan subordinadas al modelo implementado y contr
 
 Revisión polish 2026-10-29: [reglas de cardinalidad](06-data-model-relations.md),
 [cuentas/provisión](../../guides/demo-accounts.md) y [evidencia](../../backend/feedback-e2-validation.md).
+
+## Extensión registrada, sin migraciones (2026-11-06)
+
+[Usuarios/perfiles/altas por formulario y CSV](../../planning/perfiles/modelo-datos.md):
+users completo propuesto, memberships, roles, activación, lotes/filas y auditoría.
+El anexo distingue campos existentes de nuevos; el esquema implementado no cambia aquí.

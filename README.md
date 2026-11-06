@@ -23,6 +23,8 @@ Curso -> Módulos -> Material -> Quiz autocorregido -> Nota -> Publicación -> P
 Fuera del MVP: calendarios externos, quizzes en vivo, corrección manual compleja,
 IA/chat/RAG, analítica avanzada y altas generales de usuarios por API.
 Archivos binarios y su proveedor de object storage requieren otra misión.
+Extensión especificada, sin implementación: [perfiles y altas institucionales](specs/20261106-170457_perfiles-altas-usuarios/spec.md),
+con [alcance acotado](docs/adr/institutional-account-lifecycle.md) y decisiones de remitente/limpieza resueltas; DNS y ejecución técnica pendientes.
 
 ## Interfaces y diseño
 

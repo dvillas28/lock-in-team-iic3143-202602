@@ -1,11 +1,13 @@
 <!--
 Sync Impact Report
-Version change: 1.4.0 -> 1.5.0 (explicit path tenant context and minimal DB enforcement).
-Core principles retained; mandatory isolation now includes a database omission barrier.
-Product Constraints: permit bounded RLS and opt-in automated demo data migrations.
-Templates synced: plan-template.md, spec-template.md, tasks-template.md.
-ADR: institution-context-and-database-isolation.md retains path routing and supersedes RLS deferral.
-Runtime implementation remains pending; no infrastructure or data changed here.
+Version change: 1.5.0 -> 1.6.0 (bounded account/profile extension; MINOR scope expansion).
+Core principles retained; no academic grants, tenant barriers or audit guarantees removed.
+Product Constraints: own global profile; institutional invitations/CSV; private profile photos.
+Templates updated: spec-template.md, plan-template.md, tasks-template.md, checklist-template.md.
+Constitution template and extension command guidance checked; no scope conflict requiring edits.
+ADR: docs/adr/institutional-account-lifecycle.md; provider ADRs remain separate.
+Follow-up: PEND-01/02 decisions closed; DNS verification and cleanup implementation remain pending.
+No application, infrastructure, migrations, Git history or runtime grants changed.
 -->
 
 
@@ -69,8 +71,8 @@ shared modules and markdown material, multiple-choice quizzes, automatic grading
 explicit grade publication, gradebook and immutable academic audit.
 
 Manual submissions/correction, general institutional administration, AI, chat, calendar,
-binary upload/download, workers and advanced analytics remain outside the
-core MVP. Binary material is an optional P2 extension requiring its own spec.
+academic binary upload/download, workers and advanced analytics remain outside the
+core MVP. Academic binary material is an optional P2 extension requiring its own spec.
 Minimal RLS on the shared database is included to enforce the route-derived tenant
 boundary; it does not replace academic permissions or parameterized SQL.
 Versioned demo data migrations MAY run automatically before deployment when
@@ -81,7 +83,20 @@ included: InstitutionMembership.is_super_admin grants/revokes is_admin only insi
 its Institution. Neither flag grants access to courses owned by others. Initial
 superadmin provisioning MUST be controlled, repeat-safe and auditable, with no
 credentials stored in migration source. Superadmin assignment/recovery remains
-operational; account invitations and general user management remain excluded.
+operational; general management of another person's global account remains excluded.
+The specified account extension permits active users to edit their own global
+name/bio/photo and password, even without institutional membership. Institutional
+invitations and CSV imports require active membership plus is_admin OR is_super_admin
+in that Institution; only is_super_admin delegates is_admin. Activation verifies
+the invite and existing account ownership, preserves credentials/revocations,
+and never grants academic roles, admin flags or cross-tenant visibility implicitly.
+Invitation/import rows MUST enforce tenant isolation; bounded self-profile and
+activation identity exceptions MUST preserve least-privilege runtime and atomic audit.
+The CSV original MUST be ephemeral, memory-only; private profile photos are a
+bounded binary exception and MUST NOT enable academic file uploads by implication.
+Sender selection and approved cleanup policy MUST be recorded; real email requires verified DNS.
+Spec: [profiles and institutional accounts](../../specs/20261106-170457_perfiles-altas-usuarios/spec.md).
+This extension is specified, not implemented; documentation MUST retain that distinction.
 The admin/non-admin UI capability MUST match domain permissions; URL profiles
 never grant access. Enrollment remains the source of academic roles.
 
@@ -123,4 +138,4 @@ for wording and clarification.
 Reviews MUST verify constitution compliance before merge. Complexity violations
 MUST be documented in the feature plan's Complexity Tracking section.
 
-**Version**: 1.5.0 | **Ratified**: 2026-08-27 | **Last Amended**: 2026-10-20
+**Version**: 1.6.0 | **Ratified**: 2026-08-27 | **Last Amended**: 2026-11-06
