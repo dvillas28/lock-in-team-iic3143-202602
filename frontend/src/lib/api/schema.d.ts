@@ -2407,6 +2407,8 @@ export interface components {
         InvitationList: {
             items: components["schemas"]["AccountInvitation"][];
             nextCursor: string | null;
+            /** @description Indica si existe una página siguiente; compatible con paginación institucional existente. */
+            hasMore?: boolean;
         };
         InvitationCreate: {
             name: string;
@@ -2670,6 +2672,8 @@ export interface components {
         AttemptId: string;
         /** @description Filtro docente; nunca selecciona la identidad estudiantil autenticada. */
         StudentIdFilter: string;
+        /** @description UUID opaco por actor/institución/operación de cuenta. Misma clave y entrada recuperan resultado; reutilizar con otro contenido produce 409. */
+        AccountOperationKey: string;
         InvitationId: string;
         ImportId: string;
     };
@@ -4924,13 +4928,8 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
-                /**
-                 * @description Clave opaca elegida por el cliente para una operación sensible. Su scope
-                 *     incluye la Institution del path. Repetir la misma solicitud con igual clave
-                 *     y payload devuelve el primer resultado; reutilizarla con otro payload
-                 *     produce 409 Conflict.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description UUID opaco por actor/institución/operación de cuenta. Misma clave y entrada recuperan resultado; reutilizar con otro contenido produce 409. */
+                "Idempotency-Key": components["parameters"]["AccountOperationKey"];
             };
             path: {
                 /**
@@ -4975,13 +4974,8 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
-                /**
-                 * @description Clave opaca elegida por el cliente para una operación sensible. Su scope
-                 *     incluye la Institution del path. Repetir la misma solicitud con igual clave
-                 *     y payload devuelve el primer resultado; reutilizarla con otro payload
-                 *     produce 409 Conflict.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description UUID opaco por actor/institución/operación de cuenta. Misma clave y entrada recuperan resultado; reutilizar con otro contenido produce 409. */
+                "Idempotency-Key": components["parameters"]["AccountOperationKey"];
             };
             path: {
                 /**
@@ -5022,13 +5016,8 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
-                /**
-                 * @description Clave opaca elegida por el cliente para una operación sensible. Su scope
-                 *     incluye la Institution del path. Repetir la misma solicitud con igual clave
-                 *     y payload devuelve el primer resultado; reutilizarla con otro payload
-                 *     produce 409 Conflict.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description UUID opaco por actor/institución/operación de cuenta. Misma clave y entrada recuperan resultado; reutilizar con otro contenido produce 409. */
+                "Idempotency-Key": components["parameters"]["AccountOperationKey"];
             };
             path: {
                 /**
@@ -5173,13 +5162,8 @@ export interface operations {
         parameters: {
             query?: never;
             header: {
-                /**
-                 * @description Clave opaca elegida por el cliente para una operación sensible. Su scope
-                 *     incluye la Institution del path. Repetir la misma solicitud con igual clave
-                 *     y payload devuelve el primer resultado; reutilizarla con otro payload
-                 *     produce 409 Conflict.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /** @description UUID opaco por actor/institución/operación de cuenta. Misma clave y entrada recuperan resultado; reutilizar con otro contenido produce 409. */
+                "Idempotency-Key": components["parameters"]["AccountOperationKey"];
             };
             path: {
                 /**

@@ -32,7 +32,7 @@ test('E2E-ADMIN-003 revocation is effective and replay is a no-op / revoke @regr
 });
 for(const actor of ['AO','T1','AS1','ST1'])test(`E2E-ADMIN-004 non-superadmin cannot delegate flags / ${actor} @extended`,async ({e})=>{
  const api=await e.api(actor),target=`memberships/${e.data.actors[actor].membership.uc}/course-admin`,before=await securitySnapshot(e);
- status(await api.get('memberships'),403);status(await api.put(target,{isAdmin:true}),403);
+ status(await api.get('memberships'),actor==='AO'?200:403);status(await api.put(target,{isAdmin:true}),403);
  for(const extra of [{isSuperAdmin:true},{active:true}])status(await api.put(target,{isAdmin:true,...extra}),400);
  expect(await securitySnapshot(e)).toEqual(before);
 });

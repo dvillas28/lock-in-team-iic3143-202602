@@ -14,7 +14,7 @@ const spec=(key:string,status='expected',attempts=['passed'])=>{const [id,name,p
 const report=(keys:string[],status='expected',attempts=['passed'])=>({suites:[{specs:keys.map(k=>spec(k,status,attempts))}],errors:[]});
 const key='E2E-AUTH-001/ST1/chromium';
 test('named selections derive all variants from authoritative catalogue without accepting narrow filters',()=>{
- assert.equal(suiteIds('smoke').length,22);assert.equal(expectedKeys('smoke',['chromium','firefox','webkit']).length,153);assert.equal(expectedKeys('extended',['chromium','firefox','webkit']).length,512);assert.equal(selection(['--suite=smoke']).suite,'smoke');assert.throws(()=>selection(['--suite=smoke','--grep','AUTH']));assert.throws(()=>selection(['--suite=invalid']));assert.throws(()=>selection(['--suite=smoke','--project=mobile']));
+ assert.equal(suiteIds('smoke').length,22);assert.equal(expectedKeys('smoke',['chromium','firefox','webkit']).length,153);assert.equal(expectedKeys('extended',['chromium','firefox','webkit']).length,520);assert.equal(selection(['--suite=smoke']).suite,'smoke');assert.throws(()=>selection(['--suite=smoke','--grep','AUTH']));assert.throws(()=>selection(['--suite=invalid']));assert.throws(()=>selection(['--suite=smoke','--project=mobile']));
 });
 test('empty missing skipped interrupted expected-failure and flaky reports are never green',()=>{
  assert.equal(assess(meta,report([key])).passed,true);assert.equal(assess(meta,undefined).passed,false);assert.equal(assess(meta,report([])).passed,false);

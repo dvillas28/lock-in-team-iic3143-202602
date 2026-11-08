@@ -12,6 +12,7 @@ import "@/styles/content.css";
 import "@/styles/quizzes.css";
 import "@/styles/attempts.css";
 import "@/styles/landing.css";
+import "@/styles/accounts.css";
 
 const inter = Inter({
   subsets: ["latin"],

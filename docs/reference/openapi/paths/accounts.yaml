@@ -301,7 +301,7 @@
         $ref: ../components/responses.yaml#/UnsupportedMediaType
     parameters:
     - &id003
-      $ref: ../components/parameters.yaml#/IdempotencyKey
+      $ref: ../components/parameters.yaml#/AccountOperationKey
 /api/v1/institution/{institutionSlug}/invitations/{invitationId}/send:
   parameters:
   - *id002

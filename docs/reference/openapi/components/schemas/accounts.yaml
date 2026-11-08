@@ -177,6 +177,9 @@ InvitationList:
       type:
       - string
       - 'null'
+    hasMore:
+      type: boolean
+      description: Indica si existe una página siguiente; compatible con paginación institucional existente.
 InvitationActivation:
   type: object
   additionalProperties: false
