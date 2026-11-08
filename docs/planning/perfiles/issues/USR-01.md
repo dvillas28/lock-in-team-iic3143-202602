@@ -1,6 +1,6 @@
 # Issue: USR-01 Especificar perfiles y altas institucionales por formulario y CSV
 
-Estado: issue publicada / implementación autorizada. [#233](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/233).
+Estado: completada; especificación y diseño técnico verificados. [#233](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/233).
 Registro: 2026-11-06; publicación: 2026-11-07. Responsable: Matías (matiaraos).
 Objetivo: Semana 5 E4, 2–8 de noviembre de 2026, America/Santiago; estimación aún preliminar.
 

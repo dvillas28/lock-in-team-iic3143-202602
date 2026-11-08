@@ -67,6 +67,15 @@ los contadores del resultado; no publicar PII o claves en la evidencia.
 Se aplican los plazos aprobados de 7/30 días, conservando recibos/FK/auditoría.
 Los huérfanos requieren al menos 24 h y comprobación de ausencia de referencias;
 si almacenamiento está deshabilitado, se omite esa parte y la limpieza de PII sigue.
+Para fotos, el lote limita objetos inspeccionados, incluidos recientes/referenciados.
+El resultado incluye avatarsInspected y avatarCursor: si este último no es null,
+continuar la misma pasada con --avatar-after=VALOR_DEVUELTO y el mismo modo dry-run/apply.
+Copiar el cursor literalmente; se acepta solo una clave interna de avatar válida.
+Cuando avatarCursor sea null terminó la pasada; la siguiente se inicia sin cursor.
+Una pasada --apply nueva comienza sin cursor: no reutilizar el último cursor de un dry-run.
+Guardar el progreso solo tras una ejecución correcta; ante fallo repetir el cursor
+anterior. Las eliminaciones son idempotentes. El cursor solo afecta al recorrido
+S3/local de fotos, no cambia la selección de lotes/invitaciones a depurar.
 No hay worker/cron instalado: Daniel debe programar la ejecución operativa y
 registrar el resultado sanitizado. Repetir una limpieza no recrea altas ni envíos.
 

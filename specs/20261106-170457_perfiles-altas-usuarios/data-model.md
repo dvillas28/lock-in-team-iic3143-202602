@@ -69,6 +69,8 @@ Runtime conserva prohibición de INSERT/UPDATE arbitrario en identidad. Funcione
 específicas de [seguridad](contracts/security.md) validan actor/contexto y precondiciones, realizan escritura+auditoría
 atómica y no permiten SQL dinámico. Dueño NOLOGIN mínimo, search_path fijo,
 EXECUTE revocado a PUBLIC; credenciales de operador fuera del servidor HTTP.
+El operador necesita administrar el rol escritor existente; PG17 usa SET temporal
+solo al transferir funciones y restaura sus permisos. Runtime nunca recibe esa pertenencia.
 Readiness/runtime-check verifican nuevas tablas, FORCE RLS, funciones y grants.
 Seeds siguen insert-only: no restituyen datos, contraseñas o permisos editados.
 Rollback de aplicación no borra columnas ni revierte contraseñas cambiadas.

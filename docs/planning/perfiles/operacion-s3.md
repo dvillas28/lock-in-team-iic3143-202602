@@ -84,6 +84,10 @@ El operador necesita, además de Get/Delete, esta autorización de enumeración:
 
 Esa credencial va al proceso de mantenimiento, fuera del servidor HTTP. El comando
 accounts:cleanup y sus modos dry-run/--apply se explican en el [índice](operacion.md).
+El listado recorre todas las claves válidas en orden lexicográfico, también las
+recientes/referenciadas, para acotar cada lote sin bloquear huérfanos posteriores.
+Continuar con --avatar-after=avatarCursor hasta recibir null; S3 usa StartAfter y
+el almacenamiento local aplica el mismo orden. Reiniciar sin cursor en la próxima pasada.
 No borrar por prefijo sin comprobar DB ni usar reglas de expiración para todas las fotos.
 
 ## Deshabilitar y diagnosticar

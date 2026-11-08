@@ -34,7 +34,8 @@
 
 - [x] Documento listo para revisión y continuación del diseño sobre reglas resueltas.
 - [x] USR-01 diseño técnico completo: plan/modelo/contratos/tareas y gates de identidad, grants/RLS/readiness y sesiones.
-- [ ] DNS/Resend verificados y configurados: tarea operativa de Daniel/Matías, sin evidencia aún.
+- [x] Infraestructura DNS/Resend confirmada por Daniel: dominio, clave Render y correo recibido ([#235](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/235#issuecomment-6717211571)).
+- [ ] Recorrido Resend desde AcademiX validado: invitación, recepción y activación reales.
 - [ ] Feature implementada/probada: registrar evidencia real por tareas antes de cerrar las issues.
 
 ## Notas de validación
@@ -42,7 +43,7 @@
 El usuario aprobó limpieza y delegó el remitente; ambas decisiones quedan registradas.
 Publicar documentación no equivale a habilitar correo real, limpiar datos o cerrar historias.
 Plan técnico formal y tareas completan el diseño; capacidad/estimaciones siguen preliminares.
-Usuario autorizó implementación en la misma rama y PR final; configuración externa pendiente.
+Usuario autorizó implementación en la misma rama y PR final; S3 y validación integrada Resend pendientes.
 
 ## Hooks y autorización actual
 

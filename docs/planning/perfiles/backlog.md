@@ -87,7 +87,11 @@ Bootstrap demo #52 y material CSV #219 no son altas de usuarios ni se reabren.
 CSV se procesa transitoriamente y no espera almacenamiento de material; avatar
 usa [S3 privado en producción](../../adr/s3-for-profile-photos.md), con Daniel como apoyo,
 sin activar todos los binarios académicos. Daniel administra DNS para Resend;
-remitente elegido: AcademiX <no-reply@mail.academix.dvillasc.me>; falta verificar/configurar DNS.
+remitente elegido: AcademiX <no-reply@mail.academix.dvillasc.me>. Daniel tiene asignada
+la configuración DNS/Resend y ya reportó dominio verificado, clave en Render y
+correo recibido ([evidencia #235](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/235#issuecomment-6717211571)).
+Queda pendiente el recorrido real desde AcademiX, además del aprovisionamiento S3.
+El estado comprobado de implementación y pruebas está en [evidencia](evidencia.md).
 
 ## Registro de publicación
 
@@ -95,3 +99,10 @@ Issues #233–237 publicadas en el Project, Semana 5 E4, con prioridad P1 y depe
 Matías asignado a las cinco; Daniel (dvillas28) también a #234 (S3) y #235 (DNS/Resend).
 Usuario autorizó implementación, commits por avance y PR final hacia dev en la misma rama.
 Las 112 h son preliminares; no se inventan inicio, horas reales ni pruebas externas.
+
+## Checkpoint 2026-11-08
+
+USR-01 (#233): preparación completada. USR-02/04/05/08 (#234–237): en progreso,
+con implementación local y pruebas registradas en [evidencia](evidencia.md).
+Faltan navegador, operación S3 y activación real con Resend según los criterios
+de cada issue. Guardar en commits no acredita publicación, merge ni despliegue.

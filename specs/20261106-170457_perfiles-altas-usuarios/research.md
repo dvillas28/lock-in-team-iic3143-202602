@@ -10,6 +10,8 @@ Fecha: 2026-11-07. [Plan](plan.md) · [Spec](spec.md). Decisiones cerradas para 
 - **Decisión:** funciones SQL acotadas y auditadas, con rol propietario NOLOGIN mínimo.
 - **Motivo:** triggers/runtime-check actuales prohíben escrituras generales de identidad.
 - **Alternativas:** operador en HTTP o grants UPDATE generales; rechazan mínimo privilegio.
+- **PG17:** CREATEROLE concede ADMIN al creador sin SET; transferir funciones requiere
+  SET temporal del operador, restaurado al terminar. Runtime nunca pertenece al escritor.
 
 ## Sesiones y concurrencia
 
