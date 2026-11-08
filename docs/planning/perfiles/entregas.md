@@ -105,7 +105,9 @@ Preservar reejecución de seeds: no restituir contraseña, nombre, foto o permis
   auditoría académica conservan su comportamiento y sus identificadores.
 
 Validar por historia con node:test/integración PostgreSQL, tests frontend y
-Playwright existente; integración solo en base descartable `_test` con runtime real.
+Playwright existente, omitido en esta validación por instrucción del usuario del
+2026-11-08; aceptación de interfaz manual reportada por Matías. Integración solo
+en base descartable `_test` con runtime real.
 Ejecutar build/lint, typecheck, generación/verificación API y lint/catálogo OpenAPI.
 Agregar pruebas de migración desde esquema poblado y de despliegue/readiness;
 rollback de aplicación no debe borrar columnas ni deshacer contraseñas cambiadas.

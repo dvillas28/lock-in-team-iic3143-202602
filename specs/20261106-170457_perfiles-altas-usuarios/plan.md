@@ -18,7 +18,7 @@ Matías implementa; Daniel (`dvillas28`) prepara DNS, Resend y S3.
 | Plataforma | TypeScript 5.9, Node 24, pnpm 9.15.9; NestJS 12 y Next.js 16 existentes |
 | Persistencia | PostgreSQL/pg y migraciones SQL existentes; cuatro tablas de soporte |
 | Proveedores | SDK AWS v3, Resend; sharp para imágenes y csv-parse para CSV |
-| Pruebas | node:test, PostgreSQL descartable con runtime real, jsdom y Playwright |
+| Pruebas | node:test, PostgreSQL descartable, jsdom y aceptación manual; Playwright omitido por instrucción |
 | Perfil | Global propio; nombre 1–200, bio ≤500; sin cambio de correo ni flags |
 | Credenciales | Argon2id; JWT 900 s con credentialVersion obligatorio |
 | Foto | JPEG/PNG/WebP estático ≤2 MiB/16 MP → WebP ≤1024×1024 sin metadatos |
@@ -82,6 +82,9 @@ no incluir archivos locales ajenos ni `.specify/feature.json`. No crear issues n
 Migrar antes del nuevo backend; exigir nuevo login por claim de versión. /ready depende
 de DB/seguridad, no de conexión a S3/Resend. Activar proveedores cambiando variables
 cuando Daniel complete su guía; sin fallback local/fake en producción.
+El 2026-11-08 Matías reporta pruebas manuales de Resend e interfaz y sustituye
+Playwright por validación manual. No ejecutar navegador automatizado; registrar
+esta procedencia sin atribuir escenarios/dispositivos no informados. S3 real sigue pendiente.
 
 ## Complexity Tracking
 

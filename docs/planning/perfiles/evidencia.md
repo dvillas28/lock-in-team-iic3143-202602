@@ -21,9 +21,10 @@ No acredita despliegue ni cierre remoto de issues.
 | Backend unitario y lint | Aprobados | 20 pruebas unitarias; lint final aprobado; proveedor y mantenimiento revalidados tras el cursor |
 | Mantenimiento con cursor acotado y permisos | 3 pruebas aprobadas | Dos casos de limpieza y permiso antes de 503; avance entre objetos referenciados, recientes y huérfanos |
 | Frontend DOM y dominio | 61 aprobados / 0 fallidos | Cobertura: 94,79 % líneas, 87,11 % ramas; incluye protección del borrador al cambiar foto |
-| Navegador | Validación final pendiente | Ver T035/T036 y catálogo ACCOUNTS |
+| Interfaz manual | Confirmada por el usuario | Matías reporta prueba manual el 2026-11-08; Playwright omitido por instrucción expresa |
 | Resend: infraestructura | Confirmada por Daniel | Dominio verificado, clave Render y correo recibido; [evidencia #235](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/235#issuecomment-6717211571) |
-| S3 y recorrido Resend desde AcademiX | Pendientes | Provisionar S3 y probar envío/activación opt-in; registrar evidencia sin secretos |
+| Resend desde AcademiX | Prueba manual reportada por Matías | Confirmación del usuario el 2026-11-08; no fue repetida por el agente |
+| S3 real | Pendiente | Provisionar bucket/acceso y comprobar subir/leer/reemplazar/eliminar |
 
 La primera suite completa se ejecutó antes de actualizar expectativas históricas
 de migraciones y permisos, y antes de corregir compatibilidad strip-only de Node 24.
@@ -62,10 +63,10 @@ Persistence comprueba además tipos, nulabilidad, tablas y constraints nuevos.
 
 - [x] T034: regresión académica, migraciones pobladas y runtime integrado aprobados
   mediante las corridas complementarias registradas y la revalidación del mantenimiento.
-- [ ] T035: recorridos completos, teclado, 375 px y ambos temas en Playwright.
-- [ ] T036: reunir lint, compilación, tests, documentación y catálogo definitivos.
-- [ ] T037: conciliar evidencia y cierre de las cinco issues con sus criterios.
-- [ ] T038: comprobación S3/Resend real con Daniel, según [operación](operacion.md).
+- [x] T035: aceptación manual del usuario registrada; Playwright omitido por su instrucción.
+- [x] T036: lint backend/frontend, tipos, builds, OpenAPI/cliente, catálogo y documentación aprobados.
+- [x] T037: evidencia y casillas conciliadas; #235/236 completadas, #234/237 con pendientes explícitos.
+- [ ] T038: completar S3 real con Daniel; Resend ya tiene reporte manual del usuario.
 
 La evidencia externa debe indicar fecha, entorno, responsable y resultado de
 subir/leer/reemplazar/eliminar foto y enviar/activar una invitación opt-in.
@@ -75,5 +76,23 @@ Configurar un secreto o verificar DNS por sí solo no completa esos recorridos.
 
 El usuario solicita guardar la implementación en commits de la rama actual.
 #233 cumple sus criterios documentales y se marca completada en GitHub/Project.
-#234–237 conservan estado en progreso: código preparado, validación de navegador
-y/o servicios reales pendiente según cada issue. No se acredita merge o despliegue.
+#235 y #236 completadas con pruebas de código y aceptación manual.
+#234 sigue pendiente de S3; #237 conserva pendientes externos y de evidencia.
+No se acredita push, merge ni despliegue.
+
+## Aceptación manual reportada por el usuario — 2026-11-08
+
+Matías indica que realizó la prueba manual de Resend y la interfaz, y pide
+no ejecutar Playwright. Se registra como prueba del usuario, no ejecución del agente.
+No se informan destinatarios, tokens ni secretos; no se solicitan para registrar aceptación.
+No hay desglose específico de teclado, 375 px, ambos temas, reenvíos o todas las
+variantes de cuenta existente: esos casos no se atribuyen a la prueba manual.
+Las pruebas automatizadas de API/DB/DOM descritas arriba conservan su alcance propio.
+
+## Validación final sin Playwright — 2026-11-08
+
+Lint backend/frontend, tipos frontend, cliente generado y OpenAPI: aprobados
+(tres advertencias históricas del contrato). Builds backend/frontend: aprobados.
+Backend unitario: 20/20; catálogo: 4/4. Se conserva la evidencia previa de DB/DOM,
+sin repetir integración completa ni enviar correo real desde el agente.
+Documentación y diffcheck aprobados. S3 y detalle de accesibilidad manual siguen pendientes.

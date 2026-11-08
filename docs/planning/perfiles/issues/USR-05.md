@@ -1,6 +1,6 @@
 # Issue: USR-05 Importar usuarios por CSV con validación, confirmación y envíos
 
-Estado: issue publicada / implementación autorizada. [#236](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/236).
+Estado: completada; código validado y aceptación manual reportada por Matías. [#236](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/236).
 Registro: 2026-11-06; publicación: 2026-11-07. Responsable: Matías (matiaraos).
 Objetivo: Semana 5 E4, 2–8 de noviembre de 2026, America/Santiago; estimación aún preliminar.
 
@@ -18,26 +18,26 @@ Reutilizar las invitaciones y operaciones Resend de USR-04, sin repetir infraest
 
 ## Plantilla, validación y vista previa
 
-- [ ] UTF-8/BOM opcional, coma y comillas estándar, LF/CRLF; cabeceras exactas name,email, rechazar extras, passwords, roles e identificadores de tenant.
-- [ ] Propuesta <=100 filas y <=256 KiB, incluso sin Content-Length; parser probado, sin split(',').
-- [ ] Errores por fila para formato/nombre/email/duplicados normalizados; distinguir ya pertenece/ya pendiente sin revelar otras instituciones.
-- [ ] Staging normalizado con fingerprint/TTL propuesto de 24 h y RLS; archivo solo en memoria acotada, descartado al procesar/fallar/cancelar, sin temporales en disco/S3/DB ni copia codificada.
-- [ ] Tabla accesible, resumen y confirmación bloqueada si hay errores; cubrir límites, CSV malformado, UTF-8 inválido y tenant cruzado.
+- [x] UTF-8/BOM opcional, coma y comillas estándar, LF/CRLF; cabeceras exactas name,email, rechazar extras, passwords, roles e identificadores de tenant.
+- [x] Propuesta <=100 filas y <=256 KiB, incluso sin Content-Length; parser probado, sin split(',').
+- [x] Errores por fila para formato/nombre/email/duplicados normalizados; distinguir ya pertenece/ya pendiente sin revelar otras instituciones.
+- [x] Staging normalizado con fingerprint/TTL propuesto de 24 h y RLS; archivo solo en memoria acotada, descartado al procesar/fallar/cancelar, sin temporales en disco/S3/DB ni copia codificada.
+- [x] Tabla accesible, resumen y confirmación bloqueada si hay errores; cubrir límites, CSV malformado, UTF-8 inválido y tenant cruzado.
 
 ## Confirmación y recibo
 
-- [ ] Revalidar permiso administrativo y precondiciones de todas las filas; si cambió clasificación o hay conflicto, rollback completo y 409 para nueva preview.
-- [ ] Invitaciones + filas + estado/recibo + auditoría confirman en una transacción; ninguna aplicación parcial ni hashes de contraseñas en CSV.
-- [ ] Confirmación por importId idempotente: doble clic/replay/timeout no duplican invitaciones ni eventos; recuperar mismo recibo por GET autorizado.
-- [ ] Omitir miembros/invitaciones ya vigentes; no reactivar revocados, sobrescribir perfiles ajenos o asignar roles/flags.
-- [ ] Informe por fila sin contraseñas, hashes ni códigos; neutralizar fórmulas si se exporta. Probar concurrencia, fallo de fila/auditoría y límites contra timeout real.
-- [ ] Commit CSV crea invitaciones sin llamar a Resend dentro de transacción; receipt incluye estado de envío por fila para el despacho recuperable.
-- [ ] Confirmación repetida no reenvía correos; cuota o fallo de proveedor nunca revierte lote confirmado ni implica entrega total garantizada.
-- [ ] Limpiar PII/fingerprint a los 7 días de confirmación/expiración según [política](../retencion.md); preservar recibos/FK, mostrar datos depurados y rechazar replay mutante sin recrear altas.
+- [x] Revalidar permiso administrativo y precondiciones de todas las filas; si cambió clasificación o hay conflicto, rollback completo y 409 para nueva preview.
+- [x] Invitaciones + filas + estado/recibo + auditoría confirman en una transacción; ninguna aplicación parcial ni hashes de contraseñas en CSV.
+- [x] Confirmación por importId idempotente: doble clic/replay/timeout no duplican invitaciones ni eventos; recuperar mismo recibo por GET autorizado.
+- [x] Omitir miembros/invitaciones ya vigentes; no reactivar revocados, sobrescribir perfiles ajenos o asignar roles/flags.
+- [x] Informe por fila sin contraseñas, hashes ni códigos; neutralizar fórmulas si se exporta. Probar concurrencia, fallo de fila/auditoría y límites contra timeout real.
+- [x] Commit CSV crea invitaciones sin llamar a Resend dentro de transacción; receipt incluye estado de envío por fila para el despacho recuperable.
+- [x] Confirmación repetida no reenvía correos; cuota o fallo de proveedor nunca revierte lote confirmado ni implica entrega total garantizada.
+- [x] Limpiar PII/fingerprint a los 7 días de confirmación/expiración según [política](../retencion.md); preservar recibos/FK, mostrar datos depurados y rechazar replay mutante sin recrear altas.
 
 ## Despacho y reanudación del lote
 
-- [ ] CSV coordina solicitudes cortas secuenciales; cierre de pestaña/logout pausa;
+- [x] CSV coordina solicitudes cortas secuenciales; cierre de pestaña/logout pausa;
   continuar solo pendientes no ambiguos tras revalidar, sin repetir accepted/unknown.
 
 ## Límites y validación
@@ -58,3 +58,9 @@ explícito con código nuevo, sin repetir accepted ni rotar códigos por replay 
 · [CSV](../importacion-csv.md) · [Resend](../correo-resend.md).
 
 La publicación no acredita implementación, despliegue ni validación externa.
+
+## Validación manual aceptada — 2026-11-08
+
+Matías reporta prueba manual de Resend e interfaz y solicita no ejecutar Playwright.
+Se registra como reporte del usuario, no ejecución del agente ni validación de
+variantes no desglosadas. [Evidencia y checks finales](../evidencia.md).

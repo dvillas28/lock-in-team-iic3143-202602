@@ -77,10 +77,10 @@ Una casilla marcada acredita el entregable indicado; no acredita despliegue ni p
 - [x] T032 Verificar tipos generados y catálogo desde docs/reference/openapi/openapi.yaml; generar frontend/src/lib/api/schema.d.ts.
 - [x] T033 [P] Completar guías para Daniel en docs/planning/perfiles/operacion.md, operacion-s3.md y operacion-resend.md.
 - [x] T034 Verificar migración poblada, runtime real y regresión académica en backend/test/integration/ (SC-001–010).
-- [ ] T035 Verificar recorridos/teclado/375px/temas y servicios disabled en e2e/specs/ (FR-024/SC-008).
-- [ ] T036 Ejecutar checks de lint/tests/build/API/documentación de specs/20261106-170457_perfiles-altas-usuarios/quickstart.md y registrar resultados.
-- [ ] T037 Actualizar evidencia y cierre real por issue en docs/planning/perfiles/backlog.md; excluir archivos ajenos y secretos.
-- [ ] T038 Validar S3/Resend reales con Daniel mediante docs/planning/perfiles/operacion.md; pendiente hasta disponer de configuración.
+- [x] T035 Registrar aceptación manual de recorridos por Matías en docs/planning/perfiles/evidencia.md; Playwright omitido por instrucción del 2026-11-08 (FR-024/SC-008).
+- [x] T036 Ejecutar checks de lint/tests/build/API/documentación de specs/20261106-170457_perfiles-altas-usuarios/quickstart.md y registrar resultados.
+- [x] T037 Actualizar evidencia y cierre real por issue en docs/planning/perfiles/backlog.md; excluir archivos ajenos y secretos.
+- [ ] T038 Completar S3 real con Daniel mediante docs/planning/perfiles/operacion.md; Resend manual confirmado por Matías el 2026-11-08.
 
 ## Dependencies & Execution Order
 
@@ -94,4 +94,6 @@ contratos/documentación y frontend pueden avanzar en paralelo con interfaces ac
 Una rama conservada y commits por avance. Perfil → contraseña/foto → alta individual
 → CSV → integración. Pruebas por incremento; #237 no pospone seguridad/integridad.
 Configuración faltante no bloquea arranque; tampoco acredita correo/foto enviados.
-T038 permanece pendiente hasta evidencia externa, sin reemplazarla por mocks.
+T038 permanece pendiente por S3 real; Resend cuenta con aceptación manual del usuario.
+No se ejecuta Playwright por instrucción expresa. Teclado/375 px/temas no tienen
+resultados manuales desglosados; no se presentan como comprobados individualmente.

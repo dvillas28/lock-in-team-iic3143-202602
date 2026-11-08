@@ -136,3 +136,10 @@ Como administrador autorizado, valido una lista, reviso errores y confirmo altas
 - [Decisiones y tareas operativas](pending-decisions.md), [checklist](checklists/requirements.md), [modelo](../../docs/planning/perfiles/modelo-datos.md), [CSV](../../docs/planning/perfiles/importacion-csv.md) y [retención](../../docs/planning/perfiles/retencion.md).
 - [Identidad](../20261014-234744_identidad-acceso/spec.md), [cursos/roles](../20261014-234844_cursos-roles/spec.md), [Resend](../../docs/adr/resend-for-account-invitations.md), [S3](../../docs/adr/s3-for-profile-photos.md) y [fronteras de cuenta](../../docs/adr/institutional-account-lifecycle.md).
 - Excluye: provisión externa automática, cambio de correo, recuperación de contraseña olvidada, borrado de cuenta, perfiles públicos, matrículas/privilegios por CSV, superadmin global, nuevos tenants, material académico binario, workers y entrega garantizada en background.
+
+## Ajuste de validación — 2026-11-08
+
+Matías confirma pruebas manuales de Resend e interfaz y solicita expresamente
+no ejecutar Playwright. Se acepta validación manual para los recorridos; no se
+acreditan ejecuciones automáticas ni detalles de dispositivos/temas no reportados.
+S3 real continúa pendiente. Evidencia y limitaciones en docs/planning/perfiles/evidencia.md.

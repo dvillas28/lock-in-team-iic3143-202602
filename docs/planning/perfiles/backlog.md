@@ -90,7 +90,8 @@ sin activar todos los binarios académicos. Daniel administra DNS para Resend;
 remitente elegido: AcademiX <no-reply@mail.academix.dvillasc.me>. Daniel tiene asignada
 la configuración DNS/Resend y ya reportó dominio verificado, clave en Render y
 correo recibido ([evidencia #235](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/235#issuecomment-6717211571)).
-Queda pendiente el recorrido real desde AcademiX, además del aprovisionamiento S3.
+Matías reportó prueba manual de Resend desde AcademiX el 2026-11-08.
+El aprovisionamiento y validación de S3 real continúan pendientes.
 El estado comprobado de implementación y pruebas está en [evidencia](evidencia.md).
 
 ## Registro de publicación
@@ -102,7 +103,9 @@ Las 112 h son preliminares; no se inventan inicio, horas reales ni pruebas exter
 
 ## Checkpoint 2026-11-08
 
-USR-01 (#233): preparación completada. USR-02/04/05/08 (#234–237): en progreso,
-con implementación local y pruebas registradas en [evidencia](evidencia.md).
-Faltan navegador, operación S3 y activación real con Resend según los criterios
-de cada issue. Guardar en commits no acredita publicación, merge ni despliegue.
+USR-01 (#233): preparación completada. USR-04/05 (#235/236): código probado y
+aceptación manual del usuario registrada; completadas tras validación final.
+USR-02 (#234): pendiente S3 real. USR-08 (#237): pendiente S3 y detalle de
+evidencia de teclado/375 px/temas. [Resultados y procedencia](evidencia.md).
+Matías solicita no ejecutar Playwright; la aceptación de interfaz es manual.
+Guardar en commits no acredita publicación, merge ni despliegue.

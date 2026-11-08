@@ -29,11 +29,12 @@ pnpm --dir frontend test
 pnpm build
 pnpm docs:api:test
 pnpm docs:api:build
-pnpm test:e2e
 ```
 
 Aplicar únicamente los comandos para los que estén preparadas las bases/fixtures;
 registrar faltantes y no presentar una prueba omitida como aprobada.
+Desde 2026-11-08 no ejecutar Playwright: el usuario acepta sus pruebas manuales
+de interfaz y Resend como validación de recorridos. No sustituirlas por resultados inventados.
 
 ## Recorridos de aceptación
 
@@ -61,6 +62,7 @@ registrar faltantes y no presentar una prueba omitida como aprobada.
 
 S3: bucket privado, permisos mínimos y secreto backend; comprobar subida/lectura/
 reemplazo/eliminación con cuenta de prueba. Resend: DNS verificado, remitente,
-clave de envío y orígenes permitidos; invitación real opt-in del equipo.
+clave de envío y orígenes permitidos: infraestructura confirmada por Daniel y
+prueba manual desde AcademiX reportada por Matías el 2026-11-08.
 Cada prueba deja fecha, entorno, resultado y responsable sin secretos o enlaces de activación.
 Una prueba simulada no cierra esta evidencia de operación real.

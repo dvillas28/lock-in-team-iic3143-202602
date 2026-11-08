@@ -4,6 +4,9 @@ Trazabilidad: [spec de perfiles y altas](../../../specs/20261106-170457_perfiles
 y issues #233–237. Implementaciones en [accounts.spec.ts](../../../e2e/specs/accounts.spec.ts).
 Las pruebas usan PostgreSQL y backend locales descartables; Resend está deshabilitado.
 La activación prepara un código de prueba en la DB propiedad del runner, sin envío real.
+Estado 2026-11-08: no ejecutar Playwright por instrucción del usuario. Matías
+acepta los recorridos manualmente y reporta Resend real; no se acredita ejecución
+automática ni cada variante descrita abajo. S3 real continúa pendiente.
 
 | Caso y ficha | Flujo | Prioridad | Suite | Nivel |
 | --- | --- | --- | --- | --- |
@@ -49,4 +52,5 @@ La activación prepara un código de prueba en la DB propiedad del runner, sin e
 
 - Imagen válida se normaliza y se consulta solo con autenticación.
 - Archivo local sobrevive al reinicio del backend de prueba; eliminar devuelve inicial.
-- S3 y Resend reales requieren evidencia opt-in posterior con configuración de Daniel.
+- S3 real requiere evidencia opt-in posterior con configuración de Daniel.
+- Resend real fue reportado manualmente por Matías; no se probó desde este runner.

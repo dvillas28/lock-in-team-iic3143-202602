@@ -22,7 +22,7 @@ entregar cada capacidad de punta a punta, sobre NestJS, Next.js, PostgreSQL y pn
 | Área | Base inicial investigada | Implementación actual, pendiente de integración final |
 | --- | --- | --- |
 | Identidad | User global, correo único normalizado y memberships separadas | bio, avatar_key y credential_version; altas sin Enrollment ni flags implícitos |
-| Correo | Sin mailer | Adaptadores Resend/disabled; fake solo tests; infraestructura reportada por Daniel y recorrido real pendiente |
+| Correo | Sin mailer | Adaptadores Resend/disabled; fake solo tests; infraestructura confirmada por Daniel y prueba manual real reportada por Matías |
 | Institución | Membership única; flags admin/superadmin independientes | Formulario, invitaciones y CSV autorizados por cualquiera de esos flags vigentes |
 | Login | Argon2id y JWT de 900 s, User activo | Cambio de contraseña auditado; credentialVersion revoca sesiones previas en todas las instituciones |
 | Cuenta propia | GET institucional, dependiente de membership | GET/PATCH /me global, contraseña y foto, con conflictos de edición por timestamp preciso |

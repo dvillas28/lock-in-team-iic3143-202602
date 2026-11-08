@@ -85,7 +85,7 @@ registrar el resultado sanitizado. Repetir una limpieza no recrea altas ni enví
 - [ ] Una cuenta de prueba sube, consulta, reemplaza y elimina su foto con S3 real.
 - [ ] Otro usuario y otro tenant no pueden leer/modificar la foto ajena.
 - [x] Daniel reportó DNS verificado, clave de solo envío en Render y envío recibido (2026-11-08, #235).
-- [ ] Una invitación real llega a una cuenta del equipo y se activa una sola vez.
+- [x] Matías reportó prueba manual real de Resend desde AcademiX (2026-11-08); no se atribuyen variantes no desglosadas.
 - [ ] Cuenta global existente acepta la pertenencia sin cambiar credenciales.
 - [ ] Deshabilitar correo conserva altas/lotes; habilitar permite enviar pendientes.
 - [ ] Registrar fecha, entorno, resultado y evidencia sanitizada en #237.

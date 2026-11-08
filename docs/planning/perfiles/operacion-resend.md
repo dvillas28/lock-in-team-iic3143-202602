@@ -2,7 +2,7 @@
 
 Daniel administra DNS/Resend; Matías integra el backend. [Índice](operacion.md).
 Estado: adaptador implementado; Daniel reportó dominio verificado, key en Render y envío recibido el 2026-11-08.
-Pendiente: validación del recorrido completo desde AcademiX. [Evidencia de Daniel](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/235#issuecomment-6717211571).
+Matías reportó prueba manual desde AcademiX el 2026-11-08; no repetida por el agente. [Evidencia de Daniel](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/235#issuecomment-6717211571).
 [ADR](../../adr/resend-for-account-invitations.md) · [plan de estados](correo-resend.md).
 
 ## Preparación por Daniel
@@ -22,7 +22,8 @@ como RESEND_API_KEY. No se comparte con desarrollo. Tracking desactivado.
 No sustituir estos CNAME por instrucciones antiguas de Amazon SES. Para cambios
 futuros usar los valores del dashboard. El dominio raíz conserva su reenvío previo.
 La prueba de Daniel acredita envío recibido en Gmail; no acredita aún activación
-ni reenvío desde los endpoints de AcademiX.
+ni reenvío desde los endpoints de AcademiX. Matías confirmó después su prueba
+manual desde la aplicación; las variantes no desglosadas no se dan por realizadas.
 
 ## Variables backend
 
