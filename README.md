@@ -1,13 +1,13 @@
 # Métricas del tablero
 
-Snapshots: 28 (2026-10-11 a 2026-11-07).
+Snapshots: 29 (2026-10-11 a 2026-11-08).
 
 ## Avance
 
 |  | Alcance | Terminado | % |
 | --- | --- | --- | --- |
-| Tarjetas | 124 | 99 | 80 |
-| Horas estimadas | 466.0 | 393.0 | 84 |
+| Tarjetas | 129 | 99 | 77 |
+| Horas estimadas | 526.0 | 393.0 | 75 |
 
 ## Tiempos (días)
 
@@ -28,7 +28,7 @@ Tarjetas conciliadas o registradas después de hechas (26): cuentan en el avance
 | Semana 2 E3 | 14 | 11 | 43.0 | 26.0 | 0.70 |
 | Semana 3 E3 | 31 | 30 | 132.0 | 45.6 | 0.35 |
 | Semana 4 E3 | 15 | 13 | 48.0 | 22.0 | 0.67 |
-| Semana 5 E4 | 19 | 16 | 83.0 | 6.5 | 0.93 |
+| Semana 5 E4 | 24 | 16 | 143.0 | 6.5 | 0.93 |
 | Semana 6 E4 | 19 | 13 | 80.0 | — | — |
 | Semana 7 E4 | 17 | 1 | 56.0 | — | — |
 
@@ -40,11 +40,11 @@ Tarjetas en Done sin Real (h): 28.
 
 | Tipo | Tarjetas | Terminadas | Estimado (h) |
 | --- | --- | --- | --- |
-| feat | 49 | 47 | 267.0 |
-| docs | 32 | 22 | 86.0 |
+| feat | 52 | 47 | 313.0 |
+| docs | 33 | 22 | 92.0 |
 | ci | 19 | 15 | 46.0 |
 | chore | 17 | 7 | 35.0 |
-| test | 5 | 2 | 19.0 |
+| test | 6 | 2 | 27.0 |
 | build | 4 | 3 | 11.0 |
 | fix | 4 | 3 | 15.0 |
 
@@ -52,9 +52,9 @@ Tarjetas en Done sin Real (h): 28.
 
 | Área | Tarjetas | Terminadas | Estimado (h) |
 | --- | --- | --- | --- |
-| BE | 34 | 30 | 183.0 |
-| FE | 24 | 22 | 120.0 |
-| DOC | 22 | 12 | 51.0 |
+| BE | 36 | 30 | 197.0 |
+| FE | 26 | 22 | 160.0 |
+| DOC | 23 | 12 | 57.0 |
 | PREP | 18 | 12 | 52.0 |
 | CI | 18 | 13 | 42.0 |
 | INF | 8 | 5 | 16.0 |
