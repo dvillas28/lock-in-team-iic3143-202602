@@ -87,8 +87,8 @@ export class ImportsService {
    if(lot.status!=="previewed" || new Date(lot.expires_at).getTime()<=Date.now())throw new ConflictException();
    const rows=(await db.query("SELECT * FROM public.user_import_rows WHERE institution_id=$1 AND import_id=$2 ORDER BY row_number",[m.institution_id,id])).rows;
    if(rows.some(r=>!["valid","already_member","already_pending"].includes(r.validation_code)))throw new ConflictException();
-   // Stable recipient locks align single and bulk issuance without reserving a network transaction.
-   await db.query("SELECT pg_advisory_xact_lock(hashtextextended(value,20261107)) FROM (SELECT unnest($1::text[]) AS value ORDER BY 1) ordered",[[...new Set(rows.map(r=>m.institution_id+":"+r.normalized_email))].sort()]);
+   // PostgreSQL orders recipient locks using the same collation for every batch.
+   await db.query("SELECT pg_advisory_xact_lock(hashtextextended(value,20261107)) FROM (SELECT unnest($1::text[]) AS value ORDER BY 1) ordered",[[...new Set(rows.map(r=>m.institution_id+":"+r.normalized_email))]]);
    await expireInvitations(db,m.institution_id,actor);
    const classes=await classifications(db,m.institution_id,rows.map(r=>r.normalized_email));
    for(const row of rows) {
