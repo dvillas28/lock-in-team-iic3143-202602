@@ -22,6 +22,9 @@ Los tests usan directorios temporales y transporte S3 sustituido, sin credencial
    No usar credenciales root ni las del operador de base de datos.
 4. Entregar configuración mediante el gestor de secretos del despliegue.
 
+`scripts/provision-avatar-s3.sh` aplica estos pasos en us-east-1 para prod y test
+(este con expiración de 7 días) y guarda las keys fuera del repo, sin imprimirlas.
+
 Política de aplicación, sustituyendo NOMBRE_BUCKET sin alterar el prefijo:
 
 ```json
