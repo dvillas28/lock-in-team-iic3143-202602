@@ -37,6 +37,20 @@ services:
         value: '["https://uc.academix.dvillasc.me","https://utfsm.academix.dvillasc.me"]'
       - key: DEMO_DATA_ENABLED
         value: "false"
+      # S3 remains unavailable; Daniel verified Resend and configured its secret on 2026-11-08.
+      - key: AVATAR_STORAGE_DRIVER
+        value: "disabled"
+      - key: RESEND_API_KEY
+        sync: false
+      - key: MAIL_DELIVERY_MODE
+        value: "resend"
+      - key: MAIL_FROM
+        value: "AcademiX <no-reply@mail.academix.dvillasc.me>"
+      - key: ACTIVATION_ORIGINS_BY_INSTITUTION
+        value: '{"uc":"https://uc.academix.dvillasc.me","utfsm":"https://utfsm.academix.dvillasc.me"}'
+      # Enable through backend Environment after provisioning; never NEXT_PUBLIC:
+      # AWS_REGION, S3_AVATAR_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,
+      # optional AWS_SESSION_TOKEN. See docs/planning/perfiles/operacion.md.
 
   - type: web
     name: academix-frontend

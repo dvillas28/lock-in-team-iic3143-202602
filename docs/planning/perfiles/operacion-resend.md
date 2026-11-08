@@ -1,22 +1,28 @@
 # Correo de invitaciones: DNS, Resend y recuperación
 
 Daniel administra DNS/Resend; Matías integra el backend. [Índice](operacion.md).
-Estado: adaptador implementado; dominio/configuración y prueba real pendientes.
+Estado: adaptador implementado; Daniel reportó dominio verificado, key en Render y envío recibido el 2026-11-08.
+Pendiente: validación del recorrido completo desde AcademiX. [Evidencia de Daniel](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/235#issuecomment-6717211571).
 [ADR](../../adr/resend-for-account-invitations.md) · [plan de estados](correo-resend.md).
 
 ## Preparación por Daniel
 
-1. Crear/seleccionar la cuenta de Resend del equipo y registrar el dominio
-   **mail.academix.dvillasc.me**. Confirmar que el equipo controla sus DNS.
-2. Copiar exactamente los registros que muestra Resend: nombre, tipo, valor y
-   prioridad de SPF/DKIM/MX cuando se solicite. No inventar valores de una guía.
-   Comprobar propagación y estado verificado en Resend; revisar DMARC del dominio.
-3. Crear una API key limitada al envío desde ese dominio. Guardarla en el backend.
-4. Desactivar seguimiento de clics/aperturas para estos mensajes; no adjuntar
-   datos académicos ni roles. La plantilla incluye alternativa de texto.
+Infraestructura confirmada por Daniel: Resend Forge, región us-east-1, dominio
+mail.academix.dvillasc.me y remitente AcademiX <no-reply@mail.academix.dvillasc.me>.
+La key de producción tiene Sending access restringido al dominio y está en Render
+como RESEND_API_KEY. No se comparte con desarrollo. Tracking desactivado.
 
-Remitente seleccionado: **AcademiX <no-reply@mail.academix.dvillasc.me>**.
-Elegir una dirección no acredita verificación DNS ni recepción de mensajes.
+| Tipo | Host en dvillasc.me | Valor |
+| --- | --- | --- |
+| TXT | resend._domainkey.mail.academix | Clave pública DKIM indicada por Resend |
+| CNAME | send.mail.academix | send.forge.rmta.net. |
+| CNAME | rsend.mail.academix | rsend.forge.rmta.net. |
+| TXT | _dmarc.mail.academix | v=DMARC1; p=none; |
+
+No sustituir estos CNAME por instrucciones antiguas de Amazon SES. Para cambios
+futuros usar los valores del dashboard. El dominio raíz conserva su reenvío previo.
+La prueba de Daniel acredita envío recibido en Gmail; no acredita aún activación
+ni reenvío desde los endpoints de AcademiX.
 
 ## Variables backend
 
@@ -48,10 +54,23 @@ El SDK usa HTTPS al API oficial. No se requieren puertos SMTP de Render.
 
 ## Prueba local y CI
 
-El modo por defecto es disabled. Fake solo se admite con NODE_ENV=test y captura
+En desarrollo normal el modo por defecto es disabled. Fake solo se admite con NODE_ENV=test y captura
 los mensajes en memoria de cada prueba. No existe buzón ni endpoint para recuperar
 códigos. La prueba manual requiere Resend real, dominio verificado y cuenta del equipo.
 No activar envíos reales en CI. No imprimir cuerpos, enlaces ni códigos en logs.
+
+```bash
+# Tests de proveedor: sin key y sin acceso a Resend.
+NODE_ENV=test MAIL_DELIVERY_MODE=fake pnpm --dir backend test
+```
+
+Las pruebas de integración requieren además la base PostgreSQL descartable de
+quickstart. No arrancar el servidor de desarrollo con NODE_ENV=test para obtener
+fake: este adaptador sirve a las pruebas y no ofrece buzón o enlace en la UI.
+Para prueba manual real, pedir a Daniel una key de desarrollo separada y activar
+resend explícitamente. delivered@resend.dev permite probar el API, pero no ofrece
+un buzón para hacer clic; la activación manual usa una cuenta controlada del equipo.
+Las pruebas reales consumen cuota. Nunca cargar la key productiva en local.
 
 ## Prueba real opt-in
 
