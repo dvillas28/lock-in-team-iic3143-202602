@@ -34,7 +34,7 @@ test('presentation data works with real frontend adapters and five roles, UC/UTF
       for (const role of ['admin', 'teacher', 'assistant', 'student']) assert.equal((await listCourses(clients[role], slug)).length, 3);
       assert.equal((await listCourses(clients.superadmin, slug)).length, 0);
       assert.equal((await request(app, tokens.superadmin, `${slug}/memberships`)).status, 200);
-      assert.equal((await request(app, tokens.admin, `${slug}/memberships`)).status, 403);
+      assert.equal((await request(app, tokens.admin, `${slug}/memberships`)).status, 200);
       assert.equal((await listSections(clients.admin, slug, courseId)).length, 2);
       assert.equal((await listSections(clients.teacher, slug, courseId)).length, 1);
       assert.equal((await request(app, tokens.admin, `${slug}/sections/${second}`, 'PATCH', { capacity: 15 })).status, 200);

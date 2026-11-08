@@ -10,7 +10,7 @@ export class MembershipAdminService {
  constructor(private readonly database:DatabaseService,private readonly audit:AuditService) {}
  async list(actor:string,slug:string,query:Record<string,unknown>) {
  return this.database.withInstitution(actor,slug,async (db,member)=>{
-  const m=member;requirePermission(m.is_super_admin);
+  const m=member;requirePermission(m.is_admin || m.is_super_admin);
   const p=page(query,JSON.stringify(["memberships",m.institution_id,actor]));
   const rows=(await db.query(`SELECT m.*,u.name,u.email,u.active AS user_active,to_char(m.created_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS cursor_date
    FROM public.institution_memberships m JOIN public.users u ON u.id=m.user_id

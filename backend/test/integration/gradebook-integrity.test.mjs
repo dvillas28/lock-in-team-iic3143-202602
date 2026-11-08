@@ -36,26 +36,58 @@ test('SQL enforces item identity, freeze, published-grade and receipt immutabili
  }finally{if(app)await app.close();await pool.end();}
 });
 test('publication migration upgrades populated attempts and grades without rewriting academic history',async()=>{
- const pool=await database();try{
-  const f=await gradebookFixture(pool),{runner}=await import('node-pg-migrate'),c=await pool.connect();
-  const state=()=>Promise.all(['users','institution_memberships','courses','quiz_attempts','grades','grade_items','audit_events'].map(async table=>(await pool.query(`SELECT * FROM ${table} ORDER BY id`)).rows));
+ const pool=await database();let f;
+ try{
+  f=await historicalPublicationFixture(pool);const {runner}=await import('node-pg-migrate'),c=await pool.connect();
+  const state=()=>Promise.all(['users','institution_memberships','courses','quiz_attempts','grades','grade_items','audit_events'].map(async table=>(await pool.query(`SELECT to_jsonb(t)-ARRAY['bio','avatar_key','credential_version'] AS row FROM ${table} t ORDER BY id`)).rows));
   const before=await state();
-  try{await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir:new URL('../../migrations/',import.meta.url).pathname,direction:'down',count:5,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});}finally{c.release();}
+  try{const down=await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir:f.dir,direction:'down',count:5,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});assert.equal(down.length,5);}finally{c.release();}
   assert.equal((await pool.query("SELECT to_regclass('grade_publications') AS t")).rows[0].t,null);
   assert.equal((await cli('commands/migrate').result).code,0);assert.deepEqual(await state(),before);
-  assert.equal((await cli('commands/migrate').result).code,0);assert.deepEqual(await state(),before);assert.ok(f.own);
- }finally{await pool.end();}
+  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,16);
+  assert.ok((await pool.query('SELECT bio,avatar_key,credential_version FROM users')).rows.every(row=>row.bio===null&&row.avatar_key===null&&row.credential_version===0));
+  assert.equal((await cli('commands/migrate').result).code,0);assert.deepEqual(await state(),before);
+ }finally{if(f)await f.close();await pool.end();}
 });
 test('upgrade rejects invalid legacy publications atomically without silently repairing history',async()=>{
- const pool=await database();try{
-  const f=await gradebookFixture(pool),{runner}=await import('node-pg-migrate'),c=await pool.connect();
-  try{await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir:new URL('../../migrations/',import.meta.url).pathname,direction:'down',count:5,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});}finally{c.release();}
-  await pool.query('UPDATE grades SET score_percent=99 WHERE id=$1',[f.grades[0].id]);
-  await pool.query('UPDATE grades SET published_at=now() WHERE id=$1',[f.grades[0].id]);
+ const pool=await database();let f;
+ try{
+  f=await historicalPublicationFixture(pool);const {runner}=await import('node-pg-migrate'),c=await pool.connect();
+  try{const down=await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir:f.dir,direction:'down',count:5,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});assert.equal(down.length,5);}finally{c.release();}
+  await pool.query('UPDATE grades SET score_percent=99 WHERE id=$1',[f.grade]);
+  await pool.query('UPDATE grades SET published_at=now() WHERE id=$1',[f.grade]);
   const before=(await pool.query('SELECT * FROM grades ORDER BY id')).rows;
   assert.equal((await cli('commands/migrate').result).code,1);
   assert.deepEqual((await pool.query('SELECT * FROM grades ORDER BY id')).rows,before);
   assert.equal((await pool.query("SELECT to_regclass('grade_publications') AS t")).rows[0].t,null);
+  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,6);
   assert.equal((await pool.query('SELECT grade_items_locked_at FROM courses WHERE id=$1',[f.own])).rows[0].grade_items_locked_at,null);
- }finally{await pool.end();}
+ }finally{if(f)await f.close();await pool.end();}
 });
+
+async function historicalPublicationFixture(pool) {
+ const {mkdtemp,copyFile,readdir,rm}=await import('node:fs/promises'),{tmpdir}=await import('node:os'),{join}=await import('node:path');
+ const {reset,testUrl,secrets}=await import('./helpers.mjs'),migration=await import('../../dist/commands/migrate.js');
+ const {question}=await import('./quiz-fixtures.mjs');
+ const dir=await mkdtemp(join(tmpdir(),'publication-upgrade-')),saved=process.env.MIGRATION_DATABASE_URL;
+ const close=async()=>{if(saved===undefined)delete process.env.MIGRATION_DATABASE_URL;else process.env.MIGRATION_DATABASE_URL=saved;await rm(dir,{recursive:true,force:true});};
+ try{
+  // Pin only the eleven reversible historical migrations; account data is never rolled back.
+  const files=(await readdir(new URL('../../migrations/',import.meta.url))).filter(file=>/^\d+.*\.sql$/.test(file)&&file<'20261107000100').sort();
+  assert.equal(files.length,11);
+  for(const file of files)await copyFile(new URL('../../migrations/'+file,import.meta.url),join(dir,file));
+  await reset(pool);process.env.MIGRATION_DATABASE_URL=testUrl();
+  assert.deepEqual(await migration.default.migrate(dir),{created:11,existing:0});
+  assert.equal((await cli('seeds/demo',secrets()).result).code,0);
+  const tenant=(await pool.query("SELECT id FROM institutions WHERE slug='uc'")).rows[0].id;
+  const own=randomUUID(),section=randomUUID(),quiz=randomUUID(),item=randomUUID(),attempt=randomUUID(),grade=randomUUID(),questionId=randomUUID();
+  await pool.query("INSERT INTO courses(id,institution_id,code,name,term,created_by) VALUES($1,$2,'M','Populated gradebook','2026-2',$3)",[own,tenant,users.owner]);
+  await pool.query("INSERT INTO sections(id,institution_id,course_id,code) VALUES($1,$2,$3,'1')",[section,tenant,own]);
+  await pool.query("INSERT INTO enrollments(id,institution_id,section_id,user_id,role) VALUES($1,$2,$3,$4,'student')",[randomUUID(),tenant,section,users.revoked]);
+  await pool.query("INSERT INTO quizzes(id,institution_id,course_id,section_id,title,questions,created_by,published_at) VALUES($1,$2,$3,$4,'Populated quiz',$5,$6,now())",[quiz,tenant,own,section,JSON.stringify([{...question,id:questionId}]),users.owner]);
+  await pool.query("INSERT INTO grade_items(id,institution_id,course_id,quiz_id,title,weight_percent) VALUES($1,$2,$3,$4,'Populated quiz',100)",[item,tenant,own,quiz]);
+  await pool.query("INSERT INTO quiz_attempts(id,institution_id,course_id,quiz_id,section_id,student_id,attempt_number,status,answers,start_key,submit_key,submitted_at,score_points,score_percent,grade_value) VALUES($1,$2,$3,$4,$5,$6,1,'graded',$7,$8,$9,now(),2.5,100,7)",[attempt,tenant,own,quiz,section,users.revoked,JSON.stringify([{questionId,alternativeId:'a'}]),randomUUID(),randomUUID()]);
+  await pool.query("INSERT INTO grades(id,institution_id,grade_item_id,quiz_id,student_id,section_id,attempt_id,score_percent,grade_value) VALUES($1,$2,$3,$4,$5,$6,$7,100,7)",[grade,tenant,item,quiz,users.revoked,section,attempt]);
+  return {own,grade,dir,close};
+ }catch(error){await close();throw error;}
+}

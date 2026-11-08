@@ -50,7 +50,20 @@ services:
       DEMO_UTFSM_TEACHER_PASSWORD: ${DEMO_UTFSM_TEACHER_PASSWORD:-}
       DEMO_UTFSM_ASSISTANT_PASSWORD: ${DEMO_UTFSM_ASSISTANT_PASSWORD:-}
       DEMO_UTFSM_STUDENT_PASSWORD: ${DEMO_UTFSM_STUDENT_PASSWORD:-}
+      AVATAR_STORAGE_DRIVER: ${AVATAR_STORAGE_DRIVER:-local}
+      AVATAR_LOCAL_DIR: /app/data
+      AWS_REGION: ${AWS_REGION:-}
+      S3_AVATAR_BUCKET: ${S3_AVATAR_BUCKET:-}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
+      MAIL_DELIVERY_MODE: ${MAIL_DELIVERY_MODE:-disabled}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      MAIL_FROM: ${MAIL_FROM:-AcademiX <no-reply@mail.academix.dvillasc.me>}
+      ACTIVATION_ORIGINS_BY_INSTITUTION: ${ACTIVATION_ORIGINS_BY_INSTITUTION:-}
       PORT: 3001
+    volumes:
+      - avatar_data:/app/data
     ports:
       - "3001:3001"
     healthcheck:
@@ -86,3 +99,4 @@ services:
 
 volumes:
   postgres_data:
+  avatar_data:
