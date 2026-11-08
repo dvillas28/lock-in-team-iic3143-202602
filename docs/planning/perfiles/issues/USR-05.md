@@ -1,8 +1,8 @@
-# Borrador de issue: USR-05 Importar usuarios por CSV con validación, confirmación y envíos
+# Issue: USR-05 Importar usuarios por CSV con validación, confirmación y envíos
 
-Estado: borrador local / Todo. **No publicar en GitHub por instrucción del usuario.**
-Registro: 2026-11-06. Sin implementación; responsable: Matías (matiaraos).
-Objetivo: semana 2–8 de noviembre de 2026, America/Santiago; estimación aún preliminar.
+Estado: issue publicada / implementación autorizada. [#236](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/236).
+Registro: 2026-11-06; publicación: 2026-11-07. Responsable: Matías (matiaraos).
+Objetivo: Semana 5 E4, 2–8 de noviembre de 2026, America/Santiago; estimación aún preliminar.
 
 Entregar el recorrido CSV completo: plantilla, upload/validación, preview por fila,
 confirmación DB atómica/idempotente, recibo, despacho con progreso y reanudación.
@@ -57,5 +57,4 @@ explícito con código nuevo, sin repetir accepted ni rotar códigos por replay 
 [Requisitos](../requisitos.md) · [Backlog](../backlog.md) · [Modelo](../modelo-datos.md)
 · [CSV](../importacion-csv.md) · [Resend](../correo-resend.md).
 
-Pendiente de especificación detallada/publicación e implementación; este borrador
-no equivale a una issue remota, tarjeta de Project o funcionalidad disponible.
+La publicación no acredita implementación, despliegue ni validación externa.

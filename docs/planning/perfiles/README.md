@@ -1,9 +1,9 @@
-# Plan propuesto: altas institucionales y perfil personal
+# Perfiles y altas institucionales: planificación e implementación
 
-Fecha: 2026-11-06. Estado: investigación y propuesta; sin implementación.
+Actualizado: 2026-11-07. Implementación autorizada; [tareas/evidencia](../../../specs/20261106-170457_perfiles-altas-usuarios/tasks.md).
 Base investigada: `dev`; planificación actual en `docs/perfiles-altas-usuarios`, sin cambios desplegados.
 Detalle: [requisitos](requisitos.md) · [backlog/borradores](backlog.md) · [modelo](modelo-datos.md)
-· [CSV](importacion-csv.md) · [Resend](correo-resend.md) · [datos/seguridad](datos-seguridad.md) · [entregas](entregas.md).
+· [CSV](importacion-csv.md) · [Resend](correo-resend.md) · [datos/seguridad](datos-seguridad.md) · [entregas](entregas.md) · [operación para Daniel](operacion.md).
 Matías implementa; Daniel administra DNS y levanta S3. Objetivo: 2–8 de noviembre de 2026.
 [Spec formal](../../../specs/20261106-170457_perfiles-altas-usuarios/spec.md),
 [matriz](../../../specs/20261106-170457_perfiles-altas-usuarios/traceability.md) y [pendientes](../../../specs/20261106-170457_perfiles-altas-usuarios/pending-decisions.md).
@@ -84,8 +84,8 @@ Editar el perfil o crear una pertenencia no concede acceso a cursos ni notas.
 El alta elegida queda pendiente hasta la activación: crear la invitación no
 crea todavía User ni membership. Se evita que el superadmin conozca contraseñas
 o cambie una cuenta existente de otra institución. El listado distingue pendiente/activo.
-Resend enviará el enlace desde un remitente verificado; correo fake en local/CI
-y prueba real opt-in. Crear invitación, aceptar correo y activar son estados distintos.
+Resend envía desde remitente verificado; fake exclusivamente en tests, manual real opt-in.
+Sin configuración, correo/fotos permanecen disabled y el resto de la aplicación inicia. Crear invitación, aceptar correo y activar son estados distintos.
 CSV confirma DB antes de despachar; cuota/fallo dejan pendientes recuperables, sin workers.
 
 Las rutas de cuenta requieren autenticación global, sin exigir membership activa.
@@ -95,7 +95,7 @@ Actualizar navegación, retornos seguros, shell y parsers tipados; evitar remont
 todo el espacio académico por cambiar nombre/foto, hoy incluidos en la key del shell.
 Reutilizar DESIGN.md, tokens, componentes, Lucide, foco visible, ambos temas y móvil.
 
-## Decisiones y detalles por cerrar en la especificación
+## Decisiones adoptadas
 
 - Perfil global; nombre editable como nombre visible, sin agregar identidad legal/RUT.
 - Descripción opcional de hasta 500 caracteres; nombre entre 1 y 200 tras trim.
@@ -109,14 +109,14 @@ Reutilizar DESIGN.md, tokens, componentes, Lucide, foco visible, ambos temas y m
 - Recuperación de contraseña olvidada, borrado de cuenta, cambios de correo,
   perfiles públicos, importación de matrículas y edición global de cuentas ajenas quedan fuera.
 - Fotos: [S3 privado en producción](../../adr/s3-for-profile-photos.md), Daniel provisiona;
-  local en desarrollo. La spec debe fijar límites y configuración concreta del bucket.
+  local en desarrollo; contrato limita 2 MiB/16 MP y salida WebP 1024×1024.
 - [Retención](retencion.md): archivo no se conserva; limpieza de derivados a 7/30 días aprobada.
 
 ## Alcance documental
 
 La ampliación está registrada en requisitos, backlog y borradores de issues; USR-01
-ya tiene spec y constitución 1.6.0 sincronizados; remitente/limpieza resueltos.
-USR-01 aún requiere diseño técnico detallado; DNS y configuración siguen por ejecutar.
+ya tiene spec y constitución 1.6.1 sincronizados; remitente/limpieza resueltos.
+USR-01 incorpora plan técnico/modelo/contratos/tareas; DNS y configuración real siguen pendientes.
 Ver [ADR de fronteras](../../adr/institutional-account-lifecycle.md). Los documentos base
 conservan el MVP implementado y enlazan la extensión pendiente, sin fingir nuevas capacidades.
 CodeGraph fue intentado porque existe `.codegraph/`, pero el ejecutable no está

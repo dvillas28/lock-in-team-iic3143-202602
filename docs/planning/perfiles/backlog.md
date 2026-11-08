@@ -1,7 +1,7 @@
 # Backlog trazable: perfiles y altas institucionales
 
-Registro y consolidación: 2026-11-06. **Cinco tareas activas, todas Todo**.
-Por instrucción del usuario, **no crear issues remotas ahora**; solo borradores locales.
+Registro: 2026-11-06; publicación: 2026-11-07. **Cinco issues activas**.
+Implementación autorizada en la rama actual; estado/cierre requieren evidencia por issue.
 Requisitos: [CU-17–21, RF30–56 y RNF11–20](requisitos.md), con [Resend elegido](correo-resend.md).
 Modelo: [usuarios y relaciones](modelo-datos.md); [contrato CSV](importacion-csv.md).
 Formalización: [spec](../../../specs/20261106-170457_perfiles-altas-usuarios/spec.md),
@@ -10,12 +10,12 @@ y [decisiones PEND-01/02 cerradas](../../../specs/20261106-170457_perfiles-altas
 
 ## Convención
 
-Una fila activa = un borrador publicable = un ID estable. USR identifica esta
+Una fila activa = una issue publicada = un ID estable. USR identifica esta
 ampliación; no reemplaza BE/FE/PREP/DOC. IDs absorbidos quedan como referencias
 históricas, sin filas activas ni issues adicionales. No renumerar los IDs conservados.
 Implementación: **Matías (matiaraos)**. Apoyo: **Daniel, DNS y levantamiento S3**.
-Objetivo: **semana del 2 al 8 de noviembre de 2026**, America/Santiago (Semana 5 E3).
-Asignación registrada; todas las tareas siguen Todo, sin inicio real acreditado.
+Objetivo: **semana del 2 al 8 de noviembre de 2026**, America/Santiago (Semana 5 E4).
+Project: [lock-in-LMS](https://github.com/users/dvillas28/projects/3); dependencias registradas.
 El [TSV general](../../deliveries/2/08-work-plan-detail/lock-in-LMS%20-%20Backlog.tsv)
 contiene las cinco filas activas y conserva íntegramente sus 131 filas históricas.
 
@@ -23,11 +23,11 @@ contiene las cinco filas activas y conserva íntegramente sus 131 filas históri
 
 | ID / borrador | Entregable | Área / tipo | Prioridad / h | Requisitos | Depende de |
 | --- | --- | --- | --- | --- | --- |
-| [USR-01](issues/USR-01.md) | Especificación, alcance/ADR, permisos y contratos | DOC / docs | P1 / 6 | CU-17–21; RF30–56; RNF11–20 | Base existente |
-| [USR-02](issues/USR-02.md) | Perfil propio completo: datos, contraseña y foto | FE / feat | P1 / 34 | CU-17/18/21; RF30–34/45–47; RNF11/12/14–17 | USR-01 |
-| [USR-04](issues/USR-04.md) | Alta individual, activación, Resend y reenvíos | BE / feat | P1 / 32 | CU-19 y base CU-20; RF35–38/47–53/55/56; RNF11/12/14–16/18–20 | USR-01 |
-| [USR-05](issues/USR-05.md) | CSV completo: preview, confirmación y envío recuperable | FE / feat | P1 / 32 | CU-20; RF35–44/47–56; RNF11–16/18–20 | USR-04 |
-| [USR-08](issues/USR-08.md) | Validación integrada, migraciones, aislamiento y evidencia | BE / test | P1 / 8 | CU-17–21; RF30–56; RNF11–20 | USR-02/04/05 |
+| [USR-01 / #233](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/233) | Especificación, alcance/ADR, permisos y contratos | DOC / docs | P1 / 6 | CU-17–21; RF30–56; RNF11–20 | Base existente |
+| [USR-02 / #234](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/234) | Perfil propio completo: datos, contraseña y foto | FE / feat | P1 / 34 | CU-17/18/21; RF30–34/45–47; RNF11/12/14–17 | USR-01 |
+| [USR-04 / #235](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/235) | Alta individual, activación, Resend y reenvíos | BE / feat | P1 / 32 | CU-19 y base CU-20; RF35–38/47–53/55/56; RNF11/12/14–16/18–20 | USR-01 |
+| [USR-05 / #236](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/236) | CSV completo: preview, confirmación y envío recuperable | FE / feat | P1 / 32 | CU-20; RF35–44/47–56; RNF11–16/18–20 | USR-04 |
+| [USR-08 / #237](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/237) | Validación integrada, migraciones, aislamiento y evidencia | BE / test | P1 / 8 | CU-17–21; RF30–56; RNF11–20 | USR-02/04/05 |
 
 Total conservado: **112 horas-persona preliminares**, por revisar contra el objetivo
 semanal del usuario. La fecha objetivo no acredita capacidad ni horas reales invertidas.
@@ -65,13 +65,13 @@ USR-10 se reparte entre servicio de envío y coordinación por lote, sin duplica
   S3 elegido, límites CSV y grants/RLS. Archivo CSV efímero confirmado;
   limpieza de datos extraídos a 7/30 días aprobada y remitente Resend elegido;
   [explicación](retencion.md). No implementar durante preparación.
-  Spec/constitución 1.6.0 formalizados y decisiones cerradas; falta diseño técnico detallado.
+  Spec/constitución y [plan técnico](../../../specs/20261106-170457_perfiles-altas-usuarios/plan.md) registrados; validar implementación por tareas.
 - **USR-02:** cuenta sin memberships edita name/bio/foto y cambia contraseña propia;
   correo/flags no editables, 409 ante edición obsoleta, auditoría atómica y JWT anteriores
   invalidados. Foto valida/procesa y conserva anterior ante fallo; no perder borradores.
 - **USR-04:** formulario name/email y lista institucional; activar identidad nueva o
   aceptar con la existente, sin sobrescrituras, Enrollment o flags implícitos. Incluye
-  SDK, dominio/remitente, secretos/mapa de orígenes, fake local/CI y plantilla Resend.
+  SDK, dominio/remitente, secretos/mapa de orígenes, fake exclusivamente en tests y plantilla Resend.
   Estado/versión de envío, cuota, reenvío y limpieza de invitaciones a 30 días se prueban sin depender del parser CSV.
 - **USR-05:** plantilla UTF-8 name,email, límites/duplicados y preview por fila;
   confirmación DB atómica/idempotente y recibo recuperable. Reutiliza USR-04 para correo,
@@ -91,7 +91,7 @@ remitente elegido: AcademiX <no-reply@mail.academix.dvillasc.me>; falta verifica
 
 ## Registro de publicación
 
-Cinco borradores activos, sin números/URLs remotas inventados ni tarjetas de Project.
-Matías responsable, Daniel apoya DNS/S3; objetivo semanal registrado. Todo/open,
-sin PR vinculada. Usuario autorizó commit/push de documentación y preparar texto de PR;
-las issues siguen como borradores locales. No implementar código con esta consolidación.
+Issues #233–237 publicadas en el Project, Semana 5 E4, con prioridad P1 y dependencias.
+Matías asignado a las cinco; Daniel (dvillas28) también a #234 (S3) y #235 (DNS/Resend).
+Usuario autorizó implementación, commits por avance y PR final hacia dev en la misma rama.
+Las 112 h son preliminares; no se inventan inicio, horas reales ni pruebas externas.

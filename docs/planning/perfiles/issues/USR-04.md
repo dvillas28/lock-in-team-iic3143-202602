@@ -1,8 +1,8 @@
-# Borrador de issue: USR-04 Dar alta y activar usuarios con Resend y reenvíos
+# Issue: USR-04 Dar alta y activar usuarios con Resend y reenvíos
 
-Estado: borrador local / Todo. **No publicar en GitHub por instrucción del usuario.**
-Registro: 2026-11-06. Sin implementación; responsable: Matías (matiaraos).
-Objetivo: semana 2–8 de noviembre de 2026, America/Santiago. Daniel administra DNS.
+Estado: issue publicada / implementación autorizada. [#235](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/235).
+Registro: 2026-11-06; publicación: 2026-11-07. Responsable: Matías (matiaraos); apoyo: Daniel (dvillas28).
+Objetivo: Semana 5 E4, 2–8 de noviembre de 2026, America/Santiago. Daniel administra DNS.
 
 Entregar alta individual por admin/superadmin, lista institucional, invitación y
 activación, con Resend, configuración por entorno, plantilla y reenvíos recuperables.
@@ -78,5 +78,4 @@ Sin workers/cola externa ni confirmación de entrega al buzón sin webhook.
 [Requisitos](../requisitos.md) · [Backlog](../backlog.md) · [Modelo](../modelo-datos.md)
 · [CSV](../importacion-csv.md) · [Resend](../correo-resend.md).
 
-Pendiente de especificación detallada/publicación e implementación; este borrador
-no equivale a una issue remota, tarjeta de Project o funcionalidad disponible.
+La publicación no acredita implementación, despliegue ni validación externa.

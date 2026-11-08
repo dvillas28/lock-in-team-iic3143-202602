@@ -147,3 +147,11 @@ ContentUnauthorized:
         instance: /api/v1/institution/uc/courses
         traceId: 01JQ4Y2X7B3QK5XEM0XZ4MSH8Z
         errors: []
+
+Gone:
+  description: El recurso temporal expiró o fue depurado; no se recrean altas ni envíos
+    por replay.
+  content:
+    application/problem+json:
+      schema:
+        $ref: ./schemas/common.yaml#/Problem

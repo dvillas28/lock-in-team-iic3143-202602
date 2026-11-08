@@ -1,8 +1,8 @@
-# Borrador de issue: USR-02 Gestionar perfil propio, contraseña y foto
+# Issue: USR-02 Gestionar perfil propio, contraseña y foto
 
-Estado: borrador local / Todo. **No publicar en GitHub por instrucción del usuario.**
-Registro: 2026-11-06. Sin implementación; responsable: Matías (matiaraos).
-Objetivo: semana 2–8 de noviembre de 2026, America/Santiago. Daniel provisiona S3.
+Estado: issue publicada / implementación autorizada. [#234](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/234).
+Registro: 2026-11-06; publicación: 2026-11-07. Responsable: Matías (matiaraos); apoyo: Daniel (dvillas28).
+Objetivo: Semana 5 E4, 2–8 de noviembre de 2026, America/Santiago. Daniel provisiona S3.
 
 Entregar Mi perfil, Seguridad y foto para cuenta propia global, incluso sin memberships.
 Incluye API, migraciones aditivas, auditoría, sesión, UI y pruebas. Datos personales,
@@ -56,5 +56,4 @@ verifica integración y no permite posponer aislamiento, concurrencia o integrid
 [Requisitos](../requisitos.md) · [Backlog](../backlog.md) · [Modelo](../modelo-datos.md)
 · [CSV](../importacion-csv.md) · [Resend](../correo-resend.md).
 
-Pendiente de especificación detallada/publicación e implementación; este borrador
-no equivale a una issue remota, tarjeta de Project o funcionalidad disponible.
+La publicación no acredita implementación, despliegue ni validación externa.

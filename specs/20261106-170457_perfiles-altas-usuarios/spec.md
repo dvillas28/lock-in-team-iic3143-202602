@@ -3,8 +3,8 @@
 **Feature Branch**: `docs/perfiles-altas-usuarios` (conservada)
 **Feature Directory**: `specs/20261106-170457_perfiles-altas-usuarios`
 **Created**: 2026-11-06
-**Status**: Especificación formalizada; remitente y limpieza resueltos; diseño técnico e implementación pendientes.
-**Input**: Formalizar `docs/planning/perfiles/` sin código, issues remotas, commit ni push.
+**Status**: Implementación autorizada; diseño técnico y contratos registrados; evidencia por tarea.
+**Input**: Implementar #233–237 en la rama actual; proveedores reales, modos disabled y guías para Daniel.
 **Responsables**: Matías implementa; Daniel administra DNS y provisiona fotos. Objetivo: 2–8 noviembre de 2026, sin revalidar capacidad.
 
 ## User Scenarios & Testing *(mandatory)*
@@ -75,13 +75,13 @@ Como administrador autorizado, valido una lista, reviso errores y confirmo altas
 - **FR-003**: Cambio de contraseña exige verificar la actual y que nueva/confirmación coincidan; nueva de al menos 12 caracteres y como máximo 128 bytes UTF-8; limitar intentos y conservar login de credenciales heredadas válidas.
 - **FR-004**: Cambio efectivo de credencial y evidencia se confirman juntos; invalidar todas las sesiones previas para solicitudes posteriores y resolver cambios/login concurrentes sin sobrescritura silenciosa.
 - **FR-005**: Foto propia global permite previsualizar, subir, reemplazar y eliminar; aceptar imagen estática JPEG/PNG/WebP de hasta 2 MiB, normalizada hasta 1024×1024 sin metadatos personales, validando contenido real y límite de píxeles de entrada.
-- **FR-006**: Mantener foto anterior ante fallo y recuperar limpieza de objetos huérfanos; foto inicialmente privada al titular, persistente y sin URL arbitraria ingresada por cliente.
+- **FR-006**: Mantener foto anterior ante fallo y recuperar limpieza de objetos huérfanos; foto privada al titular y sin URL arbitraria. Sin configuración, fotos no disponibles sin impedir arranque o funciones académicas.
 - **FR-007**: Alta, listado y envío/reenvío requieren usuario/institución/pertenencia activos e isAdmin OR isSuperAdmin del tenant; delegar isAdmin sigue siendo exclusivo de superadmin y promover este último es operativo; no conceder acceso académico.
 - **FR-008**: Formulario exige nombre de 1–200 caracteres y correo válido hasta 254; normalizar trim/lower para unicidad global sin revelar otras pertenencias ni modificar identidad existente; esta acepta con su sesión y correo coincidente.
 - **FR-009**: Crear invitación no crea cuenta/pertenencia; activación nueva o aceptación existente crea pertenencia sin isAdmin/isSuperAdmin ni matrícula; no reactivar revocados/inactivos ni duplicar pertenencias activas.
 - **FR-010**: Código de activación impredecible, de un uso y vigente 24 h desde emisión; verificar institución/emisor autorizados al aceptar, sin confundir estado de correo con permiso de activación.
 - **FR-011**: Abrir/consultar enlace no consume ni activa; el titular confirma expresamente. Correo visual/texto identifica AcademiX, institución, enlace y vencimiento sin contraseñas/roles; destino de configuración permitida, nunca arbitrario del solicitante.
-- **FR-012**: Emitir/reintentar correo después de registrar el alta; persistir pendiente/en curso/aceptado/fallido/cuota/resultado incierto separados de aceptada/revocada/expirada; no afirmar entrega al buzón sin evidencia.
+- **FR-012**: Emitir/reintentar correo después de registrar el alta; persistir pendiente/en curso/aceptado/fallido/cuota/resultado incierto separados de aceptada/revocada/expirada; no afirmar entrega al buzón sin evidencia. Sin mail configurado, conservar pendientes sin emitir/rotar códigos ni bloquear la aplicación.
 - **FR-013**: Reenvío explícito autorizado, confirmado y separado al menos 60 s del último envío genera código nuevo e invalida el anterior; replay o respuestas tardías no rotan ni sobrescriben una operación posterior.
 - **FR-014**: CSV UTF-8, BOM opcional, coma y comillas estándar, LF/CRLF, columnas exactas name,email; rechazar extras/duplicados, contraseñas, roles y contexto institucional en el archivo.
 - **FR-015**: Limitar importación a 100 filas de datos y 256 KiB; validar filas/cabeceras/valores, ignorar líneas completamente vacías y rechazar archivo vacío, incompleto o malformado con errores por fila.
@@ -123,7 +123,7 @@ Como administrador autorizado, valido una lista, reviso errores y confirmo altas
 
 - Reusar identidad/contexto existentes; US1/2/3/4 son verificables sobre cuentas preparadas; US5 reutiliza activación US4 sin exigir su UI individual.
 - Adoptar límites de nombre, descripción, CSV, contraseña, foto y vigencia ya propuestos como defaults de esta spec; no confundir vencimiento con limpieza de datos.
-- No ejecutar provisión, envíos reales ni limpieza destructiva al formalizar; proveedores y operación técnica permanecen en ADR/planes enlazados.
+- Código y pruebas autorizados; provisión externa y prueba real opt-in dependen de Daniel, sin secretos en Git. Correo fake exclusivamente en tests; desarrollo sin Resend conserva envíos pendientes.
 - Matías implementa; Daniel prepara DNS/S3. El objetivo semanal no revalida las 112 h preliminares ni acredita trabajo ejecutado.
 - **PEND-01 cerrado**: El usuario delegó elegir un ejemplo; se adopta `AcademiX <no-reply@mail.academix.dvillasc.me>`. Daniel debe verificar control del dominio/DNS antes de enviar; elegir dirección no acredita esa verificación.
 - **PEND-02 cerrado**: El usuario aprobó limpieza a 7/30 días. Campos, recibos, operación prevista y default de 30 días desde creación sin primera emisión constan en [retención](../../docs/planning/perfiles/retencion.md); falta implementarlos/probarlos.
@@ -131,7 +131,8 @@ Como administrador autorizado, valido una lista, reviso errores y confirmo altas
 ## Sources & Traceability
 
 - [Requisitos base y ampliación](../../docs/planning/perfiles/requisitos.md): CU-17–21, RF30–56, RNF11–20; dependencias CU-01/02/04, RF1–12/25/26 y RNF1–4/6/9/10.
-- [Matriz completa](traceability.md): FR/SC/historias ↔ CU/RF/RNF ↔ USR-01/02/04/05/08; [backlog](../../docs/planning/perfiles/backlog.md) y borradores locales, sin issues remotas.
+- [Matriz completa](traceability.md): FR/SC/historias ↔ CU/RF/RNF ↔ USR-01/02/04/05/08; [backlog](../../docs/planning/perfiles/backlog.md): #233/#234/#235/#236/#237 publicados en Project, Semana 5 E4.
+- [Plan técnico](plan.md), [tareas](tasks.md), [modelo técnico](data-model.md), [contratos](contracts/accounts.md) y [validación](quickstart.md).
 - [Decisiones y tareas operativas](pending-decisions.md), [checklist](checklists/requirements.md), [modelo](../../docs/planning/perfiles/modelo-datos.md), [CSV](../../docs/planning/perfiles/importacion-csv.md) y [retención](../../docs/planning/perfiles/retencion.md).
 - [Identidad](../20261014-234744_identidad-acceso/spec.md), [cursos/roles](../20261014-234844_cursos-roles/spec.md), [Resend](../../docs/adr/resend-for-account-invitations.md), [S3](../../docs/adr/s3-for-profile-photos.md) y [fronteras de cuenta](../../docs/adr/institutional-account-lifecycle.md).
-- Excluye: implementación/despliegue, cambio de correo, recuperación de contraseña olvidada, borrado de cuenta, perfiles públicos, matrículas/privilegios por CSV, superadmin global, nuevos tenants, material académico binario, workers y entrega garantizada en background.
+- Excluye: provisión externa automática, cambio de correo, recuperación de contraseña olvidada, borrado de cuenta, perfiles públicos, matrículas/privilegios por CSV, superadmin global, nuevos tenants, material académico binario, workers y entrega garantizada en background.

@@ -1,6 +1,6 @@
 # Specification Quality Checklist: Perfiles y altas institucionales
 
-**Purpose**: Revisar calidad documental, cobertura y decisiones explícitas, no ejecución de la feature.
+**Purpose**: Validar diseño y cobertura antes de implementar; registrar aparte evidencia funcional/externa.
 **Created**: 2026-11-06
 **Feature**: [spec.md](../spec.md)
 
@@ -28,27 +28,27 @@
 - [x] Archivo CSV efímero confirmado; datos normalizados/recibos se rigen por la política aprobada.
 - [x] Historia académica/auditoría preservadas; cambios sensibles con evidencia atómica mínima.
 - [x] Complejidad acotada: entidades justificadas, sin nuevos servicios de background ni autorización genérica.
-- [x] Constitución 1.6.0 y plantillas sincronizadas con ampliación especificada, no presentada como implementada.
+- [x] Constitución 1.6.1 y plantillas sincronizadas con ampliación especificada, no presentada como implementada.
 
 ## Feature Readiness
 
 - [x] Documento listo para revisión y continuación del diseño sobre reglas resueltas.
-- [ ] USR-01 completamente cerrado: completar diseño técnico de identidad, grants/RLS/readiness y sesiones.
+- [x] USR-01 diseño técnico completo: plan/modelo/contratos/tareas y gates de identidad, grants/RLS/readiness y sesiones.
 - [ ] DNS/Resend verificados y configurados: tarea operativa de Daniel/Matías, sin evidencia aún.
-- [ ] Feature implementada/probada/desplegada: fuera de esta formalización, sin evidencia de ejecución.
+- [ ] Feature implementada/probada: registrar evidencia real por tareas antes de cerrar las issues.
 
 ## Notas de validación
 
 El usuario aprobó limpieza y delegó el remitente; ambas decisiones quedan registradas.
 Publicar documentación no equivale a habilitar correo real, limpiar datos o cerrar historias.
-Próxima fase: completar el plan técnico formal y validar capacidad/estimaciones;
-este trabajo continúa limitado a documentación hasta nueva instrucción.
+Plan técnico formal y tareas completan el diseño; capacidad/estimaciones siguen preliminares.
+Usuario autorizó implementación en la misma rama y PR final; configuración externa pendiente.
 
-## Hooks y límites de ejecución
+## Hooks y autorización actual
 
 - Template activo: `.specify/templates/spec-template.md`; CLI/presets locales no disponibles.
 - Hook before_specify de rama deshabilitado; rama existente conservada.
 - Inicialización de constitución comprobada por script: repositorio ya existente, sin cambios Git.
 - Formalización original sin hooks de commit; posteriormente el usuario autorizó commit/push documental en la misma rama.
-- Conservar `.specify/feature.json`, backend/frontend, configuración operativa y dependencias.
-- Publicar solo documentación; issues remotas, envíos, infraestructura y migraciones siguen fuera de alcance.
+- Conservar `.specify/feature.json` local-only; implementar backend/frontend y configuración según el plan.
+- Issues #233–237 publicadas; cambios de código autorizados. Sin provisión ni envíos reales automáticos.

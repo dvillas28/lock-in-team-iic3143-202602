@@ -1,8 +1,8 @@
 # Perfiles: entregas, archivos afectados y aceptación
 
 Complementa el [plan](README.md) y [datos/seguridad](datos-seguridad.md).
-Backlog/borradores locales de issues: [registro](backlog.md). Sin migraciones ni funcionalidades nuevas.
-Matías implementa; Daniel prepara DNS/S3. Objetivo: 2–8 noviembre de 2026 (Semana 5 E3).
+Backlog/issues publicadas: [registro](backlog.md). Implementación autorizada; evidencia por tarea.
+Matías implementa; Daniel prepara DNS/S3. Objetivo: 2–8 noviembre de 2026 (Semana 5 E4).
 
 ## Preparación antes de implementar
 
@@ -10,13 +10,13 @@ Matías implementa; Daniel prepara DNS/S3. Objetivo: 2–8 noviembre de 2026 (Se
    creado, con SPECIFY_FEATURE_DIRECTORY explícito y sin cambiar la rama.
 2. Cerrar supuestos del plan: perfil global, altas por admin/superadmin, nombre
    visible, correo fijo, activación por titular y visibilidad inicial propia.
-3. Constitución 1.6.0, plantillas y [ADR](../../adr/institutional-account-lifecycle.md)
+3. Constitución 1.6.1, plantillas y [ADR](../../adr/institutional-account-lifecycle.md)
    sincronizados documentalmente; no confundir alcance especificado con implementación.
 4. ADR para escrituras acotadas de identidad y revocación por versión;
    [ADR S3 elegido](../../adr/s3-for-profile-photos.md), bucket por configurar. No agregar framework ni proveedor
    mientras una necesidad y su operación no estén definidas.
-5. Spec/matriz/checklist formalizados y PEND-01/02 resueltos; completar diseño técnico,
-   contratos y migraciones planeadas. Superadmin no hereda permisos académicos.
+5. Spec/matriz/checklist y diseño técnico registrados; implementar las tareas,
+   contratos y migraciones acordados. Superadmin no hereda permisos académicos.
 6. Resend y despacho común se incluyen en USR-04; CSV/reanudación en USR-05;
    [ADR](../../adr/resend-for-account-invitations.md) y [plan](correo-resend.md).
 
@@ -34,7 +34,7 @@ Son incrementos funcionales; en el backlog se agrupan en cinco issues: USR-01
 (preparación), USR-02 (filas 1/2/5), USR-04 (fila 3), USR-05 (fila 4), USR-08 (validación).
 Cada incremento incluye migración, backend, contrato, frontend y pruebas aplicables.
 La 3 usa identidad/auditoría institucional existentes; la 4 reutiliza alta de la 3;
-la 5 requiere configurar S3 con Daniel y los incrementos propios de perfil.
+la 5 se implementa con local/S3/disabled; Daniel configura producción por separado.
 La 2 y la 3 pueden especificarse separadamente; no hacen falta fotos para crear cuentas.
 Prioridad sugerida: 1 y 3 para habilitar perfiles/altas; 2 antes de uso real con
 credenciales propias; 4 para volumen y 5 para completar la foto solicitada.

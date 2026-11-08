@@ -1,13 +1,12 @@
 <!--
 Sync Impact Report
-Version change: 1.5.0 -> 1.6.0 (bounded account/profile extension; MINOR scope expansion).
-Core principles retained; no academic grants, tenant barriers or audit guarantees removed.
-Product Constraints: own global profile; institutional invitations/CSV; private profile photos.
-Templates updated: spec-template.md, plan-template.md, tasks-template.md, checklist-template.md.
-Constitution template and extension command guidance checked; no scope conflict requiring edits.
-ADR: docs/adr/institutional-account-lifecycle.md; provider ADRs remain separate.
-Follow-up: PEND-01/02 decisions closed; DNS verification and cleanup implementation remain pending.
-No application, infrastructure, migrations, Git history or runtime grants changed.
+Version change: 1.6.0 -> 1.6.1 (PATCH: clarify authorized implementation and external readiness).
+Core principles and account extension retained; no academic grants or isolation guarantees removed.
+Product Constraints clarify missing-config disabled behavior and test-only mail simulation.
+Templates synced: spec-template.md, plan-template.md, tasks-template.md, checklist-template.md.
+Feature plan/research/data-model/contracts/tasks record #233–237 and separate external evidence.
+ADR provider choices remain S3/Resend; provisioning and real smoke tests depend on Daniel.
+This amendment alone does not implement application, infrastructure or runtime grants.
 -->
 
 
@@ -94,9 +93,11 @@ Invitation/import rows MUST enforce tenant isolation; bounded self-profile and
 activation identity exceptions MUST preserve least-privilege runtime and atomic audit.
 The CSV original MUST be ephemeral, memory-only; private profile photos are a
 bounded binary exception and MUST NOT enable academic file uploads by implication.
-Sender selection and approved cleanup policy MUST be recorded; real email requires verified DNS.
+Sender and cleanup policy MUST be recorded; real email requires verified DNS.
+Missing external configuration MUST disable only that integration, not application readiness.
+Production MUST NOT fall back to local photos or fake email; mail simulation is test-only.
 Spec: [profiles and institutional accounts](../../specs/20261106-170457_perfiles-altas-usuarios/spec.md).
-This extension is specified, not implemented; documentation MUST retain that distinction.
+Implementation status and external validation MUST be recorded separately; the spec alone proves neither.
 The admin/non-admin UI capability MUST match domain permissions; URL profiles
 never grant access. Enrollment remains the source of academic roles.
 
@@ -138,4 +139,4 @@ for wording and clarification.
 Reviews MUST verify constitution compliance before merge. Complexity violations
 MUST be documented in the feature plan's Complexity Tracking section.
 
-**Version**: 1.6.0 | **Ratified**: 2026-08-27 | **Last Amended**: 2026-11-06
+**Version**: 1.6.1 | **Ratified**: 2026-08-27 | **Last Amended**: 2026-11-07

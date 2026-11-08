@@ -125,3 +125,19 @@ Search:
   schema:
     type: string
     minLength: 1
+
+InvitationId:
+  name: invitationId
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+
+ImportId:
+  name: importId
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid

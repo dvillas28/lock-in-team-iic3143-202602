@@ -1,0 +1,307 @@
+AccountCapabilities:
+  type: object
+  additionalProperties: false
+  required:
+  - avatar
+  - invitationEmail
+  properties:
+    avatar:
+      type: boolean
+      description: Almacenamiento configurado; no garantiza disponibilidad de red.
+    invitationEmail:
+      type: boolean
+      description: Mailer configurado. No concede permiso administrativo.
+OwnProfile:
+  type: object
+  additionalProperties: false
+  required:
+  - id
+  - email
+  - name
+  - bio
+  - hasAvatar
+  - updatedAt
+  - capabilities
+  properties:
+    id: &id005
+      type: string
+      format: uuid
+    email: &id004
+      type: string
+      format: email
+      maxLength: 254
+    name: &id001
+      type: string
+      minLength: 1
+      maxLength: 200
+    bio:
+      type:
+      - string
+      - 'null'
+      maxLength: 500
+    hasAvatar:
+      type: boolean
+    updatedAt: &id002
+      type: string
+      format: date-time
+      description: Timestamp UTC con seis dígitos de microsegundos, serializado por PostgreSQL sin pérdida de precisión.
+    capabilities:
+      $ref: '#/AccountCapabilities'
+ProfileUpdate:
+  type: object
+  additionalProperties: false
+  required:
+  - name
+  - bio
+  - expectedUpdatedAt
+  properties:
+    name: *id001
+    bio:
+      type:
+      - string
+      - 'null'
+      maxLength: 500
+    expectedUpdatedAt: *id002
+PasswordChange:
+  type: object
+  additionalProperties: false
+  required:
+  - currentPassword
+  - newPassword
+  - confirmPassword
+  properties:
+    currentPassword:
+      type: string
+      minLength: 1
+      description: Máximo 128 bytes UTF-8; errores de campo devuelven 400, nunca 401.
+    newPassword: &id003
+      type: string
+      minLength: 12
+      description: Contraseña exacta; máximo 128 bytes UTF-8. No normalizar ni registrar.
+    confirmPassword: *id003
+AvatarUpload:
+  type: object
+  additionalProperties: false
+  required:
+  - file
+  - expectedUpdatedAt
+  properties:
+    file:
+      type: string
+      format: binary
+      description: JPEG/PNG/WebP estático, hasta 2 MiB y 16 megapíxeles; salida WebP hasta 1024×1024 sin metadatos.
+    expectedUpdatedAt: *id002
+AvatarDelete:
+  type: object
+  additionalProperties: false
+  required:
+  - expectedUpdatedAt
+  properties:
+    expectedUpdatedAt: *id002
+InvitationCreate:
+  type: object
+  additionalProperties: false
+  required:
+  - name
+  - email
+  properties:
+    name: *id001
+    email: *id004
+InvitationStatus:
+  type: string
+  enum:
+  - pending
+  - accepted
+  - revoked
+  - expired
+InvitationDeliveryStatus:
+  type: string
+  enum:
+  - pending
+  - sending
+  - accepted
+  - failed
+  - quota_blocked
+  - unknown
+AccountInvitation:
+  type: object
+  additionalProperties: false
+  required:
+  - id
+  - name
+  - email
+  - status
+  - deliveryStatus
+  - createdAt
+  - expiresAt
+  - acceptedAt
+  - revokedAt
+  properties:
+    id: *id005
+    name:
+      type:
+      - string
+      - 'null'
+      maxLength: 200
+    email:
+      type:
+      - string
+      - 'null'
+      maxLength: 254
+    status:
+      $ref: '#/InvitationStatus'
+    deliveryStatus:
+      $ref: '#/InvitationDeliveryStatus'
+    createdAt: &id008
+      type: string
+      format: date-time
+    expiresAt: &id006
+      type:
+      - string
+      - 'null'
+      format: date-time
+    acceptedAt: *id006
+    revokedAt: *id006
+InvitationList:
+  type: object
+  additionalProperties: false
+  required:
+  - items
+  - nextCursor
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/AccountInvitation'
+    nextCursor:
+      type:
+      - string
+      - 'null'
+InvitationActivation:
+  type: object
+  additionalProperties: false
+  required:
+  - token
+  - password
+  - confirmPassword
+  properties:
+    token: &id007
+      type: string
+      minLength: 43
+      maxLength: 43
+      pattern: ^[A-Za-z0-9_-]{43}$
+      description: Código aleatorio de 32 bytes, de un uso. Solo en memoria y cuerpo POST; nunca en logs o almacenamiento
+        web.
+    password: *id003
+    confirmPassword: *id003
+InvitationAcceptance:
+  type: object
+  additionalProperties: false
+  required:
+  - token
+  properties:
+    token: *id007
+ImportPreview:
+  type: object
+  additionalProperties: false
+  required:
+  - file
+  properties:
+    file:
+      type: string
+      format: binary
+      description: CSV UTF-8 name,email, BOM opcional, hasta 100 filas y 256 KiB. Original efímero, sin persistencia.
+ImportRow:
+  type: object
+  additionalProperties: false
+  required:
+  - rowNumber
+  - name
+  - email
+  - validationCode
+  - outcome
+  - invitationId
+  properties:
+    rowNumber:
+      type: integer
+      minimum: 1
+    name:
+      type:
+      - string
+      - 'null'
+    email:
+      type:
+      - string
+      - 'null'
+    validationCode:
+      type: string
+      enum:
+      - valid
+      - already_member
+      - already_pending
+      - invalid_name
+      - invalid_email
+      - duplicate
+      - revoked_membership
+    outcome:
+      type:
+      - string
+      - 'null'
+      enum:
+      - created
+      - skipped
+      - null
+    invitationId:
+      type:
+      - string
+      - 'null'
+      format: uuid
+    deliveryStatus:
+      $ref: '#/InvitationDeliveryStatus'
+    invitationStatus:
+      $ref: '#/InvitationStatus'
+    deliveryVersion:
+      type: integer
+      minimum: 0
+UserImport:
+  type: object
+  additionalProperties: false
+  required:
+  - id
+  - status
+  - expiresAt
+  - confirmedAt
+  - totalRows
+  - createdCount
+  - skippedCount
+  - rows
+  properties:
+    id: *id005
+    status:
+      type: string
+      enum:
+      - previewed
+      - confirmed
+      - expired
+    expiresAt: *id008
+    confirmedAt: *id006
+    totalRows:
+      type: integer
+      minimum: 1
+      maximum: 100
+    createdCount:
+      type: integer
+      minimum: 0
+    skippedCount:
+      type: integer
+      minimum: 0
+    rows:
+      type: array
+      maxItems: 100
+      items:
+        $ref: '#/ImportRow'
+ImportConfirmation:
+  type: object
+  additionalProperties: false
+  required: []
+  properties: {}

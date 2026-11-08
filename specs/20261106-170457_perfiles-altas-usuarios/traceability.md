@@ -68,6 +68,7 @@ CA = escenarios de aceptación de cada US; SC = criterios de éxito del spec.
 PEND-01/02 cerrados: remitente elegido y limpieza 7/30 aprobada. Falta verificar DNS
 e implementar/probar mantenimiento; no confundir decisión con ejecución.
 Detalle y default sin primera emisión en [registro](pending-decisions.md).
+IDs remotos: USR-01 #233, USR-02 #234, USR-04 #235, USR-05 #236 y USR-08 #237.
 Conservar los cinco IDs activos y las referencias históricas consolidadas del backlog;
-no reabrir misiones anteriores, publicar issues ni marcar implementación como realizada.
-No generar tests/código o ejecutar migraciones para verificar esta matriz documental.
+no reabrir misiones anteriores ni marcar implementación/pruebas como realizadas sin evidencia.
+La implementación autorizada se sigue en [tasks](tasks.md), con pruebas por historia y evidencia externa separada.

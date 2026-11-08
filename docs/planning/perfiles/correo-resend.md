@@ -1,6 +1,6 @@
 # Plan de correo: invitaciones mediante Resend
 
-Fecha: 2026-11-06. Proveedor decidido; código/configuración/despliegue pendientes.
+Fecha: 2026-11-07. Proveedor decidido; implementación autorizada, configuración real pendiente.
 [ADR](../../adr/resend-for-account-invitations.md) · [Requisitos](requisitos.md) · [Backlog](backlog.md).
 Alcance: CU-19/20, RF35–44/47–56, RNF11–16/18–20. Identidad/activación son de AcademiX.
 Responsables confirmados: Matías implementa; Daniel administra DNS para verificar el remitente.
@@ -14,11 +14,11 @@ Decisión cerrada: [PEND-01](../../../specs/20261106-170457_perfiles-altas-usuar
    `AcademiX <no-reply@mail.academix.dvillasc.me>`.
 2. Usar ese remitente común para UC/UTFSM, pendiente de verificación; identificar institución en asunto/cuerpo,
    sin suplantar dominios universitarios. API key con permiso de envío solo al dominio.
-3. Definir variables propuestas, sin editar .env.example ni Render todavía:
+3. Configurar variables backend; ejemplos sin secretos en .env.example y Render:
 
 | Variable backend | Uso |
 | --- | --- |
-| MAIL_DELIVERY_MODE | fake en desarrollo/CI por defecto; resend en prueba manual/producción |
+| MAIL_DELIVERY_MODE | disabled por defecto; resend con configuración; fake exclusivamente en tests |
 | RESEND_API_KEY | Secreto, nunca NEXT_PUBLIC ni versionado |
 | MAIL_FROM | AcademiX <no-reply@mail.academix.dvillasc.me>; usar tras verificar dominio |
 | ACTIVATION_ORIGINS_BY_INSTITUTION | Mapa explícito slug → origen frontend permitido |
@@ -26,8 +26,9 @@ Decisión cerrada: [PEND-01](../../../specs/20261106-170457_perfiles-altas-usuar
 En local, el mapa usa `http://uc.localhost:3000` y `http://utfsm.localhost:3000`;
 en producción, los orígenes HTTPS UC/UTFSM configurados. La institución se deriva
 del path y permiso; Host, Origin, body o CSV no pueden elegir un destino del enlace.
-Fallar ante mapa/remitente incompleto en modo resend, sin fallback a direcciones arbitrarias.
-Producción debe usar resend; fake es solo local/CI, no un fallback silencioso ante fallos.
+Mapa/remitente/secreto incompletos deshabilitan correo: capacidad false y envío 503
+INTEGRATION_NOT_CONFIGURED, sin emitir/rotar código. La aplicación y /ready siguen disponibles.
+Producción usa resend o disabled; fake solo tests y nunca fallback ante fallos.
 
 ## Cuenta e invitación, independientes del envío
 
@@ -117,7 +118,7 @@ Aplicar [limpieza aprobada](retencion.md): tras depurar no enviar/renovar; repla
 Tras error al guardar el resultado de Resend, conservar sending y recuperar como unknown;
 auditar cada versión con metadata mínima, sin mensajes crudos del proveedor ni enlaces.
 
-Tests: fake captura correo en memoria sin envíos ni logs sensibles; manual real
+Tests: fake solo en tests captura correo en memoria sin envíos ni logs; manual real
 opt-in con destinatarios del equipo, dominio y enlaces locales; consume cuota.
 Cubrir plantilla, orígenes UC/UTFSM, GET sin efecto, activación de un uso, permisos,
 429 por cuota/rate, 5xx/timeout, fallo al persistir resultado, reenvío concurrente,

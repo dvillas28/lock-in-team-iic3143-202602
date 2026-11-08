@@ -1,15 +1,15 @@
-# Borrador de issue: USR-01 Especificar perfiles y altas institucionales por formulario y CSV
+# Issue: USR-01 Especificar perfiles y altas institucionales por formulario y CSV
 
-Estado: borrador local / Todo. **No publicar en GitHub por instrucción del usuario.**
-Registro: 2026-11-06. Sin implementación; responsable: Matías (matiaraos).
-Objetivo: semana 2–8 de noviembre de 2026, America/Santiago; estimación aún preliminar.
+Estado: issue publicada / implementación autorizada. [#233](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/233).
+Registro: 2026-11-06; publicación: 2026-11-07. Responsable: Matías (matiaraos).
+Objetivo: Semana 5 E4, 2–8 de noviembre de 2026, America/Santiago; estimación aún preliminar.
 
 Cerrar la especificación por historias y reconciliar alcance/constitución/ADR con el nuevo permiso institucional. Registrar modelo global de cuenta, pertenencias, activación, CSV y auditoría sin implementar código.
 
 La [especificación formal](../../../../specs/20261106-170457_perfiles-altas-usuarios/spec.md)
-organiza lo acordado; constitución 1.6.0 y plantillas ya sincronizadas. Este avance
-documental no cierra USR-01: PEND-01 remitente y PEND-02 limpieza están resueltos;
-aún falta el diseño técnico detallado antes de implementar.
+organiza lo acordado; constitución 1.6.1 y plantillas ya sincronizadas. Este avance
+documental incorpora [plan técnico](../../../../specs/20261106-170457_perfiles-altas-usuarios/plan.md),
+modelo, contratos y tareas; las decisiones PEND-01/02 están resueltas.
 
 ## Trazabilidad
 
@@ -25,8 +25,8 @@ aún falta el diseño técnico detallado antes de implementar.
 - [x] Especificación con trazabilidad CU/RF/RNF → USR → criterios de aceptación, exclusiones y dependencias existentes.
 - [x] Permiso de alta = membership activa e isAdmin OR isSuperAdmin vigente; delegar isAdmin sigue siendo exclusivo de superadmin, sin acceso académico implícito.
 - [x] Resend/S3, remitente elegido, CSV efímero, limpieza 7/30 aprobada y límites CSV/imagen registrados; Daniel prepara DNS/S3, Matías implementa.
-- [x] Separar commit de invitaciones del correo, cuotas globales, fake local/CI y recuperación sin conservar códigos; contemplar USR-04/05.
-- [ ] Plan de escrituras acotadas de identidad, grants/RLS/readiness y revocación por credential_version; conservar runtime sin bypass.
+- [x] Separar commit de invitaciones del correo, cuotas globales, fake exclusivamente en tests y recuperación sin conservar códigos; contemplar USR-04/05.
+- [x] Plan de escrituras acotadas de identidad, grants/RLS/readiness y revocación por credential_version; conservar runtime sin bypass.
 - [x] Distinguir esquema implementado de modelo propuesto y mantener docs <150 líneas.
 
 ## Límites
@@ -49,5 +49,4 @@ la integración y no permite posponer controles de aislamiento o integridad.
 - [ADR S3](../../../adr/s3-for-profile-photos.md) y [retención aprobada](../retencion.md)
 - [Checklist formal](../../../../specs/20261106-170457_perfiles-altas-usuarios/checklists/requirements.md)
 
-Pendiente de diseño técnico detallado/publicación e implementación; este borrador
-no equivale a una issue remota, una tarjeta de Project ni una funcionalidad disponible.
+La publicación no acredita implementación, despliegue ni validación externa.

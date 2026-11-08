@@ -1,6 +1,6 @@
 # Requisitos: perfiles y altas institucionales
 
-Registro: 2026-11-06. Estado: alcance solicitado y registrado; implementación pendiente.
+Registro: 2026-11-06. Actualizado: 2026-11-07; implementación autorizada y verificación por tareas.
 Extiende [CU-01–16, RF1–29 y RNF1–10](../../deliveries/2/03-use-cases-and-requirements.md).
 Trazabilidad: [backlog y borradores de issues](backlog.md); diseño: [modelo](modelo-datos.md).
 Invitación/activación y Resend son decisiones del usuario; [correo](correo-resend.md).
@@ -69,7 +69,7 @@ se conserva la identidad global si ya existe. No implica matrícula en un curso.
 | RNF17 | Propuesta foto JPEG/PNG/WebP ≤2 MiB; procesado ≤1024×1024; limitar píxeles de entrada y limpiar huérfanos |
 | RNF18 | Resend Free: 100 correos/día UTC y 3.000/mes compartidos; distinguir cuota agotada de rate limit |
 | RNF19 | Llamadas de correo fuera de transacciones; reintento de mismo cuerpo/clave y resultado incierto recuperable |
-| RNF20 | Fake por defecto local/CI, Resend real opt-in; producción con dominio verificado, secretos backend y mapa de orígenes |
+| RNF20 | Fake solo tests; Resend real opt-in con DNS/secretos/orígenes. Sin configuración externa: integración disabled/503 sin bloquear app ni /ready; producción nunca local/fake |
 
 RNF13 debe validarse con el timeout transaccional actual; reducir lote si la
 medición lo exige. Los tiempos no se resuelven agregando una cola por anticipación.
@@ -112,5 +112,5 @@ Diseño de entrega, expiración e idempotencia: [plan Resend](correo-resend.md).
 Sin cambio de correo, borrado de cuenta, recuperación de contraseña olvidada,
 importación de matrículas, promociones por CSV, creación de instituciones ni directorio público.
 Dependencias existentes: BE-01/03–08, FE-01/02 y DOC-05; no se reabren como trabajo nuevo.
-La constitución 1.6.0 y [ADR de cuenta](../../adr/institutional-account-lifecycle.md)
-registran la extensión especificada, no implementada. USR-01 aún requiere diseño técnico detallado.
+La constitución 1.6.1 y [ADR de cuenta](../../adr/institutional-account-lifecycle.md)
+registran la extensión. El [plan técnico](../../../specs/20261106-170457_perfiles-altas-usuarios/plan.md) guía implementación; pruebas reales pendientes se registran aparte.

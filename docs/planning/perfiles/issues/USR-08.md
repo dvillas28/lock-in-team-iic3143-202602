@@ -1,8 +1,8 @@
-# Borrador de issue: USR-08 Verificar trazabilidad, aislamiento y aceptación integrada de usuarios
+# Issue: USR-08 Verificar trazabilidad, aislamiento y aceptación integrada de usuarios
 
-Estado: borrador local / Todo. **No publicar en GitHub por instrucción del usuario.**
-Registro: 2026-11-06. Sin implementación; responsable: Matías (matiaraos).
-Objetivo: semana 2–8 de noviembre de 2026, America/Santiago; estimación aún preliminar.
+Estado: issue publicada / implementación autorizada. [#237](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/237).
+Registro: 2026-11-06; publicación: 2026-11-07. Responsable: Matías (matiaraos).
+Objetivo: Semana 5 E4, 2–8 de noviembre de 2026, America/Santiago; estimación aún preliminar.
 
 Cerrar evidencia integrada de requisitos de perfiles, seguridad, altas y CSV. No sustituye pruebas propias de cada entrega; se completa cuando existen las funcionalidades.
 
@@ -44,5 +44,4 @@ la integración y no permite posponer controles de aislamiento o integridad.
 - [Contrato CSV](../importacion-csv.md)
 - [Plan Resend](../correo-resend.md)
 
-Pendiente de especificación detallada/publicación e implementación; este borrador
-no equivale a una issue remota, una tarjeta de Project ni una funcionalidad disponible.
+La publicación no acredita implementación, despliegue ni validación externa.
