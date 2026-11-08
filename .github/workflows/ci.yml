@@ -1,10 +1,9 @@
 name: CI
 
+# Pushes to main only run Release: the dev -> main PR already ran CI on the same tree.
+# Sonar and Trivy dashboards for main are refreshed with the manual workflows.
 on:
   pull_request:
-  # Render "After CI checks pass" only sees checks reported on the pushed commit of the deploy branch.
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -14,12 +13,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-# On push to main the PR already ran documentation, contracts and checks on the same tree;
-# main only re-runs what feeds Sonar, the Security tab and the Render deploy gate.
 jobs:
   documentation:
     name: Documentation length
-    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -38,7 +34,6 @@ jobs:
 
   contracts:
     name: OpenAPI and generated client
-    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -72,6 +67,7 @@ jobs:
       pull-requests: read
     outputs:
       apps: ${{ steps.apps.outputs.list }}
+      integration: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.integration == 'true' }}
     steps:
       - uses: actions/checkout@v5
 
@@ -90,6 +86,16 @@ jobs:
               - ".github/workflows/ci.yml"
               - ".github/scripts/trivy.sh"
               - ".trivyignore"
+            # Backend integration also reads the OpenAPI catalog, the generated frontend
+            # client and the Compose files.
+            integration:
+              - "backend/**"
+              - "docs/reference/openapi/**"
+              - "frontend/src/lib/api/**"
+              - "frontend/package.json"
+              - "frontend/pnpm-lock.yaml"
+              - "docker-compose*.yml"
+              - ".github/workflows/ci.yml"
 
       # Manual runs check every app.
       - id: apps
@@ -100,13 +106,14 @@ jobs:
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
             echo 'list=["backend","frontend"]' >> "$GITHUB_OUTPUT"
           else
-            echo "list=$CHANGED" >> "$GITHUB_OUTPUT"
+            # `changes` also lists non-app filters such as `integration`.
+            echo "list=$(jq -c 'map(select(. == "backend" or . == "frontend"))' <<< "$CHANGED")" >> "$GITHUB_OUTPUT"
           fi
 
   checks:
     name: ${{ matrix.app }} (lint + ${{ matrix.app == 'backend' && 'test' || 'build' }})
     needs: changes
-    if: github.event_name != 'push' && needs.changes.outputs.apps != '[]'
+    if: needs.changes.outputs.apps != '[]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -191,6 +198,8 @@ jobs:
 
   backend-coverage:
     name: Backend integration + coverage
+    needs: changes
+    if: needs.changes.outputs.integration == 'true'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -243,9 +252,13 @@ jobs:
           if-no-files-found: error
 
   # Static analysis of our own code; the quality gate only judges the code changed by the PR.
+  # Runs when app code changed; backend coverage is attached only if integration ran.
   sonarqube:
     name: SonarQube (quality gate)
-    needs: backend-coverage
+    needs: [changes, backend-coverage]
+    if: >-
+      ${{ !cancelled() && needs.changes.result == 'success' && needs.changes.outputs.apps != '[]'
+      && needs.backend-coverage.result != 'failure' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -277,11 +290,12 @@ jobs:
             frontend/test/*.test.ts
           test -s frontend/coverage/lcov.info
       - uses: actions/download-artifact@v4
+        if: needs.backend-coverage.result == 'success'
         with:
           name: backend-coverage
           path: backend/coverage
 
-      # The gate blocks PRs only; on main the analysis feeds the dashboard and must not block the deploy.
+      # The gate blocks PRs only; manual runs feed the dashboard without waiting for it.
       - uses: SonarSource/sonarqube-scan-action@v8
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
