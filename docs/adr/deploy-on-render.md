@@ -20,7 +20,8 @@ Los únicos acoplamientos eran `railway.json`, el CLI de Railway en Release, el 
 - Mismos Dockerfiles, puertos (3001/3000) y healthchecks (`/ready`, `/`).
   `buildFilter` reemplaza `watchPatterns`.
 - `autoDeployTrigger: checksPass` reemplaza "Wait for CI": Render despliega `main`
-  solo cuando todos los checks del commit pasan, incluido el workflow Release.
+  solo cuando todos los checks del commit pasan. CI corre en la PR `dev` → `main`;
+  en el push a `main` solo corre Release, que queda como el check del deploy.
 - Release fija `APP_VERSION` con `PUT /v1/services/{id}/env-vars/APP_VERSION`.
   Necesita el secret `RENDER_API_KEY` y las variables `RENDER_BACKEND_SERVICE_ID`
   y `RENDER_FRONTEND_SERVICE_ID`. Actualizar por API no despliega por sí solo.
