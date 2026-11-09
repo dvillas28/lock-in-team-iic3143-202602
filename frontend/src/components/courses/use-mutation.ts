@@ -8,6 +8,7 @@ import { useTransientFeedback, type Feedback } from "../use-feedback.ts";
 type MutationMessages = {
   conflict?: {message: string; errors: Record<string,string>};
   fields?: Record<string,string>;
+  onSuccess?: (message: string) => void;
 };
 export function useMutation(session: Session, messages: MutationMessages = {}) {
   const [status, setStatus] = useState<{
@@ -31,8 +32,15 @@ export function useMutation(session: Session, messages: MutationMessages = {}) {
     setStatus({ busy: true });
     try {
       const feedback = await operation(current);
-      if (current())
-        setStatus({ busy: false, confirmed: true, ...(typeof feedback === "object" ? feedback : { message: feedback || "Operación completada." }) });
+      if (current()) {
+        if (typeof feedback === "object") {
+          setStatus({ busy: false, confirmed: true, ...feedback });
+        } else {
+          const message = feedback || "Operación completada.";
+          messages.onSuccess?.(message);
+          setStatus({ busy: false, confirmed: true, message: messages.onSuccess ? undefined : message });
+        }
+      }
       locked.current = false;
     }
     catch (error) {

@@ -3,14 +3,14 @@ import {test} from "node:test";
 import {createElement as h} from "react";
 import {ModulesPanel} from "../src/components/content/modules-panel.tsx";
 import {mount} from "./fixtures/course-ui.ts";
-import {unit,material,course,id} from "./fixtures/content.ts";
+import {unit,material,course,id,resources} from "./fixtures/content.ts";
 import {deferred} from "./fixtures/courses.ts";
 const view=()=>h(ModulesPanel,{courseId:course.id});
 test("teacher without admin creates at max+1; edits material minimally and retains draft on authorized refresh",async()=>{
  let parent={...unit};let item={...material};const ui=await mount(view(),async r=>{
  if(r.method==="PATCH"){const b=await r.clone().json();if(r.url.includes("/materials/")){item={...item,...b};return Response.json(item);}parent={...parent,...b};return Response.json(parent);}
  if(r.method==="POST"&&!r.url.endsWith("/login"))return Response.json({...unit,id:id(42),...await r.clone().json()},{status:201});
- return Response.json(r.url.endsWith("/materials")?{items:[item]}:r.url.endsWith("/modules")?{items:[parent]}:course);
+ return Response.json(r.url.endsWith("/resources")?resources(item):r.url.endsWith("/modules")?{items:[parent]}:course);
  },"teacher");
  try{
  assert.ok(ui.doc.querySelector('form[aria-label="Crear módulo"]'));
@@ -81,7 +81,8 @@ test("material create ambiguity and rejected edit retain original whitespace; no
  const ui=await mount(view(),async r=>{
  if(r.method==="POST"){posted=true;if(mode==="lost")throw new Error("lost");return Response.json({...material,id:id(51),...await r.clone().json()},{status:201});}
  if(r.method==="PATCH")return Response.json({},{status:422});
- return Response.json(r.url.endsWith("/materials")?{items:posted&&mode==="lost"?[material,{...material,id:id(51)}]:[material]}:r.url.endsWith("/modules")?{items:[unit]}:course);
+ const items=posted&&mode==="lost"?[material,{...material,id:id(51)}]:[material];
+ return Response.json(r.url.endsWith("/resources")?resources(...items):r.url.endsWith("/materials")?{items}:r.url.endsWith("/modules")?{items:[unit]}:course);
  },"teacher");
  try{
  await ui.click("Unidad 1");await ui.submit('form[aria-label="Crear material"]',{title:"Lectura",markdownBody:"  fuente local  "});
@@ -96,7 +97,7 @@ test("material create ambiguity and rejected edit retain original whitespace; no
 test("pending reorder, material update and create are discarded on context changes",async()=>{
  for(const operation of ["order","update","create"]){
  const pending=deferred<Response>();
- const ui=await mount(view(),r=>r.method!=="GET"?pending.promise:Response.json(r.url.endsWith("/materials")?{items:[material]}:r.url.endsWith("/modules")?{items:[unit,{...unit,id:id(42),title:"Segundo",position:9}]}:course),"teacher");
+ const ui=await mount(view(),r=>r.method!=="GET"?pending.promise:Response.json(r.url.endsWith("/resources")?resources(material):r.url.endsWith("/modules")?{items:[unit,{...unit,id:id(42),title:"Segundo",position:9}]}:course),"teacher");
  try{
  if(operation==="order")await ui.settle(()=>ui.doc.querySelector<HTMLButtonElement>('button[aria-label="Bajar Unidad 1"]')!.click());
  else{await ui.click("Unidad 1");await ui.submit(operation==="update"?'form[aria-label="Editar material Lectura"]':'form[aria-label="Crear material"]',{title:"Lectura",markdownBody:"Privado"});}
@@ -119,7 +120,7 @@ test("confirmed create followed by failed empty refresh is not uncertain or a re
 });
 
 test("collapsing an uncertain material editor cannot unlock the same creation",async()=>{
- const ui=await mount(view(),r=>r.method==="POST"?Promise.reject(new Error("lost")):Response.json(r.url.endsWith("/materials")?{items:[material]}:r.url.endsWith("/modules")?{items:[unit]}:course),"teacher");
+ const ui=await mount(view(),r=>r.method==="POST"?Promise.reject(new Error("lost")):Response.json(r.url.endsWith("/resources")?resources(material):r.url.endsWith("/modules")?{items:[unit]}:course),"teacher");
  try{
  await ui.click("Unidad 1");await ui.submit('form[aria-label="Crear material"]',{title:"Lectura",markdownBody:"borrador"});
  await ui.click("Unidad 1");await ui.click("Unidad 1");
@@ -140,7 +141,7 @@ test('material publication stays blocked after an uncertain edit even when recon
     return Response.json(item);
    }
    if(r.method==='POST'){publications++;item={...item,publishedAt:null};return Response.json(item);}
-   return Response.json(r.url.endsWith('/materials')?{items:[item]}:r.url.endsWith('/modules')?{items:[unit]}:r.url.endsWith(item.id)?item:course);
+   return Response.json(r.url.endsWith('/resources')?resources(item):r.url.endsWith('/modules')?{items:[unit]}:r.url.endsWith(item.id)?item:course);
   },'teacher');
   try{
    await ui.click('Unidad 1');await ui.submit('form[aria-label="Editar material Lectura"]',{title:'Lectura',markdownBody:'Texto persistido'});

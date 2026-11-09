@@ -40,6 +40,7 @@ function pageTitle(pathname: string) {
     if (pathname.endsWith('/quizzes')) {
         return 'Quizzes';
     }
+    if (pathname.includes('/files/')) return 'Archivo';
     if (pathname.includes('/materials/')) {
         return 'Material';
     }
@@ -62,14 +63,14 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, av
     const courseId = pathname.startsWith('/courses/') ? pathname.split('/')[2] : undefined;
     const base = courseId && isId(courseId) ? `/courses/${courseId}` : undefined;
     const roles = user ? [...new Set(user.sectionMemberships.filter(m => !courseId || m.courseId === courseId).map(m => ({ teacher: 'Docente', student: 'Estudiante', assistant: 'Ayudante' })[m.role]))] : [];
-    const closeMenu = () => { setMenuOpen(false); menuButton.current?.focus(); };
+    const closeMenu = () => { setMenuOpen(false); menuButton.current?.focus({preventScroll:true}); };
     useEffect(() => {
       if (!menuOpen) return;
       function onEscape(event: KeyboardEvent) {
         if (event.key !== 'Escape' || event.defaultPrevented) return;
         event.preventDefault();
         setMenuOpen(false);
-        menuButton.current?.focus();
+        menuButton.current?.focus({preventScroll:true});
       }
       window.addEventListener('keydown', onEscape);
       return () => window.removeEventListener('keydown', onEscape);
@@ -82,13 +83,14 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, av
             <span className="logo-icon"><GraduationCap size={16} aria-hidden="true"/></span>
             <span className="logo-name">AcademiX</span>
           </Link>
-          <button ref={menuButton} type="button" className="icon-btn mobile-menu-button" aria-label={menuOpen ? 'Cerrar navegación' : 'Abrir navegación'} aria-expanded={menuOpen} aria-controls="institution-navigation" onClick={() => {
-            if (menuOpen) closeMenu(); else { setMenuOpen(true); requestAnimationFrame(() => navigation.current?.querySelector<HTMLAnchorElement>('a')?.focus()); }
+          <button ref={menuButton} type="button" className="icon-btn mobile-menu-button" aria-label={menuOpen ? 'Cerrar navegación' : 'Abrir navegación'} aria-expanded={menuOpen} aria-controls="institution-menu" onClick={() => {
+            if (menuOpen) closeMenu(); else { setMenuOpen(true); requestAnimationFrame(() => navigation.current?.querySelector<HTMLAnchorElement>('a')?.focus({preventScroll:true})); }
           }}>{menuOpen ? <X size={18} aria-hidden="true" /> : <Menu size={18} aria-hidden="true" />}</button>
           <div className="tenant-badge institution-context">
             <span>Institución: <strong>{institutionName ?? institutionSlug}</strong></span>
           </div>
         </div>
+        <div className="sidebar-menu" id="institution-menu">
         <nav ref={navigation} id="institution-navigation" className="sidebar-nav" aria-label="Navegación institucional">
           <p className="nav-section-label">Espacio académico</p>
           <Link href={homePath} className={`nav-item${pathname === homePath ? " active" : ""}`} aria-current={pathname === homePath ? "page" : undefined} onClick={() => setMenuOpen(false)}>
@@ -106,6 +108,7 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, av
           })}</>}
         </nav>
         {user && <div className="sidebar-bottom institution-user"><div className="user-row">{avatar ?? <span className="avatar" aria-hidden="true">{user.name.slice(0,1)}</span>}<div><p className="name">{user.name}</p><p className="role">{[...roles, ...(user.institutionMembership.isAdmin ? ['Administración institucional'] : []), ...(user.institutionMembership.isSuperAdmin ? ['Superadministración'] : [])].join(' · ') || 'Miembro institucional'}</p></div></div>{actions}</div>}
+        </div>
       </aside>
       <div className="main">
         <header className="top-header">
@@ -117,7 +120,7 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, av
             <Link href={homePath} aria-current={pathname === homePath ? "page" : undefined}>Cursos</Link>
             {base && pathname !== base && <><ChevronRight size={14} aria-hidden="true"/><Link href={base}>Curso</Link></>}
             {base && pathname.includes('/quizzes/') && <><ChevronRight size={14} aria-hidden="true"/><Link href={base + '/quizzes'}>Quizzes</Link></>}
-            {base && pathname.includes('/materials/') && <><ChevronRight size={14} aria-hidden="true"/><Link href={base + '/modules'}>Módulos</Link></>}
+            {base && (pathname.includes('/materials/') || pathname.includes('/files/')) && <><ChevronRight size={14} aria-hidden="true"/><Link href={base + '/modules'}>Módulos</Link></>}
             {base && pathname.includes('/attempts/') && <><ChevronRight size={14} aria-hidden="true"/><Link href={pathname.split('/attempts/')[0] + '/attempts'}>Intentos</Link></>}
             {pathname !== homePath && <><ChevronRight size={14} aria-hidden="true"/><span className="crumb-active" aria-current="page">{pageTitle(pathname)}</span></>}
           </nav>

@@ -3,14 +3,14 @@ import {test} from "node:test";
 import {createElement as h} from "react";
 import {ModulesPanel} from "../src/components/content/modules-panel.tsx";
 import {mount} from "./fixtures/course-ui.ts";
-import {unit,material,course,timestamp,matrix} from "./fixtures/content.ts";
+import {unit,material,course,timestamp,matrix,resources} from "./fixtures/content.ts";
 import {deferred} from "./fixtures/courses.ts";
 const view=()=>h(ModulesPanel,{courseId:course.id});
 test("independent publication controls retain focus and aria state; hidden parent preserves child publication",async()=>{
  let parent={...unit};let child={...material,publishedAt:timestamp as string|null};
  const ui=await mount(view(),r=>{
  if(r.method==="POST"){if(r.url.includes("/materials/")){child={...child,publishedAt:r.url.endsWith("/unpublish")?null:timestamp};return Response.json(child);}parent={...parent,publishedAt:r.url.endsWith("/unpublish")?null:timestamp};return Response.json(parent);}
- return Response.json(r.url.endsWith("/materials")?{items:[child]}:r.url.endsWith("/modules")?{items:[parent]}:course);
+ return Response.json(r.url.endsWith("/resources")?resources(child):r.url.endsWith("/modules")?{items:[parent]}:course);
  },"teacher");
  try{
  await ui.click("Unidad 1");assert.match(ui.doc.body.textContent!,/No visible: módulo sin publicar/);
@@ -19,7 +19,7 @@ test("independent publication controls retain focus and aria state; hidden paren
  assert.match(ui.doc.body.textContent!,/Visible para estudiantes/);
  await ui.settle(()=>button.click());assert.equal(child.publishedAt,timestamp);assert.match(ui.doc.body.textContent!,/No visible: módulo sin publicar/);
  }finally{await ui.close();}
- for(const entry of matrix){const u=await mount(view(),r=>Response.json(r.url.endsWith("/materials")?{items:[entry.material]}:r.url.endsWith("/modules")?{items:[entry.unit]}:course),"teacher");try{await u.click("Unidad 1");assert.match(u.doc.body.textContent!,entry.visible?/Visible para estudiantes/:/No visible/);}finally{await u.close();}}
+ for(const entry of matrix){const u=await mount(view(),r=>Response.json(r.url.endsWith("/resources")?resources(entry.material):r.url.endsWith("/modules")?{items:[entry.unit]}:course),"teacher");try{await u.click("Unidad 1");assert.match(u.doc.body.textContent!,entry.visible?/Visible para estudiantes/:/No visible/);}finally{await u.close();}}
 });
 test("publication distinguishes rejected, uncertain and confirmed with failed refresh; never retries",async()=>{
  for(const mode of ["rejected","uncertain","refresh"]){
@@ -49,7 +49,7 @@ test("uncertain item publication refreshes observed state without claiming write
  let item={...material};
  const ui=await mount(view(),r=>{
  if(r.method==="POST"){item={...item,publishedAt:timestamp};throw new Error("response lost");}
- return Response.json(r.url.endsWith("/materials")?{items:[item]}:r.url.includes("/materials/")?item:r.url.endsWith("/modules")?{items:[unit]}:course);
+ return Response.json(r.url.endsWith("/resources")?resources(item):r.url.includes("/materials/")?item:r.url.endsWith("/modules")?{items:[unit]}:course);
  },"teacher");
  try{
  await ui.click("Unidad 1");const button=ui.doc.querySelector<HTMLButtonElement>('button[aria-label="Publicar material Lectura"]')!;

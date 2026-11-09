@@ -7,7 +7,7 @@ import { AttemptDetail } from "../src/components/attempts/attempt-detail.tsx";
 import { QuestionEditor, questionRows } from "../src/components/quizzes/question-editor.tsx";
 import { SUCCESS_FEEDBACK_MS } from "../src/components/use-feedback.ts";
 import { mount } from "./fixtures/course-ui.ts";
-import { unit, material, course, timestamp, id } from "./fixtures/content.ts";
+import { unit, material, course, timestamp, id, resources } from "./fixtures/content.ts";
 import * as grades from "./fixtures/gradebook.ts";
 import * as attempts from "./fixtures/attempts.ts";
 
@@ -20,25 +20,53 @@ test("module, material and publication confirmations expire without losing draft
       if (r.url.endsWith("/publish")) { child = { ...child, publishedAt: timestamp }; return Response.json(child); }
       return Response.json({ ...material, id: id(51), ...await r.json() }, { status: 201 });
     }
-    return Response.json(r.url.endsWith("/materials") ? { items: [child] } : r.url.endsWith("/modules") ? { items: [parent] } : course);
+    return Response.json(r.url.endsWith("/resources") ? resources(child) : r.url.endsWith("/modules") ? { items: [parent] } : course);
   }, "teacher");
   try {
     await ui.click("Unidad 1");
+    const notice = ui.doc.querySelector(".content-notices")!;
+    assert.equal(notice.getAttribute("role"), "status");
     await ui.submit('form[aria-label="Editar módulo Unidad 1"]', { title: "Unidad revisada" });
+    assert.equal(notice.textContent, "Módulo actualizado.");
     await ui.submit('form[aria-label="Crear material"]', { title: "Apuntes", markdownBody: "Contenido" });
+    assert.equal(notice.textContent, "Material creado.");
     const button = ui.doc.querySelector<HTMLButtonElement>('button[aria-label="Publicar material Lectura"]')!;
     button.focus(); await ui.settle(() => button.click());
     const draft = ui.doc.querySelector<HTMLTextAreaElement>('form[aria-label="Crear material"] textarea')!;
     draft.value = "Siguiente borrador";
-    assert.match(ui.doc.body.textContent!, /Módulo actualizado/);
-    assert.match(ui.doc.body.textContent!, /Material creado/);
-    assert.match(ui.doc.body.textContent!, /Material publicado/);
+    assert.equal(notice.textContent, "Material publicado.");
+    assert.doesNotMatch(ui.doc.querySelector(".module-workspace")!.textContent!, /Módulo actualizado|Material creado|Material publicado/);
+    assert.equal(ui.requests.filter(r => r.method === "GET" && r.url.endsWith(`/courses/${course.id}`)).length, 1);
+    assert.equal(ui.requests.filter(r => r.method === "GET" && r.url.endsWith("/modules")).length, 2);
+    assert.equal(ui.requests.filter(r => r.method === "GET" && r.url.endsWith("/resources")).length, 3);
     await ui.settle(() => t.mock.timers.tick(SUCCESS_FEEDBACK_MS));
     assert.doesNotMatch(ui.doc.body.textContent!, /Módulo actualizado|Material creado|Material publicado/);
     assert.equal(draft.value, "Siguiente borrador");
     assert.equal(ui.doc.activeElement, button);
     assert.equal(button.getAttribute("aria-pressed"), "true");
     assert.equal(ui.requests.filter(r => ["PATCH", "POST"].includes(r.method) && !r.url.endsWith("/login")).length, 3);
+  } finally { await ui.close(); }
+});
+
+test("returning revalidates each visible collection once and leaves collapsed modules alone", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const ui = await mount(h(ModulesPanel, { courseId: course.id }), r =>
+    Response.json(r.url.endsWith("/resources") ? resources(material) : r.url.endsWith("/modules") ? { items: [unit] } : course), "teacher");
+  try {
+    const reads = (suffix: string) => ui.requests.filter(r => r.method === "GET" && r.url.endsWith(suffix)).length;
+    const returnToPage = () => ui.settle(() => {
+      ui.dom.window.dispatchEvent(new ui.dom.window.Event("focus"));
+      ui.doc.dispatchEvent(new ui.dom.window.Event("visibilitychange"));
+      t.mock.timers.tick(50);
+    });
+    await returnToPage();
+    assert.equal(reads("/modules"), 2);
+    assert.equal(reads("/resources"), 0);
+    await ui.click("Unidad 1");
+    await returnToPage();
+    assert.equal(reads("/modules"), 3);
+    assert.equal(reads("/resources"), 2);
+    assert.equal(reads(`/courses/${course.id}`), 1);
   } finally { await ui.close(); }
 });
 

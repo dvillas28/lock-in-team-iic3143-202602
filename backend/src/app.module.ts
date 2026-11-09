@@ -1,3 +1,6 @@
+import {AcademicFilesController} from "./academic-files/academic-files.controller";
+import {AcademicFilesService} from "./academic-files/academic-files.service";
+import {AcademicStorage} from "./academic-files/object-storage";
 import {AccountsController} from "./accounts/accounts.controller";
 import {AccountsService} from "./accounts/accounts.service";
 import {AccountIntegrations} from "./accounts/integrations";
@@ -43,7 +46,7 @@ import { InstitutionsController } from "./institutions/institutions.controller";
   imports: [JwtModule.register({}),
     // shortcut: memory per instance; coordinate quotas before running multiple instances.
     ThrottlerModule.forRoot([{limit: 5, ttl: 60000, blockDuration: 60000}])],
-  providers: [AccountsService,AccountIntegrations,InvitationsService,ImportsService,ParticipantSearchService, GradebookService, AttemptsService, QuizzesService, ModulesService, MaterialsService, EnrollmentsService, AuditService, MembershipAdminService, CoursesService, SectionsService, DatabaseService, AuthService, InstitutionsService, {provide: APP_GUARD, useClass: AuthGuard}, {provide: APP_GUARD, useClass: TenantGuard}],
-  controllers: [AccountsController,InvitationsController,InvitationActivationController,ImportsController,GradebookController, AttemptsController, QuizzesController, ModulesController, MaterialsController, EnrollmentsController, AuditController, MembershipAdminController, CoursesController, SectionsController, HealthController, AuthController, InstitutionsController],
+  providers: [AcademicFilesService,AcademicStorage,AccountsService,AccountIntegrations,InvitationsService,ImportsService,ParticipantSearchService, GradebookService, AttemptsService, QuizzesService, ModulesService, MaterialsService, EnrollmentsService, AuditService, MembershipAdminService, CoursesService, SectionsService, DatabaseService, AuthService, InstitutionsService, {provide: APP_GUARD, useClass: AuthGuard}, {provide: APP_GUARD, useClass: TenantGuard}],
+  controllers: [AcademicFilesController,AccountsController,InvitationsController,InvitationActivationController,ImportsController,GradebookController, AttemptsController, QuizzesController, ModulesController, MaterialsController, EnrollmentsController, AuditController, MembershipAdminController, CoursesController, SectionsController, HealthController, AuthController, InstitutionsController],
 })
 export class AppModule {}

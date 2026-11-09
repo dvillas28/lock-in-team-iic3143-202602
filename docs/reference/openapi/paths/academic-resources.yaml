@@ -1,0 +1,100 @@
+/api/v1/institution/{institutionSlug}/modules/{moduleId}/resources:
+  parameters:
+  - $ref: ../components/parameters.yaml#/InstitutionSlug
+  - $ref: ../components/parameters.yaml#/ModuleId
+  get:
+    tags: [Materials]
+    operationId: listModuleResources
+    description: >-
+      Matrícula activa en el curso. Teacher consulta borradores. Assistant y student requieren módulo e ítem publicados. Un enlace a quiz aplica también su visibilidad de sección.
+    summary: Listar recursos visibles en su orden de módulo
+    responses:
+      '200':
+        description: Operación completada.
+        headers:
+          Cache-Control: {schema: {type: string, const: no-store}}
+          X-Content-Type-Options: {schema: {type: string, const: nosniff}}
+        content:
+          application/json:
+            schema: {$ref: '../components/schemas/academic-files.yaml#/ModuleResources'}
+      '400': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '401': {$ref: '../components/responses.yaml#/ContentUnauthorized'}
+      '404': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '500': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '503': {$ref: '../components/responses.yaml#/ContentProblem'}
+/api/v1/institution/{institutionSlug}/modules/{moduleId}/resources/order:
+  parameters:
+  - $ref: ../components/parameters.yaml#/InstitutionSlug
+  - $ref: ../components/parameters.yaml#/ModuleId
+  put:
+    tags: [Materials]
+    operationId: moveModuleResource
+    description: >-
+      Teacher activo del curso. Requiere recursos adyacentes en su vista autorizada. Devuelve 409 si la relación cambió.
+    summary: Intercambiar dos recursos visibles adyacentes
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: {$ref: '../components/schemas/academic-files.yaml#/MoveResource'}
+    responses:
+      '204':
+        description: Operación completada.
+      '400': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '401': {$ref: '../components/responses.yaml#/ContentUnauthorized'}
+      '403': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '404': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '409': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '413': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '415': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '422': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '500': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '503': {$ref: '../components/responses.yaml#/ContentProblem'}
+/api/v1/institution/{institutionSlug}/modules/{moduleId}/resources/quizzes:
+  parameters:
+  - $ref: ../components/parameters.yaml#/InstitutionSlug
+  - $ref: ../components/parameters.yaml#/ModuleId
+  post:
+    tags: [Materials]
+    operationId: linkModuleQuiz
+    description: >-
+      Teacher activo del curso con permiso de autoría sobre el quiz de destino. El enlace conserva el alcance de sección del quiz.
+    summary: Enlazar un quiz del curso al módulo
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: {$ref: '../components/schemas/academic-files.yaml#/LinkQuiz'}
+    responses:
+      '204':
+        description: Operación completada.
+      '400': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '401': {$ref: '../components/responses.yaml#/ContentUnauthorized'}
+      '403': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '404': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '409': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '413': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '415': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '422': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '500': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '503': {$ref: '../components/responses.yaml#/ContentProblem'}
+/api/v1/institution/{institutionSlug}/modules/{moduleId}/resources/quizzes/{resourceId}:
+  parameters:
+  - $ref: ../components/parameters.yaml#/InstitutionSlug
+  - $ref: ../components/parameters.yaml#/ModuleId
+  - {name: resourceId, in: path, required: true, schema: {type: string, format: uuid}}
+  delete:
+    tags: [Materials]
+    operationId: unlinkModuleQuiz
+    description: >-
+      Teacher activo del curso con permiso de autoría sobre el quiz. Retira el enlace del módulo.
+    summary: Retirar el enlace al quiz del módulo
+    responses:
+      '204':
+        description: Operación completada.
+      '400': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '401': {$ref: '../components/responses.yaml#/ContentUnauthorized'}
+      '403': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '404': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '500': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '503': {$ref: '../components/responses.yaml#/ContentProblem'}

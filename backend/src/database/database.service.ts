@@ -59,7 +59,7 @@ export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
       FROM public.courses c,public.sections s,public.enrollments e,public.audit_events a LIMIT 0`);
 
     await this.pool.query(`SELECT m.id,m.institution_id,m.course_id,m.title,m.position,m.published_at,
-      a.id,a.institution_id,a.module_id,a.title,a.kind,a.markdown_body,a.published_at,a.created_by
+      a.id,a.institution_id,a.module_id,a.title,a.kind,a.markdown_body,a.published_at,a.created_by,a.position,a.file_key,a.file_name,a.media_type,a.byte_size,a.quiz_id,a.quiz_course_id,a.upload_id,a.upload_digest
       FROM public.course_modules m,public.materials a LIMIT 0`);
   }
 

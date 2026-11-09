@@ -465,6 +465,299 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/institution/{institutionSlug}/modules/{moduleId}/resources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                moduleId: components["parameters"]["ModuleId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Listar recursos visibles en su orden de módulo
+         * @description Matrícula activa en el curso. Teacher consulta borradores. Assistant y student requieren módulo e ítem publicados. Un enlace a quiz aplica también su visibilidad de sección.
+         */
+        get: operations["listModuleResources"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/modules/{moduleId}/resources/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                moduleId: components["parameters"]["ModuleId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Intercambiar dos recursos visibles adyacentes
+         * @description Teacher activo del curso. Requiere recursos adyacentes en su vista autorizada. Devuelve 409 si la relación cambió.
+         */
+        put: operations["moveModuleResource"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/modules/{moduleId}/resources/quizzes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                moduleId: components["parameters"]["ModuleId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enlazar un quiz del curso al módulo
+         * @description Teacher activo del curso con permiso de autoría sobre el quiz de destino. El enlace conserva el alcance de sección del quiz.
+         */
+        post: operations["linkModuleQuiz"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/modules/{moduleId}/resources/quizzes/{resourceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                moduleId: components["parameters"]["ModuleId"];
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Retirar el enlace al quiz del módulo
+         * @description Teacher activo del curso con permiso de autoría sobre el quiz. Retira el enlace del módulo.
+         */
+        delete: operations["unlinkModuleQuiz"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/modules/{moduleId}/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                moduleId: components["parameters"]["ModuleId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Subir archivo y crear un recurso en borrador
+         * @description Teacher activo del curso. Valida extensión, MIME, firma y tamaño. Una clave idempotente solo repite el mismo intento.
+         */
+        post: operations["uploadAcademicFile"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/materials/{materialId}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                materialId: components["parameters"]["MaterialId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Consultar los metadatos de un archivo autorizado
+         * @description Teacher activo del curso o matrícula activa con módulo y archivo publicados.
+         */
+        get: operations["getAcademicFile"];
+        /**
+         * Reemplazar el binario y conservar publicación y orden
+         * @description Teacher activo del curso. Valida el nuevo binario y audita la sustitución de la referencia.
+         */
+        put: operations["replaceAcademicFile"];
+        post?: never;
+        /**
+         * Eliminar el recurso de archivo
+         * @description Teacher activo del curso. Retira la referencia y audita la eliminación.
+         */
+        delete: operations["deleteAcademicFile"];
+        options?: never;
+        head?: never;
+        /**
+         * Cambiar el nombre visible del archivo
+         * @description Teacher activo del curso. El nombre visible se guarda separado del nombre original.
+         */
+        patch: operations["renameAcademicFile"];
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/materials/{materialId}/file/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                materialId: components["parameters"]["MaterialId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Publicar el archivo
+         * @description Teacher activo del curso. Publicar el archivo no modifica la publicación del módulo.
+         */
+        post: operations["publishAcademicFile"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/materials/{materialId}/file/unpublish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                materialId: components["parameters"]["MaterialId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ocultar el archivo
+         * @description Teacher activo del curso. Retira la lectura para assistant y student en cada solicitud posterior.
+         */
+        post: operations["unpublishAcademicFile"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/materials/{materialId}/file/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                materialId: components["parameters"]["MaterialId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Leer contenido autorizado compatible con visor
+         * @description Teacher activo del curso o matrícula activa con módulo y archivo publicados. PDF, imágenes compatibles y texto inerte.
+         */
+        get: operations["previewAcademicFile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/materials/{materialId}/file/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                materialId: components["parameters"]["MaterialId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Descargar el binario autorizado
+         * @description Teacher activo del curso o matrícula activa con módulo y archivo publicados. Transmite una descarga adjunta.
+         */
+        get: operations["downloadAcademicFile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/institution/{institutionSlug}/modules/{moduleId}/materials": {
         parameters: {
             query?: never;
@@ -1850,6 +2143,71 @@ export interface components {
             readonly publishedAt: string | null;
             /** Format: uuid */
             readonly createdBy: string;
+        };
+        ResourcePosition: number;
+        OrderedMarkdown: components["schemas"]["MaterialSummary"] & {
+            /** @constant */
+            kind?: "markdown";
+            markdownBody: string;
+            position: components["schemas"]["ResourcePosition"];
+        };
+        AcademicFile: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            moduleId: string;
+            /** @constant */
+            kind: "file";
+            title: string;
+            position: components["schemas"]["ResourcePosition"];
+            /** Format: date-time */
+            publishedAt: string | null;
+            /** Format: uuid */
+            createdBy: string;
+            fileName: string;
+            mediaType: string;
+            byteSize: number;
+            /** @enum {string|null} */
+            preview: "pdf" | "image" | "text" | null;
+        };
+        ModuleQuiz: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            moduleId: string;
+            /** @constant */
+            kind: "quiz";
+            title: string;
+            position: components["schemas"]["ResourcePosition"];
+            /** Format: date-time */
+            publishedAt: string | null;
+            /** Format: uuid */
+            quizId: string;
+            canUnlink: boolean;
+        };
+        UploadLimits: {
+            document: number;
+            image: number;
+            zip: number;
+        };
+        ModuleResources: {
+            items: (components["schemas"]["OrderedMarkdown"] | components["schemas"]["AcademicFile"] | components["schemas"]["ModuleQuiz"])[];
+            limits: components["schemas"]["UploadLimits"];
+        };
+        MoveResource: {
+            /** Format: uuid */
+            resourceId: string;
+            /** Format: uuid */
+            neighborId: string;
+            /** @enum {integer} */
+            direction: -1 | 1;
+        };
+        LinkQuiz: {
+            /** Format: uuid */
+            quizId: string;
+        };
+        RenameFile: {
+            title: string;
         };
         MarkdownMaterial: components["schemas"]["MaterialSummary"] & {
             /** @constant */
@@ -3586,6 +3944,510 @@ export interface operations {
             413: components["responses"]["ContentProblem"];
             415: components["responses"]["ContentProblem"];
             422: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
+        };
+    };
+    listModuleResources: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                moduleId: components["parameters"]["ModuleId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModuleResources"];
+                };
+            };
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            404: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
+        };
+    };
+    moveModuleResource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                moduleId: components["parameters"]["ModuleId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MoveResource"];
+            };
+        };
+        responses: {
+            /** @description Operación completada. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
+            404: components["responses"]["ContentProblem"];
+            409: components["responses"]["ContentProblem"];
+            413: components["responses"]["ContentProblem"];
+            415: components["responses"]["ContentProblem"];
+            422: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
+        };
+    };
+    linkModuleQuiz: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                moduleId: components["parameters"]["ModuleId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkQuiz"];
+            };
+        };
+        responses: {
+            /** @description Operación completada. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
+            404: components["responses"]["ContentProblem"];
+            409: components["responses"]["ContentProblem"];
+            413: components["responses"]["ContentProblem"];
+            415: components["responses"]["ContentProblem"];
+            422: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
+        };
+    };
+    unlinkModuleQuiz: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                moduleId: components["parameters"]["ModuleId"];
+                resourceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operación completada. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
+            404: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
+        };
+    };
+    uploadAcademicFile: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Identifica un intento de carga del mismo archivo por el mismo docente. */
+                "Idempotency-Key"?: string;
+            };
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                moduleId: components["parameters"]["ModuleId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                    title?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Operación completada. */
+            201: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcademicFile"];
+                };
+            };
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
+            404: components["responses"]["ContentProblem"];
+            409: components["responses"]["ContentProblem"];
+            413: components["responses"]["ContentProblem"];
+            415: components["responses"]["ContentProblem"];
+            422: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
+        };
+    };
+    getAcademicFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                materialId: components["parameters"]["MaterialId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcademicFile"];
+                };
+            };
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            404: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
+        };
+    };
+    replaceAcademicFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                materialId: components["parameters"]["MaterialId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcademicFile"];
+                };
+            };
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
+            404: components["responses"]["ContentProblem"];
+            409: components["responses"]["ContentProblem"];
+            413: components["responses"]["ContentProblem"];
+            415: components["responses"]["ContentProblem"];
+            422: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
+        };
+    };
+    deleteAcademicFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                materialId: components["parameters"]["MaterialId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operación completada. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
+            404: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
+        };
+    };
+    renameAcademicFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                materialId: components["parameters"]["MaterialId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RenameFile"];
+            };
+        };
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcademicFile"];
+                };
+            };
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
+            404: components["responses"]["ContentProblem"];
+            409: components["responses"]["ContentProblem"];
+            413: components["responses"]["ContentProblem"];
+            415: components["responses"]["ContentProblem"];
+            422: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
+        };
+    };
+    publishAcademicFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                materialId: components["parameters"]["MaterialId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcademicFile"];
+                };
+            };
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
+            404: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
+        };
+    };
+    unpublishAcademicFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                materialId: components["parameters"]["MaterialId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcademicFile"];
+                };
+            };
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
+            404: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
+        };
+    };
+    previewAcademicFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                materialId: components["parameters"]["MaterialId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    "Content-Disposition"?: string;
+                    "Content-Length"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            404: components["responses"]["ContentProblem"];
+            415: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
+        };
+    };
+    downloadAcademicFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                materialId: components["parameters"]["MaterialId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    "Content-Disposition"?: string;
+                    "Content-Length"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            404: components["responses"]["ContentProblem"];
             500: components["responses"]["ContentProblem"];
             503: components["responses"]["ContentProblem"];
         };

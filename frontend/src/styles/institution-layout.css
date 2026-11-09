@@ -14,9 +14,16 @@ fieldset.stack { border: 0; padding: 0; min-width: 0; }
 .content .data-table { min-width: 640px; overflow-wrap: normal; }
 
 /* Academic composition is scoped so public access keeps its original layout. */
-.academic-app .sidebar { overflow-y: auto; }
-.academic-app .sidebar-nav { flex: 1 0 auto; }
-.academic-app .sidebar-bottom { margin-top: auto; }
+/* Bound positioned descendants to the shell and keep the content and navigation scroll independent. */
+.academic-app { position: relative; }
+.academic-app .sidebar-top, .academic-app .sidebar-bottom { flex-shrink: 0; }
+.academic-app .sidebar-menu { display: flex; flex: 1; min-height: 0; flex-direction: column; }
+.academic-app .sidebar-nav { min-height: 0; overscroll-behavior-y: contain; }
+@media (min-width: 761px) {
+  .academic-app { height: 100dvh; overflow: clip; }
+  .academic-app .main { min-height: 0; overflow: clip; }
+  .academic-app .content { min-height: 0; overscroll-behavior-y: contain; }
+}
 .academic-app .institution-user .user-row > div { min-width: 0; overflow-wrap: anywhere; }
 .academic-app .institution-user .state-actions { justify-content: start; margin-top: 16px; }
 .academic-app .top-header { height: auto; padding-block: 12px; }
@@ -52,11 +59,23 @@ fieldset.stack { border: 0; padding: 0; min-width: 0; }
 .academic-app .section-list .hint { font-size: 12px; }
 .academic-app .content > .stack > a:first-child { align-self: start; font-size: 13px; color: var(--primary-ink); text-underline-offset: 3px; }
 @media (max-width: 760px) {
+  .academic-app .sidebar { position: relative; overflow: visible; }
   .academic-app .sidebar-top { position: relative; padding-right: 60px; }
   .academic-app .mobile-menu-button { display: inline-flex; position: absolute; right: 16px; top: 16px; }
-  .academic-app .sidebar-nav, .academic-app .sidebar-bottom { display: none; }
-  .academic-app.menu-open .sidebar-nav { display: block; }
-  .academic-app.menu-open .sidebar-bottom { display: block; }
+  .academic-app .sidebar-menu {
+    display: none;
+    position: absolute;
+    inset: 100% 0 auto;
+    z-index: 20;
+    max-height: 65dvh;
+    overflow: auto;
+    overscroll-behavior-y: contain;
+    background: var(--sidebar-bg);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-float);
+  }
+  .academic-app.menu-open .sidebar-menu { display: block; }
+  .academic-app .sidebar-nav, .academic-app .sidebar-bottom { display: block; }
   .academic-app .nav-section-label { display: block; }
   .academic-app .top-header { flex-wrap: nowrap; }
   .academic-app .content { padding: 20px 16px; }

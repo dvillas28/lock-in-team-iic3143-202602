@@ -52,5 +52,8 @@ e2e/test-results/
 e2e/reports/
 e2e/.cache/
 
-# Private local profile images
+# Generated PDF.js assets
+/frontend/public/pdfjs/
+
+# Private local files
 .data/
