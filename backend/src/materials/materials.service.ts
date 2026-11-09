@@ -43,7 +43,7 @@ export class MaterialsService {
    const s=await contentScope(c,actor,slug,module,"module");await visibleModule(c,s,module);
    const rows=(await c.query<MaterialRow>(`SELECT a.id,a.module_id,a.title,a.kind,a.markdown_body,a.published_at,a.created_by
     FROM public.materials a JOIN public.course_modules m ON m.institution_id=a.institution_id AND m.id=a.module_id
-    WHERE a.institution_id=$1 AND a.module_id=$2 AND m.course_id=$3 AND ($4::boolean OR (m.published_at IS NOT NULL AND a.published_at IS NOT NULL)) ORDER BY a.id`,[s.member.institution_id,module,s.courseId,s.teacher])).rows;
+    WHERE a.institution_id=$1 AND a.module_id=$2 AND m.course_id=$3 AND a.kind='markdown' AND ($4::boolean OR (m.published_at IS NOT NULL AND a.published_at IS NOT NULL)) ORDER BY a.id`,[s.member.institution_id,module,s.courseId,s.teacher])).rows;
    return {items:rows.map(materialDto)};
   });
  }

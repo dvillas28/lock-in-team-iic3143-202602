@@ -10,6 +10,8 @@ const fields: Record<string,string[]> = {
  grade:["id","gradeItemId","studentId","sectionId","attemptId","scorePercent","grade","publishedAt"],
  quiz:["id","courseId","sectionId","title","opensAt","closesAt","maxAttempts","publishedAt","createdBy","questionCount","totalPoints","gradeItemId"],
  courseModule:["id","courseId","title","position","publishedAt"],
+ academicFile:["id","moduleId","title","kind","position","fileName","mediaType","byteSize","publishedAt","createdBy"],
+ moduleQuiz:["moduleId","quizId"],
  material:["id","moduleId","title","kind","markdownBody","publishedAt","createdBy"],
  course:["code","name","term","createdBy"], section:["code","capacity"],
  enrollment:["id","userId","sectionId","role","active"],

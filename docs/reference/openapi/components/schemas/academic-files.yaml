@@ -1,0 +1,83 @@
+ResourcePosition:
+  type: integer
+  minimum: 1
+AcademicFile:
+  type: object
+  additionalProperties: false
+  required: [id, moduleId, kind, title, position, publishedAt, createdBy, fileName, mediaType, byteSize, preview]
+  properties:
+    id: {type: string, format: uuid}
+    moduleId: {type: string, format: uuid}
+    kind: {const: file}
+    title: {type: string, minLength: 1, maxLength: 200}
+    position: {$ref: '#/ResourcePosition'}
+    publishedAt: {type: [string, 'null'], format: date-time}
+    createdBy: {type: string, format: uuid}
+    fileName: {type: string, minLength: 1, maxLength: 240}
+    mediaType: {type: string}
+    byteSize: {type: integer, minimum: 1, maximum: 52428800}
+    preview: {type: [string, 'null'], enum: [pdf, image, text, null]}
+OrderedMarkdown:
+  unevaluatedProperties: false
+  allOf:
+    - $ref: ./materials.yaml#/MaterialSummary
+    - type: object
+      required: [markdownBody, position]
+      properties:
+        kind: {const: markdown}
+        markdownBody: {type: string, minLength: 1, maxLength: 10000}
+        position: {$ref: '#/ResourcePosition'}
+ModuleQuiz:
+  type: object
+  additionalProperties: false
+  required: [id, moduleId, kind, title, position, publishedAt, quizId, canUnlink]
+  properties:
+    id: {type: string, format: uuid}
+    moduleId: {type: string, format: uuid}
+    kind: {const: quiz}
+    title: {type: string, minLength: 1, maxLength: 200}
+    position: {$ref: '#/ResourcePosition'}
+    publishedAt: {type: [string, 'null'], format: date-time}
+    quizId: {type: string, format: uuid}
+    canUnlink: {type: boolean}
+UploadLimits:
+  type: object
+  additionalProperties: false
+  required: [document, image, zip]
+  properties:
+    document: {type: integer, minimum: 1, maximum: 52428800}
+    image: {type: integer, minimum: 1, maximum: 52428800}
+    zip: {type: integer, minimum: 1, maximum: 52428800}
+ModuleResources:
+  type: object
+  additionalProperties: false
+  required: [items, limits]
+  properties:
+    items:
+      type: array
+      items:
+        oneOf:
+          - $ref: '#/OrderedMarkdown'
+          - $ref: '#/AcademicFile'
+          - $ref: '#/ModuleQuiz'
+    limits: {$ref: '#/UploadLimits'}
+RenameFile:
+  type: object
+  additionalProperties: false
+  required: [title]
+  properties:
+    title: {type: string, minLength: 1, maxLength: 200}
+MoveResource:
+  type: object
+  additionalProperties: false
+  required: [resourceId, neighborId, direction]
+  properties:
+    resourceId: {type: string, format: uuid}
+    neighborId: {type: string, format: uuid}
+    direction: {type: integer, enum: [-1, 1]}
+LinkQuiz:
+  type: object
+  additionalProperties: false
+  required: [quizId]
+  properties:
+    quizId: {type: string, format: uuid}

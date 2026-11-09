@@ -15,7 +15,8 @@
     "test:integration": "pnpm build && node --test --test-concurrency=1 test/integration/*.test.mjs",
     "test:coverage": "pnpm build && c8 --all --src dist --include \"dist/**/*.js\" --reporter=text --reporter=lcov node --test --test-concurrency=1 test/*.test.mjs test/integration/*.test.mjs",
     "db:predeploy": "node dist/commands/predeploy.js",
-    "accounts:cleanup": "node dist/commands/account-cleanup.js"
+    "accounts:cleanup": "node dist/commands/account-cleanup.js",
+    "academic:cleanup": "node dist/commands/academic-cleanup.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1164.0",

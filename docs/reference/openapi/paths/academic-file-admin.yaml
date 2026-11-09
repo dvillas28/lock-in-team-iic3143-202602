@@ -1,0 +1,145 @@
+/api/v1/institution/{institutionSlug}/modules/{moduleId}/files:
+  parameters:
+  - $ref: ../components/parameters.yaml#/InstitutionSlug
+  - $ref: ../components/parameters.yaml#/ModuleId
+  post:
+    tags: [Materials]
+    operationId: uploadAcademicFile
+    description: 'Teacher activo del curso. Valida extensión, MIME, firma y tamaño. Una clave idempotente solo repite el mismo intento.'
+    parameters:
+      - name: Idempotency-Key
+        in: header
+        required: false
+        schema: {type: string, format: uuid}
+        description: Identifica un intento de carga del mismo archivo por el mismo docente.
+    summary: Subir archivo y crear un recurso en borrador
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [file]
+            properties:
+              file: {type: string, format: binary}
+              title: {type: string, minLength: 1, maxLength: 200}
+    responses:
+      '201':
+        description: Operación completada.
+        headers:
+          Cache-Control: {schema: {type: string, const: no-store}}
+          X-Content-Type-Options: {schema: {type: string, const: nosniff}}
+        content:
+          application/json:
+            schema: {$ref: '../components/schemas/academic-files.yaml#/AcademicFile'}
+      '400': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '401': {$ref: '../components/responses.yaml#/ContentUnauthorized'}
+      '403': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '404': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '409': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '413': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '415': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '422': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '500': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '503': {$ref: '../components/responses.yaml#/ContentProblem'}
+/api/v1/institution/{institutionSlug}/materials/{materialId}/file:
+  parameters:
+  - $ref: ../components/parameters.yaml#/InstitutionSlug
+  - $ref: ../components/parameters.yaml#/MaterialId
+  get:
+    tags: [Materials]
+    operationId: getAcademicFile
+    description: 'Teacher activo del curso o matrícula activa con módulo y archivo publicados.'
+    summary: Consultar los metadatos de un archivo autorizado
+    responses:
+      '200':
+        description: Operación completada.
+        headers:
+          Cache-Control: {schema: {type: string, const: no-store}}
+          X-Content-Type-Options: {schema: {type: string, const: nosniff}}
+        content:
+          application/json:
+            schema: {$ref: '../components/schemas/academic-files.yaml#/AcademicFile'}
+      '400': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '401': {$ref: '../components/responses.yaml#/ContentUnauthorized'}
+      '404': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '500': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '503': {$ref: '../components/responses.yaml#/ContentProblem'}
+  patch:
+    tags: [Materials]
+    operationId: renameAcademicFile
+    description: 'Teacher activo del curso. El nombre visible se guarda separado del nombre original.'
+    summary: Cambiar el nombre visible del archivo
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: {$ref: '../components/schemas/academic-files.yaml#/RenameFile'}
+    responses:
+      '200':
+        description: Operación completada.
+        headers:
+          Cache-Control: {schema: {type: string, const: no-store}}
+          X-Content-Type-Options: {schema: {type: string, const: nosniff}}
+        content:
+          application/json:
+            schema: {$ref: '../components/schemas/academic-files.yaml#/AcademicFile'}
+      '400': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '401': {$ref: '../components/responses.yaml#/ContentUnauthorized'}
+      '403': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '404': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '409': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '413': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '415': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '422': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '500': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '503': {$ref: '../components/responses.yaml#/ContentProblem'}
+  put:
+    tags: [Materials]
+    operationId: replaceAcademicFile
+    description: 'Teacher activo del curso. Valida el nuevo binario y audita la sustitución de la referencia.'
+    summary: Reemplazar el binario y conservar publicación y orden
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [file]
+            properties:
+              file: {type: string, format: binary}
+    responses:
+      '200':
+        description: Operación completada.
+        headers:
+          Cache-Control: {schema: {type: string, const: no-store}}
+          X-Content-Type-Options: {schema: {type: string, const: nosniff}}
+        content:
+          application/json:
+            schema: {$ref: '../components/schemas/academic-files.yaml#/AcademicFile'}
+      '400': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '401': {$ref: '../components/responses.yaml#/ContentUnauthorized'}
+      '403': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '404': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '409': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '413': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '415': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '422': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '500': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '503': {$ref: '../components/responses.yaml#/ContentProblem'}
+  delete:
+    tags: [Materials]
+    operationId: deleteAcademicFile
+    description: 'Teacher activo del curso. Retira la referencia y audita la eliminación.'
+    summary: Eliminar el recurso de archivo
+    responses:
+      '204':
+        description: Operación completada.
+      '400': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '401': {$ref: '../components/responses.yaml#/ContentUnauthorized'}
+      '403': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '404': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '500': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '503': {$ref: '../components/responses.yaml#/ContentProblem'}

@@ -44,7 +44,7 @@ test('publication migration upgrades populated attempts and grades without rewri
   try{const down=await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir:f.dir,direction:'down',count:5,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});assert.equal(down.length,5);}finally{c.release();}
   assert.equal((await pool.query("SELECT to_regclass('grade_publications') AS t")).rows[0].t,null);
   assert.equal((await cli('commands/migrate').result).code,0);assert.deepEqual(await state(),before);
-  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,16);
+  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,17);
   assert.ok((await pool.query('SELECT bio,avatar_key,credential_version FROM users')).rows.every(row=>row.bio===null&&row.avatar_key===null&&row.credential_version===0));
   assert.equal((await cli('commands/migrate').result).code,0);assert.deepEqual(await state(),before);
  }finally{if(f)await f.close();await pool.end();}
