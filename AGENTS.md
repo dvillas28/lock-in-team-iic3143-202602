@@ -85,3 +85,4 @@ Use repo-local skills from `.agents/skills/` when relevant:
 - `lms-reviewer`
 - `lms-db-design`
 - `lms-ui-ux` — invoke before designing or reviewing any UI surface.
+- `ui-ux-pro-max` — supplement `lms-ui-ux` with searchable design and accessibility guidance.
