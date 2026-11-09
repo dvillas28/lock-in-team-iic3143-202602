@@ -105,16 +105,18 @@ CREATE CONSTRAINT TRIGGER course_group_weights_total AFTER UPDATE OF gradebook_g
  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.check_group_weights();
 
 CREATE OR REPLACE FUNCTION public.check_grade_publication() RETURNS trigger LANGUAGE plpgsql AS $$
-DECLARE course uuid;
+DECLARE course uuid; selected_attempt_number integer;
 BEGIN
  IF NEW.published_at IS NULL THEN RETURN NEW; END IF;
  SELECT course_id INTO course FROM public.grade_items WHERE institution_id=NEW.institution_id AND id=NEW.grade_item_id;
  PERFORM id FROM public.courses WHERE institution_id=NEW.institution_id AND id=course FOR UPDATE;
+ SELECT a.attempt_number INTO selected_attempt_number FROM public.quiz_attempts a
+  WHERE a.institution_id=NEW.institution_id AND a.id=NEW.attempt_id
+  AND a.status='graded' AND (a.score_percent,a.grade_value)=(NEW.score_percent,NEW.grade_value);
  IF (SELECT sum(weight_percent) FROM public.grade_groups WHERE institution_id=NEW.institution_id AND course_id=course) IS DISTINCT FROM 100::numeric
- OR NOT EXISTS(SELECT 1 FROM public.quiz_attempts a WHERE a.institution_id=NEW.institution_id AND a.id=NEW.attempt_id
-  AND a.status='graded' AND (a.score_percent,a.grade_value)=(NEW.score_percent,NEW.grade_value))
+ OR selected_attempt_number IS NULL
  OR EXISTS(SELECT 1 FROM public.quiz_attempts a WHERE a.institution_id=NEW.institution_id AND a.quiz_id=NEW.quiz_id AND a.student_id=NEW.student_id
-  AND (a.status='in_progress' OR (a.status='graded' AND a.attempt_number>(SELECT attempt_number FROM public.quiz_attempts WHERE id=NEW.attempt_id))))
+  AND (a.status='in_progress' OR (a.status='graded' AND a.attempt_number>selected_attempt_number)))
  THEN RAISE EXCEPTION 'Grade is not publishable' USING ERRCODE='23514'; END IF;
  UPDATE public.courses SET grade_items_locked_at=NEW.published_at
   WHERE institution_id=NEW.institution_id AND id=course AND grade_items_locked_at IS NULL;

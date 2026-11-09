@@ -27,7 +27,16 @@ test('groups, partial section publication and audited corrections preserve histo
   const config=(await call(t.owner,'/grade-items')).body;
   const setup=plan(config,first.item,extra.item),save=(token,body=setup)=>call(token,'/gradebook/groups','PUT',body);
   assert.equal((await save(t.assistant)).status,403);
-  assert.equal((await save(t.teacher,{...setup,confirmRecalculation:false})).status,409);
+  const largeSetup={...setup,confirmRecalculation:false,groups:[
+   ...setup.groups,...Array.from({length:24},(_,i)=>({
+    id:null,title:`Grupo ${i+1}: ${'descripción '.repeat(12).trim()}`,weightPercent:0,gradeItemIds:[],
+   })),
+  ]};
+  assert.ok(Buffer.byteLength(JSON.stringify(largeSetup))>4096);
+  const confirmation=await save(t.teacher,largeSetup);
+  assert.equal(confirmation.status,409);
+  assert.equal(confirmation.body.code,'GRADEBOOK_CONFIRM_RECALCULATION');
+  assert.equal((await call(t.teacher,'/gradebook/weights','PUT',largeSetup)).status,413);
   assert.equal((await save(t.owner,{...setup,groups:setup.groups.map(g=>({...g,weightPercent:0}))})).status,422);
   const saved=await save(t.teacher);assert.equal(saved.status,200);assert.equal(saved.body.version,1);
   assert.deepEqual((await save(t.teacher)).body,saved.body);
