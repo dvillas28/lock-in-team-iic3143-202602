@@ -41,7 +41,7 @@ export class Environment {
   }
   backendEnv() {
     return {DATABASE_URL: this.url('academix_runtime'), MIGRATION_DATABASE_URL: this.url(), AUTH_JWT_SECRET: process.env.E2E_JWT_SECRET,
-      CORS_ALLOWED_ORIGINS: JSON.stringify([origin('uc'),origin('utfsm')]), MAIL_DELIVERY_MODE:'disabled', AVATAR_STORAGE_DRIVER:'local', AVATAR_LOCAL_DIR:join(this.pgFolder,'avatars',this.namespace), NODE_ENV: 'test', PORT: String(apiPort), DEMO_DATA_ENABLED: 'false'};
+      CORS_ALLOWED_ORIGINS: JSON.stringify([origin('uc'),origin('utfsm')]), MAIL_DELIVERY_MODE:'disabled', AVATAR_STORAGE_DRIVER:'local', AVATAR_LOCAL_DIR:join(this.pgFolder,'avatars',this.namespace), ACADEMIC_STORAGE_DRIVER:'local', ACADEMIC_LOCAL_DIR:join(this.pgFolder,'academic-files',this.namespace), NODE_ENV: 'test', PORT: String(apiPort), DEMO_DATA_ENABLED: 'false'};
   }
   async start() {
     if (await readFile(join(this.pgFolder, 'owner'), 'utf8') !== this.runId) throw new Error('PostgreSQL ownership mismatch');

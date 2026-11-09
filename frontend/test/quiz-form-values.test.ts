@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { spawnSync } from "node:child_process";
 import { createRequire } from "node:module";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { configuration, formNumber, formValue, localDate } from "../src/lib/quizzes/form-values.ts";
 import { draft } from "./fixtures/quizzes.ts";
 import { FieldError } from "../src/lib/courses/validation.ts";
@@ -31,12 +31,16 @@ test("configuration rejects impossible dates, timezone suffixes and incomplete l
 });
 
 test("nonexistent DST local time cannot silently normalize to another hour", () => {
-  const moduleUrl = new URL("../src/lib/quizzes/form-values.ts", import.meta.url).href;
+  const modulePath = fileURLToPath(new URL("../src/lib/quizzes/form-values.ts", import.meta.url));
   const loaderUrl = pathToFileURL(createRequire(import.meta.url).resolve("tsx")).href;
-  const source = `import { configuration } from ${JSON.stringify(moduleUrl)};
-    const form=new FormData();form.set('opensAt','2026-03-08T02:30');
-    try { configuration(form); process.exit(1); } catch(error) { if(error.field!=='opensAt') throw error; }`;
-  const result = spawnSync(process.execPath, ["--import", loaderUrl, "--input-type=module", "-e", source], { env: { ...process.env, TZ: "America/New_York" }, encoding: "utf8" });
+  // The frontend package loads TypeScript through tsx as CommonJS in this process.
+  const source = `const assert = require("node:assert/strict");
+    const { configuration } = require(${JSON.stringify(modulePath)});
+    assert.equal(new Date(2026, 2, 8, 2, 30).getHours(), 3);
+    const form = new FormData();
+    form.set("opensAt", "2026-03-08T02:30");
+    assert.throws(() => configuration(form), error => error.field === "opensAt");`;
+  const result = spawnSync(process.execPath, ["--import", loaderUrl, "--input-type=commonjs", "-e", source], { env: { ...process.env, TZ: "America/New_York" }, encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr);
 });
 
