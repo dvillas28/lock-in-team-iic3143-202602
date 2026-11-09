@@ -23,7 +23,9 @@ Los tests usan directorios temporales y transporte S3 sustituido, sin credencial
 4. Entregar configuración mediante el gestor de secretos del despliegue.
 
 `scripts/provision-avatar-s3.sh` aplica estos pasos en us-east-1 para prod y test
-(este con expiración de 7 días) y guarda las keys fuera del repo, sin imprimirlas.
+y guarda las keys fuera del repo, sin imprimirlas. El mismo bucket y usuario sirven
+`academic/materials/` con una declaración separada ([guía](../academic-files/s3.md));
+en test solo `avatars/` expira a los 7 días.
 
 Política de aplicación, sustituyendo NOMBRE_BUCKET sin alterar el prefijo:
 
