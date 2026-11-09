@@ -47,7 +47,7 @@ function QuizLinkForm({session,slug,parent,disabled,reload,course,items}:RowCont
     <option value="" disabled>Selecciona un cuestionario</option>
     {choices.map(q=><option key={q.id} value={q.id}>{q.title}</option>)}
    </select>
-   <div><button className="btn btn-primary" disabled={disabled||mutation.busy||!!mutation.uncertain}>Enlazar cuestionario</button></div>
+   <div><button type="submit" className="btn btn-primary" disabled={disabled||mutation.busy||!!mutation.uncertain}>Enlazar cuestionario</button></div>
   </> : <p className="hint">No hay cuestionarios disponibles para enlazar.</p>}
   {mutation.message && <p role={mutation.confirmed?"status":"alert"}>{mutation.message}</p>}
  </form>;

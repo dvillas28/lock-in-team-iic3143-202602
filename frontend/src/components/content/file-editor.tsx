@@ -29,7 +29,7 @@ export function FileEditor({session,slug,item,limits,disabled,reload,remove}:{
   <form className="file-rename" onSubmit={rename}>
    <label className="field-label" htmlFor={label}>Nombre visible</label>
    <input className="field" id={label} name="title" defaultValue={item.title} maxLength={200} required disabled={unavailable}/>
-   <button className="btn btn-ghost" disabled={unavailable}>Guardar nombre</button>
+   <button type="submit" className="btn btn-ghost" disabled={unavailable}>Guardar nombre</button>
   </form>
   {mutation.message && <p role={mutation.confirmed?"status":"alert"}>{mutation.message}</p>}
   <details className="academic-disclosure file-replace">
@@ -43,7 +43,7 @@ export function FileEditor({session,slug,item,limits,disabled,reload,remove}:{
     <h2 className="serif" id={heading}>Eliminar archivo</h2>
     <p>Se retirará «{item.title}» del módulo.</p>
     <form method="dialog" className="actions">
-     <button className="btn btn-ghost">Volver</button>
+     <button type="submit" className="btn btn-ghost">Volver</button>
      <button className="btn btn-danger" type="button" onClick={()=>{dialog.current?.close();remove(item);}}>Eliminar archivo</button>
     </form>
    </div>
