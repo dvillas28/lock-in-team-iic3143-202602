@@ -1,7 +1,7 @@
 # Registro de decisiones y tareas operativas
 
 Actualizado: 2026-11-06. [Spec](spec.md). PEND-01/02 se conservan como IDs de
-trazabilidad, ahora cerrados como decisiones. La autorización sigue siendo documental.
+trazabilidad, cerrados como decisiones. Implementación y commits por avance autorizados.
 
 ## PEND-01 — Remitente de invitaciones: cerrado
 
@@ -44,5 +44,6 @@ trazabilidad, ahora cerrados como decisiones. La autorización sigue siendo docu
 | Remitente | Elegido; DNS/configuración/prueba real pendientes |
 
 No quedan aclaraciones de producto abiertas en este registro. USR-01 aún requiere
-diseño técnico detallado; las cinco tareas siguen sin implementación ni publicación.
-No se crean nuevas issues por cerrar estas decisiones.
+[plan técnico](plan.md); las cinco issues están publicadas y su ejecución se registra en [tasks](tasks.md).
+Sin configuración externa la aplicación inicia con servicios afectados disabled. Fake solo tests.
+La infraestructura y prueba real siguen pendientes de Daniel; no se crean nuevas issues.

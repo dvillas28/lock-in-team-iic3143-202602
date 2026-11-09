@@ -18,7 +18,10 @@ test("email migration populated/empty/repeat, collision rollback and concurrent 
    const insert=email=>pool.query("INSERT INTO users(id,email,name,password_hash) VALUES($1,$2,'Fixture','$argon2id$v=19$m=19456,t=2,p=1$fixture$fixture')",[randomUUID(),email]);
    await insert("Case@Example.test");if(collision)await insert(" case@example.test ");
    const before=await snapshot(pool);const result=await cli("commands/migrate").result;sanitized(result.output);
-   assert.equal(result.code,collision?1:0);assert.ok(JSON.stringify(await snapshot(pool))===JSON.stringify(before),"migration mutated users");
+   const after=await snapshot(pool);
+   const existing=after.map((rows,index)=>index===1?rows.map(row=>Object.fromEntries(Object.entries(row).filter(([key])=>!["bio","avatar_key","credential_version"].includes(key)))):rows);
+   assert.equal(result.code,collision?1:0);assert.deepEqual(existing,before,"migration mutated existing identity fields");
+   if(!collision)assert.ok(after[1].every(row=>row.bio===null&&row.avatar_key===null&&row.credential_version===0));
    assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount,collision?1:files.length);
    if(!collision){
     const results=await Promise.allSettled([insert("RACE@example.test"),insert(" race@EXAMPLE.test ")]);

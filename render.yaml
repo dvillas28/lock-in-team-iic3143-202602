@@ -37,6 +37,28 @@ services:
         value: '["https://uc.academix.dvillasc.me","https://utfsm.academix.dvillasc.me"]'
       - key: DEMO_DATA_ENABLED
         value: "false"
+      # Daniel verified Resend and configured its secret on 2026-11-08.
+      - key: RESEND_API_KEY
+        sync: false
+      - key: MAIL_DELIVERY_MODE
+        value: "resend"
+      - key: MAIL_FROM
+        value: "AcademiX <no-reply@mail.academix.dvillasc.me>"
+      - key: ACTIVATION_ORIGINS_BY_INSTITUTION
+        value: '{"uc":"https://uc.academix.dvillasc.me","utfsm":"https://utfsm.academix.dvillasc.me"}'
+      # Private S3 bucket for profile photos (docs/planning/perfiles/operacion-s3.md).
+      # The access key belongs to IAM user academix-backend-prod (Get/Put/Delete on avatars/*).
+      # If any value is missing the backend still starts and photo actions answer 503.
+      - key: AVATAR_STORAGE_DRIVER
+        value: "s3"
+      - key: AWS_REGION
+        value: "us-east-1"
+      - key: S3_AVATAR_BUCKET
+        value: "academix-avatars-prod-dvillasc"
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
 
   - type: web
     name: academix-frontend

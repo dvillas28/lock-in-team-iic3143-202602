@@ -45,7 +45,7 @@ export function createApiClient({
   client.use({
     async onRequest({ request, schemaPath }) {
       // Public operations never read or transmit session credentials.
-      if (["/health", "/ready", "/api/v1/auth/login"].includes(schemaPath)) {
+      if (["/health", "/ready", "/api/v1/auth/login", "/api/v1/auth/invitations/activate"].includes(schemaPath)) {
         request.headers.delete("Authorization");
       } else if (getToken) {
         const token = await getToken();

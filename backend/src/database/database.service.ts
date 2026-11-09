@@ -49,7 +49,7 @@ export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
       FROM public.courses c,public.quizzes q,public.grade_items g LIMIT 0`);
     // Resolve required columns without reading rows; SQL and integration tests own the constraints.
     await this.pool.query(`SELECT i.id,i.slug,i.name,i.active,i.created_at,i.updated_at,
-      u.id,u.email,u.password_hash,u.name,u.active,u.created_at,u.updated_at,
+      u.id,u.email,u.password_hash,u.name,u.bio,u.avatar_key,u.credential_version,u.active,u.created_at,u.updated_at,
       m.id,m.institution_id,m.user_id,m.active,m.is_admin,m.is_super_admin,m.created_at,m.updated_at
       FROM public.institutions i, public.users u, public.institution_memberships m LIMIT 0`);
     await this.pool.query(`SELECT c.id,c.institution_id,c.code,c.name,c.term,c.created_by,c.created_at,

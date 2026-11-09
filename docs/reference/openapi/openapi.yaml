@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: AcademiX API
-  version: 0.2.0
+  version: 0.3.0
   description: >-
     API de AcademiX. Obtén un token en login y úsalo como Bearer.
     Elige tu institución con GET /api/v1/institutions.
@@ -38,6 +38,8 @@ tags:
   description: Ponderaciones, notas, publicación y promedios derivados.
 - name: Audit
   description: Consulta inmutable del historial académico sensible.
+- name: Accounts
+  description: Perfil global propio, invitaciones institucionales e importaciones efímeras.
 paths:
   /api/v1/auth/login:
     $ref: ./paths/auth.yaml#/~1api~1v1~1auth~1login
@@ -121,6 +123,30 @@ paths:
     $ref: ./paths/platform.yaml#/~1api~1v1~1institution~1{institutionSlug}~1memberships
   /api/v1/institution/{institutionSlug}/memberships/{membershipId}/course-admin:
     $ref: ./paths/platform.yaml#/~1api~1v1~1institution~1{institutionSlug}~1memberships~1{membershipId}~1course-admin
+  /api/v1/me:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1me
+  /api/v1/me/password:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1me~1password
+  /api/v1/me/avatar:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1me~1avatar
+  /api/v1/institution/{institutionSlug}/invitations:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1institution~1{institutionSlug}~1invitations
+  /api/v1/institution/{institutionSlug}/invitations/{invitationId}/send:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1institution~1{institutionSlug}~1invitations~1{invitationId}~1send
+  /api/v1/institution/{institutionSlug}/invitations/{invitationId}/resend:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1institution~1{institutionSlug}~1invitations~1{invitationId}~1resend
+  /api/v1/institution/{institutionSlug}/invitations/{invitationId}/revoke:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1institution~1{institutionSlug}~1invitations~1{invitationId}~1revoke
+  /api/v1/auth/invitations/activate:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1auth~1invitations~1activate
+  /api/v1/me/invitations/accept:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1me~1invitations~1accept
+  /api/v1/institution/{institutionSlug}/user-imports/preview:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1institution~1{institutionSlug}~1user-imports~1preview
+  /api/v1/institution/{institutionSlug}/user-imports/{importId}:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1institution~1{institutionSlug}~1user-imports~1{importId}
+  /api/v1/institution/{institutionSlug}/user-imports/{importId}/confirm:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1institution~1{institutionSlug}~1user-imports~1{importId}~1confirm
 components:
   securitySchemes:
     bearerAuth:

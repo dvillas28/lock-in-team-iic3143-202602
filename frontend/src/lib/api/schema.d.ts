@@ -1258,6 +1258,316 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consultar perfil global propio
+         * @description Identidad global propia o contexto institucional explícito; respuesta sin secretos y Cache-Control no-store.
+         */
+        get: operations["getOwnProfile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Editar nombre y descripción propios
+         * @description Exige expectedUpdatedAt exacto; edición obsoleta devuelve 409. Correo, roles, flags y estado no son editables.
+         */
+        patch: operations["updateOwnProfile"];
+        trace?: never;
+    };
+    "/api/v1/me/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cambiar contraseña e invalidar sesiones anteriores
+         * @description Contraseña actual incorrecta devuelve 400. Hash, versión y auditoría son atómicos. Éxito exige nuevo login en todas las sesiones.
+         */
+        post: operations["changeOwnPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consultar foto privada propia
+         * @description Identidad global propia o contexto institucional explícito; respuesta sin secretos y Cache-Control no-store.
+         */
+        get: operations["getOwnAvatar"];
+        /**
+         * Subir o reemplazar foto propia
+         * @description Límite de archivo 2 MiB y entrada 16 MP; normaliza WebP 1024×1024. Fallos conservan referencia previa. Integración deshabilitada devuelve 503 sin modificar datos.
+         */
+        put: operations["putOwnAvatar"];
+        post?: never;
+        /**
+         * Eliminar foto propia
+         * @description Identidad global propia o contexto institucional explícito; respuesta sin secretos y Cache-Control no-store.
+         */
+        delete: operations["deleteOwnAvatar"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Listar invitaciones institucionales
+         * @description Identidad global propia o contexto institucional explícito; respuesta sin secretos y Cache-Control no-store.
+         */
+        get: operations["listAccountInvitations"];
+        put?: never;
+        /**
+         * Crear invitación sin crear cuenta todavía
+         * @description Idempotency-Key obligatorio. Misma clave/cuerpo recupera resultado; cambio de cuerpo da 409. No revela cuentas de otras instituciones ni crea User/membership antes de activación.
+         */
+        post: operations["createAccountInvitation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/invitations/{invitationId}/send": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                invitationId: components["parameters"]["InvitationId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enviar invitación pendiente
+         * @description Red fuera de transacción. Sin correo configurado: 503 INTEGRATION_NOT_CONFIGURED, sin emitir ni rotar código. accepted significa aceptación por proveedor, no entrega ni activación. Reenvío explícito separado 60 s; respuestas inciertas requieren rotación confirmada.
+         */
+        post: operations["sendAccountInvitation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/invitations/{invitationId}/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                invitationId: components["parameters"]["InvitationId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reenviar con código nuevo e invalidar el anterior
+         * @description Red fuera de transacción. Sin correo configurado: 503 INTEGRATION_NOT_CONFIGURED, sin emitir ni rotar código. accepted significa aceptación por proveedor, no entrega ni activación. Reenvío explícito separado 60 s; respuestas inciertas requieren rotación confirmada.
+         */
+        post: operations["resendAccountInvitation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/invitations/{invitationId}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                invitationId: components["parameters"]["InvitationId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Revocar invitación pendiente
+         * @description Revocación institucional atómica y auditada; invalida activación sin cambiar cuentas existentes.
+         */
+        post: operations["revokeAccountInvitation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/invitations/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Activar cuenta nueva mediante código de invitación
+         * @description Solo POST consume el código y crea identidad/pertenencia sin flags ni matrículas. Cuenta existente devuelve 409 INVITATION_LOGIN_REQUIRED. GET del enlace no activa. Sin login automático.
+         */
+        post: operations["activateAccountInvitation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/invitations/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Aceptar pertenencia con cuenta existente autenticada
+         * @description Token válido y correo del titular coincidente. Conserva contraseña, nombre y pertenencias; nunca reactiva revocados ni crea Enrollment.
+         */
+        post: operations["acceptAccountInvitation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/user-imports/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Validar CSV efímero y crear vista previa
+         * @description Hasta 100 filas/256 KiB, UTF-8 name,email. Solo memoria y datos derivados mínimos; preview 24 h. No crea invitaciones/cuentas. Errores por fila bloquean confirmación completa.
+         */
+        post: operations["previewUserImport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/user-imports/{importId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                importId: components["parameters"]["ImportId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Consultar preview o recibo institucional por lote
+         * @description Identidad global propia o contexto institucional explícito; respuesta sin secretos y Cache-Control no-store.
+         */
+        get: operations["getUserImport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/user-imports/{importId}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                importId: components["parameters"]["ImportId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirmar lote completo una sola vez
+         * @description importId identifica confirmación idempotente. Revalida todas las filas y permisos; conflicto da rollback completo/409. DB confirma antes de enviar correo, que se coordina después. Tras depurar devuelve 410 sin recrear altas.
+         */
+        post: operations["confirmUserImport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1305,6 +1615,7 @@ export interface components {
             title: string;
             status: number;
             detail: string | null;
+            /** @description Código seguro de problema. Cuentas añaden INTEGRATION_NOT_CONFIGURED (503), INVITATION_LOGIN_REQUIRED (409), conflictos de edición y recursos temporales depurados (410); no incluir estado global de terceros ni errores crudos de proveedores. */
             code: string;
             /** Format: uri-reference */
             instance: string | null;
@@ -2016,6 +2327,142 @@ export interface components {
         MembershipAdminUpdate: {
             isAdmin: boolean;
         };
+        AccountCapabilities: {
+            /** @description Almacenamiento configurado; no garantiza disponibilidad de red. */
+            avatar: boolean;
+            /** @description Mailer configurado. No concede permiso administrativo. */
+            invitationEmail: boolean;
+        };
+        OwnProfile: {
+            /** Format: uuid */
+            id: string;
+            /** Format: email */
+            email: string;
+            name: string;
+            bio: string | null;
+            hasAvatar: boolean;
+            /**
+             * Format: date-time
+             * @description Timestamp UTC con seis dígitos de microsegundos, serializado por PostgreSQL sin pérdida de precisión.
+             */
+            updatedAt: string;
+            capabilities: components["schemas"]["AccountCapabilities"];
+        };
+        ProfileUpdate: {
+            name: string;
+            bio: string | null;
+            /**
+             * Format: date-time
+             * @description Timestamp UTC con seis dígitos de microsegundos, serializado por PostgreSQL sin pérdida de precisión.
+             */
+            expectedUpdatedAt: string;
+        };
+        PasswordChange: {
+            /** @description Máximo 128 bytes UTF-8; errores de campo devuelven 400, nunca 401. */
+            currentPassword: string;
+            /** @description Contraseña exacta; máximo 128 bytes UTF-8. No normalizar ni registrar. */
+            newPassword: string;
+            /** @description Contraseña exacta; máximo 128 bytes UTF-8. No normalizar ni registrar. */
+            confirmPassword: string;
+        };
+        AvatarUpload: {
+            /**
+             * Format: binary
+             * @description JPEG/PNG/WebP estático, hasta 2 MiB y 16 megapíxeles; salida WebP hasta 1024×1024 sin metadatos.
+             */
+            file: string;
+            /**
+             * Format: date-time
+             * @description Timestamp UTC con seis dígitos de microsegundos, serializado por PostgreSQL sin pérdida de precisión.
+             */
+            expectedUpdatedAt: string;
+        };
+        AvatarDelete: {
+            /**
+             * Format: date-time
+             * @description Timestamp UTC con seis dígitos de microsegundos, serializado por PostgreSQL sin pérdida de precisión.
+             */
+            expectedUpdatedAt: string;
+        };
+        /** @enum {string} */
+        InvitationStatus: "pending" | "accepted" | "revoked" | "expired";
+        /** @enum {string} */
+        InvitationDeliveryStatus: "pending" | "sending" | "accepted" | "failed" | "quota_blocked" | "unknown";
+        AccountInvitation: {
+            /** Format: uuid */
+            id: string;
+            name: string | null;
+            email: string | null;
+            status: components["schemas"]["InvitationStatus"];
+            deliveryStatus: components["schemas"]["InvitationDeliveryStatus"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            expiresAt: string | null;
+            /** Format: date-time */
+            acceptedAt: string | null;
+            /** Format: date-time */
+            revokedAt: string | null;
+        };
+        InvitationList: {
+            items: components["schemas"]["AccountInvitation"][];
+            nextCursor: string | null;
+            /** @description Indica si existe una página siguiente; compatible con paginación institucional existente. */
+            hasMore?: boolean;
+        };
+        InvitationCreate: {
+            name: string;
+            /** Format: email */
+            email: string;
+        };
+        InvitationActivation: {
+            /** @description Código aleatorio de 32 bytes, de un uso. Solo en memoria y cuerpo POST; nunca en logs o almacenamiento web. */
+            token: string;
+            /** @description Contraseña exacta; máximo 128 bytes UTF-8. No normalizar ni registrar. */
+            password: string;
+            /** @description Contraseña exacta; máximo 128 bytes UTF-8. No normalizar ni registrar. */
+            confirmPassword: string;
+        };
+        InvitationAcceptance: {
+            /** @description Código aleatorio de 32 bytes, de un uso. Solo en memoria y cuerpo POST; nunca en logs o almacenamiento web. */
+            token: string;
+        };
+        ImportPreview: {
+            /**
+             * Format: binary
+             * @description CSV UTF-8 name,email, BOM opcional, hasta 100 filas y 256 KiB. Original efímero, sin persistencia.
+             */
+            file: string;
+        };
+        ImportRow: {
+            rowNumber: number;
+            name: string | null;
+            email: string | null;
+            /** @enum {string} */
+            validationCode: "valid" | "already_member" | "already_pending" | "invalid_name" | "invalid_email" | "duplicate" | "revoked_membership";
+            /** @enum {string|null} */
+            outcome: "created" | "skipped" | null;
+            /** Format: uuid */
+            invitationId: string | null;
+            deliveryStatus?: components["schemas"]["InvitationDeliveryStatus"];
+            invitationStatus?: components["schemas"]["InvitationStatus"];
+            deliveryVersion?: number;
+        };
+        UserImport: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            status: "previewed" | "confirmed" | "expired";
+            /** Format: date-time */
+            expiresAt: string;
+            /** Format: date-time */
+            confirmedAt: string | null;
+            totalRows: number;
+            createdCount: number;
+            skippedCount: number;
+            rows: components["schemas"]["ImportRow"][];
+        };
+        ImportConfirmation: Record<string, never>;
     };
     responses: {
         /** @description Request o parámetro sintácticamente inválido. */
@@ -2185,6 +2632,15 @@ export interface components {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
+        /** @description El recurso temporal expiró o fue depurado; no se recrean altas ni envíos por replay. */
+        Gone: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
     };
     parameters: {
         /**
@@ -2216,6 +2672,10 @@ export interface components {
         AttemptId: string;
         /** @description Filtro docente; nunca selecciona la identidad estudiantil autenticada. */
         StudentIdFilter: string;
+        /** @description UUID opaco por actor/institución/operación de cuenta. Misma clave y entrada recuperan resultado; reutilizar con otro contenido produce 409. */
+        AccountOperationKey: string;
+        InvitationId: string;
+        ImportId: string;
     };
     requestBodies: never;
     headers: never;
@@ -4227,6 +4687,602 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getOwnProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnProfile"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            409: components["responses"]["Conflict"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    updateOwnProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileUpdate"];
+            };
+        };
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnProfile"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            409: components["responses"]["Conflict"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    changeOwnPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordChange"];
+            };
+        };
+        responses: {
+            /** @description Operación completada. */
+            204: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            409: components["responses"]["Conflict"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getOwnAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Foto normalizada del titular. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/webp": string;
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    putOwnAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["AvatarUpload"];
+            };
+        };
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnProfile"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            409: components["responses"]["Conflict"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    deleteOwnAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AvatarDelete"];
+            };
+        };
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnProfile"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            409: components["responses"]["Conflict"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    listAccountInvitations: {
+        parameters: {
+            query?: {
+                /** @description Cursor base64url JSON con fecha/UUID, actor y scope/filtros; no concede acceso. Cursor opaco retornado por la página anterior. */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Cantidad máxima de elementos a retornar. */
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationList"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    createAccountInvitation: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description UUID opaco por actor/institución/operación de cuenta. Misma clave y entrada recuperan resultado; reutilizar con otro contenido produce 409. */
+                "Idempotency-Key": components["parameters"]["AccountOperationKey"];
+            };
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvitationCreate"];
+            };
+        };
+        responses: {
+            /** @description Operación completada. */
+            201: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountInvitation"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    sendAccountInvitation: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description UUID opaco por actor/institución/operación de cuenta. Misma clave y entrada recuperan resultado; reutilizar con otro contenido produce 409. */
+                "Idempotency-Key": components["parameters"]["AccountOperationKey"];
+            };
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                invitationId: components["parameters"]["InvitationId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountInvitation"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            410: components["responses"]["Gone"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    resendAccountInvitation: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description UUID opaco por actor/institución/operación de cuenta. Misma clave y entrada recuperan resultado; reutilizar con otro contenido produce 409. */
+                "Idempotency-Key": components["parameters"]["AccountOperationKey"];
+            };
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                invitationId: components["parameters"]["InvitationId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountInvitation"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            410: components["responses"]["Gone"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    revokeAccountInvitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                invitationId: components["parameters"]["InvitationId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountInvitation"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            410: components["responses"]["Gone"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    activateAccountInvitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvitationActivation"];
+            };
+        };
+        responses: {
+            /** @description Operación completada. */
+            204: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            409: components["responses"]["Conflict"];
+            410: components["responses"]["Gone"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    acceptAccountInvitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvitationAcceptance"];
+            };
+        };
+        responses: {
+            /** @description Operación completada. */
+            204: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            409: components["responses"]["Conflict"];
+            410: components["responses"]["Gone"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    previewUserImport: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description UUID opaco por actor/institución/operación de cuenta. Misma clave y entrada recuperan resultado; reutilizar con otro contenido produce 409. */
+                "Idempotency-Key": components["parameters"]["AccountOperationKey"];
+            };
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["ImportPreview"];
+            };
+        };
+        responses: {
+            /** @description Operación completada. */
+            201: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserImport"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getUserImport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                importId: components["parameters"]["ImportId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserImport"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    confirmUserImport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                importId: components["parameters"]["ImportId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportConfirmation"];
+            };
+        };
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Content-Type-Options"?: "nosniff";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserImport"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            410: components["responses"]["Gone"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            429: components["responses"]["TooManyRequests"];
             500: components["responses"]["InternalError"];
             503: components["responses"]["ServiceUnavailable"];
         };

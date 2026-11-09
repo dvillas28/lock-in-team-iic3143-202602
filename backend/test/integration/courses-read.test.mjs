@@ -55,7 +55,7 @@ test("US1 independent academic roles and institutional flags keep their own scop
   assert.equal((await request(app,token,course)).status,404);
   assert.equal((await request(app,token,"uc/courses","POST",{code:"DENIED",name:"Denied",term:"2026-2",initialSection:{code:"1"}})).status,403);
   await pool.query("UPDATE institution_memberships SET is_admin=true,is_super_admin=false WHERE user_id=$1 AND institution_id=$2",[users.owner,f.tenants.uc]);
-  assert.equal((await request(app,token,"uc/memberships")).status,403);
+  assert.equal((await request(app,token,"uc/memberships")).status,200);
   assert.equal((await request(app,token,course+"/audit-events")).status,200);
   assert.equal((await request(app,token,`uc/sections/${f.s2}`)).status,200);
  }finally{if(app)await app.close();await pool.end();}

@@ -1,6 +1,6 @@
 # Perfiles: modelo de datos, API y seguridad propuestos
 
-Complementa el [plan](README.md) y [modelo completo](modelo-datos.md). Diseño pendiente.
+Complementa [plan técnico](../../../specs/20261106-170457_perfiles-altas-usuarios/plan.md) y [modelo](modelo-datos.md).
 
 ## Evolución de User
 
@@ -16,7 +16,7 @@ Conservar `users`; no hace falta una segunda tabla de perfil para tres atributos
 
 No agregar contraseña en claro, un segundo hash, role ni institution_id a User.
 Una edición global se refleja en UC y UTFSM; sus matrículas siguen separadas.
-Usar control de concurrencia al guardar perfil, por ejemplo updated_at esperado;
+Usar expectedUpdatedAt exacto al guardar; conservar seis microsegundos desde SQL;
 conflicto devuelve 409 y solicita recargar, sin pisar otra edición silenciosamente.
 Migración aditiva con null/default preserva cuentas, hashes, matrículas e historia.
 
@@ -117,7 +117,7 @@ su integridad, staging e idempotencia se describen en el modelo completo.
 | POST /auth/invitations/activate | Código válido; crear User y membership si no existe |
 | POST /me/invitations/accept | Cuenta autenticada coincidente; añadir membership |
 
-Nombres sujetos al spec. Activación pública no reemplaza login ni resetea cuentas.
+Contratos fijados en OpenAPI. Activación pública no reemplaza login ni resetea cuentas.
 Rechazar campos extra; respuestas DTO nunca incluyen hashes/claves de almacenamiento.
 Mantener no-store y Problem Details; ampliar errores de campo/códigos permitidos.
 Actualizar OpenAPI modular, catálogo, schema.d.ts generado y parsers frontend.
@@ -129,7 +129,7 @@ CSV reutiliza el alta; [contrato preview/confirmación](importacion-csv.md), sin
 [S3 privado elegido para producción](../../adr/s3-for-profile-photos.md), local en desarrollo;
 Daniel provisiona, Matías integra. Claves globales por userId, autorizadas al titular.
 Propuesta: multipart acotado en backend, JPEG/PNG/WebP, máximo 2 MiB y 1024×1024
-tras procesar; validar firma, dimensiones/píxeles de entrada y decodificación real,
+tras procesar; validar firma, dimensiones/16 MP de entrada y decodificación real,
 reprocesar para eliminar metadatos; rechazar SVG, animados y tipos suplantados.
 Mantener JSON en 4096 bytes; configurar límite binario solo para esa ruta.
 Subir/procesar antes de cambiar avatar_key; si falla DB, eliminar objeto nuevo;

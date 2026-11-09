@@ -34,7 +34,11 @@ test("populated identity schema upgrades without changing identities or membersh
   for(const file of ["20261015000100_institutional-foundation.sql","20261015000400_unique_login_email.sql"])await copyFile(new URL("../../migrations/"+file,import.meta.url),join(dir,file));
   await migration.default.migrate(dir);assert.equal((await cli("seeds/demo",secrets()).result).code,0);
   const before=await snapshot(pool);assert.equal((await cli("commands/migrate").result).code,0);
-  const after=await snapshot(pool);assert.deepEqual(after.slice(0,2),before.slice(0,2));
+  const after=await snapshot(pool);assert.deepEqual(after[0],before[0]);
+  assert.deepEqual(after[1].map(({bio,avatar_key,credential_version,...u})=>{
+   assert.equal(bio,null);assert.equal(avatar_key,null);assert.equal(credential_version,0);return u;
+  }),before[1]);
+  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,16);
   assert.deepEqual(after[2].map(({is_admin,is_super_admin,...m})=>{assert.equal(is_admin,false);assert.equal(is_super_admin,false);return m;}),before[2]);
  }finally{if(saved===undefined)delete process.env.MIGRATION_DATABASE_URL;else process.env.MIGRATION_DATABASE_URL=saved;await rm(dir,{recursive:true,force:true});await pool.end();}
 });

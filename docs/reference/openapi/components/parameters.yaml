@@ -2,24 +2,25 @@ InstitutionSlug:
   name: institutionSlug
   in: path
   required: true
-  description: |
-    Slug de la Institution solicitada. Solo identifica contexto; el backend
+  description: 'Slug de la Institution solicitada. Solo identifica contexto; el backend
+
     valida que la identidad tenga una InstitutionMembership activa.
+
+    '
   schema:
     type: string
     minLength: 1
     maxLength: 63
-    pattern: '^[a-z0-9]([a-z0-9-]*[a-z0-9])?$'
+    pattern: ^[a-z0-9]([a-z0-9-]*[a-z0-9])?$
   example: uc
-
 Cursor:
   name: cursor
   in: query
   required: false
-  description: Cursor base64url JSON con fecha/UUID, actor y scope/filtros; no concede acceso. Cursor opaco retornado por la página anterior.
+  description: Cursor base64url JSON con fecha/UUID, actor y scope/filtros; no concede acceso. Cursor opaco retornado
+    por la página anterior.
   schema:
     type: string
-
 Limit:
   name: limit
   in: query
@@ -30,20 +31,22 @@ Limit:
     minimum: 1
     maximum: 100
     default: 20
-
 IdempotencyKey:
   name: Idempotency-Key
   in: header
   required: true
-  description: |
-    Clave opaca elegida por el cliente para una operación sensible. Su scope
+  description: 'Clave opaca elegida por el cliente para una operación sensible. Su scope
+
     incluye la Institution del path. Repetir la misma solicitud con igual clave
+
     y payload devuelve el primer resultado; reutilizarla con otro payload
+
     produce 409 Conflict.
+
+    '
   schema:
     type: string
     minLength: 1
-
 CourseId:
   name: courseId
   in: path
@@ -51,7 +54,6 @@ CourseId:
   schema:
     type: string
     format: uuid
-
 SectionId:
   name: sectionId
   in: path
@@ -59,7 +61,6 @@ SectionId:
   schema:
     type: string
     format: uuid
-
 EnrollmentId:
   name: enrollmentId
   in: path
@@ -67,7 +68,6 @@ EnrollmentId:
   schema:
     type: string
     format: uuid
-
 ModuleId:
   name: moduleId
   in: path
@@ -75,7 +75,6 @@ ModuleId:
   schema:
     type: string
     format: uuid
-
 MaterialId:
   name: materialId
   in: path
@@ -83,7 +82,6 @@ MaterialId:
   schema:
     type: string
     format: uuid
-
 QuizId:
   name: quizId
   in: path
@@ -91,7 +89,6 @@ QuizId:
   schema:
     type: string
     format: uuid
-
 AttemptId:
   name: attemptId
   in: path
@@ -99,7 +96,6 @@ AttemptId:
   schema:
     type: string
     format: uuid
-
 SectionIdFilter:
   name: sectionId
   in: query
@@ -107,7 +103,6 @@ SectionIdFilter:
   schema:
     type: string
     format: uuid
-
 StudentIdFilter:
   name: studentId
   in: query
@@ -116,7 +111,6 @@ StudentIdFilter:
   schema:
     type: string
     format: uuid
-
 Search:
   name: search
   in: query
@@ -125,3 +119,26 @@ Search:
   schema:
     type: string
     minLength: 1
+InvitationId:
+  name: invitationId
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+ImportId:
+  name: importId
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+AccountOperationKey:
+  name: Idempotency-Key
+  in: header
+  required: true
+  description: UUID opaco por actor/institución/operación de cuenta. Misma clave y entrada recuperan resultado;
+    reutilizar con otro contenido produce 409.
+  schema:
+    type: string
+    format: uuid

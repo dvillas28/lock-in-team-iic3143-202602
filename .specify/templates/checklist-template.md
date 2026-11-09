@@ -34,7 +34,7 @@
 - [ ] CHK-LMS-004 Added complexity is justified by the current feature
 
 - [ ] CHK-LMS-005 Document length passes; mission coverage and exclusions are explicit
-- [ ] CHK-LMS-006 Account extension, if present, separates own profile/scoped invitations, ephemeral CSV/private photos, and pending sender/derived-data cleanup without implicit approval
+- [ ] CHK-LMS-006 Account extension, if present, separates own profile/scoped invitations, ephemeral CSV/private photos, and sender/cleanup decisions and production-disabled behavior without false external validation
 
 ## [Category 2]
 

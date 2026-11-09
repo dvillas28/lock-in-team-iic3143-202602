@@ -142,5 +142,5 @@
 
 - CU / RF / RNF: [source IDs and links]
 - Backlog: [task IDs / issue links; preserve assigned owners]
-- Dependencies: [prerequisite specs; specify ephemeral CSV/private-photo scope and unresolved sender/derived-data cleanup gates when applicable]
+- Dependencies: [prerequisite specs; specify ephemeral CSV/private-photo scope and sender/cleanup decision status and external configuration gates when applicable]
 - Exclusions: [explicit boundaries and deferred requirements]

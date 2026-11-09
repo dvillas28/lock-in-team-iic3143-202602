@@ -38,6 +38,10 @@ Problem:
       type: [string, 'null']
     code:
       type: string
+      description: >-
+        Código seguro de problema. Cuentas añaden INTEGRATION_NOT_CONFIGURED (503),
+        INVITATION_LOGIN_REQUIRED (409), conflictos de edición y recursos temporales
+        depurados (410); no incluir estado global de terceros ni errores crudos de proveedores.
     instance:
       type: [string, 'null']
       format: uri-reference

@@ -85,9 +85,10 @@ export async function http(extra = {}, file = "commands/start") {
     return app.result;
   };
   try {
-    for (let i=0;i<150;i++) {
+    const deadline=Date.now()+25000;
+    while(Date.now()<deadline) {
       if(app.child.exitCode !== null) throw new Error("HTTP startup failed");
-      try { if((await fetch(`${base}/ready`)).ok) return {...app, base, close}; } catch { /* Startup only. */ }
+      try { if((await fetch(`${base}/ready`,{signal:AbortSignal.timeout(1000)})).ok) return {...app, base, close}; } catch { /* Startup only. */ }
       await delay(20);
     }
     throw new Error("HTTP readiness deadline");

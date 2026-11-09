@@ -15,7 +15,7 @@ test("US3 delegation active members only, exact body, no-op, foreign IDs and ato
   assert.equal(new Set(listed.map(m=>m.id)).size,listed.length);
   assert.ok(listed.every(m=>m.active && m.user.active));
   assert.equal((await request(app,owner,"utfsm/memberships?cursor="+members.nextCursor)).status,403);
-  assert.equal((await request(app,other,"uc/memberships")).status,403);
+  assert.equal((await request(app,other,"uc/memberships")).status,200);
   const target=(await pool.query("SELECT id FROM institution_memberships WHERE institution_id=$1 AND user_id=$2",[f.tenants.uc,users.other])).rows[0].id;
   const path=`uc/memberships/${target}/course-admin`;
   assert.equal((await request(app,owner,path,"PUT",{isAdmin:false,isSuperAdmin:true})).status,400);

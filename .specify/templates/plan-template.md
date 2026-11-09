@@ -48,7 +48,7 @@
 - Authored documents target <150 lines; justify 150–200, split above 200.
 - CU/RF/RNF coverage and dependent permission clarifications are resolved.
 - Complexity beyond the simplest deployable shape is justified below.
-- Account extensions define ephemeral memory-only CSV, private-photo limits and unresolved sender/derived-data cleanup gates; specification is not runtime authorization.
+- Account extensions define ephemeral memory-only CSV, private-photo limits and sender/cleanup decision status and external configuration gates; specification is not runtime authorization.
 
 ## Project Structure
 

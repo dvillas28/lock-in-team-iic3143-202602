@@ -156,6 +156,14 @@ for(const id of ['E2E-AUTH-011','E2E-TENANT-001','E2E-TENANT-002','E2E-TENANT-00
 }
 caseDefinitions['E2E-TENANT-013']=[...caseDefinitions['E2E-TENANT-013'],variant('browser-recovery','T1','browser','both')];
 Object.assign(caseDefinitions,phaseFour,phaseFive,phaseSix);
+Object.assign(caseDefinitions,{
+ 'E2E-ACCOUNT-001':[variant('profile-own','ST1','browser'),variant('without-membership','NONE','browser','none')],
+ 'E2E-ACCOUNT-002':[variant('password-revocation','ST1','browser','both')],
+ 'E2E-ACCOUNT-003':[variant('invitations','AO','browser')],
+ 'E2E-ACCOUNT-004':[variant('csv-atomic','AO','browser')],
+ 'E2E-ACCOUNT-005':[variant('activate-new','ANON','browser'),variant('accept-existing','FST1','browser','both')],
+ 'E2E-ACCOUNT-006':[variant('avatar-local','ST1','browser')],
+});
 export const caseVariants: Record<string, readonly string[]> = Object.fromEntries(
   Object.entries(caseDefinitions).map(([id, variants]) => [id, variants.map(v => v.name)]),
 );

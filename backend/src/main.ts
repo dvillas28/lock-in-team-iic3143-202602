@@ -17,6 +17,17 @@ async function bootstrap() {
     app.getHttpAdapter().getInstance().set("trust proxy", false);
     app.enableCors(corsOptions());
     app.use((request: {method: string; path: string; headers: Record<string, string>}, response: {setHeader(name:string,value:string):void}, next: (error?: unknown) => void) => {
+      if (/^\/api\/v1\/(?:me(?:\/|$)|auth\/invitations(?:\/|$)|institution\/[^/]+\/(?:invitations|user-imports)(?:\/|$))/i.test(request.path)) {
+        response.setHeader("Cache-Control", "no-store");
+        response.setHeader("X-Content-Type-Options", "nosniff");
+        const multipart=(request.method==="PUT" && /^\/api\/v1\/me\/avatar\/?$/i.test(request.path)) ||
+          (request.method==="POST" && /^\/api\/v1\/institution\/[^/]+\/user-imports\/preview\/?$/i.test(request.path));
+        const content=request.headers["content-type"]?.split(";",1)[0].trim().toLowerCase();
+        if (multipart ? content!=="multipart/form-data" :
+            ((Number(request.headers["content-length"])>0 || request.headers["transfer-encoding"]) && content!=="application/json")) {
+          next(new UnsupportedMediaTypeException()); return;
+        }
+      }
       if (/^\/api\/v1\/institution\/[^/]+\/(?:courses\/[^/]+\/(?:modules|quizzes|grade-items|gradebook|my-grades)|sections\/[^/]+\/quizzes\/[^/]+\/attempts|quiz-attempts|modules|materials|quizzes)(?:\/|$)/i.test(request.path)) {
         response.setHeader("Cache-Control", "no-store");
         response.setHeader("X-Content-Type-Options", "nosniff");

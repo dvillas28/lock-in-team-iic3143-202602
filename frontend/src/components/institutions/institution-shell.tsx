@@ -1,5 +1,5 @@
 "use client";
-import { BookOpen, ChevronRight, ClipboardList, FolderOpen, GraduationCap, Home, Menu, Moon, Sun, X } from "lucide-react";
+import { BookOpen, ChevronRight, ClipboardList, FolderOpen, GraduationCap, Home, Menu, Moon, Sun, X, UserRound, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { CurrentUser } from "../../lib/auth/validation.ts";
@@ -11,9 +11,11 @@ type InstitutionShellProps = Readonly<{
     user?: CurrentUser;
     institutionName?: string;
     actions?: ReactNode;
+    avatar?: ReactNode;
     pathname?: string;
 }>;
 function pageTitle(pathname: string) {
+    if (pathname === '/admin/users') return 'Usuarios institucionales';
     if (pathname.endsWith('/grades')) {
         return 'Mis notas';
     }
@@ -52,7 +54,7 @@ function pageTitle(pathname: string) {
 function toggleTheme() {
     document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
 }
-export function InstitutionShell({ institutionSlug, institutionName, actions, children, user, pathname = "/courses" }: InstitutionShellProps) {
+export function InstitutionShell({ institutionSlug, institutionName, actions, avatar, children, user, pathname = "/courses" }: InstitutionShellProps) {
     const homePath = institutionHomePath(institutionSlug);
     const [menuOpen, setMenuOpen] = useState(false);
     const menuButton = useRef<HTMLButtonElement>(null);
@@ -93,6 +95,8 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, ch
             <Home size={16} aria-hidden="true"/>
             Mis cursos
           </Link>
+          <Link href="/profile" className="nav-item" onClick={()=>setMenuOpen(false)}><UserRound size={16} aria-hidden="true"/>Mi perfil</Link>
+          {user && (user.institutionMembership.isAdmin || user.institutionMembership.isSuperAdmin) && <Link href="/admin/users" className={`nav-item${pathname === '/admin/users' ? ' active' : ''}`} aria-current={pathname === '/admin/users' ? 'page' : undefined} onClick={()=>setMenuOpen(false)}><Users size={16} aria-hidden="true"/>Usuarios institucionales</Link>}
           {base && <><p className="nav-section-label">Curso actual</p>{[
             [base, 'Resumen del curso', BookOpen], [base + '/modules', 'Módulos y material', FolderOpen], [base + '/quizzes', 'Quizzes', ClipboardList],
           ].map(([href, label, Icon]) => {
@@ -101,7 +105,7 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, ch
             return <Link key={target} href={target} className={`nav-item${active ? ' active' : ''}`} aria-current={active ? 'page' : undefined} onClick={() => setMenuOpen(false)}><Glyph size={16} aria-hidden="true" />{label as string}</Link>;
           })}</>}
         </nav>
-        {user && <div className="sidebar-bottom institution-user"><div className="user-row"><span className="avatar" aria-hidden="true">{user.name.slice(0, 1)}</span><div><p className="name">{user.name}</p><p className="role">{[...roles, ...(user.institutionMembership.isAdmin ? ['Administración institucional'] : []), ...(user.institutionMembership.isSuperAdmin ? ['Superadministración'] : [])].join(' · ') || 'Miembro institucional'}</p></div></div>{actions}</div>}
+        {user && <div className="sidebar-bottom institution-user"><div className="user-row">{avatar ?? <span className="avatar" aria-hidden="true">{user.name.slice(0,1)}</span>}<div><p className="name">{user.name}</p><p className="role">{[...roles, ...(user.institutionMembership.isAdmin ? ['Administración institucional'] : []), ...(user.institutionMembership.isSuperAdmin ? ['Superadministración'] : [])].join(' · ') || 'Miembro institucional'}</p></div></div>{actions}</div>}
       </aside>
       <div className="main">
         <header className="top-header">

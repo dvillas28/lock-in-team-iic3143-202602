@@ -1,9 +1,9 @@
-# Plan propuesto: altas institucionales y perfil personal
+# Perfiles y altas institucionales: planificación e implementación
 
-Fecha: 2026-11-06. Estado: investigación y propuesta; sin implementación.
+Actualizado: 2026-11-08. Implementación autorizada; [tareas/evidencia](../../../specs/20261106-170457_perfiles-altas-usuarios/tasks.md).
 Base investigada: `dev`; planificación actual en `docs/perfiles-altas-usuarios`, sin cambios desplegados.
 Detalle: [requisitos](requisitos.md) · [backlog/borradores](backlog.md) · [modelo](modelo-datos.md)
-· [CSV](importacion-csv.md) · [Resend](correo-resend.md) · [datos/seguridad](datos-seguridad.md) · [entregas](entregas.md).
+· [CSV](importacion-csv.md) · [Resend](correo-resend.md) · [datos/seguridad](datos-seguridad.md) · [entregas](entregas.md) · [operación para Daniel](operacion.md).
 Matías implementa; Daniel administra DNS y levanta S3. Objetivo: 2–8 de noviembre de 2026.
 [Spec formal](../../../specs/20261106-170457_perfiles-altas-usuarios/spec.md),
 [matriz](../../../specs/20261106-170457_perfiles-altas-usuarios/traceability.md) y [pendientes](../../../specs/20261106-170457_perfiles-altas-usuarios/pending-decisions.md).
@@ -17,23 +17,23 @@ revocación de sesiones, auditoría y almacenamiento persistente de imágenes.
 Recomendación: conservar User global + InstitutionMembership + Enrollment y
 entregar cada capacidad de punta a punta, sobre NestJS, Next.js, PostgreSQL y pnpm.
 
-## Qué existe y qué falta
+## Base inicial e implementación en la rama
 
-| Área | Evidencia actual | Cambio necesario |
+| Área | Base inicial investigada | Implementación actual, pendiente de integración final |
 | --- | --- | --- |
-| Identidad | `users`: UUID, email, password_hash, name, active y timestamps | Añadir bio, avatar_key y credential_version |
-| Correo | Índice único global sobre `lower(btrim(email))` | Reutilizar normalización y manejar concurrencia |
-| Envío de correos | Sin integración de mailer | Resend elegido; preparar dominio, SDK backend y estado de envío |
-| Institución | Membership única por institución/usuario; is_admin e is_super_admin | Alta controlada de nuevas pertenencias |
-| Rol académico | Enrollment por sección: teacher/student/assistant | Reutilizar asignación; no crear un rol global |
-| Login | Argon2id + JWT de 900 s; guard consulta User activo | Cambio de contraseña e invalidación por versión |
-| Cuenta actual | Solo `GET /api/v1/institution/{slug}/me` | Consulta/edición global de cuenta propia |
-| Administración | Lista memberships y cambia isAdmin por API, solo superadmin | Lista para admin/superadmin y alta formulario/CSV |
-| Búsqueda | `/institution/{slug}/users` exige teacher activo | Superadmin usa memberships; no ampliar búsqueda docente |
-| Frontend | Sesión en memoria, shell, avatar con inicial y cierre de sesión | Mi perfil, Seguridad, foto y administración |
-| Imágenes | Sin endpoints ni proveedor implementado; JSON limitado a 4096 bytes | S3 privado en producción y archivos locales en desarrollo, pendientes de integración |
-| Base runtime | Usuarios de solo lectura; INSERT/UPDATE sensibles prohibidos | Operaciones específicas de identidad, sin credencial de operador HTTP |
-| Auditoría | Eventos institucionales/académicos con constraints y snapshots permitidos | Eventos globales de cuenta y nuevas acciones institucionales |
+| Identidad | User global, correo único normalizado y memberships separadas | bio, avatar_key y credential_version; altas sin Enrollment ni flags implícitos |
+| Correo | Sin mailer | Adaptadores Resend/disabled; fake solo tests; infraestructura confirmada por Daniel y prueba manual real reportada por Matías |
+| Institución | Membership única; flags admin/superadmin independientes | Formulario, invitaciones y CSV autorizados por cualquiera de esos flags vigentes |
+| Login | Argon2id y JWT de 900 s, User activo | Cambio de contraseña auditado; credentialVersion revoca sesiones previas en todas las instituciones |
+| Cuenta propia | GET institucional, dependiente de membership | GET/PATCH /me global, contraseña y foto, con conflictos de edición por timestamp preciso |
+| Administración | Lista y delegación de isAdmin exclusivas de superadmin | Lectura también para admin; delegación conserva exclusividad de superadmin |
+| Búsqueda docente | /institution/{slug}/users exige teacher activo | Mantiene su permiso académico; administración reutiliza memberships |
+| Frontend | Sesión en memoria y shell académico | /profile, /profile/security, /admin/users y /activate; navegación actualiza identidad sin desmontar trabajo |
+| Imágenes | Sin endpoints ni proveedor | Lectura privada backend; local en desarrollo, adaptador S3 privado o disabled en producción |
+| Base runtime | Escrituras generales de identidad prohibidas | Funciones específicas bajo propietario NOLOGIN, sin credencial operadora en HTTP |
+| Auditoría | Eventos institucionales y académicos | Eventos globales de seguridad y auditoría atómica de invitaciones/importaciones |
+| CSV | Sin alta masiva | Archivo efímero en memoria; preview, confirmación atómica, recibos y envíos recuperables |
+| Retención | Sin datos derivados de altas | Comando operador con dry-run, límites 7/30 días y limpieza acotada de objetos huérfanos |
 
 Fuentes implementadas, prioritarias sobre planes históricos:
 
@@ -49,7 +49,7 @@ Fuentes implementadas, prioritarias sobre planes históricos:
   [shell](../../../frontend/src/components/institutions/institution-shell.tsx),
   [protección institucional](../../../frontend/src/components/auth/protected-institution.tsx).
 
-## Permisos propuestos
+## Permisos aplicados en la rama
 
 La ampliación solicitada autoriza **admin o superadmin de la institución**, no
 operador global. Los flags son independientes del rol académico y entre sí.
@@ -66,7 +66,7 @@ isAdmin ni isSuperAdmin. El servidor deriva actor e institución autorizada.
 Promover superadmins y recuperar ese privilegio sigue siendo una operación del PM.
 Editar el perfil o crear una pertenencia no concede acceso a cursos ni notas.
 
-## Experiencia propuesta
+## Experiencia implementada en la rama
 
 1. **Mi perfil**, `/profile`: nombre visible, correo de solo lectura y descripción
    en texto plano; guardar, cancelar, errores por campo y aviso de cambios pendientes.
@@ -84,18 +84,17 @@ Editar el perfil o crear una pertenencia no concede acceso a cursos ni notas.
 El alta elegida queda pendiente hasta la activación: crear la invitación no
 crea todavía User ni membership. Se evita que el superadmin conozca contraseñas
 o cambie una cuenta existente de otra institución. El listado distingue pendiente/activo.
-Resend enviará el enlace desde un remitente verificado; correo fake en local/CI
-y prueba real opt-in. Crear invitación, aceptar correo y activar son estados distintos.
+Resend envía desde remitente verificado; fake exclusivamente en tests, manual real opt-in.
+Sin configuración, correo/fotos permanecen disabled y el resto de la aplicación inicia. Crear invitación, aceptar correo y activar son estados distintos.
 CSV confirma DB antes de despachar; cuota/fallo dejan pendientes recuperables, sin workers.
 
 Las rutas de cuenta requieren autenticación global, sin exigir membership activa.
-Reutilizar SessionProvider y añadir protección global: ProtectedInstitution depende
-de `/me` institucional y bloquearía a una cuenta sin pertenencias.
-Actualizar navegación, retornos seguros, shell y parsers tipados; evitar remontar
-todo el espacio académico por cambiar nombre/foto, hoy incluidos en la key del shell.
+La protección global reutiliza SessionProvider sin exigir `/me` institucional.
+Navegación, retornos seguros y parsers tipados preservan el contexto académico
+al cambiar nombre/foto; la validación integrada verifica este comportamiento.
 Reutilizar DESIGN.md, tokens, componentes, Lucide, foco visible, ambos temas y móvil.
 
-## Decisiones y detalles por cerrar en la especificación
+## Decisiones adoptadas
 
 - Perfil global; nombre editable como nombre visible, sin agregar identidad legal/RUT.
 - Descripción opcional de hasta 500 caracteres; nombre entre 1 y 200 tras trim.
@@ -109,15 +108,17 @@ Reutilizar DESIGN.md, tokens, componentes, Lucide, foco visible, ambos temas y m
 - Recuperación de contraseña olvidada, borrado de cuenta, cambios de correo,
   perfiles públicos, importación de matrículas y edición global de cuentas ajenas quedan fuera.
 - Fotos: [S3 privado en producción](../../adr/s3-for-profile-photos.md), Daniel provisiona;
-  local en desarrollo. La spec debe fijar límites y configuración concreta del bucket.
+  local en desarrollo; contrato limita 2 MiB/16 MP y salida WebP 1024×1024.
 - [Retención](retencion.md): archivo no se conserva; limpieza de derivados a 7/30 días aprobada.
 
-## Alcance documental
+## Estado y evidencia
 
-La ampliación está registrada en requisitos, backlog y borradores de issues; USR-01
-ya tiene spec y constitución 1.6.0 sincronizados; remitente/limpieza resueltos.
-USR-01 aún requiere diseño técnico detallado; DNS y configuración siguen por ejecutar.
-Ver [ADR de fronteras](../../adr/institutional-account-lifecycle.md). Los documentos base
-conservan el MVP implementado y enlazan la extensión pendiente, sin fingir nuevas capacidades.
-CodeGraph fue intentado porque existe `.codegraph/`, pero el ejecutable no está
-disponible; la investigación continuó con lectura de código, SQL, contratos y tests.
+La ampliación tiene cinco issues publicadas (#233–237), spec, constitución 1.6.1,
+contratos y tareas trazables. Backend, migraciones, frontend y adaptadores están en
+la rama; esto no acredita despliegue ni cierre automático de las issues.
+Consultar [evidencia de validación](evidencia.md): la suite completa y los recorridos
+integrados deben quedar aprobados antes del cierre. Daniel tiene asignados DNS,
+Resend y S3; DNS/correo recibido ya reportados en #235, con S3 y recorrido
+real desde AcademiX pendientes.
+Ver [ADR de fronteras](../../adr/institutional-account-lifecycle.md).
+CodeGraph no está disponible; la investigación usó código, SQL, contratos y tests.

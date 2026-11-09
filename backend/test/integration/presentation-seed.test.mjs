@@ -119,6 +119,8 @@ test('presentation runs as a managed non-superuser owner under FORCE RLS and rej
   try {
     await migrated(pool);
     await pool.query(`CREATE ROLE ${owner} LOGIN NOSUPERUSER NOBYPASSRLS CREATEROLE`);
+    // The writer role already exists in this test cluster; emulate its creator's PG17 grant.
+    await pool.query(`GRANT academix_account_writer TO ${owner} WITH ADMIN TRUE, INHERIT FALSE, SET FALSE`);
     await pool.query(`CREATE DATABASE ${name} OWNER ${owner}`);
     target.pathname = `/${name}`; target.username = owner; target.password = '';
     const env = { MIGRATION_DATABASE_URL: target.href };

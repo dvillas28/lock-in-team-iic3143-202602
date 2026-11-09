@@ -61,13 +61,16 @@ CA = escenarios de aceptación de cada US; SC = criterios de éxito del spec.
 | RNF17 | FR-005/006; SC-008 | Foto inválida/ajena, reemplazo y limpieza recuperable | USR-02 |
 | RNF18 | FR-012/020; SC-007 | Cuota compartida, rate y resultado por destinatario | USR-04/05 |
 | RNF19 | FR-012/013/017/018/020; SC-005/007 | Límite entre confirmación local y efecto externo | USR-04/05 |
-| RNF20 | FR-011/012/024; SC-007/009 | Simulación local/CI; remitente elegido, DNS pendiente | USR-04/08 |
+| RNF20 | FR-011/012/024; SC-007/009 | Fake solo tests; DNS confirmado y Resend manual reportado | USR-04/08 |
 
 ## Decisiones resueltas y exclusiones
 
-PEND-01/02 cerrados: remitente elegido y limpieza 7/30 aprobada. Falta verificar DNS
-e implementar/probar mantenimiento; no confundir decisión con ejecución.
+PEND-01/02 cerrados: remitente elegido y limpieza 7/30 aprobada. DNS confirmado,
+mantenimiento implementado/probado y Resend manual reportado por Matías.
+Interfaz aceptada manualmente por el usuario; no se ejecuta Playwright.
+S3 real y desglose manual de teclado/375 px/temas siguen sin evidencia específica.
 Detalle y default sin primera emisión en [registro](pending-decisions.md).
+IDs remotos: USR-01 #233, USR-02 #234, USR-04 #235, USR-05 #236 y USR-08 #237.
 Conservar los cinco IDs activos y las referencias históricas consolidadas del backlog;
-no reabrir misiones anteriores, publicar issues ni marcar implementación como realizada.
-No generar tests/código o ejecutar migraciones para verificar esta matriz documental.
+no reabrir misiones anteriores ni marcar implementación/pruebas como realizadas sin evidencia.
+La implementación autorizada se sigue en [tasks](tasks.md), con pruebas por historia y evidencia externa separada.

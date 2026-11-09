@@ -3,6 +3,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { hostInstitution, safeReturnPath } from "../../lib/auth/navigation.ts";
+import { AccountAvatar } from "../accounts/account-avatar.tsx";
 import { InstitutionShell } from "../institutions/institution-shell.tsx";
 import { ErrorState, LoadingState } from "../route-states.tsx";
 import { useSession } from "./session-provider.tsx";
@@ -26,6 +27,7 @@ export function ProtectedInstitution({ slug: legacySlug, children }: Readonly<{ 
     }
     if (state.status !== "authenticated" || !validHost) return;
     void session.loadContext(slug);
+    void session.loadAccount();
     const stop = watchContextAccess(session, slug, window, document);
     return () => { stop(); session.clearContext(); };
   }, [origin, validHost, state.status, state.generation, slug, legacySlug, session, router]);
@@ -34,7 +36,7 @@ export function ProtectedInstitution({ slug: legacySlug, children }: Readonly<{ 
   const context = state.context?.slug === slug ? state.context : undefined;
   if (context?.error) return <main className="content"><SessionActions /><ErrorState feedback={context.error} onRetry={() => void session.loadContext(slug!)} /></main>;
   if (!validHost || !slug || !context?.user) return <main className="content"><LoadingState /></main>;
-  return <InstitutionShell key={`${state.generation}:${slug}:${JSON.stringify(context.user)}`} pathname={pathname} institutionSlug={slug} institutionName={context.user.institutionMembership.institution.name} user={context.user} actions={<SessionActions />}>
+  return <InstitutionShell key={`${state.generation}:${slug}:${JSON.stringify([context.user.institutionMembership,context.user.sectionMemberships])}`} pathname={pathname} institutionSlug={slug} institutionName={context.user.institutionMembership.institution.name} user={context.user} avatar={<AccountAvatar name={context.user.name}/>} actions={<SessionActions />}>
     {state.contextWarning && <div className="notice" role="alert">
       <p>No se pudo verificar tu acceso. Puedes consultar el contenido; confirma la conexión antes de guardar cambios.</p>
       <button type="button" className="btn btn-ghost" onClick={() => void session.loadContext(slug)}>Verificar acceso</button>

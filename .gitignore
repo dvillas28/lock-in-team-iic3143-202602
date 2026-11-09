@@ -51,3 +51,6 @@ temp/
 e2e/test-results/
 e2e/reports/
 e2e/.cache/
+
+# Private local profile images
+.data/

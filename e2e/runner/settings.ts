@@ -33,7 +33,7 @@ export function preflight(env: NodeJS.ProcessEnv = process.env) {
 export function isolatedEnv(extra: NodeJS.ProcessEnv = {}) {
   const env = {...process.env};
   for (const key of Object.keys(env)) {
-    if (/^(DATABASE_URL|MIGRATION_DATABASE_URL|TEST_.*DATABASE_URL|AUTH_JWT_SECRET|DEMO_|ONBOARD_|SUPERADMIN_|NEXT_PUBLIC_|API_URL|PGHOST|PGDATABASE|PGUSER|PGPASSWORD|PGPORT)/.test(key)) delete env[key];
+    if (/^(DATABASE_URL|MIGRATION_DATABASE_URL|TEST_.*DATABASE_URL|AUTH_JWT_SECRET|DEMO_|ONBOARD_|SUPERADMIN_|NEXT_PUBLIC_|API_URL|PGHOST|PGDATABASE|PGUSER|PGPASSWORD|PGPORT|AVATAR_|MAIL_|RESEND_|AWS_|ACTIVATION_ORIGINS_)/.test(key)) delete env[key];
   }
   return {...env, ...extra};
 }

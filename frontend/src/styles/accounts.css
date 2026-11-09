@@ -1,0 +1,11 @@
+.account-content { width: 100%; max-width: 1120px; margin-inline: auto; }
+.account-content > .state-actions { margin-bottom: 24px; flex-wrap: wrap; }
+.account-avatar-large, .account-avatar-preview { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; font-size: 32px; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+.account-table-wrap { max-width: 100%; overflow-x: auto; }
+.account-table-wrap td { vertical-align: top; }
+.account-table-wrap .state-actions { flex-wrap: wrap; }
+.account-invite-status { display: block; margin-top: 4px; }
+.account-file-field { max-width: 100%; }
+.account-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 760px) { .account-form-grid { grid-template-columns: 1fr; } }
