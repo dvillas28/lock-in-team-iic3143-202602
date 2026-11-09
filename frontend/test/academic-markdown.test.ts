@@ -9,7 +9,7 @@ import { CourseNavigation } from '../src/components/courses/course-navigation.ts
 import { course, user } from './fixtures/courses.ts';
 import { mount } from './fixtures/course-ui.ts';
 import { ModulesPanel } from '../src/components/content/modules-panel.tsx';
-import { material, unit } from './fixtures/content.ts';
+import { material, unit, resources } from './fixtures/content.ts';
 
 const documentFor = (source: string) => new JSDOM(renderToStaticMarkup(h(AcademicMarkdown, { source }))).window.document;
 test('Markdown renders semantic nested lists, shifted headings, GFM, quotes and literal code', () => {
@@ -71,9 +71,9 @@ test('course tabs reflect effective capabilities and keep all links in the curre
 });
 
 test('module index lazily opens resources and closing editor preserves its draft', async () => {
-  const ui = await mount(h(ModulesPanel, {courseId: course.id}), r => Response.json(r.url.endsWith('/materials') ? {items:[material]} : r.url.endsWith('/modules') ? {items:[unit]} : course), 'teacher');
+  const ui = await mount(h(ModulesPanel, {courseId: course.id}), r => Response.json(r.url.endsWith('/resources') ? resources(material) : r.url.endsWith('/modules') ? {items:[unit]} : course), 'teacher');
   try {
-    assert.equal(ui.requests.some(r => r.url.endsWith('/materials')), false);
+    assert.equal(ui.requests.some(r => r.url.endsWith('/resources')), false);
     const link = ui.doc.querySelector<HTMLAnchorElement>('.module-index a')!;
     await ui.settle(() => link.click());
     assert.equal(ui.doc.querySelector('.module-collapse')?.getAttribute('aria-expanded'), 'true');
@@ -82,13 +82,15 @@ test('module index lazily opens resources and closing editor preserves its draft
     const textarea = details.querySelector('textarea')!;
     await ui.settle(() => { details.open = true; textarea.value = 'Borrador con espacios  '; details.open = false; details.open = true; });
     assert.equal(textarea.value, 'Borrador con espacios  ');
-    await ui.click('Actualizar materiales');
+    await ui.click('Unidad 1');
+    await ui.click('Unidad 1');
+    assert.equal(ui.requests.filter(r => r.url.endsWith('/resources')).length, 2);
     assert.equal(details.querySelector('textarea')?.value, 'Borrador con espacios  ');
   } finally { await ui.close(); }
 });
 
 test('module fragment return opens the selected module and preserves editorial boundaries', async () => {
-  const ui = await mount(h(ModulesPanel,{courseId:course.id}),r=>Response.json(r.url.endsWith('/materials')?{items:[material]}:r.url.endsWith('/modules')?{items:[unit]}:course),'assistant');
+  const ui = await mount(h(ModulesPanel,{courseId:course.id}),r=>Response.json(r.url.endsWith('/resources')?resources(material):r.url.endsWith('/modules')?{items:[unit]}:course),'assistant');
   try {
     await ui.settle(() => { ui.dom.window.location.hash = `module-${unit.id}`; ui.dom.window.dispatchEvent(new ui.dom.window.HashChangeEvent('hashchange')); });
     assert.equal(ui.doc.querySelector('.module-collapse')?.getAttribute('aria-expanded'), 'true');

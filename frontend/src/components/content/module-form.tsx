@@ -3,13 +3,13 @@ import type { FormEvent } from "react";
 import type { Session } from "../../lib/auth/session.ts";
 import { title, nextPosition, type CourseModule } from "../../lib/content/validation.ts";
 import { changed } from "../../lib/courses/validation.ts";
-import { createCourseModule, updateCourseModule, listCourseModules, getCourseModule } from "../../lib/api/modules.ts";
+import { createCourseModule, updateCourseModule } from "../../lib/api/modules.ts";
 import { Field } from "../courses/form-fields.tsx";
-import { useMutation } from "../courses/use-mutation.ts";
+import { useContentMutation } from "./content-notices.tsx";
 export function ModuleForm({session, slug, courseId, item, items, onSaved, disabled = false}: {
   session: Session; slug: string; courseId: string; item?: CourseModule; items: CourseModule[]; onSaved: () => Promise<boolean | undefined>; disabled?: boolean;
 }) {
-  const mutation = useMutation(session);
+  const mutation = useContentMutation(session);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (disabled) return;
@@ -25,8 +25,6 @@ export function ModuleForm({session, slug, courseId, item, items, onSaved, disab
       const message = item ? "Módulo actualizado." : "Módulo creado.";
       return refreshed ? message : { message: `${message} No se pudo actualizar la consulta; reintenta solo la lectura.`, persistent: true };
     }, async current => {
-      if (item) await session.request(c => getCourseModule(c, slug, item.id, courseId), current);
-      else await session.request(c => listCourseModules(c, slug, courseId), current);
       if (!current()) return "Contexto cambiado.";
       const refreshed = await onSaved();
       if (!refreshed) return "No se pudo actualizar la consulta. Revisión manual pendiente.";

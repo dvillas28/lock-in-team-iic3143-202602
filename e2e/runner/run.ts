@@ -27,7 +27,8 @@ try{
  phase='postgres';pg=await startPostgres(runId);environment.postgres=pg.version;environment.ci=!!process.env.CI;checkCancellation();phase='build';
  await command('pnpm',['--dir','backend','build']);checkCancellation();await command('pnpm',['--dir','frontend','build'],{...buildEnv,E2E_PASSWORD:undefined,E2E_JWT_SECRET:undefined,E2E_RUNTIME_PASSWORD:undefined});checkCancellation();
  const {relativeAppDir}=JSON.parse(await readFile(resolve(root,'frontend/.next/required-server-files.json'),'utf8')),standalone=resolve(root,'frontend/.next/standalone',relativeAppDir);
- await cp(resolve(root,'frontend/.next/static'),resolve(standalone,'.next/static'),{recursive:true});frontend=launch(process.execPath,['server.js'],{...buildEnv,PORT:String(webPort),HOSTNAME:'127.0.0.1'},standalone);await ready(`http://127.0.0.1:${webPort}`,frontend.child);checkCancellation();phase='playwright';
+ await cp(resolve(root,'frontend/.next/static'),resolve(standalone,'.next/static'),{recursive:true});
+ await cp(resolve(root,'frontend/public'),resolve(standalone,'public'),{recursive:true});frontend=launch(process.execPath,['server.js'],{...buildEnv,PORT:String(webPort),HOSTNAME:'127.0.0.1'},standalone);await ready(`http://127.0.0.1:${webPort}`,frontend.child);checkCancellation();phase='playwright';
  const tests=launch(resolve(work,'node_modules/.bin/playwright'),['test',...selected.args],{...env,E2E_PG_PORT:String(pg.port),E2E_PG_FOLDER:pg.folder,E2E_WEB_PORT:String(webPort),E2E_API_PORT:String(apiPort)},work);
  tests.child.stdout?.on('data',chunk=>process.stdout.write(safe(String(chunk))));tests.child.stderr?.on('data',chunk=>process.stderr.write(safe(String(chunk))));process.exitCode=(await tests.finished)??1;
 }catch(error){failure=safe(error instanceof Error?error.message:String(error));process.exitCode=1;console.error(failure);}

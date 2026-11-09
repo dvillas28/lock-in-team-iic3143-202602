@@ -3,13 +3,13 @@ import { useEffect, type FormEvent } from "react";
 import type { Session } from "../../lib/auth/session.ts";
 import { title, markdown, type Material } from "../../lib/content/validation.ts";
 import { changed } from "../../lib/courses/validation.ts";
-import { createMarkdownMaterial, updateMaterial, getMaterial, listModuleMaterials } from "../../lib/api/materials.ts";
+import { createMarkdownMaterial, updateMaterial } from "../../lib/api/materials.ts";
 import { Field } from "../courses/form-fields.tsx";
-import { useMutation } from "../courses/use-mutation.ts";
+import { useContentMutation } from "./content-notices.tsx";
 export function MaterialForm({session, slug, moduleId, item, onSaved, disabled = false, onBlockedChange}: {
   session: Session; slug: string; moduleId: string; item?: Material; onSaved: () => Promise<boolean | undefined>; disabled?: boolean; onBlockedChange?: (blocked: boolean) => void;
 }) {
-  const mutation = useMutation(session);
+  const mutation = useContentMutation(session);
   useEffect(() => { onBlockedChange?.(mutation.busy || !!mutation.uncertain); }, [mutation.busy, mutation.uncertain, onBlockedChange]);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -26,8 +26,6 @@ export function MaterialForm({session, slug, moduleId, item, onSaved, disabled =
       const message = item ? "Material actualizado." : "Material creado.";
       return refreshed ? message : { message: `${message} No se pudo actualizar la consulta; reintenta solo la lectura.`, persistent: true };
     }, async current => {
-      if (item) await session.request(c => getMaterial(c, slug, item.id, moduleId), current);
-      else await session.request(c => listModuleMaterials(c, slug, moduleId), current);
       if (!current()) return "Contexto cambiado.";
       const refreshed = await onSaved();
       if (!refreshed) return "No se pudo actualizar la consulta. Revisión manual pendiente.";

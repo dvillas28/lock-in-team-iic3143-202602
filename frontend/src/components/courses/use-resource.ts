@@ -5,7 +5,7 @@ import { ApiHttpError, ApiResponseError } from "../../lib/api/errors.ts";
 import type { Session } from "../../lib/auth/session.ts";
 import { getRouteFeedback, type RouteFeedback } from "../../lib/route-feedback.ts";
 // Each mounted resource owns its sequence; Session alone cannot order requests within a tenant.
-export function useResource<T>(session: Session, resource: string, load: (client: ApiClient) => Promise<T>, preserve = true) {
+export function useResource<T>(session: Session, resource: string, load: (client: ApiClient) => Promise<T>, preserve = true, timeoutMs?:number) {
   const [state, setState] = useState<{
     key: string;
     data?: T;
@@ -23,7 +23,7 @@ export function useResource<T>(session: Session, resource: string, load: (client
       return;
     setState(previous => ({ key: resource, data: preserve && previous.key === resource ? previous.data : undefined, refreshing: true }));
     try {
-      const data = await session.request(loader.current, () => request === sequence.current && context === session.getSnapshot().context);
+      const data = await session.request(loader.current, () => request === sequence.current && context === session.getSnapshot().context, timeoutMs===undefined?undefined:{timeoutMs});
       if (request === sequence.current && context === session.getSnapshot().context)
         setState({ key: resource, data });
       return true;
@@ -35,7 +35,7 @@ export function useResource<T>(session: Session, resource: string, load: (client
       }
       return false;
     }
-  }, [session, resource, preserve]);
+  }, [session, resource, preserve, timeoutMs]);
   useEffect(() => { void reload(); const counter = sequence; return () => { counter.current++; }; }, [reload]);
   return { ...(state.key === resource ? state : {}), reload };
 }

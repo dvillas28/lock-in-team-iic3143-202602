@@ -27,6 +27,8 @@ export class StaleSessionError extends Error {
 }
 
 /** One instance per mounted browser provider. Never a module singleton or server session. */
+type RequestTransport = { fetch?: (request: Request) => Promise<Response>; timeoutMs: number };
+
 export class Session {
   private state: SessionState = { status: "anonymous", generation: 0, retryAt: 0 };
   private readonly listeners = new Set<() => void>();
@@ -63,7 +65,7 @@ export class Session {
     this.checkExpiry();
     if (generation !== this.state.generation) throw new StaleSessionError();
   }
-  private async perform<T>(generation: number, token: string | undefined, operation: (client: ApiClient) => Promise<T>, current: () => boolean = () => true, revalidateOnFailure = true): Promise<T> {
+  private async perform<T>(generation: number, token: string | undefined, operation: (client: ApiClient) => Promise<T>, current: () => boolean = () => true, revalidateOnFailure = true, transport?: RequestTransport): Promise<T> {
     const context = this.state.context;
     const controller = new AbortController(); this.controllers.add(controller);
     try {
@@ -76,7 +78,7 @@ export class Session {
           if (!['GET', 'HEAD'].includes(request.method) && this.state.contextWarning && new URL(request.url).pathname.startsWith('/api/v1/institution/')) {
             throw new ApiHttpError(409, { code: 'ACCESS_REVALIDATION_REQUIRED' });
           }
-          const response = await (this.options.fetch ?? globalThis.fetch)(new Request(request, { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15_000)]) }));
+          const response = await (transport?.fetch ?? this.options.fetch ?? globalThis.fetch)(new Request(request, { signal: AbortSignal.any([request.signal, controller.signal, AbortSignal.timeout(transport?.timeoutMs ?? 15_000)]) }));
           this.assertCurrent(generation);
           if (!current()) throw new StaleSessionError();
           return response;
@@ -94,11 +96,11 @@ export class Session {
     } finally { this.controllers.delete(controller); }
   }
   /** All private consumers use this boundary; old completions/401s cannot affect a new identity. */
-  request = async <T>(operation: (client: ApiClient) => Promise<T>, current?: () => boolean): Promise<T> => {
+  request = async <T>(operation: (client: ApiClient) => Promise<T>, current?: () => boolean, transport?: RequestTransport): Promise<T> => {
     this.checkExpiry();
     if (this.state.status !== "authenticated" || !this.token) throw new StaleSessionError();
     const context = this.state.context;
-    return this.perform(this.state.generation, this.token, operation, () => context === this.state.context && (current?.() ?? true));
+    return this.perform(this.state.generation, this.token, operation, () => context === this.state.context && (current?.() ?? true), true, transport);
   };
   /** Global account operations survive institution refresh but never an identity change. */
   accountRequest = async <T>(operation: (client: ApiClient) => Promise<T>, current?: () => boolean): Promise<T> => {

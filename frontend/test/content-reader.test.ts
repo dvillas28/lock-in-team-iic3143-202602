@@ -4,7 +4,7 @@ import {createElement as h} from "react";
 import {ModulesPanel} from "../src/components/content/modules-panel.tsx";
 import {MaterialReader} from "../src/components/content/material-reader.tsx";
 import {mount} from "./fixtures/course-ui.ts";
-import {unit,material,course,matrix,id} from "./fixtures/content.ts";
+import {unit,material,course,matrix,id,resources} from "./fixtures/content.ts";
 import {deferred} from "./fixtures/courses.ts";
 const route={courseId:course.id,moduleId:unit.id,materialId:material.id};
 test("reader renders adversarial source inert and preserves whitespace; validates both parents",async()=>{
@@ -23,8 +23,8 @@ test("student/assistant direct route publication matrix is enforced by rejected 
  }
 });
 test("modules lazy-load material; loading, empty and errors differ; links navigate real routes",async()=>{
- const ui=await mount(h(ModulesPanel,{courseId:course.id}),r=>Response.json(r.url.endsWith("/materials")?{items:[material]}:r.url.endsWith("/modules")?{items:[unit]}:course),"teacher");
- try {assert.equal(ui.requests.some(r=>r.url.endsWith("/materials")),false);await ui.click("Unidad 1");assert.ok(ui.doc.querySelector('a[href$="/materials/'+material.id+'"]'));await ui.click("Unidad 1");}
+ const ui=await mount(h(ModulesPanel,{courseId:course.id}),r=>Response.json(r.url.endsWith("/resources")?resources(material):r.url.endsWith("/modules")?{items:[unit]}:course),"teacher");
+ try {assert.equal(ui.requests.some(r=>r.url.endsWith("/resources")),false);await ui.click("Unidad 1");assert.ok(ui.doc.querySelector('a[href$="/materials/'+material.id+'"]'));await ui.click("Unidad 1");}
  finally{await ui.close();}
  for(const [status,body,expected] of [[200,{items:[]},/Sin contenido/],[503,{},/No se pudo/]] as const){
  const u=await mount(h(ModulesPanel,{courseId:course.id}),r=>Response.json(r.url.endsWith("/modules")?body:course,{status:r.url.endsWith("/modules")?status:200}),"student");
@@ -61,7 +61,7 @@ test("publication matrix in course navigation exposes only jointly published mat
  for(const profile of ["student","assistant"])for(const entry of matrix){
  const ui=await mount(h(ModulesPanel,{courseId:course.id}),r=>{
  if(r.url.endsWith("/modules"))return Response.json({items:entry.unit.publishedAt?[entry.unit]:[]});
- if(r.url.endsWith("/materials"))return Response.json({items:entry.visible?[entry.material]:[]});
+ if(r.url.endsWith("/resources"))return Response.json(resources(...(entry.visible?[entry.material]:[])));
  return Response.json(course);
  },profile);
  try{
