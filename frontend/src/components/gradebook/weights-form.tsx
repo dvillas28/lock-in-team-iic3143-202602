@@ -20,7 +20,7 @@ function initialAssignments(data: GradeItems) {
   return Object.fromEntries(data.items.map(i => [i.id, i.groupId ?? i.id]));
 }
 const weightCents = (value: string) => {
-  try { return cents(value.trim().replace(",", ".")); } catch { return NaN; }
+  try { return cents(value.trim().replace(",", ".")); } catch { return Number.NaN; }
 };
 
 export function WeightsForm({ session, slug, courseId, initial, onSaved, onCancel, onBusy, onError }: Readonly<{
@@ -119,10 +119,12 @@ export function WeightsForm({ session, slug, courseId, initial, onSaved, onCance
           {groups.map((g, index) => {
             const name = g.title.trim() || `Grupo ${index + 1}`;
             return <li key={g.key} className="grade-plan-group">
-              <label className="field-label">Nombre del grupo
+              <label className="field-label">
+                <span>Nombre del grupo</span>
                 <input className="field" value={g.title} onChange={e => edit(g.key, { title: e.target.value })} required maxLength={200} />
               </label>
-              <label className="field-label">Peso (%)
+              <label className="field-label">
+                <span>Peso (%)</span>
                 <input className="field tnum" value={g.weight} onChange={e => edit(g.key, { weight: e.target.value })} inputMode="decimal" required />
               </label>
               <div className="grade-plan-group-actions">

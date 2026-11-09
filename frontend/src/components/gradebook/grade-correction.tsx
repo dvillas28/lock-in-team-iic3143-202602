@@ -75,7 +75,8 @@ export function GradeCorrection({ session, slug, courseId, target, onClose, onSa
       <fieldset className="selection-group" disabled={saving || stale || uncertain}>
         <legend className="gradebook-sr-only">Datos de la corrección</legend>
         {maxPoints !== undefined && <p>Puntaje máximo <strong className="tnum">{formatPoints.format(maxPoints)} {maxPoints === 1 ? "punto" : "puntos"}</strong></p>}
-        <label className="field-label">Puntaje corregido
+        <label className="field-label">
+          <span>Puntaje corregido</span>
           <input className="field tnum" inputMode="decimal" required aria-describedby="correction-points-help"
             aria-invalid={points.trim().length > 0 && !preview} value={points} onChange={e => setPoints(e.target.value)} />
         </label>
@@ -86,7 +87,8 @@ export function GradeCorrection({ session, slug, courseId, target, onClose, onSa
             <strong className="grade-value">Nota {formatGrade.format(preview.grade)}</strong>
           </> : <span className="hint">{points.trim() ? "Ingresa un puntaje válido entre 0 y el máximo." : "La nota resultante aparecerá aquí."}</span>}
         </output>
-        <label className="field-label">Motivo de la corrección
+        <label className="field-label">
+          <span>Motivo de la corrección</span>
           <textarea className="field" rows={3} required maxLength={500} value={reason} onChange={e => setReason(e.target.value)} />
         </label>
       </fieldset>

@@ -14,7 +14,7 @@ export function weightsInput(body:unknown) {
 }
 function selectionIds(value:unknown) {
  if(!Array.isArray(value) || !value.length)throw new BadRequestException();
- const ids=value.map(uuid).sort();
+ const ids=value.map(uuid).sort((a,b)=>a.localeCompare(b,"en"));
  if(new Set(ids).size!==ids.length)throw new BadRequestException();
  return ids;
 }
@@ -54,7 +54,7 @@ export function groupsInput(body:unknown) {
   const weight=group.weightPercent;
   if(typeof weight!=="number" || weight<0 || weight>100 || !/^\d+(?:\.\d{1,2})?$/.test(String(weight)))throw new BadRequestException();
   return {id:group.id===null?null:uuid(group.id),title:text(group.title,200),weightPercent:weight,
-   gradeItemIds:group.gradeItemIds.map(uuid).sort()};
+   gradeItemIds:group.gradeItemIds.map(uuid).sort((a,b)=>a.localeCompare(b,"en"))};
  });
  const items=groups.flatMap(g=>g.gradeItemIds),ids=groups.flatMap(g=>g.id?[g.id]:[]);
  if(new Set(items).size!==items.length || new Set(ids).size!==ids.length)throw new BadRequestException();

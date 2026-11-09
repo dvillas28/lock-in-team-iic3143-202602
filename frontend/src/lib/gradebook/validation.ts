@@ -150,7 +150,7 @@ function selectionIds(a: string[]) {
     if (!Array.isArray(a) || !a.length || !a.every(isId)) {
         throw new TypeError('Selecciona evaluaciones, secciones y estudiantes.');
     }
-    const ids = a.map(x => x.toLowerCase()).sort();
+    const ids = a.map(x => x.toLowerCase()).sort((left, right) => left.localeCompare(right, "en"));
     if (!unique(ids)) throw new TypeError('Selección duplicada.');
     return ids;
 }
