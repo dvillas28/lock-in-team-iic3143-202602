@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Aprovisiona los buckets S3 privados de fotos de perfil de AcademiX (prod y test)
-# y un usuario IAM de mínimo privilegio por bucket. Idempotente: se puede re-ejecutar.
-# Guía, políticas y variables: docs/planning/perfiles/operacion-s3.md
+# Aprovisiona los buckets S3 privados de AcademiX (prod y test) para fotos de perfil
+# (avatars/) y archivos académicos (academic/materials/), con un usuario IAM de mínimo
+# privilegio por bucket. Idempotente: se puede re-ejecutar para aplicar cambios.
 #
 # Uso:
 #   AWS_PROFILE=<perfil-admin> scripts/provision-avatar-s3.sh [--suffix dvillasc] [--region us-east-1] [--yes]
+# Guías: docs/planning/perfiles/operacion-s3.md y docs/planning/academic-files/s3.md
 #
 # Requisitos: AWS CLI v2 y un perfil con permisos para S3 e IAM (no uses la cuenta root).
 # Las access keys nuevas se guardan en ~/.config/academix/s3-<env>.env (permisos 600);
@@ -15,14 +16,17 @@ SUFFIX="dvillasc"
 REGION="us-east-1"
 ASSUME_YES=false
 SECRETS_DIR="${HOME}/.config/academix"
-TAGS='Key=Project,Value=academix Key=Purpose,Value=profile-avatars'
+TAGS='Key=Project,Value=academix Key=Purpose,Value=private-files'
+# Prefijos que el backend usa hoy. academic/submissions/ queda fuera hasta que exista código que lo use.
+AVATAR_PREFIX="avatars/"
+ACADEMIC_PREFIX="academic/materials/"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --suffix) SUFFIX="$2"; shift 2 ;;
     --region) REGION="$2"; shift 2 ;;
     --yes) ASSUME_YES=true; shift ;;
-    -h|--help) sed -n '2,11p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,12p' "$0"; exit 0 ;;
     *) echo "Argumento desconocido: $1" >&2; exit 2 ;;
   esac
 done
@@ -105,19 +109,25 @@ JSON
 
   # shellcheck disable=SC2086
   aws s3api put-bucket-tagging --bucket "$bucket" \
-    --tagging "TagSet=[{Key=Project,Value=academix},{Key=Purpose,Value=profile-avatars},{Key=Environment,Value=${env}}]"
+    --tagging "TagSet=[{Key=Project,Value=academix},{Key=Purpose,Value=private-files},{Key=Environment,Value=${env}}]"
 
   if [[ "$env" == "test" ]]; then
-    aws s3api put-bucket-lifecycle-configuration --bucket "$bucket" --lifecycle-configuration '{
-      "Rules": [{
-        "ID": "reset-test-avatars",
-        "Status": "Enabled",
-        "Filter": {"Prefix": ""},
-        "Expiration": {"Days": 7},
-        "AbortIncompleteMultipartUpload": {"DaysAfterInitiation": 1}
+    # La expiración se limita a avatars/: los archivos académicos tienen referencias en la DB
+    # y su limpieza es academic:cleanup (docs/planning/academic-files/s3.md).
+    aws s3api put-bucket-lifecycle-configuration --bucket "$bucket" --lifecycle-configuration "{
+      \"Rules\": [{
+        \"ID\": \"reset-test-avatars\",
+        \"Status\": \"Enabled\",
+        \"Filter\": {\"Prefix\": \"${AVATAR_PREFIX}\"},
+        \"Expiration\": {\"Days\": 7}
+      }, {
+        \"ID\": \"abort-incomplete-uploads\",
+        \"Status\": \"Enabled\",
+        \"Filter\": {\"Prefix\": \"\"},
+        \"AbortIncompleteMultipartUpload\": {\"DaysAfterInitiation\": 1}
       }]
-    }'
-    ok "Lifecycle: objetos expiran a los 7 días (solo test)"
+    }"
+    ok "Lifecycle: ${AVATAR_PREFIX} expira a los 7 días; ${ACADEMIC_PREFIX} no expira (solo test)"
   else
     aws s3api put-bucket-lifecycle-configuration --bucket "$bucket" --lifecycle-configuration '{
       "Rules": [{
@@ -127,7 +137,7 @@ JSON
         "AbortIncompleteMultipartUpload": {"DaysAfterInitiation": 1}
       }]
     }'
-    ok "Lifecycle: solo limpia subidas incompletas (las fotos no expiran)"
+    ok "Lifecycle: solo limpia subidas incompletas (los objetos no expiran)"
   fi
 }
 
@@ -144,21 +154,22 @@ ensure_user() {
 
   local list_statement=""
   if [[ "$env" == "test" ]]; then
-    # Solo test: permite probar accounts:cleanup. El servidor HTTP de prod no lista.
+    # Solo test: permite probar accounts:cleanup y academic:cleanup. El servidor HTTP de prod no lista.
     list_statement=$(cat <<JSON
 ,
     {
-      "Sid": "ListAvatarPrefixForCleanup",
+      "Sid": "ListPrefixesForCleanup",
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": "arn:aws:s3:::${bucket}",
-      "Condition": {"StringLike": {"s3:prefix": "avatars/*"}}
+      "Condition": {"StringLike": {"s3:prefix": ["${AVATAR_PREFIX}*", "${ACADEMIC_PREFIX}*"]}}
     }
 JSON
 )
   fi
 
-  aws iam put-user-policy --user-name "$user" --policy-name academix-avatar-objects --policy-document "$(cat <<JSON
+  # Declaraciones separadas por prefijo, como piden ambas guías.
+  aws iam put-user-policy --user-name "$user" --policy-name academix-storage-objects --policy-document "$(cat <<JSON
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -166,14 +177,25 @@ JSON
       "Sid": "AvatarObjects",
       "Effect": "Allow",
       "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
-      "Resource": "arn:aws:s3:::${bucket}/avatars/*"
+      "Resource": "arn:aws:s3:::${bucket}/${AVATAR_PREFIX}*"
+    },
+    {
+      "Sid": "AcademicMaterials",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::${bucket}/${ACADEMIC_PREFIX}*"
     }${list_statement}
   ]
 }
 JSON
 )"
-  if [[ "$env" == "test" ]]; then ok "Política: Get/Put/Delete en avatars/* + ListBucket del prefijo"
-  else ok "Política: Get/Put/Delete en avatars/*"; fi
+  # Política inline de la versión anterior del script (solo avatars/); se retira tras aplicar la nueva.
+  if aws iam get-user-policy --user-name "$user" --policy-name academix-avatar-objects >/dev/null 2>&1; then
+    aws iam delete-user-policy --user-name "$user" --policy-name academix-avatar-objects
+    ok "Política anterior academix-avatar-objects reemplazada"
+  fi
+  if [[ "$env" == "test" ]]; then ok "Política: Get/Put/Delete en ${AVATAR_PREFIX}* y ${ACADEMIC_PREFIX}* + ListBucket de ambos"
+  else ok "Política: Get/Put/Delete en ${AVATAR_PREFIX}* y ${ACADEMIC_PREFIX}*"; fi
 
   local key_count secrets_file="${SECRETS_DIR}/s3-${env}.env"
   key_count=$(aws iam list-access-keys --user-name "$user" --query 'length(AccessKeyMetadata)' --output text)
@@ -191,10 +213,12 @@ JSON
   (
     umask 077
     cat >"$secrets_file" <<ENV
-# AcademiX avatar storage (${env}). Creado $(date -u +%Y-%m-%dT%H:%M:%SZ). NO versionar.
+# AcademiX private storage (${env}). Creado $(date -u +%Y-%m-%dT%H:%M:%SZ). NO versionar.
 AVATAR_STORAGE_DRIVER=s3
+ACADEMIC_STORAGE_DRIVER=s3
 AWS_REGION=${REGION}
 S3_AVATAR_BUCKET=${bucket}
+S3_ACADEMIC_BUCKET=${bucket}
 AWS_ACCESS_KEY_ID=${key_id}
 AWS_SECRET_ACCESS_KEY=${key_secret}
 ENV
@@ -210,27 +234,45 @@ smoke_test() {
     set -a; # shellcheck disable=SC1090
     source "$secrets_file"; set +a
     unset AWS_PROFILE AWS_SESSION_TOKEN
-    local key tmp attempt
-    key="avatars/00000000-0000-4000-8000-000000000000/$(cat /proc/sys/kernel/random/uuid).webp"
+    # Los .env creados por la versión anterior no traen S3_ACADEMIC_BUCKET: es el mismo bucket.
+    local bucket="${S3_AVATAR_BUCKET}" tmp zero="00000000-0000-4000-8000-000000000000"
+    uuid() { cat /proc/sys/kernel/random/uuid; }
     tmp=$(mktemp); trap 'rm -f "$tmp" "$tmp.out"' EXIT
     printf 'academix-smoke-test' >"$tmp"
-    # Las keys nuevas pueden tardar unos segundos en propagarse.
-    for attempt in $(seq 1 15); do
-      if aws s3api put-object --bucket "$S3_AVATAR_BUCKET" --key "$key" --body "$tmp" \
-           --server-side-encryption AES256 --if-none-match '*' >/dev/null 2>&1; then break; fi
-      [[ "$attempt" == 15 ]] && { warn "PutObject sigue fallando tras 45 s; revisa la política."; exit 1; }
-      sleep 3
-    done
-    ok "PutObject (con If-None-Match, como el backend)"
-    aws s3api get-object --bucket "$S3_AVATAR_BUCKET" --key "$key" "$tmp.out" >/dev/null && ok "GetObject"
-    aws s3api delete-object --bucket "$S3_AVATAR_BUCKET" --key "$key" >/dev/null && ok "DeleteObject"
-    if aws s3api put-object --bucket "$S3_AVATAR_BUCKET" --key "fuera-de-prefijo.txt" --body "$tmp" >/dev/null 2>&1; then
-      warn "¡Pudo escribir fuera de avatars/! Revisa la política."
-    else ok "Escritura fuera de avatars/ rechazada"; fi
+
+    # Sube, lee y borra como el backend (SSE-S3 + If-None-Match). Reintenta por propagación de IAM.
+    roundtrip() {
+      local label="$1" key="$2" attempt
+      for attempt in $(seq 1 15); do
+        if aws s3api put-object --bucket "$bucket" --key "$key" --body "$tmp" \
+             --server-side-encryption AES256 --if-none-match '*' >/dev/null 2>&1; then break; fi
+        [[ "$attempt" == 15 ]] && { warn "${label}: PutObject sigue fallando tras 45 s; revisa la política."; exit 1; }
+        sleep 3
+      done
+      aws s3api get-object --bucket "$bucket" --key "$key" "$tmp.out" >/dev/null
+      aws s3api delete-object --bucket "$bucket" --key "$key" >/dev/null
+      ok "${label}: PutObject, GetObject y DeleteObject"
+    }
+    denied_put() {
+      local label="$1" key="$2"
+      if aws s3api put-object --bucket "$bucket" --key "$key" --body "$tmp" \
+           --server-side-encryption AES256 >/dev/null 2>&1; then
+        aws s3api delete-object --bucket "$bucket" --key "$key" >/dev/null 2>&1 || true
+        warn "¡Pudo escribir en ${label}! Revisa la política."
+      else ok "Escritura en ${label} rechazada"; fi
+    }
+
+    roundtrip "${AVATAR_PREFIX}" "${AVATAR_PREFIX}${zero}/$(uuid).webp"
+    roundtrip "${ACADEMIC_PREFIX}" "${ACADEMIC_PREFIX}${zero}/${zero}/$(uuid)"
+    denied_put "la raíz del bucket" "fuera-de-prefijo.txt"
+    denied_put "academic/submissions/ (aún no habilitado)" "academic/submissions/${zero}/${zero}/$(uuid)"
     if [[ "$env" == "prod" ]]; then
-      if aws s3api list-objects-v2 --bucket "$S3_AVATAR_BUCKET" --prefix avatars/ >/dev/null 2>&1; then
+      if aws s3api list-objects-v2 --bucket "$bucket" --prefix "${ACADEMIC_PREFIX}" >/dev/null 2>&1; then
         warn "¡prod puede listar el bucket! Revisa la política."
       else ok "ListBucket rechazado en prod"; fi
+    else
+      aws s3api list-objects-v2 --bucket "$bucket" --prefix "${ACADEMIC_PREFIX}" --max-items 1 >/dev/null \
+        && ok "ListBucket de ${ACADEMIC_PREFIX} permitido en test (academic:cleanup)"
     fi
   )
 }
@@ -243,7 +285,8 @@ echo
 log "Listo. Próximos pasos:"
 echo "  1. Render (academix-backend → Environment, 'Save only'): copia AWS_ACCESS_KEY_ID y"
 echo "     AWS_SECRET_ACCESS_KEY desde ${SECRETS_DIR}/s3-prod.env."
-echo "  2. render.yaml declara AWS_REGION y S3_AVATAR_BUCKET: confirma que coincidan con"
-echo "     ${REGION} y $(bucket_name prod); si usaste otro --suffix o región, actualízalo."
+echo "  2. render.yaml declara AWS_REGION, S3_AVATAR_BUCKET y S3_ACADEMIC_BUCKET: confirma que"
+echo "     coincidan con ${REGION} y $(bucket_name prod); si usaste otro --suffix o región, actualízalo."
+echo "     Re-ejecutar el script actualiza políticas sin crear keys nuevas: Render no cambia."
 echo "  3. Entrega ${SECRETS_DIR}/s3-test.env al equipo de desarrollo por un canal seguro."
 echo "  4. Cuando estén cargados, borra los .env de ${SECRETS_DIR}."
