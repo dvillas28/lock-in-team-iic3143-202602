@@ -20,13 +20,13 @@ Estado efectivo por ficha en[el ledger](../execution/VALIDATION.md). Las variant
 | [E2E-GRADE-011 — Libro vacío no incluye estudiantes sin Grade](grade-03.md#e2e-grade-011) | FL-GRADE-02 | P1 | regression | B |
 | [E2E-GRADE-012 — Cambio filtro reinicia cursor y selección](grade-03.md#e2e-grade-012) | FL-GRADE-02 | P0 | regression | B |
 | [E2E-GRADE-013 — Límites y curso ajeno en libro](grade-03.md#e2e-grade-013) | FL-GRADE-02 | P1 | extended | M |
-| [E2E-GRADE-014 — Guardar pesos exactos suma100](grade-03.md#e2e-grade-014) | FL-GRADE-03 | P0 | regression | B |
+| [E2E-GRADE-014 — Organizar evaluaciones y guardar pesos exactos](grade-03.md#e2e-grade-014) | FL-GRADE-03 | P0 | regression | B |
 | [E2E-GRADE-015 — Suma inválida colección incompleta y duplicados](grade-03.md#e2e-grade-015) | FL-GRADE-03 | P1 | regression | M |
 | [E2E-GRADE-016 — Rango precisión y tipo de ponderación](grade-04.md#e2e-grade-016) | FL-GRADE-03 | P1 | extended | M |
-| [E2E-GRADE-017 — No-op antes y después de freeze](grade-04.md#e2e-grade-017) | FL-GRADE-03 | P1 | regression | M |
-| [E2E-GRADE-018 — Freeze en otra página o sección no visible](grade-04.md#e2e-grade-018) | FL-GRADE-03 | P0 | regression | B |
-| [E2E-GRADE-019 — Carrera pesos contra primera publicación](grade-04.md#e2e-grade-019) | FL-GRADE-03 | P0 | extended | M |
-| [E2E-GRADE-020 — Resultado incierto de pesos exige reconciliar](grade-04.md#e2e-grade-020) | FL-GRADE-03 | P1 | regression | B |
+| [E2E-GRADE-017 — Ajustar ponderaciones con notas publicadas](grade-04.md#e2e-grade-017) | FL-GRADE-03 | P1 | regression | M |
+| [E2E-GRADE-018 — Publicación y corrección en móvil](grade-04.md#e2e-grade-018) | FL-GRADE-03 | P0 | regression | B |
+| [E2E-GRADE-019 — Guardado obsoleto tras otra edición](grade-04.md#e2e-grade-019) | FL-GRADE-03 | P0 | extended | M |
+| [E2E-GRADE-020 — Conciliar el guardado de grupos tras pérdida de respuesta](grade-04.md#e2e-grade-020) | FL-GRADE-03 | P1 | regression | B |
 | [E2E-GRADE-021 — Publicar selección explícita y ver nota estudiante](grade-05.md#e2e-grade-021) | FL-GRADE-04 | P0 | smoke | B |
 | [E2E-GRADE-022 — Selección vacía y rectángulo incompleto](grade-05.md#e2e-grade-022) | FL-GRADE-04 | P0 | regression | M |
 | [E2E-GRADE-023 — Intento activo bloquea; cancelado no basta para nota](grade-05.md#e2e-grade-023) | FL-GRADE-04 | P0 | regression | M |

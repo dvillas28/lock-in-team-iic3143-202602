@@ -1,95 +1,180 @@
 "use client";
-import { useFeedbackState } from "../use-feedback.ts";
-import { useRef, useState } from 'react';
-import type { Session } from '../../lib/auth/session.ts';
-import type { GradeItem } from '../../lib/gradebook/validation.ts';
-import { readFreeze, updateGradebookWeights, listCourseGradeItems } from '../../lib/api/gradebook.ts';
-import { ApiHttpError } from '../../lib/api/errors.ts';
-import { getRouteFeedback } from '../../lib/route-feedback.ts';
-import { useResource } from '../courses/use-resource.ts';
-export function WeightsForm({ session, slug, courseId, items, locked, busy = false, onSaved }: Readonly<{
-    session: Session;
-    slug: string;
-    courseId: string;
-    items: GradeItem[];
-    locked: boolean;
-    busy?: boolean;
-    onSaved: () => Promise<unknown>;
+import { useState, type FormEvent } from "react";
+import { ArrowDown, ArrowUp, Info, Plus, Trash2 } from "lucide-react";
+import { ApiHttpError } from "../../lib/api/errors.ts";
+import { listCourseGradeItems, matchesGroupPlan, updateGradeGroups } from "../../lib/api/gradebook.ts";
+import type { Session } from "../../lib/auth/session.ts";
+import { cents, type GradeItems, type GroupPlan } from "../../lib/gradebook/validation.ts";
+import { getRouteFeedback } from "../../lib/route-feedback.ts";
+
+type GroupDraft = { key: string; id: string | null; title: string; weight: string };
+function initialGroups(data: GradeItems): GroupDraft[] {
+  const groups = data.groups ?? data.items.map(item => ({
+    id: item.id, title: item.title, weightPercent: item.weightPercent,
+  }));
+  return groups.length
+    ? groups.map(g => ({ key: g.id, id: g.id, title: g.title, weight: String(g.weightPercent) }))
+    : [{ key: "first", id: null, title: "Quizzes", weight: "100" }];
+}
+function initialAssignments(data: GradeItems) {
+  return Object.fromEntries(data.items.map(i => [i.id, i.groupId ?? i.id]));
+}
+const weightCents = (value: string) => {
+  try { return cents(value.trim().replace(",", ".")); } catch { return NaN; }
+};
+
+export function WeightsForm({ session, slug, courseId, initial, onSaved, onCancel, onBusy, onError }: Readonly<{
+  session: Session; slug: string; courseId: string; initial: GradeItems;
+  onSaved: () => Promise<void>; onCancel: () => void; onBusy: (busy: boolean) => void; onError: (message: string) => void;
 }>) {
-    const [status, setStatus] = useState<'ready' | 'saving' | 'uncertain' | 'locked'>('ready'), [message, setMessage] = useFeedbackState();
-    const pending = useRef(false);
-    const scan = useResource(session, `${session.getSnapshot().generation}:${slug}:${courseId}:freeze`, async (c) => {
-        const current = await listCourseGradeItems(c, slug, courseId);
-        const freeze = current.weightsLocked === undefined ? await readFreeze(c, slug, courseId, items) : current.weightsLocked ? 'locked' : 'unlocked';
-        if (freeze === 'locked') {
-            setStatus('locked');
-        }
-        return { freeze, current };
-    });
-    const frozen = locked || status === 'locked' || scan.data?.freeze === 'locked';
-    async function save(form: HTMLFormElement) {
-        if (pending.current || busy || frozen || status !== 'ready' || !scan.data || scan.error) {
-            return;
-        }
-        const current = scan.data.current.items, data = new FormData(form), values = current.map(i => {
-            const value = data.get(i.id);
-            return { gradeItemId: i.id, weightPercent: typeof value === 'string' ? value : '' };
-        });
-        const context = session.getSnapshot().context;
-        pending.current = true;
-        setStatus('saving');
-        setMessage('');
+  const [source, setSource] = useState(initial),
+    [groups, setGroups] = useState(() => initialGroups(initial)),
+    [assignments, setAssignments] = useState(() => initialAssignments(initial)),
+    [confirmed, setConfirmed] = useState(false),
+    [saving, setSaving] = useState(false),
+    [uncertain, setUncertain] = useState(false),
+    [conflict, setConflict] = useState(false);
+  const total = groups.reduce((sum, g) => sum + weightCents(g.weight), 0);
+  const warning = source.hasPublishedGrades || (source.calculation === "legacy" && source.items.length > 0);
+  const unassigned = source.items.filter(i => !groups.some(g => g.key === assignments[i.id])).length;
+  const valid = total === 10000 && !unassigned && groups.every(g => g.title.trim()) && (!warning || confirmed);
+
+  function move(index: number, step: number) {
+    const order = [...groups], target = index + step;
+    [order[index], order[target]] = [order[target], order[index]];
+    setGroups(order);
+  }
+  function edit(key: string, change: Partial<GroupDraft>) {
+    setGroups(values => values.map(g => g.key === key ? { ...g, ...change } : g));
+  }
+  async function reload() {
+    setSaving(true);
+    onBusy(true);
+    try {
+      const current = await session.request(c => listCourseGradeItems(c, slug, courseId));
+      setSource(current);
+      setGroups(initialGroups(current));
+      setAssignments(initialAssignments(current));
+      setConfirmed(false);
+      setConflict(false);
+    } catch (error) { onError(getRouteFeedback(error).message); }
+    finally { setSaving(false); onBusy(false); }
+  }
+  async function save(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!valid || saving || conflict || session.getSnapshot().contextWarning) return;
+    const body: GroupPlan = {
+      expectedVersion: source.version ?? 0,
+      confirmRecalculation: confirmed,
+      groups: groups.map(g => ({
+        id: g.id, title: g.title.trim(), weightPercent: weightCents(g.weight) / 100,
+        gradeItemIds: source.items.filter(i => assignments[i.id] === g.key).map(i => i.id),
+      })),
+    };
+    setSaving(true);
+    onBusy(true);
+    try {
+      await session.request(c => updateGradeGroups(c, slug, courseId, body));
+      await onSaved();
+    } catch (error) {
+      const rejected = error instanceof ApiHttpError && error.status >= 400 && error.status < 500;
+      if (!rejected) {
         try {
-            await session.request(c => updateGradebookWeights(c, slug, courseId, current, values));
-            if (context !== session.getSnapshot().context) {
-                return;
-            }
-            setMessage('Ponderaciones guardadas.');
-            setStatus('ready');
-            await scan.reload();
-            await onSaved();
-        }
-        catch (e) {
-            if (context !== session.getSnapshot().context) {
-                return;
-            }
-            if (e instanceof ApiHttpError && e.problem.code === 'GRADE_WEIGHTS_LOCKED') {
-                setStatus('locked');
-                setMessage({ message: 'Pesos bloqueados por publicación.', persistent: true });
-            }
-            else if (e instanceof TypeError || e instanceof ApiHttpError && e.status < 500) {
-                setStatus('ready');
-                setMessage({ message: e instanceof TypeError ? e.message : getRouteFeedback(e).message, persistent: true });
-            }
-            else {
-                setStatus('uncertain');
-                setMessage({ message: 'Guardado incierto. Consulta los pesos actuales; una lectura no descarta una escritura aún en vuelo. No se reenviará automáticamente.', persistent: true });
-            }
-        }
-        finally {
-            pending.current = false;
-        }
-    }
-    let statusMessage = 'Puedes ajustar las ponderaciones antes de publicar notas.';
-    if (frozen) {
-        statusMessage = 'Pesos bloqueados por publicación.';
-    }
-    else if (!scan.data || scan.error) {
-        statusMessage = 'Comprobando si las ponderaciones se pueden editar.';
-    }
-    else if (status === 'saving') {
-        statusMessage = 'Guardando pesos…';
-    }
-    return <section className="panel stack"><h2 className="serif">Ponderaciones</h2><p className="hint">Estos porcentajes son comunes a todas las secciones del curso. Cualquier docente activo del curso puede modificarlos antes de publicar notas.</p><output aria-live="polite">{statusMessage}</output>
- {scan.error && <p role="alert">{scan.error.message}</p>}{message && <p aria-live="polite">{message}</p>}
- {!frozen && scan.data && !scan.error && status !== 'uncertain' && <form key={JSON.stringify(scan.data.current)} onSubmit={e => {
-        e.preventDefault();
-        void save(e.currentTarget);
-    }} className="stack"><fieldset className="selection-group" disabled={busy || status === 'saving'}><legend>La suma de las ponderaciones debe ser 100 %</legend>{scan.data.current.items.map(i => <label className="field-label" key={i.id}>{i.title}<input className="field tnum" name={i.id} defaultValue={String(i.weightPercent)} inputMode="decimal" required/></label>)}</fieldset><button type="submit" data-weights className="btn btn-primary" disabled={busy || status === 'saving' || !scan.data.current.items.length}>Guardar pesos</button></form>}
- {status === 'uncertain' && scan.data && <ul>{scan.data.current.items.map(i => <li className="tnum" key={i.id}>{i.title}: {i.weightPercent} % observado</li>)}</ul>}
- <button type="button" className="btn btn-ghost" disabled={busy || status === 'saving'} onClick={() => void scan.reload()}>Consultar pesos y bloqueo</button>{status === 'uncertain' && <button type="button" className="btn btn-ghost" onClick={() => {
-                if (window.confirm('La lectura no prueba que terminó la escritura anterior. ¿Revisaste el estado y deseas habilitar un nuevo guardado explícito?')) {
-                    setStatus('ready');
-                }
-            }}>Revisé la incertidumbre</button>}</section>;
+          const current = await session.request(c => listCourseGradeItems(c, slug, courseId));
+          if (matchesGroupPlan(current, body)) { await onSaved(); return; }
+        } catch { /* A replay with the same version can still confirm the write. */ }
+        setUncertain(true);
+        onError("No pudimos confirmar el guardado. Puedes reintentar el mismo cambio.");
+      } else {
+        const changed = [409, 422].includes(error.status);
+        setUncertain(false);
+        setConflict(changed);
+        onError(changed ? "La configuración del curso cambió. Carga la versión vigente para volver a editar." : getRouteFeedback(error).message);
+      }
+    } finally { setSaving(false); onBusy(false); }
+  }
+
+  return <form onSubmit={e => void save(e)} className="grade-plan-form">
+    <div className="grade-plan-total">
+      <div><strong>Total de ponderación</strong>
+        <p className="hint">{total === 10000 ? "La suma coincide con el 100 %." : "Distribuye el 100 % entre los grupos."}</p>
+      </div>
+      <output aria-live="polite" className="tnum">{Number.isNaN(total) ? "—" : total / 100} <small>/ 100 %</small></output>
+      <progress aria-label="Ponderación asignada" max={10000} value={Number.isFinite(total) ? Math.min(total, 10000) : 0} />
+    </div>
+    {warning && <div className="grade-plan-warning notice">
+      <Info size={17} aria-hidden />
+      <div>
+        <strong>Este cambio puede modificar los promedios</strong>
+        <p className="hint">{source.calculation === "legacy"
+          ? "Al guardar, el curso pasará a calcular por puntos de grupo. Las notas individuales se conservan."
+          : "Los nuevos pesos y grupos recalcularán los promedios de todas las secciones."}</p>
+      </div>
+    </div>}
+    <fieldset className="grade-plan-body" disabled={saving || conflict || uncertain}>
+      <legend className="gradebook-sr-only">Grupos y evaluaciones</legend>
+      <section className="stack" aria-label="Grupos de evaluación">
+        <div className="grade-plan-heading"><h3>Grupos de evaluación</h3><span className="hint tnum">{groups.length}</span></div>
+        <ol className="grade-plan-groups">
+          {groups.map((g, index) => {
+            const name = g.title.trim() || `Grupo ${index + 1}`;
+            return <li key={g.key} className="grade-plan-group">
+              <label className="field-label">Nombre del grupo
+                <input className="field" value={g.title} onChange={e => edit(g.key, { title: e.target.value })} required maxLength={200} />
+              </label>
+              <label className="field-label">Peso (%)
+                <input className="field tnum" value={g.weight} onChange={e => edit(g.key, { weight: e.target.value })} inputMode="decimal" required />
+              </label>
+              <div className="grade-plan-group-actions">
+                <span className="hint">{source.items.filter(i => assignments[i.id] === g.key).length} eval.</span>
+                <div className="actions">
+                  <button className="btn btn-ghost" type="button" aria-label={`Subir ${name}`} disabled={!index}
+                    onClick={() => move(index, -1)}><ArrowUp size={15} aria-hidden /></button>
+                  <button className="btn btn-ghost" type="button" aria-label={`Bajar ${name}`} disabled={index === groups.length - 1}
+                    onClick={() => move(index, 1)}><ArrowDown size={15} aria-hidden /></button>
+                  <button className="btn btn-ghost" type="button" aria-label={`Quitar ${name}`} disabled={groups.length === 1}
+                    onClick={() => setGroups(values => values.filter(value => value.key !== g.key))}><Trash2 size={15} aria-hidden /></button>
+                </div>
+              </div>
+            </li>;
+          })}
+        </ol>
+        <button className="btn btn-ghost grade-plan-add" type="button" disabled={groups.length >= 100}
+          onClick={() => setGroups(values => [...values, { key: crypto.randomUUID(), id: null, title: "", weight: "0" }])}>
+          <Plus size={16} aria-hidden /><span>Añadir grupo</span>
+        </button>
+      </section>
+      <section className="stack" aria-label="Asignación de evaluaciones">
+        <div className="grade-plan-heading"><h3>Evaluaciones</h3><span className="hint tnum">{source.items.length}</span></div>
+        {!source.items.length && <p className="hint">Las evaluaciones aparecerán aquí cuando se publiquen.</p>}
+        {unassigned > 0 && <p role="status" className="field-error">Quedan {unassigned} evaluaciones por asignar.</p>}
+        <ul className="grade-plan-items">
+          {source.items.map(item => <li key={item.id}>
+            <label className="field-label">
+              <span>{item.title} <small className="hint tnum">{item.maxPoints === undefined ? "" : `${item.maxPoints} pts`}</small></span>
+              <select className="field" value={groups.some(g => g.key === assignments[item.id]) ? assignments[item.id] : ""}
+                onChange={e => setAssignments(values => ({ ...values, [item.id]: e.target.value }))} required>
+                <option value="" disabled>Elige un grupo</option>
+                {groups.map((g, index) => <option key={g.key} value={g.key}>{g.title.trim() || `Grupo ${index + 1}`}</option>)}
+              </select>
+            </label>
+          </li>)}
+        </ul>
+      </section>
+    </fieldset>
+    <div className="grade-plan-footer">
+      {warning && !conflict && <label className="grade-plan-confirm">
+        <input type="checkbox" checked={confirmed} disabled={saving || uncertain}
+          onChange={e => setConfirmed(e.target.checked)} /> Confirmo el recálculo
+      </label>}
+      <div className="actions">
+        <button className="btn btn-ghost" type="button" disabled={saving} onClick={onCancel}>Cancelar</button>
+        {conflict
+          ? <button className="btn btn-ghost" type="button" disabled={saving} onClick={() => void reload()}>Cargar versión vigente</button>
+          : <button className="btn btn-primary" type="submit" disabled={saving || !valid}>
+            {saving ? "Guardando…" : uncertain ? "Reintentar guardado" : "Guardar grupos"}
+          </button>}
+      </div>
+    </div>
+  </form>;
 }

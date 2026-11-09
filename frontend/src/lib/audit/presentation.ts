@@ -34,6 +34,8 @@ export const auditActions: Record<string, string> = {
   "attempt.cancelled": "Intento cancelado",
   "grade.created": "Nota calculada",
   "grade.updated": "Nota recalculada",
+  "grade.corrected": "Nota corregida",
+  "gradebook.groupsUpdated": "Grupos y ponderaciones actualizados",
   "grade.published": "Nota publicada",
   "gradebook.weightsUpdated": "Ponderaciones actualizadas",
 };
@@ -46,5 +48,6 @@ export const auditResources: Record<string, string> = {
   quiz: "Quiz",
   quizAttempt: "Intento",
   grade: "Nota",
+  gradebook: "Libro de notas",
   gradeItem: "Evaluación",
 };

@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { PencilLine } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "../auth/session-provider.tsx";
 import { useResource } from "../courses/use-resource.ts";
@@ -16,6 +17,9 @@ import type { Course } from "../../lib/courses/validation.ts";
 import { LoadingState } from "../route-states.tsx";
 import { ResourceFeedback, shortId } from "../academic/feedback.tsx";
 import { WeightsDialog } from "./weights-dialog.tsx";
+import { GradeCorrection } from "./grade-correction.tsx";
+import type { GradeItem, GradeResult } from "../../lib/gradebook/validation.ts";
+import { ContentNotices } from "../content/content-notices.tsx";
 import { GradePublication } from "./grade-publication.tsx";
 export function CourseGradebook({ courseId }: Readonly<{ courseId: string }>) {
   return (
@@ -36,8 +40,7 @@ function BookView({ course }: Readonly<{ course: Course }>) {
   const [sectionId, setSectionId] = useState(""),
     [cursor, setCursor] = useState<string>(),
     [pages, setPages] = useState<(string | undefined)[]>([]);
-  const [locked, setLocked] = useState(false),
-    [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState(false);
   const cap = gradebookCapabilities(user, course, sectionId || undefined);
   const scope = `${state.generation}:${slug}:${JSON.stringify(user)}:${courseId}`;
   const meta = useResource(session, `${scope}:meta`, async (c) => {
@@ -60,32 +63,31 @@ function BookView({ course }: Readonly<{ course: Course }>) {
       />
     );
   return (
-    <BookResults
-      key={scope}
-      course={course}
-      meta={meta.data}
-      sectionId={sectionId}
-      cursor={cursor}
-      pages={pages}
-      busy={busy}
-      locked={locked}
-      onSection={(v) => {
-        setSectionId(v);
-        setCursor(undefined);
-        setPages([]);
-      }}
-      previous={() => {
-        setCursor(pages.at(-1));
-        setPages((p) => p.slice(0, -1));
-      }}
-      next={(v) => {
-        setPages((p) => [...p, cursor]);
-        setCursor(v);
-      }}
-      onBusy={setBusy}
-      onLocked={() => setLocked(true)}
-      onMetaReload={meta.reload}
-    />
+    <ContentNotices key={scope}>
+      <BookResults
+        course={course}
+        meta={meta.data}
+        sectionId={sectionId}
+        cursor={cursor}
+        pages={pages}
+        busy={busy}
+        onSection={(v) => {
+          setSectionId(v);
+          setCursor(undefined);
+          setPages([]);
+        }}
+        previous={() => {
+          setCursor(pages.at(-1));
+          setPages((p) => p.slice(0, -1));
+        }}
+        next={(v) => {
+          setPages((p) => [...p, cursor]);
+          setCursor(v);
+        }}
+        onBusy={setBusy}
+        onMetaReload={meta.reload}
+      />
+    </ContentNotices>
   );
 }
 function BookResults({
@@ -95,12 +97,10 @@ function BookResults({
   cursor,
   pages,
   busy,
-  locked,
   onSection,
   previous,
   next,
   onBusy,
-  onLocked,
   onMetaReload,
 }: Readonly<{
   course: Course;
@@ -112,17 +112,17 @@ function BookResults({
   cursor?: string;
   pages: (string | undefined)[];
   busy: boolean;
-  locked: boolean;
   onSection: (v: string) => void;
   previous: () => void;
   next: (v: string) => void;
   onBusy: (v: boolean) => void;
-  onLocked: () => void;
   onMetaReload: () => Promise<unknown>;
 }>) {
   const { session, state } = useSession(),
     user = state.context!.user!,
     slug = state.context!.slug;
+  const [correction, setCorrection] = useState<{ grade: GradeResult; item: GradeItem; student: string }>();
+  const correctionTrigger = useRef<HTMLButtonElement>(null);
   const { sections, items } = meta,
     cap = gradebookCapabilities(user, course, sectionId || undefined);
   const r = useResource(
@@ -142,10 +142,15 @@ function BookResults({
     },
   );
   const book = r.data,
+    groups = items.groups ?? [],
+    grouped = items.calculation === "points",
+    groupOrder = new Map(groups.map(g => [g.id, g.position])),
+    columns = [...items.items].sort((a,b) => (groupOrder.get(a.groupId ?? "") ?? 0) - (groupOrder.get(b.groupId ?? "") ?? 0) ||
+      a.title.localeCompare(b.title, "es")),
     blocked = !!r.refreshing || !!r.error || !book;
   return (
     <div className="stack">
-      <div className="academic-toolbar card panel">
+      <div className="gradebook-toolbar card panel">
         <label className="field-label">
           Sección histórica
           <select
@@ -164,34 +169,39 @@ function BookResults({
               ))}
           </select>
         </label>
-        <div className="actions">
+        {(cap.weights || cap.publish) && <div className="gradebook-actions">
           {cap.weights && (
             <WeightsDialog
               session={session}
               slug={slug}
               courseId={course.id}
-              items={items.items}
-              busy={busy || blocked}
-              locked={
-                locked ||
-                !!book?.items.some((r) => r.grades.some((g) => g.publishedAt))
-              }
+              configuration={items}
+              busy={busy}
               onSaved={async () => {
                 await onMetaReload();
                 await r.reload();
               }}
             />
           )}
-          <button
-            className="btn btn-ghost"
-            type="button"
-            disabled={!!r.refreshing}
-            onClick={() => void r.reload()}
-          >
-            {r.refreshing ? "Actualizando…" : "Consultar estado actual"}
-          </button>
-        </div>
+          {cap.publish && (
+            <GradePublication
+              key={`${sectionId}:${cursor}`}
+              session={session} slug={slug} courseId={course.id} disabled={blocked}
+              totalWeightPercent={items.totalWeightPercent} moreRows={book?.hasMore || pages.length > 0}
+              items={columns} rows={book?.items ?? []}
+              sections={sections.filter(s => (cap.global || cap.writeSections.includes(s.id)) && (!sectionId || s.id === sectionId))}
+              onBusy={onBusy}
+              onConfirmed={() => { void onMetaReload(); void r.reload(); }}
+            />
+          )}
+        </div>}
       </div>
+      {groups.length > 0 && <section className="grade-group-strip" aria-label="Ponderaciones por grupo">
+        <h2>Grupos de evaluación</h2>
+        <ul>{groups.map(g => <li key={g.id}>
+          <span>{g.title}</span><strong className="tnum">{g.weightPercent} %</strong>
+        </li>)}</ul>
+      </section>}
       {r.error && (
         <ResourceFeedback error={r.error} retry={() => void r.reload()} />
       )}
@@ -225,13 +235,17 @@ function BookResults({
                   <tr>
                     <th scope="col">Estudiante</th>
                     <th scope="col">Sección histórica</th>
-                    {items.items.map((i) => (
+                    {columns.map((i) => (
                       <th scope="col" key={i.id}>
                         {i.title}
-                        <small className="hint tnum">{i.weightPercent} %</small>
+                        <small className="hint">{grouped ? groups.find(g => g.id === i.groupId)?.title : `${i.weightPercent} %`}</small>
+                        {i.maxPoints !== undefined && <small className="hint tnum">{i.maxPoints} pts</small>}
                       </th>
                     ))}
-                    <th scope="col">Promedio publicado</th>
+                    {grouped && groups.map(g => <th scope="col" key={g.id} className="group-total-cell">
+                      {g.title}<small className="hint tnum">Subtotal · {g.weightPercent} %</small>
+                    </th>)}
+                    <th scope="col">Promedio parcial</th>
                     <th scope="col">Ponderación publicada</th>
                   </tr>
                 </thead>
@@ -249,7 +263,7 @@ function BookResults({
                         {sections.find((s) => s.id === row.sectionId)?.code ??
                           shortId(row.sectionId)}
                       </td>
-                      {items.items.map((i) => {
+                      {columns.map((i) => {
                         const g = row.grades.find(
                           (g) => g.gradeItemId === i.id,
                         );
@@ -266,14 +280,26 @@ function BookResults({
                                 <small
                                   className={`grade-state ${g.publishedAt ? "published" : "unpublished"}`}
                                 >
-                                  {g.publishedAt ? "Publicada" : "Sin publicar"}
+                                  {g.publishedAt ? (g.revisedAt ? "Corregida" : "Publicada") : "Sin publicar"}
                                 </small>
+                                {g.publishedAt && i.maxPoints !== undefined && (cap.global || cap.writeSections.includes(row.sectionId)) &&
+                                  <button className="btn btn-ghost grade-edit" type="button" disabled={busy || blocked}
+                                    aria-label={`Corregir nota de ${row.student.name} en ${i.title}`}
+                                    onClick={e => { correctionTrigger.current = e.currentTarget; setCorrection({ grade: g, item: i, student: row.student.name }); }}>
+                                    <PencilLine size={14} aria-hidden /> Corregir
+                                  </button>}
                               </>
                             ) : (
                               <span className="hint">Pendiente</span>
                             )}
                           </td>
                         );
+                      })}
+                      {grouped && groups.map(group => {
+                        const total = row.groupResults?.find(g => g.groupId === group.id);
+                        return <td key={group.id} className="group-total-cell tnum">{total
+                          ? <>{total.scorePercent} %<small className="hint">{total.pointsEarned} / {total.pointsPossible} pts</small></>
+                          : <span className="hint">Sin notas publicadas</span>}</td>;
                       })}
                       <td className="grade-value tnum">
                         {row.partialAverage ?? "Pendiente"}
@@ -307,28 +333,10 @@ function BookResults({
             Siguiente
           </button>
         </nav>
-        {cap.publish && book && (
-          <GradePublication
-            key={`${sectionId}:${cursor}`}
-            session={session}
-            slug={slug}
-            courseId={course.id}
-            disabled={blocked}
-            items={items.items}
-            rows={book.items}
-            sections={sections.filter(
-              (s) =>
-                (cap.global || cap.writeSections.includes(s.id)) &&
-                (!sectionId || s.id === sectionId),
-            )}
-            onBusy={onBusy}
-            onConfirmed={() => {
-              onLocked();
-              void r.reload();
-            }}
-          />
-        )}
+
       </div>
+      {correction && <GradeCorrection session={session} slug={slug} courseId={course.id} target={correction}
+        onSaved={r.reload} onClose={() => { setCorrection(undefined); requestAnimationFrame(() => correctionTrigger.current?.focus()); }} />}
     </div>
   );
 }

@@ -15,11 +15,11 @@ test('assistant reads historical rows without write controls; owner without teac
  }finally{await ui.close();}}
 });
 
-test('temporary refresh keeps authorized rows; denied read clears rows without blocking the institution',async()=>{
+test('denied read clears rows without blocking the institution',async()=>{
  let status=200;
  const ui=await mount(h(CourseGradebook,{courseId:course.id}),r=>new URL(r.url).pathname.endsWith('/gradebook')?Response.json(status===200?book:{},{status}):reply(r),'assistant');
  try{
-  status=503;await ui.click('Consultar estado actual');assert.match(ui.doc.body.textContent!,new RegExp(row.student.name));
-  status=404;await ui.click('Consultar estado actual');assert.doesNotMatch(ui.doc.body.textContent!,new RegExp(row.student.name));assert.ok(ui.session.getSnapshot().context?.user);assert.ok(ui.doc.querySelector('nav[aria-label="Curso"]'));
+  status=503;await ui.settle(()=>{const select=ui.doc.querySelector<HTMLSelectElement>('select')!;select.value=row.sectionId;select.dispatchEvent(new ui.dom.window.Event('change',{bubbles:true}));});assert.match(ui.doc.body.textContent!,/Reintentar/);
+  status=404;await ui.click('Reintentar');assert.doesNotMatch(ui.doc.body.textContent!,new RegExp(row.student.name));assert.ok(ui.session.getSnapshot().context?.user);assert.ok(ui.doc.querySelector('nav[aria-label="Curso"]'));
  }finally{await ui.close();}
 });

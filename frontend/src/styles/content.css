@@ -123,5 +123,8 @@
   color: var(--text-1);
   box-shadow: var(--shadow-float);
   overflow-wrap: anywhere;
+  pointer-events: auto;
 }
-.content-notice svg { color: var(--success); flex-shrink: 0; }
+.content-notice > svg { color: var(--success); flex-shrink: 0; }
+.content-notice-error > svg { color: var(--danger); }
+.content-notice .icon-btn { flex: 0 0 32px; height: 32px; margin-inline-start: auto; }
