@@ -59,6 +59,12 @@ services:
         sync: false
       - key: AWS_SECRET_ACCESS_KEY
         sync: false
+      # Academic files share the bucket and credentials above under academic/materials/
+      # (docs/planning/academic-files/s3.md). Missing values answer 503 on file operations.
+      - key: ACADEMIC_STORAGE_DRIVER
+        value: "s3"
+      - key: S3_ACADEMIC_BUCKET
+        value: "academix-avatars-prod-dvillasc"
 
   - type: web
     name: academix-frontend
