@@ -1,4 +1,4 @@
-import {Injectable,BadRequestException,ConflictException} from "@nestjs/common";
+import {Injectable,BadRequestException} from "@nestjs/common";
 import {randomUUID} from "node:crypto";
 import {isDeepStrictEqual} from "node:util";
 import {DatabaseService} from "../database/database.service";
@@ -45,15 +45,8 @@ export class QuizzesService {
    requirePermission(canAuthorQuiz(s,row.section_id));noBody(body);
    if(row.published_at!==null)return authoringDto(row);
    validatePublish(quizInput(row));
-   if(s.course.grade_items_locked_at!==null)throw new ConflictException();
    const item=randomUUID();
-   try {
-    await c.query("INSERT INTO public.grade_items(id,institution_id,course_id,quiz_id,title) VALUES($1,$2,$3,$4,$5)",[item,s.member.institution_id,s.courseId,id,row.title]);
-   }catch(error){
-    const e=error as {code?:string;constraint?:string};
-    if(e.code==="23514" && e.constraint==="grade_items_course_frozen")throw new ConflictException();
-    throw error;
-   }
+   await c.query("INSERT INTO public.grade_items(id,institution_id,course_id,quiz_id,title) VALUES($1,$2,$3,$4,$5)",[item,s.member.institution_id,s.courseId,id,row.title]);
    await c.query("UPDATE public.quizzes SET published_at=clock_timestamp() WHERE institution_id=$1 AND id=$2",[s.member.institution_id,id]);
    const after=await visibleQuiz(c,s,id);
    await this.audit.record(c,{institutionId:s.member.institution_id,actorUserId:actor,action:"quiz.published",resourceType:"quiz",resourceId:id,courseId:s.courseId,sectionId:row.section_id,before:quizSnapshot(row),after:quizSnapshot(after,item)});

@@ -1,5 +1,7 @@
 # Publicación de notas y congelamiento de ponderaciones
 
+
+La [decisión de grupos y revisiones](gradebook-groups-and-revisions.md) actualiza la política de congelamiento.
 Fecha: 2026-10-19. Estado: implementado; aceptación registrada en
 [validación](../backend/gradebook-validation.md).
 

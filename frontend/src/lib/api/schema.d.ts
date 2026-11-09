@@ -1353,11 +1353,12 @@ export interface paths {
         };
         get?: never;
         /**
-         * Reemplazar ponderaciones del curso de forma atómica
+         * Reemplazar pesos individuales en cursos con cálculo histórico
+         * @deprecated
          * @description Cualquier teacher activo del curso, sin exigir is_admin ni ownership. Ponderaciones comunes
          *     a todas las secciones; esto no amplía acceso a notas o participantes. Colección completa, única, pesos
-         *     de hasta dos decimales, suma exacta 100. Primera publicación congela pesos e ítems; 409
-         *     GRADE_WEIGHTS_LOCKED incluso en no-op. Antes de freeze no-op no emite evento.
+         *     de hasta dos decimales, suma exacta 100. Los cambios posteriores a la primera publicación y el modo de puntos usan el endpoint de grupos.
+         *     Una solicitud sin cambios no emite evento.
          */
         put: operations["updateGradebookWeights"];
         post?: never;
@@ -1399,6 +1400,73 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/institution/{institutionSlug}/courses/{courseId}/gradebook/grades/{gradeId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                courseId: components["parameters"]["CourseId"];
+                gradeId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Registrar una corrección de nota publicada
+         * @description Requiere docencia en la sección histórica o docencia más administración
+         *     del curso propio. La revisión reemplaza el resultado visible inmediatamente.
+         *     Se conserva la nota original, el intento, la revisión previa y un evento con
+         *     actor, fecha y motivo. La nota se calcula con el puntaje corregido. Repetir
+         *     exactamente el mismo ID de revisión devuelve su resultado, y una revisión
+         *     previa obsoleta devuelve 409.
+         */
+        patch: operations["correctPublishedGrade"];
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/courses/{courseId}/gradebook/groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Guardar grupos, ponderaciones y asignación de evaluaciones
+         * @description Un docente activo puede guardar el plan completo del curso. El orden de la
+         *     lista define el de los grupos. Cada evaluación debe estar en un único grupo
+         *     y los pesos sumar 100 %. Los cambios se registran en auditoría. La operación
+         *     puede recalcular promedios publicados y requiere confirmación si hay notas
+         *     publicadas o se adopta el cálculo por puntos para evaluaciones existentes.
+         *     Una versión antigua devuelve 409.
+         */
+        put: operations["updateGradeGroups"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/institution/{institutionSlug}/courses/{courseId}/gradebook/publications": {
         parameters: {
             query?: never;
@@ -1426,7 +1494,9 @@ export interface paths {
          *     publicar una nota. Un intento abandonado debe cancelarse explícitamente antes de publicar;
          *     esta operación no lo cancela automáticamente y responde 409 Conflict si aún existe un intento
          *     activo. La operación es atómica, no sobrescribe notas publicadas y genera auditoría histórica.
-         *     Selección explícita completa de gradeItemIds, sectionIds y studentIds. Recibo persistente por
+         *     Selección explícita por evaluaciones, secciones y estudiantes, o notas pendientes de las secciones
+         *     completas con scope=pending y filtro opcional de evaluaciones. El lote pendiente omite las
+         *     notas ya publicadas y las evaluaciones sin nota registrada. Recibo persistente por
          *     tenant/actor/clave; selección canónica igual devuelve original tras revalidar permisos,
          *     distinta selección o curso da 409 IDEMPOTENCY_CONFLICT. Otra clave sobre nota publicada da
          *     GRADE_ALREADY_PUBLISHED. Fallos no reservan clave.
@@ -1456,8 +1526,9 @@ export interface paths {
         /**
          * Consultar notas publicadas del estudiante autenticado
          * @description La identidad se deriva de `sub`; no acepta `studentId`. Retorna solo notas propias publicadas.
-         *     El promedio parcial es `sum(grade * weight) / sum(published weights)` y no se recibe del
-         *     cliente.
+         *     Los subtotales y el promedio parcial se calculan con notas publicadas propias. Los grupos
+         *     ponderan la suma de puntos obtenidos sobre los posibles. En modo histórico se conserva el
+         *     promedio de notas individuales ponderadas.
          */
         get: operations["getStudentGrades"];
         put?: never;
@@ -2542,12 +2613,30 @@ export interface components {
             weightPercent: number;
             /** Format: date-time */
             readonly createdAt: string;
+            /** Format: uuid */
+            groupId?: string;
+            maxPoints?: number;
+        };
+        GradeGroup: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            weightPercent: number;
+            position: number;
         };
         GradeItemListResponse: {
             items: components["schemas"]["GradeItem"][];
             totalWeightPercent: number;
-            /** @description Bloqueo común del curso por publicación; no revela notas de otras secciones. */
+            /**
+             * @deprecated
+             * @description Campo de compatibilidad. Siempre false.
+             */
             weightsLocked?: boolean;
+            hasPublishedGrades?: boolean;
+            /** @enum {string} */
+            calculation?: "legacy" | "points";
+            version?: number;
+            groups?: components["schemas"]["GradeGroup"][];
         };
         GradeWeightInput: {
             /** Format: uuid */
@@ -2578,6 +2667,21 @@ export interface components {
             grade: components["schemas"]["GradeValue"];
             /** Format: date-time */
             readonly publishedAt: string | null;
+            pointsEarned?: number;
+            /** Format: uuid */
+            revisionId?: string | null;
+            /** Format: date-time */
+            revisedAt?: string | null;
+        };
+        GradeGroupResult: {
+            /** Format: uuid */
+            groupId: string;
+            title: string;
+            weightPercent: number;
+            pointsEarned: number;
+            pointsPossible: number;
+            scorePercent: number;
+            grade: components["schemas"]["GradeValue"];
         };
         GradebookStudentRow: {
             student: components["schemas"]["UserSummary"];
@@ -2586,16 +2690,45 @@ export interface components {
             grades: components["schemas"]["GradeTeacherView"][];
             readonly partialAverage: components["schemas"]["GradeValue"] | null;
             readonly publishedWeightPercent: number;
+            groupResults?: components["schemas"]["GradeGroupResult"][];
         };
         GradebookResponse: components["schemas"]["PageInfo"] & {
             /** Format: uuid */
             courseId: string;
             items: components["schemas"]["GradebookStudentRow"][];
         };
+        CorrectPublishedGradeRequest: {
+            /** Format: uuid */
+            revisionId: string;
+            /** Format: uuid */
+            expectedRevisionId: string | null;
+            points: number;
+            reason: string;
+        };
+        UpdateGradeGroupsRequest: {
+            expectedVersion: number;
+            confirmRecalculation: boolean;
+            groups: {
+                /**
+                 * Format: uuid
+                 * @description Null crea un grupo.
+                 */
+                id: string | null;
+                title: string;
+                weightPercent: number;
+                gradeItemIds: string[];
+            }[];
+        };
         PublishGradesRequest: {
             gradeItemIds: string[];
             sectionIds: string[];
             studentIds: string[];
+        };
+        PublishPendingRequest: {
+            /** @constant */
+            scope: "pending";
+            sectionIds: string[];
+            gradeItemIds?: string[];
         };
         PublishGradesResponse: {
             publishedCount: number;
@@ -2611,6 +2744,13 @@ export interface components {
             grade: components["schemas"]["GradeValue"];
             /** Format: date-time */
             readonly publishedAt: string;
+            /** Format: uuid */
+            groupId?: string;
+            groupTitle?: string;
+            pointsEarned?: number;
+            maxPoints?: number;
+            /** Format: date-time */
+            revisedAt?: string | null;
         };
         StudentGradesResponse: {
             /** Format: uuid */
@@ -2618,14 +2758,17 @@ export interface components {
             /** @description Contiene exclusivamente notas propias ya publicadas. */
             items: components["schemas"]["PublishedGradeStudentView"][];
             /**
-             * @description Promedio de notas publicadas normalizado por la suma de sus ponderaciones:
-             *     sum(grade * weight) / sum(weight). Se redondea a un decimal con HALF_UP y
-             *     es null cuando no hay notas publicadas o el peso publicado es cero.
+             * @description En modo puntos, se aplica la escala chilena al porcentaje de grupos con resultados
+             *     publicados, normalizado por la suma de sus pesos. En modo histórico se conserva
+             *     el promedio ponderado de notas individuales. Devuelve null si el peso activo es cero.
              */
             readonly partialAverage: components["schemas"]["GradeValue"] | null;
             readonly publishedWeightPercent: number;
-            /** @description True cuando la suma de ponderaciones publicadas es menor que 100%. */
+            /** @description En modo puntos representa un promedio en curso. En modo histórico indica peso activo menor al 100%. */
             readonly isPartial: boolean;
+            /** @enum {string} */
+            calculation?: "legacy" | "points";
+            groupResults?: components["schemas"]["GradeGroupResult"][];
         };
         /** @description Snapshot sanitizado al escribir y al leer historia; nunca contiene secretos, credenciales, claves de idempotencia, answers, isCorrect ni pointsAwarded. Pesos usan items con solo gradeItemId/weightPercent; publicaciones usan campos públicos de Grade. */
         AuditChanges: {
@@ -5346,6 +5489,87 @@ export interface operations {
             503: components["responses"]["ServiceUnavailable"];
         };
     };
+    correctPublishedGrade: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                courseId: components["parameters"]["CourseId"];
+                gradeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorrectPublishedGradeRequest"];
+            };
+        };
+        responses: {
+            /** @description Calificación de la revisión registrada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeTeacherView"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    updateGradeGroups: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateGradeGroupsRequest"];
+            };
+        };
+        responses: {
+            /** @description Configuración actual del libro de notas. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeItemListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
     publishGrades: {
         parameters: {
             query?: never;
@@ -5371,7 +5595,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["PublishGradesRequest"];
+                "application/json": components["schemas"]["PublishGradesRequest"] | components["schemas"]["PublishPendingRequest"];
             };
         };
         responses: {

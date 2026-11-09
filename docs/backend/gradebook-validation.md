@@ -1,5 +1,7 @@
 # Validación de notas, publicación y auditoría
 
+Esta página registra la entrega histórica. La [política vigente del libro de notas](../adr/gradebook-groups-and-revisions.md) describe los grupos, el recálculo y la corrección de notas publicadas.
+
 Fecha: 2026-10-19. Estado: ambas historias implementadas; 35/36 completas, cierre T036 pendiente.
 Feature: specs/20261014-235244_notas-publicacion-auditoria.
 Rama: feat/notas-publicacion-auditoria; worktree ../academix-notas-publicacion-auditoria.

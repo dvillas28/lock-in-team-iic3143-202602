@@ -101,7 +101,7 @@ test('presentation data works with real frontend adapters and five roles, UC/UTF
       assert.equal((await request(app, tokens.assistant, publicationPath, 'POST', selection, 'demo-publish')).status, 403);
       assert.equal((await request(app, tokens.teacher, publicationPath, 'POST', selection, 'demo-publish')).status, 200);
       assert.equal((await getStudentGrades(clients.student, slug, workshop)).partialAverage, 7);
-      assert.equal((await request(app, tokens.admin, `${slug}/courses/${workshop}/gradebook/weights`, 'PUT', weights)).status, 409);
+      assert.equal((await request(app, tokens.admin, `${slug}/courses/${workshop}/gradebook/weights`, 'PUT', weights)).status, 200);
       const events = await request(app, tokens.teacher, `${slug}/courses/${workshop}/audit-events?action=grade.published`);
       assert.equal(events.status, 200); assert.equal(events.body.items.length, 1);
       const empty = id(`${slug}/course/2`);
