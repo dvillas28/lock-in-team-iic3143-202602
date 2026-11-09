@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Aprovisiona los buckets S3 privados de AcademiX (prod y test) para fotos de perfil
 # (avatars/) y archivos académicos (academic/materials/), con un usuario IAM de mínimo
-# privilegio por bucket. Idempotente: se puede re-ejecutar para aplicar cambios.
+# privilegio por bucket y una credencial de mantenimiento de prod (solo listar/borrar).
+# Idempotente: se puede re-ejecutar para aplicar cambios.
 #
 # Uso:
 #   AWS_PROFILE=<perfil-admin> scripts/provision-avatar-s3.sh [--suffix dvillasc] [--region us-east-1] [--yes]
@@ -26,7 +27,7 @@ while [[ $# -gt 0 ]]; do
     --suffix) SUFFIX="$2"; shift 2 ;;
     --region) REGION="$2"; shift 2 ;;
     --yes) ASSUME_YES=true; shift ;;
-    -h|--help) sed -n '2,12p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,13p' "$0"; exit 0 ;;
     *) echo "Argumento desconocido: $1" >&2; exit 2 ;;
   esac
 done
@@ -44,6 +45,7 @@ IDENTITY=$(aws sts get-caller-identity --query Arn --output text 2>/dev/null) \
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 
 ENVS=(prod test)
+MAINTENANCE_USER="academix-maintenance-prod"
 bucket_name() { echo "academix-avatars-$1-${SUFFIX}"; }
 user_name()   { echo "academix-backend-$1"; }
 
@@ -54,7 +56,8 @@ echo "Región:   ${REGION}"
 for env in "${ENVS[@]}"; do
   echo "  [$env] bucket s3://$(bucket_name "$env")  usuario IAM $(user_name "$env")"
 done
-echo "Secretos: ${SECRETS_DIR}/s3-<env>.env"
+echo "  [prod] mantenimiento: usuario IAM ${MAINTENANCE_USER}"
+echo "Secretos: ${SECRETS_DIR}/s3-<env>.env y s3-maintenance-prod.env"
 if ! $ASSUME_YES; then
   read -r -p "¿Continuar? [s/N] " answer
   [[ "$answer" =~ ^[sSyY]$ ]] || { echo "Cancelado."; exit 0; }
@@ -197,7 +200,13 @@ JSON
   if [[ "$env" == "test" ]]; then ok "Política: Get/Put/Delete en ${AVATAR_PREFIX}* y ${ACADEMIC_PREFIX}* + ListBucket de ambos"
   else ok "Política: Get/Put/Delete en ${AVATAR_PREFIX}* y ${ACADEMIC_PREFIX}*"; fi
 
-  local key_count secrets_file="${SECRETS_DIR}/s3-${env}.env"
+  ensure_access_key "$user" "$bucket" "${SECRETS_DIR}/s3-${env}.env" "AcademiX private storage (${env})"
+}
+
+# Crea una access key solo si el usuario no tiene ninguna y la guarda con las variables
+# de almacenamiento que leen el backend y los comandos de limpieza. Nunca la imprime.
+ensure_access_key() {
+  local user="$1" bucket="$2" secrets_file="$3" header="$4" key_count
   key_count=$(aws iam list-access-keys --user-name "$user" --query 'length(AccessKeyMetadata)' --output text)
   if [[ "$key_count" != "0" ]]; then
     warn "ya tiene ${key_count} access key(s); no se crea otra."
@@ -213,7 +222,7 @@ JSON
   (
     umask 077
     cat >"$secrets_file" <<ENV
-# AcademiX private storage (${env}). Creado $(date -u +%Y-%m-%dT%H:%M:%SZ). NO versionar.
+# ${header}. Creado $(date -u +%Y-%m-%dT%H:%M:%SZ). NO versionar.
 AVATAR_STORAGE_DRIVER=s3
 ACADEMIC_STORAGE_DRIVER=s3
 AWS_REGION=${REGION}
@@ -224,6 +233,45 @@ AWS_SECRET_ACCESS_KEY=${key_secret}
 ENV
   )
   ok "Access key creada y guardada en ${secrets_file}"
+}
+
+# Credencial de mantenimiento de prod para accounts:cleanup y academic:cleanup.
+# Solo enumera y borra: no lee ni escribe objetos, y nunca se carga en Render.
+# En test, la limpieza usa academix-backend-test, que ya puede listar ambos prefijos.
+ensure_maintenance_user() {
+  local bucket user; bucket=$(bucket_name prod); user="$MAINTENANCE_USER"
+  log "Usuario IAM ${user} (mantenimiento de prod)"
+  if aws iam get-user --user-name "$user" >/dev/null 2>&1; then
+    ok "ya existe"
+  else
+    # shellcheck disable=SC2086
+    aws iam create-user --user-name "$user" --tags $TAGS "Key=Environment,Value=prod" "Key=Role,Value=maintenance" >/dev/null
+    ok "creado (sin acceso a consola)"
+  fi
+
+  aws iam put-user-policy --user-name "$user" --policy-name academix-storage-maintenance --policy-document "$(cat <<JSON
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ListPrefixesForCleanup",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::${bucket}",
+      "Condition": {"StringLike": {"s3:prefix": ["${AVATAR_PREFIX}*", "${ACADEMIC_PREFIX}*"]}}
+    },
+    {
+      "Sid": "DeleteOrphanObjects",
+      "Effect": "Allow",
+      "Action": "s3:DeleteObject",
+      "Resource": ["arn:aws:s3:::${bucket}/${AVATAR_PREFIX}*", "arn:aws:s3:::${bucket}/${ACADEMIC_PREFIX}*"]
+    }
+  ]
+}
+JSON
+)"
+  ok "Política: ListBucket y DeleteObject en ${AVATAR_PREFIX}* y ${ACADEMIC_PREFIX}*"
+  ensure_access_key "$user" "$bucket" "${SECRETS_DIR}/s3-maintenance-prod.env" "AcademiX storage maintenance (prod)"
 }
 
 smoke_test() {
@@ -277,9 +325,49 @@ smoke_test() {
   )
 }
 
+smoke_test_maintenance() {
+  local secrets_file="${SECRETS_DIR}/s3-maintenance-prod.env"
+  log "Prueba con la credencial de mantenimiento de prod"
+  [[ -f "$secrets_file" ]] || { warn "sin ${secrets_file}; se omite la prueba."; return; }
+  (
+    set -a; # shellcheck disable=SC1090
+    source "$secrets_file"; set +a
+    unset AWS_PROFILE AWS_SESSION_TOKEN
+    local bucket="${S3_AVATAR_BUCKET}" zero="00000000-0000-4000-8000-000000000000" prefix attempt tmp err
+    tmp=$(mktemp); trap 'rm -f "$tmp"' EXIT
+    printf 'academix-smoke-test' >"$tmp"
+    for prefix in "${AVATAR_PREFIX}" "${ACADEMIC_PREFIX}"; do
+      for attempt in $(seq 1 15); do
+        aws s3api list-objects-v2 --bucket "$bucket" --prefix "$prefix" --max-items 1 >/dev/null 2>&1 && break
+        [[ "$attempt" == 15 ]] && { warn "ListBucket de ${prefix} sigue fallando tras 45 s; revisa la política."; exit 1; }
+        sleep 3
+      done
+      ok "ListBucket de ${prefix} permitido"
+    done
+    # S3 responde 204 al borrar una clave inexistente: prueba el permiso sin tocar objetos reales.
+    aws s3api delete-object --bucket "$bucket" --key "${AVATAR_PREFIX}${zero}/${zero}.webp" >/dev/null
+    aws s3api delete-object --bucket "$bucket" --key "${ACADEMIC_PREFIX}${zero}/${zero}/${zero}" >/dev/null
+    ok "DeleteObject permitido en ambos prefijos"
+    if aws s3api list-objects-v2 --bucket "$bucket" --max-items 1 >/dev/null 2>&1; then
+      warn "¡Puede listar todo el bucket! Revisa la condición s3:prefix."
+    else ok "ListBucket fuera de los prefijos rechazado"; fi
+    if aws s3api put-object --bucket "$bucket" --key "${AVATAR_PREFIX}${zero}/$(cat /proc/sys/kernel/random/uuid).webp" \
+         --body "$tmp" --server-side-encryption AES256 >/dev/null 2>&1; then
+      warn "¡La credencial de mantenimiento puede escribir! Revisa la política."
+    else ok "PutObject rechazado"; fi
+    # Con ListBucket, un GetObject permitido sobre una clave inexistente da 404; uno denegado, 403.
+    if err=$(aws s3api get-object --bucket "$bucket" --key "${AVATAR_PREFIX}${zero}/${zero}.webp" "$tmp" 2>&1); then
+      warn "¡La credencial de mantenimiento puede leer objetos! Revisa la política."
+    elif [[ "$err" == *AccessDenied* || "$err" == *403* ]]; then ok "GetObject rechazado"
+    else warn "GetObject devolvió un error inesperado (¿lectura permitida?): revisa la política."; fi
+  )
+}
+
 for env in "${ENVS[@]}"; do ensure_bucket "$env"; done
 for env in "${ENVS[@]}"; do ensure_user "$env"; done
+ensure_maintenance_user
 for env in "${ENVS[@]}"; do smoke_test "$env"; done
+smoke_test_maintenance
 
 echo
 log "Listo. Próximos pasos:"
@@ -289,4 +377,7 @@ echo "  2. render.yaml declara AWS_REGION, S3_AVATAR_BUCKET y S3_ACADEMIC_BUCKET
 echo "     coincidan con ${REGION} y $(bucket_name prod); si usaste otro --suffix o región, actualízalo."
 echo "     Re-ejecutar el script actualiza políticas sin crear keys nuevas: Render no cambia."
 echo "  3. Entrega ${SECRETS_DIR}/s3-test.env al equipo de desarrollo por un canal seguro."
-echo "  4. Cuando estén cargados, borra los .env de ${SECRETS_DIR}."
+echo "  4. Guarda ${SECRETS_DIR}/s3-maintenance-prod.env en un gestor de secretos del operador."
+echo "     NO va a Render. Desactívala entre usos (ver docs/planning/perfiles/operacion-s3.md):"
+echo "     aws iam update-access-key --user-name ${MAINTENANCE_USER} --access-key-id <id> --status Inactive"
+echo "  5. Cuando estén cargados, borra los .env de ${SECRETS_DIR}."

@@ -76,19 +76,23 @@ El mantenimiento debe enumerar candidatos antiguos, comprobar referencias vigent
 en DB y eliminar únicamente objetos sin referencia; conservar auditoría mínima.
 Usar margen de al menos 24 h para no competir con subidas en curso y lotes acotados.
 
-El operador necesita, además de Get/Delete, esta autorización de enumeración:
+Los comandos de limpieza solo enumeran y borran. En prod usan el usuario IAM
+`academix-maintenance-prod`, creado por el script: `s3:ListBucket` condicionado a
+`avatars/*` y `academic/materials/*`, y `s3:DeleteObject` sobre esos prefijos.
+No puede leer ni escribir objetos. En test se usa `academix-backend-test`.
 
-```json
-{
-  "Effect": "Allow",
-  "Action": "s3:ListBucket",
-  "Resource": "arn:aws:s3:::NOMBRE_BUCKET",
-  "Condition": {"StringLike": {"s3:prefix": "avatars/*"}}
-}
-```
+Esa credencial nunca va a Render ni al servidor HTTP: el operador la guarda en su
+gestor de secretos y la mantiene inactiva entre usos. Render Free no ofrece shell
+ni cron jobs, así que la limpieza se ejecuta desde la máquina del operador:
 
-Esa credencial va al proceso de mantenimiento, fuera del servidor HTTP. El comando
-accounts:cleanup y sus modos dry-run/--apply se explican en el [índice](operacion.md).
+1. Activar la key: `aws iam update-access-key --user-name academix-maintenance-prod
+   --access-key-id <id> --status Active`.
+2. Cargar `s3-maintenance-prod.env`, `MIGRATION_DATABASE_URL` de prod y
+   `ACCOUNT_MAINTENANCE_OPERATOR_REF`; compilar con `pnpm --dir backend build`.
+3. Ejecutar en dry-run, revisar el resultado y repetir con `--apply`
+   (accounts:cleanup según el [índice](operacion.md); academic:cleanup según su guía).
+4. Desactivar la key con el mismo comando y `--status Inactive`. Registrar fecha,
+   operador y resultado en el registro operativo.
 El listado recorre todas las claves válidas en orden lexicográfico, también las
 recientes/referenciadas, para acotar cada lote sin bloquear huérfanos posteriores.
 Continuar con --avatar-after=avatarCursor hasta recibir null; S3 usa StartAfter y
