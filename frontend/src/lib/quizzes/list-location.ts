@@ -1,12 +1,14 @@
 import { isId } from "../courses/validation.ts";
 
+const phases = ["draft", "open", "scheduled", "closed"];
+
 export type QuizFilters = { query: string; status: string; section: string };
 export type QuizSearchParams = Record<string, string | string[] | undefined>;
 
 export function quizListLocation(params: QuizSearchParams) {
   const filters: QuizFilters = {
     query: typeof params.q === "string" ? params.q : "",
-    status: params.estado === "draft" || params.estado === "published" ? params.estado : "",
+    status: typeof params.estado === "string" && phases.includes(params.estado) ? params.estado : "",
     section: params.seccion === "course" || isId(params.seccion) ? params.seccion : "",
   };
   return { filters, createdId: isId(params.creado) ? params.creado : undefined };

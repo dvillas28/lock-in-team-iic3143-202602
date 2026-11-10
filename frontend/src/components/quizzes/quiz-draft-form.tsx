@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
-import { Save } from "lucide-react";
+import { Save, Send } from "lucide-react";
 import type { EvaluationGroup } from "../../lib/api/assignments.ts";
 import type { Section } from "../../lib/courses/validation.ts";
 import { checkNativeInputs, focusQuizError } from "../../lib/quizzes/form-values.ts";
@@ -30,7 +30,9 @@ export function useQuizDraft(mutation: Mutation, original?: Authoring) {
   return { form, id, rows, setRows, sentRows, setSentRows, reset, mutation, original };
 }
 
-export function QuizDraftForm({ draft, label, blocked, revision, groups, sections, wholeCourse, save, reconcile }: {
+export type PublishRequest = { values: Values; changed: boolean; persist: () => Promise<Authoring | undefined> };
+
+export function QuizDraftForm({ draft, label, blocked, revision, groups, sections, wholeCourse, save, reconcile, persist, onPublish }: {
   draft: ReturnType<typeof useQuizDraft>;
   label: string;
   blocked: boolean;
@@ -40,6 +42,9 @@ export function QuizDraftForm({ draft, label, blocked, revision, groups, section
   wholeCourse: boolean;
   save: (values: Values, current: () => boolean, element: HTMLFormElement) => Promise<string | void>;
   reconcile: (current: () => boolean) => Promise<string>;
+  /** Saves the validated values when needed and resolves the draft to publish. */
+  persist?: (values: Values, current: () => boolean, element: HTMLFormElement) => Promise<Authoring>;
+  onPublish?: (request: PublishRequest) => void;
 }) {
   const { id, form, mutation, original, rows, setRows, sentRows, setSentRows } = draft;
   const { ref: formRef, blur, change, startPointerAction, summary, summaryRef } = form;
@@ -54,6 +59,8 @@ export function QuizDraftForm({ draft, label, blocked, revision, groups, section
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const element = event.currentTarget;
+    const submitter = (event.nativeEvent as SubmitEvent).submitter;
+    if (submitter?.getAttribute("value") === "publish") return requestPublication(element);
     if (blocked || (original && !form.hasChanges(element)) || !form.validate(element)) return;
     const data = new FormData(element);
     setSentRows(rows);
@@ -62,6 +69,29 @@ export function QuizDraftForm({ draft, label, blocked, revision, groups, section
       const values = readQuizDraft(data, rows, original);
       return save(values, current, element);
     }, reconcile);
+  }
+
+  function requestPublication(element: HTMLFormElement) {
+    if (blocked || !persist || !onPublish || !form.validate(element, true)) return;
+    const data = new FormData(element);
+    let values: Values;
+    try {
+      checkNativeInputs(element);
+      values = readQuizDraft(data, rows, original);
+    } catch {
+      return;
+    }
+    const changed = !original || form.hasChanges(element);
+    onPublish({ values, changed, persist: async () => {
+      if (original && !changed) return original;
+      let saved: Authoring | undefined;
+      setSentRows(rows);
+      await mutation.run(async current => {
+        saved = await persist(values, current, element);
+        return original ? "Cambios guardados." : "Borrador guardado.";
+      }, reconcile);
+      return saved;
+    } });
   }
 
   function update(event: FormEvent<HTMLFormElement>) {
@@ -86,10 +116,14 @@ export function QuizDraftForm({ draft, label, blocked, revision, groups, section
   </form>;
 }
 
-export function QuizDraftSave({ form, busy, blocked, creating }: {
-  form: string; busy: boolean; blocked: boolean; creating?: boolean;
-}) {
-  return <button type="submit" form={form} className={`btn quiz-draft-save ${creating ? "btn-primary" : "btn-ghost"}`} disabled={blocked}>
-    <Save size={16} aria-hidden="true"/>{busy ? "Guardando…" : creating ? "Crear borrador" : "Guardar borrador"}
+export function QuizDraftSave({ form, busy, blocked }: { form: string; busy: boolean; blocked: boolean }) {
+  return <button type="submit" form={form} className="btn btn-ghost quiz-draft-save" disabled={blocked}>
+    <Save size={16} aria-hidden="true"/>{busy ? "Guardando…" : "Guardar borrador"}
+  </button>;
+}
+
+export function QuizPublishSubmit({ form, blocked }: { form: string; blocked: boolean }) {
+  return <button type="submit" form={form} value="publish" className="btn btn-primary" disabled={blocked}>
+    <Send size={16} aria-hidden="true"/>Publicar quiz
   </button>;
 }

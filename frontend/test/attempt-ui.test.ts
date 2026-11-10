@@ -9,7 +9,7 @@ const view=()=>h(AttemptDetail,{attemptId:attempt.id});
 test("US1 opens the confirmed attempt; history replaces manual attempt codes; no pauta",async()=>{
  const ui=await mount(h(QuizDetail,{courseId:course.id,quizId:quiz.id}),r=>r.method==="POST"?Response.json(attempt,{status:201}):reply(r),"student");
  try{await ui.click("Iniciar nuevo intento");assert.deepEqual(ui.destinations,[`/attempts/${attempt.id}`]);assert.ok(ui.requests.some(r=>r.url.endsWith(`/quiz-attempts/${attempt.id}`)));
- await ui.render(h(QuizList,{courseId:course.id}));assert.match(ui.doc.body.textContent!,/consultar tus intentos/);assert.equal(ui.doc.querySelector('input[autocomplete="off"]'),null);
+ await ui.render(h(QuizList,{courseId:course.id}));assert.ok(ui.doc.querySelector(`a.quiz-row-link[href$="/quizzes/${quiz.id}"]`));assert.doesNotMatch(ui.doc.body.textContent!,/consultar tus intentos/);assert.equal(ui.doc.querySelector('input[autocomplete="off"]'),null);
  }finally{await ui.close();}
 });
 test("US1 save, dirty announcement, explicit clearing and empty submission confirmation",async()=>{

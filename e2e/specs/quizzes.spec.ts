@@ -52,7 +52,7 @@ test('E2E-QUIZ-005 browser creates draft with server question UUIDs / create @re
  await expect(p.getByRole('heading', { name: 'Quizzes', exact: true })).toBeVisible();
 
  await p.getByRole('searchbox', { name: 'Buscar quiz' }).fill('título que no coincide');
- await p.getByRole('combobox', { name: 'Estado', exact: true }).selectOption('published');
+ await p.getByRole('combobox', { name: 'Estado', exact: true }).selectOption('closed');
  await p.getByRole('link', { name: 'Crear quiz', exact: true }).click();
  await p.getByRole('link', { name: 'Volver a quizzes' }).click();
  await expect(p.getByRole('searchbox', { name: 'Buscar quiz' })).toHaveValue('título que no coincide');
@@ -118,8 +118,8 @@ test('E2E-QUIZ-005 browser creates draft with server question UUIDs / create @re
  expect(await e.events('quiz.created',q.id)).toHaveLength(1);
  expect(status(await api.get(`quizzes/${q.id}/authoring`),200).body.questions).toEqual(q.questions);
  await expect(p.getByRole('searchbox', { name: 'Buscar quiz' })).toHaveValue('título que no coincide');
- await expect(p.getByRole('combobox', { name: 'Estado', exact: true })).toHaveValue('published');
- await expect(p.getByText('Quiz navegador F5 queda fuera de los filtros.', { exact: true })).toBeVisible();
+ await expect(p.getByRole('combobox', { name: 'Estado', exact: true })).toHaveValue('closed');
+ await expect(p.getByText('«Quiz navegador F5» no coincide con los filtros.')).toBeVisible();
  await expect(p.getByRole('link', { name: 'Editar borrador', exact: true })).toBeVisible();
  await p.getByRole('link', { name: 'Editar borrador', exact: true }).click();
  await expect(p.getByRole('heading', { name: 'Quiz navegador F5', exact: true })).toBeVisible();
@@ -206,7 +206,7 @@ test('E2E-QUIZ-008 invalid alternatives reject without persistence and UI recove
  await expect(first.getByText('Escribe esta alternativa.')).toHaveCount(0);
  await option.press('Tab');
  await expect(first.getByText('Escribe esta alternativa.')).toBeVisible();
- await p.getByRole('button', { name: 'Crear borrador', exact: true }).click();
+ await p.getByRole('button', { name: 'Guardar borrador', exact: true }).click();
  expect(await securitySnapshot(e)).toEqual(before);
  await option.fill('Recuperada');
  await expect(first.getByText('Escribe esta alternativa.')).toHaveCount(0);
@@ -238,7 +238,7 @@ test('E2E-QUIZ-013 lost creation response locks form and observes candidates wit
  const p=await actorPage('T1'),f=await quizCreate(p,e,'Creación incierta');let posts=0;await p.route('**/courses/*/quizzes',async route=>{if(route.request().method()!=='POST')return route.continue();posts++;const r=await route.fetch();expect(r.status()).toBe(201);await route.abort('failed');});await p.getByRole('button',{name:'Crear borrador',exact:true}).click();await expect(f.getByRole('alert')).toContainText('Resultado incierto');await expect(f.getByLabel('Título del quiz',{exact:true})).toBeDisabled();await expect(p.getByRole('link',{name:'Creación incierta',exact:true})).toBeVisible();await p.evaluate(()=>window.dispatchEvent(new Event('focus')));expect(posts).toBe(1);expect(await e.count('quizzes',"title='Creación incierta'")).toBe(1);expect((await e.events('quiz.created')).filter(x=>x.changes.after.title==='Creación incierta')).toHaveLength(1);
 });
 test('E2E-QUIZ-014 publication creates unique zero weight item and locks authoring / publish @smoke',async({e,actorPage})=>{
- const p=await actorPage('T1'),q=await draft(e);await editor(p,e,q.id);const r=await publishInBrowser(p);expect(r.request().postData()).toBeNull();await expect(p.getByLabel('Título del quiz',{exact:true})).toBeDisabled();await expect(p.getByRole('button',{name:'Guardar borrador'})).toHaveCount(0);const rows=(await e.pool.query('SELECT weight_percent FROM grade_items WHERE quiz_id=$1',[q.id])).rows;expect(rows).toEqual([{weight_percent:'0.00'}]);expect(await e.events('quiz.published',q.id)).toHaveLength(1);
+ const p=await actorPage('T1'),q=await draft(e);await editor(p,e,q.id);const r=await publishInBrowser(p);expect(r.request().postData()).toBeNull();await expect(p).toHaveURL(new RegExp(`/quizzes/${q.id}(?:\\?|$)`));await expect(p.locator('.content-notice')).toHaveText('Quiz publicado.');await expect(p.getByRole('link',{name:'Ver pauta'})).toBeVisible();const rows=(await e.pool.query('SELECT weight_percent FROM grade_items WHERE quiz_id=$1',[q.id])).rows;expect(rows).toEqual([{weight_percent:'0.00'}]);expect(await e.events('quiz.published',q.id)).toHaveLength(1);
 });
 test('E2E-QUIZ-015 publication replay after a grade is published is a no-op / publish-replay @regression',async({e,actorPage})=>{
  const api=await e.api('AO'),p=await actorPage('AO'),q=e.data.quizzes.QD;status(await api.post(`quizzes/${q}/publish`),200);await e.graded();await e.publish();const before=await securitySnapshot(e);status(await api.post(`quizzes/${q}/publish`),200);expect(await securitySnapshot(e)).toEqual(before);await editor(p,e,q);await expect(p.getByLabel('Título del quiz',{exact:true})).toBeDisabled();expect(await e.count('grade_items','quiz_id=$1',[q])).toBe(1);
