@@ -30,14 +30,14 @@ export async function quizCreate(page: Page, e: Environment, title = 'Quiz naveg
 export async function createInBrowser(page: Page, form: Locator) {
   await expect(form).toBeVisible();
   const pending = page.waitForResponse(r => r.request().method() === 'POST' && r.url().endsWith('/quizzes'));
-  await page.getByRole('button', { name: 'Crear borrador', exact: true }).click();
+  await page.getByRole('button', { name: 'Guardar borrador', exact: true }).click();
   const response = await pending;
   expect(response.status()).toBe(201);
   const quiz = await response.json();
-  await expect(page.getByRole('link', { name: 'Editar borrador', exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\/quizzes(?:\?|$)/);
   return quiz;
 }
-export async function publishInBrowser(page:Page){await page.getByRole('button',{name:'Publicar quiz',exact:true}).click();const pending=page.waitForResponse(r=>r.url().endsWith('/publish')&&r.request().method()==='POST');await page.getByRole('button',{name:'Confirmar publicación',exact:true}).click();const r=await pending;expect(r.status()).toBe(200);return r;}
+export async function publishInBrowser(page:Page){await page.getByRole('button',{name:'Publicar quiz',exact:true}).click();const pending=page.waitForResponse(r=>r.url().endsWith('/publish')&&r.request().method()==='POST');await page.getByRole('dialog',{name:'¿Publicar este quiz?',exact:true}).getByRole('button',{name:'Publicar quiz',exact:true}).click();const r=await pending;expect(r.status()).toBe(200);return r;}
 export async function attemptPage(page:Page,id:string){await compatibilityNavigate(page,`/attempts/${id}`);await expect(page.getByRole('heading',{name:/Intento/}).first()).toBeVisible();}
 // Independent integer arithmetic; no imports from product scoring or floating point sums.
 const halfUp=(n:bigint,d:bigint)=>(2n*n+d)/(2n*d);
@@ -48,7 +48,7 @@ export async function confirm(page:Page,label:string,title:string){await page.ge
 export async function staffAttempt(page:Page,e:Environment,id:string,q=e.data.quizzes.Q1){await compatibilityNavigate(page,`/courses/${e.data.courses.C1}/quizzes/${q}/attempts/${id}`);await expect(page.getByText(id,{exact:false}).first()).toBeVisible();}
 export async function book(page:Page,e:Environment,course=e.data.courses.C1){await go(page,course,'/gradebook');await expect(page.getByRole('combobox',{name:'Sección histórica',exact:true})).toBeVisible();}
 export async function publicationSelection(page:Page,selection:{gradeItemIds:string[];sectionIds:string[];studentIds:string[]}){await page.getByRole('button',{name:'Publicar notas',exact:true}).click();const dialog=page.getByRole('dialog',{name:'Publicar notas',exact:true});for(const ids of [selection.gradeItemIds,selection.sectionIds,selection.studentIds])for(const id of ids)await dialog.locator(`input[type=checkbox][value="${id}"]`).check();await dialog.getByRole('button',{name:'Revisar publicación',exact:true}).click();await expect(page.getByRole('dialog',{name:'Confirmar selección de publicación',exact:true})).toBeVisible();}
-export async function publishGradesInBrowser(page:Page){const pending=page.waitForResponse(r=>r.request().method()==='POST'&&r.url().endsWith('/publications'));await page.getByRole('button',{name:'Confirmar publicación',exact:true}).click();return pending;}
+export async function publishGradesInBrowser(page:Page){const pending=page.waitForResponse(r=>r.request().method()==='POST'&&r.url().endsWith('/publications'));await page.getByRole('dialog',{name:'¿Publicar este quiz?',exact:true}).getByRole('button',{name:'Publicar quiz',exact:true}).click();return pending;}
 export async function weights(e:Environment,course=e.data.courses.C1,actor='AO',slug='uc'){const api=await e.api(actor,slug);return status(await api.get(`courses/${course}/grade-items`),200).body.items.map((i:any)=>({gradeItemId:i.id,weightPercent:i.weightPercent}));}
 export async function freshCourse(e:Environment,slug='uc'){const foreign=slug==='utfsm',actor=foreign?'FAO':'AO',student=foreign?'FST1':'ST1',api=await e.api(actor,slug),course=status(await api.post('courses',{code:'F5-'+e.key().slice(0,8),name:'Ciclo académico F5',term:'2026-2',initialSection:{code:'1'}}),201).body,section=status(await api.get(`courses/${course.id}/sections`),200).body.items[0];status(await api.post(`sections/${section.id}/enrollments`,{userId:e.data.actors[student].id,role:'student'}),201);return {course:course.id,section:section.id,actor,student,api};}
 export async function gradeMany(e:Environment,count=21){
