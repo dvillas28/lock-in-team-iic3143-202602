@@ -15,7 +15,7 @@ export async function calculateGrade(db:PoolClient,questions:Question[],answers:
   SELECT COALESCE((SELECT sum(points) FROM corrected),0::numeric) AS score,
    (SELECT sum((q->>'points')::numeric) FROM questions) AS total
  ), percentages AS (SELECT score,round(100*score/total,2) AS percent FROM totals)
- SELECT score,percent,round(CASE WHEN percent<=60 THEN 1+percent*3/60 ELSE 4+(percent-60)*3/40 END,1) AS grade,
+ SELECT score,percent,public.chilean_grade(percent) AS grade,
   COALESCE((SELECT jsonb_agg(answer || jsonb_build_object('isCorrect',correct,'pointsAwarded',points) ORDER BY ordinality) FROM corrected),'[]'::jsonb) AS answers
  FROM percentages`,[JSON.stringify(questions),JSON.stringify(answers)]);
  return result.rows[0];

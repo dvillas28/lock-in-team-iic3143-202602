@@ -7,7 +7,7 @@ const fields: Record<string,string[]> = {
  accountInvitation:["id","status","deliveryVersion","deliveryStatus","operationKey","operation"],
  userImport:["id","status","totalRows","createdCount","skippedCount"],
  quizAttempt:["id","quizId","studentId","sectionId","attemptNumber","status","startedAt","submittedAt","cancelledAt"],
- grade:["id","gradeItemId","studentId","sectionId","attemptId","scorePercent","grade","publishedAt"],
+ grade:["id","gradeItemId","studentId","sectionId","attemptId","scorePercent","grade","publishedAt","pointsEarned","revisionId","revisedAt","reason"],
  quiz:["id","courseId","sectionId","title","opensAt","closesAt","maxAttempts","publishedAt","createdBy","questionCount","totalPoints","gradeItemId"],
  courseModule:["id","courseId","title","position","publishedAt"],
  academicFile:["id","moduleId","title","kind","position","fileName","mediaType","byteSize","publishedAt","createdBy"],
@@ -20,6 +20,15 @@ const fields: Record<string,string[]> = {
 export function snapshot(type: string, value: unknown): Record<string,unknown>|null {
   if(value===null || typeof value!=="object" || Array.isArray(value))return null;
   const source=value as Record<string,unknown>;
+  if(type==="gradebook" && Array.isArray(source.groups)) {
+    const groups=source.groups.flatMap(value=>{
+      if(!value || typeof value!=="object" || Array.isArray(value))return [];
+      const {id,title,weightPercent,position,gradeItemIds}=value;
+      if(typeof id!=="string" || typeof title!=="string" || typeof weightPercent!=="number" || typeof position!=="number")return [];
+      return [{id,title,weightPercent,position,gradeItemIds:Array.isArray(gradeItemIds)?gradeItemIds.filter(v=>typeof v==="string"):[]}];
+    });
+    return {calculation:source.calculation==="points"?"points":"legacy",groups};
+  }
   if(type==="moduleOrder" || type==="gradebook") {
     const key=type==="moduleOrder"?"modules":"items",allowed=type==="moduleOrder"?["id","position"]:["gradeItemId","weightPercent"];
     return {[key]:Array.isArray(source[key])?source[key].filter(v=>v && typeof v==="object" && !Array.isArray(v)).map(v=>

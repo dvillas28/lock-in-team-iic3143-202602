@@ -1,21 +1,21 @@
 import { ApiHttpError } from '../api/errors.ts';
-import { selection, receiptDto, type Selection, type Receipt } from './validation.ts';
+import { publicationSelection, receiptDto, type PublicationSelection, type Receipt } from './validation.ts';
 export class PublicationOperation {
     state: 'sending' | 'uncertain' | 'confirmed' | 'rejected' | 'ready' | 'disposed' = 'ready';
-    input?: Selection;
+    input?: PublicationSelection;
     key?: string;
     receipt?: Receipt;
     error?: unknown;
     private pending?: Promise<void>;
-    constructor(private scope: string, input: Selection, key: string) {
-        const v = selection(input);
+    constructor(private scope: string, input: PublicationSelection, key: string) {
+        const v = publicationSelection(input);
         for (const a of Object.values(v)) {
             Object.freeze(a);
         }
         this.input = Object.freeze(v);
         this.key = key;
     }
-    async send(scope: string, post: (input: Selection, key: string) => Promise<Receipt>): Promise<void> {
+    async send(scope: string, post: (input: PublicationSelection, key: string) => Promise<Receipt>): Promise<void> {
         if (scope !== this.scope || !this.input || !this.key || this.state === 'disposed') {
             throw new Error('Contexto perdido.');
         }

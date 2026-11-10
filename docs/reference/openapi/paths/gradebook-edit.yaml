@@ -1,0 +1,93 @@
+/api/v1/institution/{institutionSlug}/courses/{courseId}/gradebook/groups:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/CourseId'
+  put:
+    tags: [Gradebook]
+    operationId: updateGradeGroups
+    summary: Guardar grupos, ponderaciones y asignación de evaluaciones
+    description: |
+      Un docente activo puede guardar el plan completo del curso. El orden de la
+      lista define el de los grupos. Cada evaluación debe estar en un único grupo
+      y los pesos sumar 100 %. Los cambios se registran en auditoría. La operación
+      puede recalcular promedios publicados y requiere confirmación si hay notas
+      publicadas o se adopta el cálculo por puntos para evaluaciones existentes.
+      Una versión antigua devuelve 409.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/gradebook-groups.yaml#/UpdateGradeGroupsRequest'
+    responses:
+      '200':
+        description: Configuración actual del libro de notas.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/grades.yaml#/GradeItemListResponse'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+      '500':
+        $ref: '../components/responses.yaml#/InternalError'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'
+
+/api/v1/institution/{institutionSlug}/courses/{courseId}/gradebook/grades/{gradeId}:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/CourseId'
+    - name: gradeId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+  patch:
+    tags: [Gradebook]
+    operationId: correctPublishedGrade
+    summary: Registrar una corrección de nota publicada
+    description: |
+      Requiere docencia en la sección histórica o docencia más administración
+      del curso propio. La revisión reemplaza el resultado visible inmediatamente.
+      Se conserva la nota original, el intento, la revisión previa y un evento con
+      actor, fecha y motivo. La nota se calcula con el puntaje corregido. Repetir
+      exactamente el mismo ID de revisión devuelve su resultado, y una revisión
+      previa obsoleta devuelve 409.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/gradebook-groups.yaml#/CorrectPublishedGradeRequest'
+    responses:
+      '200':
+        description: Calificación de la revisión registrada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/grades.yaml#/GradeTeacherView'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+      '500':
+        $ref: '../components/responses.yaml#/InternalError'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'

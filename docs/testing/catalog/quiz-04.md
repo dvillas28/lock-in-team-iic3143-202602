@@ -33,12 +33,12 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 
 <a id="e2e-quiz-017"></a>
 
-## E2E-QUIZ-017 — Publicar vacío o con curso congelado
+## E2E-QUIZ-017 — Publicar un quiz después de la primera nota
 
 - Módulo / flujo: QUIZ; [FL-QUIZ-03](../audit/FLOWS.md#fl-quiz-03).
 - Requisito: CU-07/10; RF18/21/26; RNF3; [fuente normativa](../../deliveries/2/03-use-cases-and-requirements.md).
 - Evidencia: [quizzes.service.ts](../../../backend/src/quizzes/quizzes.service.ts); [quiz-validation.ts](../../../backend/src/quizzes/quiz-validation.ts); [quiz-editor.tsx](../../../frontend/src/components/quizzes/quiz-editor.tsx); [quiz-create.tsx](../../../frontend/src/components/quizzes/quiz-create.tsx).
-- Objetivo: Publicar vacío o con curso congelado; verificar las aserciones siguientes, sin inferir éxito solo por carga.
+- Objetivo: Publicar un quiz después de la primera nota; verificar las aserciones siguientes, sin inferir éxito solo por carga.
 - Prioridad / criticidad: P1 / Alta; categorías: validación,estado.
 - Rol / institución: AO; UC por defecto, UTFSM en escenarios cruzados según pasos.
 - Precondiciones / fixtures: WRITE+FROZEN; [diccionario](../E2E_TEST_DATA.md); manifest validado y namespace exclusivo.
@@ -47,12 +47,12 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 
 1. Crear draft sin preguntas en COPEN.
 2. Intentar publish por API.
-3. Crear draft válido antes de freeze CFROZEN y publicarlo después de primera nota.
+3. Publicar un borrador válido después de publicar la primera nota.
 
-- Interfaz esperada: Bloqueo sin preguntas; freeze impide nuevo ítem.
-- API esperada: 422 vacío;409 curso frozen; draft válido no publicado.
+- Interfaz esperada: El quiz vacío sigue como borrador y el válido puede publicarse.
+- API esperada: 422 para el quiz vacío. 200 para el quiz válido.
 - Persistencia / consistencia: Sin GradeItem ni quiz.published de rechazo.
-- Denegación: No modificar pesos para sortear freeze.
+- Denegación: Un quiz vacío queda fuera del libro de notas.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
 - Dependencias: F1 entorno/seed listo; [fase F5](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador + comprobación API/SQL; regression (regression incluye smoke; extended incluye regression).
@@ -74,11 +74,11 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 
 1. Dos contextos: publicar QD y publicar primera Grade C1 con barrera.
 2. Esperar ambas.
-3. Leer ítems/pesos/freeze y eventos.
+3. Leer los ítems, la primera publicación y los eventos.
 
-- Interfaz esperada: Resultado coherente; UI informa conflicto del perdedor según orden.
-- API esperada: Si QD primero añade peso0 compatible con total100, ambas pueden ganar; si freeze primero publish quiz409.
-- Persistencia / consistencia: Nunca GradeItem creado después de lock activo; todo atómico.
+- Interfaz esperada: Ambas operaciones son visibles tras completarse.
+- API esperada: Ambas solicitudes responden 200 con el mismo estado final en ambos órdenes.
+- Persistencia / consistencia: Un ítem nuevo con peso inicial 0 % y una sola publicación de la nota.
 - Denegación: No exigir exactamente un ganador si ambas operaciones son compatibles.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
 - Dependencias: F1 entorno/seed listo; [fase F5](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.

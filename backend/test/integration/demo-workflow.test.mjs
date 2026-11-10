@@ -19,7 +19,7 @@ test('manifest accounts complete delegated UC/UTFSM workflow with publication an
    await runtime.withInstitution(actor,slug,async(c,m)=>{
     for(const table of tenantTables) {
      const rows=(await c.query(`SELECT * FROM ${table}`)).rows;
-     if(!["account_invitations","user_imports","user_import_rows"].includes(table))assert.ok(rows.length>0,table);assert.ok(rows.every(r=>r.institution_id===m.institution_id),table);
+     if(!["account_invitations","user_imports","user_import_rows","grade_revisions"].includes(table))assert.ok(rows.length>0,table);assert.ok(rows.every(r=>r.institution_id===m.institution_id),table);
     }
    });
   }

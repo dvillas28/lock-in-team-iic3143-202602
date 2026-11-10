@@ -34,8 +34,9 @@ export class ProblemFilter implements ExceptionFilter {
     if(status>=500)reportError("http",error);
     const domain=error instanceof HttpException?error.getResponse():null;
     const candidate=domain && typeof domain==="object" && "code" in domain?domain.code:null;
-    const allowed:Record<number,string[]>={409:["GRADE_WEIGHTS_LOCKED","GRADE_ALREADY_PUBLISHED","IDEMPOTENCY_CONFLICT","INVITATION_LOGIN_REQUIRED"],
-      410:["DATA_PURGED"],503:["INTEGRATION_NOT_CONFIGURED","AVATAR_STORAGE_UNAVAILABLE"]};
+    const allowed:Record<number,string[]>={409:["GRADE_WEIGHTS_LOCKED","GRADE_ALREADY_PUBLISHED","IDEMPOTENCY_CONFLICT","INVITATION_LOGIN_REQUIRED",
+      "USE_GRADE_GROUPS","GRADEBOOK_CHANGED","GRADEBOOK_CONFIRM_RECALCULATION","GRADE_NOT_PUBLISHED","GRADE_REVISION_CHANGED"],
+      422:["INVALID_GRADE_GROUPS","GRADE_POINTS_OUT_OF_RANGE"],410:["DATA_PURGED"],503:["INTEGRATION_NOT_CONFIGURED","AVATAR_STORAGE_UNAVAILABLE"]};
     const code=typeof candidate==="string" && allowed[status]?.includes(candidate)?candidate:defaultCode;
     if(status===429 && domain && typeof domain==="object" && "retryAfter" in domain && typeof domain.retryAfter==="number")
       response.setHeader("Retry-After",String(Math.max(1,Math.min(86400,Math.ceil(domain.retryAfter)))));

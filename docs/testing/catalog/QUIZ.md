@@ -23,5 +23,5 @@ Estado efectivo por ficha en[el ledger](../execution/VALIDATION.md). Las variant
 | [E2E-QUIZ-014 — Publicar quiz crea ítem único peso cero](quiz-03.md#e2e-quiz-014) | FL-QUIZ-03 | P0 | smoke | M |
 | [E2E-QUIZ-015 — Publicación repetida es no-op autorizado](quiz-03.md#e2e-quiz-015) | FL-QUIZ-03 | P1 | regression | M |
 | [E2E-QUIZ-016 — Publicado no editable aunque no tenga intentos](quiz-04.md#e2e-quiz-016) | FL-QUIZ-03 | P0 | regression | M |
-| [E2E-QUIZ-017 — Publicar vacío o con curso congelado](quiz-04.md#e2e-quiz-017) | FL-QUIZ-03 | P1 | regression | M |
+| [E2E-QUIZ-017 — Publicar un quiz después de la primera nota](quiz-04.md#e2e-quiz-017) | FL-QUIZ-03 | P1 | regression | M |
 | [E2E-QUIZ-018 — Carrera publish quiz con primera publicación de notas](quiz-04.md#e2e-quiz-018) | FL-QUIZ-03 | P0 | extended | M |

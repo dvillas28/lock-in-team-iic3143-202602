@@ -1,0 +1,74 @@
+GradeGroup:
+  type: object
+  additionalProperties: false
+  required: [id, title, weightPercent, position]
+  properties:
+    id: {type: string, format: uuid}
+    title: {type: string, minLength: 1, maxLength: 200}
+    weightPercent: {type: number, minimum: 0, maximum: 100, multipleOf: 0.01}
+    position: {type: integer, minimum: 1}
+
+GradeGroupResult:
+  type: object
+  additionalProperties: false
+  required: [groupId, title, weightPercent, pointsEarned, pointsPossible, scorePercent, grade]
+  properties:
+    groupId: {type: string, format: uuid}
+    title: {type: string}
+    weightPercent: {type: number, minimum: 0, maximum: 100}
+    pointsEarned: {type: number, minimum: 0}
+    pointsPossible: {type: number, exclusiveMinimum: 0}
+    scorePercent: {type: number, minimum: 0, maximum: 100}
+    grade:
+      $ref: './grades.yaml#/GradeValue'
+
+UpdateGradeGroupsRequest:
+  type: object
+  additionalProperties: false
+  required: [expectedVersion, confirmRecalculation, groups]
+  properties:
+    expectedVersion: {type: integer, minimum: 0}
+    confirmRecalculation: {type: boolean}
+    groups:
+      type: array
+      minItems: 1
+      maxItems: 100
+      items:
+        type: object
+        additionalProperties: false
+        required: [id, title, weightPercent, gradeItemIds]
+        properties:
+          id: {type: [string, 'null'], format: uuid, description: Null crea un grupo.}
+          title: {type: string, minLength: 1, maxLength: 200}
+          weightPercent: {type: number, minimum: 0, maximum: 100, multipleOf: 0.01}
+          gradeItemIds:
+            type: array
+            uniqueItems: true
+            items: {type: string, format: uuid}
+
+CorrectPublishedGradeRequest:
+  type: object
+  additionalProperties: false
+  required: [revisionId, expectedRevisionId, points, reason]
+  properties:
+    revisionId: {type: string, format: uuid}
+    expectedRevisionId: {type: [string, 'null'], format: uuid}
+    points: {type: number, minimum: 0, maximum: 999999.99, multipleOf: 0.01}
+    reason: {type: string, minLength: 1, maxLength: 500}
+
+PublishPendingRequest:
+  type: object
+  additionalProperties: false
+  required: [scope, sectionIds]
+  properties:
+    scope: {type: string, const: pending}
+    sectionIds:
+      type: array
+      minItems: 1
+      uniqueItems: true
+      items: {type: string, format: uuid}
+    gradeItemIds:
+      type: array
+      minItems: 1
+      uniqueItems: true
+      items: {type: string, format: uuid}

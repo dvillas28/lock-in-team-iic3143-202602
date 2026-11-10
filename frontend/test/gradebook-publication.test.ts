@@ -1,5 +1,5 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
-import {selection,rectangle} from '../src/lib/gradebook/validation.ts';import {PublicationOperation} from '../src/lib/gradebook/publication.ts';
+import {selection,rectangle,type PublicationSelection} from '../src/lib/gradebook/validation.ts';import {PublicationOperation} from '../src/lib/gradebook/publication.ts';
 import {item,row,section,id,receipt,deferred} from './fixtures/gradebook.ts';
 import {getRouteFeedback} from '../src/lib/route-feedback.ts';import {ApiHttpError} from '../src/lib/api/errors.ts';
 test('feedback distinguishes invalid request, conflict, validation and unavailable without detail',()=>{
@@ -15,6 +15,6 @@ test('publication requires complete explicit rectangular selection and canonical
 });
 test('double click shares one immutable operation and exact key/body replay',async()=>{
  const op=new PublicationOperation('scope',selected,'key'),slow=deferred<typeof receipt>();let count=0;
- const send=async(body:typeof selected,key:string)=>{count++;assert.deepEqual(body,selected);assert.equal(key,'key');return slow.promise;};
+ const send=async(body:PublicationSelection,key:string)=>{count++;assert.deepEqual(body,selected);assert.equal(key,'key');return slow.promise;};
  const a=op.send('scope',send),b=op.send('scope',send);assert.equal(count,1);slow.resolve(receipt);await Promise.all([a,b]);assert.equal(op.state,'confirmed');assert.deepEqual(op.receipt,receipt);await op.send('scope',send);assert.equal(count,1);
 });

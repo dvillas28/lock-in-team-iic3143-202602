@@ -37,12 +37,13 @@
     tags:
       - Gradebook
     operationId: updateGradebookWeights
-    summary: Reemplazar ponderaciones del curso de forma atómica
+    summary: Reemplazar pesos individuales en cursos con cálculo histórico
+    deprecated: true
     description: |
       Cualquier teacher activo del curso, sin exigir is_admin ni ownership. Ponderaciones comunes
       a todas las secciones; esto no amplía acceso a notas o participantes. Colección completa, única, pesos
-      de hasta dos decimales, suma exacta 100. Primera publicación congela pesos e ítems; 409
-      GRADE_WEIGHTS_LOCKED incluso en no-op. Antes de freeze no-op no emite evento.
+      de hasta dos decimales, suma exacta 100. Los cambios posteriores a la primera publicación y el modo de puntos usan el endpoint de grupos.
+      Una solicitud sin cambios no emite evento.
     requestBody:
       required: true
       content:
@@ -130,7 +131,9 @@
       publicar una nota. Un intento abandonado debe cancelarse explícitamente antes de publicar;
       esta operación no lo cancela automáticamente y responde 409 Conflict si aún existe un intento
       activo. La operación es atómica, no sobrescribe notas publicadas y genera auditoría histórica.
-      Selección explícita completa de gradeItemIds, sectionIds y studentIds. Recibo persistente por
+      Selección explícita por evaluaciones, secciones y estudiantes, o notas pendientes de las secciones
+      completas con scope=pending y filtro opcional de evaluaciones. El lote pendiente omite las
+      notas ya publicadas y las evaluaciones sin nota registrada. Recibo persistente por
       tenant/actor/clave; selección canónica igual devuelve original tras revalidar permisos,
       distinta selección o curso da 409 IDEMPOTENCY_CONFLICT. Otra clave sobre nota publicada da
       GRADE_ALREADY_PUBLISHED. Fallos no reservan clave.
@@ -141,7 +144,9 @@
       content:
         application/json:
           schema:
-            $ref: '../components/schemas/grades.yaml#/PublishGradesRequest'
+            oneOf:
+              - $ref: '../components/schemas/grades.yaml#/PublishGradesRequest'
+              - $ref: '../components/schemas/gradebook-groups.yaml#/PublishPendingRequest'
     responses:
       '200':
         description: Publicación registrada, o resultado idempotente de una ya procesada.
@@ -177,8 +182,9 @@
     summary: Consultar notas publicadas del estudiante autenticado
     description: |
       La identidad se deriva de `sub`; no acepta `studentId`. Retorna solo notas propias publicadas.
-      El promedio parcial es `sum(grade * weight) / sum(published weights)` y no se recibe del
-      cliente.
+      Los subtotales y el promedio parcial se calculan con notas publicadas propias. Los grupos
+      ponderan la suma de puntos obtenidos sobre los posibles. En modo histórico se conserva el
+      promedio de notas individuales ponderadas.
     responses:
       '200':
         description: Notas propias publicadas y promedio parcial derivado.

@@ -4,7 +4,7 @@ import {randomUUID} from 'node:crypto';
 import {database,http} from './helpers.mjs';
 import {gradebookFixture,request,tokens,users,selection,coursePath,snapshot} from './gradebook-fixtures.mjs';
 import {failAudit,restoreAudit} from './course-fixtures.mjs';
-test('weights require complete exact collection, atomic audit, no-op and freeze',async()=>{
+test('weights require complete exact collection, atomic audit, no-op and redirects published edits to groups',async()=>{
  const pool=await database();let app;try{
  const f=await gradebookFixture(pool);app=await http();const t=await tokens(app,f),path=coursePath(f),items=(await request(app,t.owner,path+'/grade-items')).body.items;
  const input={items:items.map(i=>({gradeItemId:i.id,weightPercent:i.weightPercent}))};
@@ -18,7 +18,9 @@ test('weights require complete exact collection, atomic audit, no-op and freeze'
  const event=(await pool.query("SELECT changes FROM audit_events WHERE action='gradebook.weightsUpdated'")).rows[0].changes;
  assert.deepEqual(event.before,input);assert.deepEqual(event.after,changed);
  assert.equal((await request(app,t.owner,path+'/gradebook/publications','POST',selection(f),'freeze')).status,200);
- const frozen=await request(app,t.owner,path+'/gradebook/weights','PUT',changed);assert.equal(frozen.status,409);assert.equal(frozen.body.code,'GRADE_WEIGHTS_LOCKED');
+ assert.equal((await request(app,t.owner,path+'/gradebook/weights','PUT',changed)).status,200);
+ const redirect=await request(app,t.owner,path+'/gradebook/weights','PUT',input);
+ assert.equal(redirect.status,409);assert.equal(redirect.body.code,'USE_GRADE_GROUPS');
  }finally{if(app)await app.close();await pool.end();}
 });
 

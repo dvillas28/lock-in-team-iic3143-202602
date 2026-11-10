@@ -4,16 +4,16 @@ import type { Session } from "../../lib/auth/session.ts";
 import type { Section } from "../../lib/courses/validation.ts";
 import {
   rectangle,
-  weightsInput,
+  publicationSelection,
   type Book,
   type GradeItem,
   type Selection,
+  type PublicationSelection,
 } from "../../lib/gradebook/validation.ts";
 import { PublicationOperation } from "../../lib/gradebook/publication.ts";
 import { publishGrades } from "../../lib/api/gradebook.ts";
 import { getRouteFeedback } from "../../lib/route-feedback.ts";
-import { AcademicDate } from "../academic/feedback.tsx";
-import { useTransientFeedback } from "../use-feedback.ts";
+import { useContentNotice } from "../content/content-notices.tsx";
 const emptySelection = (): Selection => ({
   gradeItemIds: [],
   sectionIds: [],
@@ -27,6 +27,8 @@ export function GradePublication({
   rows,
   sections,
   disabled = false,
+  totalWeightPercent,
+  moreRows = false,
   onConfirmed,
   onBusy,
 }: Readonly<{
@@ -37,24 +39,23 @@ export function GradePublication({
   rows: Book["items"];
   sections: Section[];
   disabled?: boolean;
+  totalWeightPercent?: number;
+  moreRows?: boolean;
   onConfirmed: () => void;
   onBusy: (busy: boolean) => void;
 }>) {
   const [chosen, setChosen] = useState(emptySelection),
-    [reviewing, setReviewing] = useState(false),
-    [message, setMessage] = useState("");
-  const [snapshot, setSnapshot] = useState<{
-    state: PublicationOperation["state"];
-    receipt: PublicationOperation["receipt"];
-  }>();
-  const feedback = useTransientFeedback(message, snapshot?.state === "confirmed", snapshot);
+    [wholeSections, setWholeSections] = useState(false),
+    [reviewing, setReviewing] = useState(false);
+  const [status, setStatus] = useState<PublicationOperation["state"]>();
+  const notify = useContentNotice();
   const operation = useRef<PublicationOperation | undefined>(undefined),
     dialog = useRef<HTMLDialogElement>(null),
     trigger = useRef<HTMLButtonElement>(null),
     back = useRef<HTMLButtonElement>(null);
   const scope = `${session.getSnapshot().generation}:${slug}:${courseId}:${JSON.stringify(session.getSnapshot().context?.user)}`;
   const locked =
-    snapshot?.state === "sending" || snapshot?.state === "uncertain";
+    status === "sending" || status === "uncertain";
   useEffect(
     () => () => {
       operation.current?.dispose();
@@ -88,23 +89,18 @@ export function GradePublication({
     };
   }, [locked]);
   let reason = "";
+  let request: PublicationSelection | undefined;
   try {
-    weightsInput(
-      items.map((i) => ({
-        gradeItemId: i.id,
-        weightPercent: String(i.weightPercent),
-      })),
-      items,
-    );
-    rectangle(chosen, rows);
+    if ((totalWeightPercent ?? items.reduce((n, i) => n + Math.round(i.weightPercent * 100), 0) / 100) !== 100)
+      throw new Error("Guarda ponderaciones que sumen 100 % para publicar notas.");
+    request = wholeSections
+      ? publicationSelection({scope:"pending",sectionIds:chosen.sectionIds,
+        ...(chosen.gradeItemIds.length ? {gradeItemIds:chosen.gradeItemIds} : {})})
+      : rectangle(chosen, rows);
   } catch (error) {
     reason = (error as Error).message;
   }
-  const eligible = rows.some(
-    (r) =>
-      sections.some((s) => s.id === r.sectionId) &&
-      r.grades.some((g) => !g.publishedAt),
-  );
+  const eligible = moreRows || rows.some(row => sections.some(s => s.id === row.sectionId) && row.grades.some(g => !g.publishedAt));
   const students = rows
     .filter((r) => chosen.sectionIds.includes(r.sectionId))
     .filter(
@@ -116,15 +112,14 @@ export function GradePublication({
       [k]: v[k].includes(id) ? v[k].filter((x) => x !== id) : [...v[k], id],
       ...(k === "sectionIds" ? { studentIds: [] } : {}),
     }));
-    setMessage("");
   }
   function reset() {
     operation.current?.dispose();
     operation.current = undefined;
-    setSnapshot(undefined);
+    setStatus(undefined);
     setChosen(emptySelection());
+    setWholeSections(false);
     setReviewing(false);
-    setMessage("");
   }
   async function send() {
     if (
@@ -133,10 +128,10 @@ export function GradePublication({
     )
       return;
     if (!operation.current) {
-      if (disabled || reason) return;
+      if (disabled || !request) return;
       operation.current = new PublicationOperation(
         scope,
-        rectangle(chosen, rows),
+        request,
         crypto.randomUUID(),
       );
     }
@@ -147,79 +142,37 @@ export function GradePublication({
     const promise = current.send(scope, (body, key) =>
       session.request((c) => publishGrades(c, slug, courseId, body, key)),
     );
-    setSnapshot({ state: current.state, receipt: current.receipt });
+    setStatus(current.state);
     await promise;
     if (context !== session.getSnapshot().context) return;
-    setSnapshot({ state: current.state, receipt: current.receipt });
+    setStatus(current.state);
     onBusy(current.state === "uncertain");
     if (current.state === "confirmed") {
-      setMessage("Notas publicadas correctamente.");
+      notify?.("Notas publicadas correctamente.");
       onConfirmed();
     } else
-      setMessage(
+      notify?.(
         current.state === "uncertain"
           ? "Resultado incierto. Conservamos tu selección para consultar o repetir esta misma publicación."
           : getRouteFeedback(current.error).message,
+        "error",
       );
   }
   return (
-    <div className="publication-control">
+    <>
       <button
         ref={trigger}
         className="btn btn-primary"
         type="button"
-        disabled={disabled || locked || !eligible}
+        disabled={status === "sending" || (status !== "uncertain" && (disabled || !items.length || !sections.length || !eligible))}
         onClick={() => {
-          if (snapshot) reset();
+          if (status === "uncertain") { void send(); return; }
+          if (status) reset();
           dialog.current?.showModal();
         }}
       >
-        Publicar notas
+        {status === "sending" ? "Publicando…" : status === "uncertain" ? "Repetir operación exacta" : "Publicar notas"}
       </button>
-      {!eligible && (
-        <p className="hint">
-          No hay notas pendientes de publicación en esta página.
-        </p>
-      )}
-      {snapshot && (snapshot.state !== "confirmed" || feedback) && (
-        <div
-          className="notice stack publication-status"
-          aria-live="polite"
-          aria-busy={snapshot.state === "sending"}
-        >
-          <p>{snapshot.state === "sending" ? "Publicando notas…" : feedback}</p>
-          {snapshot.state === "uncertain" && (
-            <button
-              className="btn btn-ghost"
-              type="button"
-              onClick={() => void send()}
-            >
-              Repetir operación exacta
-            </button>
-          )}
-          {snapshot.state === "rejected" && (
-            <button
-              className="btn btn-ghost"
-              type="button"
-              onClick={() => {
-                reset();
-                dialog.current?.showModal();
-              }}
-            >
-              Corregir selección
-            </button>
-          )}
-        </div>
-      )}
-      {snapshot?.state === "confirmed" && (
-        <details className="academic-disclosure">
-          <summary>Comprobante de última publicación</summary>
-          <output>
-            Recibo confirmado: {snapshot.receipt?.publishedCount} notas ·{" "}
-            <AcademicDate value={snapshot.receipt!.publishedAt} />
-          </output>
-        </details>
-      )}
       <dialog
         className="modal native-dialog academic-dialog"
         ref={dialog}
@@ -248,39 +201,35 @@ export function GradePublication({
         {reviewing ? (
           <div className="stack">
             <p className="notice tnum">
-              {chosen.gradeItemIds.length} evaluaciones ×{" "}
-              {chosen.studentIds.length} estudiantes ={" "}
-              {chosen.gradeItemIds.length * chosen.studentIds.length} notas;{" "}
-              {chosen.sectionIds.length} secciones.
+              {wholeSections ? "Se publicarán las notas registradas pendientes en las secciones elegidas, incluidas otras páginas del libro."
+                : `Se publicarán ${chosen.gradeItemIds.length * chosen.studentIds.length} notas de ${chosen.studentIds.length} estudiantes.`}
             </p>
             <h3>Evaluaciones</h3>
-            <ul>
-              {chosen.gradeItemIds.map((id) => (
-                <li key={id}>{items.find((i) => i.id === id)?.title}</li>
-              ))}
-            </ul>
-            <h3>Destinatarios</h3>
-            <ul>
-              {chosen.studentIds.map((id) => (
-                <li key={id}>
-                  {students.find((r) => r.student.id === id)?.student.name}
-                </li>
-              ))}
-            </ul>
-            <p className="hint">
-              Las notas publicadas quedan disponibles para los estudiantes y no
-              se pueden modificar. Se comprobará que los resultados siguen
-              siendo publicables.
-            </p>
+            <ul>{chosen.gradeItemIds.length ? chosen.gradeItemIds.map(id => (
+              <li key={id}>{items.find(i => i.id === id)?.title}</li>
+            )) : <li>Todas las evaluaciones</li>}</ul>
+            <h3>{wholeSections ? "Secciones" : "Destinatarios"}</h3>
+            <ul>{wholeSections
+              ? chosen.sectionIds.map(id => <li key={id}>Sección {sections.find(s => s.id === id)?.code}</li>)
+              : chosen.studentIds.map(id => <li key={id}>{students.find(r => r.student.id === id)?.student.name}</li>)}</ul>
+            <p className="hint">Los estudiantes verán las notas al confirmar. Una corrección posterior queda registrada en el historial.</p>
           </div>
         ) : (
           <div className="stack">
-            <p className="hint">
-              Selecciona las evaluaciones y los estudiantes de esta página que
-              ya revisaste.
-            </p>
             <fieldset className="selection-group" disabled={locked || disabled}>
-              <legend>Evaluaciones</legend>
+              <legend>¿A quién quieres publicar?</legend>
+              <div className="publication-modes">
+                <label className="option"><input type="radio" name="publish-scope" checked={!wholeSections}
+                  onChange={() => setWholeSections(false)} /> Estudiantes seleccionados</label>
+                <label className="option"><input type="radio" name="publish-scope" checked={wholeSections}
+                  onChange={() => setWholeSections(true)} /> Secciones completas</label>
+              </div>
+            </fieldset>
+            <p className="hint">{wholeSections
+              ? "Elige las secciones y, si quieres, limita la publicación a ciertas evaluaciones."
+              : "Elige las evaluaciones y los estudiantes de esta página cuyas notas ya revisaste."}</p>
+            <fieldset className="selection-group" disabled={locked || disabled}>
+              <legend>{wholeSections ? "Evaluaciones (opcional)" : "Evaluaciones"}</legend>
               {items.map((i) => (
                 <label className="option" key={i.id}>
                   <input
@@ -307,7 +256,7 @@ export function GradePublication({
                 </label>
               ))}
             </fieldset>
-            <fieldset className="selection-group" disabled={locked || disabled}>
+            {!wholeSections && <fieldset className="selection-group" disabled={locked || disabled}>
               <legend>Estudiantes de esta página</legend>
               {students.length ? (
                 students.map((r) => (
@@ -329,7 +278,7 @@ export function GradePublication({
                   Selecciona una sección para ver sus estudiantes.
                 </p>
               )}
-            </fieldset>
+            </fieldset>}
             {reason && (
               <p className="hint" role="status">
                 {reason}
@@ -358,6 +307,6 @@ export function GradePublication({
           </button>
         </div>
       </dialog>
-    </div>
+    </>
   );
 }

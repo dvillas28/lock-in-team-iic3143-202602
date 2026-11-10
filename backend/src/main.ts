@@ -53,7 +53,13 @@ async function bootstrap() {
       }
       next();
     });
-    app.useBodyParser("json", {limit: 4096, strict: false, inflate: false});
+    app.useBodyParser("json", {limit: 64*1024, strict: false, inflate: false,
+      verify: (request: {method?:string;url?:string}, _response: unknown, body: Buffer) => {
+        const gradeGroups=request.method==="PUT" &&
+          /^\/api\/v1\/institution\/[^/]+\/courses\/[^/]+\/gradebook\/groups\/?$/i.test(request.url?.split("?",1)[0]??"");
+        if (!gradeGroups && body.length>4096) throw Object.assign(new Error("Request too large"),{status:413});
+      },
+    });
     app.use((error: {status?: number}, _request: unknown, _response: unknown, next: (error: unknown) => void) => {
       next(new HttpException("Invalid request", [400,413,415,503].includes(error.status ?? 0) ? error.status! : 500));
     });
