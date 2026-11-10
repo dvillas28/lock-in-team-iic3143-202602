@@ -6,6 +6,10 @@ export async function disclose(page:Page,name:string) {
  const summary=page.locator('summary').filter({hasText:new RegExp('^'+name+'$')});
  if(!await summary.evaluate(s=>(s.parentElement as HTMLDetailsElement).open))await summary.click();
 }
+export async function addContent(scope:Locator,item:'Subir archivo'|'Crear página'|'Enlazar cuestionario') {
+ await scope.getByRole('button',{name:'Añadir contenido',exact:true}).click();
+ await scope.getByRole('menuitem',{name:new RegExp('^'+item)}).click();
+}
 export async function sections(page:Page,e:Environment,section=e.data.sections.S1,course=e.data.courses.C1) {
  await go(page,course,'/sections');
  const picker=page.getByRole('combobox',{name:'Sección a gestionar',exact:true});await expect(picker).toBeVisible();

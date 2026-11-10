@@ -1,14 +1,13 @@
 "use client";
 
-import {useEffect,useRef,useState,type FormEvent} from "react";
-import {ArrowDown,ArrowUp,ClipboardList,File,FileText,Image} from "lucide-react";
+import {useEffect,useRef,useState} from "react";
+import {ArrowDown,ArrowUp,ClipboardList,File,FileText,Image,X} from "lucide-react";
 import Link from "next/link";
 import {useResource} from "../courses/use-resource.ts";
 import {useRefreshOnReturn} from "./use-refresh-on-return.ts";
 import {useContentMutation} from "./content-notices.tsx";
 import {ErrorState,EmptyState,LoadingState} from "../route-states.tsx";
-import {deleteAcademicFile,linkModuleQuiz,listModuleResources,moveResource,unlinkModuleQuiz} from "../../lib/api/academic-files.ts";
-import {listCourseQuizzes} from "../../lib/api/quizzes.ts";
+import {deleteAcademicFile,listModuleResources,moveResource,unlinkModuleQuiz} from "../../lib/api/academic-files.ts";
 import type {Session} from "../../lib/auth/session.ts";
 import {fileExtension,formatBytes,type AcademicFile,type ModuleQuiz,type ModuleResource,type UploadLimits} from "../../lib/content/academic-files.ts";
 import type {CourseModule} from "../../lib/content/validation.ts";
@@ -17,42 +16,13 @@ import {PublicationToggle} from "./publication-toggle.tsx";
 import {MaterialForm} from "./material-form.tsx";
 import {FileEditor} from "./file-editor.tsx";
 import {FileUploadForm} from "./file-upload-form.tsx";
+import {AddContentMenu,type ContentAction} from "./add-content-menu.tsx";
+import {QuizLinkDialog} from "./quiz-link-dialog.tsx";
+import {useDelayedFlag} from "./use-delayed-flag.ts";
 
 type RowContext={
  session:Session;slug:string;parent:CourseModule;author:boolean;disabled:boolean;reload:()=>Promise<boolean|undefined>;
 };
-function QuizLinkForm({session,slug,parent,disabled,reload,course,items}:RowContext&{course:Course;items:ModuleResource[]}) {
- const result=useResource(session,`link-quiz:${slug}:${parent.id}`,c=>listCourseQuizzes(c,slug,course.id),false);
- const mutation=useContentMutation(session);
- const user=session.getSnapshot().context?.user;
- const owner=user?.institutionMembership.isAdmin && user.id===course.createdBy;
- const ownSections=user?.sectionMemberships.filter(m=>m.courseId===course.id && m.role==="teacher").map(m=>m.sectionId);
- const choices=result.data?.filter(q=>(owner||ownSections?.includes(q.sectionId??"")) &&
-  !items.some(item=>item.kind==="quiz"&&item.quizId===q.id));
- function submit(event:FormEvent<HTMLFormElement>) {
-  event.preventDefault();
-  const quizId=new FormData(event.currentTarget).get("quiz");
-  if (typeof quizId!=="string" || !choices?.some(q=>q.id===quizId)) return;
-  void mutation.run(async current=>{
-   await session.request(c=>linkModuleQuiz(c,slug,parent.id,quizId),current);
-   return await reload() ? "Cuestionario enlazado." : {message:"Enlace guardado. Usa Reintentar para consultar los recursos.",persistent:true};
-  },async()=>{await reload();return "Revisa los recursos actuales.";});
- }
- if (result.error) return <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/>;
- if (!choices) return <LoadingState/>;
- return <form className="quiz-link-form stack" onSubmit={submit}>
-  {choices.length ? <>
-   <label className="field-label" htmlFor={`quiz-${parent.id}`}>Cuestionario del curso</label>
-   <select id={`quiz-${parent.id}`} className="field" name="quiz" required defaultValue="" disabled={disabled||mutation.busy||!!mutation.uncertain}>
-    <option value="" disabled>Selecciona un cuestionario</option>
-    {choices.map(q=><option key={q.id} value={q.id}>{q.title}</option>)}
-   </select>
-   <div><button type="submit" className="btn btn-primary" disabled={disabled||mutation.busy||!!mutation.uncertain}>Enlazar cuestionario</button></div>
-  </> : <p className="hint">No hay cuestionarios disponibles para enlazar.</p>}
-  {mutation.message && <p role={mutation.confirmed?"status":"alert"}>{mutation.message}</p>}
- </form>;
-}
-
 function ResourceRow({session,slug,parent,item,author,disabled,reload,limits,previous,next,move,unlink,remove}:RowContext&{
  item:ModuleResource;limits:UploadLimits;previous?:string;next?:string;
  move:(id:string,neighbor:string,direction:-1|1)=>void;unlink:(item:ModuleQuiz)=>void;remove:(item:AcademicFile)=>void;
@@ -99,7 +69,11 @@ export function ModuleResources({session,slug,parent,author,disabled,course,expa
  const result=useResource(session,`${session.getSnapshot().generation}:${slug}:${parent.courseId}:${parent.id}`,
   c=>listModuleResources(c,slug,parent.id),true);
  const mutation=useContentMutation(session);
- const [showQuiz,setShowQuiz]=useState(false);
+ const [panel,setPanel]=useState<"file"|"page"|null>(null),[quizOpen,setQuizOpen]=useState(false);
+ const [fileBusy,setFileBusy]=useState(false),[pageBusy,setPageBusy]=useState(false);
+ const trigger=useRef<HTMLButtonElement>(null),panels=useRef<HTMLDivElement>(null);
+ const slow=useDelayedFlag(!result.data&&!result.error);
+ const closePanel=()=>{setPanel(null);trigger.current?.focus();};
  const {reload}=result;
  const wasExpanded=useRef(expanded);
  useEffect(()=>{
@@ -107,8 +81,11 @@ export function ModuleResources({session,slug,parent,author,disabled,course,expa
   wasExpanded.current=expanded;
  },[expanded,reload]);
  useRefreshOnReturn(reload,expanded&&!!result.data&&!result.refreshing);
+ useEffect(()=>{
+  if (panel) panels.current?.querySelector<HTMLElement>(`[data-panel="${panel}"] input:not([type=hidden]),[data-panel="${panel}"] textarea`)?.focus();
+ },[panel]);
  if (result.error&&!result.data) return <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/>;
- if (!result.data) return <LoadingState/>;
+ if (!result.data) return slow ? <LoadingState/> : <div className="resource-pending" aria-busy="true"/>;
  const {items,limits}=result.data;
  const unavailable=disabled||!!result.error||!!result.refreshing||mutation.busy||!!mutation.uncertain;
  const row={session,slug,parent,author,disabled:unavailable,reload:result.reload};
@@ -141,15 +118,22 @@ export function ModuleResources({session,slug,parent,author,disabled,course,expa
   {mutation.message && <p role={mutation.confirmed?"status":"alert"}>{mutation.message}</p>}
   <div className="resource-toolbar"><span className="section-label">Materiales del módulo</span></div>
   {author && <div className="resource-creation">
-   <details className="academic-disclosure file-creation"><summary>Agregar archivo</summary>
-    <FileUploadForm session={session} slug={slug} moduleId={parent.id} limits={limits} disabled={unavailable} reload={result.reload}/>
-   </details>
-   <details className="academic-disclosure"><summary>Crear material</summary>
-    <MaterialForm session={session} slug={slug} moduleId={parent.id} onSaved={result.reload} disabled={unavailable}/>
-   </details>
-   <details className="academic-disclosure" onToggle={event=>setShowQuiz(event.currentTarget.open)}><summary>Enlazar cuestionario</summary>
-    {showQuiz&&<QuizLinkForm {...row} course={course} items={items}/>}
-   </details>
+   <AddContentMenu triggerRef={trigger} disabled={unavailable} onSelect={(action:ContentAction)=>{
+    if (action==="quiz") setQuizOpen(true); else setPanel(action);
+   }}/>
+  </div>}
+  {author && <div ref={panels}>
+   <section className="resource-panel card" data-panel="file" aria-label="Subir archivo" hidden={panel!=="file"}>
+    <div className="dialog-heading"><h3>Subir archivo</h3>
+     <button type="button" className="btn btn-ghost" aria-label="Cerrar" disabled={fileBusy} onClick={closePanel}><X size={18} aria-hidden="true"/></button></div>
+    <FileUploadForm session={session} slug={slug} moduleId={parent.id} limits={limits} disabled={unavailable} reload={result.reload} onBusyChange={setFileBusy} onDone={closePanel}/>
+   </section>
+   <section className="resource-panel card" data-panel="page" aria-label="Crear página" hidden={panel!=="page"}>
+    <div className="dialog-heading"><h3>Crear página</h3>
+     <button type="button" className="btn btn-ghost" aria-label="Cerrar" disabled={pageBusy} onClick={closePanel}><X size={18} aria-hidden="true"/></button></div>
+    <MaterialForm session={session} slug={slug} moduleId={parent.id} onSaved={result.reload} disabled={unavailable} onBlockedChange={setPageBusy} onDone={closePanel}/>
+   </section>
+   <QuizLinkDialog open={quizOpen} {...row} course={course} items={items} onClose={()=>{setQuizOpen(false);trigger.current?.focus();}}/>
   </div>}
   {!result.error&&!result.refreshing&&!items.length && <EmptyState/>}
   <ul className="module-resource-list">

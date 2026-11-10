@@ -5,6 +5,7 @@ import {ModulesPanel} from "../src/components/content/modules-panel.tsx";
 import {mount} from "./fixtures/course-ui.ts";
 import {unit,material,course,id,resources} from "./fixtures/content.ts";
 import {deferred} from "./fixtures/courses.ts";
+import {published as publishedQuiz} from "./fixtures/quizzes.ts";
 const view=()=>h(ModulesPanel,{courseId:course.id});
 test("teacher without admin creates at max+1; edits material minimally and retains draft on authorized refresh",async()=>{
  let parent={...unit};let item={...material};const ui=await mount(view(),async r=>{
@@ -85,10 +86,10 @@ test("material create ambiguity and rejected edit retain original whitespace; no
  return Response.json(r.url.endsWith("/resources")?resources(...items):r.url.endsWith("/materials")?{items}:r.url.endsWith("/modules")?{items:[unit]}:course);
  },"teacher");
  try{
- await ui.click("Unidad 1");await ui.submit('form[aria-label="Crear material"]',{title:"Lectura",markdownBody:"  fuente local  "});
- const source=ui.doc.querySelector<HTMLTextAreaElement>('form[aria-label="Crear material"] textarea')!;
+ await ui.click("Unidad 1");await ui.submit('form[aria-label="Crear página"]',{title:"Lectura",markdownBody:"  fuente local  "});
+ const source=ui.doc.querySelector<HTMLTextAreaElement>('form[aria-label="Crear página"] textarea')!;
  assert.equal(source.value,mode==="lost"?"  fuente local  ":"");
- if(mode==="lost"){assert.match(ui.doc.body.textContent!,/coincidencias no prueban/);await ui.submit('form[aria-label="Crear material"]',{title:"Lectura",markdownBody:"otra"});assert.equal(ui.requests.filter(r=>r.method==="POST"&&!r.url.endsWith("/login")).length,1);}
+ if(mode==="lost"){assert.match(ui.doc.body.textContent!,/coincidencias no prueban/);await ui.submit('form[aria-label="Crear página"]',{title:"Lectura",markdownBody:"otra"});assert.equal(ui.requests.filter(r=>r.method==="POST"&&!r.url.endsWith("/login")).length,1);}
  await ui.submit('form[aria-label="Editar material Lectura"]',{title:"Lectura",markdownBody:"  editar  "});
  assert.equal(ui.doc.querySelector<HTMLTextAreaElement>('form[aria-label="Editar material Lectura"] textarea')!.value,"  editar  ");
  }finally{await ui.close();}
@@ -100,7 +101,7 @@ test("pending reorder, material update and create are discarded on context chang
  const ui=await mount(view(),r=>r.method!=="GET"?pending.promise:Response.json(r.url.endsWith("/resources")?resources(material):r.url.endsWith("/modules")?{items:[unit,{...unit,id:id(42),title:"Segundo",position:9}]}:course),"teacher");
  try{
  if(operation==="order")await ui.settle(()=>ui.doc.querySelector<HTMLButtonElement>('button[aria-label="Bajar Unidad 1"]')!.click());
- else{await ui.click("Unidad 1");await ui.submit(operation==="update"?'form[aria-label="Editar material Lectura"]':'form[aria-label="Crear material"]',{title:"Lectura",markdownBody:"Privado"});}
+ else{await ui.click("Unidad 1");await ui.submit(operation==="update"?'form[aria-label="Editar material Lectura"]':'form[aria-label="Crear página"]',{title:"Lectura",markdownBody:"Privado"});}
  await ui.actor("student");
  await ui.settle(()=>pending.resolve(Response.json(operation==="order"?{items:[]}:{...material,markdownBody:"Privado"})));
  assert.equal(ui.doc.querySelector("form"),null);assert.doesNotMatch(ui.doc.body.textContent!,/Privado|creado|actualizado/);
@@ -122,10 +123,10 @@ test("confirmed create followed by failed empty refresh is not uncertain or a re
 test("collapsing an uncertain material editor cannot unlock the same creation",async()=>{
  const ui=await mount(view(),r=>r.method==="POST"?Promise.reject(new Error("lost")):Response.json(r.url.endsWith("/resources")?resources(material):r.url.endsWith("/modules")?{items:[unit]}:course),"teacher");
  try{
- await ui.click("Unidad 1");await ui.submit('form[aria-label="Crear material"]',{title:"Lectura",markdownBody:"borrador"});
+ await ui.click("Unidad 1");await ui.submit('form[aria-label="Crear página"]',{title:"Lectura",markdownBody:"borrador"});
  await ui.click("Unidad 1");await ui.click("Unidad 1");
  assert.match(ui.doc.body.textContent!,/Resultado incierto/);
- await ui.submit('form[aria-label="Crear material"]',{title:"Lectura",markdownBody:"borrador"});
+ await ui.submit('form[aria-label="Crear página"]',{title:"Lectura",markdownBody:"borrador"});
  assert.equal(ui.requests.filter(r=>r.method==="POST"&&!r.url.endsWith("/login")).length,1);
  }finally{await ui.close();}
 });
@@ -169,5 +170,133 @@ test("module dialog: 'Nuevo módulo' opens empty, 'Renombrar' is preloaded, canc
  await ui.settle(()=>rename.click());
  const edit=ui.doc.querySelector<HTMLInputElement>(`form[aria-label="Editar módulo ${unit.title}"] input`)!;
  assert.equal(edit.value,unit.title);assert.ok(edit.closest("dialog")!.hasAttribute("open"));
+ }finally{await ui.close();}
+});
+test("add-content menu offers three actions, closes on Escape and reveals the chosen panel",async()=>{
+ const ui=await mount(view(),r=>Response.json(r.url.endsWith("/modules")?{items:[unit]}:r.url.endsWith("/resources")?resources(material):course),"teacher");
+ try{
+  await ui.click("Unidad 1");
+  assert.equal(ui.doc.querySelectorAll('button[aria-haspopup="menu"]').length,1);
+  assert.equal(ui.doc.querySelector('[role="menu"]'),null);
+  await ui.click("Añadir contenido");
+  const labels=Array.from(ui.doc.querySelectorAll('[role="menuitem"] strong')).map(e=>e.textContent);
+  assert.deepEqual(labels,["Subir archivo","Crear página","Enlazar cuestionario"]);
+  await ui.settle(()=>{ui.doc.querySelector('[role="menu"]')!.dispatchEvent(new ui.doc.defaultView!.KeyboardEvent("keydown",{key:"Escape",bubbles:true}));});
+  assert.equal(ui.doc.querySelector('[role="menu"]'),null);
+  await ui.click("Añadir contenido");
+  await ui.settle(()=>ui.doc.querySelectorAll<HTMLElement>('[role="menuitem"]')[1].click());
+  assert.equal(ui.doc.querySelector('[data-panel="page"]')!.hasAttribute("hidden"),false);
+  assert.equal(ui.doc.querySelector('[data-panel="file"]')!.hasAttribute("hidden"),true);
+ }finally{await ui.close();}
+});
+test("students never see the add-content menu",async()=>{
+ const ui=await mount(view(),r=>Response.json(r.url.endsWith("/modules")?{items:[unit]}:r.url.endsWith("/resources")?resources(material):course),"student");
+ try{assert.equal(ui.doc.querySelector('button[aria-haspopup="menu"]'),null);assert.equal(ui.doc.querySelector("[data-panel]"),null);}finally{await ui.close();}
+});
+const panelHidden=(ui:{doc:Document},name:string)=>ui.doc.querySelector(`[data-panel="${name}"]`)!.hasAttribute("hidden");
+test("page panel closes only after a confirmed creation and keeps the draft otherwise",async()=>{
+ for(const mode of ["ok","rejected"]){
+  const ui=await mount(view(),async r=>{
+   if(r.method==="POST")return mode==="ok"?Response.json({...material,id:id(51),...await r.clone().json()},{status:201}):Response.json({},{status:422});
+   return Response.json(r.url.endsWith("/resources")?resources(material):r.url.endsWith("/modules")?{items:[unit]}:course);
+  },"teacher");
+  try{
+   await ui.click("Unidad 1");
+   await ui.click("Añadir contenido");
+   await ui.settle(()=>ui.doc.querySelectorAll<HTMLElement>('[role="menuitem"]')[1].click());
+   assert.equal(panelHidden(ui,"page"),false);
+   await ui.submit('form[aria-label="Crear página"]',{title:"Nueva",markdownBody:"contenido"});
+   assert.equal(panelHidden(ui,"page"),mode==="ok");
+   assert.equal(ui.doc.querySelector<HTMLTextAreaElement>('form[aria-label="Crear página"] textarea')!.value,mode==="ok"?"":"contenido");
+   if(mode==="ok")assert.equal(ui.doc.querySelector(".content-notice")?.textContent,"Página creada.");
+   else assert.equal(ui.doc.querySelector(".content-notice"),null);
+  }finally{await ui.close();}
+ }
+});
+test("expanding a module does not flash a loading state for fast loads but explains slow ones",async()=>{
+ const pending=deferred<Response>();
+ const ui=await mount(view(),r=>r.url.endsWith("/resources")?pending.promise:Response.json(r.url.endsWith("/modules")?{items:[unit]}:course),"teacher");
+ try{
+  await ui.click("Unidad 1");
+  assert.doesNotMatch(ui.doc.body.textContent!,/Cargando contenido/);
+  await ui.settle(()=>{pending.resolve(Response.json(resources(material)));});
+  assert.doesNotMatch(ui.doc.body.textContent!,/Cargando contenido/);
+  assert.ok(ui.doc.querySelector('a[href$="/materials/'+material.id+'"]'));
+ }finally{await ui.close();}
+ const slow=deferred<Response>();
+ const ui2=await mount(view(),r=>r.url.endsWith("/resources")?slow.promise:Response.json(r.url.endsWith("/modules")?{items:[unit]}:course),"teacher");
+ try{
+  await ui2.click("Unidad 1");
+  await ui2.settle(()=>{});
+  await new Promise(done=>setTimeout(done,450));
+  await ui2.settle(()=>{});
+  assert.match(ui2.doc.body.textContent!,/Cargando contenido/);
+ }finally{await ui2.close();}
+});
+const linkedQuiz=(quizId:string)=>({kind:"quiz" as const,id:id(77),moduleId:unit.id,title:"Ya enlazado",position:2,publishedAt:null,quizId,canUnlink:true});
+const quizzes=(n:number)=>Array.from({length:n},(_,i)=>({...publishedQuiz,id:id(200+i),title:`Cuestionario ${i+1}`}));
+async function openQuizDialog(ui:{doc:Document;click:(t:string)=>Promise<void>;settle:(a:()=>void)=>Promise<void>}) {
+ await ui.click("Unidad 1");await ui.click("Añadir contenido");
+ await ui.settle(()=>ui.doc.querySelectorAll<HTMLElement>('[role="menuitem"]')[2].click());
+ await ui.settle(()=>{});
+ return ui.doc.querySelector<HTMLDialogElement>('dialog[aria-labelledby^="quiz-link-"]')!;
+}
+const quizServer=(items:unknown[],options:{linked?:string;failResources?:boolean;failQuizzes?:boolean}={})=>{let posted=false;return async(r:Request)=>{
+ if(r.method==="POST"&&r.url.endsWith("/quizzes")){posted=true;return Response.json({},{status:201});}
+ if(r.url.endsWith("/resources")){
+  if(options.failResources&&posted)return Response.json({},{status:503});
+  return Response.json({...resources(material),items:[...resources(material).items,...(options.linked?[linkedQuiz(options.linked)]:[])]});
+ }
+ if(r.url.endsWith("/quizzes"))return options.failQuizzes?Response.json({},{status:503}):Response.json({items});
+ return Response.json(r.url.endsWith("/modules")?{items:[unit]}:course);
+};};
+test("quiz dialog links the selected quiz, notifies once and closes",async()=>{
+ const ui=await mount(view(),quizServer(quizzes(2)),"teacher");
+ try{
+  const dialog=await openQuizDialog(ui);
+  assert.ok(dialog.hasAttribute("open"));
+  const submit=Array.from(dialog.querySelectorAll<HTMLButtonElement>("button")).find(b=>b.textContent==="Enlazar cuestionario")!;
+  assert.equal(submit.disabled,true);
+  assert.equal(dialog.querySelector("input[type=search]"),null);
+  await ui.settle(()=>dialog.querySelectorAll<HTMLInputElement>("input[type=radio]")[1].click());
+  assert.equal(submit.disabled,false);
+  await ui.settle(()=>submit.click());
+  await ui.settle(()=>{});
+  const post=ui.requests.find(r=>r.method==="POST"&&r.url.endsWith("/quizzes"))!;
+  assert.deepEqual(await post.clone().json(),{quizId:id(201)});
+  assert.equal(dialog.hasAttribute("open"),false);
+  assert.equal(ui.doc.querySelectorAll(".content-notice").length,1);
+  assert.equal(ui.doc.querySelector(".content-notice")!.textContent,"Cuestionario enlazado.");
+ }finally{await ui.close();}
+});
+test("quiz dialog hides linked quizzes, searches long lists and explains an empty list",async()=>{
+ const ui=await mount(view(),quizServer(quizzes(9),{linked:id(200)}),"teacher");
+ try{
+  const dialog=await openQuizDialog(ui);
+  const titles=()=>Array.from(dialog.querySelectorAll(".option span")).map(e=>e.textContent);
+  assert.equal(titles().length,8);assert.ok(!titles().includes("Cuestionario 1"));
+  assert.ok(dialog.querySelector("input[type=search]"),"search appears from 8 quizzes");
+ }finally{await ui.close();}
+ const empty=await mount(view(),quizServer([]),"teacher");
+ try{
+  const dialog=await openQuizDialog(empty);
+  assert.match(dialog.textContent!,/No hay cuestionarios para enlazar/);
+  assert.equal(dialog.querySelector<HTMLAnchorElement>("a")!.getAttribute("href"),`/courses/${course.id}/quizzes`);
+  await empty.settle(()=>Array.from(dialog.querySelectorAll<HTMLButtonElement>("button")).find(b=>b.textContent==="Cerrar")!.click());
+  assert.equal(dialog.hasAttribute("open"),false);
+ }finally{await empty.close();}
+});
+test("quiz dialog shows list errors and keeps a stale-list warning open after linking",async()=>{
+ const failing=await mount(view(),quizServer([],{failQuizzes:true}),"teacher");
+ try{const dialog=await openQuizDialog(failing);assert.ok(dialog.hasAttribute("open"));assert.equal(dialog.querySelector("input[type=radio]"),null);}finally{await failing.close();}
+ const ui=await mount(view(),quizServer(quizzes(2),{failResources:true}),"teacher");
+ try{
+  const dialog=await openQuizDialog(ui);
+  await ui.settle(()=>dialog.querySelectorAll<HTMLInputElement>("input[type=radio]")[0].click());
+  await ui.settle(()=>Array.from(dialog.querySelectorAll<HTMLButtonElement>("button")).find(b=>b.textContent==="Enlazar cuestionario")!.click());
+  await ui.settle(()=>{});
+  assert.ok(dialog.hasAttribute("open"));
+  assert.match(dialog.textContent!,/Enlace guardado/);
+  assert.equal(ui.doc.querySelector(".content-notice"),null);
  }finally{await ui.close();}
 });
