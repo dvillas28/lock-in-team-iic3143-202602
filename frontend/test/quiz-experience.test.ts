@@ -11,21 +11,21 @@ test("combined quiz filters stay local and creation remains separate from result
   const ui = await mount(h(QuizList, { courseId: course.id }), r => r.url.endsWith('/quizzes') ? Response.json({ items }) : reply(r), "teacher");
   try {
     assert.equal(ui.doc.querySelector('h1')?.textContent, 'Quizzes');
-    assert.equal(ui.doc.querySelectorAll('.quiz-resource-list a').length, 2);
+    assert.equal(ui.doc.querySelectorAll('.quiz-row-link').length, 2);
     assert.ok(ui.doc.querySelector('a[href$="/quizzes/new"]'));
     assert.equal(ui.doc.querySelector('form'), null);
     const requests = ui.requests.length;
-    const filters = ui.doc.querySelectorAll<HTMLSelectElement>('.quiz-filters select');
-    await ui.settle(() => { filters[0].value = 'published';filters[0].dispatchEvent(new ui.dom.window.Event('change', { bubbles: true })); });
-    assert.equal(ui.doc.querySelectorAll('.quiz-resource-list a').length, 1);
+    const filters = ui.doc.querySelectorAll<HTMLSelectElement>('.quiz-toolbar select');
+    await ui.settle(() => { filters[0].value = 'open';filters[0].dispatchEvent(new ui.dom.window.Event('change', { bubbles: true })); });
+    assert.equal(ui.doc.querySelectorAll('.quiz-row-link').length, 1);
     const search = ui.doc.querySelector<HTMLInputElement>('input[type="search"]')!;
     await ui.settle(() => { search.value = '  INTEGRACIÓN  ';search.dispatchEvent(new ui.dom.window.Event('input', { bubbles: true })); });
-    assert.match(ui.doc.querySelector('.quiz-resource-list')!.textContent!, /integración/);
+    assert.match(Array.from(ui.doc.querySelectorAll('.quiz-row-link')).map(a => a.textContent).join(' '), /integración/);
     await ui.settle(() => { filters[1].value = section.id;filters[1].dispatchEvent(new ui.dom.window.Event('change', { bubbles: true })); });
     assert.match(ui.doc.body.textContent!, /No hay quizzes que coincidan/);
-    assert.match(ui.doc.querySelector<HTMLAnchorElement>('a[href*="/quizzes/new"]')!.search, /estado=published/);
+    assert.match(ui.doc.querySelector<HTMLAnchorElement>('a[href*="/quizzes/new"]')!.search, /estado=open/);
     await ui.click('Mostrar todos los quizzes');
-    assert.equal(ui.doc.querySelectorAll('.quiz-resource-list a').length, 2);
+    assert.equal(ui.doc.querySelectorAll('.quiz-row-link').length, 2);
     assert.equal(ui.requests.length, requests);
   } finally { await ui.close(); }
 });
@@ -66,8 +66,11 @@ test("missing correct answer and malformed points focus their controls without s
   const noCorrect = { ...draft, questions: [] };
   const ui = await mount(h(QuizEditor, { courseId: course.id, quizId: draft.id }), r => reply(r, noCorrect), 'teacher');
   try {
-    for (const label of ["Guardar borrador", "Publicar quiz"])
-      assert.equal(Array.from(ui.doc.querySelectorAll("button")).find(button => button.textContent === label)?.disabled, true);
+    assert.equal(Array.from(ui.doc.querySelectorAll("button")).find(button => button.textContent === "Guardar borrador")?.disabled, true);
+    await ui.submit('form', {}, 'Publicar quiz');
+    assert.match(ui.doc.body.textContent!, /Agrega al menos una pregunta para publicar/);
+    assert.equal(ui.doc.activeElement?.textContent, 'Agregar pregunta');
+    assert.equal(ui.doc.querySelector('dialog[open]'), null);
     await ui.click('Agregar pregunta');
     await ui.submit('form', { 'questions.0.prompt': 'Pregunta', 'questions.0.alternatives.0.text': 'Sí', 'questions.0.alternatives.1.text': 'No' });
     assert.equal(ui.doc.activeElement?.getAttribute('type'), 'radio');

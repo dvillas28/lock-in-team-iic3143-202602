@@ -7,7 +7,7 @@ const view=()=>h(QuizEditor,{courseId:course.id,quizId:draft.id});
 test("authoring is explicit, authorized source required, admin alone cannot load key",async()=>{
  for(const role of ["teacher","multi","ownerTeacher","owner","super","student","assistant"]) {
  const ui=await mount(view(),r=>reply(r),role);
- try {const allowed=["teacher","multi","ownerTeacher"].includes(role);assert.equal(ui.requests.some(r=>r.url.endsWith('/authoring')),allowed);assert.equal(!!ui.doc.querySelector('form'),allowed);if(allowed)assert.match(ui.doc.body.textContent!,/impide rendir/);}finally{await ui.close();}
+ try {const allowed=["teacher","multi","ownerTeacher"].includes(role);assert.equal(ui.requests.some(r=>r.url.endsWith('/authoring')),allowed);assert.equal(!!ui.doc.querySelector('form'),allowed);if(allowed)assert.doesNotMatch(ui.doc.body.textContent!,/impide rendir|ponderación inicial|congel/);}finally{await ui.close();}
  }
  const ui=await mount(view(),r=>r.url.endsWith('/sections')?Response.json({items:[section,otherSection]}):reply(r,{...draft,sectionId:otherSection.id}),'teacher');
  try{assert.equal(ui.requests.some(r=>r.url.endsWith('/authoring')),false);}finally{await ui.close();}

@@ -33,7 +33,7 @@ test("create confirms draft; lost response stays blocked despite same-title cand
 test("empty/error states and cross-course direct detail fail safely",async()=>{
  for(const mode of ['empty','error','cross']) {
  const ui=await mount(mode==='cross'?h(QuizDetail,{courseId:course.id,quizId:draft.id}):h(QuizList,{courseId:course.id}),r=>r.url.endsWith('/quizzes')?Response.json(mode==='error'?{}:{items:[]},{status:mode==='error'?503:200}):reply(r,{...draft,courseId:id(11)}),'student');
- try {assert.match(ui.doc.body.textContent!,mode==='empty'?/Aún no hay quizzes disponibles/:/No se pudo|inválida/);assert.equal(ui.requests.some(r=>r.url.endsWith('/authoring')),false);}finally{await ui.close();}
+ try {assert.match(ui.doc.body.textContent!,mode==='empty'?/Aún no hay quizzes/:/No se pudo|inválida/);assert.equal(ui.requests.some(r=>r.url.endsWith('/authoring')),false);}finally{await ui.close();}
  }
 });
 
@@ -52,35 +52,35 @@ test("quiz empty states preserve teacher creation and differ from loading and fi
    assert.match(ui.doc.body.textContent!,/Cargando/);assert.doesNotMatch(ui.doc.body.textContent!,/Aún no hay quizzes/);
    await ui.settle(()=>pending.resolve(Response.json({items:[]})));
    assert.equal(ui.doc.querySelectorAll('.empty-zone').length,1);
-   assert.match(ui.doc.body.textContent!,/Aún no hay quizzes disponibles/);
+   assert.match(ui.doc.body.textContent!,/Aún no hay quizzes/);
    assert.doesNotMatch(ui.doc.body.textContent!,/Sin contenido para mostrar|Abre un quiz|Consulta las evaluaciones/);
    assert.equal(!!ui.doc.querySelector('a[href$="/new"]'),profile==='teacher');
-   assert.match(ui.doc.body.textContent!,profile==='teacher'?/Crea un borrador/:/Los quizzes publicados para tu sección aparecerán aquí/);
+   assert.match(ui.doc.body.textContent!,profile==='teacher'?/Crea el primer quiz/:/Los quizzes publicados para tu sección aparecerán aquí/);
   }finally{await ui.close();}
  }
  const ui=await mount(h(QuizList,{courseId:course.id}),r=>reply(r),'student');
  try{
-  await ui.select('select[id$="-status"]','published');
+  await ui.select('select[id$="-status"]','closed');
   assert.match(ui.doc.body.textContent!,/No hay quizzes que coincidan/);
-  assert.doesNotMatch(ui.doc.body.textContent!,/Aún no hay quizzes disponibles/);
+  assert.doesNotMatch(ui.doc.body.textContent!,/Aún no hay quizzes/);
   await ui.click('Mostrar todos los quizzes');assert.match(ui.doc.body.textContent!,/Quiz de aislamiento/);
  }finally{await ui.close();}
 });
 
 test("a filtered recent draft stays editable without replaying the creation toast", async () => {
   const ui = await mount(h(QuizList, {
-    courseId: course.id, createdId: draft.id, filters: { query: "", status: "published", section: "" },
+    courseId: course.id, createdId: draft.id, filters: { query: "", status: "closed", section: "" },
   }), r => reply(r), "teacher");
   try {
     const edit = ui.doc.querySelector('a[href*="/authoring"]');
     assert.equal(edit?.textContent, "Editar borrador");
     assert.match(edit?.getAttribute("href") ?? "", new RegExp(draft.id));
-    assert.match(ui.doc.body.textContent!, /queda fuera de los filtros/);
+    assert.match(ui.doc.body.textContent!, /no coincide con los filtros/);
     assert.equal(ui.doc.querySelector(".content-notice"), null);
     await ui.click("Mostrar todos los quizzes");
-    const editInCard = ui.doc.querySelector('.quiz-resource-list li a[href*="/authoring"]');
-    assert.equal(editInCard?.textContent, "Editar borrador");
-    assert.match(editInCard?.closest("li")?.textContent ?? "", /Quiz de aislamiento/);
-    assert.equal(ui.doc.querySelector(".quiz-recent-draft"), null);
+    const row = ui.doc.querySelector(".quiz-row");
+    assert.match(row?.textContent ?? "", /Quiz de aislamiento/);
+    assert.ok(row?.querySelector('button[aria-label="Publicar Quiz de aislamiento"]'));
+    assert.match(ui.doc.body.textContent!, /Borradores/);
   } finally { await ui.close(); }
 });
