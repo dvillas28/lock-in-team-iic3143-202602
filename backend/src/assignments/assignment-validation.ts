@@ -84,8 +84,8 @@ function version(value: unknown) {
 }
 
 export function assignmentCreate(body: unknown) {
- const input = object(body, ["id", "publish", ...fields], ["id", "title", "maxPoints"]);
- return {id:uuid(input.id), values:fieldsFrom(input,blank), publish:"publish" in input && boolean(input.publish)};
+ const input = object(body, ["idempotencyKey", "publish", ...fields], ["idempotencyKey", "title", "maxPoints"]);
+ return {key:uuid(input.idempotencyKey), values:fieldsFrom(input,blank), publish:"publish" in input && boolean(input.publish)};
 }
 export function assignmentUpdate(body: unknown, current: AssignmentInput) {
  const input = object(body, ["expectedVersion", "publish", ...fields], ["expectedVersion"]);

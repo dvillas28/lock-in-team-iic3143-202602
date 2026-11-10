@@ -51,7 +51,7 @@ export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
       r.score_points,r.score_percent,r.grade_value,r.actor_user_id,r.created_at
       FROM public.grade_groups k,public.grade_revisions r LIMIT 0`);
     await this.pool.query(`SELECT id,institution_id,course_id,section_id,description,instructions,
-      available_from,due_at,available_until,allowed_extensions,max_attempts,status,published_at,version,created_by,create_digest
+      available_from,due_at,available_until,allowed_extensions,max_attempts,status,published_at,version,created_by,creation_key,create_digest
       FROM public.assignments LIMIT 0`);
     // Resolve required columns without reading rows; SQL and integration tests own the constraints.
     await this.pool.query(`SELECT i.id,i.slug,i.name,i.active,i.created_at,i.updated_at,

@@ -93,19 +93,23 @@ export class AssignmentsService {
  }
 
  async create(actor: string, slug: string, course: string, body: unknown) {
-  const {id,values,publish} = assignmentCreate(body);
+  const {key,values,publish} = assignmentCreate(body);
+  const id = randomUUID();
   const digest = createHash("sha256").update(JSON.stringify(publish ? {...values,publish} : values)).digest("hex");
   return this.db.withInstitution(actor,slug,async c => {
    const scope = await gradebookScope(c,actor,slug,course), tenant = scope.member.institution_id;
    await requireDestination(c,scope,values.sectionId,true);
    const inserted = await c.query(`INSERT INTO public.assignments
-    (id,institution_id,course_id,created_by,create_digest,section_id,description,instructions,
+    (id,institution_id,course_id,created_by,creation_key,create_digest,section_id,description,instructions,
      available_from,due_at,available_until,allowed_extensions,max_attempts)
-    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT(id) DO NOTHING`,
-   [id,tenant,course,actor,digest,...metadata(values)]);
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+    ON CONFLICT(institution_id,course_id,created_by,creation_key) DO NOTHING`,
+   [id,tenant,course,actor,key,digest,...metadata(values)]);
    if (!inserted.rowCount) {
-    const [existing] = await visible(c,scope,id);
-    if (!existing || existing.create_digest !== digest || existing.created_by !== actor || !canAuthor(scope,existing.section_id)) {
+    const match = (await c.query(`SELECT id FROM public.assignments
+     WHERE institution_id=$1 AND course_id=$2 AND created_by=$3 AND creation_key=$4`,[tenant,course,actor,key])).rows[0];
+    const [existing] = match ? await visible(c,scope,match.id) : [];
+    if (!existing || existing.create_digest !== digest || !canAuthor(scope,existing.section_id)) {
      throw new ConflictException({code:"IDEMPOTENCY_CONFLICT"});
     }
     return dto(existing,scope);

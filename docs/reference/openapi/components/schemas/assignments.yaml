@@ -31,9 +31,9 @@ Assignment:
 AssignmentCreate:
   type: object
   additionalProperties: false
-  required: [id, title, maxPoints]
+  required: [idempotencyKey, title, maxPoints]
   properties:
-    id: {type: string, format: uuid, description: UUID estable de la operación de creación.}
+    idempotencyKey: {type: string, format: uuid, description: UUID estable del reintento acotado a institución, curso y autor. El servidor genera el ID de la tarea.}
     title: { $ref: '#/Assignment/properties/title' }
     description: { $ref: '#/Assignment/properties/description' }
     instructions: { $ref: '#/Assignment/properties/instructions' }

@@ -68,7 +68,7 @@ test('attempt migration upgrades populated authoring data, repeats, restarts and
   try{const down=await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir,direction:'down',count:6,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});assert.equal(down.length,6);}finally{c.release();}
   assert.equal((await pool.query("SELECT to_regclass('public.quiz_attempts') AS table")).rows[0].table,null);
   assert.equal((await cli('commands/migrate').result).code,0);assert.deepEqual(await snapshot(),parent);
-  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,19);
+  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,20);
   const profileDefaults=(await pool.query('SELECT bio,avatar_key,credential_version FROM users')).rows;
   assert.ok(profileDefaults.every(row=>row.bio===null&&row.avatar_key===null&&row.credential_version===0));
   const id=randomUUID();

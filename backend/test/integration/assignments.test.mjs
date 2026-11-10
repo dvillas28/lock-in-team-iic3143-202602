@@ -12,9 +12,9 @@ test("assignments and quizzes share defaults, enforce scope and preserve gradebo
   app=await http();
   const t=await tokens(app,f), course=`uc/courses/${f.own}`, path=course+"/assignments";
   const call=(actor,suffix="",method="GET",body)=>request(app,t[actor],path+suffix,method,body);
-  const first={id:randomUUID(),title:"Informe de laboratorio",maxPoints:0,sectionId:f.s1,
+  const first={idempotencyKey:randomUUID(),title:"Informe de laboratorio",maxPoints:0,sectionId:f.s1,
    allowedExtensions:["PDF",".docx","pdf"],maxAttempts:null,instructions:"Incluye las observaciones del laboratorio."};
-  const second={...first,id:randomUUID(),title:"Lectura sin fecha"};
+  const second={...first,idempotencyKey:randomUUID(),title:"Lectura sin fecha"};
   assert.equal((await call("student","","POST",first)).status,403);
   assert.equal((await call("teacher","","POST",{...first,sectionId:null})).status,403);
   assert.equal((await call("teacher","","POST",{...first,sectionId:f.s3})).status,404);
@@ -22,12 +22,24 @@ test("assignments and quizzes share defaults, enforce scope and preserve gradebo
   assert.equal((await call("teacher","","POST",{...first,dueAt:"2026-02-30T00:00:00Z"})).status,400);
   assert.equal((await call("teacher","","POST",{...first,availableFrom:"2026-04-05T03:00:00Z",availableUntil:"2026-04-05T02:59:59.999999Z"})).status,422);
   assert.equal((await call("teacher","","POST",{...first,allowedExtensions:["../../pdf"]})).status,400);
-  assert.equal((await call("teacher","","POST",{...first,id:randomUUID(),allowedExtensions:[]})).status,422);
-  assert.equal((await call("teacher","","POST",{...first,id:randomUUID(),allowedExtensions:["odt"]})).status,422);
+  assert.equal((await call("teacher","","POST",{...first,idempotencyKey:randomUUID(),allowedExtensions:[]})).status,422);
+  assert.equal((await call("teacher","","POST",{...first,idempotencyKey:randomUUID(),allowedExtensions:["odt"]})).status,422);
   const created=await Promise.all([first,second,first].map(body=>call("teacher","","POST",body)));
   assert.deepEqual(created.map(r=>r.status),[201,201,201]);
   const a=created[0].body, b=created[1].body;
   assert.equal(a.groupId,b.groupId);
+  assert.notEqual(a.id,first.idempotencyKey);
+  assert.equal(created[2].body.id,a.id);
+  await f.add(f.s4,users.owner,"teacher",f.tenants.utfsm);
+  const foreignToken=t.owner;
+  const foreignPath=`utfsm/courses/${f.foreign}/assignments`;
+  for(const idempotencyKey of [first.idempotencyKey,a.id]) {
+   const foreignBody={...first,sectionId:f.s4,idempotencyKey};
+   const foreign=await request(app,foreignToken,foreignPath,"POST",foreignBody);
+   assert.equal(foreign.status,201);
+   assert.notEqual(foreign.body.id,a.id);
+   assert.equal((await request(app,foreignToken,foreignPath,"POST",foreignBody)).body.id,foreign.body.id);
+  }
   assert.deepEqual(a.allowedExtensions,["docx","pdf"]);
   assert.equal(a.weightPercent,100);
   assert.equal(a.maxPoints,0);
@@ -46,7 +58,7 @@ test("assignments and quizzes share defaults, enforce scope and preserve gradebo
    expectedVersion:before.body.version,confirmRecalculation:false,groups,
   });
   assert.equal(renamed.status,200);
-  const third=await call("teacher","","POST",{...first,id:randomUUID()});
+  const third=await call("teacher","","POST",{...first,idempotencyKey:randomUUID()});
   assert.equal(third.body.groupTitle,"Trabajos");
   assert.equal(third.body.groupId,a.groupId);
   const quiz=await request(app,t.teacher,course+"/quizzes","POST",{title:"Control",sectionId:f.s1,questions:[question]});
@@ -85,12 +97,12 @@ test("assignments and quizzes share defaults, enforce scope and preserve gradebo
   assert.equal((await call("student",suffix)).status,404);
   const events=await pool.query("SELECT action FROM audit_events WHERE resource_id=$1 AND resource_type='assignment'",[a.id]);
   assert.equal(events.rowCount,6);
-  const global=await call("owner","","POST",{...first,id:randomUUID(),sectionId:null,title:"Tarea para el curso"});
+  const global=await call("owner","","POST",{...first,idempotencyKey:randomUUID(),sectionId:null,title:"Tarea para el curso"});
   assert.equal(global.status,201);
   assert.equal((await call("owner","/"+global.body.id+"/visibility","PATCH",{expectedVersion:0,published:true})).status,200);
   await f.add(f.s2,users.revoked,"student");
   const visible=await call("student");
-  assert.deepEqual(visible.body.items.map(i=>i.id),[global.body.id]);
+  assert.deepEqual(visible.body.items.map(i=>i.id),[global.id]);
   const db=await runtimeDatabase();
   try {
    await db.withInstitution(users.owner,"utfsm",async c=>{
@@ -109,9 +121,9 @@ test("deadlines reject new or changed past due dates while preserving historical
   const path=`uc/courses/${f.own}/assignments`;
   const dueAt=new Date(Date.now()+86_400_000).toISOString().replace(/\.\d{3}Z$/, ".123456Z");
   const historical="2000-04-05T03:30:00.123456Z";
-  const body={id:randomUUID(),title:"Evaluación histórica",maxPoints:0,sectionId:f.s1,dueAt};
+  const body={idempotencyKey:randomUUID(),title:"Evaluación histórica",maxPoints:0,sectionId:f.s1,dueAt};
   const create=(input,actor="teacher")=>request(app,t[actor],path,"POST",input);
-  const edit=input=>request(app,t.teacher,path+"/"+body.id,"PATCH",input);
+  const edit=(id,input)=>request(app,t.teacher,path+"/"+id,"PATCH",input);
   const rejected=await create({...body,dueAt:historical});
   assert.equal(rejected.status,422);
   assert.equal(rejected.body.code,"ASSIGNMENT_DUE_DATE_IN_PAST");
@@ -119,26 +131,27 @@ test("deadlines reject new or changed past due dates while preserving historical
   const saved=await create(body);
   assert.equal(saved.status,201);
   assert.equal(saved.body.dueAt,dueAt);
-  assert.equal((await create(body)).body.id,body.id);
-  const undated=await create({id:randomUUID(),title:"Sin fecha",maxPoints:0,sectionId:f.s1});
+  const id=saved.body.id;
+  assert.equal((await create(body)).body.id,id);
+  const undated=await create({idempotencyKey:randomUUID(),title:"Sin fecha",maxPoints:0,sectionId:f.s1});
   assert.equal(undated.status,201);
-  const rename=await edit({expectedVersion:0,title:"Evaluación corregida",dueAt});
+  const rename=await edit(id,{expectedVersion:0,title:"Evaluación corregida",dueAt});
   assert.equal(rename.status,200);
   assert.equal(rename.body.dueAt,dueAt);
 
   const older="2000-01-01T00:00:00Z";
-  const change=await edit({expectedVersion:1,dueAt:older});
+  const change=await edit(id,{expectedVersion:1,dueAt:older});
   assert.equal(change.status,422);
   assert.equal(change.body.code,"ASSIGNMENT_DUE_DATE_IN_PAST");
-  await pool.query("UPDATE assignments SET due_at=$1 WHERE id=$2",[historical,body.id]);
-  const updated=await edit({expectedVersion:1,title:"Evaluación histórica corregida",dueAt:historical});
+  await pool.query("UPDATE assignments SET due_at=$1 WHERE id=$2",[historical,id]);
+  const updated=await edit(id,{expectedVersion:1,title:"Evaluación histórica corregida",dueAt:historical});
   assert.equal(updated.status,200);
   assert.equal(updated.body.dueAt,historical);
-  assert.equal((await request(app,t.owner,path.replace(/^uc/,"utfsm")+"/"+body.id,"PATCH",
+  assert.equal((await request(app,t.owner,path.replace(/^uc/,"utfsm")+"/"+id,"PATCH",
    {expectedVersion:2,dueAt,confirmPastDue:true})).status,404);
-  assert.equal((await request(app,t.teacher,path+"/"+body.id+"/visibility","PATCH",
+  assert.equal((await request(app,t.teacher,path+"/"+id+"/visibility","PATCH",
    {expectedVersion:2,published:true})).status,200);
-  assert.equal((await request(app,t.student,path+"/"+body.id)).body.dueAt,updated.body.dueAt);
+  assert.equal((await request(app,t.student,path+"/"+id)).body.dueAt,updated.body.dueAt);
  } finally {if(app)await app.close();await pool.end();}
 });
 
@@ -148,29 +161,30 @@ test("direct publication is atomic for creation and edits and can be retried",as
   const f=await quizFixture(pool);
   app=await http();
   const t=await tokens(app,f), path=`uc/courses/${f.own}/assignments`;
-  const body={id:randomUUID(),title:"Publicación directa",sectionId:f.s1,maxPoints:10,allowedExtensions:["pdf"],publish:true};
+  const body={idempotencyKey:randomUUID(),title:"Publicación directa",sectionId:f.s1,maxPoints:10,allowedExtensions:["pdf"],publish:true};
   const create=(input=body,actor="teacher")=>request(app,t[actor],path,"POST",input);
   const student=id=>request(app,t.student,path+"/"+id);
   const events=async id=>(await pool.query("SELECT action FROM audit_events WHERE resource_id=$1 ORDER BY action",[id])).rows.map(r=>r.action);
   assert.equal((await create(body,"student")).status,403);
   assert.equal((await create({...body,dueAt:"2000-01-01T00:00:00Z"})).body.code,"ASSIGNMENT_DUE_DATE_IN_PAST");
-  await failAudit(pool,"assignment.published",body.id);
+  await failAudit(pool,"assignment.published");
   try {assert.equal((await create()).status,500);}
   finally {await restoreAudit(pool);}
-  assert.equal((await pool.query("SELECT id FROM assignments WHERE id=$1",[body.id])).rowCount,0);
-  assert.equal((await pool.query("SELECT id FROM grade_items WHERE assignment_id=$1",[body.id])).rowCount,0);
-  assert.deepEqual(await events(body.id),[]);
+  assert.equal((await pool.query("SELECT id FROM assignments WHERE creation_key=$1",[body.idempotencyKey])).rowCount,0);
+  assert.equal((await pool.query("SELECT id FROM grade_items")).rowCount,0);
+  assert.equal((await pool.query("SELECT id FROM audit_events WHERE resource_type='assignment'")).rowCount,0);
 
   const pair=await Promise.all([create(),create()]);
   assert.deepEqual(pair.map(r=>r.status),[201,201]);
   assert.deepEqual(pair[0].body,pair[1].body);
   assert.equal(pair[0].body.status,"published");
-  assert.equal((await student(body.id)).status,200);
-  assert.deepEqual(await events(body.id),["assignment.created","assignment.published"]);
+  const publishedId=pair[0].body.id;
+  assert.equal((await student(publishedId)).status,200);
+  assert.deepEqual(await events(publishedId),["assignment.created","assignment.published"]);
   assert.equal((await create({...body,publish:false})).status,409);
 
-  const draftId=randomUUID();
-  const draft=await create({...body,id:draftId,publish:false,title:"Borrador"});
+  const draft=await create({...body,idempotencyKey:randomUUID(),publish:false,title:"Borrador"});
+  const draftId=draft.body.id;
   assert.equal(draft.body.status,"draft");
   assert.equal((await student(draftId)).status,404);
   const changes={expectedVersion:draft.body.version,publish:true,title:"Borrador revisado"};

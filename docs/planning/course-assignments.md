@@ -21,8 +21,8 @@ cubrirá las entregas, S3, el registro de intentos, la corrección y las notas d
   Puede leer instrucciones antes de la apertura y después del cierre.
   Ocultar una tarea retira el acceso estudiantil de inmediato.
 - El historial registra creación, edición, publicación y ocultamiento con actor,
-  curso, sección y cambios. El UUID de creación permite reintentos con el mismo
-  cuerpo. La versión protege contra ediciones concurrentes incompatibles.
+  curso, sección y cambios. La clave de idempotencia permite reintentos con el mismo cuerpo y
+  está acotada a institución, curso y autor. El servidor genera el ID de la tarea. La versión protege contra ediciones concurrentes incompatibles.
 
 ## Fechas y configuración
 

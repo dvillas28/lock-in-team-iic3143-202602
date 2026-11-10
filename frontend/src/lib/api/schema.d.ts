@@ -1955,7 +1955,7 @@ export interface paths {
         put?: never;
         /**
          * Crear tarea como borrador o publicada
-         * @description Con publish=true se crea y publica en la misma transacción. El mismo actor puede repetir el UUID con el cuerpo original. Las fechas son instantes UTC con sufijo Z y cumplen apertura ≤ entrega ≤ cierre cuando están definidas. Una fecha de entrega anterior al reloj del servidor devuelve 422 con ASSIGNMENT_DUE_DATE_IN_PAST.
+         * @description Con publish=true se crea y publica en la misma transacción. El mismo actor puede repetir la clave de idempotencia con el cuerpo original. El servidor genera el ID de la tarea. Las fechas son instantes UTC con sufijo Z y cumplen apertura ≤ entrega ≤ cierre cuando están definidas. Una fecha de entrega anterior al reloj del servidor devuelve 422 con ASSIGNMENT_DUE_DATE_IN_PAST.
          */
         post: operations["createAssignment"];
         delete?: never;
@@ -3149,9 +3149,9 @@ export interface components {
         AssignmentCreate: {
             /**
              * Format: uuid
-             * @description UUID estable de la operación de creación.
+             * @description UUID estable del reintento acotado a institución
              */
-            id: string;
+            idempotencyKey: string;
             title: components["schemas"]["title"];
             description?: components["schemas"]["description"];
             instructions?: components["schemas"]["instructions"];

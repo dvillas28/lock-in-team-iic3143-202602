@@ -15,7 +15,7 @@ const schedule = {
   availableUntil:{label:"Cierre",timeLabel:"Hora de cierre"},
 } as const;
 type DateKey = keyof typeof schedule;
-type Draft = Omit<AssignmentCreate,"id">;
+type Draft = Omit<AssignmentCreate,"idempotencyKey">;
 const attemptsError = "Ingresa al menos 1 intento o deja el campo vacío para permitir intentos ilimitados";
 
 function values(form: HTMLFormElement, original?: Assignment): Draft {

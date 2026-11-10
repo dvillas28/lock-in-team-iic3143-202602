@@ -46,7 +46,7 @@ export async function getAssignment(c: ApiClient, slug: string, courseId: string
 }
 export async function createAssignment(c: ApiClient, slug: string, courseId: string, body: AssignmentCreate) {
   const result = await c.POST(collection,{params:{path:parameters(slug,courseId)},body});
-  return assignment(result.data,courseId,body.id);
+  return assignment(result.data,courseId);
 }
 export async function updateAssignment(c: ApiClient, slug: string, courseId: string, id: string, body: AssignmentUpdate) {
   const result = await c.PATCH(detail,{params:{path:forItem(slug,courseId,id)},body});

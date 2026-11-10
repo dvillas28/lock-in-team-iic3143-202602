@@ -21,7 +21,7 @@ import { AssignmentForm } from "./assignment-form.tsx";
 import { AssignmentStatus, ChileDate, points } from "./assignment-facts.tsx";
 
 type Route = {courseId:string;assignmentId?:string};
-type Draft = Omit<AssignmentCreate,"id"|"confirmPastDue">;
+type Draft = Omit<AssignmentCreate,"idempotencyKey"|"confirmPastDue">;
 type SaveOperation = {kind:"create";body:AssignmentCreate} | {kind:"edit";item:Assignment;body:Draft};
 type Operation = SaveOperation | {kind:"visibility";item:Assignment;published:boolean};
 
@@ -109,7 +109,7 @@ function Workspace({courseId,assignmentId,scope}:Route & {scope:string}) {
     }
     const body = {...draft,publish};
     const operation: SaveOperation = item ? {kind:"edit",item,body} :
-      {kind:"create",body:{...body,id:crypto.randomUUID()}};
+      {kind:"create",body:{...body,idempotencyKey:crypto.randomUUID()}};
     void run(operation);
   }
   function close() {

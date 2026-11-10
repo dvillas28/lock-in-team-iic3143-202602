@@ -1,3 +1,4 @@
+import assert from 'node:assert/strict';
 import type {Environment} from '../fixtures/environment.ts';
 import {status} from './api.ts';
 export async function ownerStudentHistory(e:Environment) {
@@ -6,8 +7,8 @@ export async function ownerStudentHistory(e:Environment) {
  await e.pool.query('INSERT INTO enrollments(id,institution_id,section_id,user_id,role) VALUES($1,$2,$3,$4,$5)',[enrollment,e.data.tenants.uc,s,e.data.actors['AO-ST'].id,'teacher']);
  const q=status(await teacher.post(`courses/${c}/quizzes`,{title:'Private audit quiz',sectionId:s,questions:[{position:1,prompt:'SECRET_QUESTION',points:1,alternatives:[{id:'a',text:'SECRET_CORRECT',isCorrect:true},{id:'b',text:'B',isCorrect:false}]}]}),201).body;
  status(await teacher.post(`quizzes/${q.id}/publish`),200);
- const item=status(await owner.get(`courses/${c}/grade-items`),200).body.items[0];
- status(await owner.put(`courses/${c}/gradebook/weights`,{items:[{gradeItemId:item.id,weightPercent:100}]}),200);
+ const item=status(await owner.get(`courses/${c}/grade-items`),200).body.items.find((entry:{quizId:string})=>entry.quizId===q.id);
+ assert.equal(item?.weightPercent,100,'Default quiz group weight mismatch');
  await e.pool.query('UPDATE enrollments SET active=false WHERE id=$1',[enrollment]);
  status(await owner.post(`sections/${s}/enrollments`,{userId:e.data.actors.MEMBER.id,role:'student'}),201);
  for(const actor of ['AO-ST','MEMBER']) {
