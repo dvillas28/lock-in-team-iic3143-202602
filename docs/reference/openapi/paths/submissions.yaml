@@ -7,6 +7,7 @@
     tags: [Assignments]
     operationId: getMyAssignmentSubmissions
     summary: Consultar intentos propios y nota publicada
+    x-permissions: Estudiante con matrícula activa en el alcance de la tarea publicada. Solo consulta sus propios intentos y su nota publicada.
     responses:
       '200':
         description: Consultar intentos propios y nota publicada.
@@ -23,6 +24,7 @@
     tags: [Assignments]
     operationId: submitAssignment
     summary: Entregar un intento inmutable
+    x-permissions: Estudiante con matrícula activa en la sección elegida y dentro del alcance de la tarea. Un envío nuevo requiere que la tarea esté publicada, abierta y tenga intentos disponibles.
     requestBody:
       required: true
       content:
@@ -44,7 +46,6 @@
       '422': {$ref: '../components/responses.yaml#/UnprocessableEntity'}
       '500': {$ref: '../components/responses.yaml#/InternalError'}
       '503': {$ref: '../components/responses.yaml#/ServiceUnavailable'}
-
 /api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}/submissions:
   parameters:
     - $ref: '../components/parameters.yaml#/InstitutionSlug'
@@ -54,6 +55,7 @@
     tags: [Assignments]
     operationId: getAssignmentRoster
     summary: Consultar estudiantes y estados de entrega
+    x-permissions: Docente activo limitado a sus secciones. El propietario con administración vigente y docencia activa tiene alcance de curso.
     responses:
       '200':
         description: Consultar estudiantes y estados de entrega.
@@ -66,7 +68,6 @@
       '404': {$ref: '../components/responses.yaml#/NotFound'}
       '500': {$ref: '../components/responses.yaml#/InternalError'}
       '503': {$ref: '../components/responses.yaml#/ServiceUnavailable'}
-
 /api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}/submission-review:
   parameters:
     - $ref: '../components/parameters.yaml#/InstitutionSlug'
@@ -76,6 +77,7 @@
     tags: [Assignments]
     operationId: reviewAssignmentSubmission
     summary: Revisar intentos de un estudiante en su sección
+    x-permissions: Docente activo en la sección histórica del intento o propietario con administración vigente y docencia activa en el curso. Se excluye la revisión de entregas propias.
     parameters:
       - {name: sectionId, in: query, required: true, schema: {type: string, format: uuid}}
       - {name: studentId, in: query, required: true, schema: {type: string, format: uuid}}
@@ -91,7 +93,6 @@
       '404': {$ref: '../components/responses.yaml#/NotFound'}
       '500': {$ref: '../components/responses.yaml#/InternalError'}
       '503': {$ref: '../components/responses.yaml#/ServiceUnavailable'}
-
 /api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}/submissions/{attemptId}/grade:
   parameters:
     - $ref: '../components/parameters.yaml#/InstitutionSlug'
@@ -102,6 +103,7 @@
     tags: [Assignments]
     operationId: saveAssignmentGradeDraft
     summary: Guardar borrador sobre un intento concreto
+    x-permissions: Docente activo en la sección histórica del intento o propietario con administración vigente y docencia activa en el curso. Se excluye la calificación propia y se exige una versión vigente del borrador.
     requestBody:
       required: true
       content:
@@ -121,7 +123,6 @@
       '422': {$ref: '../components/responses.yaml#/UnprocessableEntity'}
       '500': {$ref: '../components/responses.yaml#/InternalError'}
       '503': {$ref: '../components/responses.yaml#/ServiceUnavailable'}
-
 /api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}/submission-files/{fileId}:
   parameters:
     - $ref: '../components/parameters.yaml#/InstitutionSlug'
@@ -132,6 +133,7 @@
     tags: [Assignments]
     operationId: downloadAssignmentFile
     summary: Descargar un archivo privado de una entrega
+    x-permissions: Estudiante con matrícula activa en el alcance de la tarea y archivo propio, docente de la sección histórica del intento o propietario con administración vigente y docencia activa en el curso.
     responses:
       '200':
         description: Descargar un archivo privado de una entrega.
