@@ -1,6 +1,7 @@
 import { JSDOM } from "jsdom";
 import { act, createElement, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
+import { AppRouterContext, type AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime.js";
 import { SessionProvider, useSession } from "../../src/components/auth/session-provider.tsx";
 import { ErrorState } from "../../src/components/route-states.tsx";
 import type { Session } from "../../src/lib/auth/session.ts";
@@ -21,11 +22,14 @@ export async function mount(view:ReactNode, reply:(r:Request)=>Response|Promise<
  globalThis.fetch=async input=>{const r=input as Request;requests.push(r);if(r.url.endsWith('/login')){const iat=Math.floor(Date.now()/1000);return Response.json({tokenType:"Bearer",expiresIn:900,accessToken:`e30.${Buffer.from(JSON.stringify({sub:actor.id,iat,exp:iat+900,iss:"academix-api",aud:"academix-clients"})).toString("base64url")}.signature`});}if(r.url.endsWith('/institutions'))return Response.json({items:[actor.institutionMembership.institution]});if(r.url.endsWith('/me'))return Response.json(actor);return reply(r);};
  function Probe(){const s=useSession();session=s.session;return s.state.context?.error?createElement(ErrorState,{feedback:s.state.context.error}):s.state.context?.user?view:null;}
  const root=createRoot(dom.window.document.getElementById('root')!);
- await act(async()=>{root.render(createElement(SessionProvider,null,createElement(Probe)));await flush();});
+ const destinations:string[]=[];
+ const router:AppRouterInstance={back(){},forward(){},refresh(){},prefetch(){},bfcacheId:'test',push(href){destinations.push(href);},replace(href){destinations.push(href);}};
+ function render(){root.render(createElement(AppRouterContext.Provider,{value:router},createElement(SessionProvider,null,createElement(Probe))));}
+ await act(async()=>{render();await flush();});
  await act(async()=>{await session.login('ana@example.test','pass');await session.loadContext(slug);await flush();});
  const doc=dom.window.document;
- return {dom,doc,requests,session,id,
- async render(next:ReactNode){view=next;await act(async()=>{root.render(createElement(SessionProvider,null,createElement(Probe)));await flush();});},
+ return {dom,doc,requests,session,id,destinations,
+ async render(next:ReactNode){view=next;await act(async()=>{render();await flush();});},
  setActor(profile:string){actor=user(profile,slug);},
  async actor(profile:string,tenant=slug){actor=user(profile,tenant);await act(async()=>{await session.loadContext(tenant);await flush();});},
  async click(text:string){const el=Array.from(doc.querySelectorAll<HTMLElement>('button,a')).find(e=>e.textContent===text);if(!el)throw new Error(`Missing ${text}: ${doc.body.textContent}`);await act(async()=>{el.click();await flush();});},

@@ -8,12 +8,13 @@ import {InstitutionUsers} from '../src/components/accounts/institution-users.tsx
 import {CsvImport} from '../src/components/accounts/csv-import.tsx';
 import {ProtectedAccount} from '../src/components/accounts/protected-account.tsx';
 import {useSession} from '../src/components/auth/session-provider.tsx';
+import {DEFAULT_PORTAL_ORIGIN} from '../src/lib/auth/portal-origin.ts';
 import {mountAccount} from './fixtures/account-ui.ts';
 const id='10000000-0000-4000-8000-000000000001';
 const batch={id,status:'previewed',expiresAt:'2099-11-08T12:00:00.000001Z',confirmedAt:null,totalRows:1,createdCount:0,skippedCount:0,rows:[{rowNumber:2,name:'Ana',email:'ana@example.test',validationCode:'valid',outcome:null,invitationId:null}]};
 function ImportView({emailAvailable=false}:{emailAvailable?:boolean}){const {session}=useSession();return h(CsvImport,{session,slug:'uc',emailAvailable,onConfirmed:async()=>{}});}
 test('own profile is usable without memberships and disabled photos remain explicit',async()=>{
- const ui=await mountAccount(h(ProtectedAccount,null,h(Profile)),()=>Response.json({}),{membership:false});
+ const ui=await mountAccount(h(ProtectedAccount,null,h(Profile)),()=>Response.json({}),{membership:false,url:`${DEFAULT_PORTAL_ORIGIN}/profile`});
  try{assert.match(ui.doc.body.textContent!,/Mi perfil/);assert.ok(ui.doc.querySelector('form[aria-label="Editar perfil"]'));assert.match(ui.doc.body.textContent!,/gestión de fotos está temporalmente no disponible/);assert.equal(ui.doc.querySelector<HTMLFieldSetElement>('form[aria-label="Cambiar foto"] fieldset')?.disabled,true);assert.equal(ui.session.getSnapshot().context,undefined);assert.equal(ui.dom.window.localStorage.length,0);}finally{await ui.close();}
 });
 test('unsaved personal fields block avatar changes without losing the draft',async()=>{
