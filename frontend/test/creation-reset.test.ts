@@ -77,16 +77,14 @@ for (const kind of ['module', 'material'] as const) test(`${kind} keeps pending 
 });
 
 test('student section context stays in course detail without a management link or useless open action', async () => {
-  for (const sections of [false, true]) {
-    const ui = await mount(h(CourseDetail, { courseId: course.id, sections }), r => Response.json(r.url.endsWith('/sections') ? { items: [section, otherSection] } : course), 'student');
-    try {
-      assert.match(ui.doc.body.textContent!, /Tu secciónSección 1Estudiante/);
-      assert.equal(ui.doc.querySelector('a[href$="/sections"]'), null);
-      assert.equal(ui.doc.querySelector('button,form'), null);
-      assert.doesNotMatch(ui.doc.body.textContent!, /Capacidad|Secciones autorizadas|Sección 2/);
-      assert.equal(ui.requests.some(r => r.url.endsWith(`/sections/${section.id}`)), false);
-    } finally { await ui.close(); }
-  }
+  const ui = await mount(h(CourseDetail, { courseId: course.id }), r => Response.json(r.url.endsWith('/sections') ? { items: [section, otherSection] } : course), 'student');
+  try {
+    assert.match(ui.doc.body.textContent!, /Tu secciónSección 1Estudiante/);
+    assert.equal(ui.doc.querySelector('a[href$="/sections"]'), null);
+    assert.equal(ui.doc.querySelector('button,form'), null);
+    assert.doesNotMatch(ui.doc.body.textContent!, /Capacidad|Secciones autorizadas|Sección 2/);
+    assert.equal(ui.requests.some(r => r.url.endsWith(`/sections/${section.id}`)), false);
+  } finally { await ui.close(); }
 });
 
 for (const kind of ['module', 'material'] as const) test(`${kind} update retains the edited values`, async () => {

@@ -39,6 +39,7 @@ fieldset.stack { border: 0; padding: 0; min-width: 0; }
 .course-icon { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: var(--radius-sm); background: var(--primary-soft); color: var(--primary-ink); }
 .course-card h2 { font-family: var(--font-eb-garamond), serif; font-size: 22px; font-weight: 600; line-height: 1.25; }
 .course-card .section-label { color: var(--primary-ink); }
+.course-memberships { overflow-wrap: anywhere; }
 .course-card-footer { border-top: 1px solid var(--border); padding-top: 16px; margin-top: auto; font-size: 13px; font-weight: 600; color: var(--primary-ink); }
 .course-navigation { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
 .course-tab { padding: 8px 12px; text-decoration: none; border-radius: var(--radius-sm); font-size: 13px; color: var(--text-2); border-bottom: 2px solid transparent; }

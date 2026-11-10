@@ -114,8 +114,8 @@ test("confirmed create followed by failed empty refresh is not uncertain or a re
  return r.url.endsWith("/modules")?Response.json(posted?{}:{items:[]},{status:posted?503:200}):Response.json(course);
  },"teacher");
  try{
- assert.match(ui.doc.body.textContent!,/Sin contenido/);await ui.submit('form[aria-label="Crear módulo"]',{title:"Unidad 1"});
- assert.match(ui.doc.body.textContent!,/Módulo creado.*No se pudo actualizar/);assert.doesNotMatch(ui.doc.body.textContent!,/Resultado incierto|Sin contenido para mostrar/);
+ assert.match(ui.doc.body.textContent!,/Aún no hay módulos disponibles/);await ui.submit('form[aria-label="Crear módulo"]',{title:"Unidad 1"});
+ assert.match(ui.doc.body.textContent!,/Módulo creado.*No se pudo actualizar/);assert.doesNotMatch(ui.doc.body.textContent!,/Resultado incierto|Aún no hay módulos disponibles/);
  }finally{await ui.close();}
 });
 

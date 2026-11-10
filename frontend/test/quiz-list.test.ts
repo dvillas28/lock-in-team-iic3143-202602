@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { createElement as h } from "react";
 import { QuizList } from "../src/components/quizzes/quiz-list.tsx";
 import { QuizDetail } from "../src/components/quizzes/quiz-detail.tsx";
-import { mount, draft, emptyDraft, reply, course, id } from "./fixtures/quizzes.ts";
+import { mount, draft, emptyDraft, reply, course, id, deferred } from "./fixtures/quizzes.ts";
 test("safe list/detail never request authoring; create only for teacher",async()=>{
  for(const role of ["teacher","ownerTeacher","owner","super","assistant","student"]) {
  const ui=await mount(h(QuizList,{courseId:course.id}),r=>reply(r),role);
@@ -32,7 +32,7 @@ test("create confirms draft; lost response stays blocked despite same-title cand
 test("empty/error states and cross-course direct detail fail safely",async()=>{
  for(const mode of ['empty','error','cross']) {
  const ui=await mount(mode==='cross'?h(QuizDetail,{courseId:course.id,quizId:draft.id}):h(QuizList,{courseId:course.id}),r=>r.url.endsWith('/quizzes')?Response.json(mode==='error'?{}:{items:[]},{status:mode==='error'?503:200}):reply(r,{...draft,courseId:id(11)}),'student');
- try {assert.match(ui.doc.body.textContent!,mode==='empty'?/Sin contenido/:/No se pudo|inválida/);assert.equal(ui.requests.some(r=>r.url.endsWith('/authoring')),false);}finally{await ui.close();}
+ try {assert.match(ui.doc.body.textContent!,mode==='empty'?/Aún no hay quizzes disponibles/:/No se pudo|inválida/);assert.equal(ui.requests.some(r=>r.url.endsWith('/authoring')),false);}finally{await ui.close();}
  }
 });
 
@@ -41,4 +41,27 @@ test("creation rejects validation/size responses safely and keeps authorized for
  const ui=await mount(h(QuizList,{courseId:course.id}),r=>r.method==='POST'?Response.json({detail:'PRIVATE KEY'},{status}):reply(r),'teacher');
  try{await ui.submit('form',{title:'Local'});assert.equal(ui.doc.querySelector<HTMLInputElement>('[name="title"]')!.value,'Local');assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE KEY/);if(status===413)assert.match(ui.doc.body.textContent!,/JSON máximo 4096 bytes UTF-8/);assert.equal(ui.requests.filter(r=>r.method==='POST'&&!r.url.endsWith('/login')).length,1);}finally{await ui.close();}
  }
+});
+
+test("quiz empty states preserve teacher creation and differ from loading and filtered results",async()=>{
+ for(const profile of ["student","assistant","teacher","owner"]){
+  const pending=deferred<Response>();
+  const ui=await mount(h(QuizList,{courseId:course.id}),r=>r.url.endsWith('/quizzes')?pending.promise:reply(r),profile);
+  try{
+   assert.match(ui.doc.body.textContent!,/Cargando/);assert.doesNotMatch(ui.doc.body.textContent!,/Aún no hay quizzes/);
+   await ui.settle(()=>pending.resolve(Response.json({items:[]})));
+   assert.equal(ui.doc.querySelectorAll('.empty-zone').length,1);
+   assert.match(ui.doc.body.textContent!,/Aún no hay quizzes disponibles/);
+   assert.doesNotMatch(ui.doc.body.textContent!,/Sin contenido para mostrar|Abre un quiz|Consulta las evaluaciones/);
+   assert.equal(!!ui.doc.querySelector('form'),profile==='teacher');
+   assert.match(ui.doc.body.textContent!,profile==='teacher'?/Crea un borrador/:/Los quizzes publicados para tu sección aparecerán aquí/);
+  }finally{await ui.close();}
+ }
+ const ui=await mount(h(QuizList,{courseId:course.id}),r=>reply(r),'student');
+ try{
+  await ui.select('select[id$="-status"]','published');
+  assert.match(ui.doc.body.textContent!,/No hay quizzes que coincidan/);
+  assert.doesNotMatch(ui.doc.body.textContent!,/Aún no hay quizzes disponibles/);
+  await ui.click('Mostrar todos los quizzes');assert.match(ui.doc.body.textContent!,/Quiz de aislamiento/);
+ }finally{await ui.close();}
 });

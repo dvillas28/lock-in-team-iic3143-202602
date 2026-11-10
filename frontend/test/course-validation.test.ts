@@ -61,7 +61,7 @@ test('duplicate course preserves values and explains both code and term',async()
 
 test('editing a demo course name preserves its historical period and untouched legacy code',async()=>{
  const original={...course,term:'DEMO-2026-2',code:'legacy_code'};let body:unknown;
- const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),async r=>{
+ const ui=await mount(h(CourseDetail,{courseId:course.id}),async r=>{
   if(r.method==='PATCH'){body=await r.json();return Response.json({...original,...body as object});}
   return Response.json(r.url.endsWith('/sections')?{items:[section]}:original);
  });

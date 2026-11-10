@@ -1,10 +1,12 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { ArrowDown, ArrowUp, ChevronDown, ChevronRight } from "lucide-react";
+import Link from "next/link";
 import { CourseNavigation } from "../courses/course-navigation.tsx";
+import { capabilities } from "../../lib/courses/capabilities.ts";
 import { useSession } from "../auth/session-provider.tsx";
 import { useResource } from "../courses/use-resource.ts";
-import { ErrorState, EmptyState, LoadingState } from "../route-states.tsx";
+import { ErrorState, LoadingState } from "../route-states.tsx";
 import { getCourse } from "../../lib/api/courses.ts";
 import { listCourseModules } from "../../lib/api/modules.ts";
 import type { CourseModule } from "../../lib/content/validation.ts";
@@ -73,8 +75,15 @@ function CourseContent({ courseId }: { courseId: string }) {
   const [requested, setRequested] = useState({ id: "", revision: 0 });
   if (!state.context?.user) return <LoadingState />;
   if (courseError) return <ErrorState feedback={courseError} onRetry={() => void reloadCourse()} />;
-  if (result.error && !result.data) return <ErrorState feedback={result.error} onRetry={() => void result.reload()} />;
-  if (!course || !result.data) return <LoadingState />;
+  if (!course) return <LoadingState />;
+  const ownerWithoutAcademicRole = capabilities(state.context.user, course).sections && !state.context.user.sectionMemberships.some(m => m.courseId === course.id);
+  if (result.error && !result.data) return <div className="stack">
+    <CourseNavigation course={course} user={state.context.user} active="/modules" />
+    {ownerWithoutAcademicRole
+      ? <section className="card panel stack"><h2>Gestiona este curso desde Secciones</h2><p className="hint">Tu cuenta administra el curso pero no participa en él con un rol académico, por lo que no tiene módulos que consultar.</p><div className="actions"><Link className="btn btn-primary" href={`/courses/${course.id}/sections`}>Secciones y participantes</Link></div></section>
+      : <ErrorState feedback={result.error} onRetry={() => void result.reload()} />}
+  </div>;
+  if (!result.data) return <LoadingState />;
   const items = result.data;
   const author = canAuthorContent(state.context.user, courseId);
   const disabled = !!result.error || !!result.refreshing;
@@ -97,9 +106,9 @@ function CourseContent({ courseId }: { courseId: string }) {
     {result.error && <><p role="alert">Consulta fallida. Representación anterior, no vigente.</p><ErrorState feedback={result.error} onRetry={() => void result.reload()} /></>}
     {mutation.message && <p role={mutation.confirmed ? "status" : "alert"}>{mutation.message}</p>}
     {author && <details className="academic-disclosure card"><summary>Crear módulo</summary><ModuleForm session={session} slug={slug} courseId={courseId} items={items} onSaved={result.reload} disabled={disabled} /></details>}
-    {!result.error && !result.refreshing && !items.length && <EmptyState />}
-    <div className="module-workspace" aria-busy={result.refreshing}><nav className="module-index card" aria-label="Índice de módulos"><p className="section-label">Módulos del curso</p>{items.map(parent => <a key={parent.id} className="nav-item" href={`#module-${parent.id}`} onClick={() => setRequested(previous => ({ id: parent.id, revision: previous.revision + 1 }))}><span className="tnum">{parent.position}.</span><span>{parent.title}</span></a>)}</nav><div className="stack">
+    {!result.error && !result.refreshing && !items.length && <div className="empty-zone panel"><h2>Aún no hay módulos disponibles</h2><p className="hint">{author ? "Crea un módulo para organizar el material del curso." : "Los módulos y materiales publicados del curso aparecerán aquí"}</p></div>}
+    {items.length > 0 && <div className="module-workspace" aria-busy={result.refreshing}><nav className="module-index card" aria-label="Índice de módulos"><p className="section-label">Módulos del curso</p>{items.map(parent => <a key={parent.id} className="nav-item" href={`#module-${parent.id}`} onClick={() => setRequested(previous => ({ id: parent.id, revision: previous.revision + 1 }))}><span className="tnum">{parent.position}.</span><span>{parent.title}</span></a>)}</nav><div className="stack">
     {items.map(parent => <ModuleRow key={`${state.generation}:${slug}:${parent.id}`} session={session} slug={slug} parent={parent} author={author} items={items} course={course} reload={result.reload} disabled={disabled} move={move} busy={mutation.busy || !!mutation.uncertain} requested={requested} />)}
-    </div></div>
+    </div></div>}
   </div>;
 }

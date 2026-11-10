@@ -22,7 +22,7 @@ test('E2E-RBAC-002 other owner needs contextual roles and cannot configure / oth
 });
 test('E2E-RBAC-003 ownership without teaching grants only administration / owner-only @regression',async ({e,actorPage})=>{
  const page=await actorPage('AO-ONLY'),api=await e.api('AO-ONLY'),c=e.data.courses.COWNER;
- await course(page,c);status(await api.patch(`courses/${c}`,{name:'Owner configured'}),200);status(await api.post(`courses/${c}/sections`,{code:'owner-section'}),201);
+ await course(page,c);await expect(page.getByRole('link',{name:'Secciones y participantes',exact:true})).toBeVisible();await go(page,c,'/sections');await expect(page.getByRole('heading',{name:'Secciones y participantes',exact:true})).toBeVisible();status(await api.patch(`courses/${c}`,{name:'Owner configured'}),200);status(await api.post(`courses/${c}/sections`,{code:'owner-section'}),201);
  const before=await securitySnapshot(e);
  for(const path of [`courses/${c}/modules`,`courses/${c}/quizzes`])status(await api.get(path),404);
  status(await api.get(`courses/${c}/gradebook`),403);status(await api.put(`courses/${c}/gradebook/weights`,weights(e)),403);

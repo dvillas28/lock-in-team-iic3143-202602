@@ -7,7 +7,7 @@ import { ErrorState } from "../../src/components/route-states.tsx";
 import type { Session } from "../../src/lib/auth/session.ts";
 import { user, id } from "./courses.ts";
 export const flush=()=>new Promise<void>(r=>setImmediate(r));
-export async function mount(view:ReactNode, reply:(r:Request)=>Response|Promise<Response>,profile="owner",slug="uc"){
+export async function mount(view:ReactNode, reply:(r:Request)=>Response|Promise<Response>,profile: string | ReturnType<typeof user>="owner",slug="uc"){
  const dom=new JSDOM('<div id="root"></div>',{url:`http://${slug}.localhost:3000/courses`});
  // React imported before jsdom selects its legacy input event fallback.
  Object.assign(dom.window.HTMLElement.prototype,{attachEvent(){},detachEvent(){}});
@@ -18,7 +18,7 @@ export async function mount(view:ReactNode, reply:(r:Request)=>Response|Promise<
  for(const [key,value] of Object.entries({window:dom.window,self:dom.window,document:dom.window.document,navigator:dom.window.navigator,HTMLElement:dom.window.HTMLElement,HTMLInputElement:dom.window.HTMLInputElement,FormData:dom.window.FormData,IS_REACT_ACT_ENVIRONMENT:true})){
  old.set(key,Object.getOwnPropertyDescriptor(globalThis,key));Object.defineProperty(globalThis,key,{value,writable:true,configurable:true});}
  const prev=globalThis.fetch;const env=process.env.NEXT_PUBLIC_API_URL;process.env.NEXT_PUBLIC_API_URL="https://api.test";
- const requests:Request[]=[];let actor=user(profile,slug);let session!:Session;
+ const requests:Request[]=[];let actor=typeof profile === "string" ? user(profile,slug) : profile;let session!:Session;
  globalThis.fetch=async input=>{const r=input as Request;requests.push(r);if(r.url.endsWith('/login')){const iat=Math.floor(Date.now()/1000);return Response.json({tokenType:"Bearer",expiresIn:900,accessToken:`e30.${Buffer.from(JSON.stringify({sub:actor.id,iat,exp:iat+900,iss:"academix-api",aud:"academix-clients"})).toString("base64url")}.signature`});}if(r.url.endsWith('/institutions'))return Response.json({items:[actor.institutionMembership.institution]});if(r.url.endsWith('/me'))return Response.json(actor);return reply(r);};
  function Probe(){const s=useSession();session=s.session;return s.state.context?.error?createElement(ErrorState,{feedback:s.state.context.error}):s.state.context?.user?view:null;}
  const root=createRoot(dom.window.document.getElementById('root')!);

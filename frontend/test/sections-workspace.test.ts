@@ -13,7 +13,7 @@ const reply = (request: Request) => {
 };
 
 test('one hundred sections mount one workspace; filtering preserves selection without more requests', async () => {
-  const ui = await mount(h(CourseDetail, { courseId: course.id, sections: true }), reply);
+  const ui = await mount(h(CourseDetail, { courseId: course.id }), reply);
   try {
     assert.equal(ui.doc.querySelectorAll('select[name="managedSection"] option').length, 100);
     assert.equal(ui.doc.querySelectorAll('section[aria-label="Participantes"]').length, 1);
@@ -40,7 +40,7 @@ test('one hundred sections mount one workspace; filtering preserves selection wi
 
 test('abandoned section response cannot replace the selected workspace', async () => {
   const pending = deferred<Response>();
-  const ui = await mount(h(CourseDetail, { courseId: course.id, sections: true }), request =>
+  const ui = await mount(h(CourseDetail, { courseId: course.id }), request =>
     request.url.endsWith(`/sections/${sections[0].id}`) ? pending.promise : reply(request));
   try {
     await ui.select('select[name="managedSection"]', sections[98].id);
@@ -51,7 +51,7 @@ test('abandoned section response cannot replace the selected workspace', async (
 });
 
 test('participant management opens outside the table; Escape restores focus and uncertain writes stay locked', async () => {
-  const ui = await mount(h(CourseDetail, { courseId: course.id, sections: true }), request => {
+  const ui = await mount(h(CourseDetail, { courseId: course.id }), request => {
     if (request.url.includes('/enrollments')) {
       if (request.method === 'PATCH') throw new Error('Response lost');
       return Response.json(page([{ ...enrollment, sectionId: sections[0].id }, { ...history, sectionId: sections[0].id }]));
@@ -92,7 +92,7 @@ test('participant management opens outside the table; Escape restores focus and 
 
 test('role rejection stays inside the dialog; pending double submits and stale section responses cannot mutate twice', async () => {
   const pending = deferred<Response>();
-  const ui = await mount(h(CourseDetail, { courseId: course.id, sections: true }), request => request.method === 'PATCH' ? pending.promise : reply(request));
+  const ui = await mount(h(CourseDetail, { courseId: course.id }), request => request.method === 'PATCH' ? pending.promise : reply(request));
   try {
     const trigger = ui.doc.querySelector<HTMLButtonElement>('.participants-table button')!;
     await ui.settle(() => trigger.click());
@@ -111,7 +111,7 @@ test('role rejection stays inside the dialog; pending double submits and stale s
   } finally { await ui.close(); }
 
   const late = deferred<Response>();
-  const second = await mount(h(CourseDetail, { courseId: course.id, sections: true }), request => request.method === 'PATCH' ? late.promise : reply(request));
+  const second = await mount(h(CourseDetail, { courseId: course.id }), request => request.method === 'PATCH' ? late.promise : reply(request));
   try {
     await second.settle(() => second.doc.querySelector<HTMLButtonElement>('.participants-table button')!.click());
     await second.submit(`form[aria-label="Cambiar rol ${enrollment.id}"]`, { role: 'teacher' });
