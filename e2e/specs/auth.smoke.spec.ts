@@ -13,7 +13,7 @@ test(`E2E-AUTH-001 login real / ${actor} @smoke`, async ({e, actorPage}) => {
     await expect(page.getByText('Crear curso',{exact:true}).filter({visible:true})).toHaveCount(0);
   } else {
     await course(page,e.data.courses.C1);
-    await expect(page.getByRole('heading',{name:'Curso E2E C1',exact:true})).toBeVisible();
+    await expect(page.locator('main').getByText('Curso E2E C1',{exact:true}).first()).toBeVisible();
   }
   const stored = await page.evaluate(()=>({cookies:document.cookie,local:{...localStorage},session:{...sessionStorage}}));
   expect(stored).toEqual({cookies:'',local:{},session:{}});

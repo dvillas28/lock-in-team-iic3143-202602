@@ -1,6 +1,6 @@
 import {test,expect} from '../fixtures/test.ts';
 import {status} from '../helpers/api.ts';
-import {course,go,compatibilityNavigate} from '../helpers/browser.ts';
+import {course,go,compatibilityNavigate,showMenu} from '../helpers/browser.ts';
 import {fillCourse,period,submit,focus} from '../helpers/management.ts';
 import {courseInput,securitySnapshot,deniedUI} from '../helpers/security.ts';
 
@@ -49,10 +49,10 @@ test('E2E-COURSE-005 directory loading failure and retry use current identity / 
 });
 test('E2E-COURSE-006 UI course creation persists initial section teacher and audit atomically / create @smoke',async ({e,actorPage})=>{
  const page=await actorPage('AO'),form=await fillCourse(page),response=page.waitForResponse(r=>r.url().endsWith('/courses')&&r.request().method()==='POST');await submit(form,'Crear curso');const r=await response;expect(r.status()).toBe(201);const created=await r.json();expect(r.headers().location).toContain(created.id);
- await expect(page.getByRole('heading',{name:'Curso E2E nuevo',exact:true})).toBeVisible();const api=await e.api('AO');expect(status(await api.get(`courses/${created.id}`),200).body).toMatchObject({code:'E2E-NEW',term:'2026-2',createdBy:e.data.actors.AO.id});
+ await expect(page.locator('main').getByText('Curso E2E nuevo',{exact:true}).first()).toBeVisible();const api=await e.api('AO');expect(status(await api.get(`courses/${created.id}`),200).body).toMatchObject({code:'E2E-NEW',term:'2026-2',createdBy:e.data.actors.AO.id});
  const ss=status(await api.get(`courses/${created.id}/sections`),200).body.items;expect(ss).toHaveLength(1);expect(ss[0]).toMatchObject({code:'1',capacity:30});const enrolled=status(await api.get(`sections/${ss[0].id}/enrollments`),200).body.items;expect(enrolled).toHaveLength(1);expect(enrolled[0]).toMatchObject({role:'teacher',active:true,user:{id:e.data.actors.AO.id}});
  expect((await e.pool.query('SELECT action FROM audit_events WHERE course_id=$1 ORDER BY action',[created.id])).rows.map(r=>r.action)).toEqual(['course.created','enrollment.created','section.created']);
- const fresh=await actorPage('AO');await course(fresh,created.id);await expect(fresh.locator('main')).toContainText('Docente');await go(fresh,created.id,'/sections');await expect(fresh.getByRole('heading',{name:'Participantes e historial · Sección 1',exact:true})).toBeVisible();
+ const fresh=await actorPage('AO');await course(fresh,created.id);await showMenu(fresh);await fresh.getByRole('link',{name:'Mis cursos',exact:true}).click();await expect(fresh.locator(`a[href="/courses/${created.id}/modules"]`)).toContainText('Docente');await go(fresh,created.id,'/sections');await expect(fresh.getByRole('heading',{name:'Participantes e historial · Sección 1',exact:true})).toBeVisible();
 });
 test('E2E-COURSE-007 natural key duplicate rejects without partial effects / duplicate @regression',async ({e,actorPage})=>{
  const api=await e.api('AO'),input={...courseInput,code:'E2E-DUP'},created=status(await api.post('courses',input),201).body,page=await actorPage('AO');const before=await securitySnapshot(e);
