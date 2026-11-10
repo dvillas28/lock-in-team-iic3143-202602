@@ -30,7 +30,7 @@ function FormView({ kind, refresh = true, search = false, edit = false }: { kind
 }
 const cases: { kind: Kind; label: string; values: Record<string, string>; message: string }[] = [
   { kind: 'module', label: 'Crear módulo', values: { title: 'Nueva unidad' }, message: 'Módulo creado.' },
-  { kind: 'material', label: 'Crear material', values: { title: 'Nueva lectura', markdownBody: '  # Contenido nuevo  ' }, message: 'Material creado.' },
+  { kind: 'material', label: 'Crear página', values: { title: 'Nueva lectura', markdownBody: '  # Contenido nuevo  ' }, message: 'Página creada.' },
   { kind: 'course', label: 'Crear curso', values: { code: 'NUEVO', name: 'Nuevo curso', term: '2026-2', sectionCode: '1', capacity: '30' }, message: 'Curso creado.' },
   { kind: 'section', label: 'Crear sección', values: { code: '2', capacity: '30' }, message: 'Sección creada.' },
   { kind: 'enrollment', label: 'Asignar rol', values: { userId: person.id, role: 'assistant' }, message: 'Participante asignado.' },
@@ -74,7 +74,7 @@ for (const kind of ['module', 'material'] as const) test(`${kind} keeps pending 
     const response = await created(kind, request);
     await ui.settle(() => pending.resolve(response));
     assert.equal(title.value, '');
-    assert.match(ui.doc.querySelector('[role="status"]')!.textContent!, /creado\. No se pudo actualizar/);
+    assert.match(ui.doc.querySelector('[role="status"]')!.textContent!, /(creado|creada)\. No se pudo actualizar/);
     assert.doesNotMatch(ui.doc.body.textContent!, /Resultado incierto/);
   } finally { await ui.close(); }
 });

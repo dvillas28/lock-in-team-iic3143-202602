@@ -1,3 +1,4 @@
+import {addContent} from '../helpers/management.ts';
 import {readFile} from 'node:fs/promises';
 import type {Locator,Page} from '@playwright/test';
 import {test,expect} from '../fixtures/test.ts';
@@ -7,12 +8,14 @@ import {academicPdf} from '../helpers/academic-pdf.ts';
 
 const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR42mMAAQAABQABoIJXOAAAAABJRU5ErkJggg==','base64');
 async function upload(page:Page,panel:Locator,name:string,mimeType:string,buffer:Buffer) {
+ if(!await panel.getByRole('region',{name:'Subir archivo',exact:true}).isVisible())await addContent(panel,'Subir archivo');
  await panel.getByLabel('Seleccionar archivo',{exact:true}).setInputFiles({name,mimeType,buffer});
  const response=page.waitForResponse(r=>r.url().endsWith('/files')&&r.request().method()==='POST');
  await panel.getByRole('button',{name:'Subir como borrador'}).click();
  const uploaded=await response;
  expect(uploaded.status()).toBe(201);
  await expect(panel.getByRole('link',{name,exact:true})).toBeVisible();
+ await expect(panel.getByRole('region',{name:'Subir archivo',exact:true})).toBeHidden();
  return uploaded.json();
 }
 
@@ -26,7 +29,7 @@ test('E2E-CONTENT-008 Upload publish read and download an academic file / academ
  const teacher=await actorPage('T1'), panel=await modulePanel(teacher,e);
  const notice=teacher.locator('.content-notices');
  await expect(teacher.getByRole('button',{name:/^Actualizar (módulos|materiales)$/})).toHaveCount(0);
- await panel.locator('summary').filter({hasText:/^Agregar archivo$/}).click();
+ await addContent(panel,'Subir archivo');
  await panel.getByLabel('Seleccionar archivo',{exact:true}).setInputFiles({name:'invalido.html',mimeType:'text/html',buffer:Buffer.from('archivo inválido')});
  await expect(panel.getByRole('alert')).toContainText('formato admitido');
  const original=academicPdf(), title='Clase 01 - Introducción.pdf';
@@ -37,12 +40,13 @@ test('E2E-CONTENT-008 Upload publish read and download an academic file / academ
  const picture=await upload(teacher,panel,'Diagrama de procesos.png','image/png',png);
  const zip=Buffer.alloc(22);zip.writeUInt32LE(0x06054b50);
  await upload(teacher,panel,'Material complementario.zip','application/zip',zip);
- const quizDisclosure=panel.locator('summary').filter({hasText:/^Enlazar cuestionario$/});
- await quizDisclosure.click();
- await panel.getByLabel('Cuestionario del curso').selectOption(e.data.quizzes.Q1);
- await panel.getByRole('button',{name:'Enlazar cuestionario',exact:true}).click();
+ await addContent(panel,'Enlazar cuestionario');
+ const quizDialog=teacher.getByRole('dialog',{name:'Enlazar cuestionario',exact:true});
+ await quizDialog.getByRole('radio',{name:'Quiz E2E Q1',exact:true}).check();
+ await quizDialog.getByRole('button',{name:'Enlazar cuestionario',exact:true}).click();
  await expect(panel.getByRole('link',{name:'Quiz E2E Q1',exact:true})).toBeVisible();
- await quizDisclosure.click();
+ await expect(quizDialog).toBeHidden();
+ await expect(teacher.locator('.content-notices')).toHaveText('Cuestionario enlazado.');
  const student=await actorPage('ST1'), studentPanel=await modulePanel(student,e);
  await expect(studentPanel.getByRole('link',{name:title})).toHaveCount(0);
  const detail=`/courses/${course}/modules/${module}/files/${created.id}`;
@@ -66,7 +70,7 @@ test('E2E-CONTENT-008 Upload publish read and download an academic file / academ
  await expect(notice).toHaveText('Archivo publicado.');
  expect(await rows.evaluate(element=>element.clientHeight)).toBe(height);
  await expect(rows.getByText('Archivo publicado.',{exact:true})).toHaveCount(0);
- await panel.locator('summary').filter({hasText:/^Agregar archivo$/}).click();
+ await addContent(panel,'Subir archivo');
  async function evidence(page:Page,name:string) {
   const path=info.outputPath(name+'.png');
   await page.locator('main').evaluate(main=>{window.scrollTo(0,0);main.scrollTo(0,0);});
@@ -81,7 +85,7 @@ test('E2E-CONTENT-008 Upload publish read and download an academic file / academ
  await student.evaluate(()=>window.dispatchEvent(new Event('focus')));
  await expect(studentPanel.getByRole('link',{name:title})).toBeVisible();
  await expect(studentPanel.locator(`a[href$="/${draft.id}"]`)).toHaveCount(0);
- await expect(studentPanel.getByText('Agregar archivo',{exact:true})).toHaveCount(0);
+ await expect(studentPanel.getByRole('button',{name:'Añadir contenido',exact:true})).toHaveCount(0);
  await expect(studentPanel.getByRole('link',{name:'Quiz E2E Q1',exact:true})).toBeVisible();
  await student.setViewportSize({width:1440,height:1000});
  await evidence(student,'02-estudiante-modulos');
@@ -116,7 +120,7 @@ test('E2E-CONTENT-008 Upload publish read and download an academic file / academ
  await expect(student.getByRole('button',{name:'Descargar archivo'})).toBeEnabled();
 
  const assistant=await actorPage('AS1'), assistantPanel=await modulePanel(assistant,e);
- await expect(assistantPanel.getByText('Agregar archivo',{exact:true})).toHaveCount(0);
+ await expect(assistantPanel.getByRole('button',{name:'Añadir contenido',exact:true})).toHaveCount(0);
  await assistantPanel.getByRole('link',{name:title}).click();
  await expect(assistant.getByRole('region',{name:'Visor de PDF'}).locator('.pdf-text-layer')).toContainText('Gestion de Operaciones');
  await assistant.setViewportSize({width:375,height:812});
@@ -189,9 +193,8 @@ test('E2E-CONTENT-008 Keep navigation anchored while browsing a long course / ac
  const panel=await modulePanel(teacher,e);
  await teacher.getByRole('navigation',{name:'Índice de módulos'}).locator(`a[href="#module-${last}"]`).click();
  const tail=teacher.locator('#module-'+last);
- await tail.getByText('Agregar archivo',{exact:true}).click();
+ await addContent(tail,'Subir archivo');
  await upload(teacher,tail,'Lectura de cierre.pdf','application/pdf',academicPdf());
- await tail.getByText('Agregar archivo',{exact:true}).click();
  await panel.locator('button.module-collapse').evaluate(element=>(element as HTMLButtonElement).focus({preventScroll:true}));
 
  for (const width of [1440,1024]) {

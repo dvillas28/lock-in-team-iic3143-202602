@@ -85,10 +85,10 @@ test("material create ambiguity and rejected edit retain original whitespace; no
  return Response.json(r.url.endsWith("/resources")?resources(...items):r.url.endsWith("/materials")?{items}:r.url.endsWith("/modules")?{items:[unit]}:course);
  },"teacher");
  try{
- await ui.click("Unidad 1");await ui.submit('form[aria-label="Crear material"]',{title:"Lectura",markdownBody:"  fuente local  "});
- const source=ui.doc.querySelector<HTMLTextAreaElement>('form[aria-label="Crear material"] textarea')!;
+ await ui.click("Unidad 1");await ui.submit('form[aria-label="Crear página"]',{title:"Lectura",markdownBody:"  fuente local  "});
+ const source=ui.doc.querySelector<HTMLTextAreaElement>('form[aria-label="Crear página"] textarea')!;
  assert.equal(source.value,mode==="lost"?"  fuente local  ":"");
- if(mode==="lost"){assert.match(ui.doc.body.textContent!,/coincidencias no prueban/);await ui.submit('form[aria-label="Crear material"]',{title:"Lectura",markdownBody:"otra"});assert.equal(ui.requests.filter(r=>r.method==="POST"&&!r.url.endsWith("/login")).length,1);}
+ if(mode==="lost"){assert.match(ui.doc.body.textContent!,/coincidencias no prueban/);await ui.submit('form[aria-label="Crear página"]',{title:"Lectura",markdownBody:"otra"});assert.equal(ui.requests.filter(r=>r.method==="POST"&&!r.url.endsWith("/login")).length,1);}
  await ui.submit('form[aria-label="Editar material Lectura"]',{title:"Lectura",markdownBody:"  editar  "});
  assert.equal(ui.doc.querySelector<HTMLTextAreaElement>('form[aria-label="Editar material Lectura"] textarea')!.value,"  editar  ");
  }finally{await ui.close();}
@@ -100,7 +100,7 @@ test("pending reorder, material update and create are discarded on context chang
  const ui=await mount(view(),r=>r.method!=="GET"?pending.promise:Response.json(r.url.endsWith("/resources")?resources(material):r.url.endsWith("/modules")?{items:[unit,{...unit,id:id(42),title:"Segundo",position:9}]}:course),"teacher");
  try{
  if(operation==="order")await ui.settle(()=>ui.doc.querySelector<HTMLButtonElement>('button[aria-label="Bajar Unidad 1"]')!.click());
- else{await ui.click("Unidad 1");await ui.submit(operation==="update"?'form[aria-label="Editar material Lectura"]':'form[aria-label="Crear material"]',{title:"Lectura",markdownBody:"Privado"});}
+ else{await ui.click("Unidad 1");await ui.submit(operation==="update"?'form[aria-label="Editar material Lectura"]':'form[aria-label="Crear página"]',{title:"Lectura",markdownBody:"Privado"});}
  await ui.actor("student");
  await ui.settle(()=>pending.resolve(Response.json(operation==="order"?{items:[]}:{...material,markdownBody:"Privado"})));
  assert.equal(ui.doc.querySelector("form"),null);assert.doesNotMatch(ui.doc.body.textContent!,/Privado|creado|actualizado/);
@@ -122,10 +122,10 @@ test("confirmed create followed by failed empty refresh is not uncertain or a re
 test("collapsing an uncertain material editor cannot unlock the same creation",async()=>{
  const ui=await mount(view(),r=>r.method==="POST"?Promise.reject(new Error("lost")):Response.json(r.url.endsWith("/resources")?resources(material):r.url.endsWith("/modules")?{items:[unit]}:course),"teacher");
  try{
- await ui.click("Unidad 1");await ui.submit('form[aria-label="Crear material"]',{title:"Lectura",markdownBody:"borrador"});
+ await ui.click("Unidad 1");await ui.submit('form[aria-label="Crear página"]',{title:"Lectura",markdownBody:"borrador"});
  await ui.click("Unidad 1");await ui.click("Unidad 1");
  assert.match(ui.doc.body.textContent!,/Resultado incierto/);
- await ui.submit('form[aria-label="Crear material"]',{title:"Lectura",markdownBody:"borrador"});
+ await ui.submit('form[aria-label="Crear página"]',{title:"Lectura",markdownBody:"borrador"});
  assert.equal(ui.requests.filter(r=>r.method==="POST"&&!r.url.endsWith("/login")).length,1);
  }finally{await ui.close();}
 });
@@ -170,4 +170,65 @@ test("module dialog: 'Nuevo módulo' opens empty, 'Renombrar' is preloaded, canc
  const edit=ui.doc.querySelector<HTMLInputElement>(`form[aria-label="Editar módulo ${unit.title}"] input`)!;
  assert.equal(edit.value,unit.title);assert.ok(edit.closest("dialog")!.hasAttribute("open"));
  }finally{await ui.close();}
+});
+test("add-content menu offers three actions, closes on Escape and reveals the chosen panel",async()=>{
+ const ui=await mount(view(),r=>Response.json(r.url.endsWith("/modules")?{items:[unit]}:r.url.endsWith("/resources")?resources(material):course),"teacher");
+ try{
+  await ui.click("Unidad 1");
+  assert.equal(ui.doc.querySelectorAll('button[aria-haspopup="menu"]').length,1);
+  assert.equal(ui.doc.querySelector('[role="menu"]'),null);
+  await ui.click("Añadir contenido");
+  const labels=Array.from(ui.doc.querySelectorAll('[role="menuitem"] strong')).map(e=>e.textContent);
+  assert.deepEqual(labels,["Subir archivo","Crear página","Enlazar cuestionario"]);
+  await ui.settle(()=>{ui.doc.querySelector('[role="menu"]')!.dispatchEvent(new ui.doc.defaultView!.KeyboardEvent("keydown",{key:"Escape",bubbles:true}));});
+  assert.equal(ui.doc.querySelector('[role="menu"]'),null);
+  await ui.click("Añadir contenido");
+  await ui.settle(()=>ui.doc.querySelectorAll<HTMLElement>('[role="menuitem"]')[1].click());
+  assert.equal(ui.doc.querySelector('[data-panel="page"]')!.hasAttribute("hidden"),false);
+  assert.equal(ui.doc.querySelector('[data-panel="file"]')!.hasAttribute("hidden"),true);
+ }finally{await ui.close();}
+});
+test("students never see the add-content menu",async()=>{
+ const ui=await mount(view(),r=>Response.json(r.url.endsWith("/modules")?{items:[unit]}:r.url.endsWith("/resources")?resources(material):course),"student");
+ try{assert.equal(ui.doc.querySelector('button[aria-haspopup="menu"]'),null);assert.equal(ui.doc.querySelector("[data-panel]"),null);}finally{await ui.close();}
+});
+const panelHidden=(ui:{doc:Document},name:string)=>ui.doc.querySelector(`[data-panel="${name}"]`)!.hasAttribute("hidden");
+test("page panel closes only after a confirmed creation and keeps the draft otherwise",async()=>{
+ for(const mode of ["ok","rejected"]){
+  const ui=await mount(view(),async r=>{
+   if(r.method==="POST")return mode==="ok"?Response.json({...material,id:id(51),...await r.clone().json()},{status:201}):Response.json({},{status:422});
+   return Response.json(r.url.endsWith("/resources")?resources(material):r.url.endsWith("/modules")?{items:[unit]}:course);
+  },"teacher");
+  try{
+   await ui.click("Unidad 1");
+   await ui.click("Añadir contenido");
+   await ui.settle(()=>ui.doc.querySelectorAll<HTMLElement>('[role="menuitem"]')[1].click());
+   assert.equal(panelHidden(ui,"page"),false);
+   await ui.submit('form[aria-label="Crear página"]',{title:"Nueva",markdownBody:"contenido"});
+   assert.equal(panelHidden(ui,"page"),mode==="ok");
+   assert.equal(ui.doc.querySelector<HTMLTextAreaElement>('form[aria-label="Crear página"] textarea')!.value,mode==="ok"?"":"contenido");
+   if(mode==="ok")assert.equal(ui.doc.querySelector(".content-notice")?.textContent,"Página creada.");
+   else assert.equal(ui.doc.querySelector(".content-notice"),null);
+  }finally{await ui.close();}
+ }
+});
+test("expanding a module does not flash a loading state for fast loads but explains slow ones",async()=>{
+ const pending=deferred<Response>();
+ const ui=await mount(view(),r=>r.url.endsWith("/resources")?pending.promise:Response.json(r.url.endsWith("/modules")?{items:[unit]}:course),"teacher");
+ try{
+  await ui.click("Unidad 1");
+  assert.doesNotMatch(ui.doc.body.textContent!,/Cargando contenido/);
+  await ui.settle(()=>{pending.resolve(Response.json(resources(material)));});
+  assert.doesNotMatch(ui.doc.body.textContent!,/Cargando contenido/);
+  assert.ok(ui.doc.querySelector('a[href$="/materials/'+material.id+'"]'));
+ }finally{await ui.close();}
+ const slow=deferred<Response>();
+ const ui2=await mount(view(),r=>r.url.endsWith("/resources")?slow.promise:Response.json(r.url.endsWith("/modules")?{items:[unit]}:course),"teacher");
+ try{
+  await ui2.click("Unidad 1");
+  await ui2.settle(()=>{});
+  await new Promise(done=>setTimeout(done,450));
+  await ui2.settle(()=>{});
+  assert.match(ui2.doc.body.textContent!,/Cargando contenido/);
+ }finally{await ui2.close();}
 });
