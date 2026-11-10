@@ -39,7 +39,9 @@ export function QuestionEditor({ rows, onRows, error = () => undefined }: {
       <h2 className="serif">Preguntas y pauta</h2>
       <span className="chip tnum">{rows.length} {rows.length === 1 ? "pregunta" : "preguntas"}</span>
     </div>
-    {!rows.length && <p className="hint">Puedes guardar el borrador sin preguntas.</p>}
+    {!rows.length && (error("questions")
+      ? <p className="field-error" id={`${errorId}-questions`}>{error("questions")}</p>
+      : <p className="hint">Puedes guardar el borrador sin preguntas.</p>)}
     {rows.map((q, i) => {
       const field = `questions.${i}`;
       const number = i + 1;
@@ -115,7 +117,8 @@ export function QuestionEditor({ rows, onRows, error = () => undefined }: {
         </div>
       </fieldset>;
     })}
-    <div className="actions"><button type="button" data-add-question className="btn btn-ghost" onClick={() => {
+    <div className="actions"><button type="button" data-add-question data-error-field="questions" className="btn btn-ghost"
+      aria-describedby={!rows.length && error("questions") ? `${errorId}-questions` : undefined} onClick={() => {
       const key = sequence.current++;
       const alternatives = ["a", "b"].map(id => ({ key: sequence.current++, id, text: "", isCorrect: false }));
       update([...rows, { key, prompt: "", position: rows.length + 1, points: 1, alternatives }],

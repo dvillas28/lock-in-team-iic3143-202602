@@ -1,6 +1,10 @@
 "use client";
 import { QuizWorkspace } from "./quiz-workspace.tsx";
-import { QuizFacts, QuizStatus } from "./quiz-facts.tsx";
+import { QuizFacts, QuizPhaseChip } from "./quiz-facts.tsx";
+import { useEffect, useState } from "react";
+import { ContentNotices, useContentNotice } from "../content/content-notices.tsx";
+import { quizPublicationReceipt } from "./quiz-created-receipt.ts";
+import { quizPhase } from "../../lib/quizzes/publication.ts";
 import { ClipboardList, LockKeyhole, Pencil } from "lucide-react";
 import Link from "next/link";
 import {gradebookCapabilities} from '../../lib/gradebook/capabilities.ts';
@@ -13,13 +17,24 @@ import { getQuiz } from "../../lib/api/quizzes.ts";
 import { canAuthor } from "../../lib/quizzes/capabilities.ts";
 import { ApiResponseError } from "../../lib/api/errors.ts";
 import { ErrorState, LoadingState } from "../route-states.tsx";
-export function QuizDetail({courseId,quizId,listQuery=""}:{courseId:string;quizId:string;listQuery?:string}) {
+export function QuizDetail(props:{courseId:string;quizId:string;listQuery?:string}) {
+  return <ContentNotices><QuizDetailView {...props}/></ContentNotices>;
+}
+function QuizDetailView({courseId,quizId,listQuery=""}:{courseId:string;quizId:string;listQuery?:string}) {
   const {session,state}=useSession(), context=state.context, slug=context?.slug ?? "";
+  const notify=useContentNotice(), [now]=useState(Date.now);
   const result=useResource(session,`${state.generation}:${slug}:${courseId}:${quizId}:safe:${JSON.stringify(context?.user)}`,async c=>{
     const course=await getCourse(c,slug,courseId),sections=await listSections(c,slug,courseId),quiz=await getQuiz(c,slug,courseId,quizId);
     if(quiz.sectionId !== null && !sections.some(s=>s.id===quiz.sectionId)) throw new ApiResponseError();
     return {course,sections,quiz};
   });
+  const loaded=!!result.data;
+  useEffect(()=>{
+    const receipt=quizPublicationReceipt(session,courseId);
+    if(!loaded || !notify || !receipt || receipt.id!==quizId || receipt.announced) return;
+    receipt.announced=true;
+    notify("Quiz publicado.");
+  },[loaded,notify,session,courseId,quizId]);
   if(!context?.user) return <LoadingState/>;
   if(result.error) return <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/>;
   if(!result.data) return <LoadingState/>;
@@ -28,7 +43,7 @@ export function QuizDetail({courseId,quizId,listQuery=""}:{courseId:string;quizI
   return <QuizWorkspace course={course} user={context.user} title={quiz.title}>
     <Link className="text-link" href={`/courses/${courseId}/quizzes${listQuery}`}>Volver a quizzes</Link>
     <section className="card panel stack quiz-summary" aria-label="Información del quiz">
-      <div className="quiz-section-heading"><h2>Información del quiz</h2><div className="quiz-chips"><QuizStatus status={quiz.status}/><span className="chip">{quiz.sectionId ? `Sección ${sections.find(s=>s.id===quiz.sectionId)?.code}` : "Todo el curso"}</span></div></div>
+      <div className="quiz-section-heading"><h2>Información del quiz</h2><div className="quiz-chips"><QuizPhaseChip phase={quizPhase(quiz,now)}/><span className="chip">{quiz.sectionId ? `Sección ${sections.find(s=>s.id===quiz.sectionId)?.code}` : "Todo el curso"}</span></div></div>
       <QuizFacts quiz={quiz}/>
       <div><h3 className="serif">Instrucciones</h3><p className="quiz-instructions">{quiz.instructions?.trim() ? quiz.instructions : "Este quiz no tiene instrucciones adicionales."}</p></div>
       {(author || gradebookCapabilities(context.user,course).book) && <div className="actions">

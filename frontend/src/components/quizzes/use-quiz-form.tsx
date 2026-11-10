@@ -25,7 +25,7 @@ export function quizControlField(control: EventTarget) {
     : "";
 }
 
-function issuesIn(form: HTMLFormElement, rows: QuestionRow[], original?: Authoring) {
+function issuesIn(form: HTMLFormElement, rows: QuestionRow[], original?: Authoring, publishing = false) {
   const issues: Issue[] = [];
   const data = new FormData(form);
   const now = Date.now();
@@ -54,6 +54,8 @@ function issuesIn(form: HTMLFormElement, rows: QuestionRow[], original?: Authori
       issues.push(issue(field, error.message, element, rows));
     }
   }
+  if (publishing && !rows.length)
+    issues.push({ field: "questions", key: "questions", label: "Preguntas", message: "Agrega al menos una pregunta para publicar." });
   if (!issues.some(entry => entry.field === "opensAt" || entry.field === "closesAt")) {
     try {
       validateQuizSchedule(dates.opensAt, dates.closesAt);
@@ -190,8 +192,8 @@ export function useQuizForm(rows: QuestionRow[], original?: Authoring) {
     inspect(event.currentTarget);
   }
 
-  function validate(form: HTMLFormElement) {
-    const next = issuesIn(form, rows, original);
+  function validate(form: HTMLFormElement, publishing = false) {
+    const next = issuesIn(form, rows, original, publishing);
     if (!next.length) {
       if (issues.length) setIssues([]);
       return true;
