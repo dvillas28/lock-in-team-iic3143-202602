@@ -1,5 +1,5 @@
 "use client";
-import { BookOpen, ChevronRight, ClipboardList, FileText, FolderOpen, GraduationCap, Home, Menu, Moon, Shield, Sun, X, UserRound, Users } from "lucide-react";
+import { ChevronRight, ClipboardList, FileText, FolderOpen, GraduationCap, Home, Menu, Moon, Shield, Sun, X, UserRound, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { CurrentUser } from "../../lib/auth/validation.ts";
@@ -54,7 +54,7 @@ function pageTitle(pathname: string) {
     if (pathname.endsWith('/sections')) {
         return 'Secciones';
     }
-    return 'Resumen del curso';
+    return 'Curso';
 }
 function toggleTheme() {
     document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
@@ -108,7 +108,7 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, av
           {(profilePage || securityPage) && <Link href="/profile/security" className={`nav-item${securityPage ? ' active' : ''}`} aria-current={securityPage ? 'page' : undefined} onClick={()=>setMenuOpen(false)}><Shield size={16} aria-hidden="true"/>Seguridad</Link>}
           {user && (user.institutionMembership.isAdmin || user.institutionMembership.isSuperAdmin) && <Link href="/admin/users" className={`nav-item${pathname === '/admin/users' ? ' active' : ''}`} aria-current={pathname === '/admin/users' ? 'page' : undefined} onClick={()=>setMenuOpen(false)}><Users size={16} aria-hidden="true"/>Usuarios institucionales</Link>}
           {base && <><p className="nav-section-label">Curso actual</p>{[
-            [base, 'Resumen del curso', BookOpen], [base + '/modules', 'Módulos y material', FolderOpen], [base + '/quizzes', 'Quizzes', ClipboardList],
+            [base + '/modules', 'Módulos y material', FolderOpen], [base + '/quizzes', 'Quizzes', ClipboardList],
             ...(user?.sectionMemberships.some(m => `/courses/${m.courseId}` === base && ['teacher','student'].includes(m.role))
               ? [[base + '/assignments', 'Tareas', FileText]] : []),
           ].map(([href, label, Icon]) => {
@@ -128,7 +128,7 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, av
             <span>{institutionSlug}</span>
             <ChevronRight size={14} aria-hidden="true"/>
             <Link href={homePath} aria-current={pathname === homePath ? "page" : undefined}>Cursos</Link></>}
-            {base && pathname !== base && <><ChevronRight size={14} aria-hidden="true"/><Link href={base}>Curso</Link></>}
+            {base && pathname !== base && <><ChevronRight size={14} aria-hidden="true"/><Link href={base + "/modules"}>Curso</Link></>}
             {base && pathname.includes('/assignments/') && <><ChevronRight size={14} aria-hidden="true"/><Link href={base + '/assignments'}>Tareas</Link></>}
             {base && pathname.includes('/quizzes/') && <><ChevronRight size={14} aria-hidden="true"/><Link href={base + '/quizzes'}>Quizzes</Link></>}
             {base && (pathname.includes('/materials/') || pathname.includes('/files/')) && <><ChevronRight size={14} aria-hidden="true"/><Link href={base + '/modules'}>Módulos</Link></>}

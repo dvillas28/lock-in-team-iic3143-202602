@@ -11,7 +11,7 @@ import { listSections } from "../../lib/api/sections.ts";
 import { listEvaluationGroups } from "../../lib/api/assignments.ts";
 import { listCourseQuizzes } from "../../lib/api/quizzes.ts";
 import { ApiResponseError } from "../../lib/api/errors.ts";
-import { EmptyState, ErrorState, LoadingState } from "../route-states.tsx";
+import { ErrorState, LoadingState } from "../route-states.tsx";
 import { QuizCreate } from "./quiz-create.tsx";
 export function QuizList({courseId}:{courseId:string}) {
   const {state}=useSession(), context=state.context, slug=context?.slug ?? "";
@@ -36,7 +36,7 @@ function QuizDirectory({courseId,scope,slug}:{courseId:string;scope:string;slug:
   const student=context.user.sectionMemberships.some(m=>m.courseId===courseId && m.role==="student");
   function clearFilters(){setQuery("");setStatus("");setSection("");}
   return <QuizWorkspace course={course} user={context.user} title="Quizzes">
-    <p className="hint">Consulta las evaluaciones del curso, sus fechas y los intentos permitidos.</p>
+    {items.length > 0 && <p className="hint">Consulta las evaluaciones del curso, sus fechas y los intentos permitidos.</p>}
     <QuizCreate key={scope} session={session} slug={slug} user={context.user} course={course} sections={sections} groups={groups} onSaved={result.reload}/>
     {result.error && <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/>}
     {items.length>0 && <section className="card panel stack quiz-filters" aria-label="Filtrar quizzes">
@@ -55,8 +55,8 @@ function QuizDirectory({courseId,scope,slug}:{courseId:string;scope:string;slug:
         </div><ArrowUpRight size={18} aria-hidden="true" />
       </Link>
     </li>)}</ul>
-    {!items.length && !result.error && <><EmptyState/><p className="hint">Aún no hay quizzes disponibles para tu participación en este curso.</p></>}
+    {!items.length && !result.error && !result.refreshing && <div className="empty-zone panel"><h2>Aún no hay quizzes disponibles</h2><p className="hint">{context.user.sectionMemberships.some(m => m.courseId === courseId && m.role === "teacher") ? "Crea un borrador para preparar el primer quiz del curso." : "Los quizzes publicados para tu sección aparecerán aquí"}</p></div>}
     {items.length>0 && !visible.length && <section className="empty-zone panel stack"><h2 className="serif">No hay quizzes que coincidan</h2><p className="hint">Prueba otro título, estado o destinatario.</p><button type="button" className="btn btn-ghost" onClick={clearFilters}>Mostrar todos los quizzes</button></section>}
-    {student && <p className="hint">Abre un quiz para consultar tus intentos y continuar uno pendiente.</p>}
+    {student && items.length > 0 && <p className="hint">Abre un quiz para consultar tus intentos y continuar uno pendiente.</p>}
   </QuizWorkspace>;
 }

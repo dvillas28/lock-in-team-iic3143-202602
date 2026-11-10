@@ -20,7 +20,7 @@ test("enrollment API preserves returned successor, pagination and HTTP failures"
 });
 test("only authorized sections mount participant management; owner without teacher never searches",async()=>{
  for(const profile of ['owner','teacher','assistant','student','super','foreign']){
- const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),reply,profile);try{
+ const ui=await mount(h(CourseDetail,{courseId:course.id}),reply,profile);try{
  const allowed=['owner','teacher','foreign'].includes(profile);
  assert.equal(!!ui.doc.querySelector('select[name="managedSection"]'),allowed);
  if(allowed)await ui.select('select[name="managedSection"]',section.id);
@@ -30,7 +30,7 @@ test("only authorized sections mount participant management; owner without teach
  }finally{await ui.close();}}
 });
 test("history and sibling roles survive role successor, POST 200 and pagination reset",async()=>{
- let rows: import("../src/lib/courses/validation.ts").Enrollment[]=[enrollment,history];const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),async r=>{
+ let rows: import("../src/lib/courses/validation.ts").Enrollment[]=[enrollment,history];const ui=await mount(h(CourseDetail,{courseId:course.id}),async r=>{
  if(!r.url.includes('/enrollments'))return reply(r);
  if(r.method==='POST')return Response.json(enrollment);
  if(r.method==='PATCH'){rows=[{...enrollment,active:false},history,{...enrollment,id:id(99),role:'teacher'}];return Response.json(rows[2]);}
@@ -44,7 +44,7 @@ test("history and sibling roles survive role successor, POST 200 and pagination 
  }finally{await ui.close();}
 });
 test("revoke last teacher requires confirmation; cancel sends nothing",async()=>{
- const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>r.url.includes('/enrollments')?Response.json(r.method==='PATCH'?{...enrollment,role:'teacher',active:false}:page([{...enrollment,role:'teacher'}])):reply(r));try{
+ const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>r.url.includes('/enrollments')?Response.json(r.method==='PATCH'?{...enrollment,role:'teacher',active:false}:page([{...enrollment,role:'teacher'}])):reply(r));try{
  await ui.select('select[name="managedSection"]',section.id);const dialog=ui.doc.querySelector('dialog') as HTMLDialogElement;
  dialog.showModal=()=>{dialog.setAttribute('open','');};dialog.close=()=>{dialog.removeAttribute('open');};
  await ui.click('Gestionar');await ui.click('Revocar Docente');assert.ok(dialog.hasAttribute('open'));
@@ -53,16 +53,16 @@ test("revoke last teacher requires confirmation; cancel sends nothing",async()=>
  }finally{await ui.close();}
 });
 test("search 404 is unavailable, not empty; stale searches and section completions discarded",async()=>{
- const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>r.url.includes('/users')?Response.json({},{status:404}):reply(r),'teacher');try{
+ const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>r.url.includes('/users')?Response.json({},{status:404}):reply(r),'teacher');try{
  await ui.select('select[name="managedSection"]',section.id);await ui.submit('form[aria-label="Buscar participantes"]',{search:'María'});assert.doesNotMatch(ui.doc.body.textContent!,/Sin coincidencias/);assert.match(ui.doc.body.textContent!,/no está disponible/);
  }finally{await ui.close();}
- const pending=deferred<Response>();const u=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>r.url.includes('/enrollments')?pending.promise:reply(r),'owner');try{
+ const pending=deferred<Response>();const u=await mount(h(CourseDetail,{courseId:course.id}),r=>r.url.includes('/enrollments')?pending.promise:reply(r),'owner');try{
  await u.select('select[name="managedSection"]',section.id);await u.select('select[name="managedSection"]',otherSection.id);await u.settle(()=>pending.resolve(Response.json(page([enrollment]))));assert.doesNotMatch(u.doc.body.textContent!,/María/);
  await u.settle(()=>u.session.logout());assert.equal(u.doc.body.textContent,'');
  }finally{await u.close();}
 });
 test("self revocation refreshes me and removes management; lost mutation is never retried",async()=>{
- let lost=true;const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>{if(r.url.includes('/enrollments')&&r.method==='POST'){if(lost)throw new Error('lost');return Response.json(enrollment);}return reply(r);});try{
+ let lost=true;const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>{if(r.url.includes('/enrollments')&&r.method==='POST'){if(lost)throw new Error('lost');return Response.json(enrollment);}return reply(r);});try{
  await ui.select('select[name="managedSection"]',section.id);await ui.submit('form[aria-label="Asignar rol"]',{userId:person.id,role:'student'});assert.match(ui.doc.body.textContent!,/incierto/i);lost=false;
  await ui.submit('form[aria-label="Asignar rol"]',{userId:person.id,role:'student'});assert.equal(ui.requests.filter(r=>r.url.includes('/enrollments')&&r.method==='POST').length,1);
  await ui.actor('student');assert.equal(ui.doc.querySelector('form[aria-label="Asignar rol"]'),null);
@@ -70,7 +70,7 @@ test("self revocation refreshes me and removes management; lost mutation is neve
 });
 
 test("teacher search pagination preserves opaque cursor, excludes inactive destination and assigns chosen user",async()=>{
- const requests:Request[]=[];const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>{requests.push(r);if(r.url.includes('/users'))return Response.json(new URL(r.url).searchParams.has('cursor')?page([person]):page([{...person,active:false}], 'opaque+/='));if(r.url.includes('/enrollments')&&r.method==='POST')return Response.json(enrollment,{status:201});return reply(r);},'teacher');try{
+ const requests:Request[]=[];const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>{requests.push(r);if(r.url.includes('/users'))return Response.json(new URL(r.url).searchParams.has('cursor')?page([person]):page([{...person,active:false}], 'opaque+/='));if(r.url.includes('/enrollments')&&r.method==='POST')return Response.json(enrollment,{status:201});return reply(r);},'teacher');try{
  await ui.select('select[name="managedSection"]',section.id);await ui.submit('form[aria-label="Buscar participantes"]',{search:'María'});assert.equal(ui.doc.querySelector<HTMLButtonElement>('form[aria-label="Asignar rol"] button')?.disabled,true);
  const inactive=Array.from(ui.doc.querySelectorAll<HTMLButtonElement>('button')).find(b=>b.textContent?.includes('(inactiva)'));assert.equal(inactive?.disabled,true);
  await ui.click('Más personas');assert.equal(new URL(requests.find(r=>r.url.includes('cursor='))!.url).searchParams.get('cursor'),'opaque+/=');
@@ -79,13 +79,13 @@ test("teacher search pagination preserves opaque cursor, excludes inactive desti
  }finally{await ui.close();}
 });
 test("search responses from older query cannot restore users",async()=>{
- const pending=deferred<Response>();const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>r.url.includes('/users')?(new URL(r.url).searchParams.get('search')==='vieja'?pending.promise:Response.json(page([]))):reply(r),'teacher');try{
+ const pending=deferred<Response>();const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>r.url.includes('/users')?(new URL(r.url).searchParams.get('search')==='vieja'?pending.promise:Response.json(page([]))):reply(r),'teacher');try{
  await ui.select('select[name="managedSection"]',section.id);await ui.submit('form[aria-label="Buscar participantes"]',{search:'vieja'});await ui.submit('form[aria-label="Buscar participantes"]',{search:'nueva'});
  await ui.settle(()=>pending.resolve(Response.json(page([person]))));assert.equal(Array.from(ui.doc.querySelectorAll('button')).some(b=>b.textContent?.includes('María Pérez ·')),false);
  }finally{await ui.close();}
 });
 test("pagination shows history by enrollment ID and returns to initial cursor after mutation",async()=>{
- const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>{
+ const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>{
  if(!r.url.includes('/enrollments'))return reply(r);
  if(r.method==='POST')return Response.json(enrollment);
  return Response.json(new URL(r.url).searchParams.has('cursor')?page([history]):page([enrollment],'next'));
@@ -96,7 +96,7 @@ test("pagination shows history by enrollment ID and returns to initial cursor af
 });
 test("actual self revocation refreshes me and teacher loses participant surface",async()=>{
  const self={...enrollment,user:{...person,id:id(1)},role:'teacher'};
- const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>{if(r.method==='PATCH'){ui.setActor('student');return Response.json({...self,active:false});}return r.url.includes('/enrollments')?Response.json(page([self])):reply(r);},'teacher');try{
+ const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>{if(r.method==='PATCH'){ui.setActor('student');return Response.json({...self,active:false});}return r.url.includes('/enrollments')?Response.json(page([self])):reply(r);},'teacher');try{
  await ui.select('select[name="managedSection"]',section.id);const dialog=ui.doc.querySelector('dialog') as HTMLDialogElement;dialog.showModal=()=>dialog.setAttribute('open','');dialog.close=()=>dialog.removeAttribute('open');
  await ui.click('Gestionar');await ui.click('Revocar Docente');await ui.click('Confirmar revocación');assert.equal(ui.requests.filter(r=>r.url.endsWith('/me')).length,2);
  assert.equal(ui.doc.querySelector('section[aria-label="Participantes"]'),null);
@@ -105,7 +105,7 @@ test("actual self revocation refreshes me and teacher loses participant surface"
 
 test("a change returning an existing target enrollment retains sibling roles and history",async()=>{
  const sibling={...enrollment,id:id(32),role:'assistant'};let changed=false;
- const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>{
+ const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>{
  if(!r.url.includes('/enrollments'))return reply(r);
  if(r.method==='PATCH'){changed=true;return Response.json(sibling);}
  return Response.json(page([{...enrollment,active:!changed},sibling,history]));
@@ -118,7 +118,7 @@ test("a change returning an existing target enrollment retains sibling roles and
 });
 
 test('search can repeat identical input, empty stays local and selection survives pagination',async()=>{
- let calls=0;const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>r.url.includes('/users')?(calls++,Response.json(new URL(r.url).searchParams.has('cursor')?page([]):page([person],'next'))):reply(r),'teacher');
+ let calls=0;const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>r.url.includes('/users')?(calls++,Response.json(new URL(r.url).searchParams.has('cursor')?page([]):page([person],'next'))):reply(r),'teacher');
  try{
   await ui.submit('form[aria-label="Buscar participantes"]',{search:'   '});assert.equal(calls,0);assert.match(ui.doc.body.textContent!,/Escribe un nombre/);
   await ui.submit('form[aria-label="Buscar participantes"]',{search:'María'});await ui.click('María Pérez · maria@example.test');

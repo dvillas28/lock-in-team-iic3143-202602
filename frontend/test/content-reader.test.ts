@@ -26,7 +26,7 @@ test("modules lazy-load material; loading, empty and errors differ; links naviga
  const ui=await mount(h(ModulesPanel,{courseId:course.id}),r=>Response.json(r.url.endsWith("/resources")?resources(material):r.url.endsWith("/modules")?{items:[unit]}:course),"teacher");
  try {assert.equal(ui.requests.some(r=>r.url.endsWith("/resources")),false);await ui.click("Unidad 1");assert.ok(ui.doc.querySelector('a[href$="/materials/'+material.id+'"]'));await ui.click("Unidad 1");}
  finally{await ui.close();}
- for(const [status,body,expected] of [[200,{items:[]},/Sin contenido/],[503,{},/No se pudo/]] as const){
+ for(const [status,body,expected] of [[200,{items:[]},/Aún no hay módulos disponibles/],[503,{},/No se pudo/]] as const){
  const u=await mount(h(ModulesPanel,{courseId:course.id}),r=>Response.json(r.url.endsWith("/modules")?body:course,{status:r.url.endsWith("/modules")?status:200}),"student");
  try{assert.match(u.doc.body.textContent!,expected);}finally{await u.close();}
  }
@@ -71,6 +71,22 @@ test("publication matrix in course navigation exposes only jointly published mat
  }
  for(const profile of ["owner","super"]){
  const ui=await mount(h(ModulesPanel,{courseId:course.id}),r=>r.url.endsWith("/modules")?Response.json({},{status:404}):Response.json(course),profile);
- try{assert.doesNotMatch(ui.doc.body.textContent!,/Unidad 1|Lectura|Desarrollo de software/);assert.equal(ui.doc.querySelector("form"),null);}finally{await ui.close();}
+ try{assert.doesNotMatch(ui.doc.body.textContent!,/Unidad 1|Lectura|Desarrollo de software/);assert.equal(ui.doc.querySelector("form"),null);assert.equal(!!ui.doc.querySelector('a[href$="/sections"]'),profile==="owner");}finally{await ui.close();}
+ }
+});
+
+test("empty modules keep staff controls but omit the empty index and generic message",async()=>{
+ for(const profile of ["student","assistant","teacher","owner"]){
+  const pending=deferred<Response>();
+  const ui=await mount(h(ModulesPanel,{courseId:course.id}),r=>r.url.endsWith('/modules')?pending.promise:Response.json(course),profile);
+  try{
+   assert.match(ui.doc.body.textContent!,/Cargando/);assert.doesNotMatch(ui.doc.body.textContent!,/Aún no hay módulos/);
+   await ui.settle(()=>pending.resolve(Response.json({items:[]})));
+   assert.equal(ui.doc.querySelectorAll('.empty-zone').length,1);
+   assert.equal(ui.doc.querySelector('.module-index'),null);
+   assert.doesNotMatch(ui.doc.body.textContent!,/Sin contenido para mostrar|Módulos del curso/);
+   assert.equal(!!ui.doc.querySelector('form[aria-label="Crear módulo"]'),profile==='teacher');
+   assert.match(ui.doc.body.textContent!,profile==='teacher'?/Crea un módulo/:/Los módulos y materiales publicados del curso aparecerán aquí/);
+  }finally{await ui.close();}
  }
 });
