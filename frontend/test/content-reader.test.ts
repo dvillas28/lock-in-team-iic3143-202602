@@ -71,7 +71,7 @@ test("publication matrix in course navigation exposes only jointly published mat
  }
  for(const profile of ["owner","super"]){
  const ui=await mount(h(ModulesPanel,{courseId:course.id}),r=>r.url.endsWith("/modules")?Response.json({},{status:404}):Response.json(course),profile);
- try{assert.doesNotMatch(ui.doc.body.textContent!,/Unidad 1|Lectura|Desarrollo de software/);assert.equal(ui.doc.querySelector("form"),null);assert.equal(!!ui.doc.querySelector('a[href$="/sections"]'),profile==="owner");}finally{await ui.close();}
+ try{assert.doesNotMatch(ui.doc.body.textContent!,/Unidad 1|Lectura|Desarrollo de software/);assert.equal(ui.doc.querySelector("form"),null);assert.equal(!!ui.doc.querySelector('a[href$="/sections"]'),profile==="owner");assert.equal(/Gestiona este curso desde Secciones/.test(ui.doc.body.textContent!),profile==="owner");}finally{await ui.close();}
  }
 });
 

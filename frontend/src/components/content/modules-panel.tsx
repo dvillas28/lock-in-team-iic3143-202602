@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { ArrowDown, ArrowUp, ChevronDown, ChevronRight } from "lucide-react";
+import Link from "next/link";
 import { CourseNavigation } from "../courses/course-navigation.tsx";
+import { capabilities } from "../../lib/courses/capabilities.ts";
 import { useSession } from "../auth/session-provider.tsx";
 import { useResource } from "../courses/use-resource.ts";
 import { ErrorState, LoadingState } from "../route-states.tsx";
@@ -74,9 +76,12 @@ function CourseContent({ courseId }: { courseId: string }) {
   if (!state.context?.user) return <LoadingState />;
   if (courseError) return <ErrorState feedback={courseError} onRetry={() => void reloadCourse()} />;
   if (!course) return <LoadingState />;
+  const ownerWithoutAcademicRole = capabilities(state.context.user, course).sections && !state.context.user.sectionMemberships.some(m => m.courseId === course.id);
   if (result.error && !result.data) return <div className="stack">
     <CourseNavigation course={course} user={state.context.user} active="/modules" />
-    <ErrorState feedback={result.error} onRetry={() => void result.reload()} />
+    {ownerWithoutAcademicRole
+      ? <section className="card panel stack"><h2>Gestiona este curso desde Secciones</h2><p className="hint">Tu cuenta administra el curso pero no participa en él con un rol académico, por lo que no tiene módulos que consultar.</p><div className="actions"><Link className="btn btn-primary" href={`/courses/${course.id}/sections`}>Secciones y participantes</Link></div></section>
+      : <ErrorState feedback={result.error} onRetry={() => void result.reload()} />}
   </div>;
   if (!result.data) return <LoadingState />;
   const items = result.data;
