@@ -1,6 +1,6 @@
 import {ownerStudentHistory} from '../helpers/audit-profile.ts';
 import {modulePanel} from '../helpers/content.ts';
-import {addContent,disclose} from '../helpers/management.ts';
+import {addContent} from '../helpers/management.ts';
 import {test,expect} from '../fixtures/test.ts';
 import {status} from '../helpers/api.ts';
 import {origin,portal} from '../runner/settings.ts';

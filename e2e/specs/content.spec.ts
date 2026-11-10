@@ -1,7 +1,7 @@
 import {test,expect} from '../fixtures/test.ts';
 import {status} from '../helpers/api.ts';
 import {go,compatibilityNavigate} from '../helpers/browser.ts';
-import {addContent,disclose,submit} from '../helpers/management.ts';
+import {addContent,submit} from '../helpers/management.ts';
 import {modulePanel,reader} from '../helpers/content.ts';
 import {securitySnapshot} from '../helpers/security.ts';
 
@@ -88,7 +88,7 @@ for(const viewport of ['desktop','mobile'])test(`E2E-CONTENT-013 images stay tex
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBe(true);const table=page.getByRole('region',{name:'Tabla del material',exact:true});await table.focus();await expect(table).toBeFocused();await page.keyboard.press('Tab');await expect(page.locator('pre')).toBeFocused();expect(await page.locator('pre').evaluate(el=>el.scrollWidth>el.clientWidth)).toBe(true);if(viewport==='mobile')expect(await table.evaluate(el=>el.scrollWidth>el.clientWidth)).toBe(true);
 });
 test('E2E-CONTENT-014 publication has no body and deleting a page leaves the others untouched / publication-contract @regression',async ({e,actorPage})=>{
- const api=await e.api('T1'),r=e.data.materials.R1;status(await api.post(`materials/${r}/unpublish`),200);const before=await securitySnapshot(e);for(const body of [{},{published:true}])status(await api.post(`materials/${r}/publish`,body),400);expect(await securitySnapshot(e)).toEqual(before);status(await api.post(`materials/${r}/publish`),200);const published=await securitySnapshot(e),removable=status(await api.post(`modules/${e.data.modules.M1}/materials`,{title:'Para eliminar',markdownBody:'x'}),201).body,deleted=await api.request(api.path(`materials/${removable.id}`),'DELETE');expect(deleted.status).toBe(204);status(await api.get(`materials/${removable.id}`),404);status(await api.get(`materials/${r}`),200);
+ const api=await e.api('T1'),r=e.data.materials.R1;status(await api.post(`materials/${r}/unpublish`),200);const before=await securitySnapshot(e);for(const body of [{},{published:true}])status(await api.post(`materials/${r}/publish`,body),400);expect(await securitySnapshot(e)).toEqual(before);status(await api.post(`materials/${r}/publish`),200);const removable=status(await api.post(`modules/${e.data.modules.M1}/materials`,{title:'Para eliminar',markdownBody:'x'}),201).body,deleted=await api.request(api.path(`materials/${removable.id}`),'DELETE');expect(deleted.status).toBe(204);status(await api.get(`materials/${removable.id}`),404);status(await api.get(`materials/${r}`),200);
  const page=await actorPage('T1');await modulePanel(page,e);await expect(page.getByRole('link',{name:'Lectura E2E R1',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:/^(Borrar|Eliminar) material/})).toHaveCount(0);
 });
 test('E2E-CONTENT-015 stale editors preserve the last confirmed complete write and ordered audit / last-confirmed-write @extended',async ({e,actorPage})=>{
