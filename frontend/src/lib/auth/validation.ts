@@ -53,6 +53,7 @@ export function currentUser(value: unknown, slug: string, subject: string): Curr
   if (!isId(membership.id) || !isInstitution(membership.institution) || membership.institution.slug !== slug ||
       membership.active !== true || typeof membership.isAdmin !== "boolean" || typeof membership.isSuperAdmin !== "boolean" ||
       !value.sectionMemberships.every(m => isRecord(m) && isId(m.courseId) && isId(m.sectionId) &&
+        (m.sectionCode === undefined || (typeof m.sectionCode === "string" && m.sectionCode.trim().length > 0 && [...m.sectionCode].length <= 32)) &&
         typeof m.role === "string" && ["teacher", "assistant", "student"].includes(m.role))) throw new ApiResponseError();
   return value as CurrentUser;
 }

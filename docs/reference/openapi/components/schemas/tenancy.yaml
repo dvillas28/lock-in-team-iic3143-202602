@@ -73,6 +73,11 @@ SectionMembershipSummary:
     sectionId:
       type: string
       format: uuid
+    sectionCode:
+      type: string
+      minLength: 1
+      maxLength: 32
+      description: Código visible de la sección propia. Campo aditivo para compatibilidad con respuestas anteriores.
     role:
       type: string
       enum:

@@ -308,3 +308,12 @@ test("concurrent revalidation deduplicates and unchanged identity keeps operatio
  assert.equal(h.session.getSnapshot().context, context);
  assert.equal(h.requests.filter(r=>r.url.endsWith('/me')).length, 2); h.session.logout();
 });
+
+ test("section codes are additive and validated without changing membership scope",()=>{
+  const membership={courseId:id,sectionId:id,role:"student"};
+  for(const sectionCode of [undefined,"1","UTFSM-A","𐐀".repeat(32)]){
+   const actor={...user(),sectionMemberships:[{...membership,...(sectionCode===undefined?{}:{sectionCode})}]};
+   assert.deepEqual(currentUser(actor,"uc",id).sectionMemberships,actor.sectionMemberships);
+  }
+  for(const sectionCode of [null,5,""," ","a".repeat(33)]) assert.throws(()=>currentUser({...user(),sectionMemberships:[{...membership,sectionCode}]},"uc",id),ApiResponseError);
+ });

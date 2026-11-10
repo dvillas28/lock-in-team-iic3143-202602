@@ -2289,6 +2289,8 @@ export interface components {
             courseId: string;
             /** Format: uuid */
             sectionId: string;
+            /** @description Código visible de la sección propia. Campo aditivo para compatibilidad con respuestas anteriores. */
+            sectionCode?: string;
             /** @enum {string} */
             role: "teacher" | "assistant" | "student";
         };

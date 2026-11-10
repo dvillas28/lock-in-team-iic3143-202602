@@ -25,7 +25,7 @@ export class InstitutionsService {
       row = result.rows[0];
     } catch { throw new ServiceUnavailableException(); }
     if (!row) throw new NotFoundException();
-    const roles=await db.query(`SELECT s.course_id AS "courseId",e.section_id AS "sectionId",e.role
+    const roles=await db.query(`SELECT s.course_id AS "courseId",e.section_id AS "sectionId",s.code AS "sectionCode",e.role
       FROM public.enrollments e JOIN public.sections s ON s.institution_id=e.institution_id AND s.id=e.section_id
       WHERE e.institution_id=$1 AND e.user_id=$2 AND e.active ORDER BY s.course_id,e.section_id,e.role`,[row.institution_id,userId]);
     return {id: row.id, email: row.email, name: row.name,
