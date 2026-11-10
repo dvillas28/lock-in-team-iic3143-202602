@@ -136,7 +136,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
-      - run: pnpm ${{ matrix.app == 'backend' && 'test' || 'build' }}
+      - if: matrix.app == 'backend'
+        run: pnpm test
+      # Turbopack fails to resolve generated next/font URLs in this runner.
+      - if: matrix.app == 'frontend'
+        run: pnpm build --webpack
 
   docker:
     name: ${{ matrix.app }} (docker build + trivy)
