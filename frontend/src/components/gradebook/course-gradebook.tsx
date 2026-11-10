@@ -279,16 +279,17 @@ function BookResults({
                               <>
                                 <Link
                                   className="grade-value tnum"
-                                  href={`/courses/${course.id}/quizzes/${i.quizId}/attempts/${g.attemptId}`}
+                                  href={i.assignmentId ? `/courses/${course.id}/assignments/${i.assignmentId}` :
+                                    `/courses/${course.id}/quizzes/${i.quizId}/attempts/${g.attemptId}`}
                                 >
-                                  {g.grade}
+                                  {g.grade ?? "Sin nota numérica"}
                                 </Link>
                                 <small
                                   className={`grade-state ${g.publishedAt ? "published" : "unpublished"}`}
                                 >
                                   {g.publishedAt ? (g.revisedAt ? "Corregida" : "Publicada") : "Sin publicar"}
                                 </small>
-                                {g.publishedAt && i.maxPoints !== undefined && (cap.global || cap.writeSections.includes(row.sectionId)) &&
+                                {g.publishedAt && !i.assignmentId && i.maxPoints !== undefined && (cap.global || cap.writeSections.includes(row.sectionId)) &&
                                   <button className="btn btn-ghost grade-edit" type="button" disabled={busy || blocked}
                                     aria-label={`Corregir nota de ${row.student.name} en ${i.title}`}
                                     onClick={e => { correctionTrigger.current = e.currentTarget; setCorrection({ grade: g, item: i, student: row.student.name }); }}>

@@ -75,7 +75,7 @@ type Schedule = {availableFrom: string | null; dueAt: string | null; availableUn
 export function assignmentState(value: Schedule, now: number) {
   const clock = now*1000;
   if (value.availableFrom && clock < instant(value.availableFrom)) return "upcoming";
-  const close = value.availableUntil ?? value.dueAt;
+  const close = value.availableUntil;
   if (close && clock > instant(close)) return "closed";
   if (value.dueAt && clock > instant(value.dueAt)) return "late";
   return "open";

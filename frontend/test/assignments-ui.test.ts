@@ -10,13 +10,15 @@ const task: Assignment = {
   id:id(65),courseId:course.id,sectionId:section.id,groupId:id(66),groupTitle:"Tareas",
   status:"draft",publishedAt:null,canManage:true,title:"Análisis",description:"Descripción",
   instructions:"Lee el enunciado.",maxPoints:10,weightPercent:0,allowedExtensions:["pdf"],
-  maxAttempts:2,availableFrom:null,dueAt:null,availableUntil:null,version:0,
+  allowWrittenResponse:false,maxAttempts:2,availableFrom:null,dueAt:null,availableUntil:null,version:0,
 };
 const view = (assignmentId?: string) => h(Assignments,{courseId:course.id,assignmentId});
 const isWrite = (r: Request) => ["POST","PATCH"].includes(r.method) && r.url.includes("/assignments");
 
 function fixture(reply: (r: Request) => Response | Promise<Response>) {
   return (r: Request) => {
+    if (r.url.endsWith("/my-submissions")) return Response.json({attempts:[],grade:null,usedAttempts:0,sections:[section.id],serverNow:new Date().toISOString()});
+    if (r.url.endsWith("/submissions")) return Response.json({gradeItemId:id(68),students:[]});
     if (r.url.endsWith("/sections")) return Response.json({items:[section]});
     if (r.url.endsWith("/evaluation-groups")) return Response.json({items:[{id:task.groupId,title:task.groupTitle,weightPercent:0,position:1}]});
     if (r.url.endsWith("/courses/"+course.id)) return Response.json(course);
@@ -37,7 +39,7 @@ test("teacher validates the form and retries direct publication with the origina
     assert.match(ui.doc.body.textContent!,/Aún no hay tareas|0 tareas/);
     await ui.click("Nueva tarea");
     await ui.submit("form",{title:"Análisis"});
-    assert.match(ui.doc.body.textContent!,/Selecciona al menos un formato de archivo/);
+    assert.match(ui.doc.body.textContent!,/Selecciona un formato de archivo o habilita la respuesta escrita/);
     await ui.click("Selecciona formatos");
     const pdf=ui.doc.querySelector<HTMLInputElement>('.assignment-format-options input[type="checkbox"]')!;
     await ui.settle(()=>pdf.click());
@@ -100,11 +102,22 @@ test("student sees published timing and detail but cannot load a draft payload",
     await ui.click("Por fecha");
     await ui.render(view(task.id));
     assert.match(ui.doc.body.textContent!,/Todo el curso/);
-    assert.match(ui.doc.body.textContent!,/Ilimitados/);
+    assert.match(ui.doc.body.textContent!,/Ilimitados|ilimitados/);
+    assert.match(ui.doc.body.textContent!,/Tu entrega/);
     assert.doesNotMatch(ui.doc.body.textContent!,/Editar tarea/);
     assert.equal(ui.requests.some(r=>r.url.endsWith("/evaluation-groups")),false);
     payload={...task,id:id(67),canManage:false};
     await ui.render(view(id(67)));
     assert.doesNotMatch(ui.doc.body.textContent!,/Lee el enunciado/);
   } finally {await ui.close();}
+});
+
+test("written evidence renders basic markup without executable HTML or external resources",async()=>{
+  const {renderToStaticMarkup}=await import("react-dom/server");
+  const {WrittenResponse}=await import("../src/components/assignments/submission-evidence.tsx");
+  const html=renderToStaticMarkup(h(WrittenResponse,{text:"**Informe**\n\n- _Hipótesis_\n\n<script>alert(1)</script>\n\n![dato](https://example.test/x.png) [link](javascript:alert%281%29)"}));
+  assert.match(html,/<strong>Informe<\/strong>/);
+  assert.match(html,/<em>Hipótesis<\/em>/);
+  assert.match(html,/<ul>/);
+  assert.doesNotMatch(html,/<script|<img|<a\s|href=|src=/);
 });

@@ -29,7 +29,8 @@ function assignment(value: unknown, courseId: string, expected?: string): Assign
         v !== null && (typeof v !== "string" || !v.endsWith("Z") || !Number.isFinite(Date.parse(v))))) {
     throw new ApiResponseError();
   }
-  return value as Assignment;
+  if (value.allowWrittenResponse!==undefined && typeof value.allowWrittenResponse!=="boolean") throw new ApiResponseError();
+  return {...value,allowWrittenResponse:value.allowWrittenResponse ?? false} as Assignment;
 }
 
 const parameters = (slug: string, courseId: string) => ({...path(slug,{courseId}),courseId});
