@@ -70,7 +70,7 @@ test('course tabs reflect effective capabilities and keep all links in the curre
   }
 });
 
-test('module index lazily opens resources and closing editor preserves its draft', async () => {
+test('module index lazily opens resources and keeps the page editor out of the list until requested', async () => {
   const ui = await mount(h(ModulesPanel, {courseId: course.id}), r => Response.json(r.url.endsWith('/resources') ? resources(material) : r.url.endsWith('/modules') ? {items:[unit]} : course), 'teacher');
   try {
     assert.equal(ui.requests.some(r => r.url.endsWith('/resources')), false);
@@ -78,14 +78,11 @@ test('module index lazily opens resources and closing editor preserves its draft
     await ui.settle(() => link.click());
     assert.equal(ui.doc.querySelector('.module-collapse')?.getAttribute('aria-expanded'), 'true');
     assert.equal(ui.doc.activeElement, ui.doc.querySelector('.module-collapse'));
-    const details = ui.doc.querySelector<HTMLDetailsElement>('.resource-editor')!;
-    const textarea = details.querySelector('textarea')!;
-    await ui.settle(() => { details.open = true; textarea.value = 'Borrador con espacios  '; details.open = false; details.open = true; });
-    assert.equal(textarea.value, 'Borrador con espacios  ');
+    assert.equal(ui.doc.querySelector('.resource-editor'), null);
+    assert.equal(ui.doc.querySelector('textarea'), null);
     await ui.click('Unidad 1');
     await ui.click('Unidad 1');
     assert.equal(ui.requests.filter(r => r.url.endsWith('/resources')).length, 2);
-    assert.equal(details.querySelector('textarea')?.value, 'Borrador con espacios  ');
   } finally { await ui.close(); }
 });
 

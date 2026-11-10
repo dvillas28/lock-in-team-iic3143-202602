@@ -156,3 +156,39 @@
 
 /* Delete-file confirmation: native dialog centered in the viewport, with a gutter on small screens. */
 .native-dialog.file-delete-dialog { width: min(440px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; }
+
+/* Page editor modal (create/edit), reusing the Tareas toolbar look */
+.native-dialog.page-editor-dialog { width: min(860px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px); }
+.page-editor-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.page-editor-bar .actions { margin: 0; gap: 6px; }
+.page-editor-bar .tab-btn { min-height: 36px; }
+.page-editor-area, .page-editor-preview { min-height: min(340px, 42dvh); max-height: 52dvh; overflow: auto; resize: vertical; line-height: 1.55; }
+.page-editor-area { font-family: inherit; }
+.page-editor-preview { resize: none; }
+.page-editor-dialog .dialog-actions { justify-content: flex-end; flex-wrap: wrap; }
+@media (max-width: 760px) {
+  .page-editor-bar .btn { min-width: 40px; min-height: 40px; }
+  .page-editor-area { font-size: 16px; min-height: 38dvh; }
+  .native-dialog.page-editor-dialog { padding: 16px; }
+}
+/* Unverified access: the editor stays visible but non-modal so the page's recovery notice remains reachable. */
+.native-dialog.page-editor-dialog:not(:modal) { position: fixed; top: 72px; left: 50%; transform: translateX(-50%); margin: 0; z-index: 30; box-shadow: var(--shadow-float); }
+
+/* Visual (WYSIWYG) page editor */
+.assignment-rich-editor.page-rich-editor { height: auto; min-height: min(340px, 42dvh); max-height: 52dvh; flex: none; resize: vertical; }
+.page-rich-editor h2 { font-family: var(--font-eb-garamond), serif; font-size: 1.5em; line-height: 1.25; margin: .6em 0 .3em; }
+.page-rich-editor h3 { font-size: 1.2em; font-weight: 600; line-height: 1.3; margin: .6em 0 .25em; }
+.page-rich-editor h2:first-child, .page-rich-editor h3:first-child { margin-top: 0; }
+.page-rich-editor a { color: var(--primary-ink); text-decoration: underline; }
+.page-rich-editor li > p { margin: 0; }
+.rich-link-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.rich-link-row .field { flex: 1 1 220px; min-width: 0; width: auto; }
+.rich-link-row .field-error { flex-basis: 100%; }
+@media (max-width: 760px) { .assignment-rich-editor.page-rich-editor { font-size: 16px; min-height: 38dvh; } }
+
+/* Active formatting in the page editor toolbar (same look as the Tareas editor) */
+.page-editor-dialog .actions .btn.is-active { background: var(--primary-soft); border-color: var(--primary-ink); color: var(--primary-ink); }
+.page-editor-dialog .actions { margin: 0; gap: 6px; }
+.discard-confirm { display: grid; gap: 12px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); }
+.discard-confirm p { margin: 0; }
+.discard-confirm .actions { justify-content: flex-end; }

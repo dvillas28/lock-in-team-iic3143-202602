@@ -3,7 +3,6 @@ import { test } from 'node:test';
 import { createElement as h } from 'react';
 import { useSession } from '../src/components/auth/session-provider.tsx';
 import { ModuleForm } from '../src/components/content/module-form.tsx';
-import { MaterialForm } from '../src/components/content/material-form.tsx';
 import { CourseForm } from '../src/components/courses/course-form.tsx';
 import { SectionForm } from '../src/components/courses/section-form.tsx';
 import { EnrollmentForm } from '../src/components/courses/enrollment-form.tsx';
@@ -11,17 +10,16 @@ import { QuizCreate } from '../src/components/quizzes/quiz-create.tsx';
 import { CourseDetail } from '../src/components/courses/course-detail.tsx';
 import { mount } from './fixtures/course-ui.ts';
 import { course, section, otherSection, person, enrollment, deferred } from './fixtures/courses.ts';
-import { unit, material } from './fixtures/content.ts';
+import { unit } from './fixtures/content.ts';
 import { emptyDraft, reply as quizReply } from './fixtures/quizzes.ts';
 import { academicYears } from '../src/lib/courses/creation.ts';
 
-type Kind = 'module' | 'material' | 'course' | 'section' | 'enrollment' | 'quiz';
+type Kind = 'module' | 'course' | 'section' | 'enrollment' | 'quiz';
 function FormView({ kind, refresh = true, search = false, edit = false }: { kind: Kind; refresh?: boolean; search?: boolean; edit?: boolean }) {
   const { session, state } = useSession();
   const props = { session, slug: state.context!.slug, onSaved: async () => refresh };
   switch (kind) {
     case 'module': return h(ModuleForm, { ...props, courseId: course.id, items: [unit], item: edit ? unit : undefined });
-    case 'material': return h(MaterialForm, { ...props, moduleId: unit.id, item: edit ? material : undefined });
     case 'course': return h(CourseForm, props);
     case 'section': return h(SectionForm, { ...props, courseId: course.id });
     case 'enrollment': return h(EnrollmentForm, { ...props, sectionId: section.id, search, onSaved: async () => {} });
@@ -30,7 +28,6 @@ function FormView({ kind, refresh = true, search = false, edit = false }: { kind
 }
 const cases: { kind: Kind; label: string; values: Record<string, string>; message: string }[] = [
   { kind: 'module', label: 'Crear módulo', values: { title: 'Nueva unidad' }, message: 'Módulo creado.' },
-  { kind: 'material', label: 'Crear página', values: { title: 'Nueva lectura', markdownBody: '  # Contenido nuevo  ' }, message: 'Página creada.' },
   { kind: 'course', label: 'Crear curso', values: { code: 'NUEVO', name: 'Nuevo curso', term: '2026-2', sectionCode: '1', capacity: '30' }, message: 'Curso creado.' },
   { kind: 'section', label: 'Crear sección', values: { code: '2', capacity: '30' }, message: 'Sección creada.' },
   { kind: 'enrollment', label: 'Asignar rol', values: { userId: person.id, role: 'assistant' }, message: 'Participante asignado.' },
@@ -38,7 +35,7 @@ const cases: { kind: Kind; label: string; values: Record<string, string>; messag
 ];
 async function created(kind: Kind, request: Request) {
   const body = await request.json();
-  const base = { module: unit, material, course, section, enrollment: { ...enrollment, role: body.role }, quiz: emptyDraft }[kind];
+  const base = { module: unit, course, section, enrollment: { ...enrollment, role: body.role }, quiz: emptyDraft }[kind];
   return Response.json({ ...base, ...body }, { status: 201 });
 }
 for (const entry of cases) test(`${entry.label} clears confirmed input and reports the operation`, async () => {
@@ -61,7 +58,7 @@ for (const entry of cases) test(`${entry.label} clears confirmed input and repor
     assert.equal(ui.requests.filter(r => r.method === 'POST' && !r.url.endsWith('/login')).length, 1);
   } finally { await ui.close(); }
 });
-for (const kind of ['module', 'material'] as const) test(`${kind} keeps pending input, then clears confirmed creation even if refreshing fails`, async () => {
+for (const kind of ['module'] as const) test(`${kind} keeps pending input, then clears confirmed creation even if refreshing fails`, async () => {
   const pending = deferred<Response>(), entry = cases.find(c => c.kind === kind)!;
   const ui = await mount(h(FormView, { kind, refresh: false }), () => pending.promise, 'teacher');
   try {
@@ -90,13 +87,12 @@ test('student section context stays in course detail without a management link o
   } finally { await ui.close(); }
 });
 
-for (const kind of ['module', 'material'] as const) test(`${kind} update retains the edited values`, async () => {
-  const ui = await mount(h(FormView, { kind, edit: true }), async r => Response.json({ ...(kind === 'module' ? unit : material), ...await r.json() }), 'teacher');
+for (const kind of ['module'] as const) test(`${kind} update retains the edited values`, async () => {
+  const ui = await mount(h(FormView, { kind, edit: true }), async r => Response.json({ ...unit, ...await r.json() }), 'teacher');
   try {
-    const selector = `form[aria-label="${kind === 'module' ? 'Editar módulo Unidad 1' : 'Editar material Lectura'}"]`;
-    await ui.submit(selector, { title: 'Título actualizado', ...(kind === 'material' ? { markdownBody: '  Texto actualizado  ' } : {}) });
+    const selector = 'form[aria-label="Editar módulo Unidad 1"]';
+    await ui.submit(selector, { title: 'Título actualizado' });
     assert.equal(ui.doc.querySelector<HTMLInputElement>(`${selector} input[name="title"]`)!.value, 'Título actualizado');
-    if (kind === 'material') assert.equal(ui.doc.querySelector<HTMLTextAreaElement>(`${selector} textarea`)!.value, '  Texto actualizado  ');
     assert.match(ui.doc.querySelector('[role="status"]')!.textContent!, /actualizado/);
   } finally { await ui.close(); }
 });
