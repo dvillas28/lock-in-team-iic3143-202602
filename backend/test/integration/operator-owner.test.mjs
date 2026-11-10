@@ -37,7 +37,7 @@ test("non-superuser owner runs predeploy with demo under FORCE RLS; runtime chec
     admin = new pg.Pool({ connectionString: at(testUrl(), name) });
     assert.equal((await admin.query("SELECT count(*)::int AS n FROM institution_memberships")).rows[0].n, 10);
     const policies = (await admin.query("SELECT roles::text[] AS roles FROM pg_policies WHERE policyname='operator_maintenance'")).rows;
-    assert.equal(policies.length, 18);
+    assert.equal(policies.length, 19);
     assert.equal((await admin.query("SELECT pg_has_role($1,'academix_account_writer','SET') AS enabled",[owner])).rows[0].enabled,false);
     assert.equal((await admin.query("SELECT pg_has_role('academix_runtime','academix_account_writer','MEMBER') AS enabled")).rows[0].enabled,false);
     assert.ok(policies.every(p => JSON.stringify(p.roles) === JSON.stringify([owner])));

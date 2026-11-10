@@ -11,17 +11,17 @@ test("E2E-ASSIGNMENT-001 CU-22 and CU-23 create, publish, consult and hide @regr
   const form = teacher.getByRole("form",{name:"Nueva tarea"});
   await form.getByLabel("Título",{exact:true}).fill("Informe de diseño");
   await form.getByLabel("Instrucciones",{exact:true}).fill("Adjunta un diagrama del diseño.");
-  await form.getByLabel("Fecha de entrega",{exact:true}).fill("01-01-2000");
-  await form.getByLabel("Hora de entrega",{exact:true}).fill("12:00");
+  const formats = form.getByRole("button",{name:"Formatos de archivo permitidos"});
+  await formats.click();
+  await form.getByRole("checkbox",{name:/PDF/}).check();
+  await formats.click();
+  const deadline = form.getByLabel("Hora de entrega",{exact:true});
+  await deadline.fill("2000-01-01T12:00");
   await form.getByRole("button",{name:"Guardar borrador"}).click();
-  const warning=teacher.getByRole("dialog",{name:"El plazo de entrega ya venció"});
-  await expect(warning.getByRole("button",{name:"Volver al formulario"})).toBeFocused();
-  await warning.getByRole("button",{name:"Volver al formulario"}).click();
-  await expect(form.getByLabel("Fecha de entrega",{exact:true})).toHaveValue("01-01-2000");
-  await expect(form.getByLabel("Hora de entrega",{exact:true})).toHaveValue("12:00");
-  await form.getByLabel("Formatos de archivo permitidos").fill("pdf");
+  await expect(form.getByText("La fecha de entrega no puede ser anterior a la fecha y hora actual.",{exact:true})).toBeVisible();
+  await expect(deadline).toHaveValue("2000-01-01T12:00");
+  await deadline.fill("");
   await form.getByRole("button",{name:"Guardar borrador"}).click();
-  await warning.getByRole("button",{name:"Guardar con plazo vencido"}).click();
   await expect(teacher.getByText("Borrador creado.",{exact:true})).toBeVisible();
 
   const row = (page: typeof teacher) => page.getByRole("link",{name:/Informe de diseño/});
@@ -32,13 +32,12 @@ test("E2E-ASSIGNMENT-001 CU-22 and CU-23 create, publish, consult and hide @regr
   await row(teacher).click();
   await teacher.getByRole("button",{name:"Publicar tarea",exact:true}).click();
   await expect(teacher.getByText("Tarea publicada.",{exact:true})).toBeVisible();
-  await expect(teacher.getByText("Recepción cerrada",{exact:true})).toBeVisible();
   await expect(teacher.getByText("Atrasada",{exact:true})).toHaveCount(0);
 
   await student.getByRole("navigation",{name:"Curso",exact:true}).getByRole("link",{name:"Resumen",exact:true}).click();
   await go(student,course,"/assignments");
   await student.getByRole("searchbox",{name:"Buscar por nombre"}).fill("diseno");
-  await expect(row(student)).toContainText("Cerrada");
+  await expect(row(student)).toContainText("Disponible");
   await student.getByRole("button",{name:"Por grupo",exact:true}).click();
   await row(student).click();
   await expect(student.getByRole("heading",{name:"Informe de diseño",exact:true})).toBeVisible();

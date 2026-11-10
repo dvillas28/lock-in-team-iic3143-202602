@@ -53,6 +53,7 @@
     tags: [Assignments]
     operationId: listEvaluationGroups
     summary: Consultar grupos disponibles para la autoría docente
+    x-permissions: Docente con matrícula activa en el curso y pertenencia activa a la institución.
     responses:
       '200':
         description: Operación completada.

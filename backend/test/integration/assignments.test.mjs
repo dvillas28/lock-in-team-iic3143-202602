@@ -107,17 +107,15 @@ test("deadlines reject new or changed past due dates while preserving historical
   app=await http();
   const t=await tokens(app,f);
   const path=`uc/courses/${f.own}/assignments`;
-  const dueAt="2027-04-05T03:30:00.123456Z";
+  const dueAt=new Date(Date.now()+86_400_000).toISOString().replace(/\.\d{3}Z$/, ".123456Z");
+  const historical="2000-04-05T03:30:00.123456Z";
   const body={id:randomUUID(),title:"Evaluación histórica",maxPoints:0,sectionId:f.s1,dueAt};
   const create=(input,actor="teacher")=>request(app,t[actor],path,"POST",input);
   const edit=input=>request(app,t.teacher,path+"/"+body.id,"PATCH",input);
-  const rejected=await create(body);
+  const rejected=await create({...body,dueAt:historical});
   assert.equal(rejected.status,422);
   assert.equal(rejected.body.code,"ASSIGNMENT_DUE_DATE_IN_PAST");
   assert.equal((await pool.query("SELECT id FROM assignments")).rowCount,0);
-  const past=await create({...body,dueAt:"2026-04-05T03:30:00.123456Z"});
-  assert.equal(past.status,422);
-  assert.equal(past.body.code,"ASSIGNMENT_DUE_DATE_IN_PAST");
   const saved=await create(body);
   assert.equal(saved.status,201);
   assert.equal(saved.body.dueAt,dueAt);
@@ -132,9 +130,10 @@ test("deadlines reject new or changed past due dates while preserving historical
   const change=await edit({expectedVersion:1,dueAt:older});
   assert.equal(change.status,422);
   assert.equal(change.body.code,"ASSIGNMENT_DUE_DATE_IN_PAST");
-  const updated=await edit({expectedVersion:1,title:"Evaluación corregida"});
+  await pool.query("UPDATE assignments SET due_at=$1 WHERE id=$2",[historical,body.id]);
+  const updated=await edit({expectedVersion:1,title:"Evaluación histórica corregida",dueAt:historical});
   assert.equal(updated.status,200);
-  assert.equal(updated.body.dueAt,dueAt);
+  assert.equal(updated.body.dueAt,historical);
   assert.equal((await request(app,t.owner,path.replace(/^uc/,"utfsm")+"/"+body.id,"PATCH",
    {expectedVersion:2,dueAt,confirmPastDue:true})).status,404);
   assert.equal((await request(app,t.teacher,path+"/"+body.id+"/visibility","PATCH",

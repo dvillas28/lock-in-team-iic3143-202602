@@ -75,6 +75,7 @@
     tags: [Assignments]
     operationId: getAssignment
     summary: Consultar tarea visible
+    x-permissions: Docente autorizado o estudiante con matrícula activa y tarea publicada para su curso o sección.
     responses:
       '200':
         description: Operación completada.
