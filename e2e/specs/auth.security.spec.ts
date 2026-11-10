@@ -142,6 +142,6 @@ test('E2E-AUTH-020 focus revalidation preserves unsaved answer / draft-focus @re
   expect((await e.pool.query('SELECT answers FROM quiz_attempts WHERE id=$1',[attempt.id])).rows[0].answers).toEqual([]);
   expect(saves).toBe(0);expect(revalidations).toBe(1);
   const saved=page.waitForResponse(r=>r.request().method()==='PUT' && r.url().endsWith('/answers'));
-  await page.getByRole('button',{name:'Guardar respuestas',exact:true}).click();expect((await saved).status()).toBe(200);
+  await page.getByRole('button',{name:'Guardar',exact:true}).click();expect((await saved).status()).toBe(200);
   expect((await e.pool.query('SELECT answers FROM quiz_attempts WHERE id=$1',[attempt.id])).rows[0].answers).toHaveLength(1);
 });
