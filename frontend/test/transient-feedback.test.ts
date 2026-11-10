@@ -178,19 +178,19 @@ test("group settings success expires after a confirmed save", async t => {
   } finally { await ui.close(); }
 });
 
-test("question editing notices renew for identical actions without moving focus when dismissed", async t => {
+test("question editing notices renew for repeated actions without moving focus when dismissed", async t => {
   t.mock.timers.enable({ apis: ["setTimeout"] });
   function Editor() { const [rows, setRows] = useState(() => questionRows([])); return h(QuestionEditor, { rows, onRows: setRows }); }
   const ui = await mount(h(Editor), () => Response.json({}), "teacher");
   try {
     await ui.click("Agregar pregunta"); await ui.settle(() => t.mock.timers.tick(3000));
     await ui.click("Agregar pregunta"); await ui.settle(() => t.mock.timers.tick(3000));
-    assert.match(ui.doc.body.textContent!, /Pregunta agregada/);
+    assert.match(ui.doc.body.textContent!, /Pregunta 2 agregada/);
     const focus = ui.doc.activeElement;
     await ui.settle(() => t.mock.timers.tick(2000));
-    assert.doesNotMatch(ui.doc.body.textContent!, /Pregunta agregada/);
+    assert.doesNotMatch(ui.doc.body.textContent!, /Pregunta 2 agregada/);
     assert.equal(ui.doc.activeElement, focus);
-    assert.equal(ui.doc.querySelectorAll("fieldset").length, 2);
+    assert.equal(ui.doc.querySelectorAll("fieldset.quiz-question").length, 2);
   } finally { await ui.close(); }
 });
 

@@ -38,6 +38,7 @@ function pageTitle(pathname: string) {
     }
     if (pathname.includes('/assignments/')) return 'Detalle de la tarea';
     if (pathname.endsWith('/assignments')) return 'Tareas';
+    if (pathname.endsWith('/quizzes/new')) return 'Crear quiz';
     if (pathname.includes('/quizzes/')) {
         return 'Detalle del quiz';
     }

@@ -1,61 +1,104 @@
 "use client";
-import { useEffect, useRef, useState, type FormEvent } from "react";
-import Link from "next/link";
-import { Plus } from "lucide-react";
-import { checkNativeInputs, focusQuizError } from "../../lib/quizzes/form-values.ts";
-import type { Session } from "../../lib/auth/session.ts";
-import type { CurrentUser } from "../../lib/auth/validation.ts";
-import { FieldError, type Course, type Section } from "../../lib/courses/validation.ts";
-import { canAuthor, destinations } from "../../lib/quizzes/capabilities.ts";
-import type { Summary } from "../../lib/quizzes/validation.ts";
-import type { EvaluationGroup } from "../../lib/api/assignments.ts";
-import { createQuiz, listCourseQuizzes } from "../../lib/api/quizzes.ts";
-import { useMutation } from "../courses/use-mutation.ts";
-import { QuizConfiguration, configuration } from "./quiz-configuration.tsx";
-import { QuestionEditor, questionRows, readQuestions } from "./question-editor.tsx";
-export function QuizCreate({session,slug,user,course,sections,groups,onSaved}:{session:Session;slug:string;user:CurrentUser;course:Course;sections:Section[];groups?:EvaluationGroup[];onSaved:()=>Promise<unknown>}) {
-  const mutation=useMutation(session),formRef=useRef<HTMLFormElement>(null),feedback=useRef<HTMLParagraphElement>(null);
-  useEffect(()=>{
-    if(!mutation.message || mutation.confirmed)return;
-    if(!focusQuizError(formRef.current,mutation.field))feedback.current?.focus();
-  },[mutation.message,mutation.field,mutation.confirmed]);
-  const [created,setCreated]=useState<Summary>();
-  const [candidates,setCandidates]=useState<Summary[]>();
-  const [rows,setRows]=useState(()=>questionRows([]));
-  const allowed=destinations(user,course,sections), wholeCourse=canAuthor(user,course,sections,null);
-  if (!allowed.length && !wholeCourse) return null;
-  async function submit(event:FormEvent<HTMLFormElement>) {
-    event.preventDefault();const form=event.currentTarget, data=new FormData(form);
-    if (created) return;
-    await mutation.run(async current=>{
-      checkNativeInputs(form);
-      const values=configuration(data);
-      const now=Date.now();
-      if (values.opensAt && Date.parse(values.opensAt) <= now) throw new FieldError("opensAt","La apertura debe ser posterior a la fecha y hora actuales.");
-      if (values.closesAt && Date.parse(values.closesAt) <= now) throw new FieldError("closesAt","El cierre debe ser posterior a la fecha y hora actuales.");
-      if (!canAuthor(user,course,sections,values.sectionId ?? null)) throw new FieldError("sectionId","Destino fuera de tu alcance docente.");
-      const questions=readQuestions(data,rows);
-      const saved=await session.request(c=>createQuiz(c,slug,course.id,{...values,title:values.title!,questions}),current);
-      if (!current()) return;
-      form.reset();
-      setRows(questionRows([]));
-      // Creation returns authoring; retain only safe metadata for navigation.
-      setCreated({id:saved.id,courseId:saved.courseId,sectionId:saved.sectionId,title:saved.title,instructions:saved.instructions,opensAt:saved.opensAt,closesAt:saved.closesAt,maxAttempts:saved.maxAttempts,status:saved.status,publishedAt:saved.publishedAt});
-      try { await onSaved(); } catch { return "Quiz creado. No se pudo actualizar la lista; abre el detalle para continuar."; }
-      return "Quiz creado.";
-    },async current=>{
-      const items=await session.request(c=>listCourseQuizzes(c,slug,course.id),current);
-      if(current()) setCandidates(items);
-      return "Lista consultada: las coincidencias no prueban la creación ni su ausencia. Revisa candidatos antes de iniciar otra creación consciente desde la lista.";
-    });
 
+import { useState, type ComponentProps } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import { getCourse } from "../../lib/api/courses.ts";
+import { listSections } from "../../lib/api/sections.ts";
+import { listEvaluationGroups } from "../../lib/api/assignments.ts";
+import { ApiHttpError } from "../../lib/api/errors.ts";
+import { createQuiz, listCourseQuizzes } from "../../lib/api/quizzes.ts";
+import type { CurrentUser } from "../../lib/auth/validation.ts";
+import { FieldError } from "../../lib/courses/validation.ts";
+import { canAuthor, destinations } from "../../lib/quizzes/capabilities.ts";
+import { quizListQuery, type QuizFilters } from "../../lib/quizzes/list-location.ts";
+import type { Summary } from "../../lib/quizzes/validation.ts";
+import { useSession } from "../auth/session-provider.tsx";
+import { useMutation } from "../courses/use-mutation.ts";
+import { useResource } from "../courses/use-resource.ts";
+import { ErrorState, LoadingState } from "../route-states.tsx";
+import { QuizWorkspace } from "./quiz-workspace.tsx";
+import { QuizDraftForm, QuizDraftSave, useQuizDraft } from "./quiz-draft-form.tsx";
+import { rememberQuizCreation } from "./quiz-created-receipt.ts";
+import { QuizLeaveGuard } from "./quiz-leave-guard.tsx";
+
+const emptyFilters: QuizFilters = { query: "", status: "", section: "" };
+
+export function QuizCreate({ courseId, filters = emptyFilters }: { courseId: string; filters?: QuizFilters }) {
+  const { session, state } = useSession();
+  const context = state.context;
+  const slug = context?.slug ?? "";
+  const scope = `${state.generation}:${slug}:${courseId}:new:${JSON.stringify(context?.user)}`;
+  const result = useResource(session, scope, async client => {
+    const user = context?.user;
+    if (!user) throw new ApiHttpError(403);
+    const [course, sections] = await Promise.all([getCourse(client, slug, courseId), listSections(client, slug, courseId)]);
+    const allowed = destinations(user, course, sections);
+    const wholeCourse = canAuthor(user, course, sections, null);
+    if (!allowed.length && !wholeCourse) throw new ApiHttpError(403);
+    const groups = await listEvaluationGroups(client, slug, courseId);
+    return { course, sections, allowed, wholeCourse, groups, user };
+  });
+  if (!context?.user) return <LoadingState/>;
+  if (result.error) return <ErrorState feedback={result.error} onRetry={() => void result.reload()}/>;
+  if (!result.data) return <LoadingState/>;
+  return <CreateForm key={scope} {...result.data} filters={filters}/>;
+}
+
+function CreateForm({ course, sections, allowed, wholeCourse, groups, user, filters }: {
+  course: Awaited<ReturnType<typeof getCourse>>;
+  sections: Awaited<ReturnType<typeof listSections>>;
+  allowed: Awaited<ReturnType<typeof listSections>>;
+  wholeCourse: boolean;
+  groups: Awaited<ReturnType<typeof listEvaluationGroups>>;
+  user: CurrentUser;
+  filters: QuizFilters;
+}) {
+  const { session, state } = useSession();
+  const slug = state.context!.slug;
+  const router = useRouter();
+  const [candidates, setCandidates] = useState<Summary[]>();
+  const [createdId, setCreatedId] = useState<string>();
+  const mutation = useMutation(session);
+  const draft = useQuizDraft(mutation);
+  const base = `/courses/${course.id}/quizzes`;
+  const suffix = quizListQuery(filters);
+  const blocked = mutation.busy || !!mutation.uncertain || !!createdId;
+
+  const save: ComponentProps<typeof QuizDraftForm>["save"] = async (values, current, element) => {
+    if (!canAuthor(user, course, sections, values.sectionId ?? null))
+      throw new FieldError("sectionId", "Selecciona un destinatario de tu alcance docente.");
+    const saved = await session.request(client => createQuiz(client, slug, course.id, { ...values, title: values.title! }), current);
+    if (!current()) return;
+    rememberQuizCreation(session, course.id, saved.id);
+    setCreatedId(saved.id);
+    element.reset();
+    draft.reset();
+    router.replace(base + quizListQuery(filters, saved.id));
+    return "Borrador creado.";
+  };
+
+  async function reconcile(current: () => boolean) {
+    const items = await session.request(client => listCourseQuizzes(client, slug, course.id), current);
+    if (current()) setCandidates(items.filter(item => item.status === "draft" && canAuthor(user, course, sections, item.sectionId)));
+    return "La lista puede mostrar coincidencias, pero no confirma si se creó el borrador.";
   }
-  return <details className="academic-disclosure card quiz-create"><summary><Plus size={16} aria-hidden="true"/>Crear quiz</summary><section className="panel stack"><form ref={formRef} aria-label="Crear quiz" className="stack" onSubmit={submit} noValidate aria-busy={mutation.busy}>
-    <div><h2 className="serif">Crear borrador</h2><p className="hint">Configura el quiz, agrega preguntas y marca sus respuestas correctas antes de guardar.</p></div><fieldset className="stack" disabled={mutation.busy || mutation.uncertain || !!created}>
-      <QuizConfiguration sections={allowed} groups={groups} wholeCourse={wholeCourse} field={mutation.field} message={mutation.message}/>
-      {!created && <QuestionEditor rows={rows} onRows={setRows} field={mutation.field} message={mutation.message}/>}
-      <button type="submit" className="btn btn-primary">{mutation.busy ? "Creando…" : "Crear borrador"}</button>
-    </fieldset>{mutation.message && <p ref={feedback} tabIndex={-1} role="status" aria-live="polite">{mutation.message}</p>}
-    {created && <Link className="btn btn-primary" href={`/courses/${course.id}/quizzes/${created.id}`}>Quiz creado: abrir detalle</Link>}
-  </form>{candidates && <div className="stack"><h3 className="serif">Quizzes para revisar</h3>{candidates.length ? candidates.map(q=><Link key={q.id} href={`/courses/${course.id}/quizzes/${q.id}`}>{q.title} · {q.id}</Link>):<p>No hay candidatos visibles. Esto no prueba que el envío haya fallado.</p>}</div>}</section></details>;
+
+  return <QuizWorkspace course={course} user={user} title="Crear quiz" authoring>
+    <Link className="text-link quiz-back" href={base + suffix}><ArrowLeft size={16} aria-hidden="true"/>Volver a quizzes</Link>
+    <QuizLeaveGuard active={!createdId && (draft.form.dirty || !!mutation.busy || !!mutation.uncertain)}/>
+    <div className="card quiz-save-bar" role="region" aria-label="Guardar borrador">
+      <span className="hint" role="status">{draft.form.dirty ? "Cambios sin guardar" : "Nuevo borrador"}</span>
+      <QuizDraftSave form={draft.id} busy={mutation.busy} blocked={blocked} creating/>
+    </div>
+    <QuizDraftForm draft={draft} label="Crear quiz" blocked={blocked} sections={allowed}
+      groups={groups} wholeCourse={wholeCourse} save={save} reconcile={reconcile}/>
+    {createdId && <Link className="text-link" href={base + quizListQuery(filters, createdId)}>Ver borrador en el listado</Link>}
+    {candidates && <section className="card panel stack">
+      <h2 className="serif">Borradores para revisar</h2>
+      {candidates.length ? candidates.map(item => <Link key={item.id} href={`${base}/${item.id}${suffix}`}>{item.title}</Link>)
+        : <p>No hay borradores visibles. La creación sigue sin confirmar.</p>}
+    </section>}
+  </QuizWorkspace>;
 }

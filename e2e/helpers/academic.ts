@@ -2,7 +2,6 @@ import {expect,type Page,type Locator} from '@playwright/test';
 import type {Environment} from '../fixtures/environment.ts';
 import {status} from './api.ts';
 import {compatibilityNavigate,go} from './browser.ts';
-import {disclose} from './management.ts';
 
 export const questions=(points=[6,4])=>points.map((n,i)=>({prompt:`Pregunta ${i+1}`,position:i+1,points:n,alternatives:[{id:'a',text:'Correcta',isCorrect:true},{id:'b',text:'Incorrecta',isCorrect:false}]}));
 export async function draft(e:Environment,patch:Record<string,unknown>={},actor='T1',slug='uc',course=e.data.courses.C1){
@@ -10,11 +9,34 @@ export async function draft(e:Environment,patch:Record<string,unknown>={},actor=
 }
 export async function published(e:Environment,patch:Record<string,unknown>={}){const q=await draft(e,patch);return status(await (await e.api()).post(`quizzes/${q.id}/publish`),200).body;}
 export async function editor(page:Page,e:Environment,id=e.data.quizzes.QD,c=e.data.courses.C1){await compatibilityNavigate(page,`/courses/${c}/quizzes/${id}/authoring`);const f=page.getByRole('form',{name:'Editar quiz',exact:true});await expect(f).toBeVisible();return f;}
-export async function quizCreate(page:Page,e:Environment,title='Quiz navegador F5',course=e.data.courses.C1,section=e.data.sections.S1){
- await go(page,course,'/quizzes');await disclose(page,'Crear quiz');const f=page.getByRole('form',{name:'Crear quiz',exact:true});await f.getByLabel('Título del quiz',{exact:true}).fill(title);await f.getByRole('combobox',{name:'Destinatarios',exact:true}).selectOption(section);
- for(let i=1;i<=2;i++){await f.getByRole('button',{name:'Agregar pregunta',exact:true}).click();await f.getByLabel(`Enunciado ${i}`,{exact:true}).fill(`Pregunta ${i}`);await f.getByLabel(`Puntaje ${i}`,{exact:true}).fill(i===1?'6':'4');for(let j=1;j<=2;j++)await f.getByLabel(`Alternativa ${i}.${j}`,{exact:true}).fill(j===1?'Correcta':'Incorrecta');await f.getByRole('radio',{name:`Correcta: alternativa 1 de pregunta ${i}`,exact:true}).check();}return f;
+export async function quizCreate(page: Page, e: Environment, title = 'Quiz navegador F5', course = e.data.courses.C1, section = e.data.sections.S1) {
+  await go(page, course, '/quizzes');
+  await page.getByRole('link', { name: 'Crear quiz', exact: true }).click();
+  const form = page.getByRole('form', { name: 'Crear quiz', exact: true });
+  await form.getByLabel('Título del quiz', { exact: true }).fill(title);
+  await form.getByRole('combobox', { name: 'Destinatarios', exact: true }).selectOption(section);
+  for (let i = 1; i <= 2; i++) {
+    await form.getByRole('button', { name: 'Agregar pregunta', exact: true }).click();
+    const question = form.getByRole('group', { name: `Pregunta ${i}`, exact: true });
+    await question.getByLabel('Enunciado', { exact: true }).fill(`Pregunta ${i}`);
+    await question.getByLabel('Puntaje', { exact: true }).fill(i === 1 ? '6' : '4');
+    await question.getByLabel('Alternativa A', { exact: true }).fill('Correcta');
+    await question.getByLabel('Alternativa B', { exact: true }).fill('Incorrecta');
+    await question.getByRole('radio', { name: `Marcar alternativa A como correcta en pregunta ${i}`, exact: true }).check();
+  }
+  return form;
 }
-export async function createInBrowser(page:Page,f:Locator){const pending=page.waitForResponse(r=>r.request().method()==='POST'&&r.url().endsWith('/quizzes'));await f.getByRole('button',{name:'Crear borrador',exact:true}).click();const r=await pending;expect(r.status()).toBe(201);const q=await r.json();await expect(f.getByRole('link',{name:'Quiz creado: abrir detalle',exact:true})).toBeVisible();return q;}
+
+export async function createInBrowser(page: Page, form: Locator) {
+  await expect(form).toBeVisible();
+  const pending = page.waitForResponse(r => r.request().method() === 'POST' && r.url().endsWith('/quizzes'));
+  await page.getByRole('button', { name: 'Crear borrador', exact: true }).click();
+  const response = await pending;
+  expect(response.status()).toBe(201);
+  const quiz = await response.json();
+  await expect(page.getByRole('link', { name: 'Editar borrador', exact: true })).toBeVisible();
+  return quiz;
+}
 export async function publishInBrowser(page:Page){await page.getByRole('button',{name:'Publicar quiz',exact:true}).click();const pending=page.waitForResponse(r=>r.url().endsWith('/publish')&&r.request().method()==='POST');await page.getByRole('button',{name:'Confirmar publicación',exact:true}).click();const r=await pending;expect(r.status()).toBe(200);return r;}
 export async function attemptPage(page:Page,id:string){await compatibilityNavigate(page,`/attempts/${id}`);await expect(page.getByRole('heading',{name:/Intento/}).first()).toBeVisible();}
 // Independent integer arithmetic; no imports from product scoring or floating point sums.

@@ -11,9 +11,24 @@ export type Question = components["schemas"]["QuestionUpdate"];
 export type GradeItem = components["schemas"]["GradeItem"];
 const fail = (field: string, message: string): never => { throw new FieldError(field, message); };
 function string(v: unknown, field: string, max = Infinity, blank = false): string {
-  if (typeof v !== "string" || (!blank && !v.trim()) || [...v].length > max || v.includes("\0")) return fail(field, "Revisa el texto y su límite; no se admite NUL.");
+  if (typeof v !== "string") return fail(field, "Ingresa texto en este campo.");
+  if (!blank && !v.trim()) {
+    const message = field === "title" ? "Escribe el título del quiz."
+      : field.endsWith(".prompt") ? "Escribe el enunciado."
+      : field.endsWith(".text") ? "Escribe esta alternativa."
+      : "Completa este campo.";
+    return fail(field, message);
+  }
+  if ([...v].length > max) return fail(field, `Usa hasta ${max.toLocaleString("es-CL")} caracteres.`);
+  if (v.includes("\0")) return fail(field, "El texto contiene un carácter no válido. Borra el texto pegado y vuelve a escribirlo.");
   return v;
 }
+export function quizText(value: string, field: string) {
+  return string(field === "title" ? value.trim() : value, field,
+    field === "title" ? 200 : field === "instructions" ? 10000 : Infinity,
+    field === "instructions");
+}
+
 export function timestamp(v: unknown, field: string): string | null {
   if (v === null) return null;
   const m = typeof v === "string" && /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,6}))?(Z|[+-]\d{2}:\d{2})$/.exec(v);
@@ -24,6 +39,22 @@ export function timestamp(v: unknown, field: string): string | null {
 function instant(value: string) {
   const fraction = /\.(\d{1,6})/.exec(value)?.[1] ?? "";
   return BigInt(Date.parse(value)) * BigInt(1000) + BigInt(fraction.padEnd(6,"0").slice(3));
+}
+export function validateQuizDraftDate(
+  field: "opensAt" | "closesAt", value: string | null, previous: string | null | undefined, now: number,
+) {
+  if (!value) return;
+  const candidate = instant(value);
+  if (previous && candidate === instant(previous)) return;
+  if (candidate <= BigInt(now) * BigInt(1000)) {
+    fail(field, field === "opensAt" ? "La apertura debe ser posterior a la fecha y hora actuales."
+      : "El cierre debe ser posterior a la fecha y hora actuales.");
+  }
+}
+
+export function validateQuizSchedule(opens: string | null, closes: string | null) {
+  if (opens && closes && instant(opens) >= instant(closes))
+    fail("closesAt", "El cierre debe ser posterior a la apertura.");
 }
 function integer(v: unknown, field: string) {
   if (typeof v !== "number" || !Number.isInteger(v) || v < 1 || v > 2147483647) return fail(field, "Ingresa un entero entre 1 y 2147483647.");
@@ -37,9 +68,9 @@ export function questionsInput(v: unknown, current?: Authoring): Question[] {
   if (!Array.isArray(v)) return fail("questions", "Revisa las preguntas.");
   const questions = v.map((value, i) => {
     const f = `questions.${i}`, q = object(value, current ? ["id","prompt","position","points","alternatives"] : ["prompt","position","points","alternatives"], f);
-    if (q.id !== undefined && (!isId(q.id) || !current?.questions.some(p => p.id === q.id))) fail(f, "UUID de pregunta ajeno o inválido.");
+    if (q.id !== undefined && (!isId(q.id) || !current?.questions.some(p => p.id === q.id))) fail(f, "No se pudo identificar esta pregunta. Revisa la versión guardada.");
     const points = q.points;
-    if (typeof points !== "number" || !Number.isFinite(points) || points <= 0 || points > 999999.99 || Number(points.toFixed(2)) !== points) fail(f + ".points", "Puntaje positivo hasta 999999.99, con hasta dos decimales.");
+    if (typeof points !== "number" || !Number.isFinite(points) || points <= 0 || points > 999999.99 || Number(points.toFixed(2)) !== points) fail(f + ".points", "Ingresa un puntaje entre 0,01 y 999.999,99, con hasta dos decimales.");
     if (!Array.isArray(q.alternatives)) return fail(f, "Agrega al menos dos alternativas.");
     const alternatives = q.alternatives.map((value, j) => {
       const a = object(value, ["id","text","isCorrect"], f);
@@ -47,31 +78,34 @@ export function questionsInput(v: unknown, current?: Authoring): Question[] {
       return { id: string(a.id, f + `.alternatives.${j}.id`), text: string(a.text, f + `.alternatives.${j}.text`), isCorrect: a.isCorrect as boolean };
     });
     if (alternatives.length < 2 || new Set(alternatives.map(a => a.id)).size !== alternatives.length) fail(f + ".alternatives", "Agrega al menos dos alternativas distintas a esta pregunta.");
-    if (alternatives.filter(a => a.isCorrect).length !== 1) fail(f + ".correct", "Selecciona exactamente una correcta para esta pregunta.");
+    if (alternatives.filter(a => a.isCorrect).length !== 1) fail(f + ".correct", "Selecciona una respuesta correcta para esta pregunta.");
     return { ...(q.id === undefined ? {} : {id: q.id as string}), prompt: string(q.prompt, f + ".prompt"), position: integer(q.position, f + ".position"), points: points as number, alternatives };
   });
   const ids = questions.flatMap(q => q.id ? [q.id] : []);
-  if (new Set(ids).size !== ids.length || new Set(questions.map(q => q.position)).size !== questions.length || questions.reduce((n,q) => n + Math.round(q.points * 100), 0) > 99999999) fail("questions", "Revisa IDs, posiciones únicas y suma máxima de 999999.99 puntos.");
+  if (new Set(ids).size !== ids.length || new Set(questions.map(q => q.position)).size !== questions.length)
+    fail("questions", "No se pudo validar el orden de las preguntas. Revisa la versión guardada.");
+  if (questions.reduce((total, question) => total + Math.round(question.points * 100), 0) > 99999999)
+    fail("questions", "Reduce los puntajes. El total máximo es 999.999,99 puntos.");
   return questions;
 }
-export function jsonBody<T>(body: T): T {
-  if (new TextEncoder().encode(JSON.stringify(body)).length > 4096) fail("form", "El JSON completo supera 4096 bytes UTF-8. Reduce el contenido sin perder tu borrador.");
+export function jsonBody<T>(body: T, message = "El JSON completo supera 4096 bytes UTF-8. Reduce el contenido sin perder tu borrador."): T {
+  if (new TextEncoder().encode(JSON.stringify(body)).length > 4096) fail("form", message);
   return body;
 }
 export function quizInput(value: unknown, current?: Authoring): Update {
   const v = object(value, ["title","groupId","sectionId","instructions","opensAt","closesAt","maxAttempts","questions"], "form");
   const out: Update = {};
-  if (!current || "title" in v) out.title = string(typeof v.title === "string" ? v.title.trim() : v.title, "title", 200);
+  if (!current || "title" in v) out.title = typeof v.title === "string" ? quizText(v.title, "title") : fail("title", "Escribe el título del quiz.");
   if ("groupId" in v) { if (v.groupId !== null && !isId(v.groupId)) fail("groupId", "Selecciona un grupo válido."); out.groupId = v.groupId as string | null; }
   if ("sectionId" in v) { if (v.sectionId !== null && !isId(v.sectionId)) fail("sectionId", "Selecciona una sección válida."); out.sectionId = v.sectionId as string | null; }
-  if ("instructions" in v) out.instructions = v.instructions === null ? null : string(v.instructions, "instructions", 10000, true);
+  if ("instructions" in v) out.instructions = v.instructions === null ? null : typeof v.instructions === "string" ? quizText(v.instructions, "instructions") : fail("instructions", "Ingresa texto en este campo.");
   for (const k of ["opensAt","closesAt"] as const) if (k in v) out[k] = timestamp(v[k], k);
   const opens = out.opensAt === undefined ? current?.opensAt : out.opensAt, closes = out.closesAt === undefined ? current?.closesAt : out.closesAt;
-  if (opens && closes && instant(opens) >= instant(closes)) fail("closesAt", "El cierre debe ser posterior a la apertura.");
+  validateQuizSchedule(opens ?? null, closes ?? null);
   if ("maxAttempts" in v) out.maxAttempts = v.maxAttempts === null ? null : integer(v.maxAttempts, "maxAttempts");
   if ("questions" in v) out.questions = questionsInput(v.questions, current);
   if (!Object.keys(out).length) fail("form", "No hay cambios para guardar.");
-  return jsonBody(out);
+  return jsonBody(out, "El quiz supera el tamaño permitido. Acorta las instrucciones, los enunciados o las alternativas e inténtalo de nuevo.");
 }
 export function summary(v: unknown, courseId: string, expected?: string): Summary {
   try {
