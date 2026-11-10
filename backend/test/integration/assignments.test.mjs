@@ -99,10 +99,12 @@ test("assignments and quizzes share defaults, enforce scope and preserve gradebo
   assert.equal(events.rowCount,6);
   const global=await call("owner","","POST",{...first,idempotencyKey:randomUUID(),sectionId:null,title:"Tarea para el curso"});
   assert.equal(global.status,201);
-  assert.equal((await call("owner","/"+global.body.id+"/visibility","PATCH",{expectedVersion:0,published:true})).status,200);
+  const courseWideId=global.body.id;
+  assert.equal((await call("owner","/"+courseWideId+"/visibility","PATCH",{expectedVersion:0,published:true})).status,200);
   await f.add(f.s2,users.revoked,"student");
   const visible=await call("student");
-  assert.deepEqual(visible.body.items.map(i=>i.id),[global.id]);
+  assert.equal(visible.status,200);
+  assert.deepEqual(visible.body.items.map(i=>i.id),[courseWideId]);
   const db=await runtimeDatabase();
   try {
    await db.withInstitution(users.owner,"utfsm",async c=>{
