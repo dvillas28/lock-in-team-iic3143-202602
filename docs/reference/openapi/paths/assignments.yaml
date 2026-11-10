@@ -1,0 +1,133 @@
+/api/v1/institution/{institutionSlug}/courses/{courseId}/assignments:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/CourseId'
+  get:
+    tags: [Assignments]
+    operationId: listAssignments
+    summary: Listar tareas visibles
+    description: Solo las publicadas se muestran a estudiantes con matrícula activa en el alcance, incluso antes de la apertura.
+    responses:
+      '200':
+        description: Operación completada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/assignments.yaml#/AssignmentList'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '500':
+        $ref: '../components/responses.yaml#/InternalError'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'
+  post:
+    tags: [Assignments]
+    operationId: createAssignment
+    summary: Crear tarea como borrador o publicada
+    description: Con publish=true se crea y publica en la misma transacción. El mismo actor puede repetir la clave de idempotencia con el cuerpo original. El servidor genera el ID de la tarea. Las fechas son instantes UTC con sufijo Z y cumplen apertura ≤ entrega ≤ cierre cuando están definidas. Una fecha de entrega anterior al reloj del servidor devuelve 422 con ASSIGNMENT_DUE_DATE_IN_PAST.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/assignments.yaml#/AssignmentCreate'
+    responses:
+      '201':
+        description: Operación completada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/assignments.yaml#/Assignment'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '413':
+        $ref: '../components/responses.yaml#/PayloadTooLarge'
+      '415':
+        $ref: '../components/responses.yaml#/UnsupportedMediaType'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+      '500':
+        $ref: '../components/responses.yaml#/InternalError'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'
+
+/api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/CourseId'
+    - name: assignmentId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+  get:
+    tags: [Assignments]
+    operationId: getAssignment
+    summary: Consultar tarea visible
+    x-permissions: Docente autorizado o estudiante con matrícula activa y tarea publicada para su curso o sección.
+    responses:
+      '200':
+        description: Operación completada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/assignments.yaml#/Assignment'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '500':
+        $ref: '../components/responses.yaml#/InternalError'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'
+  patch:
+    tags: [Assignments]
+    operationId: updateAssignment
+    summary: Editar tarea dentro del alcance docente
+    description: Requiere permiso sobre origen y destino. Con publish=true se aplican los cambios y se publica en la misma transacción. Una edición concurrente incompatible devuelve 409. Acepta instantes UTC con sufijo Z. Cambiar el plazo a un instante pasado devuelve 422 con ASSIGNMENT_DUE_DATE_IN_PAST; un plazo histórico sin cambios se conserva.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/assignments.yaml#/AssignmentUpdate'
+    responses:
+      '200':
+        description: Operación completada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/assignments.yaml#/Assignment'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '413':
+        $ref: '../components/responses.yaml#/PayloadTooLarge'
+      '415':
+        $ref: '../components/responses.yaml#/UnsupportedMediaType'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+      '500':
+        $ref: '../components/responses.yaml#/InternalError'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'

@@ -30,7 +30,7 @@ async function bootstrap() {
           next(new UnsupportedMediaTypeException()); return;
         }
       }
-      if (/^\/api\/v1\/institution\/[^/]+\/(?:courses\/[^/]+\/(?:modules|quizzes|grade-items|gradebook|my-grades)|sections\/[^/]+\/quizzes\/[^/]+\/attempts|quiz-attempts|modules|materials|quizzes)(?:\/|$)/i.test(request.path)) {
+      if (/^\/api\/v1\/institution\/[^/]+\/(?:courses\/[^/]+\/(?:modules|quizzes|assignments|evaluation-groups|grade-items|gradebook|my-grades)|sections\/[^/]+\/quizzes\/[^/]+\/attempts|quiz-attempts|modules|materials|quizzes)(?:\/|$)/i.test(request.path)) {
         response.setHeader("Cache-Control", "no-store");
         response.setHeader("X-Content-Type-Options", "nosniff");
         const upload=(request.method==="POST" && /\/modules\/[^/]+\/files\/?$/i.test(request.path)) ||
@@ -55,9 +55,12 @@ async function bootstrap() {
     });
     app.useBodyParser("json", {limit: 64*1024, strict: false, inflate: false,
       verify: (request: {method?:string;url?:string}, _response: unknown, body: Buffer) => {
+        const pathname=request.url?.split("?",1)[0]??"";
         const gradeGroups=request.method==="PUT" &&
-          /^\/api\/v1\/institution\/[^/]+\/courses\/[^/]+\/gradebook\/groups\/?$/i.test(request.url?.split("?",1)[0]??"");
-        if (!gradeGroups && body.length>4096) throw Object.assign(new Error("Request too large"),{status:413});
+          /^\/api\/v1\/institution\/[^/]+\/courses\/[^/]+\/gradebook\/groups\/?$/i.test(pathname);
+        const assignmentWrite=(request.method==="POST" || request.method==="PATCH") &&
+          /^\/api\/v1\/institution\/[^/]+\/courses\/[^/]+\/assignments(?:\/[^/]+)?\/?$/i.test(pathname);
+        if (!gradeGroups && !assignmentWrite && body.length>4096) throw Object.assign(new Error("Request too large"),{status:413});
       },
     });
     app.use((error: {status?: number}, _request: unknown, _response: unknown, next: (error: unknown) => void) => {

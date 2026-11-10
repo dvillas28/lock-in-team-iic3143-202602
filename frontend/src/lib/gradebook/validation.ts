@@ -58,13 +58,13 @@ export function gradeItems(v: unknown, courseId: string): GradeItems {
         groups.some(g => !isRecord(g) || !isId(g.id) || !title(g.title) || !number(g.weightPercent) ||
             !Number.isSafeInteger(g.position) || Number(g.position) < 1))) throw new ApiResponseError();
     for (const i of v.items) {
-        if (!isRecord(i) || !isId(i.id) || i.courseId !== courseId || !isId(i.quizId) || !title(i.title) ||
+        if (!isRecord(i) || !isId(i.id) || i.courseId !== courseId || !(i.quizId === null ? isId(i.assignmentId) : isId(i.quizId) && i.assignmentId === undefined) || !title(i.title) ||
             !number(i.weightPercent) || !date(i.createdAt) ||
-            (Array.isArray(groups) && (!groups.some(g => g.id === i.groupId) || !number(i.maxPoints, Number.MIN_VALUE, 999999.99)))) {
+            (Array.isArray(groups) && (!groups.some(g => g.id === i.groupId) || !number(i.maxPoints, i.quizId === null ? 0 : Number.MIN_VALUE, 999999.99)))) {
             throw new ApiResponseError();
         }
     }
-    if (!unique(v.items.map(i => i.id)) || !unique(v.items.map(i => i.quizId))) throw new ApiResponseError();
+    if (!unique(v.items.map(i => i.id)) || !unique(v.items.map(i => i.quizId ?? i.assignmentId))) throw new ApiResponseError();
     return v as GradeItems;
 }
 export function correctionPreview(input: string, maxPoints: number | undefined) {

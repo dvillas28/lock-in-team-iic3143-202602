@@ -19,13 +19,13 @@ export async function resultSummary(c:PoolClient,grades:QueryResultRow[],grouped
   SELECT * FROM jsonb_to_recordset($1::jsonb) AS s("groupId" uuid,title text,position int,weight numeric,earned numeric,possible numeric,grade numeric)
  ), subtotals AS (
   SELECT "groupId",title,position,weight,sum(earned) AS earned,sum(possible) AS possible,
-   100*sum(earned)/NULLIF(sum(possible),0) AS percent
+   100*sum(earned)/NULLIF(sum(possible),0) AS percent,avg(grade) AS legacy_grade
   FROM scores GROUP BY "groupId",title,position,weight
  ), totals AS (
   SELECT sum(weight*percent)/NULLIF(sum(weight),0) AS percent,COALESCE(sum(weight),0) AS weight FROM subtotals
  )
  SELECT totals.weight,CASE WHEN $2 THEN public.chilean_grade(round(totals.percent,2))
-  ELSE (SELECT round(sum(grade*weight)/NULLIF(sum(weight),0),1) FROM scores) END AS average,
+  ELSE (SELECT round(sum(legacy_grade*weight)/NULLIF(sum(weight),0),1) FROM subtotals) END AS average,
   COALESCE((SELECT jsonb_agg(jsonb_build_object('groupId',"groupId",'title',title,'weightPercent',weight,
     'pointsEarned',earned,'pointsPossible',possible,'scorePercent',round(percent,2),
     'grade',public.chilean_grade(round(percent,2))) ORDER BY position,"groupId") FROM subtotals),'[]'::jsonb) AS groups

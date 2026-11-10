@@ -188,7 +188,7 @@ function BookResults({
               key={`${sectionId}:${cursor}`}
               session={session} slug={slug} courseId={course.id} disabled={blocked}
               totalWeightPercent={items.totalWeightPercent} moreRows={book?.hasMore || pages.length > 0}
-              items={columns} rows={book?.items ?? []}
+              items={columns.filter(i=>i.quizId!==null)} rows={book?.items ?? []}
               sections={sections.filter(s => (cap.global || cap.writeSections.includes(s.id)) && (!sectionId || s.id === sectionId))}
               onBusy={onBusy}
               onConfirmed={() => { void onMetaReload(); void r.reload(); }}
@@ -215,6 +215,12 @@ function BookResults({
               Los resultados aparecerán cuando existan intentos calificados en
               las secciones seleccionadas.
             </p>
+            {columns.some(i=>i.assignmentId) && <ul aria-label="Tareas sin calificar">
+              {columns.filter(i=>i.assignmentId).map(i=><li key={i.id}>
+                <Link className="text-link" href={`/courses/${course.id}/assignments/${i.assignmentId}`}>{i.title}</Link>
+                <span className="hint"> · {groups.find(g=>g.id===i.groupId)?.title}</span>
+              </li>)}
+            </ul>}
           </div>
         ) : (
           <>
@@ -237,8 +243,8 @@ function BookResults({
                     <th scope="col">Sección histórica</th>
                     {columns.map((i) => (
                       <th scope="col" key={i.id}>
-                        {i.title}
-                        <small className="hint">{grouped ? groups.find(g => g.id === i.groupId)?.title : `${i.weightPercent} %`}</small>
+                        {i.assignmentId ? <Link className="text-link" href={`/courses/${course.id}/assignments/${i.assignmentId}`}>{i.title}</Link> : i.title}
+                        <small className="hint">{(grouped || i.assignmentId) ? groups.find(g => g.id === i.groupId)?.title : `${i.weightPercent} %`}</small>
                         {i.maxPoints !== undefined && <small className="hint tnum">{i.maxPoints} pts</small>}
                       </th>
                     ))}

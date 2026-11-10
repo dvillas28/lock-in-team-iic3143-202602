@@ -15,6 +15,7 @@ test("numeric form values reject scientific notation, coercions, fractions and b
   assert.equal(formNumber("0.01", "points"), 0.01);
   assert.equal(formNumber("999999.99", "points"), 999999.99);
   assert.equal(formNumber("2147483647", "maxAttempts", true), 2147483647);
+  assert.equal(formNumber("1", "maxAttempts", true), 1);
 });
 
 test("configuration rejects impossible dates, timezone suffixes and incomplete local times", () => {

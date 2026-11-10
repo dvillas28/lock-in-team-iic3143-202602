@@ -21,7 +21,7 @@ test('complete HTTP academic workflow in UC and UTFSM, publication and own read 
   const quiz=await request(app,teacher,`${slug}/courses/${courseId}/quizzes`,'POST',{title:'Control',sectionId:section,questions:[question]});assert.equal(quiz.status,201);
   assert.equal((await request(app,teacher,`${slug}/quizzes/${quiz.body.id}/publish`,'POST')).status,200);
   const items=await request(app,teacher,`${slug}/courses/${courseId}/grade-items`),item=items.body.items[0].id;
-  assert.equal((await request(app,teacher,`${slug}/courses/${courseId}/gradebook/weights`,'PUT',{items:[{gradeItemId:item,weightPercent:100}]})).status,200);
+  assert.equal(items.body.groups[0].title,"Quizzes");assert.equal(items.body.groups[0].weightPercent,100);
   const safe=await request(app,student,`${slug}/quizzes/${quiz.body.id}`);assert.equal(safe.status,200);assert.deepEqual(safe.body.questions,[]);
   const startPath=`${slug}/sections/${section}/quizzes/${quiz.body.id}/attempts`;
   const abandoned=await request(app,student,startPath,'POST',{},'abandoned');assert.equal(abandoned.status,201);
@@ -34,7 +34,7 @@ test('complete HTTP academic workflow in UC and UTFSM, publication and own read 
   const own=`${slug}/courses/${courseId}/my-grades`;assert.deepEqual((await request(app,student,own)).body.items,[]);
   const pub=`${slug}/courses/${courseId}/gradebook/publications`,body={gradeItemIds:[item],sectionIds:[section],studentIds:[studentId]};
   assert.equal((await request(app,teacher,pub,'POST',body,'publication')).status,200);
-  const result=await request(app,student,own);assert.equal(result.body.partialAverage,7);assert.equal(result.body.publishedWeightPercent,100);assert.equal(result.body.isPartial,false);
+  const result=await request(app,student,own);assert.equal(result.body.partialAverage,7);assert.equal(result.body.publishedWeightPercent,100);assert.equal(result.body.isPartial,true);
   assert.equal((await request(app,teacher,`${foreignSlug}/courses/${courseId}/gradebook`)).status,404);
   assert.equal((await request(app,student,`${slug}/courses/${courseId}/audit-events`)).status,403);
   const history=await request(app,teacher,`${slug}/courses/${courseId}/audit-events?action=grade.published`);assert.equal(history.status,200);assert.equal(history.body.items.length,1);

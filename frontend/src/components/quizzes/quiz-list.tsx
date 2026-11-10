@@ -8,6 +8,7 @@ import { useSession } from "../auth/session-provider.tsx";
 import { useResource } from "../courses/use-resource.ts";
 import { getCourse } from "../../lib/api/courses.ts";
 import { listSections } from "../../lib/api/sections.ts";
+import { listEvaluationGroups } from "../../lib/api/assignments.ts";
 import { listCourseQuizzes } from "../../lib/api/quizzes.ts";
 import { ApiResponseError } from "../../lib/api/errors.ts";
 import { EmptyState, ErrorState, LoadingState } from "../route-states.tsx";
@@ -24,17 +25,19 @@ function QuizDirectory({courseId,scope,slug}:{courseId:string;scope:string;slug:
   const result=useResource(session,scope,async c=>{
     const course=await getCourse(c,slug,courseId), sections=await listSections(c,slug,courseId), items=await listCourseQuizzes(c,slug,courseId);
     if(items.some(q=>q.sectionId !== null && !sections.some(s=>s.id===q.sectionId))) throw new ApiResponseError();
-    return {course,sections,items};
+    const groups=context?.user?.sectionMemberships.some(m=>m.courseId===courseId && m.role==="teacher")
+      ? await listEvaluationGroups(c,slug,courseId) : undefined;
+    return {course,sections,items,groups};
   },true);
   if(!context?.user) return <LoadingState/>;
   if(!result.data) return result.error ? <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/> : <LoadingState/>;
-  const {course,sections,items}=result.data;
+  const {course,sections,items,groups}=result.data;
   const visible=items.filter(q=>q.title.toLocaleLowerCase("es").includes(query.trim().toLocaleLowerCase("es")) && (!status || q.status===status) && (!section || (section==="course" ? q.sectionId===null : q.sectionId===section)));
   const student=context.user.sectionMemberships.some(m=>m.courseId===courseId && m.role==="student");
   function clearFilters(){setQuery("");setStatus("");setSection("");}
   return <QuizWorkspace course={course} user={context.user} title="Quizzes">
     <p className="hint">Consulta las evaluaciones del curso, sus fechas y los intentos permitidos.</p>
-    <QuizCreate key={scope} session={session} slug={slug} user={context.user} course={course} sections={sections} onSaved={result.reload}/>
+    <QuizCreate key={scope} session={session} slug={slug} user={context.user} course={course} sections={sections} groups={groups} onSaved={result.reload}/>
     {result.error && <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/>}
     {items.length>0 && <section className="card panel stack quiz-filters" aria-label="Filtrar quizzes">
       <div className="quiz-filter-grid">

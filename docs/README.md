@@ -31,6 +31,7 @@ plataforma de despliegue.
 
 ## Contratos
 
+- [Tareas del curso, CU-22 y CU-23](planning/course-assignments.md)
 - [OpenAPI de AcademiX](reference/openapi/README.md)
 
 ## Backend y Pruebas

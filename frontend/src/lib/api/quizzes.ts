@@ -43,7 +43,7 @@ export async function publishQuiz(client: ApiClient, slug: string, courseId: str
 }
 export async function listCourseGradeItems(client: ApiClient, slug: string, courseId: string) {
   const result = await client.GET("/api/v1/institution/{institutionSlug}/courses/{courseId}/grade-items", {params:{path:{...path(slug,{courseId}),courseId}}});
-  const items = list(result.data,v=>gradeItem(v,courseId));
+  const items = list(result.data,v=>gradeItem(v,courseId)).filter(i=>i.quizId!==null);
   if (new Set(items.map(i=>i.quizId)).size !== items.length) throw new ApiResponseError();
   return items;
 }

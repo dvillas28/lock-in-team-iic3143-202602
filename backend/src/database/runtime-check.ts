@@ -1,5 +1,5 @@
 import type {Pool,Client} from "pg";
-export const tenantTables=["institution_memberships","courses","sections","enrollments","course_modules","materials","quizzes","grade_items","grade_groups","grade_revisions","quiz_attempts","grades","grade_publications","audit_events","account_invitations","user_imports","user_import_rows"];
+export const tenantTables=["institution_memberships","courses","sections","enrollments","course_modules","materials","quizzes","assignments","grade_items","grade_groups","grade_revisions","quiz_attempts","grades","grade_publications","audit_events","account_invitations","user_imports","user_import_rows"];
 export async function checkRuntime(db:Pool|Client) {
  const role=(await db.query(`SELECT r.oid,r.rolname,r.rolsuper,r.rolbypassrls,r.rolcreatedb,r.rolcreaterole,
   EXISTS(SELECT FROM pg_auth_members WHERE member=r.oid) AS member,
@@ -15,7 +15,7 @@ export async function checkRuntime(db:Pool|Client) {
  const operator=policies.filter(p=>p.policyname==="operator_maintenance");
  if(operator.some(p=>p.cmd!=="ALL" || p.permissive!=="PERMISSIVE" || p.qual!=="true" || p.with_check!=="true"
   || p.roles.some((r:string)=>r==="academix_runtime" || r==="public")))throw new Error("Unsafe operator policy");
- if(policies.length-operator.length!==24)throw new Error("Unexpected RLS policies");
+ if(policies.length-operator.length!==25)throw new Error("Unexpected RLS policies");
  for(const name of tenantTables) {
   const p=policies.find(p=>p.tablename===name && p.policyname==="tenant_boundary");
   if(!p || p.cmd!=="ALL" || p.permissive!=="PERMISSIVE" || JSON.stringify(p.roles)!=='["academix_runtime"]' || p.qual!=="(institution_id = (NULLIF(current_setting('academix.institution_id'::text, true), ''::text))::uuid)" || p.qual!==p.with_check)throw new Error("Invalid tenant policy");
@@ -41,6 +41,7 @@ export async function checkRuntime(db:Pool|Client) {
   has_table_privilege(current_user,'public.institution_memberships','INSERT,DELETE,TRUNCATE') OR
   has_table_privilege(current_user,'public.audit_events','UPDATE,DELETE,TRUNCATE') OR
   has_table_privilege(current_user,'public.grade_revisions','UPDATE,DELETE,TRUNCATE') OR
+  has_table_privilege(current_user,'public.assignments','DELETE,TRUNCATE') OR
   has_table_privilege(current_user,'public.demo_data_runs','SELECT,INSERT,UPDATE,DELETE,TRUNCATE') OR
   has_table_privilege(current_user,'public.pgmigrations','SELECT,INSERT,UPDATE,DELETE,TRUNCATE') AS unsafe`)).rows[0];
  if(forbidden.unsafe)throw new Error("Unsafe runtime grants");

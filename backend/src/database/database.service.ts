@@ -44,12 +44,15 @@ export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
       g.id,g.institution_id,g.grade_item_id,g.quiz_id,g.student_id,g.section_id,g.attempt_id,g.score_percent,g.grade_value,g.published_at,g.created_at,g.updated_at
       FROM public.quiz_attempts a,public.grades g LIMIT 0`);
     await this.pool.query(`SELECT c.grade_items_locked_at,c.gradebook_grouped,c.gradebook_version,q.id,q.institution_id,q.course_id,q.section_id,q.title,
-      q.instructions,q.opens_at,q.closes_at,q.max_attempts,q.published_at,q.created_by,q.questions,
-      g.id,g.institution_id,g.course_id,g.quiz_id,g.title,g.weight_percent,g.group_id,g.max_points,g.created_at
+      q.group_id,q.instructions,q.opens_at,q.closes_at,q.max_attempts,q.published_at,q.created_by,q.questions,
+      g.id,g.institution_id,g.course_id,g.quiz_id,g.assignment_id,g.title,g.weight_percent,g.group_id,g.max_points,g.created_at
       FROM public.courses c,public.quizzes q,public.grade_items g LIMIT 0`);
-    await this.pool.query(`SELECT k.id,k.title,k.weight_percent,k.position,r.grade_id,r.previous_revision_id,r.reason,
+    await this.pool.query(`SELECT k.id,k.title,k.weight_percent,k.position,k.default_kind,r.grade_id,r.previous_revision_id,r.reason,
       r.score_points,r.score_percent,r.grade_value,r.actor_user_id,r.created_at
       FROM public.grade_groups k,public.grade_revisions r LIMIT 0`);
+    await this.pool.query(`SELECT id,institution_id,course_id,section_id,description,instructions,
+      available_from,due_at,available_until,allowed_extensions,max_attempts,status,published_at,version,created_by,creation_key,create_digest
+      FROM public.assignments LIMIT 0`);
     // Resolve required columns without reading rows; SQL and integration tests own the constraints.
     await this.pool.query(`SELECT i.id,i.slug,i.name,i.active,i.created_at,i.updated_at,
       u.id,u.email,u.password_hash,u.name,u.bio,u.avatar_key,u.credential_version,u.active,u.created_at,u.updated_at,

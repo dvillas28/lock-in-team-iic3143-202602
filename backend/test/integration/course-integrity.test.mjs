@@ -38,7 +38,7 @@ test("populated identity schema upgrades without changing identities or membersh
   assert.deepEqual(after[1].map(({bio,avatar_key,credential_version,...u})=>{
    assert.equal(bio,null);assert.equal(avatar_key,null);assert.equal(credential_version,0);return u;
   }),before[1]);
-  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,18);
+  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,20);
   assert.deepEqual(after[2].map(({is_admin,is_super_admin,...m})=>{assert.equal(is_admin,false);assert.equal(is_super_admin,false);return m;}),before[2]);
  }finally{if(saved===undefined)delete process.env.MIGRATION_DATABASE_URL;else process.env.MIGRATION_DATABASE_URL=saved;await rm(dir,{recursive:true,force:true});await pool.end();}
 });

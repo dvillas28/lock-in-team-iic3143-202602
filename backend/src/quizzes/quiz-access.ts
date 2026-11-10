@@ -35,7 +35,8 @@ export function visibilityArgs(s:QuizScope) {
 }
 export async function visibleQuiz(db:PoolClient,s:QuizScope,id:string) {
  const [tenant,course,owner,teacher,teachers,sections]=visibilityArgs(s);
- const q=(await db.query<QuizRow>(`SELECT ${quizColumns} FROM public.quizzes q
+ const q=(await db.query<QuizRow>(`SELECT ${quizColumns},coalesce(i.group_id,q.group_id) AS group_id
+  FROM public.quizzes q LEFT JOIN public.grade_items i ON (i.institution_id,i.course_id,i.quiz_id)=(q.institution_id,q.course_id,q.id)
   WHERE q.institution_id=$1 AND q.course_id=$2 AND q.id=$3 AND ${visibleSql()} FOR UPDATE OF q`,
  [tenant,course,id,owner,teacher,teachers,sections])).rows[0];
  if(!q)throw new NotFoundException();return q;

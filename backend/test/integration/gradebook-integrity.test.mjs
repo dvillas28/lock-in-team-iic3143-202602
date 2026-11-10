@@ -35,12 +35,12 @@ test('publication migration upgrades populated attempts and grades without rewri
  const pool=await database();let f;
  try{
   f=await historicalPublicationFixture(pool);const {runner}=await import('node-pg-migrate'),c=await pool.connect();
-  const state=()=>Promise.all(['users','institution_memberships','courses','quiz_attempts','grades','grade_items','audit_events'].map(async table=>(await pool.query(`SELECT to_jsonb(t)-ARRAY['bio','avatar_key','credential_version','gradebook_grouped','gradebook_version','group_id','max_points'] AS row FROM ${table} t ORDER BY id`)).rows));
+  const state=()=>Promise.all(['users','institution_memberships','courses','quiz_attempts','grades','grade_items','audit_events'].map(async table=>(await pool.query(`SELECT to_jsonb(t)-ARRAY['bio','avatar_key','credential_version','gradebook_grouped','gradebook_version','group_id','max_points','assignment_id'] AS row FROM ${table} t ORDER BY id`)).rows));
   const before=await state();
   try{const down=await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir:f.dir,direction:'down',count:5,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});assert.equal(down.length,5);}finally{c.release();}
   assert.equal((await pool.query("SELECT to_regclass('grade_publications') AS t")).rows[0].t,null);
   assert.equal((await cli('commands/migrate').result).code,0);assert.deepEqual(await state(),before);
-  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,18);
+  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,20);
   assert.ok((await pool.query('SELECT bio,avatar_key,credential_version FROM users')).rows.every(row=>row.bio===null&&row.avatar_key===null&&row.credential_version===0));
   assert.equal((await cli('commands/migrate').result).code,0);assert.deepEqual(await state(),before);
  }finally{if(f)await f.close();await pool.end();}

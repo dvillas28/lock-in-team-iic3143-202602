@@ -8,7 +8,8 @@ const fields: Record<string,string[]> = {
  userImport:["id","status","totalRows","createdCount","skippedCount"],
  quizAttempt:["id","quizId","studentId","sectionId","attemptNumber","status","startedAt","submittedAt","cancelledAt"],
  grade:["id","gradeItemId","studentId","sectionId","attemptId","scorePercent","grade","publishedAt","pointsEarned","revisionId","revisedAt","reason"],
- quiz:["id","courseId","sectionId","title","opensAt","closesAt","maxAttempts","publishedAt","createdBy","questionCount","totalPoints","gradeItemId"],
+ assignment:["id","courseId","sectionId","title","description","instructions","maxPoints","groupId","status","publishedAt","availableFrom","dueAt","availableUntil","maxAttempts","allowedExtensions","version"],
+ quiz:["id","courseId","sectionId","title","opensAt","closesAt","maxAttempts","publishedAt","createdBy","questionCount","totalPoints","gradeItemId","groupId"],
  courseModule:["id","courseId","title","position","publishedAt"],
  academicFile:["id","moduleId","title","kind","position","fileName","mediaType","byteSize","publishedAt","createdBy"],
  moduleQuiz:["moduleId","quizId"],
@@ -33,6 +34,10 @@ export function snapshot(type: string, value: unknown): Record<string,unknown>|n
     const key=type==="moduleOrder"?"modules":"items",allowed=type==="moduleOrder"?["id","position"]:["gradeItemId","weightPercent"];
     return {[key]:Array.isArray(source[key])?source[key].filter(v=>v && typeof v==="object" && !Array.isArray(v)).map(v=>
       Object.fromEntries(Object.entries(v).filter(([k,val])=>((k===allowed[0] && typeof val==="string") || (k===allowed[1] && typeof val==="number" && Number.isFinite(val)))))):[]};
+  }
+  if(type==="assignment" && Array.isArray(source.allowedExtensions)) {
+    const {allowedExtensions,...rest}=source;
+    return {...snapshot(type,rest),allowedExtensions:allowedExtensions.filter(v=>typeof v==="string")};
   }
   return Object.fromEntries(Object.entries(source).filter(([key,val])=>fields[type]?.includes(key) && (val===null || typeof val==="string" || typeof val==="number" || typeof val==="boolean" || val instanceof Date)));
 }
