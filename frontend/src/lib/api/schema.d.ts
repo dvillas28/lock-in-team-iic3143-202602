@@ -3149,7 +3149,7 @@ export interface components {
         AssignmentCreate: {
             /**
              * Format: uuid
-             * @description UUID estable del reintento acotado a institución
+             * @description UUID estable del reintento acotado a institución, curso y autor. El servidor genera el ID de la tarea.
              */
             idempotencyKey: string;
             title: components["schemas"]["title"];
