@@ -8,8 +8,11 @@ export const attemptStatuses: Record<Attempt["status"], { label: string; tone: s
   cancelled: { label: "Cancelado", tone: "chip-danger" },
 };
 
-export function AttemptStatus({ status }: { status: Attempt["status"] }) {
-  const { label, tone } = attemptStatuses[status];
+/** Students see “Enviado”: automatic grading is internal until the grade is published. */
+export function AttemptStatus({ status, student = false, published = false }: { status: Attempt["status"]; student?: boolean; published?: boolean }) {
+  const { label, tone } = student && status === "graded"
+    ? published ? { label: "Nota publicada", tone: "chip-success" } : { label: "Enviado", tone: "chip-primary" }
+    : attemptStatuses[status];
   return <span className={`chip ${tone}`}>{label}</span>;
 }
 

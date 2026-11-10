@@ -14,7 +14,15 @@ type BrowserNavigation = EventTarget & {
 };
 
 /** Warn only while the authorized editor has work or a write to recover. */
-export function QuizLeaveGuard({ active }: { active: boolean }) {
+type LeaveCopy = { title: string; body: string; stay: string; leave: string };
+const formCopy: LeaveCopy = {
+  title: "¿Salir del formulario?",
+  body: "Si sales, perderás los cambios sin guardar y cualquier operación pendiente de confirmar.",
+  stay: "Seguir editando",
+  leave: "Salir del formulario",
+};
+
+export function QuizLeaveGuard({ active, copy = formCopy }: { active: boolean; copy?: LeaveCopy }) {
   const router = useRouter();
   const dialog = useRef<HTMLDialogElement>(null);
   const stay = useRef<HTMLButtonElement>(null);
@@ -134,10 +142,10 @@ export function QuizLeaveGuard({ active }: { active: boolean }) {
       }
     }}
     onCancel={event => { event.preventDefault(); close(); }}>
-    <h2 className="serif" id={title}>¿Salir del formulario?</h2>
-    <p>Si sales, perderás los cambios sin guardar y cualquier operación pendiente de confirmar.</p>
+    <h2 className="serif" id={title}>{copy.title}</h2>
+    <p>{copy.body}</p>
     <div className="actions">
-      <button className="btn btn-ghost" type="button" ref={stay} onClick={close}>Seguir editando</button>
+      <button className="btn btn-ghost" type="button" ref={stay} onClick={close}>{copy.stay}</button>
       <button className="btn btn-danger" type="button" onClick={() => {
         const action = proceed.current;
         if (!action) return;
@@ -145,7 +153,7 @@ export function QuizLeaveGuard({ active }: { active: boolean }) {
         allowed.current = true;
         dialog.current?.close();
         action();
-      }}>Salir del formulario</button>
+      }}>{copy.leave}</button>
     </div>
   </dialog>;
 }
