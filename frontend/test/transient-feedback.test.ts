@@ -194,7 +194,7 @@ test("question editing notices renew for repeated actions without moving focus w
   } finally { await ui.close(); }
 });
 
-test("answer-save confirmation expires while answers and unsaved-change warnings survive", async t => {
+test("answer-save status stays accurate while answers and unsaved-change warnings survive", async t => {
   t.mock.timers.enable({ apis: ["setTimeout"] });
   let saved = attempts.attempt;
   const ui = await mount(h(AttemptDetail, { attemptId: saved.id }), async r => {
@@ -203,13 +203,13 @@ test("answer-save confirmation expires while answers and unsaved-change warnings
   }, "student");
   try {
     await ui.settle(() => ui.doc.querySelector<HTMLInputElement>('input[value="a"]')!.click());
-    await ui.submit(); assert.match(ui.doc.body.textContent!, /Respuestas guardadas y confirmadas/);
+    await ui.submit(); assert.match(ui.doc.body.textContent!, /Respuestas guardadas/);
     await ui.settle(() => t.mock.timers.tick(SUCCESS_FEEDBACK_MS));
-    assert.doesNotMatch(ui.doc.body.textContent!, /Respuestas guardadas y confirmadas/);
+    assert.match(ui.doc.querySelector(".attempt-actions-bar")!.textContent!, /Respuestas guardadas/);
     assert.equal(ui.doc.querySelector<HTMLInputElement>('input[value="a"]')!.checked, true);
-    await ui.click("Quitar todas las selecciones");
+    await ui.click("Quitar respuesta");
     await ui.settle(() => t.mock.timers.tick(SUCCESS_FEEDBACK_MS * 2));
-    assert.match(ui.doc.body.textContent!, /Borrador con cambios sin guardar/);
+    assert.match(ui.doc.body.textContent!, /Cambios sin guardar/);
     assert.equal(ui.requests.filter(r => r.method === "PUT").length, 1);
   } finally { await ui.close(); }
 });
