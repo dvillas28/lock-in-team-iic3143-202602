@@ -187,6 +187,31 @@
         $ref: ../components/responses.yaml#/ContentProblem
       '415':
         $ref: ../components/responses.yaml#/ContentProblem
+  delete:
+    tags:
+    - Materials
+    operationId: deleteMaterial
+    summary: Eliminar una página
+    description: Teacher activo del curso. Elimina la página (material Markdown) de forma
+      definitiva y registra el evento material.deleted con su contenido anterior. Los
+      archivos y cuestionarios del módulo se eliminan por sus propios endpoints (404 aquí).
+      Assistant/student reciben 403 si la ven publicada y 404 si no. Sin body.
+    responses:
+      '204':
+        description: Página eliminada.
+      '400':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '401':
+        $ref: ../components/responses.yaml#/ContentUnauthorized
+      '403':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '404':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '500':
+        $ref: ../components/responses.yaml#/ContentProblem
+      '503':
+        $ref: ../components/responses.yaml#/ContentProblem
+
 /api/v1/institution/{institutionSlug}/materials/{materialId}/publish:
   parameters:
   - $ref: ../components/parameters.yaml#/InstitutionSlug

@@ -812,7 +812,11 @@ export interface paths {
         get: operations["getMaterial"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Eliminar una página
+         * @description Teacher activo del curso. Elimina la página (material Markdown) de forma definitiva y registra el evento material.deleted con su contenido anterior. Los archivos y cuestionarios del módulo se eliminan por sus propios endpoints (404 aquí). Assistant/student reciben 403 si la ven publicada y 404 si no. Sin body.
+         */
+        delete: operations["deleteMaterial"];
         options?: never;
         head?: never;
         /**
@@ -5217,6 +5221,38 @@ export interface operations {
             };
             400: components["responses"]["ContentProblem"];
             401: components["responses"]["ContentUnauthorized"];
+            404: components["responses"]["ContentProblem"];
+            500: components["responses"]["ContentProblem"];
+            503: components["responses"]["ContentProblem"];
+        };
+    };
+    deleteMaterial: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                materialId: components["parameters"]["MaterialId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página eliminada. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["ContentProblem"];
+            401: components["responses"]["ContentUnauthorized"];
+            403: components["responses"]["ContentProblem"];
             404: components["responses"]["ContentProblem"];
             500: components["responses"]["ContentProblem"];
             503: components["responses"]["ContentProblem"];

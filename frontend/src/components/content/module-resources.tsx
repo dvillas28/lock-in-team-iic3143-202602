@@ -1,7 +1,7 @@
 "use client";
 
 import {useEffect,useRef,useState} from "react";
-import {ArrowDown,ArrowUp,ClipboardList,File,FileText,Image,X} from "lucide-react";
+import {ArrowDown,ArrowUp,ClipboardList,File,FileText,Image,Pencil,X} from "lucide-react";
 import Link from "next/link";
 import {useResource} from "../courses/use-resource.ts";
 import {useRefreshOnReturn} from "./use-refresh-on-return.ts";
@@ -13,8 +13,8 @@ import {fileExtension,formatBytes,type AcademicFile,type ModuleQuiz,type ModuleR
 import type {CourseModule} from "../../lib/content/validation.ts";
 import type {Course} from "../../lib/courses/validation.ts";
 import {PublicationToggle} from "./publication-toggle.tsx";
-import {MaterialForm} from "./material-form.tsx";
-import {FileEditor} from "./file-editor.tsx";
+import {PageEditorDialog} from "./page-editor-dialog.tsx";
+import {FileEditorDialog} from "./file-editor.tsx";
 import {FileUploadForm} from "./file-upload-form.tsx";
 import {AddContentMenu,type ContentAction} from "./add-content-menu.tsx";
 import {QuizLinkDialog} from "./quiz-link-dialog.tsx";
@@ -27,7 +27,7 @@ function ResourceRow({session,slug,parent,item,author,disabled,reload,limits,pre
  item:ModuleResource;limits:UploadLimits;previous?:string;next?:string;
  move:(id:string,neighbor:string,direction:-1|1)=>void;unlink:(item:ModuleQuiz)=>void;remove:(item:AcademicFile)=>void;
 }) {
- const [editBlocked,setEditBlocked]=useState(false);
+ const [editing,setEditing]=useState(false),[editBlocked,setEditBlocked]=useState(false),editTrigger=useRef<HTMLButtonElement>(null);
  const isFile=item.kind==="file";
  const Icon=isFile ? item.preview==="image"?Image:item.preview==="pdf"?FileText:File :
   item.kind==="quiz"?ClipboardList:FileText;
@@ -49,6 +49,7 @@ function ResourceRow({session,slug,parent,item,author,disabled,reload,limits,pre
    {author && <div className="module-tools resource-controls">
     {item.kind!=="quiz" && <PublicationToggle session={session} slug={slug} kind={isFile?"file":"material"} id={item.id}
      parentId={parent.id} title={item.title} published={item.publishedAt!==null} onSaved={reload} disabled={disabled||editBlocked}/>}
+    {(item.kind==="markdown"||isFile)&&<button ref={editTrigger} type="button" className="btn btn-ghost" aria-label={`${isFile?"Editar archivo":"Editar página"} ${item.title}`} disabled={disabled} onClick={()=>setEditing(true)}><Pencil size={14} aria-hidden="true"/>Editar</button>}
     <button type="button" className="icon-btn" aria-label={`Subir recurso ${item.title}`} aria-disabled={disabled||!previous}
      onClick={()=>{if(previous&&!disabled) move(item.id,previous,-1);}}><ArrowUp size={16} aria-hidden="true"/></button>
     <button type="button" className="icon-btn" aria-label={`Bajar recurso ${item.title}`} aria-disabled={disabled||!next}
@@ -57,11 +58,12 @@ function ResourceRow({session,slug,parent,item,author,disabled,reload,limits,pre
      onClick={()=>unlink(item)}>Quitar enlace</button>}
    </div>}
   </div>
-  {author && item.kind==="markdown" && <details className="academic-disclosure resource-editor">
-   <summary>Editar material {item.title}</summary>
-   <MaterialForm session={session} slug={slug} moduleId={parent.id} item={item} onSaved={reload} disabled={disabled} onBlockedChange={setEditBlocked}/>
-  </details>}
-  {author && isFile && <FileEditor session={session} slug={slug} item={item} limits={limits} disabled={disabled} reload={reload} remove={remove}/>}
+  {author && item.kind==="markdown" && <PageEditorDialog open={editing} session={session} slug={slug} moduleId={parent.id} item={item}
+   visibleToStudents={!!parent.publishedAt&&item.publishedAt!==null} disabled={disabled} onSaved={reload} onBlockedChange={setEditBlocked}
+   onDeleted={()=>document.querySelector<HTMLButtonElement>(`#module-${parent.id} .module-collapse`)?.focus({preventScroll:true})}
+   onClose={()=>{setEditing(false);editTrigger.current?.focus();}}/>}
+  {author && isFile && <FileEditorDialog open={editing} session={session} slug={slug} item={item} limits={limits} disabled={disabled} reload={reload} remove={remove}
+   onClose={()=>{setEditing(false);editTrigger.current?.focus();}}/>}
  </li>;
 }
 
@@ -69,8 +71,8 @@ export function ModuleResources({session,slug,parent,author,disabled,course,expa
  const result=useResource(session,`${session.getSnapshot().generation}:${slug}:${parent.courseId}:${parent.id}`,
   c=>listModuleResources(c,slug,parent.id),true);
  const mutation=useContentMutation(session);
- const [panel,setPanel]=useState<"file"|"page"|null>(null),[quizOpen,setQuizOpen]=useState(false);
- const [fileBusy,setFileBusy]=useState(false),[pageBusy,setPageBusy]=useState(false);
+ const [panel,setPanel]=useState<"file"|null>(null),[quizOpen,setQuizOpen]=useState(false),[pageOpen,setPageOpen]=useState(false);
+ const [fileBusy,setFileBusy]=useState(false);
  const trigger=useRef<HTMLButtonElement>(null),panels=useRef<HTMLDivElement>(null);
  const slow=useDelayedFlag(!result.data&&!result.error);
  const closePanel=()=>{setPanel(null);trigger.current?.focus();};
@@ -119,7 +121,7 @@ export function ModuleResources({session,slug,parent,author,disabled,course,expa
   <div className="resource-toolbar"><span className="section-label">Materiales del módulo</span></div>
   {author && <div className="resource-creation">
    <AddContentMenu triggerRef={trigger} disabled={unavailable} onSelect={(action:ContentAction)=>{
-    if (action==="quiz") setQuizOpen(true); else setPanel(action);
+    if (action==="quiz") setQuizOpen(true); else if (action==="page") setPageOpen(true); else setPanel("file");
    }}/>
   </div>}
   {author && <div ref={panels}>
@@ -128,11 +130,8 @@ export function ModuleResources({session,slug,parent,author,disabled,course,expa
      <button type="button" className="btn btn-ghost" aria-label="Cerrar" disabled={fileBusy} onClick={closePanel}><X size={18} aria-hidden="true"/></button></div>
     <FileUploadForm session={session} slug={slug} moduleId={parent.id} limits={limits} disabled={unavailable} reload={result.reload} onBusyChange={setFileBusy} onDone={closePanel}/>
    </section>
-   <section className="resource-panel card" data-panel="page" aria-label="Crear página" hidden={panel!=="page"}>
-    <div className="dialog-heading"><h3>Crear página</h3>
-     <button type="button" className="btn btn-ghost" aria-label="Cerrar" disabled={pageBusy} onClick={closePanel}><X size={18} aria-hidden="true"/></button></div>
-    <MaterialForm session={session} slug={slug} moduleId={parent.id} onSaved={result.reload} disabled={unavailable} onBlockedChange={setPageBusy} onDone={closePanel}/>
-   </section>
+   <PageEditorDialog open={pageOpen} session={session} slug={slug} moduleId={parent.id} disabled={unavailable} onSaved={result.reload}
+    onClose={()=>{setPageOpen(false);trigger.current?.focus();}}/>
    <QuizLinkDialog open={quizOpen} {...row} course={course} items={items} onClose={()=>{setQuizOpen(false);trigger.current?.focus();}}/>
   </div>}
   {!result.error&&!result.refreshing&&!items.length && <EmptyState/>}

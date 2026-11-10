@@ -25,6 +25,7 @@ export const auditActions: Record<string, string> = {
   "material.updated": "Material actualizado",
   "material.published": "Material publicado",
   "material.unpublished": "Material ocultado",
+  "material.deleted": "Página eliminada",
   "quiz.created": "Quiz creado",
   "quiz.updated": "Quiz actualizado",
   "quiz.published": "Quiz publicado",
