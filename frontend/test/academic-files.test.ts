@@ -116,11 +116,13 @@ test("teacher can reorder, rename and remove an independent module file",async()
   assert.ok(ui.doc.querySelector(`a[href$="/quizzes/${quiz.quizId}"]`));
   await ui.settle(()=>ui.doc.querySelector<HTMLButtonElement>('[aria-label="Subir recurso Apuntes"]')!.click());
   assert.ok(ui.requests.some(r=>r.method==="PUT"&&r.url.endsWith("/resources/order")));
-  await ui.submit(".file-rename",{title:"Apuntes corregidos"});
+  await ui.settle(()=>ui.doc.querySelector<HTMLButtonElement>('[aria-label="Editar archivo Apuntes"]')!.click());
+  await ui.submit('form[aria-label="Editar archivo Apuntes"]',{title:"Apuntes corregidos"});
   assert.equal(ui.doc.querySelector(`a[href$="/files/${file.id}"]`)?.textContent,"Apuntes corregidos");
+  await ui.settle(()=>ui.doc.querySelector<HTMLButtonElement>('[aria-label="Editar archivo Apuntes corregidos"]')!.click());
   await ui.click("Eliminar archivo");
-  assert.ok(ui.doc.querySelector("dialog[open]"));
-  await ui.settle(()=>ui.doc.querySelector<HTMLButtonElement>("dialog .btn-danger")!.click());
+  assert.ok(ui.doc.querySelector("dialog.file-delete-dialog[open]"));
+  await ui.settle(()=>ui.doc.querySelector<HTMLButtonElement>("dialog.file-delete-dialog .btn-danger")!.click());
   assert.equal(ui.doc.querySelector(`a[href$="/files/${file.id}"]`),null);
  }finally{await ui.close();}
 });

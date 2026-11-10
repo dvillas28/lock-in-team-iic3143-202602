@@ -9,8 +9,8 @@ import {acceptedFiles,checkSelectedFile,formatBytes,type AcademicFile,type Uploa
 import {useContentNotice} from "./content-notices.tsx";
 import {getRouteFeedback} from "../../lib/route-feedback.ts";
 
-export function FileUploadForm({session,slug,moduleId,item,limits,disabled,reload,onBusyChange,onDone}:{
- session:Session;slug:string;moduleId:string;item?:AcademicFile;limits:UploadLimits;disabled:boolean;reload:()=>Promise<boolean|undefined>;onBusyChange?:(busy:boolean)=>void;onDone?:()=>void;
+export function FileUploadForm({session,slug,moduleId,item,limits,disabled,reload,onBusyChange,onDone,onPendingChange}:{
+ session:Session;slug:string;moduleId:string;item?:AcademicFile;limits:UploadLimits;disabled:boolean;reload:()=>Promise<boolean|undefined>;onBusyChange?:(busy:boolean)=>void;onDone?:()=>void;onPendingChange?:(pending:boolean)=>void;
 }) {
  const [selected,setSelected]=useState<{file:globalThis.File;operation:string}[]>([]);
  const [progress,setProgress]=useState<number>();
@@ -21,6 +21,7 @@ export function FileUploadForm({session,slug,moduleId,item,limits,disabled,reloa
  const input=useRef<HTMLInputElement>(null), running=useRef<AbortController>(null);
  useEffect(()=>()=>{running.current?.abort();running.current=null;},[]);
  useEffect(()=>{onBusyChange?.(busy);},[busy,onBusyChange]);
+ useEffect(()=>{onPendingChange?.(selected.length>0);},[selected.length,onPendingChange]);
  useEffect(()=>{
   if (!selected.length) return;
   function warn(event:BeforeUnloadEvent) {event.preventDefault();event.returnValue=true;}

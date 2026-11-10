@@ -14,7 +14,7 @@ import type {CourseModule} from "../../lib/content/validation.ts";
 import type {Course} from "../../lib/courses/validation.ts";
 import {PublicationToggle} from "./publication-toggle.tsx";
 import {PageEditorDialog} from "./page-editor-dialog.tsx";
-import {FileEditor} from "./file-editor.tsx";
+import {FileEditorDialog} from "./file-editor.tsx";
 import {FileUploadForm} from "./file-upload-form.tsx";
 import {AddContentMenu,type ContentAction} from "./add-content-menu.tsx";
 import {QuizLinkDialog} from "./quiz-link-dialog.tsx";
@@ -49,7 +49,7 @@ function ResourceRow({session,slug,parent,item,author,disabled,reload,limits,pre
    {author && <div className="module-tools resource-controls">
     {item.kind!=="quiz" && <PublicationToggle session={session} slug={slug} kind={isFile?"file":"material"} id={item.id}
      parentId={parent.id} title={item.title} published={item.publishedAt!==null} onSaved={reload} disabled={disabled||editBlocked}/>}
-    {item.kind==="markdown"&&<button ref={editTrigger} type="button" className="btn btn-ghost" aria-label={`Editar página ${item.title}`} disabled={disabled} onClick={()=>setEditing(true)}><Pencil size={14} aria-hidden="true"/>Editar</button>}
+    {(item.kind==="markdown"||isFile)&&<button ref={editTrigger} type="button" className="btn btn-ghost" aria-label={`${isFile?"Editar archivo":"Editar página"} ${item.title}`} disabled={disabled} onClick={()=>setEditing(true)}><Pencil size={14} aria-hidden="true"/>Editar</button>}
     <button type="button" className="icon-btn" aria-label={`Subir recurso ${item.title}`} aria-disabled={disabled||!previous}
      onClick={()=>{if(previous&&!disabled) move(item.id,previous,-1);}}><ArrowUp size={16} aria-hidden="true"/></button>
     <button type="button" className="icon-btn" aria-label={`Bajar recurso ${item.title}`} aria-disabled={disabled||!next}
@@ -62,7 +62,8 @@ function ResourceRow({session,slug,parent,item,author,disabled,reload,limits,pre
    visibleToStudents={!!parent.publishedAt&&item.publishedAt!==null} disabled={disabled} onSaved={reload} onBlockedChange={setEditBlocked}
    onDeleted={()=>document.querySelector<HTMLButtonElement>(`#module-${parent.id} .module-collapse`)?.focus({preventScroll:true})}
    onClose={()=>{setEditing(false);editTrigger.current?.focus();}}/>}
-  {author && isFile && <FileEditor session={session} slug={slug} item={item} limits={limits} disabled={disabled} reload={reload} remove={remove}/>}
+  {author && isFile && <FileEditorDialog open={editing} session={session} slug={slug} item={item} limits={limits} disabled={disabled} reload={reload} remove={remove}
+   onClose={()=>{setEditing(false);editTrigger.current?.focus();}}/>}
  </li>;
 }
 

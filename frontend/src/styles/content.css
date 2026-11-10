@@ -193,3 +193,7 @@
 .discard-confirm p { margin: 0; }
 .discard-confirm .actions { justify-content: flex-end; }
 .page-editor-dialog .dialog-actions .page-delete { margin-right: auto; }
+.page-editor-dialog .file-replace { padding-top: 16px; border-top: 1px solid var(--border); }
+.page-editor-dialog .file-replace h3 { margin: 0; font-size: 16px; }
+.page-editor-dialog .file-drop { min-width: 0; }
+.page-editor-dialog .file-drop input[type="file"] { max-width: 100%; min-width: 0; }

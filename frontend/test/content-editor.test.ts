@@ -464,3 +464,89 @@ test("only editors get a delete action; students and assistants never see it",as
   try{await ui.click("Unidad 1");assert.doesNotMatch(ui.doc.body.textContent!,/Eliminar página/);assert.equal(ui.doc.querySelector("dialog.file-delete-dialog"),null);}finally{await ui.close();}
  }
 });
+const pdf={kind:"file" as const,id:id(90),moduleId:unit.id,title:"Guía de estudio",position:2,publishedAt:null as string|null,createdBy:id(1),byteSize:2048,fileName:"guia.pdf",mediaType:"application/pdf",preview:"pdf" as const};
+const filesServer=(mode:"ok"|"lost"="ok")=>{let renamed="Guía de estudio",gone=false;return async(r:Request)=>{
+ if(r.method==="PATCH"&&r.url.endsWith(`/materials/${pdf.id}/file`)){if(mode==="lost")throw new Error("lost");renamed=(await r.clone().json()).title;return Response.json({...pdf,title:renamed});}
+ if(r.method==="DELETE"){gone=true;return new Response(null,{status:204});}
+ if(r.url.endsWith("/resources"))return Response.json({...resources(),items:gone?[]:[{...pdf,title:renamed}]});
+ return Response.json(r.url.endsWith("/modules")?{items:[unit]}:course);
+};};
+const openFile=async(ui:{doc:Document;click:(t:string)=>Promise<void>;settle:(a:()=>void)=>Promise<void>})=>{
+ await ui.click("Unidad 1");
+ await ui.settle(()=>ui.doc.querySelector<HTMLButtonElement>('button[aria-label="Editar archivo Guía de estudio"]')!.click());await ui.settle(()=>{});
+ return ui.doc.querySelector<HTMLFormElement>('form[aria-label="Editar archivo Guía de estudio"]')!.closest("dialog")! as HTMLDialogElement;
+};
+test("files use the same edit button and modal as pages instead of the old disclosure",async()=>{
+ const ui=await mount(view(),filesServer(),"teacher");
+ try{
+  await ui.click("Unidad 1");
+  assert.doesNotMatch(ui.doc.body.textContent!,/Administrar archivo/);
+  assert.equal(ui.doc.querySelector(".resource-editor"),null);
+  const dialog=await openFile(ui);
+  assert.ok(dialog.hasAttribute("open"));
+  assert.equal(dialog.querySelector("h2")!.textContent,"Editar archivo");
+  const field=dialog.querySelector<HTMLInputElement>('input[name="title"]')!;
+  assert.equal(field.value,"Guía de estudio");
+  const save=Array.from(dialog.querySelectorAll<HTMLButtonElement>('button[type="submit"]')).find(b=>b.textContent==="Guardar cambios")!;
+  assert.equal(save.disabled,true,"nothing changed yet");
+  await typeInto(ui,field,"Guía final");assert.equal(save.disabled,false);
+  await typeInto(ui,field,"Guía de estudio");assert.equal(save.disabled,true,"back to the original");
+  await typeInto(ui,field,"  ");assert.equal(save.disabled,true);
+  await ui.settle(()=>fire(ui,field,"focusout"));assert.match(dialog.querySelector(".field-error")!.textContent!,/Ingresa un nombre/);
+  assert.ok(dialog.querySelector("input[type=file]"),"replace upload lives in the modal");
+  assert.ok(Array.from(dialog.querySelectorAll("button")).some(b=>b.textContent==="Eliminar archivo"));
+ }finally{await ui.close();}
+});
+test("renaming a file saves, refreshes the list, notifies and closes",async()=>{
+ const ui=await mount(view(),filesServer(),"teacher");
+ try{
+  const dialog=await openFile(ui);
+  await typeInto(ui,dialog.querySelector<HTMLInputElement>('input[name="title"]')!,"  Guía final  ");
+  await ui.submit('form[aria-label="Editar archivo Guía de estudio"]');
+  await ui.settle(()=>{});
+  const patch=ui.requests.find(r=>r.method==="PATCH"&&r.url.endsWith("/file"))!;
+  assert.deepEqual(await patch.clone().json(),{title:"Guía final"});
+  assert.equal(ui.doc.querySelector('form[aria-label="Editar archivo Guía de estudio"]'),null,"modal closes");
+  assert.ok(ui.doc.querySelector('button[aria-label="Editar archivo Guía final"]'),"list shows the new name");
+  assert.equal(ui.doc.querySelector(".content-notice")?.textContent,"Nombre actualizado.");
+ }finally{await ui.close();}
+});
+test("an uncertain rename keeps the modal open and never repeats the write",async()=>{
+ const ui=await mount(view(),filesServer("lost"),"teacher");
+ try{
+  const dialog=await openFile(ui);
+  await typeInto(ui,dialog.querySelector<HTMLInputElement>('input[name="title"]')!,"Guía final");
+  await ui.submit('form[aria-label="Editar archivo Guía de estudio"]');await ui.settle(()=>{});
+  assert.ok(dialog.hasAttribute("open"));assert.match(dialog.textContent!,/Resultado incierto/);assert.equal(ui.doc.querySelector(".content-notice"),null);
+  await ui.submit('form[aria-label="Editar archivo Guía de estudio"]');
+  assert.equal(ui.requests.filter(r=>r.method==="PATCH").length,1);
+ }finally{await ui.close();}
+});
+test("deleting a file asks for confirmation, removes it and notifies; unsaved changes ask before discarding",async()=>{
+ const ui=await mount(view(),filesServer(),"teacher");
+ try{
+  let dialog=await openFile(ui);
+  const confirm=dialog.querySelector<HTMLDialogElement>("dialog.file-delete-dialog")!;
+  const button=(root:Element,text:string,outside?:Element)=>Array.from(root.querySelectorAll<HTMLButtonElement>("button")).find(b=>b.textContent===text&&!(outside?.contains(b)))!;
+  await typeInto(ui,dialog.querySelector<HTMLInputElement>('input[name="title"]')!,"Cambio sin guardar");
+  await ui.settle(()=>button(dialog,"Cancelar",confirm).click());
+  assert.match(dialog.textContent!,/cambios sin guardar/);assert.ok(dialog.hasAttribute("open"));
+  await ui.settle(()=>button(dialog,"Descartar cambios").click());
+  assert.equal(ui.doc.querySelector('form[aria-label="Editar archivo Guía de estudio"]'),null);
+  assert.equal(ui.requests.filter(r=>r.method==="PATCH").length,0,"discarding sends nothing");
+  dialog=await openFile(ui);
+  const modal=dialog.querySelector<HTMLDialogElement>("dialog.file-delete-dialog")!;
+  await ui.settle(()=>button(dialog,"Eliminar archivo",modal).click());
+  assert.ok(modal.hasAttribute("open"));assert.match(modal.textContent!,/Se retirará «Guía de estudio» del módulo/);
+  assert.equal(ui.requests.some(r=>r.method==="DELETE"),false);
+  await ui.settle(()=>button(modal,"Eliminar archivo").click());await ui.settle(()=>{});
+  const deleted=ui.requests.filter(r=>r.method==="DELETE");
+  assert.equal(deleted.length,1);assert.ok(deleted[0].url.endsWith(`/materials/${pdf.id}/file`));
+  assert.equal(ui.doc.querySelector('button[aria-label="Editar archivo Guía de estudio"]'),null,"list refreshed without the file");
+  assert.equal(ui.doc.querySelector(".content-notice")?.textContent,"Archivo eliminado.");
+ }finally{await ui.close();}
+});
+test("students never get an edit action for files",async()=>{
+ const ui=await mount(view(),r=>Response.json(r.url.endsWith("/resources")?{...resources(),items:[{...pdf,publishedAt:"2026-10-31T00:00:00Z"}]}:r.url.endsWith("/modules")?{items:[{...unit,publishedAt:"2026-10-31T00:00:00Z"}]}:course),"student");
+ try{await ui.click("Unidad 1");assert.equal(ui.doc.querySelector('button[aria-label^="Editar archivo"]'),null);assert.equal(ui.doc.querySelector("dialog"),null);}finally{await ui.close();}
+});
