@@ -35,6 +35,15 @@ export class MaterialsService {
    return after;
   });
  }
+ async remove(actor:string,slug:string,id:string) {
+  return this.db.withInstitution(actor,slug,async c=>{
+   // Same scope, visibility and teacher checks as editing; file and quiz resources keep their own endpoints (404 here).
+   const s=await contentScope(c,actor,slug,id,"material"),row=await visibleMaterial(c,s,id);requirePermission(s.teacher);
+   const before=materialDto(row);
+   await c.query("DELETE FROM public.materials WHERE institution_id=$1 AND id=$2",[s.member.institution_id,id]);
+   await this.audit.record(c,{institutionId:s.member.institution_id,actorUserId:actor,action:"material.deleted",resourceType:"material",resourceId:id,courseId:s.courseId,before,after:null});
+  });
+ }
  async get(actor:string,slug:string,id:string) {
   return this.db.withInstitution(actor,slug,async c=>{const s=await contentScope(c,actor,slug,id,"material");return materialDto(await visibleMaterial(c,s,id));});
  }

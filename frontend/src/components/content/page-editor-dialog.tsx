@@ -5,7 +5,7 @@ import { useSession } from "../auth/session-provider.tsx";
 import type { Session } from "../../lib/auth/session.ts";
 import { markdown, title as checkTitle, type Material } from "../../lib/content/validation.ts";
 import { pageChanged, pageErrors, pageRoom, type PageValues } from "../../lib/content/page-validation.ts";
-import { createMarkdownMaterial, updateMaterial } from "../../lib/api/materials.ts";
+import { createMarkdownMaterial, deleteMaterial, updateMaterial } from "../../lib/api/materials.ts";
 import { useContentMutation } from "./content-notices.tsx";
 import { canEditVisually } from "../../lib/content/markdown-html.ts";
 import { MarkdownEditor } from "./markdown-editor.tsx";
@@ -13,14 +13,14 @@ import { VisualMarkdownEditor } from "./visual-markdown-editor.tsx";
 
 type Props = {
   session: Session; slug: string; moduleId: string; item?: Material; visibleToStudents?: boolean; disabled: boolean;
-  onSaved: () => Promise<boolean | undefined>; onClose: () => void; onBlockedChange?: (blocked: boolean) => void;
+  onSaved: () => Promise<boolean | undefined>; onClose: () => void; onBlockedChange?: (blocked: boolean) => void; onDeleted?: () => void;
 };
 const LOW_ROOM = 500;
 
-function Editor({ session, slug, moduleId, item, visibleToStudents, disabled, onSaved, onClose, onBlockedChange }: Props) {
+function Editor({ session, slug, moduleId, item, visibleToStudents, disabled, onSaved, onClose, onBlockedChange, onDeleted }: Props) {
   const mutation = useContentMutation(session);
   const accessWarning = !!useSession().state.contextWarning;
-  const dialog = useRef<HTMLDialogElement>(null), modal = useRef(true), name = useRef<HTMLInputElement>(null);
+  const dialog = useRef<HTMLDialogElement>(null), confirmation = useRef<HTMLDialogElement>(null), modal = useRef(true), name = useRef<HTMLInputElement>(null);
   const ids = { heading: useId(), title: useId(), body: useId(), bodyLabel: useId() };
   const original: PageValues | undefined = item && { title: item.title, markdownBody: item.markdownBody };
   const [values, setValues] = useState<PageValues>(original ?? { title: "", markdownBody: "" });
@@ -86,6 +86,22 @@ function Editor({ session, slug, moduleId, item, visibleToStudents, disabled, on
       return "Se consultó el estado. Las coincidencias no prueban el origen de este envío ni su ausencia.";
     });
   }
+  async function remove() {
+    confirmation.current?.close();
+    if (!item || locked) return;
+    await mutation.run(async current => {
+      await session.request(c => deleteMaterial(c, slug, item.id, moduleId), current);
+      if (!current()) return;
+      const refreshed = await onSaved();
+      if (refreshed) onDeleted?.();
+      return refreshed ? "Página eliminada." : { message: "Página eliminada. No se pudo actualizar la consulta; reintenta solo la lectura.", persistent: true };
+    }, async current => {
+      if (!current()) return "Contexto cambiado.";
+      const refreshed = await onSaved();
+      if (!refreshed) return "No se pudo actualizar la consulta. Revisión manual pendiente.";
+      return "Se consultó el estado. Revisa si la página sigue en el módulo antes de repetir la operación.";
+    });
+  }
   const roomHint = room >= 0 && room <= LOW_ROOM ? `Quedan unos ${room} caracteres disponibles.` : undefined;
   return <dialog ref={dialog} className="modal native-dialog academic-dialog page-editor-dialog" aria-labelledby={ids.heading}
     onCancel={event => { event.preventDefault(); requestClose(); }}>
@@ -124,10 +140,22 @@ function Editor({ session, slug, moduleId, item, visibleToStudents, disabled, on
         <div className="actions"><button type="button" className="btn btn-ghost" onClick={() => setConfirming(false)}>Seguir editando</button>
           <button type="button" className="btn btn-danger" onClick={onClose}>Descartar cambios</button></div></div>}
       <div className="actions dialog-actions">
+        {item && <button type="button" className="btn btn-danger page-delete" disabled={locked} onClick={() => confirmation.current?.showModal()}>Eliminar página</button>}
         <button type="button" className="btn btn-ghost" disabled={mutation.busy} onClick={requestClose}>Cancelar</button>
         <button type="submit" className="btn btn-primary" disabled={locked || !dirty || !!errors.title || !!errors.markdownBody}>{item ? "Guardar cambios" : "Crear página"}</button>
       </div>
     </form>
+    {item && <dialog className="modal native-dialog file-delete-dialog" ref={confirmation} aria-labelledby={`${ids.heading}-delete`}>
+      <div className="stack">
+        <h2 className="serif" id={`${ids.heading}-delete`}>Eliminar página</h2>
+        <p>Se eliminará «{item.title}» del módulo. Esta acción no se puede deshacer.</p>
+        {visibleToStudents && <p className="hint">Los estudiantes dejarán de verla.</p>}
+        <form method="dialog" className="actions">
+          <button type="submit" className="btn btn-ghost">Volver</button>
+          <button type="button" className="btn btn-danger" onClick={() => void remove()}>Eliminar página</button>
+        </form>
+      </div>
+    </dialog>}
   </dialog>;
 }
 

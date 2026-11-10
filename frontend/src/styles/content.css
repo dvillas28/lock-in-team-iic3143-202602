@@ -192,3 +192,4 @@
 .discard-confirm { display: grid; gap: 12px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); }
 .discard-confirm p { margin: 0; }
 .discard-confirm .actions { justify-content: flex-end; }
+.page-editor-dialog .dialog-actions .page-delete { margin-right: auto; }

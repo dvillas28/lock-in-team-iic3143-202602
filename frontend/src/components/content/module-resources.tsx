@@ -60,6 +60,7 @@ function ResourceRow({session,slug,parent,item,author,disabled,reload,limits,pre
   </div>
   {author && item.kind==="markdown" && <PageEditorDialog open={editing} session={session} slug={slug} moduleId={parent.id} item={item}
    visibleToStudents={!!parent.publishedAt&&item.publishedAt!==null} disabled={disabled} onSaved={reload} onBlockedChange={setEditBlocked}
+   onDeleted={()=>document.querySelector<HTMLButtonElement>(`#module-${parent.id} .module-collapse`)?.focus({preventScroll:true})}
    onClose={()=>{setEditing(false);editTrigger.current?.focus();}}/>}
   {author && isFile && <FileEditor session={session} slug={slug} item={item} limits={limits} disabled={disabled} reload={reload} remove={remove}/>}
  </li>;

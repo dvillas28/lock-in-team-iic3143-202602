@@ -416,3 +416,51 @@ test("visual editor toolbar sends block, inline and list commands and keeps form
  }finally{await ui.close();}
 });
 
+const deletable=(mode:"ok"|"forbidden"|"lost")=>{let gone=false;return async(r:Request)=>{
+ if(r.method==="DELETE"){if(mode==="forbidden")return Response.json({},{status:403});if(mode==="lost")throw new Error("lost");gone=true;return new Response(null,{status:204});}
+ return Response.json(r.url.endsWith("/resources")?resources(...(gone?[]:[material])):r.url.endsWith("/modules")?{items:[unit]}:course);
+};};
+test("deleting a page asks for confirmation, then removes it, refreshes the list and notifies",async()=>{
+ const ui=await mount(view(),deletable("ok"),"teacher");
+ try{
+  await ui.click("Unidad 1");await openEditPage(ui);
+  const dialog=ui.doc.querySelector(editForm())!.closest("dialog")!;
+  const confirm=dialog.querySelector<HTMLDialogElement>("dialog.file-delete-dialog")!;
+  assert.equal(confirm.hasAttribute("open"),false);
+  await ui.settle(()=>Array.from(dialog.querySelectorAll<HTMLButtonElement>("button")).find(b=>b.textContent==="Eliminar página"&&!confirm.contains(b))!.click());
+  assert.ok(confirm.hasAttribute("open"));assert.match(confirm.textContent!,/Se eliminará «Lectura» del módulo/);
+  assert.equal(ui.requests.some(r=>r.method==="DELETE"),false,"nothing is deleted before confirming");
+  await ui.settle(()=>Array.from(confirm.querySelectorAll<HTMLButtonElement>("button")).find(b=>b.textContent==="Volver")!.click());
+  await ui.settle(()=>Array.from(dialog.querySelectorAll<HTMLButtonElement>("button")).find(b=>b.textContent==="Eliminar página"&&!confirm.contains(b))!.click());
+  await ui.settle(()=>Array.from(confirm.querySelectorAll<HTMLButtonElement>("button")).find(b=>b.textContent==="Eliminar página")!.click());
+  await ui.settle(()=>{});
+  const deleted=ui.requests.filter(r=>r.method==="DELETE");
+  assert.equal(deleted.length,1);assert.ok(deleted[0].url.endsWith(`/materials/${material.id}`));
+  assert.equal(ui.doc.querySelector(editForm()),null,"editor closes");
+  assert.equal(ui.doc.querySelector(`button[aria-label="Editar página Lectura"]`),null,"the list refreshed without the page");
+  assert.equal(ui.doc.querySelector(".content-notice")?.textContent,"Página eliminada.");
+ }finally{await ui.close();}
+});
+test("a failed or uncertain deletion keeps the page and the editor open without a success notice",async()=>{
+ for(const mode of ["forbidden","lost"] as const){
+  const ui=await mount(view(),deletable(mode),"teacher");
+  try{
+   await ui.click("Unidad 1");await openEditPage(ui);
+   const dialog=ui.doc.querySelector(editForm())!.closest("dialog")!,confirm=dialog.querySelector<HTMLDialogElement>("dialog.file-delete-dialog")!;
+   await ui.settle(()=>Array.from(dialog.querySelectorAll<HTMLButtonElement>("button")).find(b=>b.textContent==="Eliminar página"&&!confirm.contains(b))!.click());
+   await ui.settle(()=>Array.from(confirm.querySelectorAll<HTMLButtonElement>("button")).find(b=>b.textContent==="Eliminar página")!.click());
+   await ui.settle(()=>{});
+   assert.ok(ui.doc.querySelector(editForm()),"editor stays open");
+   assert.equal(ui.doc.querySelector(".content-notice"),null);
+   assert.ok(ui.doc.querySelector(`button[aria-label="Editar página Lectura"]`),"the page is still listed");
+   assert.match(dialog.textContent!,mode==="lost"?/Resultado incierto/:/Revisa|permiso|acceso|solicitud/i);
+   if(mode==="lost")assert.equal(ui.requests.filter(r=>r.method==="DELETE").length,1);
+  }finally{await ui.close();}
+ }
+});
+test("only editors get a delete action; students and assistants never see it",async()=>{
+ for(const profile of ["student","assistant"]){
+  const ui=await mount(view(),r=>Response.json(r.url.endsWith("/resources")?resources({...material,publishedAt:"2026-10-31T00:00:00Z"}):r.url.endsWith("/modules")?{items:[{...unit,publishedAt:"2026-10-31T00:00:00Z"}]}:course),profile);
+  try{await ui.click("Unidad 1");assert.doesNotMatch(ui.doc.body.textContent!,/Eliminar página/);assert.equal(ui.doc.querySelector("dialog.file-delete-dialog"),null);}finally{await ui.close();}
+ }
+});
