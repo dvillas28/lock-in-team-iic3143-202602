@@ -3,7 +3,7 @@
 La [issue #249](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/249)
 parte del libro de notas por grupos de la [issue #248](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/248).
 La [issue #250](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/250)
-cubrirá las entregas, S3, el registro de intentos, la corrección y las notas de tareas.
+describe [CU-24 y CU-25](assignment-submissions.md) para entregas, revisión y calificación.
 
 | Caso de uso | Actor y resultado | Trazabilidad |
 | --- | --- | --- |
@@ -19,7 +19,8 @@ cubrirá las entregas, S3, el registro de intentos, la corrección y las notas d
   Una edición de destinatarios exige autorización sobre el origen y el destino.
 - El estudiante ve publicadas de todo el curso o de sus secciones activas.
   Puede leer instrucciones antes de la apertura y después del cierre.
-  Ocultar una tarea retira el acceso estudiantil de inmediato.
+  Ocultar una tarea retira su detalle y bloquea envíos. El acceso autenticado
+  a archivos propios ya entregados se conserva mientras siga autorizada la matrícula.
 - El historial registra creación, edición, publicación y ocultamiento con actor,
   curso, sección y cambios. La clave de idempotencia permite reintentos con el mismo cuerpo y
   está acotada a institución, curso y autor. El servidor genera el ID de la tarea. La versión protege contra ediciones concurrentes incompatibles.
@@ -29,13 +30,12 @@ cubrirá las entregas, S3, el registro de intentos, la corrección y las notas d
 La UI usa `America/Santiago` y la API recibe instantes UTC con sufijo `Z`.
 El formulario rechaza una hora local inexistente y permite elegir la primera
 o segunda ocurrencia de una hora repetida. Si se informan fechas, su orden es
-apertura, entrega y cierre. Para crear o cambiar un plazo anterior al reloj del servidor se requiere
-confirmación explícita. Editar otros campos conserva un plazo histórico
-sin volver a pedir confirmación.
+apertura, entrega y cierre. El servidor rechaza crear o cambiar un plazo a una fecha pasada. Editar
+otros campos conserva un plazo histórico.
 
 La apertura es inclusiva y el atraso comienza después del plazo. Se admite
-un periodo de atraso cuando se define un cierre posterior. A falta de cierre
-explícito, rige el plazo si existe. Una tarea sin ambos campos queda sin cierre.
+un periodo de atraso hasta el cierre. Si no se configura un cierre, el
+plazo de entrega solo marca el inicio del atraso.
 Los formatos se guardan como extensiones normalizadas y el límite nulo de
 intentos representa intentos ilimitados.
 
