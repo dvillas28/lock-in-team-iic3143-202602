@@ -13,14 +13,14 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Evidencia: [courses.service.ts](../../../backend/src/courses/courses.service.ts); [course-directory.tsx](../../../frontend/src/components/courses/course-directory.tsx); [course-form.tsx](../../../frontend/src/components/courses/course-form.tsx).
 - Objetivo: Mis cursos refleja usuario tenant y periodo; verificar las aserciones siguientes, sin inferir éxito solo por carga.
 - Prioridad / criticidad: P1 / Alta; categorías: happy,consistencia.
-- Rol / institución: ST1; T1; AO; UC por defecto, UTFSM en escenarios cruzados según pasos.
+- Rol / institución: ST1; AS1; T1; AO; UC por defecto, UTFSM en escenarios cruzados según pasos.
 - Precondiciones / fixtures: BASE; [diccionario](../E2E_TEST_DATA.md); manifest validado y namespace exclusivo.
 - Entrada / operación: `/courses; /courses/{C1}`; `listCourses; getCourse; listSections`; [inventario](../audit/API.md).
 - Preparación: resolver variables del manifest; actor de UI hace login real en origen institucional (ANON no); navegar por Link tras login, salvo reload explícito.
 
 1. Login cada actor UC.
 2. Comparar tarjetas con manifest permitido.
-3. Abrir C1 y breadcrumbs/resumen.
+3. Verificar secciones y roles propios en las tarjetas; abrir C1 en módulos y comprobar la redirección desde la ruta antigua.
 
 - Interfaz esperada: Código/nombre/term exactos; no C3/F1; roles del curso actual.
 - API esperada: GET courses solo ownership o Enrollment activo; detalle createdBy correcto.

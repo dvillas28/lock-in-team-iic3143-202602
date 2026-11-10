@@ -45,7 +45,7 @@ test('E2E-CONTENT-006 repeated edit order and publication are no-ops / no-op @re
 });
 for(const actor of ['T1','AS1','ST1'])test(`E2E-CONTENT-007 empty course and draft module visibility follow role / ${actor} @regression`,async ({e,actorPage})=>{
  const c=e.data.courses.CEMPTY;if(actor==='AS1')status(await (await e.api('AO')).post(`sections/${e.data.sections.SEMPTY}/enrollments`,{userId:e.data.actors.AS1.id,role:'assistant'}),201);
- const page=await actorPage(actor),api=await e.api(actor);await go(page,c,'/modules');await expect(page.getByRole('heading',{name:'Sin contenido para mostrar',exact:true})).toBeVisible();const created=status(await (await e.api('T1')).post(`courses/${c}/modules`,{title:'Only draft',position:1}),201).body,before=await securitySnapshot(e);
+ const page=await actorPage(actor),api=await e.api(actor);await go(page,c,'/modules');await expect(page.getByRole('heading',{name:'Aún no hay módulos disponibles',exact:true})).toBeVisible();const created=status(await (await e.api('T1')).post(`courses/${c}/modules`,{title:'Only draft',position:1}),201).body,before=await securitySnapshot(e);
  await returnToCourse(page);status(await api.get(`modules/${created.id}`),actor==='T1'?200:404);expect(status(await api.get(`courses/${c}/modules`),200).body.items.map((r:any)=>r.id)).toEqual(actor==='T1'?[created.id]:[]);if(actor==='T1')await expect(page.getByRole('button',{name:'Only draft',exact:true})).toBeVisible();else await expect(page.getByRole('button',{name:'Only draft',exact:true})).toHaveCount(0);expect(await securitySnapshot(e)).toEqual(before);
 });
 test('E2E-CONTENT-008 UI Markdown authoring publication and fresh student reading persist / markdown-editor @smoke',async ({e,actorPage})=>{

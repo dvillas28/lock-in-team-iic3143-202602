@@ -46,7 +46,7 @@ export async function course(page: Page, id: string) {
     if (new URL(page.url()).pathname !== '/courses') {
       await showMenu(page); await page.getByRole('link',{name:'Mis cursos',exact:true}).click();
     }
-    await page.locator(`a[href="/courses/${id}"]`).filter({has:page.getByRole('heading')}).click();
+    await page.locator(`a[href="/courses/${id}/modules"]`).filter({has:page.getByRole('heading')}).click();
   }
   await expect(page).toHaveURL(new RegExp(`/courses/${id}(?:/|$)`));
   await expect(page.getByRole('navigation',{name:'Curso',exact:true})).toBeVisible();
@@ -70,7 +70,7 @@ export async function go(page: Page, id: string, suffix = '') {
 export async function compatibilityNavigate(page: Page, path: string) {
   if (!path.startsWith('/') || path.startsWith('//') || path.includes('://')) throw new Error('Compatibility navigation must stay on the current origin');
   const target = new URL(path,page.url());
-  const arrived = page.waitForURL(url=>url.pathname===target.pathname && url.search===target.search);
+  const arrived = page.waitForURL(url=>(url.pathname===target.pathname || /^\/courses\/[^/]+$/.test(target.pathname) && url.pathname===target.pathname+'/modules') && url.search===target.search);
   await page.evaluate(path => {
     const app = window as unknown as {next?: {router?: {push(path: string): void}}};
     if (!app.next?.router) throw new Error('Next router unavailable');

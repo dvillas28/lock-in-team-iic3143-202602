@@ -1,7 +1,7 @@
 import type {CaseVariant} from './case-variants.ts';
 const v=(name:string,actor='AO',level:CaseVariant['level']='browser',smoke=false):CaseVariant=>({name,actor,level,tenant:'uc',projects:smoke?['chromium','firefox','webkit']:['chromium']});
 export const phaseFour:Record<string,readonly CaseVariant[]>={
- 'E2E-COURSE-001':['ST1','T1','AO'].map(a=>v(a,a,'browser',true)),
+ 'E2E-COURSE-001':['ST1','AS1','T1','AO'].map(a=>v(a,a,'browser',true)),
  'E2E-COURSE-002':[v('empty','MEMBER')],
  'E2E-COURSE-003':['malformed','missing'].map(n=>v(n,'ST1')),
  'E2E-COURSE-004':[v('revoked','ST1')],
