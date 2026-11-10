@@ -28,8 +28,12 @@ GradeItem:
       type: string
       format: uuid
       readOnly: true
-    quizId:
+    assignmentId:
       type: string
+      format: uuid
+      readOnly: true
+    quizId:
+      type: [string, 'null']
       format: uuid
       readOnly: true
     title:
@@ -49,7 +53,7 @@ GradeItem:
       format: uuid
     maxPoints:
       type: number
-      exclusiveMinimum: 0
+      minimum: 0
 
 GradeItemListResponse:
   type: object

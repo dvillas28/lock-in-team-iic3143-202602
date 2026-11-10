@@ -48,6 +48,7 @@ export function configuration(form: FormData, original?: Authoring): Update {
   };
   const instructions = formValue(form, "instructions"), attempts = formValue(form, "maxAttempts");
   return {
+    ...(form.has("groupId") ? { groupId:formValue(form,"groupId") || null } : {}),
     title: formValue(form, "title"), sectionId: formValue(form, "sectionId") || null,
     instructions: original?.instructions === null && instructions === "" ? null : instructions,
     opensAt: date("opensAt"), closesAt: date("closesAt"),

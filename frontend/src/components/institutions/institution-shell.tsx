@@ -1,5 +1,5 @@
 "use client";
-import { BookOpen, ChevronRight, ClipboardList, FolderOpen, GraduationCap, Home, Menu, Moon, Sun, X, UserRound, Users } from "lucide-react";
+import { BookOpen, ChevronRight, ClipboardList, FileText, FolderOpen, GraduationCap, Home, Menu, Moon, Sun, X, UserRound, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { CurrentUser } from "../../lib/auth/validation.ts";
@@ -34,6 +34,8 @@ function pageTitle(pathname: string) {
     if (pathname.endsWith('/authoring')) {
         return 'Autoría y pauta';
     }
+    if (pathname.includes('/assignments/')) return 'Detalle de la tarea';
+    if (pathname.endsWith('/assignments')) return 'Tareas';
     if (pathname.includes('/quizzes/')) {
         return 'Detalle del quiz';
     }
@@ -101,6 +103,8 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, av
           {user && (user.institutionMembership.isAdmin || user.institutionMembership.isSuperAdmin) && <Link href="/admin/users" className={`nav-item${pathname === '/admin/users' ? ' active' : ''}`} aria-current={pathname === '/admin/users' ? 'page' : undefined} onClick={()=>setMenuOpen(false)}><Users size={16} aria-hidden="true"/>Usuarios institucionales</Link>}
           {base && <><p className="nav-section-label">Curso actual</p>{[
             [base, 'Resumen del curso', BookOpen], [base + '/modules', 'Módulos y material', FolderOpen], [base + '/quizzes', 'Quizzes', ClipboardList],
+            ...(user?.sectionMemberships.some(m => `/courses/${m.courseId}` === base && ['teacher','student'].includes(m.role))
+              ? [[base + '/assignments', 'Tareas', FileText]] : []),
           ].map(([href, label, Icon]) => {
             const target = href as string, active = pathname === target || target !== base && pathname.startsWith(target + '/');
             const Glyph = Icon as typeof Home;
@@ -119,6 +123,7 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, av
             <ChevronRight size={14} aria-hidden="true"/>
             <Link href={homePath} aria-current={pathname === homePath ? "page" : undefined}>Cursos</Link>
             {base && pathname !== base && <><ChevronRight size={14} aria-hidden="true"/><Link href={base}>Curso</Link></>}
+            {base && pathname.includes('/assignments/') && <><ChevronRight size={14} aria-hidden="true"/><Link href={base + '/assignments'}>Tareas</Link></>}
             {base && pathname.includes('/quizzes/') && <><ChevronRight size={14} aria-hidden="true"/><Link href={base + '/quizzes'}>Quizzes</Link></>}
             {base && (pathname.includes('/materials/') || pathname.includes('/files/')) && <><ChevronRight size={14} aria-hidden="true"/><Link href={base + '/modules'}>Módulos</Link></>}
             {base && pathname.includes('/attempts/') && <><ChevronRight size={14} aria-hidden="true"/><Link href={pathname.split('/attempts/')[0] + '/attempts'}>Intentos</Link></>}

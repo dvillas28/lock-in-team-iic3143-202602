@@ -1932,6 +1932,122 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/institution/{institutionSlug}/courses/{courseId}/assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Listar tareas visibles
+         * @description Solo las publicadas se muestran a estudiantes con matrícula activa en el alcance, incluso antes de la apertura.
+         */
+        get: operations["listAssignments"];
+        put?: never;
+        /**
+         * Crear tarea como borrador o publicada
+         * @description Con publish=true se crea y publica en la misma transacción. El mismo actor puede repetir el UUID con el cuerpo original. Las fechas son instantes UTC con sufijo Z y cumplen apertura ≤ entrega ≤ cierre cuando están definidas. Una fecha de entrega anterior al reloj del servidor devuelve 422 con ASSIGNMENT_DUE_DATE_IN_PAST.
+         */
+        post: operations["createAssignment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                courseId: components["parameters"]["CourseId"];
+                assignmentId: string;
+            };
+            cookie?: never;
+        };
+        /** Consultar tarea visible */
+        get: operations["getAssignment"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Editar tarea dentro del alcance docente
+         * @description Requiere permiso sobre origen y destino. Con publish=true se aplican los cambios y se publica en la misma transacción. Una edición concurrente incompatible devuelve 409. Acepta instantes UTC con sufijo Z. Cambiar el plazo a un instante pasado devuelve 422 con ASSIGNMENT_DUE_DATE_IN_PAST; un plazo histórico sin cambios se conserva.
+         */
+        patch: operations["updateAssignment"];
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}/visibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                courseId: components["parameters"]["CourseId"];
+                assignmentId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Publicar u ocultar tarea
+         * @description Publicar permite la consulta de estudiantes autorizados. Ocultar revoca esa visibilidad. Repetir el mismo estado es idempotente.
+         */
+        patch: operations["setAssignmentVisibility"];
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/courses/{courseId}/evaluation-groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        /** Consultar grupos disponibles para la autoría docente */
+        get: operations["listEvaluationGroups"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2337,6 +2453,8 @@ export interface components {
             alternatives: components["schemas"]["AlternativeInput"][];
         };
         QuizCreate: {
+            /** Format: uuid */
+            groupId?: string | null;
             /**
              * Format: uuid
              * @description Null crea un quiz de alcance de curso dentro del alcance docente.
@@ -2367,6 +2485,8 @@ export interface components {
             alternatives: components["schemas"]["AlternativeAuthoring"][];
         };
         QuizAuthoringView: {
+            /** Format: uuid */
+            groupId?: string | null;
             /** Format: uuid */
             readonly id: string;
             /** Format: uuid */
@@ -2432,6 +2552,8 @@ export interface components {
             alternatives: components["schemas"]["AlternativeInput"][];
         };
         QuizUpdate: {
+            /** Format: uuid */
+            groupId?: string | null;
             /**
              * Format: uuid
              * @description Reasignable solo en draft con permiso sobre origen y destino; null indica curso completo.
@@ -2608,7 +2730,9 @@ export interface components {
             /** Format: uuid */
             readonly courseId: string;
             /** Format: uuid */
-            readonly quizId: string;
+            readonly assignmentId?: string;
+            /** Format: uuid */
+            readonly quizId: string | null;
             title: string;
             weightPercent: number;
             /** Format: date-time */
@@ -2964,6 +3088,125 @@ export interface components {
             rows: components["schemas"]["ImportRow"][];
         };
         ImportConfirmation: Record<string, never>;
+        Assignment: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            courseId: string;
+            title: string;
+            description: string | null;
+            instructions: string | null;
+            maxPoints: number;
+            /**
+             * Format: uuid
+             * @description Null identifica el curso completo.
+             */
+            sectionId: string | null;
+            /** Format: uuid */
+            groupId: string;
+            groupTitle: string;
+            weightPercent: number;
+            /** @description Extensiones normalizadas. Una lista vacía no restringe por extensión. */
+            allowedExtensions: string[];
+            /** @description Null indica intentos ilimitados. */
+            maxAttempts: number | null;
+            /** Format: date-time */
+            availableFrom: string | null;
+            /** Format: date-time */
+            dueAt: string | null;
+            /** Format: date-time */
+            availableUntil: string | null;
+            /** @enum {string} */
+            status: "draft" | "published" | "hidden";
+            /**
+             * Format: date-time
+             * @description Instante de la primera publicación.
+             */
+            publishedAt: string | null;
+            version: number;
+            canManage: boolean;
+        };
+        AssignmentList: {
+            items: components["schemas"]["Assignment"][];
+        };
+        title: string;
+        description: string | null;
+        instructions: string | null;
+        maxPoints: number;
+        /**
+         * Format: uuid
+         * @description Null identifica el curso completo.
+         */
+        sectionId: string | null;
+        /** @description Null indica intentos ilimitados. */
+        maxAttempts: number | null;
+        /** Format: date-time */
+        availableFrom: string | null;
+        /** Format: date-time */
+        dueAt: string | null;
+        /** Format: date-time */
+        availableUntil: string | null;
+        AssignmentCreate: {
+            /**
+             * Format: uuid
+             * @description UUID estable de la operación de creación.
+             */
+            id: string;
+            title: components["schemas"]["title"];
+            description?: components["schemas"]["description"];
+            instructions?: components["schemas"]["instructions"];
+            maxPoints: components["schemas"]["maxPoints"];
+            sectionId?: components["schemas"]["sectionId"];
+            /**
+             * Format: uuid
+             * @description Null u omitido elige el grupo predeterminado.
+             */
+            groupId?: string | null;
+            allowedExtensions?: string[];
+            maxAttempts?: components["schemas"]["maxAttempts"];
+            availableFrom?: components["schemas"]["availableFrom"];
+            /** @description Con true publica en la misma transacción del guardado. Si se omite conserva el estado. */
+            publish?: boolean;
+            /**
+             * @deprecated
+             * @description Campo legado ignorado; las tareas nuevas y los cambios a plazos vencidos siempre se rechazan.
+             */
+            confirmPastDue?: boolean;
+            dueAt?: components["schemas"]["dueAt"];
+            availableUntil?: components["schemas"]["availableUntil"];
+        };
+        AssignmentUpdate: {
+            expectedVersion: number;
+            title?: components["schemas"]["title"];
+            description?: components["schemas"]["description"];
+            instructions?: components["schemas"]["instructions"];
+            maxPoints?: components["schemas"]["maxPoints"];
+            sectionId?: components["schemas"]["sectionId"];
+            /**
+             * Format: uuid
+             * @description Null elige el grupo predeterminado.
+             */
+            groupId?: string | null;
+            allowedExtensions?: string[];
+            maxAttempts?: components["schemas"]["maxAttempts"];
+            availableFrom?: components["schemas"]["availableFrom"];
+            /** @description Con true publica en la misma transacción del guardado. Si se omite conserva el estado. */
+            publish?: boolean;
+            /**
+             * @deprecated
+             * @description Campo legado ignorado; las tareas nuevas y los cambios a plazos vencidos siempre se rechazan.
+             */
+            confirmPastDue?: boolean;
+            dueAt?: components["schemas"]["dueAt"];
+            availableUntil?: components["schemas"]["availableUntil"];
+        };
+        AssignmentVisibility: {
+            expectedVersion: number;
+            published: boolean;
+        };
+        EvaluationGroupList: {
+            items: components["schemas"]["GradeGroup"][];
+        };
     };
     responses: {
         /** @description Request o parámetro sintácticamente inválido. */
@@ -6369,6 +6612,234 @@ export interface operations {
             413: components["responses"]["PayloadTooLarge"];
             415: components["responses"]["UnsupportedMediaType"];
             429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    listAssignments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentList"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    createAssignment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignmentCreate"];
+            };
+        };
+        responses: {
+            /** @description Operación completada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Assignment"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getAssignment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                courseId: components["parameters"]["CourseId"];
+                assignmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Assignment"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    updateAssignment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                courseId: components["parameters"]["CourseId"];
+                assignmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignmentUpdate"];
+            };
+        };
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Assignment"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    setAssignmentVisibility: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                courseId: components["parameters"]["CourseId"];
+                assignmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignmentVisibility"];
+            };
+        };
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Assignment"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    listEvaluationGroups: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvaluationGroupList"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             500: components["responses"]["InternalError"];
             503: components["responses"]["ServiceUnavailable"];
         };
