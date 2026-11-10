@@ -48,13 +48,47 @@ export async function configureGroups(c:PoolClient,s:GradebookScope,input:Return
   ON CONFLICT(institution_id,course_id,id) DO UPDATE
    SET title=EXCLUDED.title,weight_percent=EXCLUDED.weight_percent,position=EXCLUDED.position`,
  [JSON.stringify(next.groups),tenant,course]);
- await c.query(`UPDATE public.grade_items i SET group_id=(g->>'id')::uuid
+ await c.query(`WITH moved AS (UPDATE public.grade_items i SET group_id=(g->>'id')::uuid
   FROM jsonb_array_elements($1::jsonb) g CROSS JOIN LATERAL jsonb_array_elements_text(g->'gradeItemIds') a(id)
-  WHERE i.institution_id=$2 AND i.course_id=$3 AND i.id=a.id::uuid AND i.group_id<>(g->>'id')::uuid`,
+  WHERE i.institution_id=$2 AND i.course_id=$3 AND i.id=a.id::uuid AND i.group_id<>(g->>'id')::uuid RETURNING i.assignment_id)
+  UPDATE public.assignments a SET version=version+1 FROM moved
+  WHERE a.institution_id=$2 AND a.course_id=$3 AND a.id=moved.assignment_id`,
  [JSON.stringify(next.groups),tenant,course]);
  await c.query(`DELETE FROM public.grade_groups WHERE institution_id=$1 AND course_id=$2 AND NOT(id=ANY($3::uuid[]))`,
  [tenant,course,next.groups.map(g=>g.id)]);
  await c.query(`UPDATE public.courses SET gradebook_grouped=true,gradebook_version=gradebook_version+1
   WHERE institution_id=$1 AND id=$2`,[tenant,course]);
  return {before:previous,after:next};
+}
+
+// Call with the course row locked by courseScope, as for group configuration.
+export async function evaluationGroup(c:PoolClient,s:GradebookScope,kind:"quiz"|"assignment",selected:string|null) {
+ const tenant=s.member.institution_id,course=s.courseId;
+ const groups=await groupsFor(c,s);
+ if(selected!==null && !groups.some(g=>g.id===selected)) {
+  throw new UnprocessableEntityException({code:"INVALID_GRADE_GROUP"});
+ }
+ let id=(await c.query("SELECT id FROM public.grade_groups WHERE institution_id=$1 AND course_id=$2 AND default_kind=$3",
+  [tenant,course,kind])).rows[0]?.id as string|undefined;
+ if(!id) {
+  const title=kind==="quiz"?"Quizzes":"Tareas";
+  const existing=(await c.query(`SELECT id FROM public.grade_groups
+   WHERE institution_id=$1 AND course_id=$2 AND default_kind IS NULL AND lower(title)=lower($3)
+   ORDER BY position,id LIMIT 1`,[tenant,course,title])).rows[0]?.id as string|undefined;
+  id=existing ?? randomUUID();
+  if(existing)await c.query("UPDATE public.grade_groups SET default_kind=$1 WHERE institution_id=$2 AND course_id=$3 AND id=$4",
+   [kind,tenant,course,id]);
+  if(!existing) {
+   await c.query(`INSERT INTO public.grade_groups(id,institution_id,course_id,title,weight_percent,position,default_kind)
+    VALUES($1,$2,$3,$4,$5,$6,$7)`,[id,tenant,course,title,groups.length?0:100,(groups.at(-1)?.position??0)+1,kind]);
+   await c.query(`UPDATE public.courses SET gradebook_grouped=gradebook_grouped OR $3,gradebook_version=gradebook_version+1
+    WHERE institution_id=$1 AND id=$2`,[tenant,course,groups.length===0]);
+  }
+ }
+ return selected ?? id;
+}
+
+export async function bumpGradebookVersion(c:PoolClient,s:GradebookScope) {
+ await c.query("UPDATE public.courses SET gradebook_version=gradebook_version+1 WHERE institution_id=$1 AND id=$2",
+  [s.member.institution_id,s.courseId]);
 }

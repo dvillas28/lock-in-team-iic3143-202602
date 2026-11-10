@@ -1,3 +1,4 @@
+import {bumpGradebookVersion,evaluationGroup} from "../gradebook/gradebook-groups";
 import {Injectable,BadRequestException} from "@nestjs/common";
 import {randomUUID} from "node:crypto";
 import {isDeepStrictEqual} from "node:util";
@@ -16,9 +17,9 @@ export class QuizzesService {
   return this.db.withInstitution(actor,slug,async c=>{
    const s=await quizScope(c,actor,slug,course,"course"),input=validateQuiz(body);
    await requireDestination(c,s,input.sectionId,true);
-   const id=randomUUID();
-   await c.query(`INSERT INTO public.quizzes(id,institution_id,course_id,section_id,title,instructions,opens_at,closes_at,max_attempts,questions,created_by)
-    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,[id,s.member.institution_id,course,input.sectionId,input.title,input.instructions,input.opensAt,input.closesAt,input.maxAttempts,JSON.stringify(input.questions),actor]);
+   const id=randomUUID(),groupId=await evaluationGroup(c,s,"quiz",input.groupId ?? null);
+   await c.query(`INSERT INTO public.quizzes(id,institution_id,course_id,section_id,title,instructions,opens_at,closes_at,max_attempts,questions,created_by,group_id)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,[id,s.member.institution_id,course,input.sectionId,input.title,input.instructions,input.opensAt,input.closesAt,input.maxAttempts,JSON.stringify(input.questions),actor,groupId]);
    const row=await visibleQuiz(c,s,id);
    await this.audit.record(c,{institutionId:s.member.institution_id,actorUserId:actor,action:"quiz.created",resourceType:"quiz",resourceId:id,courseId:course,sectionId:row.section_id,before:null,after:quizSnapshot(row)});
    return authoringDto(row);
@@ -30,9 +31,10 @@ export class QuizzesService {
    requirePermission(canAuthorQuiz(s,row.section_id));requireDraft(row);
    const before=quizInput(row),input=validateQuiz(body,before);
    await requireDestination(c,s,input.sectionId,true);
+   input.groupId=await evaluationGroup(c,s,"quiz",input.groupId ?? null);
    if(isDeepStrictEqual(input,before))return authoringDto(row);
-   await c.query(`UPDATE public.quizzes SET section_id=$1,title=$2,instructions=$3,opens_at=$4,closes_at=$5,max_attempts=$6,questions=$7
-    WHERE institution_id=$8 AND id=$9`,[input.sectionId,input.title,input.instructions,input.opensAt,input.closesAt,input.maxAttempts,JSON.stringify(input.questions),s.member.institution_id,id]);
+   await c.query(`UPDATE public.quizzes SET section_id=$1,title=$2,instructions=$3,opens_at=$4,closes_at=$5,max_attempts=$6,questions=$7,group_id=$10
+    WHERE institution_id=$8 AND id=$9`,[input.sectionId,input.title,input.instructions,input.opensAt,input.closesAt,input.maxAttempts,JSON.stringify(input.questions),s.member.institution_id,id,input.groupId]);
    const after=await visibleQuiz(c,s,id);
    await this.audit.record(c,{institutionId:s.member.institution_id,actorUserId:actor,action:"quiz.updated",resourceType:"quiz",resourceId:id,courseId:s.courseId,
     sectionId:row.section_id===after.section_id?row.section_id:null,before:quizSnapshot(row),after:quizSnapshot(after)});
@@ -45,9 +47,10 @@ export class QuizzesService {
    requirePermission(canAuthorQuiz(s,row.section_id));noBody(body);
    if(row.published_at!==null)return authoringDto(row);
    validatePublish(quizInput(row));
-   const item=randomUUID();
-   await c.query("INSERT INTO public.grade_items(id,institution_id,course_id,quiz_id,title) VALUES($1,$2,$3,$4,$5)",[item,s.member.institution_id,s.courseId,id,row.title]);
-   await c.query("UPDATE public.quizzes SET published_at=clock_timestamp() WHERE institution_id=$1 AND id=$2",[s.member.institution_id,id]);
+   const item=randomUUID(),groupId=await evaluationGroup(c,s,"quiz",row.group_id);
+   await c.query("INSERT INTO public.grade_items(id,institution_id,course_id,quiz_id,title,group_id) VALUES($1,$2,$3,$4,$5,$6)",[item,s.member.institution_id,s.courseId,id,row.title,groupId]);
+   await c.query("UPDATE public.quizzes SET published_at=clock_timestamp(),group_id=$3 WHERE institution_id=$1 AND id=$2",[s.member.institution_id,id,groupId]);
+   await bumpGradebookVersion(c,s);
    const after=await visibleQuiz(c,s,id);
    await this.audit.record(c,{institutionId:s.member.institution_id,actorUserId:actor,action:"quiz.published",resourceType:"quiz",resourceId:id,courseId:s.courseId,sectionId:row.section_id,before:quizSnapshot(row),after:quizSnapshot(after,item)});
    return authoringDto(after);

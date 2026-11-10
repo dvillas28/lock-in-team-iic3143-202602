@@ -9,16 +9,22 @@ import {uuid} from "../courses/validation";
 import {gradebookScope,academicScope,selectedSections,type GradebookScope} from "./gradebook-access";
 import {weightsInput,publicationRequest,bookPage,groupsInput,correctionInput,type Selection} from "./gradebook-validation";
 import {itemDto,gradeDto,gradeResultDto,publishedDto,receiptDto} from "./gradebook-dto";
+import {canAuthorQuiz} from "../quizzes/quiz-access";
 import {configureGroups,groupsFor} from "./gradebook-groups";
 import {gradeResults,resultSummary} from "./gradebook-results";
 const conflict=(code:string)=>new ConflictException({code});
 @Injectable()
 export class GradebookService {
  constructor(private readonly db:DatabaseService,private readonly audit:AuditService) {}
- async items(c:PoolClient,s:GradebookScope) {
-  return (await c.query(`SELECT i.*,g.weight_percent AS group_weight FROM public.grade_items i
+ async items(c:PoolClient,s:GradebookScope,includeHidden=false) {
+  const scope=academicScope(s);
+  const teachers=s.roles.filter(e=>e.role==="teacher").map(e=>e.section_id);
+  return (await c.query(`SELECT i.*,g.weight_percent AS group_weight,a.section_id AS assignment_section_id FROM public.grade_items i
    JOIN public.grade_groups g ON g.institution_id=i.institution_id AND g.course_id=i.course_id AND g.id=i.group_id
-   WHERE i.institution_id=$1 AND i.course_id=$2 ORDER BY i.id`,[s.member.institution_id,s.courseId])).rows;
+   LEFT JOIN public.assignments a ON (a.institution_id,a.course_id,a.id)=(i.institution_id,i.course_id,i.assignment_id)
+   WHERE i.institution_id=$1 AND i.course_id=$2 AND (i.assignment_id IS NULL OR $3::boolean OR
+    a.section_id=ANY($4::uuid[]) OR (a.status='published' AND a.section_id IS NULL AND cardinality($4::uuid[])>0))
+   ORDER BY i.id`,[s.member.institution_id,s.courseId,scope.global || includeHidden,teachers])).rows;
  }
  async configuration(c:PoolClient,s:GradebookScope) {
   const groups=await groupsFor(c,s),items=await this.items(c,s);
@@ -33,7 +39,21 @@ export class GradebookService {
   const input=groupsInput(body);
   return this.db.withInstitution(actor,slug,async c=>{
    const s=await gradebookScope(c,actor,slug,course);academicScope(s,true);
-   const changes=await configureGroups(c,s,input,await this.items(c,s));
+   const visible=await this.items(c,s),all=await this.items(c,s,true);
+   const visibleIds=new Set(visible.map(i=>i.id)),hidden=all.filter(i=>!visibleIds.has(i.id));
+   if(input.groups.some(g=>g.gradeItemIds.some(id=>!visibleIds.has(id))) ||
+    hidden.some(i=>!input.groups.some(g=>g.id===i.group_id)) ||
+    visible.some(i=>i.assignment_id && !canAuthorQuiz(s,i.assignment_section_id) &&
+     !input.groups.some(g=>g.id===i.group_id && g.gradeItemIds.includes(i.id)))) {
+    throw new UnprocessableEntityException({code:"INVALID_GRADE_GROUPS"});
+   }
+   // A section teacher can configure shared groups without moving evaluations
+   // outside their authoring scope or receiving those items in the response.
+   for(const g of input.groups) {
+    g.gradeItemIds.push(...hidden.filter(i=>i.group_id===g.id).map(i=>i.id));
+    g.gradeItemIds.sort((a,b)=>a.localeCompare(b,"en"));
+   }
+   const changes=await configureGroups(c,s,input,all);
    if(changes) {
     await this.audit.record(c,{institutionId:s.member.institution_id,actorUserId:actor,courseId:course,
      action:"gradebook.groupsUpdated",resourceType:"gradebook",resourceId:course,...changes});
@@ -78,7 +98,8 @@ export class GradebookService {
   return this.db.withInstitution(actor,slug,async c=>{
    const s=await gradebookScope(c,actor,slug,course);academicScope(s,true);
    if(s.course.gradebook_grouped)throw conflict("USE_GRADE_GROUPS");
-   const rows=await this.items(c,s);
+   const rows=await this.items(c,s,true);
+   if(rows.some(r=>r.assignment_id) || new Set(rows.map(r=>r.group_id)).size!==rows.length)throw conflict("USE_GRADE_GROUPS");
    if(rows.length!==input.length || rows.some((r,i)=>r.id!==input[i].gradeItemId))throw new UnprocessableEntityException();
    const total=(await c.query("SELECT sum((i->>'weightPercent')::numeric)=100 AS valid FROM jsonb_array_elements($1::jsonb) i",[JSON.stringify(input)])).rows[0];
    if(!total.valid)throw new UnprocessableEntityException();
@@ -95,7 +116,7 @@ export class GradebookService {
  }
  async selection(c:PoolClient,s:GradebookScope,input:Selection) {
   await selectedSections(c,s,input.sectionIds,true);
-  const items=(await c.query("SELECT * FROM public.grade_items WHERE institution_id=$1 AND course_id=$2 AND id=ANY($3::uuid[]) ORDER BY id FOR UPDATE",[s.member.institution_id,s.courseId,input.gradeItemIds])).rows;
+  const items=(await c.query("SELECT * FROM public.grade_items WHERE institution_id=$1 AND course_id=$2 AND id=ANY($3::uuid[]) AND quiz_id IS NOT NULL ORDER BY id FOR UPDATE",[s.member.institution_id,s.courseId,input.gradeItemIds])).rows;
   if(items.length!==input.gradeItemIds.length)throw new NotFoundException();
   return items;
  }
