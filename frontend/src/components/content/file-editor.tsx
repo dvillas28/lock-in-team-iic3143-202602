@@ -38,7 +38,7 @@ export function FileEditor({session,slug,item,limits,disabled,reload,remove}:{
    <FileUploadForm session={session} slug={slug} moduleId={item.moduleId} item={item} limits={limits} disabled={unavailable} reload={reload}/>
   </details>
   <button className="btn btn-danger" type="button" disabled={unavailable} onClick={()=>dialog.current?.showModal()}>Eliminar archivo</button>
-  <dialog className="modal" ref={dialog} aria-labelledby={heading}>
+  <dialog className="modal native-dialog file-delete-dialog" ref={dialog} aria-labelledby={heading}>
    <div className="stack">
     <h2 className="serif" id={heading}>Eliminar archivo</h2>
     <p>Se retirará «{item.title}» del módulo.</p>

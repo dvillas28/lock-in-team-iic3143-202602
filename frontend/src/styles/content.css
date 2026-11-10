@@ -129,3 +129,30 @@
 .content-notice > svg { color: var(--success); flex-shrink: 0; }
 .content-notice-error > svg { color: var(--danger); }
 .content-notice .icon-btn { flex: 0 0 32px; height: 32px; margin-inline-start: auto; }
+
+/* Add-content menu and inline panels (modules tab) */
+.add-content { position: relative; display: inline-block; }
+.add-content-menu { position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; width: min(340px, calc(100vw - 48px)); padding: 6px; box-shadow: var(--shadow-float); }
+.add-content-item { display: flex; gap: 12px; align-items: flex-start; width: 100%; padding: 10px; text-align: left; background: transparent; border: 0; border-radius: var(--radius-sm); color: var(--text-1); cursor: pointer; font: inherit; }
+.add-content-item:hover, .add-content-item:focus-visible { background: var(--primary-soft); }
+.add-content-item svg { flex-shrink: 0; margin-top: 2px; color: var(--primary-ink); }
+.add-content-item small { display: block; color: var(--text-2); font-size: 12px; }
+.resource-panel { margin: 0 16px 12px; padding: 16px; }
+.quiz-choices { border: 0; padding: 0; min-width: 0; }
+.resource-pending { min-height: 72px; }
+.resource-editor > .btn-danger { margin: 4px 16px 16px; }
+
+/* Resource rows adapt to the width of their own container (not the viewport):
+   title and metadata keep a readable column; when the controls no longer fit beside it they move to their own row. */
+.academic-module .material-item { container-type: inline-size; }
+.academic-module .module-resource { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; column-gap: 12px; row-gap: 8px; align-items: start; }
+.academic-module .module-resource > .module-tools { margin-left: 0; justify-content: flex-end; }
+@container (max-width: 40rem) {
+  .academic-module .module-resource { grid-template-columns: 18px minmax(0, 1fr); }
+  .academic-module .module-resource > .module-tools { grid-column: 2; justify-content: flex-start; }
+  .resource-controls .icon-btn, .resource-controls .publish-toggle { min-width: 44px; min-height: 44px; }
+  .resource-controls .btn { min-height: 44px; }
+}
+
+/* Delete-file confirmation: native dialog centered in the viewport, with a gutter on small screens. */
+.native-dialog.file-delete-dialog { width: min(440px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; }
