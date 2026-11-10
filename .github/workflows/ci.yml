@@ -138,8 +138,30 @@ jobs:
       - run: pnpm lint
       - run: pnpm ${{ matrix.app == 'backend' && 'test' || 'build' }}
 
+  # Blocking: a broken Dockerfile must not reach the Render deploy.
   docker:
-    name: ${{ matrix.app }} (docker build + trivy)
+    name: ${{ matrix.app }} (docker build)
+    needs: changes
+    if: needs.changes.outputs.apps != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJSON(needs.changes.outputs.apps) }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+      # Shares the layer cache with the trivy job, so the second build of the same tree is cheap.
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./${{ matrix.app }}
+          cache-from: type=gha,scope=${{ matrix.app }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.app }}
+
+  # Non-blocking: not listed in `result`. A failure shows red on the PR without blocking the merge;
+  # the manual Trivy workflow keeps the full report for the course audit.
+  trivy:
+    name: ${{ matrix.app }} (trivy)
     needs: changes
     if: needs.changes.outputs.apps != '[]'
     runs-on: ubuntu-latest
@@ -154,7 +176,16 @@ jobs:
       APP: ${{ matrix.app }}
     steps:
       - uses: actions/checkout@v5
-      - run: docker build --tag "academix-$APP:ci" "./$APP"
+      - uses: docker/setup-buildx-action@v3
+      # Rebuilt here instead of passed as an artifact: with the shared cache it is faster
+      # than uploading the image tarball, and both jobs stay parallel.
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./${{ matrix.app }}
+          load: true
+          tags: academix-${{ matrix.app }}:ci
+          cache-from: type=gha,scope=${{ matrix.app }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.app }}
 
       # The vulnerability DB is published several times a day; one download per day is enough.
       - id: trivy-db
@@ -253,6 +284,7 @@ jobs:
 
   # Static analysis of our own code; the quality gate only judges the code changed by the PR.
   # Runs when app code changed; backend coverage is attached only if integration ran.
+  # Non-blocking: not listed in `result`, so a failed gate shows red on the PR without blocking it.
   sonarqube:
     name: SonarQube (quality gate)
     needs: [changes, backend-coverage]
@@ -304,10 +336,11 @@ jobs:
             -Dsonar.qualitygate.wait=${{ github.event_name == 'pull_request' }}
 
   # Single required check: skipped matrix jobs never report their per-app check names.
+  # `trivy` and `sonarqube` are left out on purpose: they report but do not block.
   result:
     name: CI result
     if: always()
-    needs: [documentation, contracts, changes, checks, docker, backend-coverage, sonarqube]
+    needs: [documentation, contracts, changes, checks, docker, backend-coverage]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any job failed or was cancelled

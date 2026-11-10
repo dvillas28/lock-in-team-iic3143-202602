@@ -1,5 +1,5 @@
 # Course audit (trivy-manual.spec.md): full dependency report, on demand.
-# CI's docker job is the PR gate; this one reports every severity for the whole repo.
+# CI's trivy job checks each PR (non-blocking); this one reports every severity for the whole repo.
 name: Trivy - Dependencias y vulnerabilidades
 
 on:
