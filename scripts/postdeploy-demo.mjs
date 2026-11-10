@@ -56,8 +56,9 @@ async function academicWorkflow(slug,accounts,call,env) {
  await op('student',`/materials/${material.id}`);
  const quiz=await op('teacher',`/courses/${course.id}/quizzes`,{method:'POST',status:201,body:{title:'Quiz',sectionId:section,questions:[{prompt:'2+2?',position:1,points:1,alternatives:[{id:'a',text:'4',isCorrect:true},{id:'b',text:'3',isCorrect:false}]}]}});
  await op('teacher',`/quizzes/${quiz.id}/publish`,{method:'POST'});
- const item=(await op('admin',`/courses/${course.id}/grade-items`)).items[0].id;
- await op('admin',`/courses/${course.id}/gradebook/weights`,{method:'PUT',body:{items:[{gradeItemId:item,weightPercent:100}]}});
+ const gradebook=await op('admin',`/courses/${course.id}/grade-items`);
+ const item=gradebook.items.find(entry=>entry.quizId===quiz.id);
+ check(item?.weightPercent===100,'Default quiz group weight mismatch');
  const safe=await op('student',`/quizzes/${quiz.id}`);
  check(safe.questions.length===0,'Questions exposed before attempt');
  const attempt=await op('student',`/sections/${section}/quizzes/${quiz.id}/attempts`,{method:'POST',status:201,key:randomUUID(),body:{}});
@@ -66,8 +67,8 @@ async function academicWorkflow(slug,accounts,call,env) {
  await op('student',`/quiz-attempts/${attempt.id}/answers`,{method:'PUT',body:{answers:[{questionId:own.questions[0].id,alternativeId:'a'}]}});
  await op('student',`/quiz-attempts/${attempt.id}/submit`,{method:'POST',key:randomUUID(),body:{}});
  check((await op('student',`/courses/${course.id}/my-grades`)).items.length===0,'Unpublished grade exposed');
- await op('assistant',`/courses/${course.id}/gradebook/publications`,{method:'POST',status:403,key:randomUUID(),body:{gradeItemIds:[item],sectionIds:[section],studentIds:[accounts.student.me.id]}});
- await op('teacher',`/courses/${course.id}/gradebook/publications`,{method:'POST',key:randomUUID(),body:{gradeItemIds:[item],sectionIds:[section],studentIds:[accounts.student.me.id]}});
+ await op('assistant',`/courses/${course.id}/gradebook/publications`,{method:'POST',status:403,key:randomUUID(),body:{gradeItemIds:[item.id],sectionIds:[section],studentIds:[accounts.student.me.id]}});
+ await op('teacher',`/courses/${course.id}/gradebook/publications`,{method:'POST',key:randomUUID(),body:{gradeItemIds:[item.id],sectionIds:[section],studentIds:[accounts.student.me.id]}});
  check((await op('student',`/courses/${course.id}/my-grades`)).partialAverage===7,'Published grade mismatch');
  await op('superadmin',`/courses/${course.id}`,{status:404});
  await call('/api/v1/institution/'+(slug==='uc'?'utfsm':'uc')+`/courses/${course.id}`,{token:accounts.teacher.token,status:404});

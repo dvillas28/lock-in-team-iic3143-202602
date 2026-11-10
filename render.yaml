@@ -47,7 +47,8 @@ services:
       - key: ACTIVATION_ORIGINS_BY_INSTITUTION
         value: '{"uc":"https://uc.academix.dvillasc.me","utfsm":"https://utfsm.academix.dvillasc.me"}'
       # Private S3 bucket for profile photos (docs/planning/perfiles/operacion-s3.md).
-      # The access key belongs to IAM user academix-backend-prod (Get/Put/Delete on avatars/*).
+      # The access key belongs to IAM user academix-backend-prod (Get/Put/Delete on avatars/*,
+      # academic/materials/* and academic/submissions/*; see scripts/provision-avatar-s3.sh).
       # If any value is missing the backend still starts and photo actions answer 503.
       - key: AVATAR_STORAGE_DRIVER
         value: "s3"
@@ -59,8 +60,10 @@ services:
         sync: false
       - key: AWS_SECRET_ACCESS_KEY
         sync: false
-      # Academic files share the bucket and credentials above under academic/materials/
-      # (docs/planning/academic-files/s3.md). Missing values answer 503 on file operations.
+      # Academic files share the bucket and credentials above: module materials under
+      # academic/materials/ (docs/planning/academic-files/s3.md) and assignment submissions
+      # under academic/submissions/ (docs/guides/assignment-submissions-s3.md).
+      # Missing values answer 503 on file operations.
       - key: ACADEMIC_STORAGE_DRIVER
         value: "s3"
       - key: S3_ACADEMIC_BUCKET

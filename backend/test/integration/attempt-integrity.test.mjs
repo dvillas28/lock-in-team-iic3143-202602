@@ -63,18 +63,19 @@ test('attempt migration upgrades populated authoring data, repeats, restarts and
   await pool.query("INSERT INTO quizzes(id,institution_id,course_id,section_id,title,questions,created_by,published_at) VALUES($1,$2,$3,$4,'Populated quiz',$5,$6,now())",[quiz,tenant,course,section,JSON.stringify([{...question,id:randomUUID()}]),users.owner]);
   await pool.query("INSERT INTO grade_items(id,institution_id,course_id,quiz_id,title) VALUES($1,$2,$3,$4,'Populated quiz')",[item,tenant,course,quiz]);
   const parentTables=['users','institutions','institution_memberships','courses','sections','enrollments','quizzes','grade_items','audit_events'];
-  const snapshot=()=>Promise.all(parentTables.map(async table=>(await pool.query(`SELECT to_jsonb(t)-ARRAY['bio','avatar_key','credential_version'] AS row FROM ${table} t ORDER BY id`)).rows));
+  const snapshot=()=>Promise.all(parentTables.map(async table=>(await pool.query(`SELECT to_jsonb(t)-ARRAY['bio','avatar_key','credential_version','gradebook_grouped','gradebook_version','group_id','max_points','assignment_id'] AS row FROM ${table} t ORDER BY id`)).rows));
   const parent=await snapshot(),c=await pool.connect();
   try{const down=await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir,direction:'down',count:6,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});assert.equal(down.length,6);}finally{c.release();}
   assert.equal((await pool.query("SELECT to_regclass('public.quiz_attempts') AS table")).rows[0].table,null);
   assert.equal((await cli('commands/migrate').result).code,0);assert.deepEqual(await snapshot(),parent);
-  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,17);
+  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,22);
   const profileDefaults=(await pool.query('SELECT bio,avatar_key,credential_version FROM users')).rows;
   assert.ok(profileDefaults.every(row=>row.bio===null&&row.avatar_key===null&&row.credential_version===0));
   const id=randomUUID();
   await pool.query("INSERT INTO quiz_attempts(id,institution_id,course_id,quiz_id,section_id,student_id,attempt_number,status,answers,start_key) VALUES($1,$2,$3,$4,$5,$6,1,'in_progress','[]',$7)",[id,tenant,course,quiz,section,users.revoked,randomUUID()]);
   const before=(await pool.query('SELECT * FROM quiz_attempts')).rows;
   assert.equal((await cli('commands/migrate').result).code,0);
+  assert.equal((await cli('commands/provision-runtime').result).code,0);
   app=await http();assert.equal((await fetch(app.base+'/ready')).status,200);await app.close();app=await http();
   assert.deepEqual((await pool.query('SELECT * FROM quiz_attempts')).rows,before);
   assert.equal((await pool.query('SELECT * FROM quizzes WHERE id=$1',[quiz])).rowCount,1);

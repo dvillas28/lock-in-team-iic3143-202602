@@ -3,6 +3,9 @@
    Ningún color se hardcodea fuera de este archivo. */
 
 :root {
+  --font-inter: "Inter";
+  --font-eb-garamond: "EB Garamond";
+
   /* Marca */
   --primary:        #1E3A5F;   /* navy institucional — fills (botones, avatar sólido) */
   --primary-hover:  #24466F;

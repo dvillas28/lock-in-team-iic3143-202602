@@ -28,8 +28,12 @@ GradeItem:
       type: string
       format: uuid
       readOnly: true
-    quizId:
+    assignmentId:
       type: string
+      format: uuid
+      readOnly: true
+    quizId:
+      type: [string, 'null']
       format: uuid
       readOnly: true
     title:
@@ -43,6 +47,13 @@ GradeItem:
       type: string
       format: date-time
       readOnly: true
+
+    groupId:
+      type: string
+      format: uuid
+    maxPoints:
+      type: number
+      minimum: 0
 
 GradeItemListResponse:
   type: object
@@ -60,7 +71,20 @@ GradeItemListResponse:
       minimum: 0
     weightsLocked:
       type: boolean
-      description: Bloqueo común del curso por publicación; no revela notas de otras secciones.
+      deprecated: true
+      description: Campo de compatibilidad. Siempre false.
+    hasPublishedGrades:
+      type: boolean
+    calculation:
+      type: string
+      enum: [legacy, points]
+    version:
+      type: integer
+      minimum: 0
+    groups:
+      type: array
+      items:
+        $ref: './gradebook-groups.yaml#/GradeGroup'
 
 GradeWeightInput:
   type: object
@@ -123,6 +147,7 @@ GradeTeacherView:
       type: string
       format: uuid
       readOnly: true
+    assignmentId: {type: string, format: uuid}
     gradeItemId:
       type: string
       format: uuid
@@ -140,16 +165,28 @@ GradeTeacherView:
       format: uuid
       readOnly: true
     scorePercent:
-      type: number
+      type: [number, 'null']
       minimum: 0
       maximum: 100
       readOnly: true
     grade:
-      $ref: '#/GradeValue'
+      oneOf:
+        - $ref: '#/GradeValue'
+        - type: 'null'
     publishedAt:
       type: [string, 'null']
       format: date-time
       readOnly: true
+
+    pointsEarned:
+      type: number
+      minimum: 0
+    revisionId:
+      type: [string, 'null']
+      format: uuid
+    revisedAt:
+      type: [string, 'null']
+      format: date-time
 
 GradebookStudentRow:
   type: object
@@ -180,6 +217,11 @@ GradebookStudentRow:
       minimum: 0
       maximum: 100
       readOnly: true
+
+    groupResults:
+      type: array
+      items:
+        $ref: './gradebook-groups.yaml#/GradeGroupResult'
 
 GradebookResponse:
   unevaluatedProperties: false
@@ -255,6 +297,7 @@ PublishedGradeStudentView:
     - grade
     - publishedAt
   properties:
+    assignmentId: {type: string, format: uuid}
     gradeItemId:
       type: string
       format: uuid
@@ -267,16 +310,33 @@ PublishedGradeStudentView:
       maximum: 100
       multipleOf: 0.01
     scorePercent:
-      type: number
+      type: [number, 'null']
       minimum: 0
       maximum: 100
       readOnly: true
     grade:
-      $ref: '#/GradeValue'
+      oneOf:
+        - $ref: '#/GradeValue'
+        - type: 'null'
     publishedAt:
       type: string
       format: date-time
       readOnly: true
+
+    groupId:
+      type: string
+      format: uuid
+    groupTitle:
+      type: string
+    pointsEarned:
+      type: number
+      minimum: 0
+    maxPoints:
+      type: number
+      minimum: 0
+    revisedAt:
+      type: [string, 'null']
+      format: date-time
 
 StudentGradesResponse:
   type: object
@@ -302,9 +362,9 @@ StudentGradesResponse:
         - type: 'null'
       readOnly: true
       description: |
-        Promedio de notas publicadas normalizado por la suma de sus ponderaciones:
-        sum(grade * weight) / sum(weight). Se redondea a un decimal con HALF_UP y
-        es null cuando no hay notas publicadas o el peso publicado es cero.
+        En modo puntos, se aplica la escala chilena al porcentaje de grupos con resultados
+        publicados, normalizado por la suma de sus pesos. En modo histórico se conserva
+        el promedio ponderado de notas individuales. Devuelve null si el peso activo es cero.
     publishedWeightPercent:
       type: number
       minimum: 0
@@ -313,4 +373,11 @@ StudentGradesResponse:
     isPartial:
       type: boolean
       readOnly: true
-      description: True cuando la suma de ponderaciones publicadas es menor que 100%.
+      description: En modo puntos representa un promedio en curso. En modo histórico indica peso activo menor al 100%.
+    calculation:
+      type: string
+      enum: [legacy, points]
+    groupResults:
+      type: array
+      items:
+        $ref: './gradebook-groups.yaml#/GradeGroupResult'

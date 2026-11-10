@@ -1,5 +1,7 @@
 # Cualquier docente activo puede editar ponderaciones del curso
 
+
+La [decisión de grupos y revisiones](gradebook-groups-and-revisions.md) actualiza la política de congelamiento.
 Fecha: 2026-11-01. Estado: aceptado por instrucción del usuario.
 
 ## Decisión

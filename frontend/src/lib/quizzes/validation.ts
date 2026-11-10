@@ -59,9 +59,10 @@ export function jsonBody<T>(body: T): T {
   return body;
 }
 export function quizInput(value: unknown, current?: Authoring): Update {
-  const v = object(value, ["title","sectionId","instructions","opensAt","closesAt","maxAttempts","questions"], "form");
+  const v = object(value, ["title","groupId","sectionId","instructions","opensAt","closesAt","maxAttempts","questions"], "form");
   const out: Update = {};
   if (!current || "title" in v) out.title = string(typeof v.title === "string" ? v.title.trim() : v.title, "title", 200);
+  if ("groupId" in v) { if (v.groupId !== null && !isId(v.groupId)) fail("groupId", "Selecciona un grupo válido."); out.groupId = v.groupId as string | null; }
   if ("sectionId" in v) { if (v.sectionId !== null && !isId(v.sectionId)) fail("sectionId", "Selecciona una sección válida."); out.sectionId = v.sectionId as string | null; }
   if ("instructions" in v) out.instructions = v.instructions === null ? null : string(v.instructions, "instructions", 10000, true);
   for (const k of ["opensAt","closesAt"] as const) if (k in v) out[k] = timestamp(v[k], k);
@@ -99,6 +100,8 @@ export function quizDto(v: unknown, courseId: string, expected?: string, authori
     if (new Set(questions.map(q=>q.id)).size !== questions.length || new Set(questions.map(q=>q.position)).size !== questions.length || questions.reduce((n,q)=>n+Math.round(q.points*100),0)>99999999) throw new ApiResponseError();
     if (authoring) {
       const result = {...base,createdBy:v.createdBy as string,questions} as Authoring;
+      if (v.groupId !== undefined && v.groupId !== null && !isId(v.groupId)) throw new ApiResponseError();
+      if (v.groupId !== undefined) result.groupId = v.groupId as string | null;
       questionsInput(result.questions,result);
       return result;
     }
@@ -107,7 +110,7 @@ export function quizDto(v: unknown, courseId: string, expected?: string, authori
 }
 export const quizList = (v: unknown, courseId: string) => list(v, q => summary(q, courseId));
 export function gradeItem(v: unknown, courseId: string): GradeItem {
-  if (!isRecord(v) || !isId(v.id) || v.courseId !== courseId || !isId(v.quizId) || typeof v.title !== "string" || typeof v.weightPercent !== "number" || !Number.isFinite(v.weightPercent) || v.weightPercent < 0 || v.weightPercent > 100 || Number(v.weightPercent.toFixed(2)) !== v.weightPercent) throw new ApiResponseError();
+  if (!isRecord(v) || !isId(v.id) || v.courseId !== courseId || !(v.quizId === null ? isId(v.assignmentId) : isId(v.quizId) && v.assignmentId === undefined) || typeof v.title !== "string" || typeof v.weightPercent !== "number" || !Number.isFinite(v.weightPercent) || v.weightPercent < 0 || v.weightPercent > 100 || Number(v.weightPercent.toFixed(2)) !== v.weightPercent) throw new ApiResponseError();
   try { if (!timestamp(v.createdAt,"createdAt")) throw new ApiResponseError(); } catch { throw new ApiResponseError(); }
-  return {id:v.id,courseId,quizId:v.quizId,title:v.title,weightPercent:v.weightPercent,createdAt:v.createdAt as string};
+  return {id:v.id,courseId,quizId:v.quizId as string | null,...(isId(v.assignmentId) ? {assignmentId:v.assignmentId} : {}),title:v.title,weightPercent:v.weightPercent,createdAt:v.createdAt as string};
 }

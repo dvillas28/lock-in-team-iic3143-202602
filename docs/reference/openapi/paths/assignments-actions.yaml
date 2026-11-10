@@ -1,0 +1,73 @@
+/api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}/visibility:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/CourseId'
+    - name: assignmentId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+  patch:
+    tags: [Assignments]
+    operationId: setAssignmentVisibility
+    summary: Publicar u ocultar tarea
+    description: Publicar permite la consulta de estudiantes autorizados. Ocultar revoca esa visibilidad. Repetir el mismo estado es idempotente.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/assignments.yaml#/AssignmentVisibility'
+    responses:
+      '200':
+        description: Operación completada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/assignments.yaml#/Assignment'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses.yaml#/Conflict'
+      '413':
+        $ref: '../components/responses.yaml#/PayloadTooLarge'
+      '415':
+        $ref: '../components/responses.yaml#/UnsupportedMediaType'
+      '422':
+        $ref: '../components/responses.yaml#/UnprocessableEntity'
+      '500':
+        $ref: '../components/responses.yaml#/InternalError'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'
+
+/api/v1/institution/{institutionSlug}/courses/{courseId}/evaluation-groups:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/CourseId'
+  get:
+    tags: [Assignments]
+    operationId: listEvaluationGroups
+    summary: Consultar grupos disponibles para la autoría docente
+    x-permissions: Docente con matrícula activa en el curso y pertenencia activa a la institución.
+    responses:
+      '200':
+        description: Operación completada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/assignments.yaml#/EvaluationGroupList'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '500':
+        $ref: '../components/responses.yaml#/InternalError'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'

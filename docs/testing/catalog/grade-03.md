@@ -87,26 +87,25 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 
 <a id="e2e-grade-014"></a>
 
-## E2E-GRADE-014 — Guardar pesos exactos suma100
+## E2E-GRADE-014 — Organizar evaluaciones y guardar pesos exactos
 
 - Módulo / flujo: GRADE; [FL-GRADE-03](../audit/FLOWS.md#fl-grade-03).
 - Requisito: CU-10; RF21/26; RNF3; [fuente normativa](../../deliveries/2/03-use-cases-and-requirements.md).
 - Evidencia: [gradebook.service.ts](../../../backend/src/gradebook/gradebook.service.ts); [grading.ts](../../../backend/src/attempts/grading.ts); [course-gradebook.tsx](../../../frontend/src/components/gradebook/course-gradebook.tsx); [grade-publication.tsx](../../../frontend/src/components/gradebook/grade-publication.tsx); [weights-form.tsx](../../../frontend/src/components/gradebook/weights-form.tsx).
-- Objetivo: Guardar pesos exactos suma100; verificar las aserciones siguientes, sin inferir éxito solo por carga.
+- Objetivo: Organizar evaluaciones y guardar pesos exactos; verificar las aserciones siguientes, sin inferir éxito solo por carga.
 - Prioridad / criticidad: P0 / Crítica; categorías: happy,cálculo.
 - Rol / institución: AO; UC por defecto, UTFSM en escenarios cruzados según pasos.
 - Precondiciones / fixtures: WEIGHTS; [diccionario](../E2E_TEST_DATA.md); manifest validado y namespace exclusivo.
-- Entrada / operación: `/courses/{C1}/gradebook`; `updateGradebookWeights; listCourseGradeItems; getCourseGradebook`; [inventario](../audit/API.md).
+- Entrada / operación: `/courses/{C1}/gradebook`; `updateGradeGroups; listCourseGradeItems; getCourseGradebook`; [inventario](../audit/API.md).
 - Preparación: resolver variables del manifest; actor de UI hace login real en origen institucional (ANON no); navegar por Link tras login, salvo reload explícito.
 
-1. Abrir Ponderaciones en COPEN.
-2. Introducir33.33,33.33,33.34.
-3. Guardar y volver.
+1. Crear tres quizzes y abrir Ponderaciones.
+2. Agregar un grupo, mover una evaluación y quitar el grupo anterior.
+3. Reordenar y asignar 33,33 %, 33,33 % y 33,34 %. Confirmar el cambio de cálculo.
 
-- Interfaz esperada: Total100 y valores confirmados; solo owner+teacher puede editar.
-- API esperada: PUT200 colección completa; GETtotal100.
-- Persistencia / consistencia: Pesos NUMERIC exactos, evento weightsUpdated único.
-- Denegación: T1 ordinario/assistant/owner sin teacher denegados.
+- Interfaz esperada: Total en vivo y confirmación de recálculo.
+- API esperada: 200 con grupos, orden y evaluaciones asignadas.
+- Persistencia / consistencia: Total exacto de 100 % y un evento.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
 - Dependencias: F1 entorno/seed listo; [fase F5](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador real; regression (regression incluye smoke; extended incluye regression).

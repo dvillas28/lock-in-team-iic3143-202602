@@ -7,8 +7,10 @@ const fields: Record<string,string[]> = {
  accountInvitation:["id","status","deliveryVersion","deliveryStatus","operationKey","operation"],
  userImport:["id","status","totalRows","createdCount","skippedCount"],
  quizAttempt:["id","quizId","studentId","sectionId","attemptNumber","status","startedAt","submittedAt","cancelledAt"],
- grade:["id","gradeItemId","studentId","sectionId","attemptId","scorePercent","grade","publishedAt"],
- quiz:["id","courseId","sectionId","title","opensAt","closesAt","maxAttempts","publishedAt","createdBy","questionCount","totalPoints","gradeItemId"],
+ grade:["id","gradeItemId","assignmentId","studentId","sectionId","attemptId","scorePercent","grade","publishedAt","pointsEarned","revisionId","revisedAt","reason"],
+ assignmentAttempt:["id","assignmentId","studentId","sectionId","attemptNumber","submittedAt","isLate","fileCount","hasWrittenResponse"],
+ assignment:["id","courseId","sectionId","title","description","instructions","maxPoints","groupId","status","publishedAt","availableFrom","dueAt","availableUntil","maxAttempts","allowedExtensions","allowWrittenResponse","version"],
+ quiz:["id","courseId","sectionId","title","opensAt","closesAt","maxAttempts","publishedAt","createdBy","questionCount","totalPoints","gradeItemId","groupId"],
  courseModule:["id","courseId","title","position","publishedAt"],
  academicFile:["id","moduleId","title","kind","position","fileName","mediaType","byteSize","publishedAt","createdBy"],
  moduleQuiz:["moduleId","quizId"],
@@ -20,10 +22,23 @@ const fields: Record<string,string[]> = {
 export function snapshot(type: string, value: unknown): Record<string,unknown>|null {
   if(value===null || typeof value!=="object" || Array.isArray(value))return null;
   const source=value as Record<string,unknown>;
+  if(type==="gradebook" && Array.isArray(source.groups)) {
+    const groups=source.groups.flatMap(value=>{
+      if(!value || typeof value!=="object" || Array.isArray(value))return [];
+      const {id,title,weightPercent,position,gradeItemIds}=value;
+      if(typeof id!=="string" || typeof title!=="string" || typeof weightPercent!=="number" || typeof position!=="number")return [];
+      return [{id,title,weightPercent,position,gradeItemIds:Array.isArray(gradeItemIds)?gradeItemIds.filter(v=>typeof v==="string"):[]}];
+    });
+    return {calculation:source.calculation==="points"?"points":"legacy",groups};
+  }
   if(type==="moduleOrder" || type==="gradebook") {
     const key=type==="moduleOrder"?"modules":"items",allowed=type==="moduleOrder"?["id","position"]:["gradeItemId","weightPercent"];
     return {[key]:Array.isArray(source[key])?source[key].filter(v=>v && typeof v==="object" && !Array.isArray(v)).map(v=>
       Object.fromEntries(Object.entries(v).filter(([k,val])=>((k===allowed[0] && typeof val==="string") || (k===allowed[1] && typeof val==="number" && Number.isFinite(val)))))):[]};
+  }
+  if(type==="assignment" && Array.isArray(source.allowedExtensions)) {
+    const {allowedExtensions,...rest}=source;
+    return {...snapshot(type,rest),allowedExtensions:allowedExtensions.filter(v=>typeof v==="string")};
   }
   return Object.fromEntries(Object.entries(source).filter(([key,val])=>fields[type]?.includes(key) && (val===null || typeof val==="string" || typeof val==="number" || typeof val==="boolean" || val instanceof Date)));
 }

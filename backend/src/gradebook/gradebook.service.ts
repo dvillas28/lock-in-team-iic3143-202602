@@ -7,32 +7,124 @@ import {AuditService} from "../audit/audit.service";
 import {requirePermission} from "../courses/course-access";
 import {uuid} from "../courses/validation";
 import {gradebookScope,academicScope,selectedSections,type GradebookScope} from "./gradebook-access";
-import {weightsInput,publicationInput,bookPage,type Selection} from "./gradebook-validation";
-import {itemDto,gradeDto,publishedDto,receiptDto} from "./gradebook-dto";
+import {weightsInput,publicationRequest,bookPage,groupsInput,correctionInput,type Selection} from "./gradebook-validation";
+import {itemDto,gradeDto,gradeResultDto,publishedDto,receiptDto} from "./gradebook-dto";
+import {canAuthorQuiz} from "../quizzes/quiz-access";
+import {configureGroups,groupsFor} from "./gradebook-groups";
+import {assignmentDraftsForPublication} from "./assignment-publication";
+import {gradeResults,resultSummary} from "./gradebook-results";
 const conflict=(code:string)=>new ConflictException({code});
 @Injectable()
 export class GradebookService {
  constructor(private readonly db:DatabaseService,private readonly audit:AuditService) {}
- async items(c:PoolClient,s:GradebookScope) {
-  return (await c.query("SELECT *,sum(weight_percent) OVER() AS total FROM public.grade_items WHERE institution_id=$1 AND course_id=$2 ORDER BY id",[s.member.institution_id,s.courseId])).rows;
+ async items(c:PoolClient,s:GradebookScope,includeHidden=false) {
+  const scope=academicScope(s);
+  const teachers=s.roles.filter(e=>e.role==="teacher").map(e=>e.section_id);
+  return (await c.query(`SELECT i.*,g.weight_percent AS group_weight,a.section_id AS assignment_section_id FROM public.grade_items i
+   JOIN public.grade_groups g ON g.institution_id=i.institution_id AND g.course_id=i.course_id AND g.id=i.group_id
+   LEFT JOIN public.assignments a ON (a.institution_id,a.course_id,a.id)=(i.institution_id,i.course_id,i.assignment_id)
+   WHERE i.institution_id=$1 AND i.course_id=$2 AND (i.assignment_id IS NULL OR $3::boolean OR
+    a.section_id=ANY($4::uuid[]) OR (a.section_id IS NULL AND cardinality($4::uuid[])>0 AND (a.status='published' OR EXISTS(
+     SELECT 1 FROM public.grades result WHERE result.institution_id=i.institution_id AND result.grade_item_id=i.id
+      AND result.section_id=ANY($4::uuid[])))))
+   ORDER BY i.id`,[s.member.institution_id,s.courseId,scope.global || includeHidden,teachers])).rows;
+ }
+ async configuration(c:PoolClient,s:GradebookScope) {
+  const groups=await groupsFor(c,s),items=await this.items(c,s);
+  return {items:items.map(itemDto),groups,totalWeightPercent:groups.reduce((n,g)=>n+Math.round(g.weightPercent*100),0)/100,
+   weightsLocked:false,hasPublishedGrades:s.course.grade_items_locked_at!==null,
+   calculation:s.course.gradebook_grouped?"points" as const:"legacy" as const,version:Number(s.course.gradebook_version)};
  }
  async listItems(actor:string,slug:string,course:string) {
-  return this.db.withInstitution(actor,slug,async c=>{const s=await gradebookScope(c,actor,slug,course);academicScope(s);const rows=await this.items(c,s);
-   return {items:rows.map(itemDto),totalWeightPercent:Number(rows[0]?.total??0),weightsLocked:s.course.grade_items_locked_at!==null};});
+  return this.db.withInstitution(actor,slug,async c=>{const s=await gradebookScope(c,actor,slug,course);academicScope(s);return this.configuration(c,s);});
+ }
+ async groups(actor:string,slug:string,course:string,body:unknown) {
+  const input=groupsInput(body);
+  return this.db.withInstitution(actor,slug,async c=>{
+   const s=await gradebookScope(c,actor,slug,course);academicScope(s,true);
+   const visible=await this.items(c,s),all=await this.items(c,s,true);
+   const visibleIds=new Set(visible.map(i=>i.id)),hidden=all.filter(i=>!visibleIds.has(i.id));
+   if(input.groups.some(g=>g.gradeItemIds.some(id=>!visibleIds.has(id))) ||
+    hidden.some(i=>!input.groups.some(g=>g.id===i.group_id)) ||
+    visible.some(i=>i.assignment_id && !canAuthorQuiz(s,i.assignment_section_id) &&
+     !input.groups.some(g=>g.id===i.group_id && g.gradeItemIds.includes(i.id)))) {
+    throw new UnprocessableEntityException({code:"INVALID_GRADE_GROUPS"});
+   }
+   // A section teacher can configure shared groups without moving evaluations
+   // outside their authoring scope or receiving those items in the response.
+   for(const g of input.groups) {
+    g.gradeItemIds.push(...hidden.filter(i=>i.group_id===g.id).map(i=>i.id));
+    g.gradeItemIds.sort((a,b)=>a.localeCompare(b,"en"));
+   }
+   const changes=await configureGroups(c,s,input,all);
+   if(changes) {
+    await this.audit.record(c,{institutionId:s.member.institution_id,actorUserId:actor,courseId:course,
+     action:"gradebook.groupsUpdated",resourceType:"gradebook",resourceId:course,...changes});
+    s.course.gradebook_grouped=true;
+    s.course.gradebook_version++;
+   }
+   return this.configuration(c,s);
+  });
+ }
+ async correct(actor:string,slug:string,course:string,id:string,body:unknown) {
+  const input=correctionInput(body);
+  return this.db.withInstitution(actor,slug,async c=>{
+   const s=await gradebookScope(c,actor,slug,course),scope=academicScope(s,true),tenant=s.member.institution_id;
+   const current=(await c.query(`${gradeResults} WHERE g.institution_id=$1 AND i.course_id=$2 AND g.id=$3
+    AND ($4::boolean OR g.section_id=ANY($5::uuid[])) FOR UPDATE OF g`,[tenant,course,id,scope.global,scope.sections])).rows[0];
+   if(!current)throw new NotFoundException();
+   if(current.assignment_id) requirePermission(current.student_id!==actor);
+   if(current.published_at===null)throw conflict("GRADE_NOT_PUBLISHED");
+   if (!current.assignment_id && (input.attemptId!==undefined || input.feedback!==undefined)) throw new BadRequestException();
+   const prior=(input.expectedRevisionId && current.assignment_id) ? (await c.query(`SELECT assignment_attempt_id,feedback
+    FROM public.grade_revisions WHERE institution_id=$1 AND grade_id=$2 AND id=$3`,
+    [tenant,id,input.expectedRevisionId])).rows[0] : null;
+   const attemptId=current.assignment_id ? (input.attemptId??prior?.assignment_attempt_id??current.assignment_attempt_id) : null;
+   const feedback=current.assignment_id ? (input.feedback!==undefined ? input.feedback : prior ? prior.feedback : current.feedback) : null;
+   const replay=(await c.query(`SELECT * FROM public.grade_revisions WHERE institution_id=$1 AND grade_id=$2 AND id=$3`,
+    [tenant,id,input.revisionId])).rows[0];
+   if(replay) {
+    if(replay.actor_user_id!==actor || replay.previous_revision_id!==input.expectedRevisionId ||
+      Number(replay.score_points)!==input.points || replay.reason!==input.reason ||
+      replay.assignment_attempt_id!==attemptId || replay.feedback!==feedback)throw conflict("IDEMPOTENCY_CONFLICT");
+    return gradeResultDto({...current,effective_percent:replay.score_percent,effective_grade:replay.grade_value,
+     earned_points:replay.score_points,revision_id:replay.id,revised_at:replay.created_at,
+     effective_attempt_id:replay.assignment_attempt_id??current.attempt_id});
+   }
+   if(current.revision_id!==input.expectedRevisionId)throw conflict("GRADE_REVISION_CHANGED");
+   if(input.points>Number(current.max_points))throw new UnprocessableEntityException({code:"GRADE_POINTS_OUT_OF_RANGE"});
+   if (attemptId && !(await c.query(`SELECT 1 FROM public.assignment_attempts
+    WHERE institution_id=$1 AND id=$2 AND assignment_id=$3 AND student_id=$4 AND section_id=$5`,
+    [tenant,attemptId,current.assignment_id,current.student_id,current.section_id])).rowCount) throw new NotFoundException();
+   const revision=(await c.query(`INSERT INTO public.grade_revisions
+    (id,institution_id,grade_id,actor_user_id,previous_revision_id,reason,score_points,assignment_attempt_id,feedback)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT(id) DO NOTHING RETURNING *`,
+    [input.revisionId,tenant,id,actor,input.expectedRevisionId,input.reason,input.points,attemptId,feedback])).rows[0];
+   if(!revision)throw conflict("IDEMPOTENCY_CONFLICT");
+   const result=gradeResultDto({...current,effective_percent:revision.score_percent,effective_grade:revision.grade_value,
+    earned_points:revision.score_points,revision_id:revision.id,revised_at:revision.created_at,
+    effective_attempt_id:revision.assignment_attempt_id??current.attempt_id});
+   await this.audit.record(c,{institutionId:tenant,actorUserId:actor,courseId:course,sectionId:current.section_id,
+    action:"grade.corrected",resourceType:"grade",resourceId:id,before:gradeResultDto(current),after:{...result,reason:input.reason}});
+   return result;
+  });
  }
  async weights(actor:string,slug:string,course:string,body:unknown) {
   const input=weightsInput(body);
   return this.db.withInstitution(actor,slug,async c=>{
    const s=await gradebookScope(c,actor,slug,course);academicScope(s,true);
-   if(s.course.grade_items_locked_at!==null)throw conflict("GRADE_WEIGHTS_LOCKED");
-   const rows=await this.items(c,s);
+   if(s.course.gradebook_grouped)throw conflict("USE_GRADE_GROUPS");
+   const rows=await this.items(c,s,true);
+   if(rows.some(r=>r.assignment_id) || new Set(rows.map(r=>r.group_id)).size!==rows.length)throw conflict("USE_GRADE_GROUPS");
    if(rows.length!==input.length || rows.some((r,i)=>r.id!==input[i].gradeItemId))throw new UnprocessableEntityException();
    const total=(await c.query("SELECT sum((i->>'weightPercent')::numeric)=100 AS valid FROM jsonb_array_elements($1::jsonb) i",[JSON.stringify(input)])).rows[0];
    if(!total.valid)throw new UnprocessableEntityException();
    const before={items:rows.map(r=>({gradeItemId:r.id,weightPercent:Number(r.weight_percent)}))},after={items:input};
    if(!isDeepStrictEqual(before,after)) {
+    if(s.course.grade_items_locked_at!==null)throw conflict("USE_GRADE_GROUPS");
     await c.query(`UPDATE public.grade_items g SET weight_percent=(v->>'weightPercent')::numeric FROM jsonb_array_elements($1::jsonb) v
      WHERE g.institution_id=$2 AND g.course_id=$3 AND g.id=(v->>'gradeItemId')::uuid`,[JSON.stringify(input),s.member.institution_id,course]);
+    await c.query("UPDATE public.courses SET gradebook_version=gradebook_version+1 WHERE institution_id=$1 AND id=$2",[s.member.institution_id,course]);
     await this.audit.record(c,{institutionId:s.member.institution_id,actorUserId:actor,courseId:course,action:"gradebook.weightsUpdated",resourceType:"gradebook",resourceId:course,before,after});
    }
    const updated=await this.items(c,s);return {items:updated.map(itemDto),totalWeightPercent:100};
@@ -40,34 +132,54 @@ export class GradebookService {
  }
  async selection(c:PoolClient,s:GradebookScope,input:Selection) {
   await selectedSections(c,s,input.sectionIds,true);
-  const items=(await c.query("SELECT * FROM public.grade_items WHERE institution_id=$1 AND course_id=$2 AND id=ANY($3::uuid[]) ORDER BY id FOR UPDATE",[s.member.institution_id,s.courseId,input.gradeItemIds])).rows;
+  const items=(await c.query("SELECT * FROM public.grade_items WHERE institution_id=$1 AND course_id=$2 AND id=ANY($3::uuid[]) AND quiz_id IS NOT NULL ORDER BY id FOR UPDATE",[s.member.institution_id,s.courseId,input.gradeItemIds])).rows;
   if(items.length!==input.gradeItemIds.length)throw new NotFoundException();
   return items;
  }
  async publish(actor:string,slug:string,course:string,key:string,body:unknown) {
-  const input=publicationInput(body);
+  const input=publicationRequest(body);
   return this.db.withInstitution(actor,slug,async c=>{
-   const s=await gradebookScope(c,actor,slug,course),items=await this.selection(c,s,input);
+   const s=await gradebookScope(c,actor,slug,course);
+   const assignment="scope" in input && input.scope==="assignment" ? input : null;
+   const quizInput=assignment ? null : input as Selection;
+   const items=quizInput ? await this.selection(c,s,quizInput) : [];
+   const assignmentGrades=assignment ? await assignmentDraftsForPublication(c,s,assignment) : null;
    const existing=(await c.query("SELECT *,to_char(published_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"') AS published_at FROM public.grade_publications WHERE institution_id=$1 AND actor_user_id=$2 AND idempotency_key=$3",[s.member.institution_id,actor,key])).rows[0];
    if(existing) {
     if(existing.course_id!==course || !isDeepStrictEqual(existing.request,input))throw conflict("IDEMPOTENCY_CONFLICT");
     return receiptDto(existing);
    }
-   if(Number((await this.items(c,s))[0]?.total)!==100)throw new ConflictException();
-   const quizzes=items.map(i=>i.quiz_id).sort();
-   await c.query("SELECT id FROM public.quizzes WHERE institution_id=$1 AND id=ANY($2::uuid[]) ORDER BY id FOR UPDATE",[s.member.institution_id,quizzes]);
-   const attempts=(await c.query(`SELECT * FROM public.quiz_attempts WHERE institution_id=$1 AND quiz_id=ANY($2::uuid[]) AND student_id=ANY($3::uuid[]) ORDER BY id FOR UPDATE`,[s.member.institution_id,quizzes,input.studentIds])).rows;
-   const grades=(await c.query(`SELECT * FROM public.grades WHERE institution_id=$1 AND grade_item_id=ANY($2::uuid[]) AND student_id=ANY($3::uuid[]) ORDER BY id FOR UPDATE`,[s.member.institution_id,input.gradeItemIds,input.studentIds])).rows;
-   if(grades.length!==input.gradeItemIds.length*input.studentIds.length || attempts.some(a=>a.status==="in_progress"))throw new ConflictException();
-   for(const g of grades) {
-    if(!input.sectionIds.includes(g.section_id))throw new ConflictException();
-    const a=attempts.find(a=>a.id===g.attempt_id);
-    if(!a || a.status!=="graded" || a.score_percent!==g.score_percent || a.grade_value!==g.grade_value || attempts.some(other=>other.quiz_id===g.quiz_id && other.student_id===g.student_id && other.status==="graded" && other.attempt_number>a.attempt_number))throw new ConflictException();
-    if(g.published_at!==null)throw conflict("GRADE_ALREADY_PUBLISHED");
+   if((await groupsFor(c,s)).reduce((sum,g)=>sum+Math.round(g.weightPercent*100),0)!==10000)throw new ConflictException();
+   let grades=assignmentGrades??[];
+   if (grades.some(g=>g.published_at!==null)) throw conflict("GRADE_ALREADY_PUBLISHED");
+   if (assignment && grades.some((g,index)=>g.version_stamp!==assignment.grades[index].expectedUpdatedAt)) {
+    throw conflict("GRADE_DRAFT_CHANGED");
    }
+   if (quizInput) {
+    const bulk="scope" in quizInput;
+    grades=(await c.query(`SELECT g.* FROM public.grades g JOIN public.grade_items i
+     ON i.institution_id=g.institution_id AND i.id=g.grade_item_id
+     WHERE g.institution_id=$1 AND i.course_id=$2 AND g.quiz_id IS NOT NULL AND (cardinality($3::uuid[])=0 OR g.grade_item_id=ANY($3))
+     AND ($4::uuid[] IS NULL OR g.student_id=ANY($4))
+     AND (NOT $5::boolean OR (g.section_id=ANY($6::uuid[]) AND g.published_at IS NULL))
+     ORDER BY g.id FOR UPDATE OF g`,[s.member.institution_id,course,quizInput.gradeItemIds,bulk?null:quizInput.studentIds,bulk,quizInput.sectionIds])).rows;
+    if(!grades.length || (!bulk && grades.length!==items.length*quizInput.studentIds.length))throw new ConflictException();
+    // The course lock is shared with quiz/attempt writers and keeps each pair stable.
+    const publishable=await c.query(`SELECT g.id FROM public.grades g JOIN public.quiz_attempts a
+     ON a.institution_id=g.institution_id AND a.id=g.attempt_id
+     WHERE g.institution_id=$1 AND g.id=ANY($2::uuid[])
+     AND a.status='graded' AND (a.score_percent,a.grade_value)=(g.score_percent,g.grade_value)
+     AND NOT EXISTS (SELECT 1 FROM public.quiz_attempts other
+      WHERE other.institution_id=g.institution_id AND other.quiz_id=g.quiz_id AND other.student_id=g.student_id
+       AND (other.status='in_progress' OR (other.status='graded' AND other.attempt_number>a.attempt_number)))`,
+     [s.member.institution_id,grades.map(g=>g.id)]);
+    if(publishable.rowCount!==grades.length || grades.some(g=>!quizInput.sectionIds.includes(g.section_id)))throw new ConflictException();
+   }
+   if(grades.some(g=>g.published_at!==null))throw conflict("GRADE_ALREADY_PUBLISHED");
    const stamp=(await c.query(`SELECT to_char(clock_timestamp() AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS at`)).rows[0].at;
    const changed=(await c.query("UPDATE public.grades SET published_at=$1,updated_at=$1 WHERE institution_id=$2 AND id=ANY($3::uuid[]) RETURNING *",[stamp,s.member.institution_id,grades.map(g=>g.id)])).rows;
-   for(const g of changed)await this.audit.record(c,{institutionId:s.member.institution_id,actorUserId:actor,courseId:course,sectionId:g.section_id,action:"grade.published",resourceType:"grade",resourceId:g.id,before:gradeDto(grades.find(old=>old.id===g.id)!),after:gradeDto(g)});
+   const before=new Map(grades.map(g=>[g.id,g]));
+   for(const g of changed)await this.audit.record(c,{institutionId:s.member.institution_id,actorUserId:actor,courseId:course,sectionId:g.section_id,action:"grade.published",resourceType:"grade",resourceId:g.id,before:{...gradeDto(before.get(g.id)!),...(g.assignment_id ? {assignmentId:g.assignment_id,pointsEarned:Number(g.assignment_points)} : {})},after:{...gradeDto(g),...(g.assignment_id ? {assignmentId:g.assignment_id,pointsEarned:Number(g.assignment_points)} : {})}});
    const receipt={publishedCount:changed.length,publishedAt:stamp};
    const inserted=await c.query(`INSERT INTO public.grade_publications(id,institution_id,course_id,actor_user_id,idempotency_key,request,published_count,published_at)
     VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(institution_id,actor_user_id,idempotency_key) DO NOTHING RETURNING id`,[randomUUID(),s.member.institution_id,course,actor,key,input,changed.length,stamp]);
@@ -79,36 +191,38 @@ export class GradebookService {
   if(Object.keys(query).length)throw new BadRequestException();
   return this.db.withInstitution(actor,slug,async c=>{
    const s=await gradebookScope(c,actor,slug,course);requirePermission(s.roles.some(e=>e.role==="student"));
-   const rows=(await c.query(`SELECT g.*,i.title,i.weight_percent FROM public.grades g JOIN public.grade_items i ON i.institution_id=g.institution_id AND i.id=g.grade_item_id
-    WHERE g.institution_id=$1 AND i.course_id=$2 AND g.student_id=$3 AND g.published_at IS NOT NULL ORDER BY i.created_at,i.id`,[s.member.institution_id,course,actor])).rows;
-   const summary=(await c.query(`SELECT round(sum(g.grade_value*i.weight_percent)/NULLIF(sum(i.weight_percent),0),1) AS average,COALESCE(sum(i.weight_percent),0) AS weight
-    FROM public.grades g JOIN public.grade_items i ON i.institution_id=g.institution_id AND i.id=g.grade_item_id
-    WHERE g.institution_id=$1 AND i.course_id=$2 AND g.student_id=$3 AND g.published_at IS NOT NULL`,[s.member.institution_id,course,actor])).rows[0];
-   return {courseId:course,items:rows.map(publishedDto),partialAverage:summary.average===null?null:Number(summary.average),publishedWeightPercent:Number(summary.weight),isPartial:Number(summary.weight)<100};
+   const rows=(await c.query(`${gradeResults} WHERE g.institution_id=$1 AND i.course_id=$2 AND g.student_id=$3
+    AND g.published_at IS NOT NULL ORDER BY k.position,i.created_at,i.id`,[s.member.institution_id,course,actor])).rows;
+   const summary=await resultSummary(c,rows,s.course.gradebook_grouped);
+   return {courseId:course,items:rows.map(publishedDto),...summary,
+    calculation:s.course.gradebook_grouped?"points":"legacy",isPartial:s.course.gradebook_grouped || summary.publishedWeightPercent<100};
   });
  }
  async book(actor:string,slug:string,course:string,query:Record<string,unknown>) {
   return this.db.withInstitution(actor,slug,async c=>{
    const s=await gradebookScope(c,actor,slug,course),scope=academicScope(s),section=query.sectionId===undefined?null:uuid(query.sectionId);
    if(section)await selectedSections(c,s,[section]);
+   const teachers=s.roles.filter(e=>e.role==="teacher").map(e=>e.section_id);
    const p=bookPage(query,JSON.stringify(["gradebook",s.member.institution_id,course,actor,section]));
    const rows=(await c.query(`WITH grouped AS (
-    SELECT g.student_id,g.section_id,min(g.created_at) AS date,
-    round(sum(g.grade_value*i.weight_percent) FILTER(WHERE g.published_at IS NOT NULL)/NULLIF(sum(i.weight_percent) FILTER(WHERE g.published_at IS NOT NULL),0),1) AS average,
-    COALESCE(sum(i.weight_percent) FILTER(WHERE g.published_at IS NOT NULL),0) AS weight
+    SELECT g.student_id,g.section_id,min(g.created_at) AS date
     FROM public.grades g JOIN public.grade_items i ON i.institution_id=g.institution_id AND i.id=g.grade_item_id
     WHERE g.institution_id=$1 AND i.course_id=$2 AND ($3::boolean OR g.section_id=ANY($4::uuid[])) AND ($5::uuid IS NULL OR g.section_id=$5)
+    AND (g.assignment_id IS NULL OR $3::boolean OR g.section_id=ANY($10::uuid[]))
     GROUP BY g.student_id,g.section_id)
     SELECT x.*,u.name,u.email,u.active,to_char(x.date AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS cursor_date
     FROM grouped x JOIN public.users u ON u.id=x.student_id
     WHERE $6::timestamptz IS NULL OR (x.date,x.student_id,x.section_id)>($6::timestamptz,$7::uuid,$8::uuid)
-    ORDER BY x.date,x.student_id,x.section_id LIMIT $9`,[s.member.institution_id,course,scope.global,scope.sections,section,p.date,p.id,p.section,p.limit+1])).rows;
+    ORDER BY x.date,x.student_id,x.section_id LIMIT $9`,[s.member.institution_id,course,scope.global,scope.sections,section,p.date,p.id,p.section,p.limit+1,teachers])).rows;
    const hasMore=rows.length>p.limit,visible=rows.slice(0,p.limit),last=visible.at(-1);
    const items=[];
    for(const row of visible) {
-    const grades=(await c.query(`SELECT g.* FROM public.grades g JOIN public.grade_items i ON i.institution_id=g.institution_id AND i.id=g.grade_item_id
-     WHERE g.institution_id=$1 AND i.course_id=$2 AND g.student_id=$3 AND g.section_id=$4 ORDER BY i.created_at,i.id`,[s.member.institution_id,course,row.student_id,row.section_id])).rows;
-    items.push({student:{id:row.student_id,name:row.name,email:row.email,active:row.active},sectionId:row.section_id,grades:grades.map(gradeDto),partialAverage:row.average===null?null:Number(row.average),publishedWeightPercent:Number(row.weight)});
+    const grades=(await c.query(`${gradeResults}
+     WHERE g.institution_id=$1 AND i.course_id=$2 AND g.student_id=$3 AND g.section_id=$4
+      AND (g.assignment_id IS NULL OR $5::boolean) ORDER BY k.position,i.created_at,i.id`,
+     [s.member.institution_id,course,row.student_id,row.section_id,scope.global || teachers.includes(row.section_id)])).rows;
+    items.push({student:{id:row.student_id,name:row.name,email:row.email,active:row.active},sectionId:row.section_id,
+     grades:grades.map(gradeResultDto),...await resultSummary(c,grades,s.course.gradebook_grouped)});
    }
    return {courseId:course,items,hasMore,nextCursor:hasMore && last?Buffer.from(JSON.stringify({scope:p.scope,date:last.cursor_date,id:last.student_id,section:last.section_id})).toString("base64url"):null};
   });

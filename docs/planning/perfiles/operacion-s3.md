@@ -24,8 +24,9 @@ Los tests usan directorios temporales y transporte S3 sustituido, sin credencial
 
 `scripts/provision-avatar-s3.sh` aplica estos pasos en us-east-1 para prod y test
 y guarda las keys fuera del repo, sin imprimirlas. El mismo bucket y usuario sirven
-`academic/materials/` con una declaración separada ([guía](../academic-files/s3.md));
-en test solo `avatars/` expira a los 7 días.
+`academic/materials/` ([guía](../academic-files/s3.md)) y `academic/submissions/`
+([guía](../../guides/assignment-submissions-s3.md)), cada uno con una declaración
+separada; en test solo `avatars/` expira a los 7 días.
 
 Política de aplicación, sustituyendo NOMBRE_BUCKET sin alterar el prefijo:
 
@@ -78,7 +79,8 @@ Usar margen de al menos 24 h para no competir con subidas en curso y lotes acota
 
 Los comandos de limpieza solo enumeran y borran. En prod usan el usuario IAM
 `academix-maintenance-prod`, creado por el script: `s3:ListBucket` condicionado a
-`avatars/*` y `academic/materials/*`, y `s3:DeleteObject` sobre esos prefijos.
+`avatars/*`, `academic/materials/*` y `academic/submissions/*`, y
+`s3:DeleteObject` sobre esos prefijos.
 No puede leer ni escribir objetos. En test se usa `academix-backend-test`.
 
 Esa credencial nunca va a Render ni al servidor HTTP: el operador la guarda en su

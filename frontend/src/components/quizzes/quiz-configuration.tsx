@@ -2,9 +2,11 @@ import { useId } from "react";
 import type { Authoring } from "../../lib/quizzes/validation.ts";
 import type { Section } from "../../lib/courses/validation.ts";
 import { localDate } from "../../lib/quizzes/form-values.ts";
+import type { EvaluationGroup } from "../../lib/api/assignments.ts";
+import { EvaluationGroupField } from "../courses/evaluation-group-field.tsx";
 import { Field } from "../courses/form-fields.tsx";
 export { configuration, localDate } from "../../lib/quizzes/form-values.ts";
-export function QuizConfiguration({item,sections,wholeCourse,field,message}:{item?: Authoring;sections: Section[];wholeCourse:boolean;field?:string;message?:string}) {
+export function QuizConfiguration({item,sections,wholeCourse,groups,field,message}:{item?: Authoring;sections: Section[];wholeCourse:boolean;groups?:EvaluationGroup[];field?:string;message?:string}) {
   const destinationId=useId(), attemptsId=useId();
   return <div className="stack quiz-configuration">
     <div className="form-grid">
@@ -12,6 +14,7 @@ export function QuizConfiguration({item,sections,wholeCourse,field,message}:{ite
     <div className="stack"><label className="field-label" htmlFor={destinationId}>Destinatarios</label><select id={destinationId} className="field" name="sectionId" defaultValue={item?.sectionId ?? (wholeCourse ? "" : sections[0]?.id)} aria-invalid={field === "sectionId" || undefined} aria-describedby={field === "sectionId" ? `${destinationId}-error` : undefined}>
       {wholeCourse && <option value="">Todo el curso</option>}{sections.map(s=><option key={s.id} value={s.id}>Sección {s.code}</option>)}
     </select>{field === "sectionId" && <p className="hint" id={`${destinationId}-error`}>{message}</p>}</div></div>
+    {groups && <EvaluationGroupField key={item?.groupId} groups={groups} value={item?.groupId} kind="Quizzes"/>}
     <Field name="instructions" label="Instrucciones (opcional)" multiline required={false} value={item?.instructions ?? ""} invalid={field === "instructions"} error={field === "instructions" ? message : undefined}/>
     <div className="form-grid quiz-date-fields">
       <Field name="opensAt" label="Apertura" type="datetime-local" required={false} value={localDate(item?.opensAt)} invalid={field === "opensAt"} error={field === "opensAt" ? message : undefined}/>

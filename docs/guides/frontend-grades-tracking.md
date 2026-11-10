@@ -1,5 +1,7 @@
 # Notas y seguimiento frontend
 
+Esta página registra la entrega histórica. La [política vigente del libro de notas](../adr/gradebook-groups-and-revisions.md) describe los grupos, el recálculo y la corrección de notas publicadas.
+
 Spec: `specs/20261021-141353_frontend-notas-seguimiento`, validación local 2026-10-22.
 Estado: COMPLETA, 36/36 tareas verificadas localmente; US1–US4 y FE-20 aprobados.
 Checklists iniciales: requirements.md 14/14, sin pendientes documentales.

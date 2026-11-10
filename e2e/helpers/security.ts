@@ -17,7 +17,7 @@ export async function academic(e:Environment,slug='uc',graded=false) {
 }
 export async function securitySnapshot(e:Environment) {
  const result:Record<string,unknown>={};
- for(const name of ['institutions','institution_memberships','courses','sections','enrollments','course_modules','materials','quizzes','quiz_attempts','grade_items','grades','grade_publications','audit_events'])result[name]=(await e.pool.query(`SELECT * FROM ${name} ORDER BY id`)).rows;
+ for(const name of ['institutions','institution_memberships','courses','sections','enrollments','course_modules','materials','quizzes','quiz_attempts','grade_items','grade_groups','grades','grade_revisions','grade_publications','audit_events'])result[name]=(await e.pool.query(`SELECT * FROM ${name} ORDER BY id`)).rows;
  return result;
 }
 export async function deniedUI(page:Page,path:string) {

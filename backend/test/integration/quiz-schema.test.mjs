@@ -3,7 +3,7 @@ import {test} from 'node:test';
 import {randomUUID} from 'node:crypto';
 import {database,cli} from './helpers.mjs';
 import {quizFixture} from './quiz-fixtures.mjs';
-test('quiz schema enforces tenant/course FKs, ranges, unique item and irreversible course freeze',async()=>{
+test('quiz schema enforces tenant/course FKs, ranges, unique item and monotonic publication marker',async()=>{
  const pool=await database();try{
   const f=await quizFixture(pool,true),id=f.quizzes.draft;
   for(const [sql,args] of [
@@ -17,7 +17,7 @@ test('quiz schema enforces tenant/course FKs, ranges, unique item and irreversib
   ])await assert.rejects(pool.query(sql,args));
   await pool.query("UPDATE courses SET grade_items_locked_at=clock_timestamp() WHERE id=$1",[f.own]);
   for(const value of [null,'2020-01-01T00:00:00Z'])await assert.rejects(pool.query('UPDATE courses SET grade_items_locked_at=$1 WHERE id=$2',[value,f.own]));
-  await assert.rejects(pool.query("INSERT INTO grade_items(id,institution_id,course_id,quiz_id,title) VALUES($1,$2,$3,$4,'x')",[randomUUID(),f.tenants.uc,f.own,id]));
+  await pool.query("INSERT INTO grade_items(id,institution_id,course_id,quiz_id,title) VALUES($1,$2,$3,$4,'x')",[randomUUID(),f.tenants.uc,f.own,id]);
   assert.equal((await cli('commands/migrate').result).code,0);
   assert.equal((await pool.query('SELECT * FROM quizzes')).rowCount,6);
  }finally{await pool.end();}

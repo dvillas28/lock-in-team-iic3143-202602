@@ -27,9 +27,11 @@ export function PublicationToggle({session, slug, kind, id, parentId, title, pub
     });
   }
   return <div className="publication-control">
-    <button type="button" className={`btn btn-ghost${published ? " is-published" : ""}`} aria-label={`${published ? "Ocultar" : "Publicar"} ${label} ${title}`} aria-pressed={published} aria-disabled={disabled || mutation.busy || !!mutation.uncertain} onClick={toggle}>
-      {published ? <CircleCheck size={18} aria-hidden="true" /> : <Circle size={18} aria-hidden="true" />}
-      {published ? "Publicado" : "Borrador"}
+    <span className={`chip ${published ? "chip-success" : ""}`}><span className="publication-state-icon" aria-hidden="true">
+      {published ? <CircleCheck size={14} /> : <Circle size={14} />}
+    </span>{published ? "Publicado" : "Borrador"}</span>
+    <button type="button" className="btn btn-ghost publication-action" aria-label={`${published ? "Ocultar" : "Publicar"} ${label} ${title}`} aria-disabled={disabled || mutation.busy || !!mutation.uncertain} onClick={toggle}>
+      {published ? "Ocultar" : "Publicar"}
     </button>
     {mutation.message && <p role={mutation.confirmed ? "status" : "alert"}>{mutation.message}</p>}
   </div>;

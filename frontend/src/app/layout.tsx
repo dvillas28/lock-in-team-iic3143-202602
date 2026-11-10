@@ -1,7 +1,17 @@
 import type { Metadata } from "next";
-import { EB_Garamond, Inter } from "next/font/google";
 import type { ReactNode } from "react";
 import { SessionProvider } from "../components/auth/session-provider.tsx";
+
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/inter/700.css";
+import "@fontsource/eb-garamond/500.css";
+import "@fontsource/eb-garamond/500-italic.css";
+import "@fontsource/eb-garamond/600.css";
+import "@fontsource/eb-garamond/600-italic.css";
+import "@fontsource/eb-garamond/700.css";
+import "@fontsource/eb-garamond/700-italic.css";
 
 import "@/styles/tokens.css";
 import "@/styles/app.css";
@@ -10,24 +20,10 @@ import "@/styles/auth.css";
 import "@/styles/academic-records.css";
 import "@/styles/content.css";
 import "@/styles/quizzes.css";
+import "@/styles/assignments.css";
 import "@/styles/attempts.css";
 import "@/styles/landing.css";
 import "@/styles/accounts.css";
-
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-  variable: "--font-inter",
-});
-
-const ebGaramond = EB_Garamond({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  style: ["normal", "italic"],
-  display: "swap",
-  variable: "--font-eb-garamond",
-});
 
 export const metadata: Metadata = {
   title: "AcademiX",
@@ -40,7 +36,7 @@ type RootLayoutProps = Readonly<{
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="es" className={`${inter.variable} ${ebGaramond.variable}`}>
+    <html lang="es">
       <body><SessionProvider>{children}</SessionProvider></body>
     </html>
   );

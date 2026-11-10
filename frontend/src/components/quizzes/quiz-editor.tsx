@@ -10,6 +10,7 @@ import { useResource } from "../courses/use-resource.ts";
 import { useMutation } from "../courses/use-mutation.ts";
 import { getCourse } from "../../lib/api/courses.ts";
 import { listSections } from "../../lib/api/sections.ts";
+import { listEvaluationGroups, type EvaluationGroup } from "../../lib/api/assignments.ts";
 import { getQuiz, getQuizAuthoringView, updateQuiz } from "../../lib/api/quizzes.ts";
 import { canAuthor, destinations } from "../../lib/quizzes/capabilities.ts";
 import { quizInput, type Authoring, type Update } from "../../lib/quizzes/validation.ts";
@@ -27,14 +28,15 @@ export function QuizEditor({courseId,quizId}:{courseId:string;quizId:string}) {
     if(!context?.user || !canAuthor(context.user,course,sections,safe.sectionId)) throw new ApiHttpError(403);
     const quiz=await getQuizAuthoringView(c,slug,courseId,quizId);
     if(!canAuthor(context.user,course,sections,quiz.sectionId)) throw new ApiHttpError(403);
-    return {course,sections,quiz};
+    const groups=quiz.status==="draft" ? await listEvaluationGroups(c,slug,courseId) : undefined;
+    return {course,sections,quiz,groups};
   });
   if(!context?.user) return <LoadingState/>;
   if(result.error) return <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/>;
   if(!result.data) return <LoadingState/>;
   return <AuthoringForm key={scope} {...result.data}/>;
 }
-function AuthoringForm({course,sections,quiz}:{course:Awaited<ReturnType<typeof getCourse>>;sections:Awaited<ReturnType<typeof listSections>>;quiz:Authoring}) {
+function AuthoringForm({course,sections,quiz,groups}:{course:Awaited<ReturnType<typeof getCourse>>;sections:Awaited<ReturnType<typeof listSections>>;quiz:Authoring;groups?:EvaluationGroup[]}) {
   const {session,state}=useSession(), {slug,user}=state.context!;
   const [saved,setSaved]=useState(quiz),[observed,setObserved]=useState<Authoring>(),[revision,setRevision]=useState(0),[dirty,setDirty]=useState(false),[publishing,setPublishing]=useState(false);
   const [rows,setRows]=useState(()=>questionRows(quiz.questions));
@@ -79,7 +81,7 @@ function AuthoringForm({course,sections,quiz}:{course:Awaited<ReturnType<typeof 
     <form id={formId} key={revision} ref={formRef} className="stack" aria-label="Editar quiz" onSubmit={submit} onInput={()=>setDirty(true)} onChange={()=>setDirty(true)} noValidate aria-busy={mutation.busy}>
       {mutation.message && <p className="notice" role={mutation.confirmed ? "status" : "alert"} ref={feedback} tabIndex={-1}>{mutation.message}</p>}
       <fieldset className="stack" disabled={blocked}>
-        <section className="card panel stack"><div><h2>Configuración del quiz</h2><p className="hint">Define quién puede rendirlo y en qué horario.</p></div><QuizConfiguration item={saved} sections={destinations(user!,course,sections)} wholeCourse={canAuthor(user!,course,sections,null)} field={mutation.field} message={mutation.message}/></section>
+        <section className="card panel stack"><div><h2>Configuración del quiz</h2><p className="hint">Define quién puede rendirlo y en qué horario.</p></div><QuizConfiguration groups={groups} item={saved} sections={destinations(user!,course,sections)} wholeCourse={canAuthor(user!,course,sections,null)} field={mutation.field} message={mutation.message}/></section>
         <QuestionEditor rows={rows} onRows={next=>{setRows(next);setDirty(true);}} field={mutation.field} message={mutation.message}/>
       </fieldset>
     </form>

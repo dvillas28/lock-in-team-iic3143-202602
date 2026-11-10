@@ -24,7 +24,7 @@ export function getRouteFeedback(error: unknown): RouteFeedback {
     const conflicts: Record<string, string> = {
       ACCESS_REVALIDATION_REQUIRED: " Verifica tu acceso antes de guardar cambios.",
       IDEMPOTENCY_CONFLICT: " La clave pertenece a otra operación. Conserva la clave y revisa el contexto.",
-      GRADE_ALREADY_PUBLISHED: " La selección incluye notas ya publicadas e inmutables.",
+      GRADE_ALREADY_PUBLISHED: " La selección incluye notas ya publicadas. Elige las notas pendientes.",
       GRADE_WEIGHTS_LOCKED: " Los pesos están bloqueados por una publicación.",
     };
     const conflict = error.status === 409 && Object.hasOwn(conflicts, error.problem.code ?? "")

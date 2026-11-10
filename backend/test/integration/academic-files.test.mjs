@@ -6,7 +6,7 @@ import {join} from "node:path";
 import {fileURLToPath} from "node:url";
 import {runner} from "node-pg-migrate";
 import {test} from "node:test";
-import {cli,database,http} from "./helpers.mjs";
+import {database,http} from "./helpers.mjs";
 import {contentFixture,tokens,request,users} from "./content-fixtures.mjs";
 import {failAudit,restoreAudit} from "./course-fixtures.mjs";
 import {LocalObjectStorage} from "../../dist/academic-files/object-storage.js";
@@ -23,11 +23,11 @@ function upload(app,token,path,method="POST",data=pdf,name="Guía.pdf",type="app
  return raw(app,token,path,{method,body,headers:operation?{"Idempotency-Key":operation}:{}});
 }
 
-async function downAcademicMigration(pool) {
+async function runAcademicMigration(pool,direction="down") {
  const client=await pool.connect();
  try {
   return await runner({dbClient:client,dir:fileURLToPath(new URL("../../migrations",import.meta.url)),
-   schema:"public",migrationsSchema:"public",migrationsTable:"pgmigrations",direction:"down",count:1,singleTransaction:true,
+   schema:"public",migrationsSchema:"public",migrationsTable:"pgmigrations",direction,file:"20261109000100_academic_files",count:1,checkOrder:false,singleTransaction:true,
    logger:{debug(){},info(){},warn(){},error(){}}});
  } finally {client.release();}
 }
@@ -42,9 +42,9 @@ test("academic migration backfills the old Markdown order without altering conte
   const markdown=()=>pool.query(`SELECT id,title,markdown_body,published_at FROM materials
    WHERE module_id=$1 ORDER BY id`,[module]).then(result=>result.rows);
   const before=await markdown();
-  assert.equal((await downAcademicMigration(pool)).length,1);
+  assert.equal((await runAcademicMigration(pool)).length,1);
   assert.deepEqual(await markdown(),before);
-  assert.equal((await cli("commands/migrate").result).code,0);
+  assert.equal((await runAcademicMigration(pool,"up")).length,1);
   assert.deepEqual(await markdown(),before);
   const after=(await pool.query("SELECT id,position FROM materials WHERE module_id=$1 ORDER BY position",[module])).rows;
   assert.deepEqual(after,before.map((item,i)=>({id:item.id,position:i+1})));
@@ -72,7 +72,7 @@ test("academic file lifecycle is scoped, auditable, and consistent across object
   const file=await first.json();
   assert.equal((await second.json()).id,file.id);
   assert.equal(file.publishedAt,null);assert.equal(file.kind,"file");assert.equal(file.fileName,"Guía.pdf");
-  await assert.rejects(()=>downAcademicMigration(pool),/Retain academic file and quiz references/);
+  await assert.rejects(()=>runAcademicMigration(pool),/Retain academic file and quiz references/);
   assert.equal((await upload(app,t.teacher,create,"POST",pdf,"Otra.pdf","application/pdf",operation)).status,409);
   const detail=`uc/materials/${file.id}/file`;
   assert.equal((await request(app,t.teacher,module+"/materials")).body.items.length,1);

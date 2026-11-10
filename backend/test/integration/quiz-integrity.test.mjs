@@ -45,7 +45,7 @@ test('US1 concurrent publications and both PATCH/publication orders have serial 
   }
  }finally{if(app)await app.close();await pool.end();}
 });
-test('US1 first-grade freeze protocol vs quiz publication works in both lock orders and rollback',async()=>{
+test('US1 first-publication timestamp vs quiz publication works in both lock orders and rollback',async()=>{
  const pool=await database();let app;try{
   const f=await quizFixture(pool);app=await http();const t=await tokens(app,f);
   // Different courses keep the monotonic marker intact between scenarios.
@@ -53,9 +53,9 @@ test('US1 first-grade freeze protocol vs quiz publication works in both lock ord
    const course=first==='publish'?f.own:f.other,section=first==='publish'?f.s1:f.s3;
    const id=await f.make({course,section}),publish=()=>request(app,t.owner,'uc/quizzes/'+id+'/publish','POST');
    const result=await queued(pool,course,first==='publish'?publish:()=>freeze(pool,course),first==='publish'?()=>freeze(pool,course):publish);
-   assert.deepEqual(result.map(r=>r.status),first==='publish'?[200,200]:[200,409]);
-   assert.equal((await pool.query('SELECT * FROM grade_items WHERE quiz_id=$1',[id])).rowCount,first==='publish'?1:0);
-   if(first==='publish')assert.equal((await publish()).status,200);
+   assert.deepEqual(result.map(r=>r.status),[200,200]);
+   assert.equal((await pool.query('SELECT * FROM grade_items WHERE quiz_id=$1',[id])).rowCount,1);
+   assert.equal((await publish()).status,200);
   }
   const c=await pool.connect();try{
    await c.query('BEGIN');await c.query('SELECT * FROM courses WHERE id=$1 FOR UPDATE',[f.foreign]);
@@ -64,10 +64,10 @@ test('US1 first-grade freeze protocol vs quiz publication works in both lock ord
   }finally{c.release();}
  }finally{if(app)await app.close();await pool.end();}
 });
-test('US1 database freeze constraint maps only its own error to conflict and preserves atomic state',async()=>{
+test('US1 database check failure is sanitized and preserves atomic state',async()=>{
  const pool=await database();let app;try{
   const f=await quizFixture(pool);app=await http();const t=await tokens(app,f),id=await f.make();
-  for(const [code,constraint,status] of [['23514','grade_items_course_frozen',409],['23514','other_check',422],['XX000','unexpected',500]]){
+  for(const [code,constraint,status] of [['23514','other_check',422],['XX000','unexpected',500]]){
    await pool.query(`CREATE FUNCTION quiz_insert_fault() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN
     RAISE EXCEPTION 'private sentinel correct answer' USING ERRCODE='${code}',CONSTRAINT='${constraint}'; END $$;
     CREATE TRIGGER aaa_quiz_insert_fault BEFORE INSERT ON grade_items FOR EACH ROW EXECUTE FUNCTION quiz_insert_fault()`);

@@ -6,7 +6,7 @@ import {mount} from "./fixtures/course-ui.ts";
 import {unit,material,course,timestamp,matrix,resources} from "./fixtures/content.ts";
 import {deferred} from "./fixtures/courses.ts";
 const view=()=>h(ModulesPanel,{courseId:course.id});
-test("independent publication controls retain focus and aria state; hidden parent preserves child publication",async()=>{
+test("independent publication controls retain focus and show publication state; hidden parent preserves child publication",async()=>{
  let parent={...unit};let child={...material,publishedAt:timestamp as string|null};
  const ui=await mount(view(),r=>{
  if(r.method==="POST"){if(r.url.includes("/materials/")){child={...child,publishedAt:r.url.endsWith("/unpublish")?null:timestamp};return Response.json(child);}parent={...parent,publishedAt:r.url.endsWith("/unpublish")?null:timestamp};return Response.json(parent);}
@@ -15,7 +15,9 @@ test("independent publication controls retain focus and aria state; hidden paren
  try{
  await ui.click("Unidad 1");assert.match(ui.doc.body.textContent!,/No visible: módulo sin publicar/);
  const button=ui.doc.querySelector<HTMLButtonElement>('button[aria-label="Publicar módulo Unidad 1"]')!;assert.ok(button);button.focus();
- await ui.settle(()=>button.click());assert.equal(ui.doc.activeElement,button);assert.equal(button.getAttribute("aria-pressed"),"true");
+ await ui.settle(()=>button.click());assert.equal(ui.doc.activeElement,button);
+ assert.equal(button.getAttribute("aria-label"),"Ocultar módulo Unidad 1");
+ assert.equal(button.parentElement?.querySelector(".chip")?.textContent,"Publicado");
  assert.match(ui.doc.body.textContent!,/Visible para estudiantes/);
  await ui.settle(()=>button.click());assert.equal(child.publishedAt,timestamp);assert.match(ui.doc.body.textContent!,/No visible: módulo sin publicar/);
  }finally{await ui.close();}
@@ -54,6 +56,8 @@ test("uncertain item publication refreshes observed state without claiming write
  try{
  await ui.click("Unidad 1");const button=ui.doc.querySelector<HTMLButtonElement>('button[aria-label="Publicar material Lectura"]')!;
  await ui.settle(()=>button.click());assert.match(ui.doc.body.textContent!,/Resultado incierto/);assert.doesNotMatch(ui.doc.body.textContent!,/Material publicado/);
- assert.equal(button.getAttribute("aria-pressed"),"true");assert.equal(button.getAttribute("aria-disabled"),"true");
+ assert.equal(button.getAttribute("aria-label"),"Ocultar material Lectura");
+ assert.equal(button.parentElement?.querySelector(".chip")?.textContent,"Publicado");
+ assert.equal(button.getAttribute("aria-disabled"),"true");
  }finally{await ui.close();}
 });

@@ -8,11 +8,12 @@ import type { CurrentUser } from "../../lib/auth/validation.ts";
 import { FieldError, type Course, type Section } from "../../lib/courses/validation.ts";
 import { canAuthor, destinations } from "../../lib/quizzes/capabilities.ts";
 import type { Summary } from "../../lib/quizzes/validation.ts";
+import type { EvaluationGroup } from "../../lib/api/assignments.ts";
 import { createQuiz, listCourseQuizzes } from "../../lib/api/quizzes.ts";
 import { useMutation } from "../courses/use-mutation.ts";
 import { QuizConfiguration, configuration } from "./quiz-configuration.tsx";
 import { QuestionEditor, questionRows, readQuestions } from "./question-editor.tsx";
-export function QuizCreate({session,slug,user,course,sections,onSaved}:{session:Session;slug:string;user:CurrentUser;course:Course;sections:Section[];onSaved:()=>Promise<unknown>}) {
+export function QuizCreate({session,slug,user,course,sections,groups,onSaved}:{session:Session;slug:string;user:CurrentUser;course:Course;sections:Section[];groups?:EvaluationGroup[];onSaved:()=>Promise<unknown>}) {
   const mutation=useMutation(session),formRef=useRef<HTMLFormElement>(null),feedback=useRef<HTMLParagraphElement>(null);
   useEffect(()=>{
     if(!mutation.message || mutation.confirmed)return;
@@ -51,7 +52,7 @@ export function QuizCreate({session,slug,user,course,sections,onSaved}:{session:
   }
   return <details className="academic-disclosure card quiz-create"><summary><Plus size={16} aria-hidden="true"/>Crear quiz</summary><section className="panel stack"><form ref={formRef} aria-label="Crear quiz" className="stack" onSubmit={submit} noValidate aria-busy={mutation.busy}>
     <div><h2 className="serif">Crear borrador</h2><p className="hint">Configura el quiz, agrega preguntas y marca sus respuestas correctas antes de guardar.</p></div><fieldset className="stack" disabled={mutation.busy || mutation.uncertain || !!created}>
-      <QuizConfiguration sections={allowed} wholeCourse={wholeCourse} field={mutation.field} message={mutation.message}/>
+      <QuizConfiguration sections={allowed} groups={groups} wholeCourse={wholeCourse} field={mutation.field} message={mutation.message}/>
       {!created && <QuestionEditor rows={rows} onRows={setRows} field={mutation.field} message={mutation.message}/>}
       <button type="submit" className="btn btn-primary">{mutation.busy ? "Creando…" : "Crear borrador"}</button>
     </fieldset>{mutation.message && <p ref={feedback} tabIndex={-1} role="status" aria-live="polite">{mutation.message}</p>}

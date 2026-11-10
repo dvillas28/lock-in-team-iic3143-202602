@@ -4,7 +4,7 @@ import {object,uuid} from "../courses/validation";
 import {title,position} from "../content/content-validation";
 export interface Alternative {id:string;text:string;isCorrect:boolean}
 export interface Question {id:string;position:number;prompt:string;points:number;alternatives:Alternative[]}
-export interface QuizInput {title:string;sectionId:string|null;instructions:string|null;opensAt:string|null;closesAt:string|null;maxAttempts:number|null;questions:Question[]}
+export interface QuizInput {title:string;groupId?:string|null;sectionId:string|null;instructions:string|null;opensAt:string|null;closesAt:string|null;maxAttempts:number|null;questions:Question[]}
 function string(value:unknown,nonblank=true,max=Infinity) {
  if(typeof value!=="string")throw new BadRequestException();
  if((nonblank && !value.trim()) || [...value].length>max || value.includes("\0"))throw new UnprocessableEntityException();
@@ -19,9 +19,10 @@ function date(value:unknown):string|null {
  return new Date(value).toISOString().slice(0,19)+"."+(m[7]??"").padEnd(6,"0")+"Z";
 }
 export function validateQuiz(body:unknown,current?:QuizInput):QuizInput {
- const input=object(body,["title","sectionId","instructions","opensAt","closesAt","maxAttempts","questions"],current?[]:["title"]);
+ const input=object(body,["title","groupId","sectionId","instructions","opensAt","closesAt","maxAttempts","questions"],current?[]:["title"]);
  const result:QuizInput=current?{...current}:{title:"",sectionId:null,instructions:null,opensAt:null,closesAt:null,maxAttempts:null,questions:[]};
  if("title" in input)result.title=title(input.title);
+ if("groupId" in input)result.groupId=input.groupId===null?null:uuid(input.groupId);
  if("sectionId" in input)result.sectionId=input.sectionId===null?null:uuid(input.sectionId);
  if("instructions" in input)result.instructions=input.instructions===null?null:string(input.instructions,false,10000);
  for(const key of ["opensAt","closesAt"] as const)if(key in input)result[key]=date(input[key]);

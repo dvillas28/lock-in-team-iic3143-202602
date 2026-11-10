@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Aprovisiona los buckets S3 privados de AcademiX (prod y test) para fotos de perfil
-# (avatars/) y archivos académicos (academic/materials/), con un usuario IAM de mínimo
-# privilegio por bucket y una credencial de mantenimiento de prod (solo listar/borrar).
-# Idempotente: se puede re-ejecutar para aplicar cambios.
+# (avatars/), materiales (academic/materials/) y entregas de tareas (academic/submissions/),
+# con un usuario IAM de mínimo privilegio por bucket y una credencial de mantenimiento de
+# prod (solo listar/borrar). Idempotente: se puede re-ejecutar para aplicar cambios.
 #
 # Uso:
 #   AWS_PROFILE=<perfil-admin> scripts/provision-avatar-s3.sh [--suffix dvillasc] [--region us-east-1] [--yes]
-# Guías: docs/planning/perfiles/operacion-s3.md y docs/planning/academic-files/s3.md
-#
+# Guías: docs/planning/perfiles/operacion-s3.md, docs/planning/academic-files/s3.md y
+# docs/guides/assignment-submissions-s3.md
 # Requisitos: AWS CLI v2 y un perfil con permisos para S3 e IAM (no uses la cuenta root).
 # Las access keys nuevas se guardan en ~/.config/academix/s3-<env>.env (permisos 600);
 # nunca se imprimen en pantalla. Bórralas de ahí después de cargarlas en Render/gestor.
@@ -18,9 +18,10 @@ REGION="us-east-1"
 ASSUME_YES=false
 SECRETS_DIR="${HOME}/.config/academix"
 TAGS='Key=Project,Value=academix Key=Purpose,Value=private-files'
-# Prefijos que el backend usa hoy. academic/submissions/ queda fuera hasta que exista código que lo use.
+# Prefijos que el backend usa hoy. Cualquier otra clave del bucket queda rechazada.
 AVATAR_PREFIX="avatars/"
 ACADEMIC_PREFIX="academic/materials/"
+SUBMISSIONS_PREFIX="academic/submissions/"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -130,7 +131,7 @@ JSON
         \"AbortIncompleteMultipartUpload\": {\"DaysAfterInitiation\": 1}
       }]
     }"
-    ok "Lifecycle: ${AVATAR_PREFIX} expira a los 7 días; ${ACADEMIC_PREFIX} no expira (solo test)"
+    ok "Lifecycle: ${AVATAR_PREFIX} expira a los 7 días; academic/ no expira (solo test)"
   else
     aws s3api put-bucket-lifecycle-configuration --bucket "$bucket" --lifecycle-configuration '{
       "Rules": [{
@@ -165,7 +166,7 @@ ensure_user() {
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": "arn:aws:s3:::${bucket}",
-      "Condition": {"StringLike": {"s3:prefix": ["${AVATAR_PREFIX}*", "${ACADEMIC_PREFIX}*"]}}
+      "Condition": {"StringLike": {"s3:prefix": ["${AVATAR_PREFIX}*", "${ACADEMIC_PREFIX}*", "${SUBMISSIONS_PREFIX}*"]}}
     }
 JSON
 )
@@ -187,6 +188,12 @@ JSON
       "Effect": "Allow",
       "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
       "Resource": "arn:aws:s3:::${bucket}/${ACADEMIC_PREFIX}*"
+    },
+    {
+      "Sid": "AssignmentSubmissionObjects",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::${bucket}/${SUBMISSIONS_PREFIX}*"
     }${list_statement}
   ]
 }
@@ -197,8 +204,9 @@ JSON
     aws iam delete-user-policy --user-name "$user" --policy-name academix-avatar-objects
     ok "Política anterior academix-avatar-objects reemplazada"
   fi
-  if [[ "$env" == "test" ]]; then ok "Política: Get/Put/Delete en ${AVATAR_PREFIX}* y ${ACADEMIC_PREFIX}* + ListBucket de ambos"
-  else ok "Política: Get/Put/Delete en ${AVATAR_PREFIX}* y ${ACADEMIC_PREFIX}*"; fi
+  local prefixes="${AVATAR_PREFIX}*, ${ACADEMIC_PREFIX}* y ${SUBMISSIONS_PREFIX}*"
+  if [[ "$env" == "test" ]]; then ok "Política: Get/Put/Delete en ${prefixes} + ListBucket de los tres"
+  else ok "Política: Get/Put/Delete en ${prefixes}"; fi
 
   ensure_access_key "$user" "$bucket" "${SECRETS_DIR}/s3-${env}.env" "AcademiX private storage (${env})"
 }
@@ -258,19 +266,20 @@ ensure_maintenance_user() {
       "Effect": "Allow",
       "Action": "s3:ListBucket",
       "Resource": "arn:aws:s3:::${bucket}",
-      "Condition": {"StringLike": {"s3:prefix": ["${AVATAR_PREFIX}*", "${ACADEMIC_PREFIX}*"]}}
+      "Condition": {"StringLike": {"s3:prefix": ["${AVATAR_PREFIX}*", "${ACADEMIC_PREFIX}*", "${SUBMISSIONS_PREFIX}*"]}}
     },
     {
       "Sid": "DeleteOrphanObjects",
       "Effect": "Allow",
       "Action": "s3:DeleteObject",
-      "Resource": ["arn:aws:s3:::${bucket}/${AVATAR_PREFIX}*", "arn:aws:s3:::${bucket}/${ACADEMIC_PREFIX}*"]
+      "Resource": ["arn:aws:s3:::${bucket}/${AVATAR_PREFIX}*", "arn:aws:s3:::${bucket}/${ACADEMIC_PREFIX}*",
+        "arn:aws:s3:::${bucket}/${SUBMISSIONS_PREFIX}*"]
     }
   ]
 }
 JSON
 )"
-  ok "Política: ListBucket y DeleteObject en ${AVATAR_PREFIX}* y ${ACADEMIC_PREFIX}*"
+  ok "Política: ListBucket y DeleteObject en ${AVATAR_PREFIX}*, ${ACADEMIC_PREFIX}* y ${SUBMISSIONS_PREFIX}*"
   ensure_access_key "$user" "$bucket" "${SECRETS_DIR}/s3-maintenance-prod.env" "AcademiX storage maintenance (prod)"
 }
 
@@ -289,11 +298,12 @@ smoke_test() {
     printf 'academix-smoke-test' >"$tmp"
 
     # Sube, lee y borra como el backend (SSE-S3 + If-None-Match). Reintenta por propagación de IAM.
+    # Los argumentos extra se pasan a PutObject (p. ej., el checksum que envían las entregas).
     roundtrip() {
-      local label="$1" key="$2" attempt
+      local label="$1" key="$2" attempt; shift 2
       for attempt in $(seq 1 15); do
         if aws s3api put-object --bucket "$bucket" --key "$key" --body "$tmp" \
-             --server-side-encryption AES256 --if-none-match '*' >/dev/null 2>&1; then break; fi
+             --server-side-encryption AES256 --if-none-match '*' "$@" >/dev/null 2>&1; then break; fi
         [[ "$attempt" == 15 ]] && { warn "${label}: PutObject sigue fallando tras 45 s; revisa la política."; exit 1; }
         sleep 3
       done
@@ -312,15 +322,21 @@ smoke_test() {
 
     roundtrip "${AVATAR_PREFIX}" "${AVATAR_PREFIX}${zero}/$(uuid).webp"
     roundtrip "${ACADEMIC_PREFIX}" "${ACADEMIC_PREFIX}${zero}/${zero}/$(uuid)"
+    # Clave de entrega: institución/curso/tarea/estudiante/intento/archivo, con el SHA-256 que S3 valida.
+    roundtrip "${SUBMISSIONS_PREFIX}" "${SUBMISSIONS_PREFIX}${zero}/${zero}/${zero}/${zero}/${zero}/$(uuid)" \
+      --checksum-sha256 "$(openssl dgst -sha256 -binary "$tmp" | base64)"
     denied_put "la raíz del bucket" "fuera-de-prefijo.txt"
-    denied_put "academic/submissions/ (aún no habilitado)" "academic/submissions/${zero}/${zero}/$(uuid)"
+    denied_put "academic/ fuera de los prefijos" "academic/${zero}/$(uuid)"
     if [[ "$env" == "prod" ]]; then
       if aws s3api list-objects-v2 --bucket "$bucket" --prefix "${ACADEMIC_PREFIX}" >/dev/null 2>&1; then
         warn "¡prod puede listar el bucket! Revisa la política."
       else ok "ListBucket rechazado en prod"; fi
     else
-      aws s3api list-objects-v2 --bucket "$bucket" --prefix "${ACADEMIC_PREFIX}" --max-items 1 >/dev/null \
-        && ok "ListBucket de ${ACADEMIC_PREFIX} permitido en test (academic:cleanup)"
+      local prefix
+      for prefix in "${ACADEMIC_PREFIX}" "${SUBMISSIONS_PREFIX}"; do
+        aws s3api list-objects-v2 --bucket "$bucket" --prefix "$prefix" --max-items 1 >/dev/null \
+          && ok "ListBucket de ${prefix} permitido en test (academic:cleanup)"
+      done
     fi
   )
 }
@@ -336,7 +352,7 @@ smoke_test_maintenance() {
     local bucket="${S3_AVATAR_BUCKET}" zero="00000000-0000-4000-8000-000000000000" prefix attempt tmp err
     tmp=$(mktemp); trap 'rm -f "$tmp"' EXIT
     printf 'academix-smoke-test' >"$tmp"
-    for prefix in "${AVATAR_PREFIX}" "${ACADEMIC_PREFIX}"; do
+    for prefix in "${AVATAR_PREFIX}" "${ACADEMIC_PREFIX}" "${SUBMISSIONS_PREFIX}"; do
       for attempt in $(seq 1 15); do
         aws s3api list-objects-v2 --bucket "$bucket" --prefix "$prefix" --max-items 1 >/dev/null 2>&1 && break
         [[ "$attempt" == 15 ]] && { warn "ListBucket de ${prefix} sigue fallando tras 45 s; revisa la política."; exit 1; }
@@ -347,7 +363,8 @@ smoke_test_maintenance() {
     # S3 responde 204 al borrar una clave inexistente: prueba el permiso sin tocar objetos reales.
     aws s3api delete-object --bucket "$bucket" --key "${AVATAR_PREFIX}${zero}/${zero}.webp" >/dev/null
     aws s3api delete-object --bucket "$bucket" --key "${ACADEMIC_PREFIX}${zero}/${zero}/${zero}" >/dev/null
-    ok "DeleteObject permitido en ambos prefijos"
+    aws s3api delete-object --bucket "$bucket" --key "${SUBMISSIONS_PREFIX}${zero}/${zero}/${zero}/${zero}/${zero}/${zero}" >/dev/null
+    ok "DeleteObject permitido en los tres prefijos"
     if aws s3api list-objects-v2 --bucket "$bucket" --max-items 1 >/dev/null 2>&1; then
       warn "¡Puede listar todo el bucket! Revisa la condición s3:prefix."
     else ok "ListBucket fuera de los prefijos rechazado"; fi
