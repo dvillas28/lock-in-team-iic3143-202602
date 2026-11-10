@@ -14,12 +14,15 @@ test('manifest accounts complete delegated UC/UTFSM workflow with publication an
   assert.equal((await smoke({baseUrl:app.base,env,workflow:true})).status,'ok');
   runtime=await runtimeDatabase();
   await runtime.withIdentity(null,async c=>{for(const table of tenantTables)assert.equal((await c.query(`SELECT * FROM ${table}`)).rowCount,0);});
+  const unseededTables=new Set(["account_invitations","user_imports","user_import_rows","grade_revisions",
+   "assignments","assignment_attempts","assignment_attempt_files"]);
   for(const slug of ['uc','utfsm']) {
    const actor=(await pool.query('SELECT id FROM users WHERE email=$1',[`superadmin.${slug}@academix.example`])).rows[0].id;
    await runtime.withInstitution(actor,slug,async(c,m)=>{
     for(const table of tenantTables) {
      const rows=(await c.query(`SELECT * FROM ${table}`)).rows;
-     if(!["account_invitations","user_imports","user_import_rows","grade_revisions","assignments"].includes(table))assert.ok(rows.length>0,table);assert.ok(rows.every(r=>r.institution_id===m.institution_id),table);
+     if(!unseededTables.has(table))assert.ok(rows.length>0,table);
+     assert.ok(rows.every(r=>r.institution_id===m.institution_id),table);
     }
    });
   }
