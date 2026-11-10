@@ -14,7 +14,7 @@ export function formNumber(value: string, field: string, integer = false): numbe
     throw new FieldError(field, integer ? "Ingresa un número entero positivo, sin exponentes ni decimales." : "Ingresa un puntaje positivo con hasta dos decimales.");
   const number = Number(value);
   if (!Number.isFinite(number) || number <= 0 || number > (integer ? 2147483647 : 999999.99))
-    throw new FieldError(field, integer ? "Ingresa un número entre 1 y 2147483647." : "El puntaje debe estar entre 0,01 y 999999,99.");
+    throw new FieldError(field, integer ? "Ingresa un número mayor o igual a 1" : "El puntaje debe estar entre 0,01 y 999999,99.");
   return number;
 }
 
