@@ -47,9 +47,11 @@ test("quiz text reports the actual cause and keeps Unicode character limits", ()
   assert.equal(quizText("", "instructions"), "");
 });
 
-test("new quiz dates must be strictly future at minute, second and microsecond boundaries", () => {
+test("closing must be strictly future while opening may already have passed", () => {
   const now = Date.parse("2030-05-15T15:30:00.000Z");
-  for (const field of ["opensAt", "closesAt"] as const) {
+  for (const value of ["2020-01-01T00:00:00Z", "2030-05-15T11:29:59.999999-04:00", "2030-05-15T11:30:00-04:00"])
+    assert.doesNotThrow(() => validateQuizDraftDate("opensAt", value, undefined, now));
+  for (const field of ["closesAt"] as const) {
     for (const value of ["2030-05-15T11:29:59.999999-04:00", "2030-05-15T11:30:00-04:00"]) {
       assert.throws(() => validateQuizDraftDate(field, value, undefined, now), /posterior a la fecha y hora actuales/);
     }

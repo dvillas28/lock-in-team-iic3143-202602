@@ -34,5 +34,5 @@ test("GET following start cannot replace the explicit historical section",async(
 test("bounded window and maximum remain server-authorized, with no fabricated availability",async()=>{
  const ui=await mount(null,()=>Response.json({},{status:409}),'student');
  const ops=new AttemptOperations(ui.session,'uc',user('student'),course,boundedQuiz);
- try{await ops.start(attempt.sectionId);assert.equal(ui.requests.filter(r=>r.url.endsWith('/attempts')).length,1);assert.equal(ops.getSnapshot().attempt,undefined);assert.match(ops.getSnapshot().message,/Conflicto/);}finally{ops.dispose();await ui.close();}
+ try{await ops.start(attempt.sectionId);assert.equal(ui.requests.filter(r=>r.url.endsWith('/attempts')).length,1);assert.equal(ops.getSnapshot().attempt,undefined);assert.match(ops.getSnapshot().message,/plazo del quiz terminó/);assert.equal(ops.getSnapshot().pending,undefined);}finally{ops.dispose();await ui.close();}
 });

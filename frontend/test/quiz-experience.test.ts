@@ -179,7 +179,7 @@ for (const mode of ["crear", "editar"] as const) {
       await set("opensAt", "2030-05-15T11:29:59");
       assert.equal(input("opensAt").getAttribute("aria-invalid"), null);
       await set("closesAt", "2030-05-15T11:30");
-      assert.equal(input("opensAt").getAttribute("aria-invalid"), "true");
+      assert.equal(input("opensAt").getAttribute("aria-invalid"), null);
       await ui.settle(() => input("maxAttempts").focus());
       assert.equal(input("closesAt").getAttribute("aria-invalid"), "true");
       await ui.submit("form");

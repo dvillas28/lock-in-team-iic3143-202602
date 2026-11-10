@@ -18,7 +18,7 @@ test('own history resumes without codes; pagination preserves the active attempt
   assert.equal(ui.doc.querySelector('input'),null);
   assert.equal(ui.doc.querySelector('a.btn-primary')?.getAttribute('href'),`/attempts/${attempt.id}`);
   assert.equal(button(ui.doc,'Iniciar nuevo intento'),undefined);
-  assert.ok(ui.doc.querySelector('a[aria-label="Ver detalle del intento 1"]'));
+  assert.ok(ui.doc.querySelector('a[aria-label="Ver intento 1"]'));
   await ui.click('Siguiente');
   assert.ok(ui.requests.some(r=>r.url.includes('cursor=next-page')));
   assert.ok(ui.doc.querySelector('a[aria-label="Continuar intento 1"]'));
@@ -37,13 +37,13 @@ test('new attempt is unavailable while history is loading or failed, and recover
   await ui.settle(()=>wait.resolve(Response.json({},{status:503})));
   assert.equal(button(ui.doc,'Iniciar nuevo intento'),undefined);
   await ui.click('Reintentar');
-  assert.match(ui.doc.body.textContent!,/Todavía no tienes intentos/);
+  assert.match(ui.doc.body.textContent!,/Aún no has rendido este quiz/);
   assert.equal(button(ui.doc,'Iniciar nuevo intento')?.disabled,false);
  }finally{await ui.close();}
 });
 
 test('server availability explains closed windows, limits and published grades without offering new starts',async()=>{
- for(const [reason,message] of [['closed',/plazo.*terminó/],['notOpen',/todavía no abre/],['limitReached',/todos los intentos/],['gradesPublished',/notas.*publicadas/]] as const){
+ for(const [reason,message] of [['closed',/plazo.*terminó/],['notOpen',/todavía no abre/],['limitReached',/todos los intentos/],['gradesPublished',/nota.*publicada/]] as const){
   const ui=await mount(view(),r=>r.url.includes('/my-attempts')?Response.json(page([graded],{...available,canStart:false,reason})):reply(r),'student');
   try{assert.match(ui.doc.body.textContent!,message);assert.equal(button(ui.doc,'Iniciar nuevo intento'),undefined);assert.doesNotMatch(ui.doc.body.textContent!,/7\.0|puntaje|isCorrect/);}
   finally{await ui.close();}

@@ -43,13 +43,11 @@ function instant(value: string) {
 export function validateQuizDraftDate(
   field: "opensAt" | "closesAt", value: string | null, previous: string | null | undefined, now: number,
 ) {
-  if (!value) return;
+  // The API accepts any opening time (a past one opens on publication); only closing must lie ahead.
+  if (!value || field === "opensAt") return;
   const candidate = instant(value);
   if (previous && candidate === instant(previous)) return;
-  if (candidate <= BigInt(now) * BigInt(1000)) {
-    fail(field, field === "opensAt" ? "La apertura debe ser posterior a la fecha y hora actuales."
-      : "El cierre debe ser posterior a la fecha y hora actuales.");
-  }
+  if (candidate <= BigInt(now) * BigInt(1000)) fail(field, "El cierre debe ser posterior a la fecha y hora actuales.");
 }
 
 export function validateQuizSchedule(opens: string | null, closes: string | null) {
