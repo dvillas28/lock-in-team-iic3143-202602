@@ -12,7 +12,7 @@ import { listCourseModules } from "../../lib/api/modules.ts";
 import type { CourseModule } from "../../lib/content/validation.ts";
 import { canAuthorContent } from "../../lib/content/capabilities.ts";
 import { PublicationToggle } from "./publication-toggle.tsx";
-import { ModuleForm } from "./module-form.tsx";
+import { ModuleDialog } from "./module-dialog.tsx";
 import { ModuleResources } from "./module-resources.tsx";
 import type { Course } from "../../lib/courses/validation.ts";
 import { useRefreshOnReturn } from "./use-refresh-on-return.ts";
@@ -48,12 +48,12 @@ function ModuleRow({ session, slug, parent, author, items, reload, disabled, mov
     {!author && <span className="chip">{parent.publishedAt ? "Publicado" : "Borrador"}</span>}
     {author && <>
       <div className="module-tools"><PublicationToggle session={session} slug={slug} kind="module" id={parent.id} parentId={parent.courseId} title={parent.title} published={parent.publishedAt !== null} onSaved={reload} disabled={disabled} />
+        <ModuleDialog session={session} slug={slug} courseId={parent.courseId} item={parent} items={items} onSaved={reload} disabled={disabled} />
         <button className="btn btn-ghost" aria-label={`Subir ${parent.title}`} aria-disabled={disabled || busy || items[0].id === parent.id} onClick={() => {if (!disabled && !busy && items[0].id !== parent.id) move(parent.id,-1);}}><ArrowUp size={14} aria-hidden="true" />Subir</button>
         <button className="btn btn-ghost" aria-label={`Bajar ${parent.title}`} aria-disabled={disabled || busy || items[items.length-1].id === parent.id} onClick={() => {if (!disabled && !busy && items[items.length-1].id !== parent.id) move(parent.id,1);}}><ArrowDown size={14} aria-hidden="true" />Bajar</button>
       </div>
     </>}
     </div>
-    {author && <details className="academic-disclosure module-editor"><summary>Editar módulo {parent.title}</summary><ModuleForm session={session} slug={slug} courseId={parent.courseId} item={parent} items={items} onSaved={reload} disabled={disabled} /></details>}
     <div id={`materials-${parent.id}`} hidden={!expanded}>{(visited || requestedOpen) && <ModuleResources session={session} slug={slug} parent={parent} author={author} disabled={disabled} course={course} expanded={expanded} />}</div>
   </section>;
 }
@@ -102,10 +102,9 @@ function CourseContent({ courseId }: { courseId: string }) {
   return <div className="stack">
     <div className="page-heading"><div><p className="section-label">{course.code} · {course.term}</p><h1>Módulos y material</h1><p>{course.name}</p></div></div>
     <CourseNavigation course={course} user={state.context.user} active="/modules" />
-    {author && <p className="notice">Contenido compartido por todas las secciones del curso. La publicación de cada módulo y material es independiente.</p>}
+    {author && <div className="actions"><ModuleDialog session={session} slug={slug} courseId={courseId} items={items} onSaved={result.reload} disabled={disabled} /></div>}
     {result.error && <><p role="alert">Consulta fallida. Representación anterior, no vigente.</p><ErrorState feedback={result.error} onRetry={() => void result.reload()} /></>}
     {mutation.message && <p role={mutation.confirmed ? "status" : "alert"}>{mutation.message}</p>}
-    {author && <details className="academic-disclosure card"><summary>Crear módulo</summary><ModuleForm session={session} slug={slug} courseId={courseId} items={items} onSaved={result.reload} disabled={disabled} /></details>}
     {!result.error && !result.refreshing && !items.length && <div className="empty-zone panel"><h2>Aún no hay módulos disponibles</h2><p className="hint">{author ? "Crea un módulo para organizar el material del curso." : "Los módulos y materiales publicados del curso aparecerán aquí"}</p></div>}
     {items.length > 0 && <div className="module-workspace" aria-busy={result.refreshing}><nav className="module-index card" aria-label="Índice de módulos"><p className="section-label">Módulos del curso</p>{items.map(parent => <a key={parent.id} className="nav-item" href={`#module-${parent.id}`} onClick={() => setRequested(previous => ({ id: parent.id, revision: previous.revision + 1 }))}><span className="tnum">{parent.position}.</span><span>{parent.title}</span></a>)}</nav><div className="stack">
     {items.map(parent => <ModuleRow key={`${state.generation}:${slug}:${parent.id}`} session={session} slug={slug} parent={parent} author={author} items={items} course={course} reload={result.reload} disabled={disabled} move={move} busy={mutation.busy || !!mutation.uncertain} requested={requested} />)}
