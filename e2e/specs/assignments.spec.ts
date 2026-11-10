@@ -34,7 +34,7 @@ test("E2E-ASSIGNMENT-001 CU-22 and CU-23 create, publish, consult and hide @regr
   await expect(teacher.getByText("Tarea publicada.",{exact:true})).toBeVisible();
   await expect(teacher.getByText("Atrasada",{exact:true})).toHaveCount(0);
 
-  await student.getByRole("navigation",{name:"Curso",exact:true}).getByRole("link",{name:"Resumen",exact:true}).click();
+  await student.getByRole("navigation",{name:"Curso",exact:true}).getByRole("link",{name:"Módulos y material",exact:true}).click();
   await go(student,course,"/assignments");
   await student.getByRole("searchbox",{name:"Buscar por nombre"}).fill("diseno");
   await expect(row(student)).toContainText("Disponible");
