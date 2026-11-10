@@ -168,9 +168,10 @@ function QuizDirectory({ courseId, scope, slug, filters, createdId }: DirectoryP
       <button type="button" className="btn btn-ghost" onClick={() => changeFilters(emptyFilters)}>Limpiar filtros</button>
     </div>}
     {createdHidden && <p className="hint">«{created.title}» no coincide con los filtros. <Link className="text-link" prefetch={false} href={`${base}/${created.id}/authoring${suffix}`}>Editar borrador</Link></p>}
+    {groups.length > 0 && <div className="stack quiz-directory" role="region" aria-label="Quizzes del curso">
     {groups.map(({ phase, items: group }) => <section key={phase} className="card quiz-group" aria-labelledby={`${filterId}-${phase}`}>
       <header><h2 id={`${filterId}-${phase}`} className="serif">{phaseGroups[phase]}</h2><span className="hint tnum">{group.length}</span></header>
-      <ul className="quiz-rows">{group.map(q => <li key={q.id} className="quiz-row">
+      <ul className="quiz-rows" aria-labelledby={`${filterId}-${phase}`}>{group.map(q => <li key={q.id} className="quiz-row">
         <Link className="quiz-row-link" href={`${base}/${q.id}${suffix}`} ref={node => { if (node) rows.current.set(q.id, node); else rows.current.delete(q.id); }}>
           <span className="course-icon"><ClipboardList size={18} aria-hidden="true"/></span>
           <span className="quiz-row-copy">
@@ -186,6 +187,7 @@ function QuizDirectory({ courseId, scope, slug, filters, createdId }: DirectoryP
         </button>}
       </li>)}</ul>
     </section>)}
+    </div>}
     {!items.length && !result.error && !result.refreshing && <div className="empty-zone panel">
       <h2>Aún no hay quizzes</h2>
       <p className="hint">{mayCreate ? "Crea el primer quiz del curso." : "Los quizzes publicados para tu sección aparecerán aquí."}</p>
