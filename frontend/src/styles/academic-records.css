@@ -132,6 +132,51 @@
 .selection-group .option {
   overflow-wrap: anywhere;
 }
+.academic-dialog .publication-students {
+  gap: 0;
+}
+.academic-dialog > .stack {
+  gap: 14px;
+}
+.academic-dialog .selection-group {
+  gap: 6px;
+}
+.academic-dialog .selection-group legend {
+  padding-bottom: 4px;
+}
+.academic-dialog .publication-student-option {
+  min-height: 44px;
+  padding: 5px 8px;
+  gap: 10px;
+  border: 0;
+  border-radius: 0;
+}
+.academic-dialog .publication-student-option + .publication-student-option {
+  border-top: 1px solid var(--border);
+}
+.academic-dialog .publication-student-option:hover,
+.academic-dialog .publication-student-option:has(input:checked) {
+  background: var(--hover);
+  border-color: var(--border);
+}
+.academic-dialog .publication-student-option:has(input:focus-visible) {
+  outline: 2px solid var(--primary-ink);
+  outline-offset: -2px;
+}
+.publication-student-option > span {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+  font-weight: 600;
+}
+.publication-student-option small {
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 400;
+}
+.academic-dialog .publication-selection-hint {
+  margin: -2px 0 0;
+}
 .audit-filters .form-grid {
   align-items: start;
 }
