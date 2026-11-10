@@ -2,8 +2,8 @@
 
 Workflows pedidos por el curso para la demo, equivalentes a las plantillas del
 profesor (`trivy-manual.spec.md` y `sonarqube-manual.spec.md`). No reemplazan
-los gates de CI descritos en [git-flow](git-flow.md): esos bloquean PRs; estos
-generan evidencia descargable bajo demanda.
+los jobs de CI descritos en [git-flow](git-flow.md): esos revisan cada PR (sin
+bloquear el merge); estos generan evidencia descargable bajo demanda.
 
 | Workflow | Archivo | Artifact |
 |---|---|---|

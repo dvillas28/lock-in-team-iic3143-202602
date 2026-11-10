@@ -97,12 +97,13 @@ Pendiente de definir como proceso. Lo que ya sabemos:
 
 ## Trivy en CI
 
-El job `<app> (docker build + trivy)` revisa dependencias, secretos y
-Dockerfile de la app, y luego la imagen construida. Falla solo con
-vulnerabilidades HIGH o CRITICAL que ya tienen version corregida; las demas
-quedan visibles en la pestana Security del repo.
+El job `<app> (trivy)` revisa dependencias, secretos y Dockerfile de la app,
+y luego la imagen construida. Falla solo con vulnerabilidades HIGH o CRITICAL
+que ya tienen version corregida; las demas quedan visibles en la pestana
+Security del repo. No bloquea el merge: queda fuera de `CI result`, el unico
+check requerido. El build de la imagen si bloquea, en `<app> (docker build)`.
 
-Si un PR falla por Trivy:
+Si Trivy falla en un PR:
 
 1. Leer en el log del job el paquete, el CVE y la version corregida.
 2. Actualizar la dependencia directa, o forzar la transitiva con
@@ -126,15 +127,15 @@ Para reproducirlo local (requiere Docker):
 
 El job `SonarQube (quality gate)` analiza el codigo propio (`backend/src`,
 `frontend/src`) en SonarQube Cloud. El quality gate "Sonar way" evalua solo el
-codigo nuevo del PR: la deuda existente no bloquea, pero el PR no puede
-agregar bugs, vulnerabilidades, hotspots sin revisar ni duplicacion excesiva.
-La configuracion esta en `sonar-project.properties`.
+codigo nuevo del PR: marca bugs, vulnerabilidades, hotspots sin revisar y
+duplicacion excesiva, pero no la deuda existente. La configuracion esta en
+`sonar-project.properties`.
 
-El gate solo bloquea en los PRs. En `main` el analisis corre igual y alimenta
-el dashboard, pero no espera el gate: un problema de calidad que ya paso
-revision no debe bloquear el deploy a produccion.
+El gate no bloquea el merge: el job queda en rojo en el PR, pero esta fuera de
+`CI result`. En las ejecuciones manuales el analisis alimenta el dashboard sin
+esperar el gate.
 
-Si un PR falla por SonarQube:
+Si SonarQube falla en un PR:
 
 1. Abrir el link al dashboard que deja el job o el comentario del bot en el PR.
 2. Corregir los issues marcados en el codigo nuevo.
