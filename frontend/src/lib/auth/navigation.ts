@@ -10,6 +10,8 @@ export function safeReturnPath(value: string | null): string {
   if (course && course[0] === value && isId(course[1])) return value!;
   const assignment = value && /^\/courses\/([^/]+)\/assignments\/([^/]+)$/.exec(value);
   if (assignment && assignment[0] === value && isId(assignment[1]) && isId(assignment[2])) return value!;
+  const quizCreate = value && /^\/courses\/([^/]+)\/quizzes\/new$/.exec(value);
+  if (quizCreate && quizCreate[0] === value && isId(quizCreate[1])) return value!;
   const review = value && /^\/courses\/([^/]+)\/quizzes\/([^/]+)\/attempts(?:\/([^/]+))?$/.exec(value);
   if (review && review[0] === value && isId(review[1]) && isId(review[2]) && (review[3] === undefined || isId(review[3]))) return value!;
   return ["/institutions", "/profile", "/profile/security", "/admin/users"].includes(value ?? "") ? value! : "/courses";

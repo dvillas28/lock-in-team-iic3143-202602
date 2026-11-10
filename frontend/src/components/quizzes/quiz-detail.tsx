@@ -13,7 +13,7 @@ import { getQuiz } from "../../lib/api/quizzes.ts";
 import { canAuthor } from "../../lib/quizzes/capabilities.ts";
 import { ApiResponseError } from "../../lib/api/errors.ts";
 import { ErrorState, LoadingState } from "../route-states.tsx";
-export function QuizDetail({courseId,quizId}:{courseId:string;quizId:string}) {
+export function QuizDetail({courseId,quizId,listQuery=""}:{courseId:string;quizId:string;listQuery?:string}) {
   const {session,state}=useSession(), context=state.context, slug=context?.slug ?? "";
   const result=useResource(session,`${state.generation}:${slug}:${courseId}:${quizId}:safe:${JSON.stringify(context?.user)}`,async c=>{
     const course=await getCourse(c,slug,courseId),sections=await listSections(c,slug,courseId),quiz=await getQuiz(c,slug,courseId,quizId);
@@ -26,17 +26,16 @@ export function QuizDetail({courseId,quizId}:{courseId:string;quizId:string}) {
   const {course,sections,quiz}=result.data, author=canAuthor(context.user,course,sections,quiz.sectionId);
   const student=!author && context.user.sectionMemberships.some(m=>m.courseId===course.id && m.role==="student");
   return <QuizWorkspace course={course} user={context.user} title={quiz.title}>
-    <Link className="text-link" href={`/courses/${courseId}/quizzes`}>Volver a quizzes</Link>
+    <Link className="text-link" href={`/courses/${courseId}/quizzes${listQuery}`}>Volver a quizzes</Link>
     <section className="card panel stack quiz-summary" aria-label="Información del quiz">
       <div className="quiz-section-heading"><h2>Información del quiz</h2><div className="quiz-chips"><QuizStatus status={quiz.status}/><span className="chip">{quiz.sectionId ? `Sección ${sections.find(s=>s.id===quiz.sectionId)?.code}` : "Todo el curso"}</span></div></div>
       <QuizFacts quiz={quiz}/>
       <div><h3 className="serif">Instrucciones</h3><p className="quiz-instructions">{quiz.instructions?.trim() ? quiz.instructions : "Este quiz no tiene instrucciones adicionales."}</p></div>
       {(author || gradebookCapabilities(context.user,course).book) && <div className="actions">
-        {author && <Link className="btn btn-primary" prefetch={false} href={`/courses/${courseId}/quizzes/${quizId}/authoring`}><Pencil size={16} aria-hidden="true"/>{quiz.status==="draft" ? "Editar quiz" : "Ver pauta"}</Link>}
+        {author && <Link className="btn btn-primary" prefetch={false} href={`/courses/${courseId}/quizzes/${quizId}/authoring${listQuery}`}><Pencil size={16} aria-hidden="true"/>{quiz.status==="draft" ? "Editar quiz" : "Ver pauta"}</Link>}
         {gradebookCapabilities(context.user,course).book && <Link className="btn btn-ghost" href={`/courses/${courseId}/quizzes/${quizId}/attempts`}><ClipboardList size={16} aria-hidden="true"/>Consultar intentos</Link>}
       </div>}
     </section>
-    {author && <p className="notice">El acceso a la pauta impide rendir este quiz, aunque también participes como estudiante.</p>}
     <AttemptStart key={`${state.generation}:${slug}:${quizId}:${JSON.stringify(context.user)}`} session={session} slug={slug} user={context.user} course={course} quiz={quiz} sections={sections}/>
     {student ? <section className="card panel stack" aria-labelledby="quiz-hidden-heading"><div className="quiz-section-heading"><h2 id="quiz-hidden-heading" className="serif">Preguntas ocultas</h2><LockKeyhole size={20} aria-hidden="true"/></div><p className="hint">Las preguntas se mostrarán únicamente dentro de tu intento. Revisa las instrucciones e inicia o continúa un intento cuando estés listo para responder.</p></section> : <section className="stack" aria-labelledby="quiz-preview-heading"><div className="quiz-section-heading"><h2 id="quiz-preview-heading" className="serif">Preguntas del quiz</h2><span className="hint tnum">{quiz.questions.length} {quiz.questions.length===1 ? "pregunta" : "preguntas"}</span></div>
       {!quiz.questions.length && <p className="notice">Este borrador todavía no tiene preguntas.</p>}

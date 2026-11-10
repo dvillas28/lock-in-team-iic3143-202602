@@ -42,15 +42,13 @@ export function QuizPublish({session,slug,quiz,destination,disabled,onSaved,onLo
   return <>
     <div className="card quiz-save-bar" role="region" aria-label="Guardar y publicar quiz">{status}<div className="actions">
       {saveAction}
-      <button ref={trigger} type="button" className="btn btn-primary" aria-describedby={titleId+"-help"} disabled={disabled || mutation.busy || mutation.uncertain || !quiz.questions.length} onClick={()=>{dialog.current?.showModal();cancel.current?.focus();}}><Send size={16} aria-hidden="true"/>Publicar quiz</button>
+      <button ref={trigger} type="button" className="btn btn-primary" aria-describedby={!quiz.questions.length ? titleId+"-help" : undefined} disabled={disabled || mutation.busy || mutation.uncertain || !quiz.questions.length} onClick={()=>{dialog.current?.showModal();cancel.current?.focus();}}><Send size={16} aria-hidden="true"/>Publicar quiz</button>
     </div></div>
-    <div className="stack quiz-publication" id={titleId+"-help"}>
-    <p className="hint">Publica cuando hayas revisado las preguntas, la respuesta correcta y los destinatarios. Se publicará la última versión guardada; después no podrás editarla.</p>
-    {!quiz.questions.length && <p className="notice">Agrega y guarda al menos una pregunta antes de publicar.</p>}
-    {disabled && <p>Guarda los cambios y resuelve cualquier operación pendiente antes de publicar.</p>}
-    {mutation.message && <p role="status" ref={feedback} tabIndex={-1}>{mutation.message}{mutation.message?.startsWith("Conflicto") && " El curso podría estar congelado o el quiz haber cambiado. No se confirmó publicación; guardar borradores sigue permitido."}</p>}
-    {mutation.uncertain && <button type="button" className="btn btn-ghost" onClick={()=>void consult()}>Consultar estado de publicación</button>}
-    </div>
+    {!quiz.questions.length && <p className="hint" id={titleId+"-help"}>Agrega y guarda una pregunta para publicar.</p>}
+    {(mutation.message || mutation.uncertain) && <div className="stack quiz-publication">
+      {mutation.message && <p role="status" ref={feedback} tabIndex={-1}>{mutation.message}{mutation.message?.startsWith("Conflicto") && " El curso podría estar congelado o el quiz haber cambiado. No se confirmó publicación; guardar borradores sigue permitido."}</p>}
+      {mutation.uncertain && <button type="button" className="btn btn-ghost" onClick={()=>void consult()}>Consultar estado de publicación</button>}
+    </div>}
     <dialog ref={dialog} className="modal native-dialog panel" aria-labelledby={titleId} onKeyDown={event=>{
       if(event.key!=="Tab")return;
       const first=cancel.current,last=event.currentTarget.querySelector<HTMLButtonElement>("button:last-child");
