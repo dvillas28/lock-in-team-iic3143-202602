@@ -135,7 +135,8 @@
       completas con scope=pending y filtro opcional de evaluaciones. El lote pendiente omite las
       notas ya publicadas y las evaluaciones sin nota registrada. Recibo persistente por
       tenant/actor/clave; selección canónica igual devuelve original tras revalidar permisos,
-      distinta selección o curso da 409 IDEMPOTENCY_CONFLICT. Otra clave sobre nota publicada da
+      distinta selección o curso da 409 IDEMPOTENCY_CONFLICT.
+      Para tareas scope=assignment publica los borradores seleccionados y valida cada versión. Otra clave sobre nota publicada da
       GRADE_ALREADY_PUBLISHED. Fallos no reservan clave.
     parameters:
       - $ref: '../components/parameters.yaml#/IdempotencyKey'
@@ -147,6 +148,7 @@
             oneOf:
               - $ref: '../components/schemas/grades.yaml#/PublishGradesRequest'
               - $ref: '../components/schemas/gradebook-groups.yaml#/PublishPendingRequest'
+              - $ref: '../components/schemas/submissions.yaml#/PublishAssignmentGrades'
     responses:
       '200':
         description: Publicación registrada, o resultado idempotente de una ya procesada.

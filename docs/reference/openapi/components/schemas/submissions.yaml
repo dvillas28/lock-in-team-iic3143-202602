@@ -1,0 +1,130 @@
+AssignmentSubmissionInput:
+  type: object
+  additionalProperties: false
+  required: [idempotencyKey, sectionId, expectedAttempts]
+  properties:
+    idempotencyKey: {type: string, format: uuid}
+    sectionId: {type: string, format: uuid}
+    expectedAttempts: {type: string, pattern: '^[0-9]{1,9}$'}
+    writtenResponse:
+      type: string
+      maxLength: 10000
+      description: Markdown restringido a formato básico. Se conserva como texto.
+    files:
+      type: array
+      maxItems: 5
+      items: {type: string, format: binary}
+      description: Hasta 10 MiB por archivo, sujeto a límites académicos por tipo.
+AssignmentSubmissionFile:
+  type: object
+  required: [id, name, mediaType, byteSize, sha256]
+  properties:
+    id: {type: string, format: uuid}
+    name: {type: string}
+    mediaType: {type: string}
+    byteSize: {type: integer, minimum: 1, maximum: 10485760}
+    sha256: {type: string, pattern: '^[0-9a-f]{64}$'}
+AssignmentSubmission:
+  type: object
+  required: [id, sectionId, attemptNumber, submittedAt, isLate, writtenResponse, files]
+  properties:
+    id: {type: string, format: uuid}
+    sectionId: {type: string, format: uuid}
+    attemptNumber: {type: integer, minimum: 1}
+    submittedAt: {type: string, format: date-time}
+    isLate: {type: boolean}
+    writtenResponse: {type: [string, 'null']}
+    files:
+      type: array
+      items: {$ref: '#/AssignmentSubmissionFile'}
+AssignmentSubmissionGrade:
+  type: object
+  required: [id, assignmentId, gradeItemId, studentId, sectionId, attemptId, pointsEarned, scorePercent, grade, publishedAt, revisionId, revisedAt, feedback, updatedAt]
+  properties:
+    id: {type: string, format: uuid}
+    assignmentId: {type: string, format: uuid}
+    gradeItemId: {type: string, format: uuid}
+    studentId: {type: string, format: uuid}
+    sectionId: {type: string, format: uuid}
+    attemptId: {type: string, format: uuid}
+    pointsEarned: {type: number, minimum: 0}
+    scorePercent: {type: [number, 'null'], minimum: 0, maximum: 100}
+    grade: {type: [number, 'null'], minimum: 1, maximum: 7}
+    publishedAt: {type: [string, 'null'], format: date-time}
+    revisionId: {type: [string, 'null'], format: uuid}
+    revisedAt: {type: [string, 'null'], format: date-time}
+    feedback: {type: [string, 'null']}
+    updatedAt: {type: string, format: date-time}
+AssignmentReview:
+  type: object
+  required: [attempts, grade]
+  properties:
+    attempts:
+      type: array
+      items: {$ref: '#/AssignmentSubmission'}
+    grade:
+      oneOf:
+        - $ref: '#/AssignmentSubmissionGrade'
+        - type: 'null'
+MyAssignmentSubmissions:
+  allOf:
+    - $ref: '#/AssignmentReview'
+    - type: object
+      required: [sections, usedAttempts, serverNow]
+      properties:
+        sections:
+          type: array
+          items: {type: string, format: uuid}
+        serverNow: {type: string, format: date-time}
+        usedAttempts: {type: integer, minimum: 0}
+AssignmentRosterEntry:
+  type: object
+  required: [studentId, sectionId, name, sectionCode, latestAttempt, isLate, gradeStatus, draft]
+  properties:
+    studentId: {type: string, format: uuid}
+    sectionId: {type: string, format: uuid}
+    name: {type: string}
+    sectionCode: {type: string}
+    latestAttempt: {type: [integer, 'null'], minimum: 1}
+    isLate: {type: [boolean, 'null']}
+    draft:
+      type: [object, 'null']
+      required: [id, expectedUpdatedAt]
+      properties:
+        id: {type: string, format: uuid}
+        expectedUpdatedAt: {type: string, format: date-time}
+    gradeStatus: {type: string, enum: [none, draft, published]}
+AssignmentRoster:
+  type: object
+  required: [gradeItemId, students]
+  properties:
+    gradeItemId: {type: string, format: uuid}
+    students:
+      type: array
+      items: {$ref: '#/AssignmentRosterEntry'}
+AssignmentDraftInput:
+  type: object
+  additionalProperties: false
+  required: [points, feedback, expectedUpdatedAt]
+  properties:
+    points: {type: number, minimum: 0, maximum: 999999.99, multipleOf: 0.01}
+    feedback: {type: [string, 'null'], maxLength: 4000}
+    expectedUpdatedAt: {type: [string, 'null'], format: date-time}
+PublishAssignmentGrades:
+  type: object
+  additionalProperties: false
+  required: [scope, gradeItemId, grades]
+  properties:
+    scope: {type: string, const: assignment}
+    gradeItemId: {type: string, format: uuid}
+    grades:
+      type: array
+      minItems: 1
+      maxItems: 100
+      items:
+        type: object
+        additionalProperties: false
+        required: [id, expectedUpdatedAt]
+        properties:
+          id: {type: string, format: uuid}
+          expectedUpdatedAt: {type: string, format: date-time}

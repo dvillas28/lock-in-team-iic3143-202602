@@ -2,16 +2,19 @@ import type {PoolClient, QueryResultRow} from "pg";
 
 // Corrections are projections over immutable attempt and publication evidence.
 export const gradeResults=`SELECT g.*,i.title,i.group_id,i.max_points,k.weight_percent,k.title AS group_title,k.position AS group_position,
- COALESCE(r.score_points,a.score_points) AS earned_points,COALESCE(r.score_percent,g.score_percent) AS effective_percent,
- COALESCE(r.grade_value,g.grade_value) AS effective_grade,r.id AS revision_id,r.created_at AS revised_at
+ COALESCE(r.score_points,g.assignment_points,a.score_points) AS earned_points,COALESCE(r.score_percent,g.score_percent) AS effective_percent,
+ COALESCE(r.grade_value,g.grade_value) AS effective_grade,r.id AS revision_id,r.created_at AS revised_at,
+ COALESCE(r.assignment_attempt_id,g.assignment_attempt_id,g.attempt_id) AS effective_attempt_id,
+ CASE WHEN r.id IS NOT NULL THEN r.feedback ELSE g.feedback END AS effective_feedback,
+ to_char(g.updated_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS version_stamp
  FROM public.grades g JOIN public.grade_items i ON i.institution_id=g.institution_id AND i.id=g.grade_item_id
  JOIN public.grade_groups k ON k.institution_id=i.institution_id AND k.course_id=i.course_id AND k.id=i.group_id
- JOIN public.quiz_attempts a ON a.institution_id=g.institution_id AND a.id=g.attempt_id
- LEFT JOIN LATERAL (SELECT id,score_points,score_percent,grade_value,created_at FROM public.grade_revisions
+ LEFT JOIN public.quiz_attempts a ON a.institution_id=g.institution_id AND a.id=g.attempt_id
+ LEFT JOIN LATERAL (SELECT id,score_points,score_percent,grade_value,created_at,assignment_attempt_id,feedback FROM public.grade_revisions
   WHERE institution_id=g.institution_id AND grade_id=g.id ORDER BY created_at DESC,id DESC LIMIT 1) r ON true`;
 
 export async function resultSummary(c:PoolClient,grades:QueryResultRow[],grouped:boolean) {
- const published=grades.filter(g=>g.published_at!==null).map(g=>({
+ const published=grades.filter(g=>g.published_at!==null && Number(g.max_points)>0).map(g=>({
   groupId:g.group_id,title:g.group_title,position:g.group_position,weight:g.weight_percent,
   earned:g.earned_points,possible:g.max_points,grade:g.effective_grade,
  }));

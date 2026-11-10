@@ -41,7 +41,7 @@ function input(row: QueryResultRow): AssignmentInput {
  return {
   title:row.title, description:row.description, instructions:row.instructions, sectionId:row.section_id,
   maxPoints:Number(row.max_points), groupId:row.group_id, allowedExtensions:row.allowed_extensions,
-  maxAttempts:row.max_attempts, availableFrom:row.available_from, dueAt:row.due_at, availableUntil:row.available_until,
+  allowWrittenResponse:row.allow_written_response, maxAttempts:row.max_attempts, availableFrom:row.available_from, dueAt:row.due_at, availableUntil:row.available_until,
  };
 }
 
@@ -54,7 +54,7 @@ function dto(row: QueryResultRow, scope: GradebookScope) {
 }
 
 const metadata = (v: AssignmentInput) => [
- v.sectionId,v.description,v.instructions,v.availableFrom,v.dueAt,v.availableUntil,v.allowedExtensions,v.maxAttempts,
+ v.sectionId,v.description,v.instructions,v.availableFrom,v.dueAt,v.availableUntil,v.allowedExtensions,v.maxAttempts,v.allowWrittenResponse,
 ];
 const changed = () => new ConflictException({code:"ASSIGNMENT_CHANGED"});
 
@@ -95,14 +95,16 @@ export class AssignmentsService {
  async create(actor: string, slug: string, course: string, body: unknown) {
   const {key,values,publish} = assignmentCreate(body);
   const id = randomUUID();
-  const digest = createHash("sha256").update(JSON.stringify(publish ? {...values,publish} : values)).digest("hex");
+  const {allowWrittenResponse,...legacyValues} = values;
+  const digestInput = allowWrittenResponse ? values : legacyValues;
+  const digest = createHash("sha256").update(JSON.stringify(publish ? {...digestInput,publish} : digestInput)).digest("hex");
   return this.db.withInstitution(actor,slug,async c => {
    const scope = await gradebookScope(c,actor,slug,course), tenant = scope.member.institution_id;
    await requireDestination(c,scope,values.sectionId,true);
    const inserted = await c.query(`INSERT INTO public.assignments
     (id,institution_id,course_id,created_by,creation_key,create_digest,section_id,description,instructions,
-     available_from,due_at,available_until,allowed_extensions,max_attempts)
-    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+     available_from,due_at,available_until,allowed_extensions,max_attempts,allow_written_response)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
     ON CONFLICT(institution_id,course_id,created_by,creation_key) DO NOTHING`,
    [id,tenant,course,actor,key,digest,...metadata(values)]);
    if (!inserted.rowCount) {
@@ -138,8 +140,16 @@ export class AssignmentsService {
    if (!needsEdit) return this.setVisibility(c,scope,actor,row,true);
    if (values.dueAt !== previous.dueAt) await requireFutureDueDate(c,values.dueAt);
    const tenant = scope.member.institution_id;
+   if (values.sectionId !== previous.sectionId && (await c.query(
+    "SELECT 1 FROM public.assignment_attempts WHERE institution_id=$1 AND assignment_id=$2 LIMIT 1",[tenant,id])).rowCount) {
+    throw new ConflictException({code:"ASSIGNMENT_HAS_SUBMISSIONS"});
+   }
+   if (values.maxPoints !== previous.maxPoints && (await c.query(`SELECT 1 FROM public.grades
+    WHERE institution_id=$1 AND assignment_id=$2 LIMIT 1`,[tenant,id])).rowCount) {
+    throw new ConflictException({code:"ASSIGNMENT_HAS_GRADES"});
+   }
    await c.query(`UPDATE public.assignments SET section_id=$3,description=$4,instructions=$5,
-    available_from=$6,due_at=$7,available_until=$8,allowed_extensions=$9,max_attempts=$10,version=version+1
+    available_from=$6,due_at=$7,available_until=$8,allowed_extensions=$9,max_attempts=$10,allow_written_response=$11,version=version+1
     WHERE institution_id=$1 AND id=$2`,[tenant,id,...metadata(values)]);
    await c.query(`UPDATE public.grade_items SET title=$3,max_points=$4,group_id=$5 WHERE institution_id=$1 AND assignment_id=$2`,
     [tenant,id,values.title,values.maxPoints,groupId]);

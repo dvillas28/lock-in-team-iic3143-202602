@@ -51,6 +51,8 @@ CorrectPublishedGradeRequest:
   additionalProperties: false
   required: [revisionId, expectedRevisionId, points, reason]
   properties:
+    attemptId: {type: string, format: uuid, description: Intento de la misma tarea y sección. Si se omite se conserva el intento efectivo.}
+    feedback: {type: [string, 'null'], maxLength: 4000, description: Retroalimentación de la tarea. Si se omite se conserva la anterior.}
     revisionId: {type: string, format: uuid}
     expectedRevisionId: {type: [string, 'null'], format: uuid}
     points: {type: number, minimum: 0, maximum: 999999.99, multipleOf: 0.01}

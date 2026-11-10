@@ -147,6 +147,7 @@ GradeTeacherView:
       type: string
       format: uuid
       readOnly: true
+    assignmentId: {type: string, format: uuid}
     gradeItemId:
       type: string
       format: uuid
@@ -164,12 +165,14 @@ GradeTeacherView:
       format: uuid
       readOnly: true
     scorePercent:
-      type: number
+      type: [number, 'null']
       minimum: 0
       maximum: 100
       readOnly: true
     grade:
-      $ref: '#/GradeValue'
+      oneOf:
+        - $ref: '#/GradeValue'
+        - type: 'null'
     publishedAt:
       type: [string, 'null']
       format: date-time
@@ -294,6 +297,7 @@ PublishedGradeStudentView:
     - grade
     - publishedAt
   properties:
+    assignmentId: {type: string, format: uuid}
     gradeItemId:
       type: string
       format: uuid
@@ -306,12 +310,14 @@ PublishedGradeStudentView:
       maximum: 100
       multipleOf: 0.01
     scorePercent:
-      type: number
+      type: [number, 'null']
       minimum: 0
       maximum: 100
       readOnly: true
     grade:
-      $ref: '#/GradeValue'
+      oneOf:
+        - $ref: '#/GradeValue'
+        - type: 'null'
     publishedAt:
       type: string
       format: date-time
@@ -327,7 +333,7 @@ PublishedGradeStudentView:
       minimum: 0
     maxPoints:
       type: number
-      exclusiveMinimum: 0
+      minimum: 0
     revisedAt:
       type: [string, 'null']
       format: date-time

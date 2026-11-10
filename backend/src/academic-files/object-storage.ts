@@ -7,25 +7,32 @@ import {Readable} from "node:stream";
 import {randomUUID} from "node:crypto";
 
 const id="[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}";
-const pattern=new RegExp(`^academic/(materials|submissions)/${id}/${id}/${id}$`);
+const materialPattern=new RegExp(`^academic/materials/${id}/${id}/${id}$`);
+const submissionPattern=new RegExp(`^academic/submissions/(?:${id}/){5}${id}$`);
+type Area = "materials" | "submissions";
+const patternFor=(area:Area)=>area==="materials"?materialPattern:submissionPattern;
 const unavailable=()=>new ServiceUnavailableException();
 function segments(key:string) {
- if (!pattern.test(key) || /[\r\n]/.test(key)) throw unavailable();
+ if (!(materialPattern.test(key) || submissionPattern.test(key)) || /[\r\n]/.test(key)) throw unavailable();
  return key.split("/");
 }
 export function assertMaterialKey(key:string) {
  if (segments(key)[1]!=="materials") throw unavailable();
 }
-export function objectKey(area:"materials"|"submissions", institution:string, resource:string) {
+export function assertSubmissionKey(key:string) {
+ if (segments(key)[1]!=="submissions") throw unavailable();
+}
+export function objectKey(area:"materials", institution:string, resource:string) {
  const key=`academic/${area}/${institution}/${resource}/${randomUUID()}`;
  segments(key);
  return key;
 }
 export interface ObjectStorage {
- put(key:string, bytes:Buffer, mime:string):Promise<void>;
+ put(key:string, bytes:Buffer, mime:string,sha256?:string):Promise<void>;
  get(key:string, size:number):Promise<Readable>;
  delete(key:string):Promise<void>;
  listMaterials(after?:string):AsyncIterable<{key:string;modified:Date}>;
+ listSubmissions(after?:string):AsyncIterable<{key:string;modified:Date}>;
 }
 
 export class LocalObjectStorage implements ObjectStorage {
@@ -67,9 +74,12 @@ export class LocalObjectStorage implements ObjectStorage {
   try {await unlink(await this.path(key));}
   catch(error) {if ((error as NodeJS.ErrnoException).code!=="ENOENT") throw unavailable();}
  }
- async *listMaterials(after?:string) {
-  if (after) assertMaterialKey(after);
-  const root=join(this.root,"academic","materials");
+ listMaterials(after?:string) { return this.list("materials",after); }
+ listSubmissions(after?:string) { return this.list("submissions",after); }
+ private async *list(area:Area,after?:string) {
+  const pattern=patternFor(area);
+  if (after && !pattern.test(after)) throw unavailable();
+  const root=join(this.root,"academic",area);
   async function* walk(dir:string, relative:string, depth:number):AsyncGenerator<{key:string;modified:Date}> {
    const entries=await readdir(dir,{withFileTypes:true}).catch(error=>{if(error.code==="ENOENT") return [];throw error;});
    for (const entry of entries.sort((a,b)=>a.name<b.name?-1:a.name>b.name?1:0)) {
@@ -86,7 +96,7 @@ export class LocalObjectStorage implements ObjectStorage {
    if (!stat) return;
    if (!stat.isDirectory()) throw unavailable();
   }
-  yield* walk(root,"academic/materials",2);
+  yield* walk(root,`academic/${area}`,area==="materials"?2:5);
  }
 }
 
@@ -101,10 +111,10 @@ export class S3ObjectStorage implements ObjectStorage {
    throw unavailable();
   }
  }
- async put(key:string,bytes:Buffer,mime:string) {
+ async put(key:string,bytes:Buffer,mime:string,sha256?:string) {
   segments(key);
   await this.send(new PutObjectCommand({Bucket:this.bucket,Key:key,Body:bytes,ContentType:mime,
-   ContentLength:bytes.length,CacheControl:"private, no-store",ServerSideEncryption:"AES256",IfNoneMatch:"*"}));
+   ContentLength:bytes.length,ChecksumSHA256:sha256 ? Buffer.from(sha256,"hex").toString("base64") : undefined,CacheControl:"private, no-store",ServerSideEncryption:"AES256",IfNoneMatch:"*"}));
  }
  async get(key:string,size:number) {
   segments(key);
@@ -118,11 +128,14 @@ export class S3ObjectStorage implements ObjectStorage {
   segments(key);
   await this.send(new DeleteObjectCommand({Bucket:this.bucket,Key:key}));
  }
- async *listMaterials(after?:string) {
-  if (after) assertMaterialKey(after);
+ listMaterials(after?:string) { return this.list("materials",after); }
+ listSubmissions(after?:string) { return this.list("submissions",after); }
+ private async *list(area:Area,after?:string) {
+  const pattern=patternFor(area);
+  if (after && !pattern.test(after)) throw unavailable();
   let cursor:string|undefined;
   do {
-   const result=await this.send(new ListObjectsV2Command({Bucket:this.bucket,Prefix:"academic/materials/",MaxKeys:100,StartAfter:cursor?undefined:after,ContinuationToken:cursor})) as {
+   const result=await this.send(new ListObjectsV2Command({Bucket:this.bucket,Prefix:`academic/${area}/`,MaxKeys:100,StartAfter:cursor?undefined:after,ContinuationToken:cursor})) as {
     Contents?:{Key?:string;LastModified?:Date}[];IsTruncated?:boolean;NextContinuationToken?:string};
    for (const item of result.Contents??[]) if (item.Key && pattern.test(item.Key) && (!after || item.Key>after) && item.LastModified) yield {key:item.Key,modified:item.LastModified};
    const next=result.IsTruncated ? result.NextContinuationToken : undefined;
