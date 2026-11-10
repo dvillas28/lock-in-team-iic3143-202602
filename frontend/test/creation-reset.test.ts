@@ -12,7 +12,7 @@ import { CourseDetail } from '../src/components/courses/course-detail.tsx';
 import { mount } from './fixtures/course-ui.ts';
 import { course, section, otherSection, person, enrollment, deferred } from './fixtures/courses.ts';
 import { unit, material } from './fixtures/content.ts';
-import { emptyDraft } from './fixtures/quizzes.ts';
+import { emptyDraft, reply as quizReply } from './fixtures/quizzes.ts';
 import { academicYears } from '../src/lib/courses/creation.ts';
 
 type Kind = 'module' | 'material' | 'course' | 'section' | 'enrollment' | 'quiz';
@@ -25,7 +25,7 @@ function FormView({ kind, refresh = true, search = false, edit = false }: { kind
     case 'course': return h(CourseForm, props);
     case 'section': return h(SectionForm, { ...props, courseId: course.id });
     case 'enrollment': return h(EnrollmentForm, { ...props, sectionId: section.id, search, onSaved: async () => {} });
-    case 'quiz': return h(QuizCreate, { ...props, user: state.context!.user!, course, sections: [section] });
+    case 'quiz': return h(QuizCreate, { courseId: course.id });
   }
 }
 const cases: { kind: Kind; label: string; values: Record<string, string>; message: string }[] = [
@@ -34,7 +34,7 @@ const cases: { kind: Kind; label: string; values: Record<string, string>; messag
   { kind: 'course', label: 'Crear curso', values: { code: 'NUEVO', name: 'Nuevo curso', term: '2026-2', sectionCode: '1', capacity: '30' }, message: 'Curso creado.' },
   { kind: 'section', label: 'Crear sección', values: { code: '2', capacity: '30' }, message: 'Sección creada.' },
   { kind: 'enrollment', label: 'Asignar rol', values: { userId: person.id, role: 'assistant' }, message: 'Participante asignado.' },
-  { kind: 'quiz', label: 'Crear quiz', values: { title: 'Nuevo quiz', instructions: 'Nuevas instrucciones', maxAttempts: '2' }, message: 'Quiz creado.' },
+  { kind: 'quiz', label: 'Crear quiz', values: { title: 'Nuevo quiz', instructions: 'Nuevas instrucciones', maxAttempts: '2' }, message: 'Borrador creado.' },
 ];
 async function created(kind: Kind, request: Request) {
   const body = await request.json();
@@ -42,7 +42,7 @@ async function created(kind: Kind, request: Request) {
   return Response.json({ ...base, ...body }, { status: 201 });
 }
 for (const entry of cases) test(`${entry.label} clears confirmed input and reports the operation`, async () => {
-  const ui = await mount(h(FormView, { kind: entry.kind }), r => r.method === 'POST' ? created(entry.kind, r) : Response.json({ items: [section] }), 'ownerTeacher');
+  const ui = await mount(h(FormView, { kind: entry.kind }), r => r.method === 'POST' ? created(entry.kind, r) : entry.kind === 'quiz' ? quizReply(r) : Response.json({ items: [section] }), 'ownerTeacher');
   try {
     const selector = `form[aria-label="${entry.label}"]`;
     await ui.submit(selector, entry.values);
@@ -52,7 +52,10 @@ for (const entry of cases) test(`${entry.label} clears confirmed input and repor
       assert.equal(control.value, name === 'role' ? 'teacher' : entry.kind === 'course' && name === 'term' ? `${academicYears()[0]}-1` : '', name);
     }
     assert.equal(ui.requests.filter(r => r.method === 'POST' && !r.url.endsWith('/login')).length, 1);
-    if (entry.kind !== 'course') assert.match(ui.doc.querySelector('[role="status"]')!.textContent!, new RegExp(entry.message.replace('.', '\\.')));
+    if (entry.kind !== 'course') {
+      const status = entry.kind === 'quiz' ? form.querySelector('[role="status"]') : ui.doc.querySelector('[role="status"]');
+      assert.match(status!.textContent!, new RegExp(entry.message.replace('.', '\\.')));
+    }
     assert.doesNotMatch(ui.doc.body.textContent!, /Cambio confirmado/);
     await ui.submit(selector);
     assert.equal(ui.requests.filter(r => r.method === 'POST' && !r.url.endsWith('/login')).length, 1);

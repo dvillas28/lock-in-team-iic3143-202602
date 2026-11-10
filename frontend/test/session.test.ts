@@ -275,7 +275,7 @@ test("only exact attempt UUID survives login return allowlist",()=>{
 
  test('tracking return routes require exact UUID segments',()=>{
  const c='10000000-0000-4000-8000-000000000010',q='10000000-0000-4000-8000-000000000060',a='10000000-0000-4000-8000-000000000080';
- for(const path of [`/courses/${c}/grades`,`/courses/${c}/gradebook`,`/courses/${c}/audit`,`/courses/${c}/quizzes/${q}/attempts`,`/courses/${c}/quizzes/${q}/attempts/${a}`]){assert.equal(safeReturnPath(path),path);for(const suffix of [String.fromCharCode(10),String.fromCharCode(13),'?studentId=x','#x','/','\\','\n','%0A'])assert.equal(safeReturnPath(path+suffix),'/courses');}
+ for(const path of [`/courses/${c}/grades`,`/courses/${c}/gradebook`,`/courses/${c}/audit`,`/courses/${c}/quizzes/new`,`/courses/${c}/quizzes/${q}/attempts`,`/courses/${c}/quizzes/${q}/attempts/${a}`]){assert.equal(safeReturnPath(path),path);for(const suffix of [String.fromCharCode(10),String.fromCharCode(13),'?studentId=x','#x','/','\\','\n','%0A'])assert.equal(safeReturnPath(path+suffix),'/courses');}
  });
 
 

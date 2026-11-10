@@ -25,22 +25,28 @@ test("configuration rejects impossible dates, timezone suffixes and incomplete l
     assert.throws(() => configuration(form), (error: unknown) => error instanceof FieldError && error.field === "opensAt", value);
   }
   form.set("opensAt", "2028-02-29T12:00:30");
-  assert.ok(configuration(form).opensAt?.endsWith("Z"));
+  const seconds = configuration(form).opensAt;
+  assert.ok(seconds?.endsWith("Z"));
+  form.set("opensAt", "2028-02-29T12:00:30.000");
+  assert.equal(configuration(form).opensAt, seconds);
+  form.set("opensAt", "2028-02-29T12:00:30.001");
+  assert.throws(() => configuration(form), /segundos/);
   form.set("opensAt", "");
   assert.equal(configuration(form).opensAt, null);
   assert.equal(configuration(form).maxAttempts, null);
 });
 
-test("nonexistent DST local time cannot silently normalize to another hour", () => {
+test("Santiago time and its DST gap are independent of the browser timezone", () => {
   const modulePath = fileURLToPath(new URL("../src/lib/quizzes/form-values.ts", import.meta.url));
   const loaderUrl = pathToFileURL(createRequire(import.meta.url).resolve("tsx")).href;
   // The frontend package loads TypeScript through tsx as CommonJS in this process.
   const source = `const assert = require("node:assert/strict");
     const { configuration } = require(${JSON.stringify(modulePath)});
-    assert.equal(new Date(2026, 2, 8, 2, 30).getHours(), 3);
     const form = new FormData();
-    form.set("opensAt", "2026-03-08T02:30");
-    assert.throws(() => configuration(form), error => error.field === "opensAt");`;
+    form.set("opensAt", "2026-09-06T00:30");
+    assert.throws(() => configuration(form), error => error.field === "opensAt" && /Santiago/.test(error.message));
+    form.set("opensAt", "2026-01-15T12:30:17");
+    assert.equal(configuration(form).opensAt, "2026-01-15T15:30:17.000Z");`;
   const result = spawnSync(process.execPath, ["--import", loaderUrl, "--input-type=commonjs", "-e", source], { env: { ...process.env, TZ: "America/New_York" }, encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr);
 });
@@ -62,4 +68,16 @@ test("native minute normalization preserves unchanged timezone and microseconds"
   assert.equal(parsed.closesAt, original.closesAt);
   form.set("opensAt", localDate(original.opensAt).slice(0, 16) + ":01");
   assert.notEqual(configuration(form, original).opensAt, original.opensAt);
+});
+
+test("a repeated Santiago hour needs a choice and preserves the original precision", () => {
+  const form = new FormData();
+  form.set("closesAt", "2026-04-04T23:30");
+  assert.throws(() => configuration(form), /dos horas/);
+  form.set("closesAtOffset", "2026-04-05T03:30:00.000Z");
+  assert.equal(configuration(form).closesAt, "2026-04-05T03:30:00.000Z");
+  const original = { ...draft, closesAt: "2026-04-04T23:30:00.654321-04:00" };
+  assert.equal(configuration(form, original).closesAt, original.closesAt);
+  form.set("closesAtOffset", "2026-04-05T02:30:00.000Z");
+  assert.equal(configuration(form, original).closesAt, "2026-04-05T02:30:00.000Z");
 });

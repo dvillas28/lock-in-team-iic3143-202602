@@ -39,7 +39,8 @@ test("dirty local state blocks publishing saved older version",async()=>{
  const input=ui.doc.querySelector<HTMLInputElement>('[name="title"]')!;
  await ui.settle(()=>{input.value='Local';input.dispatchEvent(new ui.dom.window.Event('input',{bubbles:true}));});
  assert.equal(Array.from(ui.doc.querySelectorAll('button')).find(b=>b.textContent==='Publicar quiz')?.disabled,true);
- assert.match(ui.doc.body.textContent!,/Guarda los cambios/);
+ assert.match(ui.doc.body.textContent!,/Cambios sin guardar/);
+  assert.doesNotMatch(ui.doc.body.textContent!,/Publica cuando hayas revisado/);
  }finally{await ui.close();}
 });
 
