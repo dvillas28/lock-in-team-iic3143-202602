@@ -63,12 +63,12 @@ test('attempt migration upgrades populated authoring data, repeats, restarts and
   await pool.query("INSERT INTO quizzes(id,institution_id,course_id,section_id,title,questions,created_by,published_at) VALUES($1,$2,$3,$4,'Populated quiz',$5,$6,now())",[quiz,tenant,course,section,JSON.stringify([{...question,id:randomUUID()}]),users.owner]);
   await pool.query("INSERT INTO grade_items(id,institution_id,course_id,quiz_id,title) VALUES($1,$2,$3,$4,'Populated quiz')",[item,tenant,course,quiz]);
   const parentTables=['users','institutions','institution_memberships','courses','sections','enrollments','quizzes','grade_items','audit_events'];
-  const snapshot=()=>Promise.all(parentTables.map(async table=>(await pool.query(`SELECT to_jsonb(t)-ARRAY['bio','avatar_key','credential_version','gradebook_grouped','gradebook_version','group_id','max_points'] AS row FROM ${table} t ORDER BY id`)).rows));
+  const snapshot=()=>Promise.all(parentTables.map(async table=>(await pool.query(`SELECT to_jsonb(t)-ARRAY['bio','avatar_key','credential_version','gradebook_grouped','gradebook_version','group_id','max_points','assignment_id'] AS row FROM ${table} t ORDER BY id`)).rows));
   const parent=await snapshot(),c=await pool.connect();
   try{const down=await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir,direction:'down',count:6,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});assert.equal(down.length,6);}finally{c.release();}
   assert.equal((await pool.query("SELECT to_regclass('public.quiz_attempts') AS table")).rows[0].table,null);
   assert.equal((await cli('commands/migrate').result).code,0);assert.deepEqual(await snapshot(),parent);
-  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,18);
+  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,19);
   const profileDefaults=(await pool.query('SELECT bio,avatar_key,credential_version FROM users')).rows;
   assert.ok(profileDefaults.every(row=>row.bio===null&&row.avatar_key===null&&row.credential_version===0));
   const id=randomUUID();

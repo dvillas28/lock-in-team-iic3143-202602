@@ -101,7 +101,7 @@ test('groups, partial section publication and audited corrections preserve histo
   assert.equal((await request(app,t.teacher,'uc/quizzes/'+newQuiz+'/publish','POST')).status,200);
   const newConfig=(await call(t.owner,'/grade-items')).body;
   const newItem=newConfig.items.find(i=>i.quizId===newQuiz);
-  assert.equal(newItem.maxPoints,2.5);assert.equal(newItem.weightPercent,0);
+  assert.equal(newItem.maxPoints,2.5);assert.equal(newItem.weightPercent,60);assert.equal(newItem.groupId,latest.groups.find(g=>g.title==='Quizzes').id);
   assert.equal(newConfig.totalWeightPercent,100);
   runtime=await runtimeDatabase();
   await runtime.withInstitution(users.foreign,'utfsm',async c=>{
