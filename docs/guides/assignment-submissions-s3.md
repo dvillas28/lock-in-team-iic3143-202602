@@ -21,6 +21,8 @@ no-store`. Mantén S3 Block Public Access activo. [PutObject y checksum](https:/
 
 Agregar a los permisos existentes del backend, con el nombre de bucket del
 entorno correspondiente. Para otra partición, sustituir también `aws`.
+`scripts/provision-avatar-s3.sh` aplica esta política y la de limpieza en prod
+y test, y prueba ambos prefijos con las credenciales de cada entorno.
 
 ```json
 {
