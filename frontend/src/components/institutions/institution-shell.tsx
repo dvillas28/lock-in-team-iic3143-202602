@@ -1,12 +1,12 @@
 "use client";
-import { BookOpen, ChevronRight, ClipboardList, FolderOpen, GraduationCap, Home, Menu, Moon, Sun, X, UserRound, Users } from "lucide-react";
+import { BookOpen, ChevronRight, ClipboardList, FolderOpen, GraduationCap, Home, Menu, Moon, Shield, Sun, X, UserRound, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { CurrentUser } from "../../lib/auth/validation.ts";
 import { isId } from "../../lib/courses/validation.ts";
 import { institutionHomePath } from "../../lib/institution-routes.ts";
 type InstitutionShellProps = Readonly<{
-    institutionSlug: string;
+    institutionSlug?: string;
     children?: ReactNode;
     user?: CurrentUser;
     institutionName?: string;
@@ -15,6 +15,8 @@ type InstitutionShellProps = Readonly<{
     pathname?: string;
 }>;
 function pageTitle(pathname: string) {
+    if (pathname === '/profile') return 'Mi perfil';
+    if (pathname === '/profile/security') return 'Seguridad';
     if (pathname === '/admin/users') return 'Usuarios institucionales';
     if (pathname.endsWith('/grades')) {
         return 'Mis notas';
@@ -56,7 +58,10 @@ function toggleTheme() {
     document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
 }
 export function InstitutionShell({ institutionSlug, institutionName, actions, avatar, children, user, pathname = "/courses" }: InstitutionShellProps) {
-    const homePath = institutionHomePath(institutionSlug);
+    const homePath = institutionSlug ? institutionHomePath(institutionSlug) : '/#instituciones';
+    const homeLabel = institutionSlug ? 'Mis cursos' : 'Instituciones';
+    const profilePage = pathname === '/profile';
+    const securityPage = pathname === '/profile/security';
     const [menuOpen, setMenuOpen] = useState(false);
     const menuButton = useRef<HTMLButtonElement>(null);
     const navigation = useRef<HTMLElement>(null);
@@ -77,7 +82,7 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, av
     }, [menuOpen]);
     return (<div className={`app academic-app${menuOpen ? ' menu-open' : ''}`}>
       <a href="#main-content" className="btn btn-primary skip-link">Saltar al contenido</a>
-      <aside className="sidebar" aria-label="Contexto institucional">
+      <aside className="sidebar" aria-label={institutionSlug ? "Contexto institucional" : "Mi cuenta"}>
         <div className="sidebar-top">
           <Link href={homePath} className="sidebar-logo institution-brand" aria-label="AcademiX, inicio académico">
             <span className="logo-icon"><GraduationCap size={16} aria-hidden="true"/></span>
@@ -86,18 +91,19 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, av
           <button ref={menuButton} type="button" className="icon-btn mobile-menu-button" aria-label={menuOpen ? 'Cerrar navegación' : 'Abrir navegación'} aria-expanded={menuOpen} aria-controls="institution-menu" onClick={() => {
             if (menuOpen) closeMenu(); else { setMenuOpen(true); requestAnimationFrame(() => navigation.current?.querySelector<HTMLAnchorElement>('a')?.focus({preventScroll:true})); }
           }}>{menuOpen ? <X size={18} aria-hidden="true" /> : <Menu size={18} aria-hidden="true" />}</button>
-          <div className="tenant-badge institution-context">
+          {institutionSlug && <div className="tenant-badge institution-context">
             <span>Institución: <strong>{institutionName ?? institutionSlug}</strong></span>
-          </div>
+          </div>}
         </div>
         <div className="sidebar-menu" id="institution-menu">
-        <nav ref={navigation} id="institution-navigation" className="sidebar-nav" aria-label="Navegación institucional">
-          <p className="nav-section-label">Espacio académico</p>
+        <nav ref={navigation} id="institution-navigation" className="sidebar-nav" aria-label={institutionSlug ? "Navegación institucional" : "Navegación de cuenta"}>
+          <p className="nav-section-label">{institutionSlug ? "Espacio académico" : "Mi cuenta"}</p>
           <Link href={homePath} className={`nav-item${pathname === homePath ? " active" : ""}`} aria-current={pathname === homePath ? "page" : undefined} onClick={() => setMenuOpen(false)}>
             <Home size={16} aria-hidden="true"/>
-            Mis cursos
+            {homeLabel}
           </Link>
-          <Link href="/profile" className="nav-item" onClick={()=>setMenuOpen(false)}><UserRound size={16} aria-hidden="true"/>Mi perfil</Link>
+          <Link href="/profile" className={`nav-item${profilePage ? ' active' : ''}`} aria-current={profilePage ? 'page' : undefined} onClick={()=>setMenuOpen(false)}><UserRound size={16} aria-hidden="true"/>Mi perfil</Link>
+          {(profilePage || securityPage) && <Link href="/profile/security" className={`nav-item${securityPage ? ' active' : ''}`} aria-current={securityPage ? 'page' : undefined} onClick={()=>setMenuOpen(false)}><Shield size={16} aria-hidden="true"/>Seguridad</Link>}
           {user && (user.institutionMembership.isAdmin || user.institutionMembership.isSuperAdmin) && <Link href="/admin/users" className={`nav-item${pathname === '/admin/users' ? ' active' : ''}`} aria-current={pathname === '/admin/users' ? 'page' : undefined} onClick={()=>setMenuOpen(false)}><Users size={16} aria-hidden="true"/>Usuarios institucionales</Link>}
           {base && <><p className="nav-section-label">Curso actual</p>{[
             [base, 'Resumen del curso', BookOpen], [base + '/modules', 'Módulos y material', FolderOpen], [base + '/quizzes', 'Quizzes', ClipboardList],
@@ -114,10 +120,10 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, av
         <header className="top-header">
           <nav className="breadcrumb institution-context" aria-label="Ruta de navegación">
             <Link href={homePath}>AcademiX</Link>
-            <ChevronRight size={14} aria-hidden="true"/>
+            {institutionSlug && <><ChevronRight size={14} aria-hidden="true"/>
             <span>{institutionSlug}</span>
             <ChevronRight size={14} aria-hidden="true"/>
-            <Link href={homePath} aria-current={pathname === homePath ? "page" : undefined}>Cursos</Link>
+            <Link href={homePath} aria-current={pathname === homePath ? "page" : undefined}>Cursos</Link></>}
             {base && pathname !== base && <><ChevronRight size={14} aria-hidden="true"/><Link href={base}>Curso</Link></>}
             {base && pathname.includes('/quizzes/') && <><ChevronRight size={14} aria-hidden="true"/><Link href={base + '/quizzes'}>Quizzes</Link></>}
             {base && (pathname.includes('/materials/') || pathname.includes('/files/')) && <><ChevronRight size={14} aria-hidden="true"/><Link href={base + '/modules'}>Módulos</Link></>}

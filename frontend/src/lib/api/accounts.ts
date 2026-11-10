@@ -1,5 +1,5 @@
 import type { ApiClient } from './client.ts';
-import type { components } from './schema';
+import type { components, operations } from './schema';
 import { profile,invitation,member,page,userImport,isAccountId } from '../accounts/validation.ts';
 import { isInstitutionSlug } from '../institution-routes.ts';
 import { ApiResponseError } from './errors.ts';
@@ -15,7 +15,9 @@ export async function replaceAvatar(client:ApiClient,file:File,expectedUpdatedAt
  return profile((await client.PUT('/api/v1/me/avatar',{body:body as unknown as components['schemas']['AvatarUpload']})).data);
 }
 export async function deleteAvatar(client:ApiClient,expectedUpdatedAt:string){return profile((await client.DELETE('/api/v1/me/avatar',{body:{expectedUpdatedAt}})).data);}
-export async function listMembers(client:ApiClient,slug:string,cursor?:string){return page((await client.GET('/api/v1/institution/{institutionSlug}/memberships',{params:{path:scope(slug),query:{cursor,limit:20}}})).data,member);}
+type MemberQuery = NonNullable<operations['listInstitutionMemberships']['parameters']['query']>;
+export type MemberPermission = NonNullable<MemberQuery['permission']>;
+export async function listMembers(client:ApiClient,slug:string,query:MemberQuery){return page((await client.GET('/api/v1/institution/{institutionSlug}/memberships',{params:{path:scope(slug),query:{limit:20,...query}}})).data,member);}
 export async function listInvitations(client:ApiClient,slug:string,cursor?:string){return page((await client.GET('/api/v1/institution/{institutionSlug}/invitations',{params:{path:scope(slug),query:{cursor,limit:20}}})).data,invitation);}
 export async function createInvitation(client:ApiClient,slug:string,body:components['schemas']['InvitationCreate'],key:string){return invitation((await client.POST('/api/v1/institution/{institutionSlug}/invitations',{params:{path:scope(slug),header:{'Idempotency-Key':key}},body})).data);}
 export async function invitationAction(client:ApiClient,slug:string,invitationId:string,action:'send'|'resend'|'revoke',key:string){

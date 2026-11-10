@@ -16,8 +16,8 @@ export function QuizConfiguration({item,sections,wholeCourse,field,message}:{ite
     <div className="form-grid quiz-date-fields">
       <Field name="opensAt" label="Apertura" type="datetime-local" required={false} value={localDate(item?.opensAt)} invalid={field === "opensAt"} error={field === "opensAt" ? message : undefined}/>
       <Field name="closesAt" label="Cierre" type="datetime-local" required={false} value={localDate(item?.closesAt)} invalid={field === "closesAt"} error={field === "closesAt" ? message : undefined}/>
-      <div className="stack"><label className="field-label" htmlFor={attemptsId}>Máximo de intentos (opcional)</label><input id={attemptsId} className="field tnum" name="maxAttempts" type="number" min="1" max="2147483647" step="1" defaultValue={item?.maxAttempts ?? ""} aria-invalid={field === "maxAttempts" || undefined} aria-describedby={field === "maxAttempts" ? `${attemptsId}-error` : undefined} />{field === "maxAttempts" && <p className="hint" id={`${attemptsId}-error`}>{message}</p>}</div>
+      <div className="stack"><label className="field-label" htmlFor={attemptsId}>Máximo de intentos (opcional)</label><input id={attemptsId} className="field tnum" name="maxAttempts" type="number" min="1" max="2147483647" step="1" placeholder="Ilimitado" defaultValue={item?.maxAttempts ?? ""} aria-invalid={field === "maxAttempts" || undefined} aria-describedby={field === "maxAttempts" ? `${attemptsId}-error` : undefined} />{field === "maxAttempts" && <p className="hint" id={`${attemptsId}-error`}>{message}</p>}</div>
     </div>
-    <p className="hint">Horarios en {Intl.DateTimeFormat().resolvedOptions().timeZone}. Deja las fechas vacías para no limitar el horario y los intentos vacíos para permitir intentos ilimitados. El cierre debe ser posterior a la apertura.</p>
+    <p className="hint">Horarios en {Intl.DateTimeFormat().resolvedOptions().timeZone}. Deja las fechas vacías para no limitar el horario. El cierre debe ser posterior a la apertura.</p>
   </div>;
 }

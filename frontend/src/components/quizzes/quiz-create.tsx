@@ -29,6 +29,9 @@ export function QuizCreate({session,slug,user,course,sections,onSaved}:{session:
     await mutation.run(async current=>{
       checkNativeInputs(form);
       const values=configuration(data);
+      const now=Date.now();
+      if (values.opensAt && Date.parse(values.opensAt) <= now) throw new FieldError("opensAt","La apertura debe ser posterior a la fecha y hora actuales.");
+      if (values.closesAt && Date.parse(values.closesAt) <= now) throw new FieldError("closesAt","El cierre debe ser posterior a la fecha y hora actuales.");
       if (!canAuthor(user,course,sections,values.sectionId ?? null)) throw new FieldError("sectionId","Destino fuera de tu alcance docente.");
       const questions=readQuestions(data,rows);
       const saved=await session.request(c=>createQuiz(c,slug,course.id,{...values,title:values.title!,questions}),current);

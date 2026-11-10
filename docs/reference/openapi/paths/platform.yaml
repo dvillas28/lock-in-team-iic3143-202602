@@ -148,10 +148,9 @@
     tags:
     - Institutions
     operationId: listInstitutionMemberships
-    x-permissions: "Membership activa e isSuperAdmin vigente en esta institución. No concede acceso académico."
+    x-permissions: "Membership activa con isAdmin o isSuperAdmin vigente en esta institución. No concede acceso académico."
     summary: Listar miembros activos
-    description: Exige superadmin vigente del tenant. Sin altas ni cambios de isSuperAdmin.
-      Mismo estado es no-op sin evento.
+    description: Filtra los miembros de la institución antes de paginar.
     responses:
       '200':
         description: Resultado institucional.
@@ -179,6 +178,20 @@
     parameters:
     - $ref: ../components/parameters.yaml#/Cursor
     - $ref: ../components/parameters.yaml#/Limit
+    - name: search
+      in: query
+      description: Fragmento literal del nombre o correo, sin distinguir mayúsculas.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 254
+    - name: permission
+      in: query
+      description: member exige que ambos permisos estén desactivados; admin y superadmin
+        seleccionan su indicador correspondiente, incluso si el otro está activo.
+      schema:
+        type: string
+        enum: [member, admin, superadmin]
 /api/v1/institution/{institutionSlug}/memberships/{membershipId}/course-admin:
   parameters:
   - $ref: ../components/parameters.yaml#/InstitutionSlug
