@@ -11,12 +11,12 @@ export function ModuleDialog({ session, slug, courseId, item, items, onSaved, di
   onSaved: () => Promise<boolean | undefined>; disabled: boolean;
 }>) {
   const dialog = useRef<HTMLDialogElement>(null), button = useRef<HTMLButtonElement>(null);
-  const [session_, setSession] = useState(0); // remount form on open: fresh/preloaded field, no stale errors
+  const [openCount, setOpenCount] = useState(0); // remount form on open: fresh/preloaded field, no stale errors
   const titleId = `module-dialog-${item?.id ?? "new"}`;
   const close = () => dialog.current?.close();
   return <>
     <button ref={button} type="button" className={item ? "btn btn-ghost" : "btn btn-primary"} aria-label={item ? `Renombrar ${item.title}` : undefined}
-      onClick={() => { setSession(n => n + 1); dialog.current?.showModal(); }}>
+      onClick={() => { setOpenCount(n => n + 1); dialog.current?.showModal(); }}>
       {item ? <Pencil size={14} aria-hidden="true" /> : <Plus size={16} aria-hidden="true" />}{item ? "Renombrar" : "Nuevo módulo"}
     </button>
     <dialog ref={dialog} className="modal native-dialog academic-dialog" aria-labelledby={titleId} onClose={() => button.current?.focus()}>
@@ -24,7 +24,7 @@ export function ModuleDialog({ session, slug, courseId, item, items, onSaved, di
         <h2 id={titleId}>{item ? "Renombrar módulo" : "Nuevo módulo"}</h2>
         <button type="button" className="btn btn-ghost" aria-label="Cerrar" onClick={close}><X size={18} aria-hidden="true" /></button>
       </div>
-      <ModuleForm key={session_} session={session} slug={slug} courseId={courseId} item={item} items={items} onSaved={onSaved} onDone={close} onCancel={close} disabled={disabled} />
+      <ModuleForm key={openCount} session={session} slug={slug} courseId={courseId} item={item} items={items} onSaved={onSaved} onDone={close} onCancel={close} disabled={disabled} />
     </dialog>
   </>;
 }
