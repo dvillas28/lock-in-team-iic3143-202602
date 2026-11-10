@@ -13,6 +13,22 @@ async function created(request: Request) {
   return Response.json({ ...draft, ...body, id: id(80), questions: body.questions.map((q: CreatedQuestion, i: number) => ({ ...q, id: id(90 + i) })) }, { status: 201 });
 }
 
+test('past quiz dates flag the matching field and prevent creation', async () => {
+  const ui = await mount(view(), r => reply(r), 'teacher');
+  try {
+    for (const [field, label] of [['opensAt', 'apertura'], ['closesAt', 'cierre']]) {
+      await ui.submit('form', {title: 'Quiz pendiente', opensAt: '', closesAt: '', [field]: '2000-01-01T12:00'});
+      const input = ui.doc.querySelector(`[name="${field}"]`)!;
+      assert.equal(input.getAttribute('aria-invalid'), 'true');
+      assert.equal(ui.doc.activeElement, input);
+      const error = ui.doc.getElementById(input.getAttribute('aria-describedby')!)!;
+      assert.ok(error.classList.contains('field-error'));
+      assert.match(error.textContent!, new RegExp(label));
+    }
+    assert.equal(posts(ui.requests).length, 0);
+  } finally { await ui.close(); }
+});
+
 test('creation sends reordered questions and correct answers in one POST without question UUIDs', async () => {
   const ui = await mount(view(), r => r.method === 'POST' ? created(r) : reply(r), 'teacher');
   try {

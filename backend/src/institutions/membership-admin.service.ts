@@ -1,8 +1,8 @@
-import { Injectable,NotFoundException } from "@nestjs/common";
+import { BadRequestException,Injectable,NotFoundException } from "@nestjs/common";
 import { DatabaseService } from "../database/database.service";
 import { AuditService } from "../audit/audit.service";
 import { lockContext,requirePermission } from "../courses/course-access";
-import { page,paginated } from "../courses/validation";
+import { page,paginated,text } from "../courses/validation";
 import type { QueryResultRow } from "pg";
 const dto=(m:QueryResultRow)=>({id:m.id,user:{id:m.user_id,name:m.name,email:m.email,active:m.user_active},isAdmin:m.is_admin,isSuperAdmin:m.is_super_admin,active:m.active});
 @Injectable()
@@ -11,11 +11,19 @@ export class MembershipAdminService {
  async list(actor:string,slug:string,query:Record<string,unknown>) {
  return this.database.withInstitution(actor,slug,async (db,member)=>{
   const m=member;requirePermission(m.is_admin || m.is_super_admin);
-  const p=page(query,JSON.stringify(["memberships",m.institution_id,actor]));
+  const search=query.search===undefined ? null : text(query.search,254);
+  const permission=query.permission ?? null;
+  if(permission!==null && permission!=="member" && permission!=="admin" && permission!=="superadmin") throw new BadRequestException();
+  const scope=["memberships",m.institution_id,actor];
+  if(search!==null || permission!==null) scope.push(search??"",permission??"");
+  const p=page(query,JSON.stringify(scope),["search","permission"]);
   const rows=(await db.query(`SELECT m.*,u.name,u.email,u.active AS user_active,to_char(m.created_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS cursor_date
    FROM public.institution_memberships m JOIN public.users u ON u.id=m.user_id
    WHERE m.institution_id=$1 AND m.active AND u.active AND ($2::timestamptz IS NULL OR (m.created_at,m.id)>($2::timestamptz,$3::uuid))
-   ORDER BY m.created_at,m.id LIMIT $4`,[m.institution_id,p.date,p.id,p.limit+1])).rows;
+   AND ($4::text IS NULL OR strpos(lower(u.name),lower($4))>0 OR strpos(lower(u.email),lower($4))>0)
+   AND ($5::text IS NULL OR ($5='member' AND NOT m.is_admin AND NOT m.is_super_admin)
+     OR ($5='admin' AND m.is_admin) OR ($5='superadmin' AND m.is_super_admin))
+   ORDER BY m.created_at,m.id LIMIT $6`,[m.institution_id,p.date,p.id,search,permission,p.limit+1])).rows;
   const result=paginated(rows,p,r=>r.cursor_date);return {...result,items:result.items.map(dto)};
 
  });

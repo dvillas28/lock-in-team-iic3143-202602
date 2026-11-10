@@ -4,7 +4,7 @@ import { useSession } from '../auth/session-provider.tsx';
 import { useResource } from '../courses/use-resource.ts';
 import { ErrorState,LoadingState } from '../route-states.tsx';
 import { AttemptConfirmation } from '../attempts/attempt-confirmation.tsx';
-import { createInvitation,invitationAction,listInvitations,listMembers } from '../../lib/api/accounts.ts';
+import { createInvitation,invitationAction,listInvitations,listMembers,type MemberPermission } from '../../lib/api/accounts.ts';
 import type { Invitation } from '../../lib/accounts/validation.ts';
 import type { Session } from '../../lib/auth/session.ts';
 import { accountMessage } from './feedback.ts';
@@ -17,11 +17,76 @@ export function InstitutionUsers(){
  return <Users key={`${state.generation}:${context.slug}`} session={session} slug={context.slug} emailAvailable={state.account?.capabilities.invitationEmail===true}/>;
 }
 function Users({session,slug,emailAvailable}:{session:Session;slug:string;emailAvailable:boolean}) {
- const [memberCursor,setMemberCursor]=useState<string>(),[inviteCursor,setInviteCursor]=useState<string>();
- const members=useResource(session,`members:${slug}:${memberCursor??''}`,c=>listMembers(c,slug,memberCursor),false);
+ const [inviteCursor,setInviteCursor]=useState<string>();
  const invites=useResource(session,`invitations:${slug}:${inviteCursor??''}`,c=>listInvitations(c,slug,inviteCursor));
  const reload=async()=>{await invites.reload();};
- return <div className="stack"><div className="page-heading"><div><p className="section-label">Administración institucional</p><h1>Usuarios institucionales</h1><p>Invita personas a esta institución. El alta no asigna cursos ni permisos administrativos.</p></div></div>{!emailAvailable&&<p className="notice" role="status">El envío de correo está temporalmente no disponible. Puedes registrar invitaciones e importar usuarios; los correos permanecerán pendientes.</p>}<InvitationForm session={session} slug={slug} onSaved={reload}/><section className="card panel stack"><h2>Invitaciones</h2><button className="btn btn-ghost" onClick={()=>void invites.reload()}>Actualizar invitaciones</button>{invites.error?<ErrorState feedback={invites.error} onRetry={()=>void invites.reload()}/>:!invites.data?<LoadingState/>:invites.data.items.length===0?<p>No hay invitaciones en esta página.</p>:<div className="account-table-wrap" role="region" aria-label="Desplazar invitaciones" tabIndex={0}><table className="data-table"><caption>Invitaciones de esta institución</caption><thead><tr><th scope="col">Persona</th><th scope="col">Activación</th><th scope="col">Correo</th><th scope="col">Acciones</th></tr></thead><tbody>{invites.data.items.map(invite=><InvitationRow key={invite.id} session={session} slug={slug} invite={invite} emailAvailable={emailAvailable} onSaved={reload}/>)}</tbody></table></div>}<div className="state-actions">{inviteCursor&&<button className="btn btn-ghost" onClick={()=>setInviteCursor(undefined)}>Primera página</button>}{invites.data?.nextCursor&&<button className="btn btn-ghost" onClick={()=>setInviteCursor(invites.data!.nextCursor!)}>Siguientes invitaciones</button>}</div></section><CsvImport session={session} slug={slug} emailAvailable={emailAvailable} onConfirmed={reload}/><section className="card panel stack"><h2>Miembros activos</h2>{members.error?<ErrorState feedback={members.error} onRetry={()=>void members.reload()}/>:!members.data?<LoadingState/>:!members.data.items.length?<p>No hay miembros activos para mostrar.</p>:<div className="account-table-wrap" role="region" aria-label="Desplazar miembros" tabIndex={0}><table className="data-table"><caption>Miembros activos de esta institución</caption><thead><tr><th scope="col">Nombre</th><th scope="col">Correo</th><th scope="col">Permisos institucionales</th></tr></thead><tbody>{members.data.items.map(member=><tr key={member.id}><td>{member.user.name}</td><td>{member.user.email}</td><td>{[member.isAdmin?'Administración':null,member.isSuperAdmin?'Superadministración':null].filter(Boolean).join(', ')||'Miembro'}</td></tr>)}</tbody></table></div>}<div className="state-actions">{memberCursor&&<button className="btn btn-ghost" onClick={()=>setMemberCursor(undefined)}>Primera página de miembros</button>}{members.data?.nextCursor&&<button className="btn btn-ghost" onClick={()=>setMemberCursor(members.data!.nextCursor!)}>Siguientes miembros</button>}</div></section></div>;
+ return <div className="stack"><div className="page-heading"><div><p className="section-label">Administración institucional</p><h1>Usuarios institucionales</h1><p>Invita personas a esta institución. El alta no asigna cursos ni permisos administrativos.</p></div></div>{!emailAvailable&&<p className="notice" role="status">El envío de correo está temporalmente no disponible. Puedes registrar invitaciones e importar usuarios; los correos permanecerán pendientes.</p>}<InvitationForm session={session} slug={slug} onSaved={reload}/><section className="card panel stack"><h2>Invitaciones</h2><button className="btn btn-ghost" onClick={()=>void invites.reload()}>Actualizar invitaciones</button>{invites.error?<ErrorState feedback={invites.error} onRetry={()=>void invites.reload()}/>:!invites.data?<LoadingState/>:invites.data.items.length===0?<p>No hay invitaciones en esta página.</p>:<div className="account-table-wrap" role="region" aria-label="Desplazar invitaciones" tabIndex={0}><table className="data-table"><caption>Invitaciones de esta institución</caption><thead><tr><th scope="col">Persona</th><th scope="col">Activación</th><th scope="col">Correo</th><th scope="col">Acciones</th></tr></thead><tbody>{invites.data.items.map(invite=><InvitationRow key={invite.id} session={session} slug={slug} invite={invite} emailAvailable={emailAvailable} onSaved={reload}/>)}</tbody></table></div>}<div className="state-actions">{inviteCursor&&<button className="btn btn-ghost" onClick={()=>setInviteCursor(undefined)}>Primera página</button>}{invites.data?.nextCursor&&<button className="btn btn-ghost" onClick={()=>setInviteCursor(invites.data!.nextCursor!)}>Siguientes invitaciones</button>}</div></section><CsvImport session={session} slug={slug} emailAvailable={emailAvailable} onConfirmed={reload}/><ActiveMembers session={session} slug={slug}/></div>;
+}
+function ActiveMembers({session,slug}:{session:Session;slug:string}) {
+ const [search,setSearch]=useState('');
+ const [permission,setPermission]=useState<MemberPermission|''>('');
+ const [cursors,setCursors]=useState<string[]>([]);
+ const cursor=cursors.at(-1);
+ const members=useResource(session,JSON.stringify(['members',slug,search,permission,cursor]),
+  c=>listMembers(c,slug,{cursor,search:search||undefined,permission:permission||undefined}),false);
+ const nextCursor=members.data?.nextCursor;
+
+ function submitSearch(event:FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+  const input=event.currentTarget.elements.namedItem('search') as HTMLInputElement;
+  setSearch(input.value.trim());
+  setCursors([]);
+ }
+
+ function clearSearch() {
+  setSearch('');
+  setCursors([]);
+ }
+
+ return <section className="card panel stack">
+  <h2>Miembros activos</h2>
+  <div className="account-form-grid">
+   <form className="stack" role="search" aria-label="Buscar miembros activos" onSubmit={submitSearch} onReset={clearSearch}>
+    <label className="field-label" htmlFor="member-search">Nombre o correo</label>
+    <input className="field" id="member-search" name="search" type="search" maxLength={254}/>
+    <div className="state-actions"><button type="submit" className="btn btn-ghost">Buscar</button>
+     {search && <button type="reset" className="btn btn-ghost">Limpiar búsqueda</button>}
+    </div>
+   </form>
+   <div className="stack">
+    <label className="field-label" htmlFor="member-permission">Permisos institucionales</label>
+    <select className="field" id="member-permission" value={permission} onChange={event=>{
+     setPermission(event.target.value as MemberPermission|'');
+     setCursors([]);
+    }}>
+     <option value="">Todos los permisos</option>
+     <option value="member">Sin permisos administrativos</option>
+     <option value="admin">Administración</option>
+     <option value="superadmin">Superadministración</option>
+    </select>
+   </div>
+  </div>
+  {members.error ? <ErrorState feedback={members.error} onRetry={()=>void members.reload()}/>
+   : !members.data ? <LoadingState/>
+   : !members.data.items.length ? <p role="status">{search||permission ? 'No hay coincidencias. Prueba otro nombre, correo o permiso.' : 'No hay miembros activos para mostrar.'}</p>
+   : <div className="account-table-wrap" role="region" aria-label="Desplazar miembros" tabIndex={0}>
+    <table className="data-table">
+     <caption>Miembros activos de esta institución</caption>
+     <thead><tr><th scope="col">Nombre</th><th scope="col">Correo</th><th scope="col">Permisos institucionales</th></tr></thead>
+     <tbody>{members.data.items.map(member=><tr key={member.id}>
+      <td>{member.user.name}</td><td>{member.user.email}</td>
+      <td>{[member.isAdmin?'Administración':null,member.isSuperAdmin?'Superadministración':null].filter(Boolean).join(', ')||'Miembro'}</td>
+     </tr>)}</tbody>
+    </table>
+   </div>}
+  <nav className="academic-footer" aria-label="Páginas de miembros activos">
+   <span className="hint tnum" role="status">Página {cursors.length+1}</span>
+   <div className="actions">
+    <button type="button" className="btn btn-ghost" disabled={!cursor} onClick={()=>setCursors(cursors.slice(0,-1))}>Anterior</button>
+    <button type="button" className="btn btn-ghost" disabled={!nextCursor} onClick={()=>{if(nextCursor)setCursors([...cursors,nextCursor]);}}>Siguiente</button>
+   </div>
+  </nav>
+ </section>;
 }
 function InvitationForm({session,slug,onSaved}:{session:Session;slug:string;onSaved:()=>Promise<void>}) {
  const [busy,setBusy]=useState(false),[message,setMessage]=useState('');const op=useRef<{signature:string;key:string}|undefined>(undefined),locked=useRef(false);const generation=session.getSnapshot().generation;

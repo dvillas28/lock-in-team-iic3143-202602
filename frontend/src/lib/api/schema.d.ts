@@ -1585,7 +1585,7 @@ export interface paths {
         };
         /**
          * Listar miembros activos
-         * @description Exige superadmin vigente del tenant. Sin altas ni cambios de isSuperAdmin. Mismo estado es no-op sin evento.
+         * @description Filtra los miembros de la institución antes de paginar.
          */
         get: operations["listInstitutionMemberships"];
         put?: never;
@@ -6215,6 +6215,10 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Cantidad máxima de elementos a retornar. */
                 limit?: components["parameters"]["Limit"];
+                /** @description Fragmento literal del nombre o correo, sin distinguir mayúsculas. */
+                search?: string;
+                /** @description member exige que ambos permisos estén desactivados; admin y superadmin seleccionan su indicador correspondiente, incluso si el otro está activo. */
+                permission?: "member" | "admin" | "superadmin";
             };
             header?: never;
             path: {

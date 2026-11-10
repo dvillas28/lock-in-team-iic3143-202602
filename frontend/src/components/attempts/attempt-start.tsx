@@ -1,6 +1,7 @@
 "use client";
 import { useTransientFeedback } from "../use-feedback.ts";
 import Link from "next/link";
+import {useRouter} from "next/navigation";
 import {useId,useState} from "react";
 import {Play, RotateCcw} from "lucide-react";
 import type {Session} from "../../lib/auth/session.ts";
@@ -27,6 +28,7 @@ export function AttemptStart(props:{session:Session;slug:string;user:CurrentUser
  return destinations.length ? <StudentAttempts {...props} destinations={destinations}/> : null;
 }
 function StudentAttempts({session,slug,user,course,quiz,sections,destinations}:{session:Session;slug:string;user:CurrentUser;course:Course;quiz:SafeQuiz;sections:Section[];destinations:Section[]}) {
+ const router=useRouter();
  const titleId=useId(), [sectionId,setSectionId]=useState(destinations.length===1?destinations[0].id:"");
  const [cursor,setCursor]=useState<string>(), [pages,setPages]=useState<(string|undefined)[]>([]);
  const {ops,state}=useAttemptOperations(session,slug,user,course,quiz);
@@ -36,7 +38,12 @@ function StudentAttempts({session,slug,user,course,quiz,sections,destinations}:{
  const availability=history.data?.availability;
  const locked=state.busy||!!state.pending||!!state.attempt;
  const activeId=state.attempt?.status==="inProgress"?state.attempt.id:availability?.activeAttemptId;
- async function start(){await ops.start(sectionId);await history.reload();}
+ async function start(recover=false){
+  if(recover) await ops.replay(); else await ops.start(sectionId);
+  const {attempt,phase,busy}=ops.getSnapshot();
+  if(!busy && phase==="saved" && attempt) router.push(`/attempts/${attempt.id}`);
+  else if(!recover) await history.reload();
+ }
  return <section className="card panel stack quiz-attempt-start" aria-labelledby={titleId}>
   <div className="quiz-section-heading"><h2 className="serif" id={titleId}>Mis intentos</h2>
    <button type="button" className="btn btn-ghost" disabled={history.refreshing||state.busy} onClick={()=>void history.reload()}><RotateCcw size={16} aria-hidden="true"/>Actualizar intentos</button>
@@ -45,7 +52,7 @@ function StudentAttempts({session,slug,user,course,quiz,sections,destinations}:{
   {history.error && <ErrorState feedback={history.error} onRetry={()=>void history.reload()}/>}
   {history.refreshing && <p role="status">Consultando tus intentos…</p>}
   {message && <p role="status" aria-live="polite">{message}</p>}
-  {state.pending==="start" && <button type="button" className="btn btn-ghost" disabled={state.busy} onClick={()=>void ops.replay()}>Recuperar intento</button>}
+  {state.pending==="start" && <button type="button" className="btn btn-ghost" disabled={state.busy} onClick={()=>void start(true)}>Recuperar intento</button>}
   {(activeId||state.knownId) && <Link className="btn btn-primary" href={`/attempts/${activeId??state.knownId}`}><Play size={16} aria-hidden="true"/>{activeId?"Continuar intento":"Ver intento"}</Link>}
   {availability && <>
    <p className="hint tnum">{availability.remainingAttempts===null?"Intentos ilimitados":`Intentos nuevos disponibles: ${availability.remainingAttempts}`}</p>
