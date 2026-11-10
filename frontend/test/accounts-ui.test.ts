@@ -46,6 +46,47 @@ test('institution users fail closed for ordinary members before administrative q
  const ui=await mountAccount(h(InstitutionUsers),()=>{throw new Error('must not request admin');},{role:'student'});
  try{assert.match(ui.doc.body.textContent!,/Solo los administradores/);assert.equal(ui.requests.some(r=>r.url.endsWith('/invitations')||r.url.endsWith('/memberships')),false);}finally{await ui.close();}
 });
+test('active members combine search and permissions, reset cursors and recover failed pages',async()=>{
+ const member={id,user:{id,name:'Ana',email:'ana@example.test',active:true},isAdmin:true,isSuperAdmin:true,active:true};
+ let failNext=true;
+ const ui=await mountAccount(h(InstitutionUsers),request=>{
+  const {pathname,searchParams}=new URL(request.url);
+  if(!pathname.endsWith('/memberships'))return Response.json({items:[]});
+  if(searchParams.has('cursor')&&failNext){
+   failNext=false;
+   return Response.json({}, {status:503});
+  }
+  if(searchParams.get('permission')==='member')return Response.json({items:[]});
+  return Response.json({items:[member],nextCursor:searchParams.has('cursor')?null:'next'});
+ });
+ try{
+  const query=()=>new URL(ui.requests.filter(request=>new URL(request.url).pathname.endsWith('/memberships')).at(-1)!.url).searchParams;
+  const nav=()=>ui.doc.querySelector('nav[aria-label="Páginas de miembros activos"]')!;
+  await ui.submit('form[role="search"]',{search:'  ana@example  '});
+  assert.equal(query().get('search'),'ana@example');
+  await ui.click('Siguiente');
+  assert.equal(query().get('cursor'),'next');
+  await ui.click('Reintentar');
+  assert.match(nav().textContent!,/Página 2/);
+  assert.equal(nav().querySelectorAll('button')[1].disabled,true);
+  await ui.click('Anterior');
+  assert.equal(query().has('cursor'),false);
+  await ui.click('Siguiente');
+  await ui.settle(()=>{
+   const select=ui.doc.querySelector<HTMLSelectElement>('#member-permission')!;
+   select.value='member';
+   select.dispatchEvent(new ui.dom.window.Event('change',{bubbles:true}));
+  });
+  assert.equal(query().get('permission'),'member');
+  assert.equal(query().get('search'),'ana@example');
+  assert.equal(query().has('cursor'),false);
+  assert.match(nav().textContent!,/Página 1/);
+  assert.match(ui.doc.body.textContent!,/No hay coincidencias/);
+  await ui.click('Limpiar búsqueda');
+  assert.equal(query().has('search'),false);
+  assert.equal(query().get('permission'),'member');
+ }finally{await ui.close();}
+});
 test('CSV receipt recovers by authorized ID and bad rows keep confirmation disabled',async()=>{
  const ui=await mountAccount(h(ImportView),()=>Response.json({...batch,rows:[{...batch.rows[0],validationCode:'invalid_email'}]}),{url:'http://uc.localhost:3000/admin/users?importId='+id});
  try{await ui.settle(async()=>{});assert.match(ui.doc.body.textContent!,/Correo inválido/);const confirm=[...ui.doc.querySelectorAll<HTMLButtonElement>('button')].find(b=>b.textContent==='Confirmar importación')!;assert.equal(confirm.disabled,true);assert.equal(ui.requests.filter(r=>r.method==='POST'&&!r.url.endsWith('/login')).length,0);}finally{await ui.close();}

@@ -23,7 +23,6 @@ function Users({session,slug,emailAvailable}:{session:Session;slug:string;emailA
  return <div className="stack"><div className="page-heading"><div><p className="section-label">Administración institucional</p><h1>Usuarios institucionales</h1><p>Invita personas a esta institución. El alta no asigna cursos ni permisos administrativos.</p></div></div>{!emailAvailable&&<p className="notice" role="status">El envío de correo está temporalmente no disponible. Puedes registrar invitaciones e importar usuarios; los correos permanecerán pendientes.</p>}<InvitationForm session={session} slug={slug} onSaved={reload}/><section className="card panel stack"><h2>Invitaciones</h2><button className="btn btn-ghost" onClick={()=>void invites.reload()}>Actualizar invitaciones</button>{invites.error?<ErrorState feedback={invites.error} onRetry={()=>void invites.reload()}/>:!invites.data?<LoadingState/>:invites.data.items.length===0?<p>No hay invitaciones en esta página.</p>:<div className="account-table-wrap" role="region" aria-label="Desplazar invitaciones" tabIndex={0}><table className="data-table"><caption>Invitaciones de esta institución</caption><thead><tr><th scope="col">Persona</th><th scope="col">Activación</th><th scope="col">Correo</th><th scope="col">Acciones</th></tr></thead><tbody>{invites.data.items.map(invite=><InvitationRow key={invite.id} session={session} slug={slug} invite={invite} emailAvailable={emailAvailable} onSaved={reload}/>)}</tbody></table></div>}<div className="state-actions">{inviteCursor&&<button className="btn btn-ghost" onClick={()=>setInviteCursor(undefined)}>Primera página</button>}{invites.data?.nextCursor&&<button className="btn btn-ghost" onClick={()=>setInviteCursor(invites.data!.nextCursor!)}>Siguientes invitaciones</button>}</div></section><CsvImport session={session} slug={slug} emailAvailable={emailAvailable} onConfirmed={reload}/><ActiveMembers session={session} slug={slug}/></div>;
 }
 function ActiveMembers({session,slug}:{session:Session;slug:string}) {
- const [searchInput,setSearchInput]=useState('');
  const [search,setSearch]=useState('');
  const [permission,setPermission]=useState<MemberPermission|''>('');
  const [cursors,setCursors]=useState<string[]>([]);
@@ -34,18 +33,24 @@ function ActiveMembers({session,slug}:{session:Session;slug:string}) {
 
  function submitSearch(event:FormEvent<HTMLFormElement>) {
   event.preventDefault();
-  setSearch(searchInput.trim());
+  const input=event.currentTarget.elements.namedItem('search') as HTMLInputElement;
+  setSearch(input.value.trim());
+  setCursors([]);
+ }
+
+ function clearSearch() {
+  setSearch('');
   setCursors([]);
  }
 
  return <section className="card panel stack">
   <h2>Miembros activos</h2>
   <div className="account-form-grid">
-   <form className="stack" role="search" aria-label="Buscar miembros activos" onSubmit={submitSearch}>
+   <form className="stack" role="search" aria-label="Buscar miembros activos" onSubmit={submitSearch} onReset={clearSearch}>
     <label className="field-label" htmlFor="member-search">Nombre o correo</label>
-    <input className="field" id="member-search" type="search" value={searchInput} maxLength={254} onChange={event=>setSearchInput(event.target.value)}/>
+    <input className="field" id="member-search" name="search" type="search" maxLength={254}/>
     <div className="state-actions"><button type="submit" className="btn btn-ghost">Buscar</button>
-     {search && <button type="button" className="btn btn-ghost" onClick={()=>{setSearchInput('');setSearch('');setCursors([]);}}>Limpiar búsqueda</button>}
+     {search && <button type="reset" className="btn btn-ghost">Limpiar búsqueda</button>}
     </div>
    </form>
    <div className="stack">
