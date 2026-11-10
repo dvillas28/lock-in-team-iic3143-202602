@@ -128,7 +128,7 @@ export function StudentSubmissions({item,scope,sections,now}:{item:Assignment;sc
   {left===0 && <p className="hint">Ya utilizaste todos los intentos.</p>}
   {(canSubmit || pending) && <div className="stack assignment-delivery">
    <fieldset className="stack" disabled={blocked || !!pending}>
-    {data.sections.length>1 && <label className="field-label">Sección para este intento
+    {data.sections.length>1 && <label className="field-label"><span>Sección para este intento</span>
      <select className="field" value={sectionId} onChange={event=>setChosen(event.target.value)}>
       {data.sections.map(id=><option key={id} value={id}>Sección {sections.find(section=>section.id===id)?.code??id}</option>)}
      </select>
@@ -167,12 +167,11 @@ export function StudentSubmissions({item,scope,sections,now}:{item:Assignment;sc
    </div>
   </div>}
   {!(canSubmit || pending) && error && <p role="alert" className="assignment-field-error">{error}</p>}
-  <dialog ref={historyDialog} className="native-dialog submission-history-dialog"
-   onClick={event=>{if (event.target===event.currentTarget) historyDialog.current?.close();}}
-   onClose={()=>{historyTrigger.current?.focus();historyTrigger.current=null;}}>
+  <dialog ref={historyDialog} className="native-dialog submission-history-dialog" closedby="any"
+   aria-labelledby={`${titleId}-history`} onClose={()=>historyTrigger.current?.focus()}>
    <div className="submission-history-content">
     <header className="submission-review-dialog-heading">
-     <h2>Historial de intentos</h2>
+     <h2 id={`${titleId}-history`}>Historial de intentos</h2>
      <button type="button" className="btn btn-ghost" onClick={()=>historyDialog.current?.close()}>Cerrar</button>
     </header>
     <AttemptHistory attempts={data.attempts} scope={scope}/>

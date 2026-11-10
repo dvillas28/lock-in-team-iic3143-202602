@@ -40,10 +40,10 @@ export function writtenInput(value: unknown) {
   .replace(/<[^<>\n]*>/g,"")
   .replace(/&(?:nbsp|ensp|emsp|thinsp|zwnj|zwj|ZeroWidthSpace|Tab|NewLine);/gu,"")
   .replace(/&#(x[0-9a-f]{1,6}|\d{1,7});/gi,(entity,number:string)=>{
-   const code=number[0].toLowerCase()==="x" ? parseInt(number.slice(1),16) : Number(number);
+   const code=number[0].toLowerCase()==="x" ? Number.parseInt(number.slice(1),16) : Number(number);
    return code<=0x10ffff && /[\s\p{Cf}]/u.test(String.fromCodePoint(code)) ? "" : entity;
-  }).replace(/^\s*\d+[.)](?=\s|$)/gm,"")
-  .replace(/[\s\p{Cf}*_~`#>+\-\[\]\\]/gu,"");
+  }).split("\n").map(line=>line.trimStart().replace(/^\d+[.)](?=\s|$)/,"")).join("\n")
+  .replace(/[\s\p{Cf}*_~`#>+[\]\\-]/gu,"");
  if (!visible.length) throw invalid("SUBMISSION_TEXT_EMPTY");
  return content;
 }

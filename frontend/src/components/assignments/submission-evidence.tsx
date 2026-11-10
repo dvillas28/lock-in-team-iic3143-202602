@@ -2,18 +2,11 @@
 import { useId, useState } from "react";
 import { Download } from "lucide-react";
 import Markdown from "react-markdown";
+import { safeWrittenHtml } from "../../lib/assignments/written-html.ts";
 import { useSession } from "../auth/session-provider.tsx";
 import { downloadSubmissionFile, type Submission, type SubmissionFile, type SubmissionScope } from "../../lib/api/submissions.ts";
 import { ChileDate, points } from "./assignment-facts.tsx";
 import { submissionError } from "./submission-feedback.ts";
-
-function safeWrittenHtml(value:string) {
- return value
-  .replace(/<(?!\/?(?:div|p|br|strong|b|em|i|ul|ol|li)\b)[^>]*>/gi,"")
-  .replace(/<([a-z]+)\s[^>]*>/gi,(_,tag:string)=>`<${tag}>`)
-  .replace(/<((?:p|br|strong|b|em|i|ul|ol|li))\s*\/?>/gi,"<$1>")
-  .replace(/<(\/(?:p|strong|b|em|i|ul|ol|li))\s*>/gi,"<$1>");
-}
 
 export function WrittenResponse({text}:{text:string}) {
  const rich=/<\/?(?:div|p|br|strong|b|em|i|ul|ol|li)\b/i.test(text);

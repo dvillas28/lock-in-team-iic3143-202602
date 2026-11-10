@@ -26,7 +26,7 @@ export function SubmissionReview({scope,student,maxPoints,disabled,onChanged,onD
   <div><p className="section-label">Revisión · Sección {student.sectionCode}</p><h3 id={titleId}>{student.name}</h3></div>
   {resource.error && <ErrorState feedback={resource.error} onRetry={()=>void resource.reload()}/>}
   {attempt ? <>
-   <label className="field-label">Intento para revisar
+   <label className="field-label"><span>Intento para revisar</span>
     <select className="field" value={attempt.id} onChange={event=>setSelected(event.target.value)} disabled={disabled || resource.refreshing}>
      {data.attempts.map(a=><option key={a.id} value={a.id}>Intento {a.attemptNumber}{a.isLate ? " · Atrasado" : ""}
       {a.id===graded?.id ? " · Asociado a la nota" : ""}</option>)}
@@ -101,10 +101,10 @@ function GradeForm({scope,attempt,grade,maxPoints,gradedAttempt,disabled,onChang
    <label className="field-label">Puntaje sobre {points.format(maxPoints)}
     <input className="field submission-score" inputMode="decimal" required value={score} onChange={event=>setScore(event.target.value)}/>
    </label>
-   <label className="field-label">Retroalimentación
+   <label className="field-label"><span>Retroalimentación</span>
     <textarea className="field" rows={3} maxLength={4000} value={feedback} onChange={event=>setFeedback(event.target.value)}/>
    </label>
-   {published && <label className="field-label">Motivo de la corrección
+   {published && <label className="field-label"><span>Motivo de la corrección</span>
     <textarea className="field" rows={2} maxLength={500} required value={reason} onChange={event=>setReason(event.target.value)}/>
    </label>}
   </fieldset>

@@ -1,8 +1,10 @@
 "use client";
-import { useEffect, useId, useRef, useState, type ClipboardEvent, type KeyboardEvent } from "react";
+import { useEffect, useId, useRef, useState, type ClipboardEvent, type DragEvent, type KeyboardEvent } from "react";
 import { Bold, Italic, List, ListOrdered, Redo2, Undo2 } from "lucide-react";
+import { safeWrittenHtml } from "../../lib/assignments/written-html.ts";
 
 const limit=10_000;
+const words=new Intl.Segmenter("es",{granularity:"word"});
 const tools=[
  {label:"Negrita",icon:Bold,command:"bold"},
  {label:"Cursiva",icon:Italic,command:"italic"},
@@ -13,11 +15,13 @@ const tools=[
 export function WrittenEditor({value,onChange}:{value:string;onChange:(text:string)=>void}) {
  const id=useId(), field=useRef<HTMLDivElement>(null);
  const [active,setActive]=useState<Record<string,boolean>>({});
- const count=(value.replace(/<[^>]*>/g," ").replace(/^\s*\d+[.)](?=\s|$)/gm,"").match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu)??[]).length;
+ const plain=value.replace(/<[^<>]*>/g," ").split("\n")
+  .map(line=>line.trimStart().replace(/^\d+[.)](?=\s|$)/,"")).join(" ");
+ const count=Array.from(words.segment(plain)).filter(segment=>segment.isWordLike).length;
 
  useEffect(()=>{
   const input=field.current;
-  if (input && input.innerHTML!==value) input.innerHTML=value;
+  if (input && input.innerHTML!==value) input.innerHTML=safeWrittenHtml(value);
  },[value]);
 
  function sync() {
@@ -25,7 +29,7 @@ export function WrittenEditor({value,onChange}:{value:string;onChange:(text:stri
   if (!input) return;
   const text=input.textContent??"";
   if ([...text].length>limit) {
-  input.innerHTML=value;
+  input.innerHTML=safeWrittenHtml(value);
   return;
   }
   onChange(input.innerHTML);
@@ -38,9 +42,10 @@ export function WrittenEditor({value,onChange}:{value:string;onChange:(text:stri
   sync();
  }
 
- function paste(event: ClipboardEvent<HTMLDivElement>) {
+ function insertPlainText(event: ClipboardEvent<HTMLDivElement> | DragEvent<HTMLDivElement>) {
   event.preventDefault();
-  document.execCommand("insertText",false,event.clipboardData.getData("text/plain"));
+  const transfer="clipboardData" in event ? event.clipboardData : event.dataTransfer;
+  document.execCommand("insertText",false,transfer.getData("text/plain"));
   sync();
  }
 
@@ -57,7 +62,7 @@ export function WrittenEditor({value,onChange}:{value:string;onChange:(text:stri
  }
 
  return <div className="stack assignment-editor-text">
-  <label className="field-label" htmlFor={id}>Respuesta escrita</label>
+  <span className="field-label" id={`${id}-label`}>Respuesta escrita</span>
   <div className="actions" role="group" aria-label="Formato de la respuesta">
   {tools.map(tool=><button key={tool.label} type="button" className={`btn btn-ghost${active[tool.command] ? " is-active" : ""}`} title={tool.label}
    aria-label={tool.label} aria-pressed={active[tool.command]??false} onMouseDown={event=>event.preventDefault()} onClick={()=>format(tool.command)}><tool.icon size={16} aria-hidden="true"/></button>)}
@@ -65,8 +70,8 @@ export function WrittenEditor({value,onChange}:{value:string;onChange:(text:stri
   <button type="button" className="btn btn-ghost" title="Deshacer" aria-label="Deshacer" onClick={()=>format("undo")}><Undo2 size={16} aria-hidden="true"/></button>
   <button type="button" className="btn btn-ghost" title="Rehacer" aria-label="Rehacer" onClick={()=>format("redo")}><Redo2 size={16} aria-hidden="true"/></button>
   </div>
-  <div id={id} ref={field} className="field assignment-rich-editor" contentEditable role="textbox" aria-multiline="true"
-  aria-describedby={`${id}-hint`} aria-label="Respuesta escrita" onInput={sync} onPaste={paste} onKeyDown={splitListItem}
+  <div id={id} ref={field} className="field assignment-rich-editor" contentEditable role="textbox" tabIndex={0} aria-multiline="true"
+  aria-describedby={`${id}-hint`} aria-labelledby={`${id}-label`} onInput={sync} onPaste={insertPlainText} onDrop={insertPlainText} onKeyDown={splitListItem}
   onKeyUp={sync} onMouseUp={sync} suppressContentEditableWarning />
   <p id={`${id}-hint`} className="hint tnum">{count} {count===1 ? "palabra" : "palabras"} · Hasta 10.000 caracteres.</p>
  </div>;

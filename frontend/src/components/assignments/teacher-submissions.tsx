@@ -75,7 +75,7 @@ export function TeacherSubmissions({scope,maxPoints}:{scope:SubmissionScope;maxP
  return <section className="card panel stack assignment-submission teacher-submissions" aria-labelledby={titleId}>
   <header className="submission-heading">
    <div><h2 id={titleId}>Entregas y calificaciones</h2><p className="hint">{students.length} {students.length===1 ? "estudiante" : "estudiantes"} en la vista</p></div>
-   {sections.size>1 && <label className="field-label">Sección
+   {sections.size>1 && <label className="field-label"><span>Sección</span>
     <select className="field" value={section} disabled={blocked || !!pending} onChange={event=>{
      setSection(event.target.value);setStudent("");setSelected([]);
     }}>
@@ -87,7 +87,7 @@ export function TeacherSubmissions({scope,maxPoints}:{scope:SubmissionScope;maxP
   {resource.error && <ErrorState feedback={resource.error} onRetry={()=>void resource.reload()}/>}
   {!students.length ? <p className="hint">No hay estudiantes ni entregas en las secciones autorizadas.</p> : <>
    <div className="submission-master-detail">
-    <div className="table-scroll" tabIndex={0} role="region" aria-label="Estados de entrega por estudiante">
+    <div className="table-scroll" role="region" aria-label="Estados de entrega por estudiante">
      <table className="data-table">
       <caption>Selecciona los borradores que quieras publicar.</caption>
       <thead><tr><th scope="col">Publicar</th><th scope="col">Estudiante</th><th scope="col">Entrega</th><th scope="col">Nota</th></tr></thead>
@@ -129,11 +129,11 @@ export function TeacherSubmissions({scope,maxPoints}:{scope:SubmissionScope;maxP
     {grades.length>100 && <p className="hint">Puedes publicar hasta 100 notas por selección.</p>}
    </div>
   </>}
-  <dialog ref={reviewDialog} className="native-dialog submission-review-dialog" aria-labelledby={`${titleId}-review-title`}
-   onClick={event=>{if (event.target===event.currentTarget) closeReview();}}
+  <dialog ref={reviewDialog} id={`${titleId}-review`} className="native-dialog submission-review-dialog" closedby="any"
+   aria-labelledby={`${titleId}-review-title`}
    onCancel={event=>{if (reviewDirty.current && !window.confirm("Hay cambios de calificación sin guardar. ¿Deseas descartarlos?")) event.preventDefault(); else reviewDirty.current=false;}}
    onClose={()=>{studentTrigger.current?.focus();studentTrigger.current=null;}}>
-   <div className="submission-review-dialog-content" onClick={event=>event.stopPropagation()}>
+   <div className="submission-review-dialog-content">
     <header className="submission-review-dialog-heading">
      <h2 id={`${titleId}-review-title`}>Revisión de entrega</h2>
      <button type="button" className="btn btn-ghost" onClick={closeReview}>Cerrar</button>
