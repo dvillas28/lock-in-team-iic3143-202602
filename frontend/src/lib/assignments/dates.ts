@@ -49,7 +49,7 @@ export function chileCandidates(value: string) {
   const offsets = new Set([wall-day, wall, wall+day].map(instant =>
     Date.parse(localChile(new Date(instant).toISOString()) + "Z") - instant));
   return Array.from(offsets, offset => new Date(wall - offset).toISOString())
-    .filter(instant => localChile(instant) === local).sort();
+    .filter(instant => localChile(instant) === local).sort((a, b) => a.localeCompare(b, "en"));
 }
 
 export function chileInstant(value: string, field: string, original?: string | null, choice?: string) {

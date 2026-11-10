@@ -30,8 +30,8 @@ function extensions(value: unknown, current?: string[]) {
   if (typeof v !== "string" || !/^\.?[a-z0-9]{1,16}$/i.test(v)) throw new BadRequestException();
   return v.replace(/^\./, "").toLowerCase();
  });
- const unique = [...new Set(normalized)].sort();
- const previous = current ? [...new Set(current.map(v => v.toLowerCase()))].sort() : undefined;
+ const unique = [...new Set(normalized)].sort((a, b) => a.localeCompare(b, "en"));
+ const previous = current ? [...new Set(current.map(v => v.toLowerCase()))].sort((a, b) => a.localeCompare(b, "en")) : undefined;
  if (current && previous) {
   const legacy = new Set(previous.filter(value => !allowedExtensions.has(value)));
   if (unique.every(value => allowedExtensions.has(value) || legacy.has(value)) &&
