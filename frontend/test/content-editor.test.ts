@@ -5,6 +5,7 @@ import {ModulesPanel} from "../src/components/content/modules-panel.tsx";
 import {mount} from "./fixtures/course-ui.ts";
 import {unit,material,course,id,resources} from "./fixtures/content.ts";
 import {deferred} from "./fixtures/courses.ts";
+import {published as publishedQuiz} from "./fixtures/quizzes.ts";
 const view=()=>h(ModulesPanel,{courseId:course.id});
 test("teacher without admin creates at max+1; edits material minimally and retains draft on authorized refresh",async()=>{
  let parent={...unit};let item={...material};const ui=await mount(view(),async r=>{
@@ -231,4 +232,71 @@ test("expanding a module does not flash a loading state for fast loads but expla
   await ui2.settle(()=>{});
   assert.match(ui2.doc.body.textContent!,/Cargando contenido/);
  }finally{await ui2.close();}
+});
+const linkedQuiz=(quizId:string)=>({kind:"quiz" as const,id:id(77),moduleId:unit.id,title:"Ya enlazado",position:2,publishedAt:null,quizId,canUnlink:true});
+const quizzes=(n:number)=>Array.from({length:n},(_,i)=>({...publishedQuiz,id:id(200+i),title:`Cuestionario ${i+1}`}));
+async function openQuizDialog(ui:{doc:Document;click:(t:string)=>Promise<void>;settle:(a:()=>void)=>Promise<void>}) {
+ await ui.click("Unidad 1");await ui.click("Añadir contenido");
+ await ui.settle(()=>ui.doc.querySelectorAll<HTMLElement>('[role="menuitem"]')[2].click());
+ await ui.settle(()=>{});
+ return ui.doc.querySelector<HTMLDialogElement>('dialog[aria-labelledby^="quiz-link-"]')!;
+}
+const quizServer=(items:unknown[],options:{linked?:string;failResources?:boolean;failQuizzes?:boolean}={})=>{let posted=false;return async(r:Request)=>{
+ if(r.method==="POST"&&r.url.endsWith("/quizzes")){posted=true;return Response.json({},{status:201});}
+ if(r.url.endsWith("/resources")){
+  if(options.failResources&&posted)return Response.json({},{status:503});
+  return Response.json({...resources(material),items:[...resources(material).items,...(options.linked?[linkedQuiz(options.linked)]:[])]});
+ }
+ if(r.url.endsWith("/quizzes"))return options.failQuizzes?Response.json({},{status:503}):Response.json({items});
+ return Response.json(r.url.endsWith("/modules")?{items:[unit]}:course);
+};};
+test("quiz dialog links the selected quiz, notifies once and closes",async()=>{
+ const ui=await mount(view(),quizServer(quizzes(2)),"teacher");
+ try{
+  const dialog=await openQuizDialog(ui);
+  assert.ok(dialog.hasAttribute("open"));
+  const submit=Array.from(dialog.querySelectorAll<HTMLButtonElement>("button")).find(b=>b.textContent==="Enlazar cuestionario")!;
+  assert.equal(submit.disabled,true);
+  assert.equal(dialog.querySelector("input[type=search]"),null);
+  await ui.settle(()=>dialog.querySelectorAll<HTMLInputElement>("input[type=radio]")[1].click());
+  assert.equal(submit.disabled,false);
+  await ui.settle(()=>submit.click());
+  await ui.settle(()=>{});
+  const post=ui.requests.find(r=>r.method==="POST"&&r.url.endsWith("/quizzes"))!;
+  assert.deepEqual(await post.clone().json(),{quizId:id(201)});
+  assert.equal(dialog.hasAttribute("open"),false);
+  assert.equal(ui.doc.querySelectorAll(".content-notice").length,1);
+  assert.equal(ui.doc.querySelector(".content-notice")!.textContent,"Cuestionario enlazado.");
+ }finally{await ui.close();}
+});
+test("quiz dialog hides linked quizzes, searches long lists and explains an empty list",async()=>{
+ const ui=await mount(view(),quizServer(quizzes(9),{linked:id(200)}),"teacher");
+ try{
+  const dialog=await openQuizDialog(ui);
+  const titles=()=>Array.from(dialog.querySelectorAll(".option span")).map(e=>e.textContent);
+  assert.equal(titles().length,8);assert.ok(!titles().includes("Cuestionario 1"));
+  assert.ok(dialog.querySelector("input[type=search]"),"search appears from 8 quizzes");
+ }finally{await ui.close();}
+ const empty=await mount(view(),quizServer([]),"teacher");
+ try{
+  const dialog=await openQuizDialog(empty);
+  assert.match(dialog.textContent!,/No hay cuestionarios para enlazar/);
+  assert.equal(dialog.querySelector<HTMLAnchorElement>("a")!.getAttribute("href"),`/courses/${course.id}/quizzes`);
+  await empty.settle(()=>Array.from(dialog.querySelectorAll<HTMLButtonElement>("button")).find(b=>b.textContent==="Cerrar")!.click());
+  assert.equal(dialog.hasAttribute("open"),false);
+ }finally{await empty.close();}
+});
+test("quiz dialog shows list errors and keeps a stale-list warning open after linking",async()=>{
+ const failing=await mount(view(),quizServer([],{failQuizzes:true}),"teacher");
+ try{const dialog=await openQuizDialog(failing);assert.ok(dialog.hasAttribute("open"));assert.equal(dialog.querySelector("input[type=radio]"),null);}finally{await failing.close();}
+ const ui=await mount(view(),quizServer(quizzes(2),{failResources:true}),"teacher");
+ try{
+  const dialog=await openQuizDialog(ui);
+  await ui.settle(()=>dialog.querySelectorAll<HTMLInputElement>("input[type=radio]")[0].click());
+  await ui.settle(()=>Array.from(dialog.querySelectorAll<HTMLButtonElement>("button")).find(b=>b.textContent==="Enlazar cuestionario")!.click());
+  await ui.settle(()=>{});
+  assert.ok(dialog.hasAttribute("open"));
+  assert.match(dialog.textContent!,/Enlace guardado/);
+  assert.equal(ui.doc.querySelector(".content-notice"),null);
+ }finally{await ui.close();}
 });
