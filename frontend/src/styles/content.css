@@ -18,9 +18,10 @@
 .academic-module .module-resource-info > a { display: inline-block; color: var(--primary-ink); font-weight: 600; text-decoration: none; }
 .academic-module .module-resource-info > a:hover { text-decoration: underline; }
 .academic-module .module-resource-info .hint { font-size: 12px; margin-top: 4px; }
-.publication-control { min-width: 0; }
-.publication-control .btn { padding: 6px 10px; font-size: 12px; }
-.publication-control .is-published { color: var(--success); }
+.publication-control { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.publication-control .chip { gap: 5px; }
+.publication-state-icon { display: inline-flex; }
+.publication-control .publication-action { padding: 6px 10px; font-size: 12px; }
 .publication-control > p { max-width: 30em; padding: 8px; }
 .resource-editor { margin-left: 30px; }
 .module-editor { border-top: 1px solid var(--border); }

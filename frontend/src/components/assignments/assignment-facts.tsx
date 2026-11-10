@@ -14,7 +14,7 @@ export function AssignmentStatus({item,now,staff}:{item:Assignment;now:number;st
   const state = assignmentState(item,now);
   if (staff || !published) {
     return <div className="quiz-chips assignment-status">
-      <span className={published ? "chip chip-primary" : "chip"}>{publication[item.status]}</span>
+      <span className={published ? "chip chip-success" : "chip"}>{publication[item.status]}</span>
       {published && staffTiming[state] && <span className="hint">{staffTiming[state]}</span>}
     </div>;
   }

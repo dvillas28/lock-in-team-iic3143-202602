@@ -93,10 +93,12 @@ export function GradePublication({
   try {
     if ((totalWeightPercent ?? items.reduce((n, i) => n + Math.round(i.weightPercent * 100), 0) / 100) !== 100)
       throw new Error("Guarda ponderaciones que sumen 100 % para publicar notas.");
-    request = wholeSections
-      ? publicationSelection({scope:"pending",sectionIds:chosen.sectionIds,
-        ...(chosen.gradeItemIds.length ? {gradeItemIds:chosen.gradeItemIds} : {})})
-      : rectangle(chosen, rows);
+    if (wholeSections ? chosen.sectionIds.length : chosen.gradeItemIds.length && chosen.sectionIds.length && chosen.studentIds.length) {
+      request = wholeSections
+        ? publicationSelection({scope:"pending",sectionIds:chosen.sectionIds,
+          ...(chosen.gradeItemIds.length ? {gradeItemIds:chosen.gradeItemIds} : {})})
+        : rectangle(chosen, rows);
+    }
   } catch (error) {
     reason = (error as Error).message;
   }
@@ -106,6 +108,14 @@ export function GradePublication({
     .filter(
       (r, n, a) => a.findIndex((x) => x.student.id === r.student.id) === n,
     );
+  const evaluationHint = !wholeSections && !chosen.gradeItemIds.length
+    ? "Selecciona al menos una evaluación."
+    : "";
+  const sectionHint = !chosen.sectionIds.length ? "Selecciona una sección." : "";
+  const studentHint = !wholeSections && chosen.gradeItemIds.length && chosen.sectionIds.length
+    ? (!students.length ? "No hay estudiantes disponibles en la sección seleccionada."
+      : !chosen.studentIds.length ? "Selecciona al menos un estudiante." : "")
+    : "";
   function toggle(k: keyof Selection, id: string) {
     setChosen((v) => ({
       ...v,
@@ -225,9 +235,6 @@ export function GradePublication({
                   onChange={() => setWholeSections(true)} /> Secciones completas</label>
               </div>
             </fieldset>
-            <p className="hint">{wholeSections
-              ? "Elige las secciones y, si quieres, limita la publicación a ciertas evaluaciones."
-              : "Elige las evaluaciones y los estudiantes de esta página cuyas notas ya revisaste."}</p>
             <fieldset className="selection-group" disabled={locked || disabled}>
               <legend>{wholeSections ? "Evaluaciones (opcional)" : "Evaluaciones"}</legend>
               {items.map((i) => (
@@ -241,6 +248,11 @@ export function GradePublication({
                   {i.title}
                 </label>
               ))}
+              {evaluationHint && (
+                <p className="hint publication-selection-hint" role="status">
+                  {evaluationHint}
+                </p>
+              )}
             </fieldset>
             <fieldset className="selection-group" disabled={locked || disabled}>
               <legend>Secciones</legend>
@@ -255,12 +267,17 @@ export function GradePublication({
                   Sección {s.code}
                 </label>
               ))}
+              {sectionHint && (
+                <p className="hint publication-selection-hint" role="status">
+                  {sectionHint}
+                </p>
+              )}
             </fieldset>
-            {!wholeSections && <fieldset className="selection-group" disabled={locked || disabled}>
+            {!wholeSections && chosen.sectionIds.length > 0 && <fieldset className="selection-group publication-students" disabled={locked || disabled}>
               <legend>Estudiantes de esta página</legend>
               {students.length ? (
                 students.map((r) => (
-                  <label className="option" key={r.student.id}>
+                  <label className="option publication-student-option" key={r.student.id}>
                     <input
                       type="checkbox"
                       value={r.student.id}
@@ -274,8 +291,11 @@ export function GradePublication({
                   </label>
                 ))
               ) : (
-                <p className="hint">
-                  Selecciona una sección para ver sus estudiantes.
+                null
+              )}
+              {studentHint && (
+                <p className="hint publication-selection-hint" role="status">
+                  {studentHint}
                 </p>
               )}
             </fieldset>}
@@ -300,7 +320,7 @@ export function GradePublication({
           <button
             className="btn btn-primary"
             type="button"
-            disabled={disabled || !!reason || locked}
+            disabled={disabled || !!reason || !request || locked}
             onClick={() => (reviewing ? void send() : setReviewing(true))}
           >
             {reviewing ? "Confirmar publicación" : "Revisar publicación"}

@@ -58,10 +58,12 @@ ayudantes tienen lectura en sus secciones y los estudiantes solo ven notas
 propias publicadas. RLS, claves compuestas y el lock transaccional de curso
 mantienen las fronteras de institución y serializan escrituras académicas.
 
-Grupos y fórmula operan sobre ítems y puntos. Quizzes es la fuente actual
-de evidencia. Tareas podrá aportar un ítem con su máximo y un resultado
-registrado usando el mismo modelo de grupos, publicación y revisiones.
-La creación de Tareas, las entregas y S3 se implementarán en #249 y #250.
+Grupos y fórmula operan sobre ítems y puntos. Quizzes y Tareas comparten
+la tabla de notas, los recibos y las revisiones. Cada fila referencia un
+solo tipo de intento mediante claves compuestas. Una corrección de Tareas
+conserva la evidencia anterior y puede asociar otro intento autorizado.
+Los ítems con máximo cero quedan fuera de los subtotales y promedios.
+Ver [CU-24 y CU-25](../planning/assignment-submissions.md).
 
 ## Trazabilidad
 

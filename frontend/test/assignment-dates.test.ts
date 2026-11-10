@@ -20,7 +20,7 @@ test("opening, deadline and closing have distinct inclusive boundaries",()=>{
   assert.equal(assignmentState(value,Date.parse(value.dueAt)+1),"late");
   assert.equal(dateBucket(value,Date.parse(value.availableUntil)),"late");
   assert.equal(dateBucket(value,Date.parse(value.availableUntil)+1),"past");
-  assert.equal(assignmentState({...value,availableUntil:null},Date.parse(value.dueAt)+1),"closed");
+  assert.equal(assignmentState({...value,availableUntil:null},Date.parse(value.dueAt)+1),"late");
   assert.equal(dateBucket({availableFrom:null,dueAt:null,availableUntil:null},Date.now()),"undated");
   assert.throws(()=>validateSchedule({availableFrom:"2026-11-01T14:00:00.000002Z",dueAt:null,availableUntil:"2026-11-01T14:00:00.000001Z"}));
 });

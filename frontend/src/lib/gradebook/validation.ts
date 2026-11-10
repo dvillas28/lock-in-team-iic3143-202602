@@ -18,6 +18,8 @@ export const date = (v: unknown): v is string => typeof v === 'string' && /^\d{4
 export const number = (v: unknown, min = 0, max = 100): v is number => typeof v === 'number' && Number.isFinite(v) && v >= min && v <= max;
 export const unique = (v: unknown[]) => new Set(v).size === v.length;
 const title = (v: unknown) => typeof v === 'string' && v.trim().length > 0 && !v.includes('\0');
+const gradeScore = (grade: unknown, percent: unknown, assignment: unknown) =>
+    (isId(assignment) && grade===null && percent===null) || (number(grade, 1, 7) && number(percent));
 const average = (v: unknown) => v === null || number(v, 1, 7);
 function groupResults(value: unknown) {
     if (value === undefined) return;
@@ -35,9 +37,9 @@ export function studentGrades(v: unknown, courseId: string): StudentGrades {
     }
     groupResults(v.groupResults);
     for (const i of v.items) {
-        if (!isRecord(i) || !isId(i.gradeItemId) || !title(i.title) || !number(i.weightPercent) || !number(i.scorePercent) || !number(i.grade, 1, 7) || !date(i.publishedAt) ||
+        if (!isRecord(i) || !isId(i.gradeItemId) || !title(i.title) || !number(i.weightPercent) || !gradeScore(i.grade,i.scorePercent,i.assignmentId) || !date(i.publishedAt) ||
             (i.groupId !== undefined && (!isId(i.groupId) || !title(i.groupTitle) ||
-            !number(i.maxPoints, Number.MIN_VALUE, 999999.99) || !number(i.pointsEarned, 0, i.maxPoints))) || !optionalDate(i.revisedAt)) {
+            !number(i.maxPoints, isId(i.assignmentId) ? 0 : Number.MIN_VALUE, 999999.99) || !number(i.pointsEarned, 0, i.maxPoints))) || !optionalDate(i.revisedAt)) {
             throw new ApiResponseError();
         }
     }
@@ -83,7 +85,7 @@ export function correctionPreview(input: string, maxPoints: number | undefined) 
 }
 export function correctedGrade(v: unknown, gradeId: string, request: Correction): GradeResult {
     if (!isRecord(v) || v.id !== gradeId || v.revisionId !== request.revisionId || v.pointsEarned !== request.points ||
-        !number(v.grade, 1, 7) || !number(v.scorePercent) || !date(v.publishedAt) || !date(v.revisedAt)) {
+        !gradeScore(v.grade,v.scorePercent,v.assignmentId) || (request.attemptId!==undefined && v.attemptId!==request.attemptId) || !date(v.publishedAt) || !date(v.revisedAt)) {
         throw new ApiResponseError();
     }
     return v as GradeResult;
@@ -108,7 +110,7 @@ export function bookDto(v: unknown, courseId: string, items: GradeItem[], sectio
         const s = person(r.student);
         keys.push(s.id + '/' + r.sectionId);
         for (const g of r.grades) {
-            if (!isRecord(g) || !isId(g.id) || !isId(g.attemptId) || g.studentId !== s.id || g.sectionId !== r.sectionId || !items.some(i => i.id === g.gradeItemId) || !number(g.scorePercent) || !number(g.grade, 1, 7) || (g.publishedAt !== null && !date(g.publishedAt)) ||
+            if (!isRecord(g) || !isId(g.id) || !isId(g.attemptId) || g.studentId !== s.id || g.sectionId !== r.sectionId || !items.some(i => i.id === g.gradeItemId) || !gradeScore(g.grade,g.scorePercent,g.assignmentId) || (g.publishedAt !== null && !date(g.publishedAt)) ||
                 (g.pointsEarned !== undefined && !number(g.pointsEarned, 0, 999999.99)) ||
                 (g.revisionId !== undefined && g.revisionId !== null && !isId(g.revisionId)) || !optionalDate(g.revisedAt)) {
                 throw new ApiResponseError();

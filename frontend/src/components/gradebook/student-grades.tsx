@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useSession } from "../auth/session-provider.tsx";
 import { useResource } from "../courses/use-resource.ts";
 import { CourseWorkspace } from "../courses/course-workspace.tsx";
@@ -93,12 +94,14 @@ function Grades({ courseId }: Readonly<{ courseId: string }>) {
             <tbody>
               {d.items.map((i) => (
                 <tr key={i.gradeItemId}>
-                  <th scope="row">{i.title}</th>
+                  <th scope="row">{i.assignmentId
+                    ? <Link className="text-link" href={`/courses/${courseId}/assignments/${i.assignmentId}`}>{i.title}</Link>
+                    : i.title}</th>
                   <td className="tnum">{d.calculation === "points" ? i.groupTitle : `${i.weightPercent} %`}</td>
-                  <td className="tnum">{i.scorePercent} %
+                  <td className="tnum">{i.scorePercent===null ? "—" : `${i.scorePercent} %`}
                     {i.maxPoints !== undefined && <small className="grade-state hint">{i.pointsEarned} / {i.maxPoints} pts</small>}
                   </td>
-                  <td className="grade-value tnum">{i.grade}</td>
+                  <td className="grade-value tnum">{i.grade ?? "Sin nota numérica"}</td>
                   <td>
                     <AcademicDate value={i.publishedAt} />
                     {i.revisedAt && <small className="grade-state">Corregida <AcademicDate value={i.revisedAt} /></small>}

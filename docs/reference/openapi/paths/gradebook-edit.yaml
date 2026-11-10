@@ -61,7 +61,8 @@
       Se conserva la nota original, el intento, la revisión previa y un evento con
       actor, fecha y motivo. La nota se calcula con el puntaje corregido. Repetir
       exactamente el mismo ID de revisión devuelve su resultado, y una revisión
-      previa obsoleta devuelve 409.
+      previa obsoleta devuelve 409. En tareas puede asociarse un intento distinto
+      del mismo estudiante y sección y actualizarse su retroalimentación.
     requestBody:
       required: true
       content:

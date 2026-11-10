@@ -1,5 +1,6 @@
 import {BadRequestException} from "@nestjs/common";
-import {object,uuid,page,text,boolean} from "../courses/validation";
+import {object,uuid,page,text,boolean,timestamp} from "../courses/validation";
+import {feedbackInput} from "../assignments/submission-validation";
 import {idempotencyKey} from "../attempts/attempt-validation";
 export function weightsInput(body:unknown) {
  const input=object(body,["items"],["items"]);
@@ -24,12 +25,22 @@ export function publicationInput(body:unknown) {
 }
 export function publicationRequest(body:unknown) {
  if(!body || typeof body!=="object" || !("scope" in body))return publicationInput(body);
+ if (body.scope==="assignment") {
+  const input=object(body,["scope","gradeItemId","grades"],["scope","gradeItemId","grades"]);
+  if (!Array.isArray(input.grades) || !input.grades.length || input.grades.length>100) throw new BadRequestException();
+  const grades=input.grades.map(value=>{
+   const entry=object(value,["id","expectedUpdatedAt"],["id","expectedUpdatedAt"]);
+   return {id:uuid(entry.id),expectedUpdatedAt:timestamp(entry.expectedUpdatedAt)};
+  }).sort((a,b)=>a.id.localeCompare(b.id,"en"));
+  if (new Set(grades.map(g=>g.id)).size!==grades.length) throw new BadRequestException();
+  return {scope:"assignment" as const,gradeItemId:uuid(input.gradeItemId),grades};
+ }
  const input=object(body,["scope","sectionIds","gradeItemIds"],["scope","sectionIds"]);
  if(input.scope!=="pending")throw new BadRequestException();
  return {scope:"pending" as const,sectionIds:selectionIds(input.sectionIds),
   gradeItemIds:input.gradeItemIds===undefined?[]:selectionIds(input.gradeItemIds)};
 }
-export type Selection=ReturnType<typeof publicationRequest>;
+export type Selection=Exclude<ReturnType<typeof publicationRequest>,{scope:"assignment"}>;
 export function publicationKey(headers:string[]) {
  const key=idempotencyKey(headers);
  if(key!==key.trim())throw new BadRequestException();
@@ -61,9 +72,16 @@ export function groupsInput(body:unknown) {
  return {expectedVersion:input.expectedVersion,confirmRecalculation:boolean(input.confirmRecalculation),groups};
 }
 
-export function correctionInput(body:unknown) {
- const keys=["revisionId","expectedRevisionId","points","reason"],input=object(body,keys,keys),points=input.points;
+export function pointsInput(points:unknown) {
  if(typeof points!=="number" || points<0 || points>999999.99 || !/^\d+(?:\.\d{1,2})?$/.test(String(points)))throw new BadRequestException();
+ return points;
+}
+
+export function correctionInput(body:unknown) {
+ const required=["revisionId","expectedRevisionId","points","reason"];
+ const input=object(body,[...required,"attemptId","feedback"],required);
  return {revisionId:uuid(input.revisionId),expectedRevisionId:input.expectedRevisionId===null?null:uuid(input.expectedRevisionId),
-  points,reason:text(input.reason,500)};
+  points:pointsInput(input.points),reason:text(input.reason,500),
+  attemptId:"attemptId" in input ? uuid(input.attemptId) : undefined,
+  feedback:"feedback" in input ? feedbackInput(input.feedback) : undefined};
 }

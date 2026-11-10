@@ -17,8 +17,8 @@ test("migration repeat, constraints, tenant identity and restricted deletion", a
     try { summary = JSON.parse(repeat.output); }
     catch { throw new Error("invalid migration summary"); }
     assert.equal(summary.created, 0);
-    assert.equal(summary.existing, 20);
-    assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount, 20);
+    assert.equal(summary.existing, 22);
+    assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount, 22);
     const schema = await pool.query(`SELECT c.relname AS table_name,a.attname AS column_name,
       format_type(a.atttypid,a.atttypmod) AS type,a.attnotnull AS required,
       pg_get_expr(d.adbin,d.adrelid) AS default_value
@@ -77,7 +77,7 @@ test("migration repeat, constraints, tenant identity and restricted deletion", a
     const indexes = (await pool.query("SELECT indexdef FROM pg_indexes WHERE schemaname='public' AND tablename='institution_memberships'")).rows;
     assert.ok(indexes.some(row=>row.indexdef.endsWith(" USING btree (user_id, active, institution_id)")));
     const tables = await pool.query("SELECT tablename FROM pg_tables WHERE schemaname='public'");
-    assert.deepEqual(tables.rows.map(row=>row.tablename).sort(),["account_invitations","account_security_events","assignments","audit_events","course_modules","courses","demo_data_runs","enrollments","grade_groups","grade_items","grade_publications","grade_revisions","grades","institution_memberships","institutions","materials","pgmigrations","quiz_attempts","quizzes","sections","user_import_rows","user_imports","users"]);
+    assert.deepEqual(tables.rows.map(row=>row.tablename).sort(),["account_invitations","account_security_events","assignment_attempt_files","assignment_attempts","assignments","audit_events","course_modules","courses","demo_data_runs","enrollments","grade_groups","grade_items","grade_publications","grade_revisions","grades","institution_memberships","institutions","materials","pgmigrations","quiz_attempts","quizzes","sections","user_import_rows","user_imports","users"]);
     const columns = await pool.query("SELECT column_name FROM information_schema.columns WHERE table_name='institution_memberships'");
     assert.equal(columns.rowCount, 8);
   } finally { await pool.end(); }
@@ -101,7 +101,7 @@ test("failed pending batch rolls back DDL/history and migrator refuses competing
       else process.env.MIGRATION_DATABASE_URL = previous;
     }
     assert.equal((await pool.query("SELECT to_regclass('public.pending_fixture') AS t")).rows[0].t, null);
-    assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount, 20);
+    assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount, 22);
     const client = await pool.connect();
     try {
       await client.query("SELECT pg_advisory_lock(7241865325823964)");

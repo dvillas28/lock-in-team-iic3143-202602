@@ -3,7 +3,7 @@ import { boolean, object, text, timestamp, uuid } from "../courses/validation";
 import { position } from "../content/content-validation";
 
 const dateKeys = ["availableFrom", "dueAt", "availableUntil"] as const;
-const fields = ["confirmPastDue", "title", "description", "instructions", "maxPoints", "sectionId", "groupId", "allowedExtensions", "maxAttempts", ...dateKeys];
+const fields = ["confirmPastDue", "title", "description", "instructions", "maxPoints", "sectionId", "groupId", "allowedExtensions", "allowWrittenResponse", "maxAttempts", ...dateKeys];
 const allowedExtensions = new Set(["pdf","doc","docx","xls","xlsx","ppt","pptx","jpg","jpeg","png","zip","txt","csv"]);
 
 export interface AssignmentInput {
@@ -14,6 +14,7 @@ export interface AssignmentInput {
  sectionId: string | null;
  groupId: string | null;
  allowedExtensions: string[];
+ allowWrittenResponse: boolean;
  maxAttempts: number | null;
  availableFrom: string | null;
  dueAt: string | null;
@@ -21,7 +22,7 @@ export interface AssignmentInput {
 }
 const blank: AssignmentInput = {
  title: "", description: null, instructions: null, maxPoints: 0, sectionId: null, groupId: null,
- allowedExtensions: [], maxAttempts: null, availableFrom: null, dueAt: null, availableUntil: null,
+ allowedExtensions: [], allowWrittenResponse: false, maxAttempts: null, availableFrom: null, dueAt: null, availableUntil: null,
 };
 
 function extensions(value: unknown, current?: string[]) {
@@ -32,6 +33,7 @@ function extensions(value: unknown, current?: string[]) {
  });
  const unique = [...new Set(normalized)].sort((a, b) => a.localeCompare(b, "en"));
  const previous = current ? [...new Set(current.map(v => v.toLowerCase()))].sort((a, b) => a.localeCompare(b, "en")) : undefined;
+ if (!unique.length) return [];
  if (current && previous) {
   const legacy = new Set(previous.filter(value => !allowedExtensions.has(value)));
   if (unique.every(value => allowedExtensions.has(value) || legacy.has(value)) &&
@@ -40,7 +42,7 @@ function extensions(value: unknown, current?: string[]) {
    return [...current.filter(value => !allowedExtensions.has(value.toLowerCase())), ...unique.filter(value => allowedExtensions.has(value))];
   }
  }
- if (!unique.length || unique.some(value => !allowedExtensions.has(value))) {
+ if (unique.some(value => !allowedExtensions.has(value))) {
   throw new UnprocessableEntityException({code:"INVALID_ASSIGNMENT_EXTENSIONS"});
  }
  return unique;
@@ -70,10 +72,16 @@ function fieldsFrom(input: Record<string, unknown>, current: AssignmentInput) {
   result.maxPoints = value;
  }
  if ("maxAttempts" in input) result.maxAttempts = input.maxAttempts === null ? null : position(input.maxAttempts);
+ if ("allowWrittenResponse" in input) result.allowWrittenResponse = boolean(input.allowWrittenResponse);
  if ("allowedExtensions" in input) {
   result.allowedExtensions = current === blank
     ? extensions(input.allowedExtensions)
     : extensions(input.allowedExtensions, current.allowedExtensions);
+ }
+ if (!result.allowWrittenResponse && !result.allowedExtensions.length &&
+     (current === blank ? "allowedExtensions" in input || "allowWrittenResponse" in input :
+       current.allowWrittenResponse || current.allowedExtensions.length>0)) {
+  throw new UnprocessableEntityException({code:"ASSIGNMENT_MODALITY_REQUIRED"});
  }
  return result;
 }

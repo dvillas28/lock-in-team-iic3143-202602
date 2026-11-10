@@ -67,7 +67,7 @@ export function GradeCorrection({ session, slug, courseId, target, onClose, onSa
     <div className="dialog-heading">
       <div><h2 id="correction-title">Corregir nota publicada</h2><p>{target.student} · {target.item.title}</p></div>
       <div className="grade-correction-current"><span className="hint">Nota actual</span>
-        <strong className="grade-value tnum">{formatGrade.format(target.grade.grade)}</strong>
+        <strong className="grade-value tnum">{(target.grade.grade===null ? "Sin nota numérica" : formatGrade.format(target.grade.grade))}</strong>
       </div>
     </div>
     <form onSubmit={e => void save(e)} className="stack">

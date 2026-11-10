@@ -8,6 +8,27 @@
 .assignment-group > header, .assignment-detail-heading {
   display: flex; justify-content: space-between; align-items: center; gap: 12px;
 }
+.submission-review-dialog,
+.submission-history-dialog {
+  width: min(720px, calc(100vw - 32px));
+  max-width: 720px;
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  overflow: hidden;
+}
+.assignment-workspace .native-dialog:focus-visible { outline: 2px solid var(--primary-ink); outline-offset: 3px; }
+.assignment-workspace .native-dialog > .stack { padding: 28px; }
+.assignment-workspace .submission-review-dialog > .submission-review-dialog-content,
+.assignment-workspace .submission-history-dialog > .submission-history-content { padding: 24px; }
+.submission-review-dialog-content,
+.submission-history-content { max-height: calc(100dvh - 32px); overflow-y: auto; padding: 20px; }
+.submission-review-dialog-heading {
+  display: flex; align-items: start; justify-content: space-between; gap: 16px;
+  padding-bottom: 16px; border-bottom: 1px solid var(--border);
+}
+.submission-review-dialog-heading h2 { margin: 0; font-family: var(--font-eb-garamond), serif; font-size: 24px; }
+.submission-review-dialog .assignment-review { border-top: 0; padding-top: 16px; }
+.submission-history-content > .stack { gap: 12px; padding-top: 16px; }
 .assignment-group > header { padding: 10px 16px; background: var(--muted); border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
 .assignment-group > header h2 { font-size: 20px; line-height: 1.2; }
 .assignment-group > header .hint { flex: 0 0 auto; max-width: 48%; text-align: end; font-size: 13px; color: var(--text-2); }
@@ -105,4 +126,138 @@
 .assignment-format-options::-webkit-scrollbar-track { background: var(--muted); }
 @media (max-width: 760px) {
   .assignment-delivery-grid { grid-template-columns: 1fr; gap: 16px; }
+}
+
+.assignment-check, .submission-heading, .submission-file, .submission-drop label {
+  display: flex; align-items: center; gap: 8px;
+}
+.assignment-check { align-items: start; }
+.assignment-check input, .submission-checkbox { width: 18px; height: 18px; accent-color: var(--primary); }
+.assignment-check small, .submission-file small, .submission-student small { display: block; }
+.submission-heading { justify-content: space-between; flex-wrap: wrap; }
+.assignment-delivery fieldset, .assignment-grading fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+.assignment-review select, .assignment-editor-text textarea { max-width: 100%; }
+.teacher-submissions { gap: 12px; padding: 20px; }
+.teacher-submissions .data-table thead th,
+.teacher-submissions .data-table td,
+.teacher-submissions .data-table tbody th { padding: 8px 12px; }
+.teacher-submissions .data-table thead th:first-child,
+.teacher-submissions .data-table tbody td:first-child { width: 84px; }
+.teacher-submissions .data-table thead th:nth-child(3),
+.teacher-submissions .data-table tbody td:nth-child(3) { width: 140px; }
+.teacher-submissions .data-table thead th:last-child,
+.teacher-submissions .data-table tbody td:last-child { width: 96px; }
+.submission-master-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.submission-master-detail > .table-scroll { min-width: 0; }
+.submission-review-panel {
+  min-width: 0;
+  max-height: min(72dvh, 760px);
+  overflow: auto;
+  padding-inline-start: 16px;
+  border-inline-start: 1px solid var(--border);
+}
+.submission-review-panel .assignment-review {
+  border-top: 0;
+  padding-top: 0;
+}
+.submission-drop {
+  display: grid; justify-items: start; gap: 6px; width: 100%; padding: 12px 14px;
+  border: 1px dashed var(--border-strong); border-radius: var(--radius-sm); background: var(--muted);
+  color: var(--text-2); text-align: start;
+}
+.submission-drop:focus-within { border-color: var(--primary-ink); }
+.submission-drop.is-dragging { border-color: var(--primary-ink); background: var(--primary-soft); }
+.submission-drop p { margin: 0; }
+.submission-drop > .hint { max-width: 100%; overflow-wrap: anywhere; }
+.submission-drop-heading { display: flex; align-items: center; gap: 8px; color: var(--text-1); }
+.submission-heading-actions { display: flex; align-items: center; flex-wrap: wrap; justify-content: end; gap: 8px; }
+.submission-history-trigger { padding: 6px 10px; font-size: 12px; }
+.submission-drop .btn { min-height: 36px; }
+.submission-file-input {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+.submission-file-input:focus-visible + .hint,
+.submission-drop:has(.submission-file-input:focus-visible) { outline: 2px solid var(--primary-ink); outline-offset: 2px; }
+.submission-files-field { gap: 8px; }
+.submission-files { list-style: none; margin: 0; padding: 0; }
+.submission-files > li { padding: 4px 0; border-bottom: 1px solid var(--border); }
+.submission-file { text-align: start; overflow-wrap: anywhere; }
+.submission-file > svg { flex: none; }
+.submission-file > .btn { margin-inline-start: auto; }
+.assignment-delivery progress { width: 100%; accent-color: var(--primary); }
+.assignment-attempt, .assignment-preview, .assignment-published-result {
+  padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--muted);
+}
+.assignment-attempt summary { min-height: 44px; align-content: center; cursor: pointer; }
+.assignment-attempt summary .chip { margin-inline-start: 8px; }
+.assignment-evidence { padding-block: 12px; }
+.assignment-written, .submission-feedback { overflow-wrap: anywhere; white-space: pre-wrap; }
+.content .assignment-written ul { list-style: disc outside; padding-inline-start: 24px; }
+.content .assignment-written ol { list-style: decimal outside; padding-inline-start: 24px; }
+.assignment-written li { display: list-item; }
+.assignment-written :is(div,p) { margin-block: 0 8px; }
+.assignment-written p + :is(p,ul,ol) { margin-block-start: 8px; }
+.assignment-review, .assignment-grading { border-top: 1px solid var(--border); padding-top: 16px; }
+.submission-student { text-align: start; }
+.submission-student {
+  width: 100%;
+  justify-content: start;
+  min-height: 44px;
+  padding: 4px 6px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--text-1);
+}
+.submission-student:hover,
+.submission-student[aria-pressed="true"] { background: var(--hover); border-color: transparent; }
+.submission-student > span { display: block; min-width: 0; font-weight: 600; }
+.submission-student small { color: var(--text-2); font-size: 12px; font-weight: 400; }
+.submission-score { max-width: 12rem; }
+.assignment-editor-text .actions { margin: 0; gap: 6px; }
+.assignment-editor-text .btn.is-active { background: var(--primary-soft); border-color: var(--primary-ink); color: var(--primary-ink); }
+.assignment-editor-divider { width: 1px; height: 24px; background: var(--border); margin-inline: 2px; }
+.assignment-rich-editor {
+  height: 320px; min-height: 320px; max-height: 320px; flex: 0 0 320px; padding: 16px;
+  font-size: 17px; line-height: 1.6; overflow-y: auto;
+}
+.assignment-rich-editor:focus { border-color: var(--primary-ink); box-shadow: 0 0 0 3px var(--primary-soft); }
+.assignment-rich-editor p { margin: 0 0 8px; }
+.assignment-rich-editor p:last-child { margin-bottom: 0; }
+.content .assignment-rich-editor ul { list-style: disc outside; padding-inline-start: 28px; margin-block: 4px 8px; }
+.content .assignment-rich-editor ol { list-style: decimal outside; padding-inline-start: 28px; margin-block: 4px 8px; }
+.assignment-rich-editor li { display: list-item; }
+@media (max-width: 900px) {
+  .submission-master-detail { grid-template-columns: minmax(0, 1fr); }
+  .teacher-submissions .table-scroll .data-table {
+    min-width: 0;
+    table-layout: fixed;
+  }
+  .teacher-submissions .data-table :is(td, th) {
+    padding-inline: 6px;
+    overflow-wrap: anywhere;
+  }
+  .teacher-submissions .data-table thead th:first-child,
+  .teacher-submissions .data-table tbody td:first-child { width: 68px; }
+  .teacher-submissions .data-table thead th:nth-child(3),
+  .teacher-submissions .data-table tbody td:nth-child(3) { width: 100px; }
+  .teacher-submissions .data-table thead th:last-child,
+  .teacher-submissions .data-table tbody td:last-child { width: 84px; }
+  .submission-review-panel {
+    max-height: none;
+    padding: 16px 0 0;
+    border-inline-start: 0;
+    border-top: 1px solid var(--border);
+  }
+}
+@media (max-width: 560px) {
+  .assignment-workspace .native-dialog > .stack { padding: 24px 20px; }
+  .assignment-workspace .submission-review-dialog > .submission-review-dialog-content,
+  .assignment-workspace .submission-history-dialog > .submission-history-content { padding: 16px; }
+  .assignment-rich-editor { height: 260px; min-height: 260px; max-height: 260px; flex-basis: 260px; font-size: 16px; padding: 12px; }
 }

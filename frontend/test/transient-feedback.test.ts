@@ -43,7 +43,8 @@ test("module, material and publication confirmations expire without losing draft
     assert.doesNotMatch(ui.doc.body.textContent!, /Módulo actualizado|Material creado|Material publicado/);
     assert.equal(draft.value, "Siguiente borrador");
     assert.equal(ui.doc.activeElement, button);
-    assert.equal(button.getAttribute("aria-pressed"), "true");
+    assert.equal(button.getAttribute("aria-label"), "Ocultar material Lectura");
+    assert.equal(button.parentElement?.querySelector(".chip")?.textContent, "Publicado");
     assert.equal(ui.requests.filter(r => ["PATCH", "POST"].includes(r.method) && !r.url.endsWith("/login")).length, 3);
   } finally { await ui.close(); }
 });

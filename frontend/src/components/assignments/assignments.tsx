@@ -15,8 +15,10 @@ import {
 } from "../../lib/api/assignments.ts";
 import { ApiHttpError } from "../../lib/api/errors.ts";
 import { canAuthor, destinations } from "../../lib/quizzes/capabilities.ts";
-import { getRouteFeedback } from "../../lib/route-feedback.ts";
 import { dateBucket } from "../../lib/assignments/dates.ts";
+import { StudentSubmissions } from "./student-submissions.tsx";
+import { TeacherSubmissions } from "./teacher-submissions.tsx";
+import { submissionError } from "./submission-feedback.ts";
 import { AssignmentForm } from "./assignment-form.tsx";
 import { AssignmentStatus, ChileDate, points } from "./assignment-facts.tsx";
 
@@ -28,7 +30,7 @@ type Operation = SaveOperation | {kind:"visibility";item:Assignment;published:bo
 export function Assignments(props:Route) {
   const {state} = useSession();
   const key = JSON.stringify([state.generation,state.context?.slug,state.context?.user,props.courseId,props.assignmentId]);
-  return <ContentNotices key={key}><Workspace {...props} scope={key}/></ContentNotices>;
+  return <ContentNotices><Workspace {...props} scope={key}/></ContentNotices>;
 }
 
 function Workspace({courseId,assignmentId,scope}:Route & {scope:string}) {
@@ -59,6 +61,10 @@ function Workspace({courseId,assignmentId,scope}:Route & {scope:string}) {
   const allowed = destinations(user,course,sections), whole = canAuthor(user,course,sections,null);
   const staff = whole || allowed.length>0;
   const editAllowed = item ? item.canManage && canAuthor(user,course,sections,item.sectionId) : staff;
+  const submissionScope=item ? {slug,courseId,assignmentId:item.id} : null;
+  const canReview=item && (whole || allowed.some(s=>item.sectionId===null || s.id===item.sectionId));
+  const canSubmit=!whole && item?.status==="published" && user.sectionMemberships.some(m=>
+    m.courseId===courseId && m.role==="student" && !allowed.some(s=>s.id===m.sectionId) && (item.sectionId===null || m.sectionId===item.sectionId));
   const href = `/courses/${courseId}/assignments`;
 
   async function run(operation: Operation) {
@@ -91,7 +97,7 @@ function Workspace({courseId,assignmentId,scope}:Route & {scope:string}) {
           await resource.reload();
         }
         if ([401,403,404].includes(error.status)) await resource.reload();
-        if (current()) notify?.(getRouteFeedback(error).message,"error");
+        if (current()) notify?.(submissionError(error),"error");
       } else {
         setUncertain({operation});
         notify?.("El cambio quedó sin confirmar. Reintenta la misma operación.","error");
@@ -143,7 +149,11 @@ function Workspace({courseId,assignmentId,scope}:Route & {scope:string}) {
     {editAllowed && editing && <AssignmentForm assignment={item} groups={groups} sections={allowed} wholeCourse={whole}
       busy={busy} uncertain={!!uncertain} blocked={blocked} now={now} onSave={save} onCancel={close}/>}
     <div className={editing && editAllowed ? undefined : "stack"} hidden={editing && editAllowed}>
-      {item ? <Detail item={item} now={now} staff={staff} section={sections.find(s=>s.id===item.sectionId)?.code}/> :
+      {item && submissionScope ? <>
+        <Detail item={item} now={now} staff={!!canReview} section={sections.find(s=>s.id===item.sectionId)?.code}/>
+        {canSubmit && <StudentSubmissions item={item} scope={submissionScope} sections={sections} now={now}/>}
+        {canReview && <TeacherSubmissions scope={submissionScope} maxPoints={item.maxPoints}/>}
+      </> :
         <>
           {staff && groups.some(group=>group.weightPercent===0) && <aside className="notice assignment-weights">
             <Info size={18} aria-hidden="true"/>
@@ -220,11 +230,11 @@ function Detail({item,now,section,staff}:{item:Assignment;now:number;section?:st
       <dl className="assignment-dates tnum">
         <div><dt>Apertura</dt><dd><ChileDate value={item.availableFrom} empty="Sin restricción de apertura"/></dd></div>
         <div><dt>Fecha de entrega</dt><dd><ChileDate value={item.dueAt} empty="Sin plazo de entrega"/></dd></div>
-        <div><dt>Cierre de recepción</dt><dd><ChileDate value={item.availableUntil ?? item.dueAt} empty="Sin fecha de cierre"/></dd></div>
+        <div><dt>Cierre de recepción</dt><dd><ChileDate value={item.availableUntil} empty="Sin fecha de cierre"/></dd></div>
       </dl>
-      <p className="hint">Hora de Santiago de Chile.</p>
       <dl className="form-grid assignment-dates">
-        <div><dt>Formatos permitidos</dt><dd>{item.allowedExtensions.length ? item.allowedExtensions.map(ext=>`.${ext}`).join(", ") : "Sin formatos configurados"}</dd></div>
+        <div><dt>Formatos permitidos</dt><dd>{item.allowedExtensions.length ? item.allowedExtensions.map(ext=>`.${ext}`).join(", ") : item.allowWrittenResponse ? "Solo respuesta escrita" : "Formatos académicos admitidos"}</dd></div>
+        {item.allowWrittenResponse && item.allowedExtensions.length>0 && <div><dt>Respuesta escrita</dt><dd>Permitida</dd></div>}
         <div><dt>Intentos permitidos</dt><dd className="tnum">{item.maxAttempts ?? "Ilimitados"}</dd></div>
       </dl>
     </section>

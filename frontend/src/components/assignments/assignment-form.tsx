@@ -28,8 +28,9 @@ function values(form: HTMLFormElement, original?: Assignment): Draft {
   }
   if (!field("title")) throw new FieldError("title","Ingresa un título.");
   const allowedExtensions = [...new Set(field("allowedExtensions").split(/[\s,]+/).filter(Boolean))];
-  if (!original && allowedExtensions.length === 0) {
-    throw new FieldError("allowedExtensions","Selecciona al menos un formato de archivo.");
+  const allowWrittenResponse = data.has("allowWrittenResponse");
+  if (!allowWrittenResponse && allowedExtensions.length === 0 && (!original || original.allowWrittenResponse || original.allowedExtensions.length>0)) {
+    throw new FieldError("allowedExtensions","Selecciona un formato de archivo o habilita la respuesta escrita.");
   }
   if (!original && allowedExtensions.some(extension => !isAssignmentFormatExtension(extension))) {
     throw new FieldError("allowedExtensions","Selecciona solo formatos de archivo permitidos.");
@@ -46,7 +47,7 @@ function values(form: HTMLFormElement, original?: Assignment): Draft {
   return {
     title:field("title"), description:field("description") || null, instructions:field("instructions") || null,
     sectionId:field("sectionId") || null, groupId:field("groupId") || null, maxPoints:Number(points),
-    allowedExtensions, maxAttempts:field("maxAttempts") ? formNumber(field("maxAttempts"),"maxAttempts",true) : null, ...dates,
+    allowedExtensions, allowWrittenResponse, maxAttempts:field("maxAttempts") ? formNumber(field("maxAttempts"),"maxAttempts",true) : null, ...dates,
   };
 }
 
@@ -55,6 +56,7 @@ export function AssignmentForm({assignment,groups,sections,wholeCourse,busy,unce
   busy: boolean; uncertain: boolean; blocked: boolean; now: number;
   onSave: (draft?: Draft, publish?: boolean) => void; onCancel: () => void;
 }) {
+  const [allowWritten,setAllowWritten] = useState(assignment?.allowWrittenResponse ?? false);
   const [error,setError] = useState<FieldError>();
   const titleId = useId();
   const heading = useRef<HTMLHeadingElement>(null);
@@ -141,7 +143,7 @@ export function AssignmentForm({assignment,groups,sections,wholeCourse,busy,unce
         </section>
         <section className="stack assignment-form-section assignment-schedule">
           <div><h3>Disponibilidad</h3>
-            <p className="hint">Fechas opcionales · Hora de Santiago de Chile</p></div>
+            <p className="hint">Fechas opcionales</p></div>
           <div className="form-grid">{Object.keys(schedule).map(name=>{
             const key = name as DateKey;
             return <AssignmentDateField key={key} name={key} {...schedule[key]} original={assignment?.[key]}
@@ -155,8 +157,15 @@ export function AssignmentForm({assignment,groups,sections,wholeCourse,busy,unce
         </section>
         <section className="stack assignment-form-section">
           <h3>Condiciones de entrega</h3>
+          <label className="assignment-check">
+            <input type="checkbox" name="allowWrittenResponse" checked={allowWritten} onChange={event=>{
+              setAllowWritten(event.target.checked);
+              if (error?.field === "allowedExtensions") setError(undefined);
+            }}/>
+            <span>Permitir respuesta escrita<small className="hint">Habilita un editor en línea para el estudiante.</small></span>
+          </label>
           <div className="form-grid assignment-delivery-grid">
-            <AssignmentFormatSelector value={assignment?.allowedExtensions ?? []} required={!assignment} {...issue("allowedExtensions")}
+            <AssignmentFormatSelector value={assignment?.allowedExtensions ?? []} required={!allowWritten && !assignment} {...issue("allowedExtensions")}
               onChange={()=>{ if (error?.field === "allowedExtensions") setError(undefined); }}/>
             <Field name="maxAttempts" label="Máximo de intentos" type="number" min={1} required={false}
               value={assignment?.maxAttempts?.toString()} hint="En blanco permite intentos ilimitados." {...issue("maxAttempts")}/>

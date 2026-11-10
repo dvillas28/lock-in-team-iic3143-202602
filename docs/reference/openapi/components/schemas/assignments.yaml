@@ -1,7 +1,7 @@
 Assignment:
   type: object
   additionalProperties: false
-  required: [id, courseId, title, description, instructions, maxPoints, sectionId, groupId, groupTitle, weightPercent, allowedExtensions, maxAttempts, availableFrom, dueAt, availableUntil, status, publishedAt, version, canManage]
+  required: [id, courseId, title, description, instructions, maxPoints, sectionId, groupId, groupTitle, weightPercent, allowedExtensions, allowWrittenResponse, maxAttempts, availableFrom, dueAt, availableUntil, status, publishedAt, version, canManage]
   properties:
     id: {type: string, format: uuid}
     courseId: {type: string, format: uuid}
@@ -17,8 +17,9 @@ Assignment:
       type: array
       maxItems: 30
       uniqueItems: true
-      description: Extensiones normalizadas. Una lista vacía no restringe por extensión.
+      description: Extensiones normalizadas. Una lista vacía con respuesta escrita habilitada permite solo texto en línea. Para tareas históricas sin formatos y sin respuesta escrita se aceptan los tipos soportados por el validador de archivos.
       items: {type: string, pattern: '^[a-z0-9]{1,16}$'}
+    allowWrittenResponse: {type: boolean, default: false, description: Habilita una respuesta escrita independiente de los archivos .txt y .csv.}
     maxAttempts: {type: [integer, 'null'], minimum: 1, maximum: 2147483647, description: Null indica intentos ilimitados.}
     availableFrom: {type: [string, 'null'], format: date-time}
     dueAt: {type: [string, 'null'], format: date-time}
@@ -47,6 +48,7 @@ AssignmentCreate:
       type: array
       maxItems: 30
       items: {type: string, pattern: '^\.?[A-Za-z0-9]{1,16}$'}
+    allowWrittenResponse: { $ref: '#/Assignment/properties/allowWrittenResponse' }
     maxAttempts: { $ref: '#/Assignment/properties/maxAttempts' }
     availableFrom: { $ref: '#/Assignment/properties/availableFrom' }
     publish: {type: boolean, description: Con true publica en la misma transacción del guardado. Si se omite conserva el estado.}
@@ -67,6 +69,7 @@ AssignmentUpdate:
     sectionId: { $ref: '#/Assignment/properties/sectionId' }
     groupId: {type: [string, 'null'], format: uuid, description: Null elige el grupo predeterminado.}
     allowedExtensions: *extensionInput
+    allowWrittenResponse: { $ref: '#/Assignment/properties/allowWrittenResponse' }
     maxAttempts: { $ref: '#/Assignment/properties/maxAttempts' }
     availableFrom: { $ref: '#/Assignment/properties/availableFrom' }
     publish: {type: boolean, description: Con true publica en la misma transacción del guardado. Si se omite conserva el estado.}

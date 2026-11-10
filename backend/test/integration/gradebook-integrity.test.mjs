@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
 import {database,http,cli,login} from './helpers.mjs';
 import {gradebookFixture,users,snapshot} from './gradebook-fixtures.mjs';
+
+const assignmentGradeColumns=['assignment_id','assignment_attempt_id','assignment_points','feedback'];
 test('SQL enforces item identity, published-grade and receipt immutability and tenant FKs',async()=>{
  const pool=await database();let app;try{
   const f=await gradebookFixture(pool),g=f.grades[0],item=f.items.section;
@@ -35,12 +37,14 @@ test('publication migration upgrades populated attempts and grades without rewri
  const pool=await database();let f;
  try{
   f=await historicalPublicationFixture(pool);const {runner}=await import('node-pg-migrate'),c=await pool.connect();
-  const state=()=>Promise.all(['users','institution_memberships','courses','quiz_attempts','grades','grade_items','audit_events'].map(async table=>(await pool.query(`SELECT to_jsonb(t)-ARRAY['bio','avatar_key','credential_version','gradebook_grouped','gradebook_version','group_id','max_points','assignment_id'] AS row FROM ${table} t ORDER BY id`)).rows));
+  const state=()=>Promise.all(['users','institution_memberships','courses','quiz_attempts','grades','grade_items','audit_events'].map(async table=>(await pool.query(`SELECT to_jsonb(t)-ARRAY['bio','avatar_key','credential_version','gradebook_grouped','gradebook_version','group_id','max_points'] - $1::text[] AS row FROM ${table} t ORDER BY id`,[assignmentGradeColumns])).rows));
   const before=await state();
   try{const down=await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir:f.dir,direction:'down',count:5,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});assert.equal(down.length,5);}finally{c.release();}
   assert.equal((await pool.query("SELECT to_regclass('grade_publications') AS t")).rows[0].t,null);
   assert.equal((await cli('commands/migrate').result).code,0);assert.deepEqual(await state(),before);
-  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,20);
+  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,22);
+  assert.equal((await pool.query(`SELECT id FROM grades
+   WHERE num_nonnulls(assignment_id,assignment_attempt_id,assignment_points,feedback)>0`)).rowCount,0);
   assert.ok((await pool.query('SELECT bio,avatar_key,credential_version FROM users')).rows.every(row=>row.bio===null&&row.avatar_key===null&&row.credential_version===0));
   assert.equal((await cli('commands/migrate').result).code,0);assert.deepEqual(await state(),before);
  }finally{if(f)await f.close();await pool.end();}
@@ -109,7 +113,8 @@ test('group migration preserves published legacy averages until the teacher adop
    VALUES($1,$2,$3,$4,$5,$6,$7,0,1)`,[randomUUID(),tenant,secondItem,secondQuiz,users.revoked,section,attempt]);
   await pool.query('UPDATE grades SET published_at=now() WHERE grade_item_id=ANY($1::uuid[])',[[item,secondItem]]);
   assert.equal((await pool.query('SELECT published_at FROM grades WHERE id=$1',[grade])).rows[0].published_at instanceof Date,true);
-  const read=async table=>(await pool.query(`SELECT * FROM ${table} ORDER BY id`)).rows;
+  const read=async table=>(await pool.query(
+   `SELECT to_jsonb(t)-$1::text[] AS row FROM ${table} t ORDER BY id`,[assignmentGradeColumns])).rows;
   const tables=['grades','quiz_attempts','grade_publications','audit_events'];
   const evidence=await Promise.all(tables.map(read));
   const marker=(await pool.query('SELECT grade_items_locked_at FROM courses WHERE id=$1',[own])).rows[0];
