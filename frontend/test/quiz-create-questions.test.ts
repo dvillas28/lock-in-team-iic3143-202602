@@ -13,10 +13,10 @@ async function created(request: Request) {
   return Response.json({ ...draft, ...body, id: id(80), questions: body.questions.map((q: CreatedQuestion, i: number) => ({ ...q, id: id(90 + i) })) }, { status: 201 });
 }
 
-test('past quiz dates flag the matching field and prevent creation', async () => {
+test('a past closing date is flagged while a past opening date is accepted', async () => {
   const ui = await mount(view(), r => reply(r), 'teacher');
   try {
-    for (const [field, label] of [['opensAt', 'apertura'], ['closesAt', 'cierre']]) {
+    for (const [field, label] of [['closesAt', 'cierre']]) {
       await ui.submit('form', {title: 'Quiz pendiente', opensAt: '', closesAt: '', [field]: '2000-01-01T12:00'});
       const input = ui.doc.querySelector(`[name="${field}"]`)!;
       assert.equal(input.getAttribute('aria-invalid'), 'true');
@@ -26,6 +26,9 @@ test('past quiz dates flag the matching field and prevent creation', async () =>
       assert.match(error.textContent!, new RegExp(label));
     }
     assert.equal(posts(ui.requests).length, 0);
+    await ui.submit('form', {title: 'Quiz pendiente', opensAt: '2000-01-01T12:00', closesAt: ''});
+    assert.doesNotMatch(ui.doc.body.textContent!, /apertura debe ser posterior/);
+    assert.equal(posts(ui.requests).length, 1);
   } finally { await ui.close(); }
 });
 
