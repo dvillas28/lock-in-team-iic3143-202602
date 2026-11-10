@@ -156,3 +156,18 @@ test('material publication stays blocked after an uncertain edit even when recon
   }finally{await ui.close();}
  }
 });
+test("module dialog: 'Nuevo módulo' opens empty, 'Renombrar' is preloaded, cancel closes and discards",async()=>{
+ const ui=await mount(view(),r=>Response.json(r.url.endsWith("/modules")?{items:[unit]}:course),"teacher");
+ try{
+ const dialogs=()=>Array.from(ui.doc.querySelectorAll("dialog"));
+ assert.equal(dialogs().filter(d=>d.hasAttribute("open")).length,0);
+ await ui.click("Nuevo módulo");
+ const created=ui.doc.querySelector<HTMLDialogElement>("dialog:not([aria-labelledby*='"+unit.id+"'])")!;
+ assert.ok(created.hasAttribute("open"));assert.equal(created.querySelector<HTMLInputElement>("input")!.value,"");
+ await ui.click("Cancelar");assert.equal(created.hasAttribute("open"),false);
+ const rename=ui.doc.querySelector<HTMLButtonElement>(`button[aria-label="Renombrar ${unit.title}"]`)!;
+ await ui.settle(()=>rename.click());
+ const edit=ui.doc.querySelector<HTMLInputElement>(`form[aria-label="Editar módulo ${unit.title}"] input`)!;
+ assert.equal(edit.value,unit.title);assert.ok(edit.closest("dialog")!.hasAttribute("open"));
+ }finally{await ui.close();}
+});
