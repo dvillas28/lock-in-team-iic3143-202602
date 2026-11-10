@@ -11,6 +11,7 @@
 .quiz-configuration { gap: 16px; }
 .content .quiz-configuration textarea.field { min-height: 84px; }
 .quiz-date-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.quiz-date-fields .field[type="datetime-local"][aria-invalid="true"] { border-color: var(--danger); }
 .quiz-configuration .hint { font-size: 12px; }
 .quiz-filter-grid { display: grid; grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr)); gap: 16px; }
 .quiz-filters .field { margin-top: 6px; }
