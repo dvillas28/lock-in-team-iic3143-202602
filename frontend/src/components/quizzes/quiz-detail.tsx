@@ -17,6 +17,7 @@ import { getQuiz } from "../../lib/api/quizzes.ts";
 import { canAuthor } from "../../lib/quizzes/capabilities.ts";
 import { ApiResponseError } from "../../lib/api/errors.ts";
 import { ErrorState, LoadingState } from "../route-states.tsx";
+import { QuizSkeleton } from "./quiz-skeleton.tsx";
 export function QuizDetail(props:{courseId:string;quizId:string;listQuery?:string}) {
   return <ContentNotices><QuizDetailView {...props}/></ContentNotices>;
 }
@@ -37,7 +38,7 @@ function QuizDetailView({courseId,quizId,listQuery=""}:{courseId:string;quizId:s
   },[loaded,notify,session,courseId,quizId]);
   if(!context?.user) return <LoadingState/>;
   if(result.error) return <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/>;
-  if(!result.data) return <LoadingState/>;
+  if(!result.data) return <QuizSkeleton kind="detail"/>;
   const {course,sections,quiz}=result.data, author=canAuthor(context.user,course,sections,quiz.sectionId);
   const student=!author && context.user.sectionMemberships.some(m=>m.courseId===course.id && m.role==="student");
   return <QuizWorkspace course={course} user={context.user} title={quiz.title}>

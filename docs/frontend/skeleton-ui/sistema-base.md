@@ -76,6 +76,14 @@ no tiene estado ni hace peticiones, así que también puede usarse desde un `loa
   `useDelayedFlag(350)`, sin sumar el retardo de la región (`.resource-skeleton`).
 - Sobre superficies `--muted` (encabezado de módulo) las barras usan `--border-strong`.
 
+## Quizzes e intentos (PR 4)
+
+- `QuizSkeleton` (`components/quizzes/quiz-skeleton.tsx`) cubre listado, detalle, creación,
+  edición, intentos y revisión sobre `CourseSectionSkeleton`. Solo los títulos estáticos
+  («Quizzes», «Crear quiz») son `<h1>`; filtros, acciones y barras de guardado llegan con los datos.
+- `quizzes/loading.tsx` y la página renderizan la misma composición.
+- Los E2E esperan `loaded()` (sin `.skeleton-region` en `main`), no un encabezado.
+
 ## Pendiente para las siguientes PR
 
 - Confirmar el retardo de 200 ms con la latencia real de Render.

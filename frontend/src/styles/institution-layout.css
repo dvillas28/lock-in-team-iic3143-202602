@@ -32,6 +32,8 @@ fieldset.stack { border: 0; padding: 0; min-width: 0; }
 .academic-app .content > .stack > h1, .academic-app .content h1 { font-family: var(--font-eb-garamond), serif; font-size: 30px; font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; }
 .academic-app .page-heading { margin-bottom: 0; }
 .academic-app .page-heading p { margin-top: 4px; }
+/* Un título desconocido es un <p> de placeholder: ocupa el lugar del <h1>, sin margen de párrafo. */
+.academic-app .page-heading .skeleton-heading-title { margin-top: 0; }
 .academic-app .section-label { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
 .academic-app .course-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 20px; }
 .course-card { display: flex; flex-direction: column; gap: 12px; padding: 20px; min-width: 0; }

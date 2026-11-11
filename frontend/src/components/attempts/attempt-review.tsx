@@ -12,6 +12,7 @@ import { gradebookCapabilities } from '../../lib/gradebook/capabilities.ts';
 import { attemptCapabilities } from '../../lib/attempts/capabilities.ts';
 import { ApiHttpError, ApiResponseError } from '../../lib/api/errors.ts';
 import { LoadingState, ErrorState } from '../route-states.tsx';
+import { QuizSkeleton } from "../quizzes/quiz-skeleton.tsx";
 export function AttemptReview({ courseId, quizId, attemptId }: Readonly<{
     courseId: string;
     quizId: string;
@@ -36,7 +37,7 @@ export function AttemptReview({ courseId, quizId, attemptId }: Readonly<{
         return <ErrorState feedback={r.error} onRetry={() => void r.reload()}/>;
     }
     if (!r.data) {
-        return <LoadingState />;
+        return <QuizSkeleton kind="review"/>;
     }
     const { course, quiz, attempt: a } = r.data, cap = attemptCapabilities(context.user, course, quiz, a);
     return <QuizWorkspace course={course} user={context.user} title={`Revisión de intento ${a.attemptNumber}`}><div className="stack attempt-workspace"><Link className="text-link attempt-back" href={`/courses/${courseId}/quizzes/${quizId}/attempts`}><ArrowLeft size={16} aria-hidden="true"/>Volver a intentos</Link>
