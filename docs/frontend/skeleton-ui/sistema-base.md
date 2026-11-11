@@ -111,3 +111,21 @@ no tiene estado ni hace peticiones, así que también puede usarse desde un `loa
 - PDF: la hoja (`--paper`) queda visible y reserva el ancho ajustado con proporción A4; solo
   el lienzo y la capa de texto esperan. Las líneas usan `--paper-skeleton` y
   `--paper-skeleton-strong`. «Abriendo PDF…» y «Cargando página…» se mantienen.
+
+## Registros académicos y administración (PR 7)
+
+- `RecordRowsSkeleton` (`components/academic/record-skeleton.tsx`): con columnas conocidas,
+  el `caption` y el `thead` son reales y anunciados; solo el `tbody` es placeholder
+  (`aria-hidden`, `.skeleton-rows`, mismo retardo y pulso). Paginación, filtros y cambio de
+  sección no mueven la cabecera. Lo usan participantes, auditoría, invitaciones, miembros y
+  el libro de notas (que comparte `BookHead` entre la tabla real y la de carga).
+- Sin columnas conocidas (libro antes de `meta`, Mis notas, detalle de sección) se usa una
+  tabla neutra dentro de `SkeletonRegion`; `TableSkeleton` admite `caption`.
+- `CourseWorkspace` recibe `skeleton`: Libro de notas y Mis notas dibujan el mismo cuerpo en
+  la ruta y en la página. Secciones también tiene fallback de ruta (`SectionsSkeleton`), con
+  título placeholder porque depende del rol.
+- No se dibujan acciones (ponderaciones, publicación, corrección, gestión, invitaciones);
+  las ramas `!context.user` conservan `LoadingState` hasta la PR del shell.
+- Medido (escritorio): filas, cabecera y anchos de columna del libro idénticos al real;
+  Mis notas, auditoría y cuentas con alturas iguales. En móvil difieren solo filas cuyo
+  contenido real se ajusta (auditoría, acciones de invitaciones) y la barra del docente.

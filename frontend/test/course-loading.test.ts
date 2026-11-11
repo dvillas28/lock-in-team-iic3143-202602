@@ -60,7 +60,7 @@ test("other paths keep their existing states and the Mis cursos pilot is preserv
   assert.equal(directory.querySelector("h1")?.textContent, "Mis cursos");
   assert.equal(directory.querySelector('[role="status"]')?.textContent, "Cargando cursos…");
   assert.equal(directory.querySelectorAll(".course-grid > .course-card").length, 6);
-  for (const path of [`/courses/${course.id}/modules/${course.id}/materials/${course.id}`, `/courses/${course.id}/sections`, `/courses/${course.id}`, `/courses/${course.id}/unknown`]) {
+  for (const path of [`/courses/${course.id}/modules/${course.id}/materials/${course.id}`, `/courses/${course.id}`, `/courses/${course.id}/unknown`]) {
     const doc = route(path);
     assert.equal(doc.querySelector(".skeleton"), null, path);
     assert.match(doc.body.textContent!, /Cargando contenido/, path);

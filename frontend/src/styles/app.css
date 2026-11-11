@@ -243,8 +243,8 @@ textarea.field { resize: vertical; min-height: 88px; line-height: 1.55; }
 .skeleton-region { animation: skeleton-reveal 1ms linear var(--skeleton-delay, 200ms) both; }
 /* Solo pulsan las barras: tarjetas, bordes y sombras reales quedan estables. */
 .skeleton-content .skeleton { animation: skeleton-pulse 1.8s ease-in-out var(--skeleton-delay, 200ms) infinite; }
-/* Barras de un encabezado con título real, fuera de la región: mismo retardo y pulso. */
-:is(.page-heading, .skeleton-heading) .skeleton {
+/* Barras junto a contenido real, fuera de la región (título, cabecera de tabla): mismo retardo y pulso. */
+:is(.page-heading, .skeleton-heading, .skeleton-rows) .skeleton {
   animation: skeleton-reveal 1ms linear var(--skeleton-delay, 200ms) both, skeleton-pulse 1.8s ease-in-out var(--skeleton-delay, 200ms) infinite;
 }
 .skeleton {
@@ -267,7 +267,7 @@ textarea.field { resize: vertical; min-height: 88px; line-height: 1.55; }
 @keyframes skeleton-reveal { from { opacity: 0; } to { opacity: 1; } }
 @keyframes skeleton-pulse { 50% { opacity: 0.6; } }
 @media (prefers-reduced-motion: reduce) {
-  .skeleton-region, .skeleton-content .skeleton, :is(.page-heading, .skeleton-heading) .skeleton { animation: none; }
+  .skeleton-region, .skeleton-content .skeleton, :is(.page-heading, .skeleton-heading, .skeleton-rows) .skeleton { animation: none; }
 }
 
 /* ── Modal ── */

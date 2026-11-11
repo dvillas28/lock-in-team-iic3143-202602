@@ -449,3 +449,12 @@
   .gradebook-toolbar > label { max-width: none; }
   .gradebook-actions > .btn { flex: 1; min-width: 0; white-space: normal; text-align: center; padding-inline: 8px; }
 }
+
+/* Skeletons de registros: cada línea usa la tipografía del texto real que reemplaza. */
+.skeleton-record-field { display: grid; gap: 4px; max-width: 280px; }
+.skeleton-record-field > .field-label { margin: 0; }
+.skeleton-record-title { font-family: var(--font-eb-garamond), serif; font-size: 24px; margin-bottom: 16px; }
+.skeleton-grade { display: block; font-family: var(--font-eb-garamond), serif; font-size: 20px; }
+.skeleton-section-heading { font-family: var(--font-eb-garamond), serif; font-size: 22px; }
+.skeleton-wrap-line { display: none; }
+@media (max-width: 640px) { .skeleton-record-field { max-width: none; } .skeleton-wrap-line { display: block; } }

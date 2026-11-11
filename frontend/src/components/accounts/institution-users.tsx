@@ -3,12 +3,18 @@ import { useEffect,useRef,useState,type FormEvent } from 'react';
 import { useSession } from '../auth/session-provider.tsx';
 import { useResource } from '../courses/use-resource.ts';
 import { ErrorState,LoadingState } from '../route-states.tsx';
+import { Skeleton } from '../skeletons.tsx';
+import { RecordRowsSkeleton,type RecordCell } from '../academic/record-skeleton.tsx';
 import { AttemptConfirmation } from '../attempts/attempt-confirmation.tsx';
 import { createInvitation,invitationAction,listInvitations,listMembers,type MemberPermission } from '../../lib/api/accounts.ts';
 import type { Invitation } from '../../lib/accounts/validation.ts';
 import type { Session } from '../../lib/auth/session.ts';
 import { accountMessage } from './feedback.ts';
 import { CsvImport } from './csv-import.tsx';
+const inviteColumns=['Persona','Activación','Correo','Acciones'] as const,inviteCaption='Invitaciones de esta institución';
+const memberColumns=['Nombre','Correo','Permisos institucionales'] as const,memberCaption='Miembros activos de esta institución';
+/** Name over e-mail and status over expiry, as in the loaded rows; actions stay a plain line, never a button. */
+const inviteCell:RecordCell=(column,row)=>column<2?<><Skeleton width={column?'5rem':row%2?'7rem':'9rem'}/><span className="account-invite-status hint"><Skeleton width="10rem"/></span></>:<Skeleton width={column===2?'9rem':'6rem'}/>;
 const deliveryLabels={pending:'Pendiente de envío',sending:'Envío en curso',accepted:'Aceptado por el servicio de correo',failed:'Envío fallido',quota_blocked:'En pausa por cuota',unknown:'Resultado de envío incierto'};
 export function InstitutionUsers(){
  const {session,state}=useSession(),context=state.context;
@@ -20,7 +26,7 @@ function Users({session,slug,emailAvailable}:{session:Session;slug:string;emailA
  const [inviteCursor,setInviteCursor]=useState<string>();
  const invites=useResource(session,`invitations:${slug}:${inviteCursor??''}`,c=>listInvitations(c,slug,inviteCursor));
  const reload=async()=>{await invites.reload();};
- return <div className="stack"><div className="page-heading"><div><p className="section-label">Administración institucional</p><h1>Usuarios institucionales</h1><p>Invita personas a esta institución. El alta no asigna cursos ni permisos administrativos.</p></div></div>{!emailAvailable&&<p className="notice" role="status">El envío de correo está temporalmente no disponible. Puedes registrar invitaciones e importar usuarios; los correos permanecerán pendientes.</p>}<InvitationForm session={session} slug={slug} onSaved={reload}/><section className="card panel stack"><h2>Invitaciones</h2><button className="btn btn-ghost" onClick={()=>void invites.reload()}>Actualizar invitaciones</button>{invites.error?<ErrorState feedback={invites.error} onRetry={()=>void invites.reload()}/>:!invites.data?<LoadingState/>:invites.data.items.length===0?<p>No hay invitaciones en esta página.</p>:<div className="account-table-wrap" role="region" aria-label="Desplazar invitaciones" tabIndex={0}><table className="data-table"><caption>Invitaciones de esta institución</caption><thead><tr><th scope="col">Persona</th><th scope="col">Activación</th><th scope="col">Correo</th><th scope="col">Acciones</th></tr></thead><tbody>{invites.data.items.map(invite=><InvitationRow key={invite.id} session={session} slug={slug} invite={invite} emailAvailable={emailAvailable} onSaved={reload}/>)}</tbody></table></div>}<div className="state-actions">{inviteCursor&&<button className="btn btn-ghost" onClick={()=>setInviteCursor(undefined)}>Primera página</button>}{invites.data?.nextCursor&&<button className="btn btn-ghost" onClick={()=>setInviteCursor(invites.data!.nextCursor!)}>Siguientes invitaciones</button>}</div></section><CsvImport session={session} slug={slug} emailAvailable={emailAvailable} onConfirmed={reload}/><ActiveMembers session={session} slug={slug}/></div>;
+ return <div className="stack"><div className="page-heading"><div><p className="section-label">Administración institucional</p><h1>Usuarios institucionales</h1><p>Invita personas a esta institución. El alta no asigna cursos ni permisos administrativos.</p></div></div>{!emailAvailable&&<p className="notice" role="status">El envío de correo está temporalmente no disponible. Puedes registrar invitaciones e importar usuarios; los correos permanecerán pendientes.</p>}<InvitationForm session={session} slug={slug} onSaved={reload}/><section className="card panel stack"><h2>Invitaciones</h2><button className="btn btn-ghost" onClick={()=>void invites.reload()}>Actualizar invitaciones</button>{invites.error?<ErrorState feedback={invites.error} onRetry={()=>void invites.reload()}/>:!invites.data?<RecordRowsSkeleton label="Cargando invitaciones…" caption={inviteCaption} headers={inviteColumns} rows={3} scroll="account-table-wrap" cell={inviteCell}/>:invites.data.items.length===0?<p>No hay invitaciones en esta página.</p>:<div className="account-table-wrap" role="region" aria-label="Desplazar invitaciones" tabIndex={0}><table className="data-table"><caption>{inviteCaption}</caption><thead><tr>{inviteColumns.map(column=><th scope="col" key={column}>{column}</th>)}</tr></thead><tbody>{invites.data.items.map(invite=><InvitationRow key={invite.id} session={session} slug={slug} invite={invite} emailAvailable={emailAvailable} onSaved={reload}/>)}</tbody></table></div>}<div className="state-actions">{inviteCursor&&<button className="btn btn-ghost" onClick={()=>setInviteCursor(undefined)}>Primera página</button>}{invites.data?.nextCursor&&<button className="btn btn-ghost" onClick={()=>setInviteCursor(invites.data!.nextCursor!)}>Siguientes invitaciones</button>}</div></section><CsvImport session={session} slug={slug} emailAvailable={emailAvailable} onConfirmed={reload}/><ActiveMembers session={session} slug={slug}/></div>;
 }
 function ActiveMembers({session,slug}:{session:Session;slug:string}) {
  const [search,setSearch]=useState('');
@@ -67,12 +73,12 @@ function ActiveMembers({session,slug}:{session:Session;slug:string}) {
    </div>
   </div>
   {members.error ? <ErrorState feedback={members.error} onRetry={()=>void members.reload()}/>
-   : !members.data ? <LoadingState/>
+   : !members.data ? <RecordRowsSkeleton label="Cargando miembros…" caption={memberCaption} headers={memberColumns} scroll="account-table-wrap"/>
    : !members.data.items.length ? <p role="status">{search||permission ? 'No hay coincidencias. Prueba otro nombre, correo o permiso.' : 'No hay miembros activos para mostrar.'}</p>
    : <div className="account-table-wrap" role="region" aria-label="Desplazar miembros" tabIndex={0}>
     <table className="data-table">
-     <caption>Miembros activos de esta institución</caption>
-     <thead><tr><th scope="col">Nombre</th><th scope="col">Correo</th><th scope="col">Permisos institucionales</th></tr></thead>
+     <caption>{memberCaption}</caption>
+     <thead><tr>{memberColumns.map(column=><th scope="col" key={column}>{column}</th>)}</tr></thead>
      <tbody>{members.data.items.map(member=><tr key={member.id}>
       <td>{member.user.name}</td><td>{member.user.email}</td>
       <td>{[member.isAdmin?'Administración':null,member.isSuperAdmin?'Superadministración':null].filter(Boolean).join(', ')||'Miembro'}</td>

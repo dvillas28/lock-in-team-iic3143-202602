@@ -62,10 +62,14 @@ export function ListSkeleton({ rows = 3 }: Readonly<{ rows?: number }>) {
   </ul>;
 }
 
-/** Uses `.data-table`, so the placeholder keeps the real table's padding, borders and row height. */
-export function TableSkeleton({ columns, rows = 5 }: Readonly<{ columns: number; rows?: number }>) {
+/**
+ * Uses `.data-table`, so the placeholder keeps the real table's padding, borders and row height.
+ * `caption` reserves the line of a real table's caption.
+ */
+export function TableSkeleton({ columns, rows = 5, caption = false }: Readonly<{ columns: number; rows?: number; caption?: boolean }>) {
   const cells = Array.from({ length: columns }, (_, index) => index);
   return <table className="data-table skeleton-table">
+    {caption && <caption><Skeleton width="min(20rem, 80%)" /></caption>}
     <thead><tr>{cells.map(cell => <th key={cell}><Skeleton width="60%" /></th>)}</tr></thead>
     <tbody>{Array.from({ length: rows }, (_, row) => <tr key={row}>{cells.map(cell =>
       <td key={cell}><Skeleton width={(row + cell) % 3 ? "72%" : "48%"} /></td>)}</tr>)}</tbody>

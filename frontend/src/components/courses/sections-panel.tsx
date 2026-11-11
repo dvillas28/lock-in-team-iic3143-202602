@@ -8,7 +8,8 @@ import type { Session } from "../../lib/auth/session.ts";
 import type { CurrentUser } from "../../lib/auth/validation.ts";
 import type { Course, Section } from "../../lib/courses/validation.ts";
 import { getSection } from "../../lib/api/sections.ts";
-import { EmptyState, ErrorState, LoadingState } from "../route-states.tsx";
+import { EmptyState, ErrorState } from "../route-states.tsx";
+import { SectionPending } from "./sections-skeleton.tsx";
 import { useResource } from "./use-resource.ts";
 export function SectionsPanel({ session, slug, user, course, items, management, onSaved }: {
   session: Session;
@@ -65,7 +66,7 @@ function SelectedSection({ session, slug, courseId, sectionId, user, course, onS
   if (result.error)
     return <ErrorState feedback={result.error} onRetry={() => void result.reload()} />;
   if (!result.data)
-    return <LoadingState />;
+    return <SectionPending />;
   return <section className="stack section-workspace">
     <div className="section-workspace-meta"><p className="hint">Capacidad: {result.data.capacity ?? "Sin límite"}</p>{capabilities(user, course).configure && <details className="academic-disclosure"><summary>Configurar sección</summary><SectionForm key={result.data.code + result.data.capacity} session={session} slug={slug} courseId={courseId} section={result.data} onSaved={onSaved} /></details>}</div><ParticipantsPanel session={session} slug={slug} user={user} course={course} section={result.data} />
   </section>;
