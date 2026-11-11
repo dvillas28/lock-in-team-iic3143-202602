@@ -89,8 +89,13 @@
 .pdf-controls { display: flex; align-items: center; gap: 8px; }
 .pdf-viewport { position: relative; min-height: 320px; max-height: 72vh; overflow: auto; background: var(--muted); }
 .pdf-viewport:focus-visible { outline-offset: -3px; }
-.pdf-loading { position: absolute; inset: 16px auto auto 16px; color: var(--text-2); }
-.pdf-sheet { position: relative; background: var(--paper); margin: 16px auto; box-shadow: var(--paper-shadow); }
+/* Sobre la hoja de papel (fija en ambos temas): una pastilla de superficie mantiene el contraste del texto. */
+.pdf-loading {
+ position: absolute; z-index: 1; inset: 28px 0 auto; inline-size: fit-content; margin-inline: auto; padding: 4px 12px;
+ border: 1px solid var(--border); border-radius: 999px; background: var(--surface); box-shadow: var(--shadow-card); color: var(--text-2);
+}
+/* Antes de la primera página, la hoja reserva el ancho de «Ajustar al ancho» y una proporción A4. pdf.js fija después su tamaño real. */
+.pdf-sheet { position: relative; inline-size: calc(100% - 32px); aspect-ratio: 210 / 297; background: var(--paper); margin: 16px auto; box-shadow: var(--paper-shadow); }
 .pdf-sheet canvas { display: block; width: 100%; height: 100%; }
 .pdf-text-layer { position: absolute; inset: 0; overflow: clip; line-height: 1; text-align: initial; text-size-adjust: none; }
 .pdf-text-layer :is(span, br) { position: absolute; color: transparent; white-space: pre; transform-origin: 0 0; user-select: text; }
@@ -106,6 +111,23 @@
  .pdf-toolbar { padding-inline: 8px; }
  .file-reader-heading { align-items: flex-start; flex-direction: column; }
 }
+
+/* Skeleton UI de lectores: misma geometría que el lector, la vista previa y la hoja del PDF. */
+.reader-skeleton .reader-heading { flex: 1; align-items: stretch; }
+.reader-skeleton-text { display: grid; gap: 1.25em; font-size: 16px; line-height: 1.8; }
+.pdf-toolbar-skeleton { align-items: center; min-block-size: 55px; }
+.pdf-sheet-lines { display: flex; flex-direction: column; gap: 22px; padding: 8% 9%; }
+.pdf-sheet-paragraph, .pdf-sheet-code { display: flex; flex-direction: column; gap: 10px; }
+.pdf-sheet-code { padding: 14px 16px; border-radius: 6px; background: var(--paper-code); }
+.pdf-sheet .skeleton { background-color: var(--paper-skeleton); border-radius: 4px; }
+.pdf-sheet-code .skeleton { background-color: var(--paper-skeleton-strong); }
+/* Mientras pdf.js dibuja, solo esperan el lienzo y la capa de texto; las líneas siguen el retardo de la región. */
+.pdf-sheet.is-pending > :is(canvas, .pdf-text-layer) { visibility: hidden; }
+.pdf-sheet-skeleton { position: absolute; inset: 0; overflow: hidden; animation: skeleton-reveal 1ms linear var(--skeleton-delay, 200ms) both; }
+.pdf-sheet-skeleton .skeleton { animation: skeleton-pulse 1.8s ease-in-out var(--skeleton-delay, 200ms) infinite; }
+.image-preview-skeleton { inline-size: min(100%, 640px); aspect-ratio: 4 / 3; max-block-size: 75vh; }
+@media (max-width: 760px) { .reader-skeleton .skeleton-heading-title { font-size: 28px; } }
+@media (prefers-reduced-motion: reduce) { .pdf-sheet-skeleton, .pdf-sheet-skeleton .skeleton { animation: none; } }
 
 .content-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 

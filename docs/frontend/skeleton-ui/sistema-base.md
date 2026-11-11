@@ -90,3 +90,15 @@ no tiene estado ni hace peticiones, así que también puede usarse desde un `loa
 - Llevar estas reglas a DESIGN.md cuando se divida ese archivo.
 - Retirar `.gradebook-sr-only`, `.assignment-sr-only` y `.content-sr-only` a favor de
   `.sr-only` en la PR de limpieza final.
+
+## Lectores y archivos (PR 6)
+
+- `DocumentSkeleton` (`components/content/document-skeleton.tsx`) reproduce el encabezado y la
+  hoja de `material-reader` y `academic-file-reader`. El `<article>` y «Volver a módulos» son
+  reales y no se vuelven a montar al llegar los datos; la descarga llega con los datos.
+- `materials/[materialId]/loading.tsx` y `files/[fileId]/loading.tsx` renderizan lo mismo.
+- `PreviewSkeleton`: tarjeta y hoja del PDF, marco 4:3 para imágenes y página de texto. Las
+  fases se nombran («Cargando vista previa…», «Preparando la imagen…»).
+- PDF: la hoja (`--paper`) queda visible y reserva el ancho ajustado con proporción A4; solo
+  el lienzo y la capa de texto esperan. Las líneas usan `--paper-skeleton` y
+  `--paper-skeleton-strong`. «Abriendo PDF…» y «Cargando página…» se mantienen.
