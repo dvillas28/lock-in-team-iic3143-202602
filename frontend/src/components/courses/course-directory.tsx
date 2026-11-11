@@ -30,6 +30,12 @@ export function CourseDirectory() {
     return <CourseDirectorySkeleton />;
   return <Directory key={`${state.generation}:${context.slug}`} session={session} slug={context.slug} user={context.user} />;
 }
+// The create form stays below the grid; the empty state only points to it when it is rendered.
+function EmptyCourses({ canCreate }: { canCreate: boolean }) {
+  return canCreate
+    ? <EmptyState title="Aún no hay cursos" message="Registra el primero desde «Crear curso»." />
+    : <EmptyState title="Todavía no tienes cursos" message="Cuando tengas acceso a un curso, aparecerá aquí." />;
+}
 function Directory({ session, slug, user }: {
   session: Session;
   slug: string;
@@ -38,7 +44,7 @@ function Directory({ session, slug, user }: {
   const result = useResource(session, slug, client => listCourses(client, slug));
   return <div className="stack">
     {heading}
-    {result.error ? <ErrorState feedback={result.error} onRetry={() => void result.reload()} /> : !result.data ? <Pending /> : result.data.length === 0 ? <EmptyState /> :
+    {result.error ? <ErrorState headingLevel={2} feedback={result.error} onRetry={() => void result.reload()} /> : !result.data ? <Pending /> : result.data.length === 0 ? <EmptyCourses canCreate={capabilities(user).create} /> :
       <div className="course-grid">{result.data.map(course => {
         const participation = user.sectionMemberships.filter(m => m.courseId === course.id && m.sectionCode)
           .map(m => `Sección ${m.sectionCode} · ${roleLabel(m.role)}`).join("; ");

@@ -110,7 +110,7 @@ function CourseContent({ courseId }: { courseId: string }) {
   return <div className="stack">
     {header}
     {author && <div className="actions"><ModuleDialog session={session} slug={slug} courseId={courseId} items={items} onSaved={result.reload} disabled={disabled} /></div>}
-    {result.error && <><p role="alert">Consulta fallida. Representación anterior, no vigente.</p><ErrorState feedback={result.error} onRetry={() => void result.reload()} /></>}
+    {result.error && <><p role="alert">Consulta fallida. Representación anterior, no vigente.</p><ErrorState headingLevel={2} feedback={result.error} onRetry={() => void result.reload()} /></>}
     {mutation.message && <p role={mutation.confirmed ? "status" : "alert"}>{mutation.message}</p>}
     {!result.error && !result.refreshing && !items.length && <div className="empty-zone panel"><h2>Aún no hay módulos disponibles</h2><p className="hint">{author ? "Crea un módulo para organizar el material del curso." : "Los módulos y materiales publicados del curso aparecerán aquí"}</p></div>}
     {items.length > 0 && <div className="module-workspace" aria-busy={result.refreshing}><nav className="module-index card" aria-label="Índice de módulos"><p className="section-label">Módulos del curso</p>{items.map(parent => <a key={parent.id} className="nav-item" href={`#module-${parent.id}`} onClick={() => setRequested(previous => ({ id: parent.id, revision: previous.revision + 1 }))}><span className="tnum">{parent.position}.</span><span>{parent.title}</span></a>)}</nav><div className="stack">

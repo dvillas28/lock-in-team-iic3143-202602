@@ -20,12 +20,12 @@ export function SubmissionReview({scope,student,maxPoints,disabled,onChanged,onD
  const resource=useResource(session,`${scope.assignmentId}:${student.sectionId}:${student.studentId}`,c=>reviewSubmission(c,scope,student));
  const [selected,setSelected]=useState(""), titleId=useId();
  const data=resource.data;
- if (!data) return resource.error ? <ErrorState feedback={resource.error} onRetry={()=>void resource.reload()}/> : <SubmissionReviewSkeleton name={student.name} sectionCode={student.sectionCode}/>;
+ if (!data) return resource.error ? <ErrorState headingLevel={3} feedback={resource.error} onRetry={()=>void resource.reload()}/> : <SubmissionReviewSkeleton name={student.name} sectionCode={student.sectionCode}/>;
  const attempt=data.attempts.find(a=>a.id===selected) ?? data.attempts.find(a=>a.id===data.grade?.attemptId) ?? data.attempts[0];
  const graded=data.attempts.find(a=>a.id===data.grade?.attemptId);
  return <section className="stack assignment-review" aria-labelledby={titleId}>
   <div><p className="section-label">Revisión · Sección {student.sectionCode}</p><h3 id={titleId}>{student.name}</h3></div>
-  {resource.error && <ErrorState feedback={resource.error} onRetry={()=>void resource.reload()}/>}
+  {resource.error && <ErrorState headingLevel={4} feedback={resource.error} onRetry={()=>void resource.reload()}/>}
   {attempt ? <>
    <label className="field-label"><span>Intento para revisar</span>
     <select className="field" value={attempt.id} onChange={event=>setSelected(event.target.value)} disabled={disabled || resource.refreshing}>

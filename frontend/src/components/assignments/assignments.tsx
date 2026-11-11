@@ -136,7 +136,7 @@ function Workspace({courseId,assignmentId,scope}:Route & {scope:string}) {
     </div></div>
     <CourseNavigation course={course} user={user} active="/assignments"/>
     {item && <Link className="text-link assignment-back" href={href}><ArrowLeft size={16} aria-hidden="true"/> Volver a Tareas</Link>}
-    {resource.error && <ErrorState feedback={resource.error} onRetry={()=>void resource.reload()}/>}
+    {resource.error && <ErrorState headingLevel={2} feedback={resource.error} onRetry={()=>void resource.reload()}/>}
     {item && editAllowed && !editing && <div className="actions">
       {uncertain?.operation.kind==="visibility" ? <button className="btn btn-primary" disabled={busy} onClick={()=>void run(uncertain.operation)}>Reintentar cambio de visibilidad</button> :
         <>

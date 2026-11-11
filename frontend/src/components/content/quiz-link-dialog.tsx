@@ -42,7 +42,7 @@ function Choices({ session, slug, parent, course, items, disabled, reload, onClo
       return await reload() ? "Cuestionario enlazado." : { message: "Enlace guardado. Usa Reintentar para consultar los recursos.", persistent: true };
     }, async () => { await reload(); return "Revisa los recursos actuales."; });
   }
-  if (result.error) return <ErrorState feedback={result.error} onRetry={() => void result.reload()} />;
+  if (result.error) return <ErrorState headingLevel={3} feedback={result.error} onRetry={() => void result.reload()} />;
   if (!choices) return slow ? <QuizChoicesPending /> : <div className="resource-pending" aria-busy="true" />;
   if (!choices.length) return <div className="stack">
     <p><strong>No hay cuestionarios para enlazar.</strong></p>

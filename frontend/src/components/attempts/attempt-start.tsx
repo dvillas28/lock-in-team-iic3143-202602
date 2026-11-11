@@ -48,7 +48,7 @@ function StudentAttempts({session,slug,user,course,quiz,sections,destinations}:{
   <div className="quiz-section-heading"><h2 className="serif" id={titleId}>Mis intentos</h2>
    {availability && <span className="hint tnum">{availability.remainingAttempts===null?"Intentos ilimitados":`${availability.remainingAttempts} ${availability.remainingAttempts===1?"intento disponible":"intentos disponibles"}`}</span>}
   </div>
-  {history.error && <ErrorState feedback={history.error} onRetry={()=>void history.reload()}/>}
+  {history.error && <ErrorState headingLevel={3} feedback={history.error} onRetry={()=>void history.reload()}/>}
   {history.refreshing && !history.data && <p role="status">Cargando tus intentos…</p>}
   {message && <p role="status" aria-live="polite">{message}</p>}
   {state.pending==="start" && <div className="notice warning stack" role="alert"><p>No pudimos confirmar el inicio del intento. Recupéralo antes de iniciar otro.</p><div className="actions"><button type="button" className="btn btn-ghost" disabled={state.busy} onClick={()=>void start(true)}>Recuperar intento</button></div></div>}

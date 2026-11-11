@@ -67,7 +67,8 @@ test("resources keep the 350 ms delay, then show compact rows without a second d
     assert.equal(ui.doc.querySelector(".module-collapse")?.getAttribute("aria-expanded"), "true");
     await ui.settle(() => pending.resolve(Response.json(resources())));
     assert.equal(panel().querySelector(".skeleton"), null);
-    assert.match(panel().textContent!, /Sin contenido para mostrar/);
+    assert.match(panel().textContent!, /Este módulo no tiene materiales/);
+    assert.equal(panel().querySelector(".empty-zone h3")?.textContent, "Este módulo no tiene materiales", "nested under the module h2");
   } finally { await ui.close(); }
 });
 
