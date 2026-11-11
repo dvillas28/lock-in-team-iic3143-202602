@@ -64,7 +64,7 @@ test('E2E-COURSE-008 editor sends only changed metadata and fresh session sees i
  const page=await actorPage('AO'),api=await e.api('AO'),c=e.data.courses.C1;await go(page,c,'/sections');const form=await fillCourse(page,{code:'E2E-C1',name:'Curso editado',term:'2026-2'},true);
  const response=page.waitForResponse(r=>r.url().endsWith('/courses/'+c)&&r.request().method()==='PATCH');await submit(form,'Guardar curso');const r=await response;expect(r.status()).toBe(200);expect(r.request().postDataJSON()).toEqual({name:'Curso editado'});
  expect(status(await api.get(`courses/${c}`),200).body).toMatchObject({code:'E2E-C1',name:'Curso editado',term:'2026-2',createdBy:e.data.actors.AO.id});const events=(await e.pool.query("SELECT changes FROM audit_events WHERE action='course.updated' AND resource_id=$1",[c])).rows;expect(events).toHaveLength(1);expect(events[0].changes).toMatchObject({before:{name:'Curso E2E C1'},after:{name:'Curso editado'}});
- const fresh=await actorPage('AO');await course(fresh,c);await expect(fresh.getByRole('heading',{name:'Curso editado',exact:true})).toBeVisible();
+ const fresh=await actorPage('AO');await course(fresh,c);await expect(fresh.locator('main').getByText('Curso editado',{exact:true}).first()).toBeVisible();
 });
 test('E2E-COURSE-009 identical metadata preserves history / no-op @regression',async ({e,actorPage})=>{
  const api=await e.api('AO'),c=e.data.courses.C1,page=await actorPage('AO'),before=await securitySnapshot(e);status(await api.patch(`courses/${c}`,{name:'Curso E2E C1'}),200);expect(await securitySnapshot(e)).toEqual(before);

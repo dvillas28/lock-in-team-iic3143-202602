@@ -74,7 +74,8 @@ function CourseContent({ courseId }: { courseId: string }) {
   const mutation = useContentMutation(session);
   const [requested, setRequested] = useState({ id: "", revision: 0 });
   if (!state.context?.user) return <LoadingState />;
-  if (courseError) return <ErrorState feedback={courseError} onRetry={() => void reloadCourse()} />;
+  // Retry both reads: a connection loss fails the course and its modules together.
+  if (courseError) return <ErrorState feedback={courseError} onRetry={() => { void reloadCourse(); if (result.error) void result.reload(); }} />;
   if (!course) return <LoadingState />;
   const ownerWithoutAcademicRole = capabilities(state.context.user, course).sections && !state.context.user.sectionMemberships.some(m => m.courseId === course.id);
   if (result.error && !result.data) return <div className="stack">
