@@ -10,7 +10,7 @@ test('E2E-AUDIT-003 owner-student audit never reveals grade history / owner-stud
  expect(rows.length).toBeGreaterThan(0);expect(rows.some(r=>r.resourceType==='course')).toBe(true);expect(rows.some(r=>r.resourceType==='grade')).toBe(false);
  expect(status(await api.get(`courses/${fixture.course}/audit-events?resourceType=grade&limit=1`),200).body.items).toEqual([]);
  expect((await e.pool.query("SELECT count(*)::int AS n FROM audit_events WHERE course_id=$1 AND resource_type='grade' AND action='grade.published'",[fixture.course])).rows[0].n).toBe(2);
- await go(page,fixture.course,'/audit');await expect(page.getByRole('heading',{name:'Auditoría del curso',exact:true})).toBeVisible();
+ await go(page,fixture.course,'/audit');await expect(page.getByRole('heading',{name:'Auditoría del curso',exact:true})).toBeVisible();await expect(page.getByRole('navigation',{name:'Curso',exact:true})).toBeVisible();
  expect(await securitySnapshot(e)).toEqual(before);
 });
 test('E2E-AUDIT-004 cursor cannot preserve grade access after teaching revocation / revoked-owner @regression',async ({e,actorPage})=>{

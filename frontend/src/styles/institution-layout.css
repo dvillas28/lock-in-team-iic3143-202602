@@ -45,6 +45,8 @@ fieldset.stack { border: 0; padding: 0; min-width: 0; }
 .course-tab { padding: 8px 12px; text-decoration: none; border-radius: var(--radius-sm); font-size: 13px; color: var(--text-2); border-bottom: 2px solid transparent; }
 .course-tab:hover { background: var(--hover); }
 .course-tab.active { color: var(--primary-ink); background: var(--primary-soft); border-bottom-color: var(--primary-ink); font-weight: 600; }
+/* Pestañas provisionales: solo forma, sin hover ni puntero (no son enlaces). */
+.skeleton-course-tabs { pointer-events: none; }
 .academic-disclosure { min-width: 0; }
 .academic-disclosure > summary { cursor: pointer; padding: 12px 16px; font-weight: 600; color: var(--primary-ink); font-size: 13px; overflow-wrap: anywhere; }
 .academic-disclosure[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: 16px; }

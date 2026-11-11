@@ -32,7 +32,7 @@ test('E2E-AUTH-008 global login without institutional membership / no-membership
 
 test('E2E-AUTH-011 logout discards actor state and requests / logout @smoke',async ({e,actorPage})=>{
   const page=await actorPage('ST1');await go(page,e.data.courses.C1,'/grades');
-  await expect(page.getByRole('heading',{name:'Mis notas',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Mis notas',exact:true})).toBeVisible();await expect(page.getByRole('navigation',{name:'Curso',exact:true})).toBeVisible();
   const token=e.tokens.get('ST1');
   await page.getByRole('button',{name:'Cerrar sesión',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Iniciar sesión',exact:true})).toBeVisible();
@@ -46,7 +46,7 @@ test('E2E-AUTH-011 logout discards actor state and requests / logout @smoke',asy
 
 test('E2E-AUTH-016 client expiration clears private content / expiration @regression',async ({e,page})=>{
   await page.clock.install();await login(page,e);await go(page,e.data.courses.C1,'/grades');
-  await expect(page.getByRole('heading',{name:'Mis notas',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Mis notas',exact:true})).toBeVisible();await expect(page.getByRole('navigation',{name:'Curso',exact:true})).toBeVisible();
   let writes=0;
   page.on('request',r=>{if(['POST','PUT','PATCH'].includes(r.method()))writes++;});
   await page.clock.fastForward(901000);

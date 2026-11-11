@@ -5,6 +5,7 @@ import { useResource } from "./use-resource.ts";
 import { getCourse } from "../../lib/api/courses.ts";
 import type { Course } from "../../lib/courses/validation.ts";
 import { CourseNavigation } from "./course-navigation.tsx";
+import { CourseSectionSkeleton } from "./course-skeleton.tsx";
 import { ErrorState, LoadingState } from "../route-states.tsx";
 
 /** Course identity/navigation outlive loading, filters and errors of a child resource. */
@@ -34,7 +35,7 @@ export function CourseWorkspace({
         onRetry={() => void course.reload()}
       />
     );
-  if (!course.data) return <LoadingState />;
+  if (!course.data) return <CourseSectionSkeleton title={title} />;
   return (
     <div className="stack academic-workspace" key={scope}>
       <div className="page-heading">

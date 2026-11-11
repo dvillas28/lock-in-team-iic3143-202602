@@ -8,6 +8,7 @@ import { ArrowUpRight, BookOpen } from "lucide-react";
 import { useSession } from "../auth/session-provider.tsx";
 import { EmptyState, ErrorState } from "../route-states.tsx";
 import { CardGridSkeleton, SkeletonRegion } from "../skeletons.tsx";
+import { useSkeletonDelay } from "../use-skeleton-delay.ts";
 import { listCourses } from "../../lib/api/courses.ts";
 import { useResource } from "./use-resource.ts";
 import type { Session } from "../../lib/auth/session.ts";
@@ -15,12 +16,18 @@ import type { Session } from "../../lib/auth/session.ts";
 const heading = <div className="page-heading">
   <div><p className="section-label">Espacio académico</p><h1>Mis cursos</h1><p>Accede al contenido, las evaluaciones y los resultados de tus cursos.</p></div>
 </div>;
-const pending = <SkeletonRegion label="Cargando cursos…"><CardGridSkeleton /></SkeletonRegion>;
+function Pending() {
+  return <div ref={useSkeletonDelay<HTMLDivElement>()}><SkeletonRegion label="Cargando cursos…"><CardGridSkeleton /></SkeletonRegion></div>;
+}
+/** Shared by the route `loading.tsx` and the directory, so a load crossing both stays one state. */
+export function CourseDirectorySkeleton() {
+  return <div className="stack">{heading}<Pending /></div>;
+}
 export function CourseDirectory() {
   const { session, state } = useSession();
   const context = state.context;
   if (!context?.user)
-    return <div className="stack">{heading}{pending}</div>;
+    return <CourseDirectorySkeleton />;
   return <Directory key={`${state.generation}:${context.slug}`} session={session} slug={context.slug} user={context.user} />;
 }
 function Directory({ session, slug, user }: {
@@ -31,7 +38,7 @@ function Directory({ session, slug, user }: {
   const result = useResource(session, slug, client => listCourses(client, slug));
   return <div className="stack">
     {heading}
-    {result.error ? <ErrorState feedback={result.error} onRetry={() => void result.reload()} /> : !result.data ? pending : result.data.length === 0 ? <EmptyState /> :
+    {result.error ? <ErrorState feedback={result.error} onRetry={() => void result.reload()} /> : !result.data ? <Pending /> : result.data.length === 0 ? <EmptyState /> :
       <div className="course-grid">{result.data.map(course => {
         const participation = user.sectionMemberships.filter(m => m.courseId === course.id && m.sectionCode)
           .map(m => `Sección ${m.sectionCode} · ${roleLabel(m.role)}`).join("; ");

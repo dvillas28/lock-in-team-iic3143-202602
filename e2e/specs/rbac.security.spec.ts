@@ -95,7 +95,7 @@ test('E2E-RBAC-011 assistant-student uses different own and staff projections / 
  const own=status(await api.get(`quiz-attempts/${a.id}`),200).body;expect(own).not.toHaveProperty('grade');expect(JSON.stringify(own)).not.toMatch(/isCorrect|pointsAwarded/);
  const staff=status(await api.get(`quizzes/${e.data.quizzes.Q1}/attempts`),200).body;expect(staff.items.find((r:any)=>r.id===a.id)).toHaveProperty('grade');expect(JSON.stringify(staff)).not.toMatch(/isCorrect|pointsAwarded/);
  status(await api.put(`quiz-attempts/${other.id}/answers`,{answers:[]}),403);
- await go(page,e.data.courses.C1,'/gradebook');await expect(page.getByRole('heading',{name:'Libro de notas',exact:true})).toBeVisible();
+ await go(page,e.data.courses.C1,'/gradebook');await expect(page.getByRole('heading',{name:'Libro de notas',exact:true})).toBeVisible();await expect(page.getByRole('navigation',{name:'Curso',exact:true})).toBeVisible();
 });
 test('E2E-RBAC-012 revoked teacher cannot retain cursor privilege / teacher-revocation @regression',async ({e,actorPage})=>{
  await e.graded();await e.graded('MULTI');const page=await actorPage('T1'),api=await e.api('T1');
