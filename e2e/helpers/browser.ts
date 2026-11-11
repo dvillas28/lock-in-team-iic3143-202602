@@ -41,9 +41,9 @@ export async function showMenu(page: Page) {
   const button = page.getByRole('button',{name:'Abrir navegación',exact:true});
   if (await button.isVisible()) await button.click();
 }
-/** Headers and tabs render before section data; a page is loaded once no skeleton remains. */
+/** Headers, tabs and known table headers render before data; a page is loaded once no skeleton remains. */
 export async function loaded(page: Page) {
-  await expect(page.locator('main .skeleton-region')).toHaveCount(0);
+  await expect(page.locator('main :is(.skeleton-region, .skeleton-rows)')).toHaveCount(0);
 }
 export async function course(page: Page, id: string) {
   if (!new URL(page.url()).pathname.startsWith(`/courses/${id}`)) {

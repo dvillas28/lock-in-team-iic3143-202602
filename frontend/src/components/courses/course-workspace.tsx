@@ -8,16 +8,21 @@ import { CourseNavigation } from "./course-navigation.tsx";
 import { CourseSectionSkeleton } from "./course-skeleton.tsx";
 import { ErrorState, LoadingState } from "../route-states.tsx";
 
-/** Course identity/navigation outlive loading, filters and errors of a child resource. */
+/**
+ * Course identity/navigation outlive loading, filters and errors of a child resource. `skeleton` is
+ * the section body drawn under the header skeleton while the course loads (route fallback parity).
+ */
 export function CourseWorkspace({
   courseId,
   title,
   active,
+  skeleton,
   children,
 }: Readonly<{
   courseId: string;
   title: string;
   active: string;
+  skeleton?: ReactNode;
   children: (course: Course) => ReactNode;
 }>) {
   const { session, state } = useSession(),
@@ -35,7 +40,7 @@ export function CourseWorkspace({
         onRetry={() => void course.reload()}
       />
     );
-  if (!course.data) return <CourseSectionSkeleton title={title} />;
+  if (!course.data) return <CourseSectionSkeleton title={title}>{skeleton}</CourseSectionSkeleton>;
   return (
     <div className="stack academic-workspace" key={scope}>
       <div className="page-heading">

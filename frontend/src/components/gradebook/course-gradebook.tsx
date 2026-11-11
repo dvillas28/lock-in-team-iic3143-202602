@@ -14,11 +14,12 @@ import { gradebookCapabilities } from "../../lib/gradebook/capabilities.ts";
 import { ApiHttpError } from "../../lib/api/errors.ts";
 import { getRouteFeedback } from "../../lib/route-feedback.ts";
 import type { Course } from "../../lib/courses/validation.ts";
-import { LoadingState } from "../route-states.tsx";
+import { RecordRowsSkeleton } from "../academic/record-skeleton.tsx";
+import { GradebookPending, bookRowCell, bookSummarySkeleton, gradebookSkeleton } from "./gradebook-skeleton.tsx";
 import { ResourceFeedback, shortId } from "../academic/feedback.tsx";
 import { WeightsDialog } from "./weights-dialog.tsx";
 import { GradeCorrection } from "./grade-correction.tsx";
-import type { GradeItem, GradeResult } from "../../lib/gradebook/validation.ts";
+import type { GradeGroup, GradeItem, GradeResult } from "../../lib/gradebook/validation.ts";
 import { ContentNotices } from "../content/content-notices.tsx";
 import { GradePublication } from "./grade-publication.tsx";
 export function CourseGradebook({ courseId }: Readonly<{ courseId: string }>) {
@@ -27,6 +28,7 @@ export function CourseGradebook({ courseId }: Readonly<{ courseId: string }>) {
       courseId={courseId}
       title="Libro de notas"
       active="/gradebook"
+      skeleton={gradebookSkeleton}
     >
       {(course) => <BookView course={course} />}
     </CourseWorkspace>
@@ -53,7 +55,7 @@ function BookView({ course }: Readonly<{ course: Course }>) {
     return meta.error ? (
       <ResourceFeedback error={meta.error} retry={() => void meta.reload()} />
     ) : (
-      <LoadingState />
+      <GradebookPending />
     );
   if (!cap.book)
     return (
@@ -148,6 +150,7 @@ function BookResults({
     columns = [...items.items].sort((a,b) => (groupOrder.get(a.groupId ?? "") ?? 0) - (groupOrder.get(b.groupId ?? "") ?? 0) ||
       a.title.localeCompare(b.title, "es")),
     blocked = !!r.refreshing || !!r.error || !book;
+  const head = <BookHead courseId={course.id} columns={columns} groups={groups} grouped={grouped} />;
   return (
     <div className="stack">
       <div className="gradebook-toolbar card panel">
@@ -207,7 +210,9 @@ function BookResults({
       )}
       <section aria-busy={!!r.refreshing} className="stack">
         {!book ? (
-          !r.error && <LoadingState />
+          !r.error && <RecordRowsSkeleton label="Cargando resultados…" caption="Resultados por estudiante y sección histórica"
+            scroll="table-scroll gradebook-table" head={head} columns={columns.length + (grouped ? groups.length : 0) + 4}
+            cell={bookRowCell(columns.length, grouped ? groups.length : 0)} lead={bookSummarySkeleton} />
         ) : !book.items.length ? (
           <div className="empty-zone panel stack">
             <h2>No hay resultados en esta página</h2>
@@ -237,24 +242,7 @@ function BookResults({
             >
               <table className="data-table">
                 <caption>Resultados por estudiante y sección histórica</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Estudiante</th>
-                    <th scope="col">Sección histórica</th>
-                    {columns.map((i) => (
-                      <th scope="col" key={i.id}>
-                        {i.assignmentId ? <Link className="text-link" href={`/courses/${course.id}/assignments/${i.assignmentId}`}>{i.title}</Link> : i.title}
-                        <small className="hint">{(grouped || i.assignmentId) ? groups.find(g => g.id === i.groupId)?.title : `${i.weightPercent} %`}</small>
-                        {i.maxPoints !== undefined && <small className="hint tnum">{i.maxPoints} pts</small>}
-                      </th>
-                    ))}
-                    {grouped && groups.map(g => <th scope="col" key={g.id} className="group-total-cell">
-                      {g.title}<small className="hint tnum">Subtotal · {g.weightPercent} %</small>
-                    </th>)}
-                    <th scope="col">Promedio parcial</th>
-                    <th scope="col">Ponderación publicada</th>
-                  </tr>
-                </thead>
+                <thead>{head}</thead>
                 <tbody>
                   {book.items.map((row) => (
                     <tr key={row.student.id + "/" + row.sectionId}>
@@ -345,5 +333,26 @@ function BookResults({
       {correction && <GradeCorrection session={session} slug={slug} courseId={course.id} target={correction}
         onSaved={r.reload} onClose={() => { setCorrection(undefined); requestAnimationFrame(() => correctionTrigger.current?.focus()); }} />}
     </div>
+  );
+}
+/** Column headers of the book; the loaded table and its pending rows share them. */
+function BookHead({ courseId, columns, groups, grouped }: Readonly<{ courseId: string; columns: GradeItem[]; groups: GradeGroup[]; grouped: boolean }>) {
+  return (
+    <tr>
+      <th scope="col">Estudiante</th>
+      <th scope="col">Sección histórica</th>
+      {columns.map((i) => (
+        <th scope="col" key={i.id}>
+          {i.assignmentId ? <Link className="text-link" href={`/courses/${courseId}/assignments/${i.assignmentId}`}>{i.title}</Link> : i.title}
+          <small className="hint">{(grouped || i.assignmentId) ? groups.find(g => g.id === i.groupId)?.title : `${i.weightPercent} %`}</small>
+          {i.maxPoints !== undefined && <small className="hint tnum">{i.maxPoints} pts</small>}
+        </th>
+      ))}
+      {grouped && groups.map(g => <th scope="col" key={g.id} className="group-total-cell">
+        {g.title}<small className="hint tnum">Subtotal · {g.weightPercent} %</small>
+      </th>)}
+      <th scope="col">Promedio parcial</th>
+      <th scope="col">Ponderación publicada</th>
+    </tr>
   );
 }

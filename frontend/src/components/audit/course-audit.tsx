@@ -14,7 +14,8 @@ import {
 import { gradebookCapabilities } from "../../lib/gradebook/capabilities.ts";
 import type { Course } from "../../lib/courses/validation.ts";
 import { ApiHttpError } from "../../lib/api/errors.ts";
-import { LoadingState } from "../route-states.tsx";
+import { Skeleton } from "../skeletons.tsx";
+import { RecordRowsSkeleton, type RecordCell } from "../academic/record-skeleton.tsx";
 import {
   AcademicDate,
   ResourceFeedback,
@@ -31,6 +32,12 @@ const fields = [
   "to",
 ] as const;
 type Draft = Partial<Record<(typeof fields)[number], string>>;
+const columns = ["Fecha", "Actor", "Acción", "Recurso", "Sección histórica", "Cambios"] as const;
+const caption = "Historial de actividad del curso";
+/** The resource keeps its short id below, as in the loaded rows; «Ver antes y después» is a line. */
+const cell: RecordCell = (column, row) => column === 3
+  ? <><Skeleton width="6rem" /><small className="hint"><Skeleton width="4rem" /></small></>
+  : <Skeleton width={column === 0 ? "8.5rem" : (row + column) % 3 ? "72%" : "48%"} />;
 export function CourseAudit({ courseId }: Readonly<{ courseId: string }>) {
   return (
     <CourseWorkspace
@@ -300,7 +307,7 @@ function Audit({ course }: Readonly<{ course: Course }>) {
       )}
       <section aria-busy={!!page.refreshing}>
         {!page.data ? (
-          !page.error && <LoadingState />
+          !page.error && <RecordRowsSkeleton label="Cargando actividad…" caption={caption} headers={columns} table="audit-table" cell={cell} />
         ) : !page.data.items.length ? (
           <div className="empty-zone panel stack">
             <h2>No hay eventos en esta página</h2>
@@ -317,17 +324,10 @@ function Audit({ course }: Readonly<{ course: Course }>) {
             tabIndex={0}
           >
             <table className="data-table audit-table">
-              <caption>Historial de actividad del curso</caption>
+              <caption>{caption}</caption>
               <thead>
                 <tr>
-                  {[
-                    "Fecha",
-                    "Actor",
-                    "Acción",
-                    "Recurso",
-                    "Sección histórica",
-                    "Cambios",
-                  ].map((x) => (
+                  {columns.map((x) => (
                     <th key={x} scope="col">
                       {x}
                     </th>

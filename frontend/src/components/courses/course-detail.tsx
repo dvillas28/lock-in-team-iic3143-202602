@@ -8,6 +8,7 @@ import { getCourse } from "../../lib/api/courses.ts";
 import { listSections } from "../../lib/api/sections.ts";
 import { useResource } from "./use-resource.ts";
 import { SectionsPanel } from "./sections-panel.tsx";
+import { SectionsSkeleton } from "./sections-skeleton.tsx";
 export function CourseDetail({ courseId }: {
   courseId: string;
 }) {
@@ -24,7 +25,7 @@ export function CourseDetail({ courseId }: {
   if (result.error)
     return <ErrorState feedback={result.error} onRetry={() => void result.reload()} />;
   if (!result.data)
-    return <LoadingState />;
+    return <SectionsSkeleton />;
   const { course, items } = result.data;
   const access = capabilities(context.user, course);
   const management = access.sections;
