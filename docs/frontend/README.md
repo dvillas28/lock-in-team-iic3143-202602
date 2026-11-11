@@ -54,6 +54,8 @@ Los responsables JC/MA del backlog se conservan; no se crean ni cierran issues.
 ## Fuentes y siguiente paso
 
 - [Cobertura y evidencia](coverage.md): CU-01–16, FE-01–20 y 16 vistas.
+- [Skeleton UI](skeleton-ui/README.md): auditoría de estados de carga y
+  [sistema base](skeleton-ui/sistema-base.md) (issue #280).
 - [Backlog](../deliveries/2/08-work-plan-detail/08-work-plan-detail.md),
   [CU/RF/RNF](../deliveries/2/03-use-cases-and-requirements.md).
 - [Mockups](../../mockups/README.md), [diseño](../../DESIGN.md),
