@@ -173,7 +173,7 @@ test("reader route fallbacks render the article, return link and skeleton the re
 
 test("reader skeleton styles use paper tokens on the sheet and stay still under reduced motion", () => {
   const css = readFileSync(new URL("../src/styles/content.css", import.meta.url), "utf8");
-  const block = css.slice(css.indexOf("/* Skeleton UI de lectores"), css.indexOf(".content-sr-only"));
+  const block = css.slice(css.indexOf("/* Skeleton UI de lectores"), css.indexOf(".content-notices {"));
   assert.match(block, /\.pdf-sheet \.skeleton \{ background-color: var\(--paper-skeleton\);/);
   assert.match(block, /\.pdf-sheet-code \.skeleton \{ background-color: var\(--paper-skeleton-strong\); \}/);
   assert.match(block, /\.pdf-sheet\.is-pending > :is\(canvas, \.pdf-text-layer\) \{ visibility: hidden; \}/);

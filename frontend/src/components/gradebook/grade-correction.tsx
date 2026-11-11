@@ -73,7 +73,7 @@ export function GradeCorrection({ session, slug, courseId, target, onClose, onSa
     <form onSubmit={e => void save(e)} className="stack">
       <p className="hint">El nuevo puntaje actualizará la nota visible y el promedio. La corrección quedará en el historial.</p>
       <fieldset className="selection-group" disabled={saving || stale || uncertain}>
-        <legend className="gradebook-sr-only">Datos de la corrección</legend>
+        <legend className="sr-only">Datos de la corrección</legend>
         {maxPoints !== undefined && <p>Puntaje máximo <strong className="tnum">{formatPoints.format(maxPoints)} {maxPoints === 1 ? "punto" : "puntos"}</strong></p>}
         <label className="field-label">
           <span>Puntaje corregido</span>

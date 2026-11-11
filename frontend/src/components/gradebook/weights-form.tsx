@@ -112,7 +112,7 @@ export function WeightsForm({ session, slug, courseId, initial, onSaved, onCance
       </div>
     </div>}
     <fieldset className="grade-plan-body" disabled={saving || conflict || uncertain}>
-      <legend className="gradebook-sr-only">Grupos y evaluaciones</legend>
+      <legend className="sr-only">Grupos y evaluaciones</legend>
       <section className="stack" aria-label="Grupos de evaluación">
         <div className="grade-plan-heading"><h3>Grupos de evaluación</h3><span className="hint tnum">{groups.length}</span></div>
         <ol className="grade-plan-groups">

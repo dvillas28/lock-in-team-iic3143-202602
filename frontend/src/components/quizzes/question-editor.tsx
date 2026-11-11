@@ -124,7 +124,7 @@ export function QuestionEditor({ rows, onRows, error = () => undefined }: {
       update([...rows, { key, prompt: "", position: rows.length + 1, points: 1, alternatives }],
         `[name="questions.${rows.length}.prompt"]`, `Pregunta ${rows.length + 1} agregada.`);
     }}><Plus size={16} aria-hidden="true"/>Agregar pregunta</button></div>
-    <p role="status" className="quiz-sr-only">{notice}</p>
+    <p role="status" className="sr-only">{notice}</p>
   </div>;
 }
 
