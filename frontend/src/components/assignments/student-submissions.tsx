@@ -9,7 +9,8 @@ import type { Section } from "../../lib/courses/validation.ts";
 import { useSession } from "../auth/session-provider.tsx";
 import { useResource } from "../courses/use-resource.ts";
 import { useContentNotice } from "../content/content-notices.tsx";
-import { ErrorState, LoadingState } from "../route-states.tsx";
+import { ErrorState } from "../route-states.tsx";
+import { StudentSubmissionsSkeleton } from "./assignment-skeleton.tsx";
 import { AttemptHistory } from "./submission-evidence.tsx";
 import { ChileDate, points } from "./assignment-facts.tsx";
 import { submissionError, uncertainResult } from "./submission-feedback.ts";
@@ -35,7 +36,7 @@ export function StudentSubmissions({item,scope,sections,now}:{item:Assignment;sc
   return ()=>{modal.removeEventListener("close",unlock);unlock();};
  },[hasData]);
  const data=resource.data;
- if (!data) return resource.error ? <ErrorState feedback={resource.error} onRetry={()=>void resource.reload()}/> : <LoadingState/>;
+ if (!data) return resource.error ? <ErrorState feedback={resource.error} onRetry={()=>void resource.reload()}/> : <StudentSubmissionsSkeleton/>;
  const sectionId=data.sections.includes(chosen) ? chosen : data.sections[0];
  const status=assignmentState(item,now+data.clockOffset);
  const left=item.maxAttempts===null ? null : Math.max(0,item.maxAttempts-data.usedAttempts);

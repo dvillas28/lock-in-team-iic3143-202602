@@ -275,3 +275,18 @@
   .assignment-workspace .submission-history-dialog > .submission-history-content { padding: 16px; }
   .assignment-rich-editor { height: 260px; min-height: 260px; max-height: 260px; flex-basis: 260px; font-size: 16px; padding: 12px; }
 }
+
+/* Skeleton UI: medidas de los títulos y del buscador reales, sin encabezados ni campos vacíos. */
+.assignment-toolbar > .skeleton-assignment-search { flex: 1 1 260px; max-width: 420px; }
+.skeleton-assignment-field { display: flex; flex-direction: column; gap: 4px; }
+.skeleton-assignment-field > .field-label { margin-bottom: 0; }
+.skeleton-review-heading { font-family: var(--font-eb-garamond), serif; font-size: 18px; }
+.assignment-group > header .skeleton-assignment-group-title { font-family: var(--font-eb-garamond), serif; font-size: 20px; line-height: 1.2; }
+.skeleton-assignment-chevron { inline-size: 16px; }
+.assignment-instructions .skeleton-panel-heading { font-family: var(--font-eb-garamond), serif; font-size: 21px; margin-bottom: 16px; }
+/* Celda del estudiante: mismas líneas y relleno que `.submission-student`, sin aspecto de botón. */
+.skeleton-submission-student { display: grid; padding: 4px 0; border: 1px solid transparent; font-size: 13px; line-height: 1.5; }
+.skeleton-submission-student small { font-size: 12px; }
+@media (max-width: 760px) {
+  .assignment-toolbar > .skeleton-assignment-search { flex-basis: 100%; max-width: none; }
+}

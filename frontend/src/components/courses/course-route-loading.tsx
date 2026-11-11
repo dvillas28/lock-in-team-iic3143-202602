@@ -5,6 +5,7 @@ import { CourseDirectorySkeleton } from "./course-directory.tsx";
 import { CourseSectionSkeleton } from "./course-skeleton.tsx";
 import { ModulesSkeleton } from "../content/modules-skeleton.tsx";
 import { QuizSkeleton, quizSkeletonKind } from "../quizzes/quiz-skeleton.tsx";
+import { AssignmentSkeleton, assignmentSkeletonRoute } from "../assignments/assignment-skeleton.tsx";
 
 /** Section titles that each page renders before its data; kept equal by `course-loading.test.ts`. */
 export const courseSectionTitles: Readonly<Record<string, string>> = {
@@ -18,7 +19,8 @@ export const courseSectionTitles: Readonly<Record<string, string>> = {
 
 /**
  * Route fallback for `/courses` and course sections. It renders the same skeleton the page shows
- * while its own data loads, so the transition reads as one state, including quiz and attempt views.
+ * while its own data loads, so the transition reads as one state, including quiz, attempt and
+ * assignment views.
  * Other detail pages, Secciones (whose title depends on the role) and unknown paths keep the
  * generic state their pages still use.
  */
@@ -27,6 +29,8 @@ export function CourseRouteLoading() {
   if (pathname === "/courses") return <CourseDirectorySkeleton />;
   const quiz = quizSkeletonKind(pathname);
   if (quiz) return <QuizSkeleton kind={quiz} />;
+  const assignment = assignmentSkeletonRoute(pathname);
+  if (assignment) return <AssignmentSkeleton {...assignment} />;
   const section = /^\/courses\/[^/]+\/([^/]+)$/.exec(pathname)?.[1];
   const title = section && Object.hasOwn(courseSectionTitles, section) ? courseSectionTitles[section] : undefined;
   if (!title) return <LoadingState />;
