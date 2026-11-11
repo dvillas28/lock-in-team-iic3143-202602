@@ -52,7 +52,7 @@ function TextPreview({blob}:{blob:Blob}) {
 function FilePreview({item,slug}:{item:AcademicFile;slug:string}) {
  const {session}=useSession();
  const result=useResource(session,`preview:${slug}:${item.id}`,c=>fileBytes(c,slug,item,false),false,fileTransferTimeoutMs);
- if (result.error) return <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/>;
+ if (result.error) return <ErrorState headingLevel={2} feedback={result.error} onRetry={()=>void result.reload()}/>;
  if (!result.data) return <PreviewSkeleton preview={item.preview??"text"} label="Cargando vista previa…"/>;
  if (item.preview==="pdf") return <PdfPreview file={result.data}/>;
  if (item.preview==="image") return <ImagePreview blob={result.data} name={item.title}/>;

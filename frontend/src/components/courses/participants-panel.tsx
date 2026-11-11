@@ -150,7 +150,7 @@ function Participants({
         Participantes e historial · Sección {section.code}
       </h3>
       {result.error ? (
-        <ErrorState
+        <ErrorState headingLevel={4}
           feedback={result.error}
           onRetry={() => void result.reload()}
         />
@@ -158,7 +158,8 @@ function Participants({
         <RecordRowsSkeleton label="Cargando participantes…" caption={caption} headers={columns} rows={3}
           scroll="table-scroll participants-table" cell={participantCell} />
       ) : !result.data.items.length ? (
-        <EmptyState />
+        <EmptyState headingLevel={4} title="No hay participantes"
+          message="Esta sección aún no tiene matrículas. Usa «Asignar participante» para inscribir estudiantes o ayudantes." />
       ) : (
         <div
           ref={table}

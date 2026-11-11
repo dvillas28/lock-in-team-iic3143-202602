@@ -30,12 +30,13 @@ export function SectionsPanel({ session, slug, user, course, items, management, 
   const matches = manageable.filter(s => s.code.toLocaleLowerCase('es').includes(query.trim().toLocaleLowerCase('es')));
   if (!canManage) return <section className="stack section-overview">
     <h2 className="serif">{ownItems.length === 1 ? "Tu sección" : "Tus secciones"}</h2>
-    {!ownItems.length ? <EmptyState /> : <ul className="stack section-list card">{ownItems.map(s => <li key={s.id}><div><strong>Sección {s.code}</strong><p className="hint">{user.sectionMemberships.filter(m => m.courseId === course.id && m.sectionId === s.id).map(m => roleLabel(m.role)).join(" · ")}</p></div></li>)}</ul>}
+    {!ownItems.length ? <EmptyState headingLevel={3} title="No tienes secciones asignadas" message="Cuando te inscriban en una sección de este curso, aparecerá aquí." /> : <ul className="stack section-list card">{ownItems.map(s => <li key={s.id}><div><strong>Sección {s.code}</strong><p className="hint">{user.sectionMemberships.filter(m => m.courseId === course.id && m.sectionId === s.id).map(m => roleLabel(m.role)).join(" · ")}</p></div></li>)}</ul>}
   </section>;
   return <section className="stack section-overview">
     <div className="section-picker card">
       <h2 className="serif">Secciones del curso</h2>
-      {!manageable.length ? <EmptyState /> : <>
+      {!manageable.length ? <EmptyState headingLevel={3} title="No hay secciones para gestionar"
+        message={capabilities(user, course).configure ? "Crea la primera sección desde «Crear sección»." : "Este curso aún no tiene secciones dentro de tu alcance."} /> : <>
         <div className="section-picker-fields">
           <label className="field-label" htmlFor={filterId}>Buscar sección<input id={filterId} type="search" className="field" value={query} onInput={event => setQuery(event.currentTarget.value)} placeholder="Código de sección" /></label>
           <label className="field-label" htmlFor={pickerId}>Sección a gestionar<select id={pickerId} name="managedSection" className="field" value={active?.id ?? ""} onChange={event => { setSelected(event.currentTarget.value); setQuery(""); }}>
@@ -64,7 +65,7 @@ function SelectedSection({ session, slug, courseId, sectionId, user, course, onS
 }) {
   const result = useResource(session, `${slug}:${courseId}:${sectionId}`, c => getSection(c, slug, sectionId, courseId));
   if (result.error)
-    return <ErrorState feedback={result.error} onRetry={() => void result.reload()} />;
+    return <ErrorState headingLevel={3} feedback={result.error} onRetry={() => void result.reload()} />;
   if (!result.data)
     return <SectionPending />;
   return <section className="stack section-workspace">

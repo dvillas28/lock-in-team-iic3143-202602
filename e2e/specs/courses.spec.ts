@@ -20,7 +20,7 @@ for(const actor of ['ST1','AS1','T1','AO'])test(`E2E-COURSE-001 catalogue follow
  await expect(page).toHaveURL(url=>url.pathname===`/courses/${e.data.courses.C1}/modules`);
 });
 test('E2E-COURSE-002 empty directory remains empty after revalidation / empty @regression',async ({e,actorPage})=>{
- const page=await actorPage('MEMBER'),before=await securitySnapshot(e);await expect(page.getByRole('heading',{name:'Sin contenido para mostrar',exact:true})).toBeVisible();
+ const page=await actorPage('MEMBER'),before=await securitySnapshot(e);await expect(page.getByRole('heading',{level:2,name:'Todavía no tienes cursos',exact:true})).toBeVisible();
  expect(status(await (await e.api('MEMBER')).get('courses'),200).body.items).toEqual([]);expect((await focus(page)).status()).toBe(200);
  await expect(page.locator('a.course-card')).toHaveCount(0);expect(await securitySnapshot(e)).toEqual(before);
 });
