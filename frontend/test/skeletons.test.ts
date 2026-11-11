@@ -66,9 +66,9 @@ test("styles keep skeletons visible and still under reduced motion, using theme 
   assert.match(app, /animation: skeleton-reveal [^;]* both;/);
   // The delay is inherited (a replacing skeleton continues it) and bars outside a region (headers, table rows) follow it.
   assert.match(app, /\.skeleton-region \{ animation: skeleton-reveal 1ms linear var\(--skeleton-delay, 200ms\) both; \}/);
-  assert.match(app, /:is\(\.page-heading, \.skeleton-heading, \.skeleton-rows\) \.skeleton \{\s*animation: skeleton-reveal [^;]*both, skeleton-pulse [^;]*infinite;/);
+  assert.match(app, /:is\(\.page-heading, \.skeleton-heading, \.skeleton-rows, \.skeleton-shell\) \.skeleton \{\s*animation: skeleton-reveal [^;]*both, skeleton-pulse [^;]*infinite;/);
   const reduced = app.slice(app.indexOf("@keyframes skeleton-pulse"));
-  assert.match(reduced, /@media \(prefers-reduced-motion: reduce\) \{\s*\.skeleton-region, \.skeleton-content \.skeleton, :is\(\.page-heading, \.skeleton-heading, \.skeleton-rows\) \.skeleton \{ animation: none; \}/);
+  assert.match(reduced, /@media \(prefers-reduced-motion: reduce\) \{\s*\.skeleton-region, \.skeleton-content \.skeleton, :is\(\.page-heading, \.skeleton-heading, \.skeleton-rows, \.skeleton-shell\) \.skeleton \{ animation: none; \}/);
   assert.doesNotMatch(rules, /#[0-9a-f]{3,8}\b|rgba?\(/i, "colors come from tokens.css");
   const dark = tokens.slice(tokens.indexOf('[data-theme="dark"]'));
   assert.match(tokens.slice(0, tokens.indexOf('[data-theme="dark"]')), /--skeleton: var\(--border\);/);

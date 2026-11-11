@@ -16,7 +16,7 @@ import { listSections } from "../../lib/api/sections.ts";
 import { getQuiz } from "../../lib/api/quizzes.ts";
 import { canAuthor } from "../../lib/quizzes/capabilities.ts";
 import { ApiResponseError } from "../../lib/api/errors.ts";
-import { ErrorState, LoadingState } from "../route-states.tsx";
+import { ErrorState } from "../route-states.tsx";
 import { QuizSkeleton } from "./quiz-skeleton.tsx";
 export function QuizDetail(props:{courseId:string;quizId:string;listQuery?:string}) {
   return <ContentNotices><QuizDetailView {...props}/></ContentNotices>;
@@ -36,7 +36,7 @@ function QuizDetailView({courseId,quizId,listQuery=""}:{courseId:string;quizId:s
     receipt.announced=true;
     notify("Quiz publicado.");
   },[loaded,notify,session,courseId,quizId]);
-  if(!context?.user) return <LoadingState/>;
+  if(!context?.user) return <QuizSkeleton kind="detail"/>;
   if(result.error) return <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/>;
   if(!result.data) return <QuizSkeleton kind="detail"/>;
   const {course,sections,quiz}=result.data, author=canAuthor(context.user,course,sections,quiz.sectionId);

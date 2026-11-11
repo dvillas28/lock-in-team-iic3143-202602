@@ -13,6 +13,8 @@ import { CourseAudit } from "../src/components/audit/course-audit.tsx";
 import { CourseRouteLoading, courseSectionTitles } from "../src/components/courses/course-route-loading.tsx";
 import { CourseSectionSkeleton } from "../src/components/courses/course-skeleton.tsx";
 import { resetSkeletonDelay } from "../src/components/use-skeleton-delay.ts";
+import { AppRouterContext, type AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime.js";
+import { SessionProvider } from "../src/components/auth/session-provider.tsx";
 import { mount } from "./fixtures/course-ui.ts";
 import { course, deferred } from "./fixtures/courses.ts";
 
@@ -55,15 +57,25 @@ test("route fallback and each page's pending branch render the same section skel
   }
 });
 
-test("other paths keep their existing states and the Mis cursos pilot is preserved", () => {
+test("detail and unknown paths use the neutral fallback; the Mis cursos pilot is preserved", () => {
   const directory = route("/courses");
   assert.equal(directory.querySelector("h1")?.textContent, "Mis cursos");
   assert.equal(directory.querySelector('[role="status"]')?.textContent, "Cargando cursos…");
   assert.equal(directory.querySelectorAll(".course-grid > .course-card").length, 6);
   for (const path of [`/courses/${course.id}/modules/${course.id}/materials/${course.id}`, `/courses/${course.id}`, `/courses/${course.id}/unknown`]) {
     const doc = route(path);
-    assert.equal(doc.querySelector(".skeleton"), null, path);
-    assert.match(doc.body.textContent!, /Cargando contenido/, path);
+    // Neutral fallback: geometry unknown, so no course header or tabs are anticipated.
+    assert.equal(doc.querySelector(".academic-workspace, .skeleton-course-tabs, h1, h2"), null, path);
+    assert.deepEqual([...doc.querySelectorAll('[role="status"]')].map(e => e.textContent), ["Cargando contenido…"], path);
+    assert.equal(doc.querySelector("a, button, input, select, textarea, [tabindex], .empty-zone"), null, path);
+  }
+});
+
+test("without an institutional context each section draws its route skeleton", () => {
+  const router: AppRouterInstance = { back() {}, forward() {}, refresh() {}, prefetch() {}, push() {}, replace() {}, bfcacheId: "test" };
+  for (const [section, view] of Object.entries(sections)) {
+    const doc = new JSDOM(renderToStaticMarkup(h(AppRouterContext.Provider, { value: router }, h(SessionProvider, null, view(course.id))))).window.document;
+    assertSkeleton(doc, courseSectionTitles[section]);
   }
 });
 

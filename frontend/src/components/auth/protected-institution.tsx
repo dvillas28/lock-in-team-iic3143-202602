@@ -4,6 +4,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { hostInstitution, safeReturnPath } from "../../lib/auth/navigation.ts";
 import { AccountAvatar } from "../accounts/account-avatar.tsx";
+import { AppShellSkeleton } from "../institutions/app-shell-skeleton.tsx";
 import { InstitutionShell } from "../institutions/institution-shell.tsx";
 import { ErrorState, LoadingState } from "../route-states.tsx";
 import { useSession } from "./session-provider.tsx";
@@ -35,7 +36,8 @@ export function ProtectedInstitution({ slug: legacySlug, children }: Readonly<{ 
   if (legacySlug || state.status !== "authenticated") return <main className="content"><LoadingState /></main>;
   const context = state.context?.slug === slug ? state.context : undefined;
   if (context?.error) return <main className="content"><SessionActions /><ErrorState feedback={context.error} onRetry={() => void session.loadContext(slug!)} /></main>;
-  if (!validHost || !slug || !context?.user) return <main className="content"><LoadingState /></main>;
+  // Authenticated on a valid host, context pending: a decorative frame until access is confirmed.
+  if (!validHost || !slug || !context?.user) return <AppShellSkeleton />;
   return <InstitutionShell key={`${state.generation}:${slug}:${JSON.stringify([context.user.institutionMembership,context.user.sectionMemberships])}`} pathname={pathname} institutionSlug={slug} institutionName={context.user.institutionMembership.institution.name} user={context.user} avatar={<AccountAvatar name={context.user.name}/>} actions={<SessionActions />}>
     {state.contextWarning && <div className="notice access-notice" role="alert">
       <p>No se pudo verificar tu acceso. Puedes consultar el contenido; confirma la conexión antes de guardar cambios.</p>

@@ -17,7 +17,7 @@ import { quizDraftChanges } from "../../lib/quizzes/draft-values.ts";
 import { quizInput, type Authoring } from "../../lib/quizzes/validation.ts";
 import { ApiHttpError } from "../../lib/api/errors.ts";
 import { FieldError } from "../../lib/courses/validation.ts";
-import { ErrorState, LoadingState } from "../route-states.tsx";
+import { ErrorState } from "../route-states.tsx";
 import { QuizSkeleton } from "./quiz-skeleton.tsx";
 import { QuizDraftForm, QuizDraftSave, QuizPublishSubmit, useQuizDraft, type PublishRequest } from "./quiz-draft-form.tsx";
 import { QuizLeaveGuard } from "./quiz-leave-guard.tsx";
@@ -35,7 +35,7 @@ export function QuizEditor({courseId,quizId,listQuery=""}:{courseId:string;quizI
     const groups=quiz.status==="draft" ? await listEvaluationGroups(c,slug,courseId).catch(()=>null) : undefined;
     return {course,sections,quiz,groups:groups ?? undefined,groupsUnavailable:groups===null};
   });
-  if(!context?.user) return <LoadingState/>;
+  if(!context?.user) return <QuizSkeleton kind="edit"/>;
   if(result.error) return <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/>;
   if(!result.data) return <QuizSkeleton kind="edit"/>;
   return <AuthoringForm key={scope} {...result.data} listQuery={listQuery}/>;

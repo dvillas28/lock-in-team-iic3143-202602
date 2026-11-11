@@ -3,7 +3,7 @@ import { capabilities } from "../../lib/courses/capabilities.ts";
 import { CourseNavigation } from "./course-navigation.tsx";
 import { CourseForm } from "./course-form.tsx";
 import { useSession } from "../auth/session-provider.tsx";
-import { ErrorState, LoadingState } from "../route-states.tsx";
+import { ErrorState } from "../route-states.tsx";
 import { getCourse } from "../../lib/api/courses.ts";
 import { listSections } from "../../lib/api/sections.ts";
 import { useResource } from "./use-resource.ts";
@@ -21,7 +21,7 @@ export function CourseDetail({ courseId }: {
     return { course, items };
   });
   if (!context?.user)
-    return <LoadingState />;
+    return <SectionsSkeleton />;
   if (result.error)
     return <ErrorState feedback={result.error} onRetry={() => void result.reload()} />;
   if (!result.data)
