@@ -7,6 +7,7 @@ import { capabilities } from "../../lib/courses/capabilities.ts";
 import { useSession } from "../auth/session-provider.tsx";
 import { useResource } from "../courses/use-resource.ts";
 import { ErrorState, LoadingState } from "../route-states.tsx";
+import { CourseSectionSkeleton } from "../courses/course-skeleton.tsx";
 import { getCourse } from "../../lib/api/courses.ts";
 import { listCourseModules } from "../../lib/api/modules.ts";
 import type { CourseModule } from "../../lib/content/validation.ts";
@@ -76,7 +77,7 @@ function CourseContent({ courseId }: { courseId: string }) {
   if (!state.context?.user) return <LoadingState />;
   // Retry both reads: a connection loss fails the course and its modules together.
   if (courseError) return <ErrorState feedback={courseError} onRetry={() => { void reloadCourse(); if (result.error) void result.reload(); }} />;
-  if (!course) return <LoadingState />;
+  if (!course) return <CourseSectionSkeleton title="Módulos y material" />;
   const ownerWithoutAcademicRole = capabilities(state.context.user, course).sections && !state.context.user.sectionMemberships.some(m => m.courseId === course.id);
   if (result.error && !result.data) return <div className="stack">
     <CourseNavigation course={course} user={state.context.user} active="/modules" />
@@ -84,7 +85,7 @@ function CourseContent({ courseId }: { courseId: string }) {
       ? <section className="card panel stack"><h2>Gestiona este curso desde Secciones</h2><p className="hint">Tu cuenta administra el curso pero no participa en él con un rol académico, por lo que no tiene módulos que consultar.</p><div className="actions"><Link className="btn btn-primary" href={`/courses/${course.id}/sections`}>Secciones y participantes</Link></div></section>
       : <ErrorState feedback={result.error} onRetry={() => void result.reload()} />}
   </div>;
-  if (!result.data) return <LoadingState />;
+  if (!result.data) return <CourseSectionSkeleton title="Módulos y material" />;
   const items = result.data;
   const author = canAuthorContent(state.context.user, courseId);
   const disabled = !!result.error || !!result.refreshing;
