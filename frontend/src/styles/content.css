@@ -197,3 +197,12 @@
 .page-editor-dialog .file-replace h3 { margin: 0; font-size: 16px; }
 .page-editor-dialog .file-drop { min-width: 0; }
 .page-editor-dialog .file-drop input[type="file"] { max-width: 100%; min-width: 0; }
+
+/* Skeleton UI de Módulos: formas sobre las clases reales, sin interacción. */
+.content-skeleton { pointer-events: none; }
+/* Recursos y cuestionarios ya esperan `useDelayedFlag(350)`: se revelan sin sumar otro retardo. */
+.resource-skeleton { --skeleton-delay: 0ms; }
+/* El encabezado de módulo usa --muted, el mismo tono que --skeleton en oscuro: la barra necesita más contraste. */
+.content-skeleton .module-header .skeleton { background-color: var(--border-strong); }
+.skeleton-module-title { flex: 1; min-width: min(180px, 100%); font-family: var(--font-eb-garamond), serif; font-size: 21px; }
+.skeleton-option-label { flex: 1; min-width: 0; }

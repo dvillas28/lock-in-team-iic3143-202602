@@ -8,6 +8,7 @@ import { useSession } from "../auth/session-provider.tsx";
 import { useResource } from "../courses/use-resource.ts";
 import { ErrorState, LoadingState } from "../route-states.tsx";
 import { CourseSectionSkeleton } from "../courses/course-skeleton.tsx";
+import { ModulesPending, ModulesSkeleton } from "./modules-skeleton.tsx";
 import { getCourse } from "../../lib/api/courses.ts";
 import { listCourseModules } from "../../lib/api/modules.ts";
 import type { CourseModule } from "../../lib/content/validation.ts";
@@ -77,7 +78,7 @@ function CourseContent({ courseId }: { courseId: string }) {
   if (!state.context?.user) return <LoadingState />;
   // Retry both reads: a connection loss fails the course and its modules together.
   if (courseError) return <ErrorState feedback={courseError} onRetry={() => { void reloadCourse(); if (result.error) void result.reload(); }} />;
-  if (!course) return <CourseSectionSkeleton title="Módulos y material" />;
+  if (!course) return <CourseSectionSkeleton title="Módulos y material"><ModulesSkeleton /></CourseSectionSkeleton>;
   const ownerWithoutAcademicRole = capabilities(state.context.user, course).sections && !state.context.user.sectionMemberships.some(m => m.courseId === course.id);
   if (result.error && !result.data) return <div className="stack">
     <CourseNavigation course={course} user={state.context.user} active="/modules" />
@@ -85,7 +86,12 @@ function CourseContent({ courseId }: { courseId: string }) {
       ? <section className="card panel stack"><h2>Gestiona este curso desde Secciones</h2><p className="hint">Tu cuenta administra el curso pero no participa en él con un rol académico, por lo que no tiene módulos que consultar.</p><div className="actions"><Link className="btn btn-primary" href={`/courses/${course.id}/sections`}>Secciones y participantes</Link></div></section>
       : <ErrorState feedback={result.error} onRetry={() => void result.reload()} />}
   </div>;
-  if (!result.data) return <CourseSectionSkeleton title="Módulos y material" />;
+  // The course is known: keep its real header and authorized tabs; only the modules are placeholders.
+  const header = <>
+    <div className="page-heading"><div><p className="section-label">{course.code} · {course.term}</p><h1>Módulos y material</h1><p>{course.name}</p></div></div>
+    <CourseNavigation course={course} user={state.context.user} active="/modules" />
+  </>;
+  if (!result.data) return <div className="stack">{header}<ModulesPending /></div>;
   const items = result.data;
   const author = canAuthorContent(state.context.user, courseId);
   const disabled = !!result.error || !!result.refreshing;
@@ -102,8 +108,7 @@ function CourseContent({ courseId }: { courseId: string }) {
     });
   }
   return <div className="stack">
-    <div className="page-heading"><div><p className="section-label">{course.code} · {course.term}</p><h1>Módulos y material</h1><p>{course.name}</p></div></div>
-    <CourseNavigation course={course} user={state.context.user} active="/modules" />
+    {header}
     {author && <div className="actions"><ModuleDialog session={session} slug={slug} courseId={courseId} items={items} onSaved={result.reload} disabled={disabled} /></div>}
     {result.error && <><p role="alert">Consulta fallida. Representación anterior, no vigente.</p><ErrorState feedback={result.error} onRetry={() => void result.reload()} /></>}
     {mutation.message && <p role={mutation.confirmed ? "status" : "alert"}>{mutation.message}</p>}

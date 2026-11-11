@@ -66,6 +66,16 @@ no tiene estado ni hace peticiones, así que también puede usarse desde un `loa
   la fila de navegación al cargar (teléfono, docente: de 43 a 126 px). Se acepta para no
   anticipar permisos.
 
+## Módulos (PR 3)
+
+- `ModulesSkeleton` (`components/content/modules-skeleton.tsx`) reproduce `.module-workspace`:
+  índice lateral y módulos colapsados. Con el curso conocido, Módulos mantiene su
+  encabezado y pestañas reales y solo la lista es placeholder; sin curso, se usa dentro
+  de `CourseSectionSkeleton` (también en la ruta).
+- Recursos y «Enlazar cuestionario» usan filas reales (`.module-resource`, `.option`) tras
+  `useDelayedFlag(350)`, sin sumar el retardo de la región (`.resource-skeleton`).
+- Sobre superficies `--muted` (encabezado de módulo) las barras usan `--border-strong`.
+
 ## Pendiente para las siguientes PR
 
 - Confirmar el retardo de 200 ms con la latencia real de Render.
