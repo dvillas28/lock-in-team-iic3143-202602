@@ -1,6 +1,6 @@
 import {test,expect} from '../fixtures/test.ts';
 import {status} from '../helpers/api.ts';
-import {course,go} from '../helpers/browser.ts';
+import {course,go,showMenu} from '../helpers/browser.ts';
 import {disclose,sections,submit} from '../helpers/management.ts';
 import {securitySnapshot} from '../helpers/security.ts';
 
@@ -9,7 +9,7 @@ for(const actor of ['AO','T1','AS1','ST1'])test(`E2E-SECTION-001 section scope f
  const items=status(await api.get(`courses/${e.data.courses.C1}/sections`),200).body.items;
  expect(items.map((s:any)=>s.id).sort()).toEqual((owner?[e.data.sections.S1,e.data.sections.S2]:[e.data.sections.S1]).sort());status(await api.get(`sections/${e.data.sections.S2}`),owner?200:404);
  if(['AO','T1'].includes(actor)){await sections(page,e);await expect(page.getByRole('combobox',{name:'Sección a gestionar',exact:true}).locator('option')).toHaveCount(owner?2:1);await expect(page.getByRole('heading',{name:'Participantes e historial · Sección 1',exact:true})).toBeVisible();}
- else{await course(page,e.data.courses.C1);await expect(page.locator('main').getByText('Sección 1',{exact:true})).toBeVisible();await expect(page.getByRole('link',{name:'Secciones y participantes',exact:true})).toHaveCount(0);await expect(page.getByRole('table')).toHaveCount(0);}
+ else{await showMenu(page);await page.getByRole('link',{name:'Mis cursos',exact:true}).click();await expect(page.locator(`main a[href="/courses/${e.data.courses.C1}/modules"]`)).toContainText('Sección 1');await course(page,e.data.courses.C1);await expect(page.getByRole('link',{name:'Secciones y participantes',exact:true})).toHaveCount(0);await expect(page.getByRole('table')).toHaveCount(0);}
  expect(await securitySnapshot(e)).toEqual(before);
 });
 test('E2E-SECTION-002 new empty section and edit persist without invented teacher / create-edit @regression',async ({e,actorPage})=>{

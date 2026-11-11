@@ -60,13 +60,16 @@ test('E2E-GRADE-014 group editor assigns evaluations and saves exact decimal wei
  await book(p,e,f.course);const d=await editorFor(p);
  await d.getByRole('button',{name:'Añadir grupo'}).click();
  await d.getByRole('textbox',{name:'Nombre del grupo'}).last().fill('Prácticas');
+ await d.getByRole('button',{name:'Añadir grupo'}).click();
+ await d.getByRole('textbox',{name:'Nombre del grupo'}).last().fill('Examen final');
  await d.getByRole('combobox',{name:/Lectura inicial/}).selectOption({label:'Prácticas'});
- await d.getByRole('button',{name:'Quitar Lectura inicial'}).click();
+ await d.getByRole('combobox',{name:/^Examen/}).selectOption({label:'Examen final'});
  await d.getByRole('button',{name:'Subir Prácticas'}).click();
  const inputs=d.getByRole('textbox',{name:'Peso (%)',exact:true});
  for(let index=0;index<3;index++)await inputs.nth(index).fill(index===2?'33,34':'33,33');
- await expect(d.getByRole('button',{name:'Guardar grupos'})).toBeDisabled();
- await d.getByRole('checkbox',{name:'Confirmo el recálculo'}).check();
+ // A fresh grouped course without published grades needs no recalculation confirmation.
+ await expect(d.getByRole('checkbox',{name:'Confirmo el recálculo'})).toHaveCount(0);
+ await expect(d.getByRole('button',{name:'Guardar grupos'})).toBeEnabled();
  const saved=p.waitForResponse(r=>r.url().endsWith('/groups')&&r.request().method()==='PUT');
  await d.getByRole('button',{name:'Guardar grupos'}).click();expect((await saved).status()).toBe(200);
  await expect(d).toBeHidden();
@@ -215,7 +218,7 @@ test('E2E-GRADE-023 active newer attempt blocks publication until explicitly can
  await e.graded();const a=await e.attempt(),api=await e.api('AO'),c=e.data.courses.C1,before=await securitySnapshot(e);status(await api.post(pub(c),e.selection(),e.key()),409);expect(await securitySnapshot(e)).toEqual(before);status(await (await e.api('ST1')).post(`quiz-attempts/${a.id}/cancel`),204);status(await api.post(pub(c),e.selection(),e.key()),200);const p=await actorPage('AO');await book(p,e);expect(await e.count('grades','published_at IS NOT NULL')).toBe(1);
 });
 test('E2E-GRADE-024 publication requires total one hundred and uses latest graded attempt / latest-weights @regression',async({e,actorPage})=>{
- const f=await freshCourse(e),q=await draft(e,{sectionId:f.section},'AO','uc',f.course);status(await f.api.post(`quizzes/${q.id}/publish`),200);await e.graded('ST1',[true,true],q.id,f.section);const latest=await e.graded('ST1',[false,false],q.id,f.section),items=await weights(e,f.course),selection={gradeItemIds:items.map((i:any)=>i.gradeItemId),sectionIds:[f.section],studentIds:[e.data.actors.ST1.id]},before=await securitySnapshot(e);status(await f.api.post(pub(f.course),selection,e.key()),409);expect(await securitySnapshot(e)).toEqual(before);expect(items).toHaveLength(1);expect(items[0].weightPercent).toBe(100);status(await f.api.post(pub(f.course),selection,e.key()),200);expect((await e.pool.query('SELECT attempt_id,grade_value FROM grades WHERE quiz_id=$1',[q.id])).rows).toEqual([{attempt_id:latest.id,grade_value:'1.0'}]);const p=await actorPage('AO');await book(p,e,f.course);await expect(p.getByRole('table')).toContainText('1');
+ const f=await freshCourse(e),q=await draft(e,{sectionId:f.section},'AO','uc',f.course);status(await f.api.post(`quizzes/${q.id}/publish`),200);await e.graded('ST1',[true,true],q.id,f.section);const latest=await e.graded('ST1',[false,false],q.id,f.section),items=await weights(e,f.course),selection={gradeItemIds:items.map((i:any)=>i.gradeItemId),sectionIds:[f.section],studentIds:[e.data.actors.ST1.id]};expect(items).toHaveLength(1);expect(items[0].weightPercent).toBe(100);status(await f.api.post(pub(f.course),selection,e.key()),200);expect((await e.pool.query('SELECT attempt_id,grade_value FROM grades WHERE quiz_id=$1',[q.id])).rows).toEqual([{attempt_id:latest.id,grade_value:'1.0'}]);const p=await actorPage('AO');await book(p,e,f.course);await expect(p.getByRole('table')).toContainText('1');
 });
 test('E2E-GRADE-025 replay canonicalizes reordered selections and preserves receipt / canonical-replay @regression',async({e,actorPage})=>{
  const api=await e.api('AO');status(await api.post(`sections/${e.data.sections.S1}/enrollments`,{userId:e.data.actors.ST2.id,role:'student'}),201);for(const actor of ['ST1','ST2']){await e.graded(actor);await e.graded(actor,[true,true],e.data.quizzes.Q2);}const c=e.data.courses.C1,key=e.key(),selection={...e.selection(),gradeItemIds:[e.id('item/Q1'),e.id('item/Q2')],studentIds:[e.data.actors.ST1.id,e.data.actors.ST2.id]},r=status(await api.post(pub(c),selection,key),200).body,before=await securitySnapshot(e);expect(status(await api.post(pub(c),{...selection,gradeItemIds:[...selection.gradeItemIds].reverse(),studentIds:[...selection.studentIds].reverse()},key),200).body).toEqual(r);expect(await securitySnapshot(e)).toEqual(before);expect(r.publishedCount).toBe(4);await book(await actorPage('AO'),e);
