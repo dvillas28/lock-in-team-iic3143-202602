@@ -8,7 +8,8 @@ import { capabilities } from '../../lib/courses/capabilities.ts';
 export function CourseNavigation({ course, user, active }: Readonly<{ course: Course; user: CurrentUser; active: string }>) {
   const base = `/courses/${course.id}`, cap = gradebookCapabilities(user, course);
   const links = [
-    ['', 'Resumen'], ['/modules', 'Módulos y material'], ['/quizzes', 'Quizzes'],
+    ['/modules', 'Módulos y material'], ['/quizzes', 'Quizzes'],
+    ...(user.sectionMemberships.some(m => m.courseId === course.id && ['teacher','student'].includes(m.role)) ? [['/assignments', 'Tareas']] : []),
     ...(capabilities(user, course).sections ? [['/sections', 'Secciones y participantes']] : []),
     ...(cap.student ? [['/grades', 'Mis notas']] : []),
     ...(cap.book ? [['/gradebook', 'Libro de notas']] : []),

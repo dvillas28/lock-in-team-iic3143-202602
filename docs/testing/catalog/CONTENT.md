@@ -14,7 +14,7 @@ Estado efectivo por ficha en[el ledger](../execution/VALIDATION.md). Las variant
 | [E2E-CONTENT-005 — Posición límite y colisión](content-01.md#e2e-content-005) | FL-CONTENT-01 | P2 | extended | M |
 | [E2E-CONTENT-006 — No-op de módulo orden y publicación](content-02.md#e2e-content-006) | FL-CONTENT-01 | P2 | regression | M |
 | [E2E-CONTENT-007 — Módulos vacíos y visibilidad staff](content-02.md#e2e-content-007) | FL-CONTENT-01 | P1 | regression | B |
-| [E2E-CONTENT-008 — Crear editar y leer Markdown persistido](content-02.md#e2e-content-008) | FL-CONTENT-02 | P1 | smoke | B |
+| [E2E-CONTENT-008 — Crear, publicar y consultar recursos del módulo](content-02.md#e2e-content-008) | FL-CONTENT-02 | P1 | smoke | B |
 | [E2E-CONTENT-009 — Cuatro combinaciones módulo e ítem](content-02.md#e2e-content-009) | FL-CONTENT-02 | P0 | smoke | M |
 | [E2E-CONTENT-010 — Ocultar material retira lectura directa](content-02.md#e2e-content-010) | FL-CONTENT-02 | P0 | regression | M |
 | [E2E-CONTENT-011 — Body Markdown vacío Unicode y bytes](content-03.md#e2e-content-011) | FL-CONTENT-02 | P2 | extended | M |

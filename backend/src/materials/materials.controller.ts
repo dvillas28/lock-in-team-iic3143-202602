@@ -1,4 +1,4 @@
-import {Controller,Get,Post,Patch,HttpCode,Param,Body,Req,Res} from "@nestjs/common";
+import {Controller,Get,Post,Patch,Delete,HttpCode,Param,Body,Req,Res} from "@nestjs/common";
 import type {IdentityRequest} from "../auth/auth.guard";
 import {slug,uuid} from "../courses/validation";
 import {MaterialsService} from "./materials.service";
@@ -17,6 +17,8 @@ export class MaterialsController {
  }
  @Patch("materials/:materialId")
  update(@Req() r:IdentityRequest,@Param("institutionSlug") s:string,@Param("materialId") id:string,@Body() body:unknown) {return this.materials.update(r.userId,slug(s),uuid(id),body);}
+ @Delete("materials/:materialId") @HttpCode(204)
+ remove(@Req() r:IdentityRequest,@Param("institutionSlug") s:string,@Param("materialId") id:string) {return this.materials.remove(r.userId,slug(s),uuid(id));}
  @Post("materials/:materialId/publish") @HttpCode(200)
  publish(@Req() r:IdentityRequest,@Param("institutionSlug") s:string,@Param("materialId") id:string,@Body() body:unknown) {return this.materials.update(r.userId,slug(s),uuid(id),body,true);}
  @Post("materials/:materialId/unpublish") @HttpCode(200)

@@ -28,22 +28,23 @@ export class AuthService implements OnModuleInit {
     if (email.length < 3 || email.length > 254 || !/^[\x21-\x7e]+$/.test(email) ||
         !/^[^@\s]+@[^@\s.]+(?:\.[^@\s.]+)+$/.test(email)) throw new BadRequestException({field: "email"});
     if (!dto.password.length || Buffer.byteLength(dto.password, "utf8") > 128) throw new BadRequestException({field: "password"});
-    let user: {id: string; password_hash: string; active: boolean} | undefined;
+    let user: {id: string; password_hash: string; active: boolean; credential_version:number} | undefined;
     let valid: boolean;
     try {
-      const result = await this.database.withIdentity(null,db=>db.query("SELECT id,password_hash,active FROM public.users WHERE lower(btrim(email))=$1", [email.toLowerCase()]));
+      const result = await this.database.withIdentity(null,db=>db.query("SELECT id,password_hash,active,credential_version FROM public.users WHERE lower(btrim(email))=$1", [email.toLowerCase()]));
       user = result.rows[0];
       valid = await verify(user?.password_hash ?? this.dummy, dto.password);
     } catch { throw new ServiceUnavailableException(); }
     if (!user?.active || !valid) throw new UnauthorizedException();
-    return {accessToken: this.jwt.sign({sub: user.id}, {secret: this.secret, algorithm: "HS256", issuer, audience, expiresIn: 900}), tokenType: "Bearer", expiresIn: 900};
+    return {accessToken: this.jwt.sign({sub:user.id,credentialVersion:user.credential_version}, {secret: this.secret, algorithm: "HS256", issuer, audience, expiresIn: 900}), tokenType: "Bearer", expiresIn: 900};
   }
   verifyToken(token: string) {
     try {
-      const claims = this.jwt.verify<{sub: string; iat: number; exp: number; iss: string; aud: string}>(token,
+      const claims = this.jwt.verify<{sub: string; iat: number; exp: number; iss: string; aud: string;credentialVersion:number}>(token,
         {secret: this.secret, algorithms: ["HS256"], issuer, audience});
       const now = Math.floor(Date.now() / 1000);
       if (typeof claims.sub !== "string" || !uuid.test(claims.sub) || claims.iss !== issuer || claims.aud !== audience ||
+          !Number.isSafeInteger(claims.credentialVersion) || claims.credentialVersion<0 ||
           !Number.isSafeInteger(claims.iat) || !Number.isSafeInteger(claims.exp) || claims.iat > now || claims.exp <= now || claims.exp - claims.iat !== 900) throw new Error();
       return claims;
     } catch { throw new UnauthorizedException(); }

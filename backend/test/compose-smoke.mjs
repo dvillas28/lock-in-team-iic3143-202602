@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { mkdtemp, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, readdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { JwtService } from "@nestjs/jwt";
@@ -39,7 +39,9 @@ try {
  const version=docker("exec","-T","postgres","psql","-U",env.POSTGRES_USER,"-d",env.POSTGRES_DB,"-Atc","SHOW server_version_num");
  assert.equal(Math.floor(Number(version.trim())/10000),17);
  const migrate=JSON.parse(docker("exec","-T","backend","node","dist/commands/migrate.js"));
- assert.equal(migrate.created,0);assert.equal(migrate.existing,11);
+ const migrationFiles=await readdir(new URL("backend/migrations/",root));
+ assert.equal(migrate.created,0);
+ assert.equal(migrate.existing,migrationFiles.filter(name=>name.endsWith(".sql")).length);
  const seed=()=>JSON.parse(docker("exec","-T","backend","node","dist/seeds/demo.js"));
  assert.deepEqual(seed().created,{institutions:2,users:5,memberships:6});
  const fingerprint=()=>docker("exec","-T","postgres","psql","-U",env.POSTGRES_USER,"-d",env.POSTGRES_DB,"-Atc",

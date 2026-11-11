@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: AcademiX API
-  version: 0.2.0
+  version: 0.3.0
   description: >-
     API de AcademiX. Obtén un token en login y úsalo como Bearer.
     Elige tu institución con GET /api/v1/institutions.
@@ -32,12 +32,16 @@ tags:
   description: Material markdown y archivos académicos publicados.
 - name: Quizzes
   description: Autoría, consulta y publicación de quizzes autocorregidos.
+- name: Assignments
+  description: Autoría, visibilidad y consulta de tareas del curso.
 - name: Attempts
   description: Intentos, respuestas, envío y cancelación de quizzes.
 - name: Gradebook
   description: Ponderaciones, notas, publicación y promedios derivados.
 - name: Audit
   description: Consulta inmutable del historial académico sensible.
+- name: Accounts
+  description: Perfil global propio, invitaciones institucionales e importaciones efímeras.
 paths:
   /api/v1/auth/login:
     $ref: ./paths/auth.yaml#/~1api~1v1~1auth~1login
@@ -73,6 +77,26 @@ paths:
     $ref: ./paths/sections.yaml#/~1api~1v1~1institution~1{institutionSlug}~1modules~1{moduleId}~1publish
   /api/v1/institution/{institutionSlug}/modules/{moduleId}/unpublish:
     $ref: ./paths/sections.yaml#/~1api~1v1~1institution~1{institutionSlug}~1modules~1{moduleId}~1unpublish
+  /api/v1/institution/{institutionSlug}/modules/{moduleId}/resources:
+    $ref: './paths/academic-resources.yaml#/~1api~1v1~1institution~1{institutionSlug}~1modules~1{moduleId}~1resources'
+  /api/v1/institution/{institutionSlug}/modules/{moduleId}/resources/order:
+    $ref: './paths/academic-resources.yaml#/~1api~1v1~1institution~1{institutionSlug}~1modules~1{moduleId}~1resources~1order'
+  /api/v1/institution/{institutionSlug}/modules/{moduleId}/resources/quizzes:
+    $ref: './paths/academic-resources.yaml#/~1api~1v1~1institution~1{institutionSlug}~1modules~1{moduleId}~1resources~1quizzes'
+  /api/v1/institution/{institutionSlug}/modules/{moduleId}/resources/quizzes/{resourceId}:
+    $ref: './paths/academic-resources.yaml#/~1api~1v1~1institution~1{institutionSlug}~1modules~1{moduleId}~1resources~1quizzes~1{resourceId}'
+  /api/v1/institution/{institutionSlug}/modules/{moduleId}/files:
+    $ref: './paths/academic-file-admin.yaml#/~1api~1v1~1institution~1{institutionSlug}~1modules~1{moduleId}~1files'
+  /api/v1/institution/{institutionSlug}/materials/{materialId}/file:
+    $ref: './paths/academic-file-admin.yaml#/~1api~1v1~1institution~1{institutionSlug}~1materials~1{materialId}~1file'
+  /api/v1/institution/{institutionSlug}/materials/{materialId}/file/publish:
+    $ref: './paths/academic-file-content.yaml#/~1api~1v1~1institution~1{institutionSlug}~1materials~1{materialId}~1file~1publish'
+  /api/v1/institution/{institutionSlug}/materials/{materialId}/file/unpublish:
+    $ref: './paths/academic-file-content.yaml#/~1api~1v1~1institution~1{institutionSlug}~1materials~1{materialId}~1file~1unpublish'
+  /api/v1/institution/{institutionSlug}/materials/{materialId}/file/preview:
+    $ref: './paths/academic-file-content.yaml#/~1api~1v1~1institution~1{institutionSlug}~1materials~1{materialId}~1file~1preview'
+  /api/v1/institution/{institutionSlug}/materials/{materialId}/file/download:
+    $ref: './paths/academic-file-content.yaml#/~1api~1v1~1institution~1{institutionSlug}~1materials~1{materialId}~1file~1download'
   /api/v1/institution/{institutionSlug}/modules/{moduleId}/materials:
     $ref: ./paths/materials.yaml#/~1api~1v1~1institution~1{institutionSlug}~1modules~1{moduleId}~1materials
   /api/v1/institution/{institutionSlug}/materials/{materialId}:
@@ -111,6 +135,10 @@ paths:
     $ref: ./paths/gradebook.yaml#/~1api~1v1~1institution~1{institutionSlug}~1courses~1{courseId}~1gradebook~1weights
   /api/v1/institution/{institutionSlug}/courses/{courseId}/gradebook:
     $ref: ./paths/gradebook.yaml#/~1api~1v1~1institution~1{institutionSlug}~1courses~1{courseId}~1gradebook
+  /api/v1/institution/{institutionSlug}/courses/{courseId}/gradebook/grades/{gradeId}:
+    $ref: ./paths/gradebook-edit.yaml#/~1api~1v1~1institution~1{institutionSlug}~1courses~1{courseId}~1gradebook~1grades~1{gradeId}
+  /api/v1/institution/{institutionSlug}/courses/{courseId}/gradebook/groups:
+    $ref: ./paths/gradebook-edit.yaml#/~1api~1v1~1institution~1{institutionSlug}~1courses~1{courseId}~1gradebook~1groups
   /api/v1/institution/{institutionSlug}/courses/{courseId}/gradebook/publications:
     $ref: ./paths/gradebook.yaml#/~1api~1v1~1institution~1{institutionSlug}~1courses~1{courseId}~1gradebook~1publications
   /api/v1/institution/{institutionSlug}/courses/{courseId}/my-grades:
@@ -121,6 +149,48 @@ paths:
     $ref: ./paths/platform.yaml#/~1api~1v1~1institution~1{institutionSlug}~1memberships
   /api/v1/institution/{institutionSlug}/memberships/{membershipId}/course-admin:
     $ref: ./paths/platform.yaml#/~1api~1v1~1institution~1{institutionSlug}~1memberships~1{membershipId}~1course-admin
+  /api/v1/me:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1me
+  /api/v1/me/password:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1me~1password
+  /api/v1/me/avatar:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1me~1avatar
+  /api/v1/institution/{institutionSlug}/invitations:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1institution~1{institutionSlug}~1invitations
+  /api/v1/institution/{institutionSlug}/invitations/{invitationId}/send:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1institution~1{institutionSlug}~1invitations~1{invitationId}~1send
+  /api/v1/institution/{institutionSlug}/invitations/{invitationId}/resend:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1institution~1{institutionSlug}~1invitations~1{invitationId}~1resend
+  /api/v1/institution/{institutionSlug}/invitations/{invitationId}/revoke:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1institution~1{institutionSlug}~1invitations~1{invitationId}~1revoke
+  /api/v1/auth/invitations/activate:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1auth~1invitations~1activate
+  /api/v1/me/invitations/accept:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1me~1invitations~1accept
+  /api/v1/institution/{institutionSlug}/user-imports/preview:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1institution~1{institutionSlug}~1user-imports~1preview
+  /api/v1/institution/{institutionSlug}/user-imports/{importId}:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1institution~1{institutionSlug}~1user-imports~1{importId}
+  /api/v1/institution/{institutionSlug}/user-imports/{importId}/confirm:
+    $ref: ./paths/accounts.yaml#/~1api~1v1~1institution~1{institutionSlug}~1user-imports~1{importId}~1confirm
+  /api/v1/institution/{institutionSlug}/courses/{courseId}/assignments:
+    $ref: ./paths/assignments.yaml#/~1api~1v1~1institution~1{institutionSlug}~1courses~1{courseId}~1assignments
+  /api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}:
+    $ref: ./paths/assignments.yaml#/~1api~1v1~1institution~1{institutionSlug}~1courses~1{courseId}~1assignments~1{assignmentId}
+  /api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}/visibility:
+    $ref: ./paths/assignments-actions.yaml#/~1api~1v1~1institution~1{institutionSlug}~1courses~1{courseId}~1assignments~1{assignmentId}~1visibility
+  /api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}/my-submissions:
+    $ref: ./paths/submissions.yaml#/~1api~1v1~1institution~1{institutionSlug}~1courses~1{courseId}~1assignments~1{assignmentId}~1my-submissions
+  /api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}/submissions:
+    $ref: ./paths/submissions.yaml#/~1api~1v1~1institution~1{institutionSlug}~1courses~1{courseId}~1assignments~1{assignmentId}~1submissions
+  /api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}/submission-review:
+    $ref: ./paths/submissions.yaml#/~1api~1v1~1institution~1{institutionSlug}~1courses~1{courseId}~1assignments~1{assignmentId}~1submission-review
+  /api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}/submissions/{attemptId}/grade:
+    $ref: ./paths/submissions.yaml#/~1api~1v1~1institution~1{institutionSlug}~1courses~1{courseId}~1assignments~1{assignmentId}~1submissions~1{attemptId}~1grade
+  /api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}/submission-files/{fileId}:
+    $ref: ./paths/submissions.yaml#/~1api~1v1~1institution~1{institutionSlug}~1courses~1{courseId}~1assignments~1{assignmentId}~1submission-files~1{fileId}
+  /api/v1/institution/{institutionSlug}/courses/{courseId}/evaluation-groups:
+    $ref: ./paths/assignments-actions.yaml#/~1api~1v1~1institution~1{institutionSlug}~1courses~1{courseId}~1evaluation-groups
 components:
   securitySchemes:
     bearerAuth:

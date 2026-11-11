@@ -60,7 +60,9 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 
 <a id="e2e-content-008"></a>
 
-## E2E-CONTENT-008 — Crear editar y leer Markdown persistido
+## E2E-CONTENT-008 — Crear, publicar y consultar recursos del módulo
+
+- La variante `academic-files` cubre carga y publicación docente, previsualización de PDF e imágenes y descarga por estudiante y ayudante. [Prueba](../../../e2e/specs/academic-files.spec.ts).
 
 - Módulo / flujo: CONTENT; [FL-CONTENT-02](../audit/FLOWS.md#fl-content-02).
 - Requisito: CU-05/06; RF14/16/25/26; RNF1/9; [fuente normativa](../../deliveries/2/03-use-cases-and-requirements.md).

@@ -27,6 +27,10 @@ export async function updateMaterial(client: ApiClient, slug: string, materialId
   return materialDto(result.data, moduleId, materialId);
 }
 
+export async function deleteMaterial(client: ApiClient, slug: string, materialId: string, moduleId: string) {
+  await client.DELETE("/api/v1/institution/{institutionSlug}/materials/{materialId}", { params: { path: { ...path(slug, { materialId, moduleId }), materialId } } });
+}
+
 export async function setMaterialPublication(client: ApiClient, slug: string, materialId: string, moduleId: string, published: boolean) {
   const params = { path: { ...path(slug, { materialId, moduleId }), materialId } };
   const result = published

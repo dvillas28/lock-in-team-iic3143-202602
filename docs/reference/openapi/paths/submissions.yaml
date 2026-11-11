@@ -1,0 +1,148 @@
+/api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}/my-submissions:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/CourseId'
+    - {name: assignmentId, in: path, required: true, schema: {type: string, format: uuid}}
+  get:
+    tags: [Assignments]
+    operationId: getMyAssignmentSubmissions
+    summary: Consultar intentos propios y nota publicada
+    x-permissions: Estudiante con matrícula activa en el alcance de la tarea publicada. Solo consulta sus propios intentos y su nota publicada.
+    responses:
+      '200':
+        description: Consultar intentos propios y nota publicada.
+        content:
+          application/json:
+            schema: {$ref: '../components/schemas/submissions.yaml#/MyAssignmentSubmissions'}
+      '400': {$ref: '../components/responses.yaml#/BadRequest'}
+      '401': {$ref: '../components/responses.yaml#/Unauthorized'}
+      '403': {$ref: '../components/responses.yaml#/Forbidden'}
+      '404': {$ref: '../components/responses.yaml#/NotFound'}
+      '500': {$ref: '../components/responses.yaml#/InternalError'}
+      '503': {$ref: '../components/responses.yaml#/ServiceUnavailable'}
+  post:
+    tags: [Assignments]
+    operationId: submitAssignment
+    summary: Entregar un intento inmutable
+    x-permissions: Estudiante con matrícula activa en la sección elegida y dentro del alcance de la tarea. Un envío nuevo requiere que la tarea esté publicada, abierta y tenga intentos disponibles.
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema: {$ref: '../components/schemas/submissions.yaml#/AssignmentSubmissionInput'}
+    responses:
+      '201':
+        description: Entregar un intento inmutable.
+        content:
+          application/json:
+            schema: {$ref: '../components/schemas/submissions.yaml#/AssignmentSubmission'}
+      '400': {$ref: '../components/responses.yaml#/BadRequest'}
+      '401': {$ref: '../components/responses.yaml#/Unauthorized'}
+      '403': {$ref: '../components/responses.yaml#/Forbidden'}
+      '404': {$ref: '../components/responses.yaml#/NotFound'}
+      '409': {$ref: '../components/responses.yaml#/Conflict'}
+      '413': {$ref: '../components/responses.yaml#/PayloadTooLarge'}
+      '415': {$ref: '../components/responses.yaml#/UnsupportedMediaType'}
+      '422': {$ref: '../components/responses.yaml#/UnprocessableEntity'}
+      '500': {$ref: '../components/responses.yaml#/InternalError'}
+      '503': {$ref: '../components/responses.yaml#/ServiceUnavailable'}
+/api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}/submissions:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/CourseId'
+    - {name: assignmentId, in: path, required: true, schema: {type: string, format: uuid}}
+  get:
+    tags: [Assignments]
+    operationId: getAssignmentRoster
+    summary: Consultar estudiantes y estados de entrega
+    x-permissions: Docente activo limitado a sus secciones. El propietario con administración vigente y docencia activa tiene alcance de curso.
+    responses:
+      '200':
+        description: Consultar estudiantes y estados de entrega.
+        content:
+          application/json:
+            schema: {$ref: '../components/schemas/submissions.yaml#/AssignmentRoster'}
+      '400': {$ref: '../components/responses.yaml#/BadRequest'}
+      '401': {$ref: '../components/responses.yaml#/Unauthorized'}
+      '403': {$ref: '../components/responses.yaml#/Forbidden'}
+      '404': {$ref: '../components/responses.yaml#/NotFound'}
+      '500': {$ref: '../components/responses.yaml#/InternalError'}
+      '503': {$ref: '../components/responses.yaml#/ServiceUnavailable'}
+/api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}/submission-review:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/CourseId'
+    - {name: assignmentId, in: path, required: true, schema: {type: string, format: uuid}}
+  get:
+    tags: [Assignments]
+    operationId: reviewAssignmentSubmission
+    summary: Revisar intentos de un estudiante en su sección
+    x-permissions: Docente activo en la sección histórica del intento o propietario con administración vigente y docencia activa en el curso. Se excluye la revisión de entregas propias.
+    parameters:
+      - {name: sectionId, in: query, required: true, schema: {type: string, format: uuid}}
+      - {name: studentId, in: query, required: true, schema: {type: string, format: uuid}}
+    responses:
+      '200':
+        description: Revisar intentos de un estudiante en su sección.
+        content:
+          application/json:
+            schema: {$ref: '../components/schemas/submissions.yaml#/AssignmentReview'}
+      '400': {$ref: '../components/responses.yaml#/BadRequest'}
+      '401': {$ref: '../components/responses.yaml#/Unauthorized'}
+      '403': {$ref: '../components/responses.yaml#/Forbidden'}
+      '404': {$ref: '../components/responses.yaml#/NotFound'}
+      '500': {$ref: '../components/responses.yaml#/InternalError'}
+      '503': {$ref: '../components/responses.yaml#/ServiceUnavailable'}
+/api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}/submissions/{attemptId}/grade:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/CourseId'
+    - {name: assignmentId, in: path, required: true, schema: {type: string, format: uuid}}
+    - {name: attemptId, in: path, required: true, schema: {type: string, format: uuid}}
+  put:
+    tags: [Assignments]
+    operationId: saveAssignmentGradeDraft
+    summary: Guardar borrador sobre un intento concreto
+    x-permissions: Docente activo en la sección histórica del intento o propietario con administración vigente y docencia activa en el curso. Se excluye la calificación propia y se exige una versión vigente del borrador.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: {$ref: '../components/schemas/submissions.yaml#/AssignmentDraftInput'}
+    responses:
+      '200':
+        description: Guardar borrador sobre un intento concreto.
+        content:
+          application/json:
+            schema: {$ref: '../components/schemas/submissions.yaml#/AssignmentSubmissionGrade'}
+      '400': {$ref: '../components/responses.yaml#/BadRequest'}
+      '401': {$ref: '../components/responses.yaml#/Unauthorized'}
+      '403': {$ref: '../components/responses.yaml#/Forbidden'}
+      '404': {$ref: '../components/responses.yaml#/NotFound'}
+      '409': {$ref: '../components/responses.yaml#/Conflict'}
+      '422': {$ref: '../components/responses.yaml#/UnprocessableEntity'}
+      '500': {$ref: '../components/responses.yaml#/InternalError'}
+      '503': {$ref: '../components/responses.yaml#/ServiceUnavailable'}
+/api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}/submission-files/{fileId}:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+    - $ref: '../components/parameters.yaml#/CourseId'
+    - {name: assignmentId, in: path, required: true, schema: {type: string, format: uuid}}
+    - {name: fileId, in: path, required: true, schema: {type: string, format: uuid}}
+  get:
+    tags: [Assignments]
+    operationId: downloadAssignmentFile
+    summary: Descargar un archivo privado de una entrega
+    x-permissions: Estudiante con matrícula activa en el alcance de la tarea y archivo propio, docente de la sección histórica del intento o propietario con administración vigente y docencia activa en el curso.
+    responses:
+      '200':
+        description: Descargar un archivo privado de una entrega.
+        content:
+          application/octet-stream:
+            schema: {type: string, format: binary}
+      '400': {$ref: '../components/responses.yaml#/BadRequest'}
+      '401': {$ref: '../components/responses.yaml#/Unauthorized'}
+      '403': {$ref: '../components/responses.yaml#/Forbidden'}
+      '404': {$ref: '../components/responses.yaml#/NotFound'}
+      '500': {$ref: '../components/responses.yaml#/InternalError'}
+      '503': {$ref: '../components/responses.yaml#/ServiceUnavailable'}

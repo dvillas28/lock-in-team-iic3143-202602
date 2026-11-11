@@ -7,6 +7,7 @@ import type {SafeQuiz} from "../quizzes/validation.ts";
 import {ApiHttpError} from "../api/errors.ts";
 import {startAttempt,getAttempt,saveAnswers,submitAttempt,cancelAttempt} from "../api/attempts.ts";
 import {attemptCapabilities} from "./capabilities.ts";
+import {quizClosed} from "./progress.ts";
 import {answersInput,sameAnswers,receiptFromAttempt,type Answer,type Attempt,type Receipt} from "./validation.ts";
 type Kind="start"|"save"|"submit"|"cancel";
 export type OperationState={attempt?:Attempt;draft:Answer[];confirmed:Answer[];busy:boolean;phase:"pristine"|"dirty"|"saving"|"saved"|"working"|"error"|"uncertain";pending?:Kind;message:string;receipt?:Receipt;cancelConfirmed?:boolean;knownId?:string};
@@ -47,13 +48,15 @@ export class AttemptOperations {
  private adopt(a:Attempt){this.update({attempt:a,draft:a.answers.map(x=>({...x})),confirmed:a.answers.map(x=>({...x})),receipt:receiptFromAttempt(a)});}
  private read(id:string){return this.session.request(c=>getAttempt(c,this.slug,id,{...(this.caps()?.student||!this.state.attempt?{studentId:this.user.id}:{staff:true}),quizId:this.quiz.id,sectionId:this.state.attempt?.sectionId??this.startTarget}),this.current);}
  private async run(kind:Kind,operation:()=>Promise<void>){
-  this.update({busy:true,phase:kind==="save"?"saving":"working",message:kind==="save"?"Guardando respuestas…":"Procesando operación…"});
+  this.update({busy:true,phase:kind==="save"?"saving":"working",message:kind==="save"?"Guardando…":kind==="submit"?"Enviando…":"Procesando…"});
   try{await operation();}
   catch(error){
    if(!this.current()){this.dispose();return;}
    const rejected=error instanceof FieldError || error instanceof ApiHttpError && error.status>=400 && error.status<500;
-   const pending=!rejected||kind==="submit"||kind==="cancel"?kind:undefined;
-   const message=error instanceof FieldError?error.message:error instanceof ApiHttpError && error.status===413?"El JSON máximo es 4096 bytes UTF-8.":error instanceof ApiHttpError && error.status===409?"Conflicto: no se confirmó la operación. Consulta el estado; se conserva la operación original.":rejected?"Operación rechazada. Revisa los datos y permisos vigentes.":"Resultado incierto: la operación podría haberse aplicado. No cierres esta página: perderás el estado de recuperación en memoria.";
+   // A 409 after the closing time is the server enforcing the window: nothing to replay.
+   const closed=error instanceof ApiHttpError && error.status===409 && kind!=="cancel" && quizClosed(this.quiz.closesAt,Date.now());
+   const pending=closed?undefined:!rejected||kind==="submit"||kind==="cancel"?kind:undefined;
+   const message=closed?"El plazo del quiz terminó. Ya no se pueden guardar ni enviar respuestas.":error instanceof FieldError?error.message:error instanceof ApiHttpError && error.status===413?"Las respuestas superan el tamaño permitido.":error instanceof ApiHttpError && error.status===409?"No se pudo completar porque el intento cambió. Comprueba su estado antes de continuar.":rejected?"No se pudo completar la operación. Revisa el estado del intento.":"No pudimos confirmar la operación por un problema de conexión. Mantén esta página abierta y comprueba el estado.";
    this.update({phase:rejected?"error":"uncertain",pending,message});
   }finally{this.update({busy:false});}
  }
@@ -87,7 +90,7 @@ export class AttemptOperations {
   await this.run("save",async()=>{
    const snapshot=this.snapshot(emptyConfirmed);
    const saved=await this.session.request(c=>saveAnswers(c,this.slug,this.state.attempt!,this.quiz,snapshot),this.current);
-   this.adopt(saved);this.update({phase:"saved",message:"Respuestas guardadas y confirmadas."});
+   this.adopt(saved);this.update({phase:"saved",message:"Respuestas guardadas."});
   });
  }
  async submit(emptyConfirmed=false){

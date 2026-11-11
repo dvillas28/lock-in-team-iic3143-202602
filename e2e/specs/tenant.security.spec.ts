@@ -24,8 +24,8 @@ test('E2E-TENANT-002 same identity distinct institutional roles / multi @smoke',
  expect(a.id).toBe(b.id);expect(a.sectionMemberships.every((m:any)=>m.role==='student')).toBe(true);expect(b.sectionMemberships.every((m:any)=>m.role==='teacher')).toBe(true);
  status(await (await e.api('MULTI')).get(`quizzes/${e.data.quizzes.Q1}/authoring`),403);
  status(await (await e.api('MULTI','utfsm')).get(`quizzes/${e.data.quizzes.FQ1}/authoring`),200);
- await go(uc,e.data.courses.C1,'/modules');await expect(uc.locator('summary').filter({hasText:/^Crear módulo$/})).toHaveCount(0);
- await go(foreign,e.data.courses.F1,'/modules');await expect(foreign.locator('summary').filter({hasText:/^Crear módulo$/})).toBeVisible();
+ await go(uc,e.data.courses.C1,'/modules');await expect(uc.getByRole('button',{name:'Nuevo módulo',exact:true})).toHaveCount(0);
+ await go(foreign,e.data.courses.F1,'/modules');await expect(foreign.getByRole('button',{name:'Nuevo módulo',exact:true})).toBeVisible();
  const before=await securitySnapshot(e);status(await (await e.api('MULTI','utfsm')).patch(`materials/${e.data.materials.FR1}`,{title:'Foreign teaching edit'}),200);
  const after=await securitySnapshot(e);for(const table of Object.keys(before)){const own=(rows:unknown)=> (rows as any[]).filter(r=>r.institution_id===e.data.tenants.uc || r.id===e.data.tenants.uc);expect(own(after[table])).toEqual(own(before[table]));}
  expect(status(await (await e.api('MULTI','utfsm')).get(`materials/${e.data.materials.FR1}`),200).body.title).toBe('Foreign teaching edit');

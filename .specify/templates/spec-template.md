@@ -21,7 +21,7 @@
 
   Assign priorities (P1, P2, P3, etc.) to each story, where P1 is the most critical.
   For LMS work, call out tenant, role, course/section and grade visibility assumptions.
-  If onboarding/delegation applies, distinguish tenant superadmin, is_admin and ownership.
+  Distinguish tenant superadmin, is_admin, ownership, scoped invitations and own global profile.
   Think of each story as a standalone slice of functionality that can be:
   - Developed independently
   - Tested independently
@@ -99,7 +99,7 @@
 - **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]
 - **FR-006**: System MUST preserve tenant isolation from a validated institutional route and membership through persistence, even when a query omits its tenant predicate.
-- **FR-007**: System MUST define which roles can view or mutate the affected data.
+- **FR-007**: System MUST define own-global vs. tenant-owned access; invitations/imports require active is_admin OR is_super_admin, while only superadmin delegates is_admin and neither grants academic access.
 
 *Example of marking unclear requirements:*
 
@@ -142,5 +142,5 @@
 
 - CU / RF / RNF: [source IDs and links]
 - Backlog: [task IDs / issue links; preserve assigned owners]
-- Dependencies: [prerequisite specs]
+- Dependencies: [prerequisite specs; specify ephemeral CSV/private-photo scope and sender/cleanup decision status and external configuration gates when applicable]
 - Exclusions: [explicit boundaries and deferred requirements]

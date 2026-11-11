@@ -17,8 +17,8 @@ test("migration repeat, constraints, tenant identity and restricted deletion", a
     try { summary = JSON.parse(repeat.output); }
     catch { throw new Error("invalid migration summary"); }
     assert.equal(summary.created, 0);
-    assert.equal(summary.existing, 11);
-    assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount, 11);
+    assert.equal(summary.existing, 22);
+    assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount, 22);
     const schema = await pool.query(`SELECT c.relname AS table_name,a.attname AS column_name,
       format_type(a.atttypid,a.atttypmod) AS type,a.attnotnull AS required,
       pg_get_expr(d.adbin,d.adrelid) AS default_value
@@ -28,16 +28,16 @@ test("migration repeat, constraints, tenant identity and restricted deletion", a
       WHERE n.nspname='public' AND c.relname IN ('institutions','users','institution_memberships')`);
     const expected = {
       institutions: {id:"uuid",slug:"character varying(63)",name:"character varying(200)",active:"boolean",created_at:"timestamp(6) with time zone",updated_at:"timestamp(6) with time zone"},
-      users: {id:"uuid",email:"character varying(254)",password_hash:"character varying(255)",name:"character varying(200)",active:"boolean",created_at:"timestamp(6) with time zone",updated_at:"timestamp(6) with time zone"},
+      users: {id:"uuid",email:"character varying(254)",password_hash:"character varying(255)",name:"character varying(200)",active:"boolean",created_at:"timestamp(6) with time zone",updated_at:"timestamp(6) with time zone",bio:"character varying(500)",avatar_key:"character varying(512)",credential_version:"integer"},
       institution_memberships: {is_admin:"boolean",is_super_admin:"boolean",id:"uuid",institution_id:"uuid",user_id:"uuid",active:"boolean",created_at:"timestamp(6) with time zone",updated_at:"timestamp(6) with time zone"},
     };
-    assert.equal(schema.rowCount,21);
+    assert.equal(schema.rowCount,24);
     for (const [table,columns] of Object.entries(expected)) {
       for (const [column,type] of Object.entries(columns)) {
         const actual=schema.rows.find(row=>row.table_name===table && row.column_name===column);
         assert.equal(actual?.type,type,`${table}.${column} type`);
-        assert.equal(actual.required,true,`${table}.${column} NOT NULL`);
-        const defaultValue=column.startsWith("is_")?"false":column==="active"?"true":["created_at","updated_at"].includes(column)?"now()":null;
+        assert.equal(actual.required,!(["bio","avatar_key"].includes(column)),`${table}.${column} nullability`);
+        const defaultValue=column==="credential_version"?"0":column.startsWith("is_")?"false":column==="active"?"true":["created_at","updated_at"].includes(column)?"now()":null;
         assert.equal(actual.default_value,defaultValue,`${table}.${column} default`);
       }
     }
@@ -61,6 +61,10 @@ test("migration repeat, constraints, tenant identity and restricted deletion", a
       ["UPDATE users SET email='   ' WHERE id=$1", [ids[2]]],
       ["UPDATE users SET password_hash='plaintext' WHERE id=$1", [ids[2]]],
       ["UPDATE users SET active=NULL WHERE id=$1", [ids[2]]],
+      ["UPDATE users SET bio=$1 WHERE id=$2", ["x".repeat(501),ids[2]]],
+      ["UPDATE users SET avatar_key='https://external.example/avatar' WHERE id=$1", [ids[2]]],
+      ["UPDATE users SET credential_version=-1 WHERE id=$1", [ids[2]]],
+      ["UPDATE users SET credential_version=NULL WHERE id=$1", [ids[2]]],
       ["UPDATE institution_memberships SET institution_id=NULL WHERE id=$1", [ids[4]]],
       ["DELETE FROM institutions WHERE id=$1", [ids[0]]],
       ["DELETE FROM users WHERE id=$1", [ids[2]]],
@@ -73,7 +77,7 @@ test("migration repeat, constraints, tenant identity and restricted deletion", a
     const indexes = (await pool.query("SELECT indexdef FROM pg_indexes WHERE schemaname='public' AND tablename='institution_memberships'")).rows;
     assert.ok(indexes.some(row=>row.indexdef.endsWith(" USING btree (user_id, active, institution_id)")));
     const tables = await pool.query("SELECT tablename FROM pg_tables WHERE schemaname='public'");
-    assert.deepEqual(tables.rows.map(row=>row.tablename).sort(),["audit_events","course_modules","courses","demo_data_runs","enrollments","grade_items","grade_publications","grades","institution_memberships","institutions","materials","pgmigrations","quiz_attempts","quizzes","sections","users"]);
+    assert.deepEqual(tables.rows.map(row=>row.tablename).sort(),["account_invitations","account_security_events","assignment_attempt_files","assignment_attempts","assignments","audit_events","course_modules","courses","demo_data_runs","enrollments","grade_groups","grade_items","grade_publications","grade_revisions","grades","institution_memberships","institutions","materials","pgmigrations","quiz_attempts","quizzes","sections","user_import_rows","user_imports","users"]);
     const columns = await pool.query("SELECT column_name FROM information_schema.columns WHERE table_name='institution_memberships'");
     assert.equal(columns.rowCount, 8);
   } finally { await pool.end(); }
@@ -97,7 +101,7 @@ test("failed pending batch rolls back DDL/history and migrator refuses competing
       else process.env.MIGRATION_DATABASE_URL = previous;
     }
     assert.equal((await pool.query("SELECT to_regclass('public.pending_fixture') AS t")).rows[0].t, null);
-    assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount, 11);
+    assert.equal((await pool.query("SELECT * FROM pgmigrations")).rowCount, 22);
     const client = await pool.connect();
     try {
       await client.query("SELECT pg_advisory_lock(7241865325823964)");

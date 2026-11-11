@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { quizInput, questionsInput, jsonBody, timestamp } from "../src/lib/quizzes/validation.ts";
+import { quizInput, quizText, validateQuizDraftDate, validateQuizSchedule, questionsInput, jsonBody, timestamp } from "../src/lib/quizzes/validation.ts";
 import { configuration, localDate } from "../src/components/quizzes/quiz-configuration.tsx";
 import { draft, question, id } from "./fixtures/quizzes.ts";
 test("validation boundaries and JSON UTF8 bytes include escapes",()=>{
@@ -34,4 +34,37 @@ test("unchanged local datetime preserves microseconds and partial patch does not
  assert.equal(configuration(data,original).opensAt,original.opensAt);
  data.set('opensAt','2026-10-23T12:30');assert.match(configuration(data,original).opensAt!,/Z$/);
  data.set('opensAt','bad');assert.throws(()=>configuration(data,original));
+});
+
+
+test("quiz text reports the actual cause and keeps Unicode character limits", () => {
+  assert.throws(() => quizText("  ", "title"), /Escribe el título del quiz/);
+  assert.throws(() => quizText(" ", "questions.0.prompt"), /Escribe el enunciado/);
+  assert.throws(() => quizText("", "questions.0.alternatives.1.text"), /Escribe esta alternativa/);
+  assert.throws(() => quizText("😀".repeat(201), "title"), /hasta 200 caracteres/);
+  assert.throws(() => quizText("texto\0", "questions.0.prompt"), /carácter no válido/);
+  assert.equal(quizText(" 😀 ", "title"), "😀");
+  assert.equal(quizText("", "instructions"), "");
+});
+
+test("closing must be strictly future while opening may already have passed", () => {
+  const now = Date.parse("2030-05-15T15:30:00.000Z");
+  for (const value of ["2020-01-01T00:00:00Z", "2030-05-15T11:29:59.999999-04:00", "2030-05-15T11:30:00-04:00"])
+    assert.doesNotThrow(() => validateQuizDraftDate("opensAt", value, undefined, now));
+  for (const field of ["closesAt"] as const) {
+    for (const value of ["2030-05-15T11:29:59.999999-04:00", "2030-05-15T11:30:00-04:00"]) {
+      assert.throws(() => validateQuizDraftDate(field, value, undefined, now), /posterior a la fecha y hora actuales/);
+    }
+    const past = "2030-05-15T15:29:59.123456Z";
+    assert.doesNotThrow(() => validateQuizDraftDate(field, "2030-05-15T11:29:59.123456-04:00", past, now));
+    assert.throws(() => validateQuizDraftDate(field, "2030-05-15T15:29:59.123455Z", past, now));
+    assert.doesNotThrow(() => validateQuizDraftDate(field, "2030-05-15T11:30:00.000001-04:00", past, now));
+    assert.doesNotThrow(() => validateQuizDraftDate(field, "2030-05-15T11:30:01-04:00", past, now));
+    assert.doesNotThrow(() => validateQuizDraftDate(field, null, past, now));
+  }
+  const opens = "2030-05-15T15:30:01.123456Z";
+  assert.throws(() => validateQuizSchedule(opens, "2030-05-15T11:30:01.123456-04:00"), /posterior a la apertura/);
+  assert.throws(() => validateQuizSchedule(opens, "2030-05-15T15:30:01.123455Z"), /posterior a la apertura/);
+  assert.doesNotThrow(() => validateQuizSchedule(opens, "2030-05-15T15:30:01.123457Z"));
+  assert.doesNotThrow(() => validateQuizSchedule(null, opens));
 });

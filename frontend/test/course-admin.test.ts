@@ -23,13 +23,13 @@ test("lost course response consults state, retains uncertainty and never repeats
 });
 test("course and section controls require confirmed owner and isAdmin",async()=>{
  for(const profile of ['owner','ownerTeacher','foreign','teacher','super','student']){
- const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>Response.json(r.url.endsWith('/sections')?{items:[section]}:course),profile);try{
+ const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>Response.json(r.url.endsWith('/sections')?{items:[section]}:course),profile);try{
  assert.equal(!!ui.doc.querySelector('form[aria-label="Configurar curso"]'),profile==='owner'||profile==='ownerTeacher');
  assert.equal(!!ui.doc.querySelector('form[aria-label="Crear sección"]'),profile==='owner'||profile==='ownerTeacher');
  }finally{await ui.close();}}
 });
 for(const mode of ['match','failed','absent']as const)test(`lost section response reconciles ${mode} without claiming authorship or retry`,async()=>{
- let posts=0;const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),r=>{if(r.method==='POST'){posts++;throw new Error('lost');}if(r.url.endsWith('/sections'))return posts&&mode==='failed'?Response.json({},{status:503}):Response.json({items:mode==='absent'&&posts?[]:[section]});return Response.json(course);});try{
+ let posts=0;const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>{if(r.method==='POST'){posts++;throw new Error('lost');}if(r.url.endsWith('/sections'))return posts&&mode==='failed'?Response.json({},{status:503}):Response.json({items:mode==='absent'&&posts?[]:[section]});return Response.json(course);});try{
  await ui.submit('form[aria-label="Crear sección"]',{code:'1',capacity:''});
  assert.match(ui.doc.body.textContent!,/incierto/i);assert.equal(posts,1);await ui.submit('form[aria-label="Crear sección"]',{code:'1',capacity:''});assert.equal(posts,1);
  assert.ok(ui.requests.filter(r=>r.url.endsWith('/sections')&&r.method==='GET').length>=2);
@@ -42,7 +42,7 @@ for(const status of [409,422,503])test(`mutation ${status} never invents success
 });
 
 test("configuration PATCH sends only changed fields and immutable ownership never leaves UI",async()=>{
- let current={...course},s={...section};const ui=await mount(h(CourseDetail,{courseId:course.id,sections:true}),async r=>{
+ let current={...course},s={...section};const ui=await mount(h(CourseDetail,{courseId:course.id}),async r=>{
   if(r.method==='PATCH'){const body=await r.clone().json();if(r.url.includes('/sections/')){s={...s,...body};return Response.json(s);}current={...current,...body};return Response.json(current);}
   return Response.json(r.url.endsWith('/sections')?{items:[s]}:r.url.includes('/sections/')?s:current);
  });try{

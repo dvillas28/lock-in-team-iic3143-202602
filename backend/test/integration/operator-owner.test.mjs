@@ -25,6 +25,9 @@ test("non-superuser owner runs predeploy with demo under FORCE RLS; runtime chec
     await pool.query(`DROP DATABASE IF EXISTS ${name} WITH (FORCE)`);
     await pool.query(`DROP ROLE IF EXISTS ${owner}`);
     await pool.query(`CREATE ROLE ${owner} LOGIN NOSUPERUSER NOBYPASSRLS CREATEROLE PASSWORD '${password}'`);
+    // The cluster role already exists from migrated(pool); emulate the creator's PG17 ADMIN-only grant.
+    await pool.query(`GRANT academix_account_writer TO ${owner} WITH ADMIN TRUE, INHERIT FALSE, SET FALSE`);
+    assert.equal((await pool.query("SELECT pg_has_role($1,'academix_account_writer','SET') AS enabled",[owner])).rows[0].enabled,false);
     await pool.query(`CREATE DATABASE ${name} OWNER ${owner}`);
     const env = { MIGRATION_DATABASE_URL: at(testUrl(), name, { name: owner, password }), DATABASE_URL: at(runtimeUrl(), name) };
     const secrets = demoSecrets();
@@ -34,7 +37,9 @@ test("non-superuser owner runs predeploy with demo under FORCE RLS; runtime chec
     admin = new pg.Pool({ connectionString: at(testUrl(), name) });
     assert.equal((await admin.query("SELECT count(*)::int AS n FROM institution_memberships")).rows[0].n, 10);
     const policies = (await admin.query("SELECT roles::text[] AS roles FROM pg_policies WHERE policyname='operator_maintenance'")).rows;
-    assert.equal(policies.length, 12);
+    assert.equal(policies.length, 21);
+    assert.equal((await admin.query("SELECT pg_has_role($1,'academix_account_writer','SET') AS enabled",[owner])).rows[0].enabled,false);
+    assert.equal((await admin.query("SELECT pg_has_role('academix_runtime','academix_account_writer','MEMBER') AS enabled")).rows[0].enabled,false);
     assert.ok(policies.every(p => JSON.stringify(p.roles) === JSON.stringify([owner])));
     await admin.query("DROP POLICY operator_maintenance ON courses");
     await admin.query("CREATE POLICY operator_maintenance ON courses TO PUBLIC USING (true) WITH CHECK (true)");

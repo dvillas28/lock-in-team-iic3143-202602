@@ -1,25 +1,25 @@
 "use client";
 import { Circle, CircleCheck } from "lucide-react";
 import type { Session } from "../../lib/auth/session.ts";
-import { setModulePublication, getCourseModule } from "../../lib/api/modules.ts";
-import { setMaterialPublication, getMaterial } from "../../lib/api/materials.ts";
-import { useMutation } from "../courses/use-mutation.ts";
+import { setModulePublication } from "../../lib/api/modules.ts";
+import { setMaterialPublication } from "../../lib/api/materials.ts";
+import { setAcademicFilePublication } from "../../lib/api/academic-files.ts";
+import { useContentMutation } from "./content-notices.tsx";
 export function PublicationToggle({session, slug, kind, id, parentId, title, published, onSaved, disabled = false}: {
-  session: Session; slug: string; kind: "module" | "material"; id: string; parentId: string; title: string; published: boolean;
+  session: Session; slug: string; kind: "module" | "material" | "file"; id: string; parentId: string; title: string; published: boolean;
   onSaved: () => Promise<boolean | undefined>; disabled?: boolean;
 }) {
-  const mutation = useMutation(session);
-  const label = kind === "module" ? "módulo" : "material";
+  const mutation = useContentMutation(session);
+  const label = kind === "module" ? "módulo" : kind === "file" ? "archivo" : "material";
   function toggle() {
     if (disabled || mutation.busy || mutation.uncertain) return;
     void mutation.run(async current => {
-      await session.request(async c => kind === "module" ? await setModulePublication(c, slug, id, parentId, !published) : await setMaterialPublication(c, slug, id, parentId, !published), current);
+      await session.request(async c => kind === "module" ? await setModulePublication(c, slug, id, parentId, !published) : kind === "file" ? await setAcademicFilePublication(c, slug, id, parentId, !published) : await setMaterialPublication(c, slug, id, parentId, !published), current);
       if (!current()) return;
       const refreshed = await onSaved();
-      const message = `${kind === "module" ? "Módulo" : "Material"} ${published ? "ocultado" : "publicado"}.`;
+      const message = `${kind === "module" ? "Módulo" : kind === "file" ? "Archivo" : "Material"} ${published ? "ocultado" : "publicado"}.`;
       return refreshed ? message : { message: `${message} No se pudo actualizar la consulta; reintenta solo la lectura.`, persistent: true };
     }, async current => {
-      await session.request(async c => kind === "module" ? await getCourseModule(c, slug, id, parentId) : await getMaterial(c, slug, id, parentId), current);
       if (!current()) return "Contexto cambiado.";
       const refreshed = await onSaved();
       if (!refreshed) return "No se pudo actualizar la consulta. Revisión manual pendiente.";
@@ -27,9 +27,11 @@ export function PublicationToggle({session, slug, kind, id, parentId, title, pub
     });
   }
   return <div className="publication-control">
-    <button type="button" className={`btn btn-ghost${published ? " is-published" : ""}`} aria-label={`${published ? "Ocultar" : "Publicar"} ${label} ${title}`} aria-pressed={published} aria-disabled={disabled || mutation.busy || !!mutation.uncertain} onClick={toggle}>
-      {published ? <CircleCheck size={18} aria-hidden="true" /> : <Circle size={18} aria-hidden="true" />}
-      {published ? "Publicado" : "Borrador"}
+    <span className={`chip ${published ? "chip-success" : ""}`}><span className="publication-state-icon" aria-hidden="true">
+      {published ? <CircleCheck size={14} /> : <Circle size={14} />}
+    </span>{published ? "Publicado" : "Borrador"}</span>
+    <button type="button" className="btn btn-ghost publication-action" aria-label={`${published ? "Ocultar" : "Publicar"} ${label} ${title}`} aria-disabled={disabled || mutation.busy || !!mutation.uncertain} onClick={toggle}>
+      {published ? "Ocultar" : "Publicar"}
     </button>
     {mutation.message && <p role={mutation.confirmed ? "status" : "alert"}>{mutation.message}</p>}
   </div>;

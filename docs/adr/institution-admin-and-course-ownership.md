@@ -2,6 +2,10 @@
 
 Fecha: 2026-10-16. Estado: aceptado e implementado; validación en docs/backend/courses-roles-validation.md.
 
+Extensión especificada el 2026-11-06, aún no implementada:
+[perfil propio e invitaciones admin/superadmin](institutional-account-lifecycle.md).
+Las exclusiones de altas en este ADR describen la base implementada, no anulan esa extensión.
+
 ## Decisión
 
 Agregar `is_admin` e `is_super_admin` boolean NOT NULL DEFAULT false a

@@ -1,4 +1,6 @@
 import { createApiClient, type ApiClient } from "../api/client.ts";
+import { getAccount } from "../api/accounts.ts";
+import type { AccountProfile } from "../accounts/validation.ts";
 import { ApiHttpError, ApiResponseError } from "../api/errors.ts";
 import { getCurrentUser, listAccessibleInstitutions } from "../api/institutions.ts";
 import { getRouteFeedback, type RouteFeedback } from "../route-feedback.ts";
@@ -10,6 +12,8 @@ export type SessionState = Readonly<{
   generation: number;
   message?: string;
   retryAt: number;
+  account?: AccountProfile;
+  accountError?: RouteFeedback;
   institutions?: ReturnType<typeof institutionList>;
   directoryError?: RouteFeedback;
   contextWarning?: RouteFeedback;
@@ -23,6 +27,8 @@ export class StaleSessionError extends Error {
 }
 
 /** One instance per mounted browser provider. Never a module singleton or server session. */
+type RequestTransport = { fetch?: (request: Request) => Promise<Response>; timeoutMs: number };
+
 export class Session {
   private state: SessionState = { status: "anonymous", generation: 0, retryAt: 0 };
   private readonly listeners = new Set<() => void>();
@@ -34,6 +40,7 @@ export class Session {
   private contextRequest = 0;
   private directoryRequest = 0;
   private contextFlight?: { slug: string; promise: Promise<void> };
+  private accountFlight?: Promise<void>;
   private readonly now: () => number;
   private readonly options: Options;
   constructor(options: Options = {}) { this.options = options; this.now = options.now ?? Date.now; }
@@ -45,7 +52,7 @@ export class Session {
   }
   logout = (message?: string) => {
     this.token = undefined; this.subject = ""; this.expiresAt = 0;
-    this.contextRequest++; this.contextFlight = undefined;
+    this.contextRequest++; this.contextFlight = undefined; this.accountFlight = undefined;
     (this.options.cancel ?? clearTimeout)(this.timer);
     this.controllers.forEach(controller => controller.abort()); this.controllers.clear();
     this.state = { status: "anonymous", generation: this.state.generation + 1, retryAt: this.state.retryAt, message };
@@ -58,7 +65,7 @@ export class Session {
     this.checkExpiry();
     if (generation !== this.state.generation) throw new StaleSessionError();
   }
-  private async perform<T>(generation: number, token: string | undefined, operation: (client: ApiClient) => Promise<T>, current: () => boolean = () => true, revalidateOnFailure = true): Promise<T> {
+  private async perform<T>(generation: number, token: string | undefined, operation: (client: ApiClient) => Promise<T>, current: () => boolean = () => true, revalidateOnFailure = true, transport?: RequestTransport): Promise<T> {
     const context = this.state.context;
     const controller = new AbortController(); this.controllers.add(controller);
     try {
@@ -68,10 +75,10 @@ export class Session {
           this.assertCurrent(generation);
           if (!current()) throw new StaleSessionError();
           const request = input instanceof Request ? input : new Request(input);
-          if (!['GET', 'HEAD'].includes(request.method) && this.state.contextWarning) {
+          if (!['GET', 'HEAD'].includes(request.method) && this.state.contextWarning && new URL(request.url).pathname.startsWith('/api/v1/institution/')) {
             throw new ApiHttpError(409, { code: 'ACCESS_REVALIDATION_REQUIRED' });
           }
-          const response = await (this.options.fetch ?? globalThis.fetch)(new Request(request, { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15_000)]) }));
+          const response = await (transport?.fetch ?? this.options.fetch ?? globalThis.fetch)(new Request(request, { signal: AbortSignal.any([request.signal, controller.signal, AbortSignal.timeout(transport?.timeoutMs ?? 15_000)]) }));
           this.assertCurrent(generation);
           if (!current()) throw new StaleSessionError();
           return response;
@@ -89,11 +96,37 @@ export class Session {
     } finally { this.controllers.delete(controller); }
   }
   /** All private consumers use this boundary; old completions/401s cannot affect a new identity. */
-  request = async <T>(operation: (client: ApiClient) => Promise<T>, current?: () => boolean): Promise<T> => {
+  request = async <T>(operation: (client: ApiClient) => Promise<T>, current?: () => boolean, transport?: RequestTransport): Promise<T> => {
     this.checkExpiry();
     if (this.state.status !== "authenticated" || !this.token) throw new StaleSessionError();
     const context = this.state.context;
-    return this.perform(this.state.generation, this.token, operation, () => context === this.state.context && (current?.() ?? true));
+    return this.perform(this.state.generation, this.token, operation, () => context === this.state.context && (current?.() ?? true), true, transport);
+  };
+  /** Global account operations survive institution refresh but never an identity change. */
+  accountRequest = async <T>(operation: (client: ApiClient) => Promise<T>, current?: () => boolean): Promise<T> => {
+    this.checkExpiry();
+    if (this.state.status !== "authenticated" || !this.token) throw new StaleSessionError();
+    return this.perform(this.state.generation, this.token, operation, current);
+  };
+  publicRequest = <T>(operation: (client: ApiClient) => Promise<T>): Promise<T> =>
+    this.perform(this.state.generation, undefined, operation);
+  rememberAccount = (account: AccountProfile) => {
+    if (this.state.status !== 'authenticated' || account.id !== this.subject) throw new ApiResponseError();
+    // Name/avatar updates are presentation changes, not a new authorization boundary.
+    const context = this.state.context;
+    if(context?.user) context.user = {...context.user,name:account.name,email:account.email};
+    this.update({account,accountError:undefined,context});
+  };
+  loadAccount = (): Promise<void> => {
+    if(this.state.status !== 'authenticated') return Promise.resolve();
+    if(this.accountFlight) return this.accountFlight;
+    const generation=this.state.generation;
+    const work=async()=>{
+      try {const account=await this.accountRequest(getAccount);if(generation===this.state.generation)this.rememberAccount(account);}
+      catch(error){if(generation===this.state.generation)this.update({account:undefined,accountError:getRouteFeedback(error)});}
+    };
+    const flight=work().finally(()=>{if(this.accountFlight===flight)this.accountFlight=undefined;});
+    this.accountFlight=flight;return flight;
   };
   login = async (email: string, password: string): Promise<boolean> => {
     if (this.state.status === "authenticating" || this.now() < this.state.retryAt) return false;
@@ -150,7 +183,8 @@ export class Session {
         if (generation !== this.state.generation || sequence !== this.contextRequest) return;
         const user = currentUser(result.data, slug, this.subject);
         // Keep object identity: mounted drafts and in-flight operations use this boundary.
-        const unchanged = previous?.user && JSON.stringify(previous.user) === JSON.stringify(user);
+        const unchanged = previous?.user && previous.user.id === user.id && JSON.stringify(previous.user.institutionMembership) === JSON.stringify(user.institutionMembership) && JSON.stringify(previous.user.sectionMemberships) === JSON.stringify(user.sectionMemberships);
+        if(unchanged && previous) previous.user=user;
         this.update({ context: unchanged ? previous : { slug, user }, contextWarning: undefined });
       } catch (error) {
         if (generation !== this.state.generation || sequence !== this.contextRequest) return;

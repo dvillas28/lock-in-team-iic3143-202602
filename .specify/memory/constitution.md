@@ -1,11 +1,12 @@
 <!--
 Sync Impact Report
-Version change: 1.4.0 -> 1.5.0 (explicit path tenant context and minimal DB enforcement).
-Core principles retained; mandatory isolation now includes a database omission barrier.
-Product Constraints: permit bounded RLS and opt-in automated demo data migrations.
-Templates synced: plan-template.md, spec-template.md, tasks-template.md.
-ADR: institution-context-and-database-isolation.md retains path routing and supersedes RLS deferral.
-Runtime implementation remains pending; no infrastructure or data changed here.
+Version change: 1.6.0 -> 1.6.1 (PATCH: clarify authorized implementation and external readiness).
+Core principles and account extension retained; no academic grants or isolation guarantees removed.
+Product Constraints clarify missing-config disabled behavior and test-only mail simulation.
+Templates synced: spec-template.md, plan-template.md, tasks-template.md, checklist-template.md.
+Feature plan/research/data-model/contracts/tasks record #233–237 and separate external evidence.
+ADR provider choices remain S3/Resend; provisioning and real smoke tests depend on Daniel.
+This amendment alone does not implement application, infrastructure or runtime grants.
 -->
 
 
@@ -69,8 +70,8 @@ shared modules and markdown material, multiple-choice quizzes, automatic grading
 explicit grade publication, gradebook and immutable academic audit.
 
 Manual submissions/correction, general institutional administration, AI, chat, calendar,
-binary upload/download, workers and advanced analytics remain outside the
-core MVP. Binary material is an optional P2 extension requiring its own spec.
+academic binary upload/download, workers and advanced analytics remain outside the
+core MVP. Academic binary material is an optional P2 extension requiring its own spec.
 Minimal RLS on the shared database is included to enforce the route-derived tenant
 boundary; it does not replace academic permissions or parameterized SQL.
 Versioned demo data migrations MAY run automatically before deployment when
@@ -81,7 +82,22 @@ included: InstitutionMembership.is_super_admin grants/revokes is_admin only insi
 its Institution. Neither flag grants access to courses owned by others. Initial
 superadmin provisioning MUST be controlled, repeat-safe and auditable, with no
 credentials stored in migration source. Superadmin assignment/recovery remains
-operational; account invitations and general user management remain excluded.
+operational; general management of another person's global account remains excluded.
+The specified account extension permits active users to edit their own global
+name/bio/photo and password, even without institutional membership. Institutional
+invitations and CSV imports require active membership plus is_admin OR is_super_admin
+in that Institution; only is_super_admin delegates is_admin. Activation verifies
+the invite and existing account ownership, preserves credentials/revocations,
+and never grants academic roles, admin flags or cross-tenant visibility implicitly.
+Invitation/import rows MUST enforce tenant isolation; bounded self-profile and
+activation identity exceptions MUST preserve least-privilege runtime and atomic audit.
+The CSV original MUST be ephemeral, memory-only; private profile photos are a
+bounded binary exception and MUST NOT enable academic file uploads by implication.
+Sender and cleanup policy MUST be recorded; real email requires verified DNS.
+Missing external configuration MUST disable only that integration, not application readiness.
+Production MUST NOT fall back to local photos or fake email; mail simulation is test-only.
+Spec: [profiles and institutional accounts](../../specs/20261106-170457_perfiles-altas-usuarios/spec.md).
+Implementation status and external validation MUST be recorded separately; the spec alone proves neither.
 The admin/non-admin UI capability MUST match domain permissions; URL profiles
 never grant access. Enrollment remains the source of academic roles.
 
@@ -123,4 +139,4 @@ for wording and clarification.
 Reviews MUST verify constitution compliance before merge. Complexity violations
 MUST be documented in the feature plan's Complexity Tracking section.
 
-**Version**: 1.5.0 | **Ratified**: 2026-08-27 | **Last Amended**: 2026-10-20
+**Version**: 1.6.1 | **Ratified**: 2026-08-27 | **Last Amended**: 2026-11-07

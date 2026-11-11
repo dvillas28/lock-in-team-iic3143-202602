@@ -10,3 +10,9 @@ export const material = {id:id(50),moduleId:unit.id,title:"Lectura",kind:"markdo
 export const matrix = [false,true].flatMap(parent=>[false,true].map(child=>({unit:{...unit,publishedAt:parent?timestamp:null},material:{...material,publishedAt:child?timestamp:null},visible:parent&&child})));
 export const utfsmModule={...unit,id:id(41),courseId:id(11)};
 export const secondTeacher={...user("teacher"),id:id(2),sectionMemberships:[{courseId:course.id,sectionId:otherSection.id,role:"teacher" as const}]};
+
+
+export const resources = (...items: (typeof material)[]) => ({
+ items: items.map((item,index)=>({...item,position:index+1})),
+ limits: {document:20*1024*1024,image:10*1024*1024,zip:50*1024*1024},
+});

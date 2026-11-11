@@ -16,7 +16,7 @@ test("US3 superadmin recovery, last replacement, replay, isolation and rollback"
   for(const target of [users.owner,users.foreign,users.inactive])assert.equal((await run(recoveryEnv(users.owner,false,"bad",target))).code,1);
   const op=recoveryEnv(users.owner,false,"replace",users.other);assert.equal((await run(op)).code,0);
   app=await http();const owner=await login(app,f.env),other=await login(app,f.env,"UC");
-  assert.equal((await request(app,owner,"uc/memberships")).status,403);assert.equal((await request(app,other,"uc/memberships")).status,200);
+  assert.equal((await request(app,owner,"uc/memberships")).status,200);assert.equal((await request(app,other,"uc/memberships")).status,200);
   assert.deepEqual(await admins(),initialAdmins);
   const target=(await pool.query("SELECT id FROM institution_memberships WHERE institution_id=$1 AND user_id=$2",[f.tenants.uc,users.owner])).rows[0].id;
   const path=`uc/memberships/${target}/course-admin`;

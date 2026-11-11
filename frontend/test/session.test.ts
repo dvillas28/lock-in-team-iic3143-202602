@@ -275,7 +275,7 @@ test("only exact attempt UUID survives login return allowlist",()=>{
 
  test('tracking return routes require exact UUID segments',()=>{
  const c='10000000-0000-4000-8000-000000000010',q='10000000-0000-4000-8000-000000000060',a='10000000-0000-4000-8000-000000000080';
- for(const path of [`/courses/${c}/grades`,`/courses/${c}/gradebook`,`/courses/${c}/audit`,`/courses/${c}/quizzes/${q}/attempts`,`/courses/${c}/quizzes/${q}/attempts/${a}`]){assert.equal(safeReturnPath(path),path);for(const suffix of [String.fromCharCode(10),String.fromCharCode(13),'?studentId=x','#x','/','\\','\n','%0A'])assert.equal(safeReturnPath(path+suffix),'/courses');}
+ for(const path of [`/courses/${c}/grades`,`/courses/${c}/gradebook`,`/courses/${c}/audit`,`/courses/${c}/quizzes/new`,`/courses/${c}/quizzes/${q}/attempts`,`/courses/${c}/quizzes/${q}/attempts/${a}`]){assert.equal(safeReturnPath(path),path);for(const suffix of [String.fromCharCode(10),String.fromCharCode(13),'?studentId=x','#x','/','\\','\n','%0A'])assert.equal(safeReturnPath(path+suffix),'/courses');}
  });
 
 
@@ -308,3 +308,12 @@ test("concurrent revalidation deduplicates and unchanged identity keeps operatio
  assert.equal(h.session.getSnapshot().context, context);
  assert.equal(h.requests.filter(r=>r.url.endsWith('/me')).length, 2); h.session.logout();
 });
+
+ test("section codes are additive and validated without changing membership scope",()=>{
+  const membership={courseId:id,sectionId:id,role:"student"};
+  for(const sectionCode of [undefined,"1","UTFSM-A","𐐀".repeat(32)]){
+   const actor={...user(),sectionMemberships:[{...membership,...(sectionCode===undefined?{}:{sectionCode})}]};
+   assert.deepEqual(currentUser(actor,"uc",id).sectionMemberships,actor.sectionMemberships);
+  }
+  for(const sectionCode of [null,5,""," ","a".repeat(33)]) assert.throws(()=>currentUser({...user(),sectionMemberships:[{...membership,sectionCode}]},"uc",id),ApiResponseError);
+ });

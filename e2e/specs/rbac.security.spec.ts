@@ -22,7 +22,7 @@ test('E2E-RBAC-002 other owner needs contextual roles and cannot configure / oth
 });
 test('E2E-RBAC-003 ownership without teaching grants only administration / owner-only @regression',async ({e,actorPage})=>{
  const page=await actorPage('AO-ONLY'),api=await e.api('AO-ONLY'),c=e.data.courses.COWNER;
- await course(page,c);status(await api.patch(`courses/${c}`,{name:'Owner configured'}),200);status(await api.post(`courses/${c}/sections`,{code:'owner-section'}),201);
+ await course(page,c);await expect(page.getByRole('link',{name:'Secciones y participantes',exact:true})).toBeVisible();await go(page,c,'/sections');await expect(page.getByRole('heading',{name:'Secciones y participantes',exact:true})).toBeVisible();status(await api.patch(`courses/${c}`,{name:'Owner configured'}),200);status(await api.post(`courses/${c}/sections`,{code:'owner-section'}),201);
  const before=await securitySnapshot(e);
  for(const path of [`courses/${c}/modules`,`courses/${c}/quizzes`])status(await api.get(path),404);
  status(await api.get(`courses/${c}/gradebook`),403);status(await api.put(`courses/${c}/gradebook/weights`,weights(e)),403);
@@ -35,7 +35,7 @@ test('E2E-RBAC-004 teacher writes own academia without global administration / t
  status(await api.post(`modules/${e.data.modules.M1}/materials`,{title:'Teacher material',markdownBody:'Evidence'}),201);
  status(await api.post(`courses/${c}/quizzes`,{title:'Teacher quiz',sectionId:e.data.sections.S1}),201);
  const before=await securitySnapshot(e);status(await api.patch(`courses/${c}`,{name:'attack'}),403);status(await api.post(`courses/${c}/sections`,{code:'attack'}),403);status(await api.put(`courses/${c}/gradebook/weights`,{items:await currentCourseWeights(e,c,'T1')}),200);status(await api.post(`courses/${c}/quizzes`,{title:'Global',sectionId:null}),403);
- expect(await securitySnapshot(e)).toEqual(before);await go(page,c,'/modules');await expect(page.locator('summary').filter({hasText:/^Crear módulo$/})).toBeVisible();
+ expect(await securitySnapshot(e)).toEqual(before);await go(page,c,'/modules');await expect(page.getByRole('button',{name:'Nuevo módulo',exact:true})).toBeVisible();
 });
 for(const {id,actor} of [{id:'E2E-RBAC-005',actor:'AS1'},{id:'E2E-RBAC-006',actor:'ST1'}])test(`${id} projections and writes obey contextual role / ${actor} @smoke`,async ({e,actorPage})=>{
  const a=await academic(e,'uc',true),other=status(await (await e.api('ST2')).post(`sections/${e.data.sections.S2}/quizzes/${e.data.quizzes.QS2}/attempts`,undefined,e.key()),201).body;

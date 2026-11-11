@@ -235,6 +235,9 @@ QuizAuthoringView:
     - createdBy
     - questions
   properties:
+    groupId:
+      type: [string, 'null']
+      format: uuid
     id:
       type: string
       format: uuid
@@ -285,6 +288,9 @@ QuizCreate:
   required:
     - title
   properties:
+    groupId:
+      type: [string, 'null']
+      format: uuid
     sectionId:
       type: [string, 'null']
       format: uuid
@@ -318,6 +324,9 @@ QuizUpdate:
   additionalProperties: false
   minProperties: 1
   properties:
+    groupId:
+      type: [string, 'null']
+      format: uuid
     sectionId:
       type: [string, 'null']
       format: uuid

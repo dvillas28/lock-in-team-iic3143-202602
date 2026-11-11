@@ -1,5 +1,5 @@
 # Course audit (sonarqube-manual.spec.md): throwaway SonarQube on the runner, no secrets.
-# CI's sonarqube job (SonarQube Cloud) is the PR gate; this one exports issues and metrics as JSON.
+# CI's sonarqube job (SonarQube Cloud, non-blocking) judges each PR; this one exports issues and metrics as JSON.
 name: SonarQube - Issues y calidad local
 
 on:

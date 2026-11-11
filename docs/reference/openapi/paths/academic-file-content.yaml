@@ -1,0 +1,103 @@
+/api/v1/institution/{institutionSlug}/materials/{materialId}/file/publish:
+  parameters:
+  - $ref: ../components/parameters.yaml#/InstitutionSlug
+  - $ref: ../components/parameters.yaml#/MaterialId
+  post:
+    tags: [Materials]
+    operationId: publishAcademicFile
+    description: >-
+      Teacher activo del curso. Publicar el archivo no modifica la publicación del módulo.
+    summary: Publicar el archivo
+    responses:
+      '200':
+        description: Operación completada.
+        headers:
+          Cache-Control: {schema: {type: string, const: no-store}}
+          X-Content-Type-Options: {schema: {type: string, const: nosniff}}
+        content:
+          application/json:
+            schema: {$ref: '../components/schemas/academic-files.yaml#/AcademicFile'}
+      '400': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '401': {$ref: '../components/responses.yaml#/ContentUnauthorized'}
+      '403': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '404': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '500': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '503': {$ref: '../components/responses.yaml#/ContentProblem'}
+/api/v1/institution/{institutionSlug}/materials/{materialId}/file/unpublish:
+  parameters:
+  - $ref: ../components/parameters.yaml#/InstitutionSlug
+  - $ref: ../components/parameters.yaml#/MaterialId
+  post:
+    tags: [Materials]
+    operationId: unpublishAcademicFile
+    description: >-
+      Teacher activo del curso. Retira la lectura para assistant y student en cada solicitud posterior.
+    summary: Ocultar el archivo
+    responses:
+      '200':
+        description: Operación completada.
+        headers:
+          Cache-Control: {schema: {type: string, const: no-store}}
+          X-Content-Type-Options: {schema: {type: string, const: nosniff}}
+        content:
+          application/json:
+            schema: {$ref: '../components/schemas/academic-files.yaml#/AcademicFile'}
+      '400': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '401': {$ref: '../components/responses.yaml#/ContentUnauthorized'}
+      '403': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '404': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '500': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '503': {$ref: '../components/responses.yaml#/ContentProblem'}
+/api/v1/institution/{institutionSlug}/materials/{materialId}/file/preview:
+  parameters:
+  - $ref: ../components/parameters.yaml#/InstitutionSlug
+  - $ref: ../components/parameters.yaml#/MaterialId
+  get:
+    tags: [Materials]
+    operationId: previewAcademicFile
+    description: >-
+      Teacher activo del curso o matrícula activa con módulo y archivo publicados. PDF, imágenes compatibles y texto inerte.
+    summary: Leer contenido autorizado compatible con visor
+    responses:
+      '200':
+        description: Operación completada.
+        headers:
+          Cache-Control: {schema: {type: string, const: no-store}}
+          X-Content-Type-Options: {schema: {type: string, const: nosniff}}
+          Content-Disposition: {schema: {type: string}}
+          Content-Length: {schema: {type: integer}}
+        content:
+          '*/*':
+            schema: {type: string, format: binary}
+      '400': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '401': {$ref: '../components/responses.yaml#/ContentUnauthorized'}
+      '404': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '415': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '500': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '503': {$ref: '../components/responses.yaml#/ContentProblem'}
+/api/v1/institution/{institutionSlug}/materials/{materialId}/file/download:
+  parameters:
+  - $ref: ../components/parameters.yaml#/InstitutionSlug
+  - $ref: ../components/parameters.yaml#/MaterialId
+  get:
+    tags: [Materials]
+    operationId: downloadAcademicFile
+    description: >-
+      Teacher activo del curso o matrícula activa con módulo y archivo publicados. Transmite una descarga adjunta.
+    summary: Descargar el binario autorizado
+    responses:
+      '200':
+        description: Operación completada.
+        headers:
+          Cache-Control: {schema: {type: string, const: no-store}}
+          X-Content-Type-Options: {schema: {type: string, const: nosniff}}
+          Content-Disposition: {schema: {type: string}}
+          Content-Length: {schema: {type: integer}}
+        content:
+          '*/*':
+            schema: {type: string, format: binary}
+      '400': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '401': {$ref: '../components/responses.yaml#/ContentUnauthorized'}
+      '404': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '500': {$ref: '../components/responses.yaml#/ContentProblem'}
+      '503': {$ref: '../components/responses.yaml#/ContentProblem'}

@@ -130,3 +130,8 @@ INST-04	Instalar el cliente del proveedor de storage.		INST	build	spmasabeu	Todo
 INF-05	Provisionar el bucket con namespace por Institution.		INF	chore	spmasabeu	Todo	Semana 7 E4	CU-05	P2	3					
 BE-33	Material basado en archivo (PDF, CSV, XLSX, TXT, JPEG, PNG).		BE	feat	Jbcleon, matiaraos	Todo	Semana 7 E4	CU-05	P2	10					
 FE-21	Subida y descarga de archivos.		FE	feat	Jbcleon	Todo	Semana 7 E4	CU-05	P2	4					
+USR-01	Especificar perfiles y altas institucionales por formulario y CSV	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/233	DOC	docs	matiaraos	Done	Semana 5 E4	CU-17–21	P1	6		2026-11-08			
+USR-02	Gestionar perfil propio, contraseña y foto	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/234	FE	feat	matiaraos, dvillas28	In progress	Semana 5 E4	CU-17/18/21	P1	34		2026-11-08			
+USR-04	Dar alta y activar usuarios con Resend y reenvíos	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/235	BE	feat	matiaraos, dvillas28	Done	Semana 5 E4	CU-19/20	P1	32		2026-11-08			
+USR-05	Importar usuarios por CSV con validación, confirmación y envíos	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/236	FE	feat	matiaraos	Done	Semana 5 E4	CU-20	P1	32		2026-11-08			
+USR-08	Verificar trazabilidad, aislamiento y aceptación integrada de usuarios	https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/237	BE	test	matiaraos	In progress	Semana 5 E4	CU-17–21	P1	8		2026-11-08			

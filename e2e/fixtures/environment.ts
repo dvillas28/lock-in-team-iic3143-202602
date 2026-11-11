@@ -41,7 +41,7 @@ export class Environment {
   }
   backendEnv() {
     return {DATABASE_URL: this.url('academix_runtime'), MIGRATION_DATABASE_URL: this.url(), AUTH_JWT_SECRET: process.env.E2E_JWT_SECRET,
-      CORS_ALLOWED_ORIGINS: JSON.stringify([origin('uc'),origin('utfsm')]), NODE_ENV: 'test', PORT: String(apiPort), DEMO_DATA_ENABLED: 'false'};
+      CORS_ALLOWED_ORIGINS: JSON.stringify([origin('uc'),origin('utfsm')]), MAIL_DELIVERY_MODE:'disabled', AVATAR_STORAGE_DRIVER:'local', AVATAR_LOCAL_DIR:join(this.pgFolder,'avatars',this.namespace), ACADEMIC_STORAGE_DRIVER:'local', ACADEMIC_LOCAL_DIR:join(this.pgFolder,'academic-files',this.namespace), NODE_ENV: 'test', PORT: String(apiPort), DEMO_DATA_ENABLED: 'false'};
   }
   async start() {
     if (await readFile(join(this.pgFolder, 'owner'), 'utf8') !== this.runId) throw new Error('PostgreSQL ownership mismatch');
@@ -87,7 +87,7 @@ export class Environment {
   async api(actor = 'T1', slug = 'uc') {return new Api(await this.token(actor), slug);}
   syntheticToken(actor: string, claims: Record<string,unknown> = {}) {
     const now = Math.floor(Date.now()/1000);
-    const payload = {sub:this.data.actors[actor].id,iat:now,exp:now+900,iss:'academix-api',aud:'academix-clients',...claims};
+    const payload = {sub:this.data.actors[actor].id,credentialVersion:0,iat:now,exp:now+900,iss:'academix-api',aud:'academix-clients',...claims};
     const header = Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT'})).toString('base64url');
     const encoded = Buffer.from(JSON.stringify(payload)).toString('base64url');
     return `${header}.${encoded}.${createHmac('sha256',Buffer.from(process.env.E2E_JWT_SECRET!,'base64')).update(`${header}.${encoded}`).digest('base64url')}`;

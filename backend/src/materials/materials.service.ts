@@ -35,6 +35,15 @@ export class MaterialsService {
    return after;
   });
  }
+ async remove(actor:string,slug:string,id:string) {
+  return this.db.withInstitution(actor,slug,async c=>{
+   // Same scope, visibility and teacher checks as editing; file and quiz resources keep their own endpoints (404 here).
+   const s=await contentScope(c,actor,slug,id,"material"),row=await visibleMaterial(c,s,id);requirePermission(s.teacher);
+   const before=materialDto(row);
+   await c.query("DELETE FROM public.materials WHERE institution_id=$1 AND id=$2",[s.member.institution_id,id]);
+   await this.audit.record(c,{institutionId:s.member.institution_id,actorUserId:actor,action:"material.deleted",resourceType:"material",resourceId:id,courseId:s.courseId,before,after:null});
+  });
+ }
  async get(actor:string,slug:string,id:string) {
   return this.db.withInstitution(actor,slug,async c=>{const s=await contentScope(c,actor,slug,id,"material");return materialDto(await visibleMaterial(c,s,id));});
  }
@@ -43,7 +52,7 @@ export class MaterialsService {
    const s=await contentScope(c,actor,slug,module,"module");await visibleModule(c,s,module);
    const rows=(await c.query<MaterialRow>(`SELECT a.id,a.module_id,a.title,a.kind,a.markdown_body,a.published_at,a.created_by
     FROM public.materials a JOIN public.course_modules m ON m.institution_id=a.institution_id AND m.id=a.module_id
-    WHERE a.institution_id=$1 AND a.module_id=$2 AND m.course_id=$3 AND ($4::boolean OR (m.published_at IS NOT NULL AND a.published_at IS NOT NULL)) ORDER BY a.id`,[s.member.institution_id,module,s.courseId,s.teacher])).rows;
+    WHERE a.institution_id=$1 AND a.module_id=$2 AND m.course_id=$3 AND a.kind='markdown' AND ($4::boolean OR (m.published_at IS NOT NULL AND a.published_at IS NOT NULL)) ORDER BY a.id`,[s.member.institution_id,module,s.courseId,s.teacher])).rows;
    return {items:rows.map(materialDto)};
   });
  }

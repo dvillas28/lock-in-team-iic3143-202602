@@ -1,15 +1,17 @@
 "use client";
-import { useTransientFeedback } from "../use-feedback.ts";
-import { ArrowLeft, Circle, CircleCheck, Save, RotateCcw } from "lucide-react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { ArrowLeft, ArrowDown, Save, Send } from "lucide-react";
 import { QuizWorkspace } from "../quizzes/quiz-workspace.tsx";
-import { QuizFacts, quizDate } from "../quizzes/quiz-facts.tsx";
+import { quizDate } from "../quizzes/quiz-facts.tsx";
+import { QuizLeaveGuard } from "../quizzes/quiz-leave-guard.tsx";
 import { AttemptReference, AttemptStatus } from "./attempt-facts.tsx";
 import Link from "next/link";
 import type {Session} from "../../lib/auth/session.ts";
 import type {CurrentUser} from "../../lib/auth/validation.ts";
 import type {Course} from "../../lib/courses/validation.ts";
 import type {SafeQuiz} from "../../lib/quizzes/validation.ts";
-import {receiptFromAttempt,type Attempt} from "../../lib/attempts/validation.ts";
+import {receiptFromAttempt,sameAnswers,type Attempt} from "../../lib/attempts/validation.ts";
+import {attemptProgress,optionLabel,quizClosed} from "../../lib/attempts/progress.ts";
 import {attemptCapabilities} from "../../lib/attempts/capabilities.ts";
 import {getAttempt,getAttemptQuestions} from "../../lib/api/attempts.ts";
 import {getQuiz} from "../../lib/api/quizzes.ts";
@@ -19,9 +21,8 @@ import {useSession} from "../auth/session-provider.tsx";
 import {useResource} from "../courses/use-resource.ts";
 import {ErrorState,LoadingState} from "../route-states.tsx";
 import {useAttemptOperations} from "./use-attempt-operations.ts";
-import {AttemptSubmit} from "./attempt-submit.tsx";
-import {AttemptCancel} from "./attempt-cancel.tsx";
-import {AttemptConfirmation} from "./attempt-confirmation.tsx";
+import {AttemptReceipt,AttemptSubmitDialog,AttemptSubmitRecovery} from "./attempt-submit.tsx";
+import {AttemptCancelMenu,AttemptCancelStatus} from "./attempt-cancel.tsx";
 export function AttemptDetail({attemptId}:{attemptId:string}){
  const {session,state}=useSession(),context=state.context,slug=context?.slug??"";
  const scope=`${state.generation}:${slug}:${attemptId}:${JSON.stringify(context?.user)}`;
@@ -52,46 +53,89 @@ export function AttemptDetail({attemptId}:{attemptId:string}){
  }
  return <AttemptWork key={scope} session={session} slug={slug} user={context.user} {...result.data}/>;
 }
+const leaveCopy = {
+ title: "¿Salir del intento?",
+ body: "Tienes respuestas que aún no se han guardado. Si sales ahora, se perderán.",
+ stay: "Seguir respondiendo",
+ leave: "Salir sin guardar",
+};
 function AttemptWork({session,slug,user,course,quiz,attempt}:{session:Session;slug:string;user:CurrentUser;course:Course;quiz:SafeQuiz;attempt:Attempt}){
  const {ops,state}=useAttemptOperations(session,slug,user,course,quiz,attempt),a=state.attempt??attempt,cap=attemptCapabilities(user,course,quiz,a);
- const message=useTransientFeedback(state.phase==="dirty"?"Borrador con cambios sin guardar.":state.phase==="pristine"&&cap.edit?"Respuestas cargadas desde el servidor.":state.message,state.phase==="saved"&&!state.pending&&!state.cancelConfirmed,state);
- const locked=state.busy||!!state.pending||!!state.cancelConfirmed||!cap.edit;
- const editing=cap.edit&&!state.cancelConfirmed;
- const answered=quiz.questions.filter(q=>state.draft.some(answer=>answer.questionId===q.id)).length;
+ const [now,setNow]=useState(Date.now),[confirming,setConfirming]=useState(false);
+ const formId=useId(),receiptRef=useRef<HTMLDivElement>(null),submitted=useRef(false);
+ // One timer at the closing time: no polling, and the server still enforces the window.
+ useEffect(()=>{
+  if(!quiz.closesAt)return;
+  const remaining=Date.parse(quiz.closesAt)-Date.now();
+  if(remaining<=0)return;
+  const timer=window.setTimeout(()=>setNow(Date.now()),Math.min(remaining+250,2147483647));
+  return ()=>window.clearTimeout(timer);
+ },[quiz.closesAt]);
+ const closed=quizClosed(quiz.closesAt,now);
+ const editing=cap.edit&&!state.cancelConfirmed&&!state.receipt;
+ const dirty=!sameAnswers(state.draft,state.confirmed);
+ const locked=state.busy||!!state.pending||!!state.cancelConfirmed||!cap.edit||closed;
+ const progress=attemptProgress(quiz,state.draft);
+ const quizHref=`/courses/${course.id}/quizzes/${quiz.id}`;
+ const closeConfirm=useCallback(()=>setConfirming(false),[]);
+ useEffect(()=>{ if(state.receipt&&submitted.current)receiptRef.current?.querySelector<HTMLElement>(".attempt-receipt")?.focus(); },[state.receipt]);
+ const saveStatus=state.busy&&state.phase==="saving"?"Guardando…":state.pending==="save"?"Guardado sin confirmar":dirty?"Cambios sin guardar":state.confirmed.length?"Respuestas guardadas":"";
+ function focusQuestion(id:string){
+  const question=document.getElementById(`question-${id}`);
+  const reduce=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  question?.scrollIntoView?.({block:"center",behavior:reduce?"auto":"smooth"});
+  question?.querySelector<HTMLInputElement>("input:not(:disabled)")?.focus({preventScroll:true});
+ }
+ function review(id:string){setConfirming(false);requestAnimationFrame(()=>focusQuestion(id));}
+ function choose(questionId:string,alternativeId?:string){
+  ops.setDraft([...state.draft.filter(answer=>answer.questionId!==questionId),...(alternativeId?[{questionId,alternativeId}]:[])]);
+ }
+ const nextPending=progress.pending[0];
  return <QuizWorkspace course={course} user={user} title={quiz.title}>
  <div className="stack attempt-workspace">
- <Link className="text-link attempt-back" href={`/courses/${course.id}/quizzes/${quiz.id}`}><ArrowLeft size={16} aria-hidden="true"/>Volver al quiz</Link>
- <section className="card panel stack attempt-summary" aria-label="Resumen del intento">
-   <div className="quiz-section-heading"><div><p className="section-label">{cap.student?"Tu intento":"Resumen del intento"}</p><h2 className="serif">Intento {a.attemptNumber}</h2></div><AttemptStatus status={state.cancelConfirmed?"cancelled":a.status}/></div>
-   {editing&&<><p className="quiz-instructions">{quiz.instructions?.trim()||"Selecciona una alternativa por pregunta. Guarda tus respuestas antes de salir."}</p><QuizFacts quiz={quiz}/></>}
-   <AttemptReference attempt={a}/>
+ <Link className="text-link attempt-back" href={quizHref}><ArrowLeft size={16} aria-hidden="true"/>Volver al quiz</Link>
+ <QuizLeaveGuard active={(editing&&!closed&&dirty)||state.busy||!!state.pending} copy={leaveCopy}/>
+ <section className="card panel attempt-header" aria-label="Resumen del intento">
+  <div className="attempt-header-top">
+   <div className="attempt-header-title"><h2 className="serif">Intento {a.attemptNumber}</h2>{cap.student&&quiz.maxAttempts?<span className="hint tnum">de {quiz.maxAttempts} permitidos</span>:null}</div>
+   <div className="attempt-header-meta"><AttemptStatus status={state.cancelConfirmed?"cancelled":a.status} student={cap.student}/><AttemptCancelMenu ops={ops} state={state} allowed={cap.cancel&&!state.receipt}/></div>
+  </div>
+  {editing&&<p className="hint tnum">{quiz.closesAt?`${closed?"Cerró":"Cierra"} el ${quizDate(quiz.closesAt)}`:"Sin fecha de cierre"} · {quiz.questions.length} {quiz.questions.length===1?"pregunta":"preguntas"}</p>}
+  {editing&&quiz.instructions?.trim()&&<p className="quiz-instructions">{quiz.instructions}</p>}
+  {!cap.student&&<AttemptReference attempt={a}/>}
  </section>
- {message && <p className={`notice${state.phase==="error"||state.pending?" warning":state.phase==="saved"?" success":""}`} role="status" aria-live="polite">{message}</p>}
- <div className={editing?"attempt-layout":"stack"}>
- {editing&&<form className="stack attempt-form" aria-label="Respuestas del intento" aria-busy={state.busy} onSubmit={e=>{e.preventDefault();void ops.save();}}>
-   <div className="quiz-section-heading"><h2 className="serif">Preguntas</h2><span className="hint tnum">{answered} de {quiz.questions.length} respondidas</span></div>
-   {quiz.questions.map((q,i)=><fieldset className="card attempt-question" id={`question-${q.id}`} key={q.id} disabled={locked}>
-     <legend><span className="attempt-question-number tnum">{i+1}</span><span>{q.prompt}</span></legend>
-     <div className="attempt-options">{q.alternatives.map((o,j)=><label className="option attempt-option" key={o.id}>
-       <input type="radio" name={q.id} value={o.id} checked={state.draft.some(answer=>answer.questionId===q.id&&answer.alternativeId===o.id)} onChange={()=>ops.setDraft([...state.draft.filter(answer=>answer.questionId!==q.id),{questionId:q.id,alternativeId:o.id}])}/>
-       <span className="attempt-option-letter" aria-hidden="true">{String.fromCharCode(65+j)}</span><span>{o.text}</span>
-     </label>)}</div>
-   </fieldset>)}
-   <div className="card attempt-save-bar"><div className="actions"><button className="btn btn-primary" type="submit" disabled={locked||!state.draft.length}><Save size={16} aria-hidden="true"/>Guardar respuestas</button><button className="btn btn-ghost" type="button" disabled={locked||!state.draft.length} onClick={()=>ops.setDraft([])}><RotateCcw size={16} aria-hidden="true"/>Quitar todas las selecciones</button>
-     {!state.draft.length&&<AttemptConfirmation label="Guardar sin respuestas" title="Confirmar borrado de respuestas" disabled={locked} onConfirm={()=>void ops.save(true)}><p>Guardar sin respuestas borra el conjunto completo en el servidor.</p></AttemptConfirmation>}</div>
-     <p className="hint">{state.phase==="dirty"?"Tienes cambios sin guardar.":state.busy?"Guardando o comprobando el intento…":"El guardado es manual. Enviar finaliza tu intento."}</p>
+ {editing&&closed&&<p className="notice warning" role="alert">El plazo terminó. Ya no puedes guardar ni enviar respuestas.</p>}
+ {editing&&state.phase==="error"&&!state.pending&&state.message&&<p className="notice warning" role="alert">{state.message}</p>}
+ {state.pending==="save"&&<section className="notice warning stack attempt-recovery" role="alert"><strong>No pudimos confirmar el guardado</strong><p>Tus selecciones siguen en pantalla, pero no podrás modificarlas ni enviar hasta confirmar el estado. Mantén esta página abierta; si el problema continúa, recárgala para ver las respuestas guardadas.</p><div className="actions"><button className="btn btn-ghost" disabled={state.busy} onClick={()=>void ops.consult()}>Comprobar estado</button></div>{state.message&&<p className="hint" role="status">{state.message}</p>}</section>}
+ <AttemptSubmitRecovery ops={ops} state={state}/>
+ {!state.receipt&&<AttemptCancelStatus ops={ops} state={state}/>}
+ <div ref={receiptRef}><AttemptReceipt state={state} attemptNumber={a.attemptNumber} quizHref={quizHref} gradesHref={cap.student?`/courses/${course.id}/grades`:undefined}/></div>
+ {editing&&<>
+  <div className="card attempt-progress" role="region" aria-label="Avance del intento">
+   <div className="attempt-progress-copy"><p className="tnum"><strong>{progress.answered}</strong> de {progress.total} respondidas{progress.pending.length?<span className="hint"> · {progress.pending.length} sin responder</span>:null}</p>
+    {nextPending&&<button type="button" className="btn btn-ghost attempt-next" onClick={()=>focusQuestion(nextPending.id)}><ArrowDown size={15} aria-hidden="true"/>Siguiente sin responder</button>}</div>
+   <progress aria-label="Preguntas respondidas" value={progress.answered} max={Math.max(1,progress.total)}/>
+   <nav className="attempt-question-nav" aria-label="Ir a una pregunta">{quiz.questions.map((q,i)=>{const selected=state.draft.some(answer=>answer.questionId===q.id);return <button type="button" key={q.id} className={`attempt-question-link tnum${selected?" answered":""}`} aria-label={`Pregunta ${i+1}: ${selected?"respondida":"sin responder"}`} onClick={()=>focusQuestion(q.id)}>{i+1}</button>;})}</nav>
+  </div>
+  <form id={formId} className="stack attempt-form" aria-label="Respuestas del intento" aria-busy={state.busy} onSubmit={e=>{e.preventDefault();if(dirty)void ops.save(!state.draft.length);}}>
+   {quiz.questions.map((q,i)=>{const selected=state.draft.find(answer=>answer.questionId===q.id);return <fieldset className={`card attempt-question${selected?" is-answered":""}`} id={`question-${q.id}`} key={q.id} disabled={locked}>
+    <legend><span className="attempt-question-number tnum">Pregunta {i+1} de {quiz.questions.length}</span><span className="attempt-question-prompt">{q.prompt}</span></legend>
+    <div className="attempt-options">{q.alternatives.map((o,j)=><label className="option attempt-option" key={o.id}>
+     <input type="radio" name={q.id} value={o.id} checked={selected?.alternativeId===o.id} onChange={()=>choose(q.id,o.id)}/>
+     <span className="attempt-option-letter" aria-hidden="true">{optionLabel(j)}</span><span className="attempt-option-text">{o.text}</span>
+    </label>)}</div>
+    {selected&&!locked&&<button type="button" className="text-link attempt-clear" onClick={()=>choose(q.id)}>Quitar respuesta</button>}
+   </fieldset>;})}
+  </form>
+  <div className="card attempt-actions-bar">
+   <span className="hint" role="status" aria-live="polite">{saveStatus}</span>
+   <div className="actions">
+    <button className="btn btn-ghost" type="submit" form={formId} disabled={locked||!dirty}><Save size={16} aria-hidden="true"/>{state.busy&&state.phase==="saving"?"Guardando…":"Guardar"}</button>
+    <button className="btn btn-primary" type="button" disabled={locked} onClick={()=>{submitted.current=true;setConfirming(true);}}><Send size={16} aria-hidden="true"/>Enviar intento</button>
    </div>
- </form>}
- <aside className="stack attempt-sidebar" aria-label={editing?"Avance y envío":"Estado del intento"}>
-   {editing&&<section className="card panel stack attempt-progress"><h2 className="serif">Tu avance</h2><p className="tnum"><strong>{answered}</strong> de {quiz.questions.length} respondidas</p><progress aria-label="Preguntas respondidas" value={answered} max={Math.max(1,quiz.questions.length)}/>
-     <nav className="attempt-question-nav" aria-label="Ir a una pregunta">{quiz.questions.map((q,i)=>{const selected=state.draft.some(answer=>answer.questionId===q.id);return <a key={q.id} className={`attempt-question-link${selected?" answered":""}`} href={`#question-${q.id}`} aria-label={`Pregunta ${i+1}: ${selected?"respondida":"sin responder"}`}>{selected?<CircleCheck size={16} aria-hidden="true"/>:<Circle size={16} aria-hidden="true"/>}<span className="tnum">{i+1}</span></a>;})}</nav>
-     <p className="hint">Puedes enviar aunque queden preguntas sin responder.</p>
-   </section>}
-   {state.pending==="save"&&<section className="notice warning stack"><h2 className="serif">Guardado incierto</h2><p>No se pudo confirmar el guardado. La edición, el envío y la cancelación siguen bloqueados. Consultar el estado no confirma que el guardado haya terminado. Mantén esta página abierta para conservar la recuperación.</p><button className="btn btn-ghost" disabled={state.busy} onClick={()=>void ops.consult()}>Consultar estado sin desbloquear</button></section>}
-   <AttemptSubmit ops={ops} state={state} quiz={quiz} allowed={editing}/>
-   <AttemptCancel ops={ops} state={state} allowed={cap.cancel}/>
-   {editing&&<details className="academic-disclosure card"><summary>Guardar y retomar después</summary><div className="stack"><p className="hint">Puedes retomarlo desde «Mis intentos» en el detalle del quiz. Guarda antes de salir: recargar descarta los cambios sin guardar y la recuperación pendiente.</p><p className="hint">Cerrar la página no envía ni cancela el intento. Trabaja en una sola pestaña para evitar cambios en paralelo.</p></div></details>}
- </aside>
- </div></div>
+  </div>
+  <AttemptSubmitDialog open={confirming} ops={ops} state={state} progress={progress} onClose={closeConfirm} onReview={review}/>
+ </>}
+ </div>
  </QuizWorkspace>;
 }

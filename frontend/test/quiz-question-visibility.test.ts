@@ -8,8 +8,8 @@ import {mount,reply,quiz,course,attempt} from './fixtures/attempts.ts';
 test('student detail hides prompts and alternatives even if an older backend includes them',async()=>{
  const ui=await mount(h(QuizDetail,{courseId:course.id,quizId:quiz.id}),r=>reply(r),'student');
  try{
-  assert.match(ui.doc.body.textContent!,/Preguntas ocultas/);
-  assert.match(ui.doc.body.textContent!,/únicamente dentro de tu intento/);
+  assert.doesNotMatch(ui.doc.body.textContent!,/Preguntas ocultas|Preguntas del quiz/);
+  assert.match(ui.doc.body.textContent!,/Las preguntas se muestran al iniciar el intento/);
   for(const question of quiz.questions){
    assert.ok(!ui.doc.body.textContent!.includes(question.prompt));
    for(const option of question.alternatives)assert.ok(!ui.doc.body.textContent!.includes(option.text));

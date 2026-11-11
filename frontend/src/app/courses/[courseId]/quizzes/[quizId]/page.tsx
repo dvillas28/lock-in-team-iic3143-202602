@@ -1,2 +1,10 @@
 import { QuizDetail } from "../../../../../components/quizzes/quiz-detail.tsx";
-export default async function Page({params}:{params:Promise<{courseId:string;quizId:string}>}){const values=await params;return <QuizDetail {...values}/>;}
+import { quizListLocation, quizListQuery, type QuizSearchParams } from "../../../../../lib/quizzes/list-location.ts";
+
+export default async function Page({ params, searchParams }: {
+  params: Promise<{ courseId: string; quizId: string }>;
+  searchParams: Promise<QuizSearchParams>;
+}) {
+  const { filters } = quizListLocation(await searchParams);
+  return <QuizDetail {...await params} listQuery={quizListQuery(filters)}/>;
+}

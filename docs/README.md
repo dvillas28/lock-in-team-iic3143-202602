@@ -31,6 +31,7 @@ plataforma de despliegue.
 
 ## Contratos
 
+- [Tareas del curso, CU-22 y CU-23](planning/course-assignments.md)
 - [OpenAPI de AcademiX](reference/openapi/README.md)
 
 ## Backend y Pruebas
@@ -46,6 +47,14 @@ plataforma de despliegue.
 
 ## Guías
 
+- Ampliación pendiente: [perfiles/altas por formulario y CSV](planning/perfiles/README.md),
+  [requisitos](planning/perfiles/requisitos.md), [backlog/borradores](planning/perfiles/backlog.md)
+  y [modelo propuesto de usuarios](planning/perfiles/modelo-datos.md).
+- Correo para activación: [plan Resend](planning/perfiles/correo-resend.md) y
+  [decisión de proveedor](adr/resend-for-account-invitations.md), pendientes de implementación.
+- Fotos de perfil: [S3 privado en producción](adr/s3-for-profile-photos.md), Daniel provisiona.
+- [Spec formal de perfiles/altas](../specs/20261106-170457_perfiles-altas-usuarios/spec.md),
+  [trazabilidad](../specs/20261106-170457_perfiles-altas-usuarios/traceability.md) y [pendientes](../specs/20261106-170457_perfiles-altas-usuarios/pending-decisions.md).
 - E2E: [qué probamos y fases](testing/E2E_MASTER_PLAN.md) · [ejecución y navegador visible](testing/E2E_README.md).
 - [Spec Kit](guides/speckit-flow.md)
 - [CodeGraph](guides/codegraph-flow.md)

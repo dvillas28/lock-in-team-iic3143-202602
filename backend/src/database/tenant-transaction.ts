@@ -1,4 +1,4 @@
-import { ConflictException, UnprocessableEntityException, ServiceUnavailableException } from "@nestjs/common";
+import { BadRequestException,ConflictException, UnauthorizedException,UnprocessableEntityException, ServiceUnavailableException } from "@nestjs/common";
 import type { Pool, PoolClient } from "pg";
 
 export async function transaction<T>(pool: Pool, operation: (client: PoolClient)=>Promise<T>) {
@@ -23,6 +23,10 @@ export async function transaction<T>(pool: Pool, operation: (client: PoolClient)
     assertConnected();
     const code=(error as {code?:string}).code;
     if (code==="23505") throw new ConflictException();
+    if (code==="40001" || code==="40P01") throw new ConflictException();
+    if (code==="28000") throw new UnauthorizedException();
+    if (code==="22023") throw new BadRequestException({field:"token"});
+    if (code==="P1001") throw new ConflictException({code:"INVITATION_LOGIN_REQUIRED"});
     if (code==="23514" || code==="23503") throw new UnprocessableEntityException();
     if (code?.startsWith("08") || code==="57P01" || code==="ECONNREFUSED") throw new ServiceUnavailableException();
     throw error;

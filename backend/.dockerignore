@@ -6,3 +6,6 @@ coverage
 .env.*
 !.env.example
 *.log
+
+# Private local profile images
+.data/

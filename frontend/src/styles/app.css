@@ -274,7 +274,11 @@ button:disabled { cursor: not-allowed; opacity: .65; transform: none; }
 .option { display: flex; gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); cursor: pointer; }
 .option:has(input:checked) { background: var(--primary-soft); border-color: var(--primary-ink); }
 .option input { accent-color: var(--primary); }
-.native-dialog { margin: auto; color: var(--text-1); }
+.native-dialog {
+  margin: auto; color: var(--text-1); background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-float);
+}
 .native-dialog::backdrop { background: var(--overlay); }
 .native-dialog h2 { font-family: var(--font-eb-garamond), serif; font-size: 24px; margin-bottom: 12px; }
 .scenarios { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-2); }

@@ -1,4 +1,5 @@
 import type { Summary } from "../../lib/quizzes/validation.ts";
+import { phaseLabels, type QuizPhase } from "../../lib/quizzes/publication.ts";
 
 export function quizDate(value: string | null): string {
   if (!value) return "Sin límite";
@@ -7,6 +8,12 @@ export function quizDate(value: string | null): string {
 
 export function QuizStatus({ status }: { status: Summary["status"] }) {
   return <span className={`chip ${status === "draft" ? "chip-warning" : "chip-success"}`}>{status === "draft" ? "Borrador" : "Publicado"}</span>;
+}
+
+const phaseTone: Record<QuizPhase, string> = { draft: "chip-warning", open: "chip-success", scheduled: "chip-primary", closed: "" };
+
+export function QuizPhaseChip({ phase }: { phase: QuizPhase }) {
+  return <span className={`chip ${phaseTone[phase]}`}>{phaseLabels[phase]}</span>;
 }
 
 export function QuizFacts({ quiz }: { quiz: Summary }) {

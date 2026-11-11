@@ -34,7 +34,7 @@ test('presentation data works with real frontend adapters and five roles, UC/UTF
       for (const role of ['admin', 'teacher', 'assistant', 'student']) assert.equal((await listCourses(clients[role], slug)).length, 3);
       assert.equal((await listCourses(clients.superadmin, slug)).length, 0);
       assert.equal((await request(app, tokens.superadmin, `${slug}/memberships`)).status, 200);
-      assert.equal((await request(app, tokens.admin, `${slug}/memberships`)).status, 403);
+      assert.equal((await request(app, tokens.admin, `${slug}/memberships`)).status, 200);
       assert.equal((await listSections(clients.admin, slug, courseId)).length, 2);
       assert.equal((await listSections(clients.teacher, slug, courseId)).length, 1);
       assert.equal((await request(app, tokens.admin, `${slug}/sections/${second}`, 'PATCH', { capacity: 15 })).status, 200);
@@ -101,7 +101,7 @@ test('presentation data works with real frontend adapters and five roles, UC/UTF
       assert.equal((await request(app, tokens.assistant, publicationPath, 'POST', selection, 'demo-publish')).status, 403);
       assert.equal((await request(app, tokens.teacher, publicationPath, 'POST', selection, 'demo-publish')).status, 200);
       assert.equal((await getStudentGrades(clients.student, slug, workshop)).partialAverage, 7);
-      assert.equal((await request(app, tokens.admin, `${slug}/courses/${workshop}/gradebook/weights`, 'PUT', weights)).status, 409);
+      assert.equal((await request(app, tokens.admin, `${slug}/courses/${workshop}/gradebook/weights`, 'PUT', weights)).status, 200);
       const events = await request(app, tokens.teacher, `${slug}/courses/${workshop}/audit-events?action=grade.published`);
       assert.equal(events.status, 200); assert.equal(events.body.items.length, 1);
       const empty = id(`${slug}/course/2`);

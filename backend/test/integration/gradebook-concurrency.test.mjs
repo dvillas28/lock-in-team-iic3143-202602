@@ -15,7 +15,7 @@ for(const other of ['start','submit','cancel','weights','item'])for(const first 
    item:()=>request(app,t.owner,`uc/quizzes/${f.quizzes.draft}/publish`,'POST'),
   };
   const r=await queued(pool,f.own,first==='publication'?publish:operations[other],first==='publication'?operations[other]:publish);
-  const expected=first==='publication'?(['submit','cancel'].includes(other)?[409,other==='submit'?200:204]:[200,409]):
+  const expected=first==='publication'?(['submit','cancel'].includes(other)?[409,other==='submit'?200:204]:[200,other==='item'?200:409]):
    other==='start'?[201,409]:other==='submit'?[200,200]:other==='cancel'?[204,200]:[200,200];
   assert.deepEqual(r.map(v=>v.status),expected);
   assert.equal((await pool.query("SELECT 1 FROM grades g JOIN quiz_attempts a ON a.quiz_id=g.quiz_id AND a.student_id=g.student_id WHERE g.published_at IS NOT NULL AND a.status='in_progress'")).rowCount,0);

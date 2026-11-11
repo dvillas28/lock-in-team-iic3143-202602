@@ -10,7 +10,7 @@ export const history = { ...enrollment, id:id(31), role:"assistant" as const, ac
 export const page = (items:unknown[], nextCursor:string|null=null) => ({items,hasMore:nextCursor!==null,nextCursor});
 export function user(profile="owner",slug="uc"): CurrentUser {
  const roles = profile==="multi" ? ["teacher","assistant","student"] as const : profile==="teacher" || profile==="foreign" || profile==="ownerTeacher" ? ["teacher"] as const : profile==="student" ? ["student"] as const : profile==="assistant" ? ["assistant"] as const : [];
- return {id:profile==="foreign"?id(2):id(1),name:"Ana",email:"ana@example.test",institutionMembership:{id:id(3),active:true,isAdmin:["owner","ownerTeacher","foreign"].includes(profile),isSuperAdmin:profile==="super",institution:{id:id(slug==="uc"?4:5),slug,name:slug.toUpperCase(),active:true}},sectionMemberships:roles.map(role=>({courseId:course.id,sectionId:section.id,role}))};
+ return {id:profile==="foreign"?id(2):id(1),name:"Ana",email:"ana@example.test",institutionMembership:{id:id(3),active:true,isAdmin:["owner","ownerTeacher","foreign"].includes(profile),isSuperAdmin:profile==="super",institution:{id:id(slug==="uc"?4:5),slug,name:slug.toUpperCase(),active:true}},sectionMemberships:roles.map(role=>({courseId:course.id,sectionId:section.id,sectionCode:section.code,role}))};
 }
 export function deferred<T>() { let resolve!: (value:T)=>void; let reject!:(reason:unknown)=>void; const promise=new Promise<T>((a,b)=>{resolve=a;reject=b;}); return {promise,resolve,reject}; }
 export const failureStatuses=[400,401,403,404,409,422,503];

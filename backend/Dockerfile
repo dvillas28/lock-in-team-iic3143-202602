@@ -35,6 +35,9 @@ COPY --from=production-dependencies /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/migrations ./migrations
 
+# Local development can mount a persistent avatar volume; production still defaults to disabled/S3.
+RUN mkdir -p /app/data && chown node:node /app/data
+
 USER node
 
 EXPOSE 3001

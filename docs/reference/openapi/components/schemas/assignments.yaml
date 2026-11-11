@@ -1,0 +1,104 @@
+Assignment:
+  type: object
+  additionalProperties: false
+  required: [id, courseId, title, description, instructions, maxPoints, sectionId, groupId, groupTitle, weightPercent, allowedExtensions, allowWrittenResponse, maxAttempts, availableFrom, dueAt, availableUntil, status, publishedAt, version, canManage]
+  properties:
+    id: {type: string, format: uuid}
+    courseId: {type: string, format: uuid}
+    title: {type: string, minLength: 1, maxLength: 200}
+    description: {type: [string, 'null'], maxLength: 2000}
+    instructions: {type: [string, 'null'], maxLength: 10000}
+    maxPoints: {type: number, minimum: 0, maximum: 999999.99, multipleOf: 0.01}
+    sectionId: {type: [string, 'null'], format: uuid, description: Null identifica el curso completo.}
+    groupId: {type: string, format: uuid}
+    groupTitle: {type: string}
+    weightPercent: {type: number, minimum: 0, maximum: 100}
+    allowedExtensions:
+      type: array
+      maxItems: 30
+      uniqueItems: true
+      description: Extensiones normalizadas. Una lista vacía con respuesta escrita habilitada permite solo texto en línea. Para tareas históricas sin formatos y sin respuesta escrita se aceptan los tipos soportados por el validador de archivos.
+      items: {type: string, pattern: '^[a-z0-9]{1,16}$'}
+    allowWrittenResponse: {type: boolean, default: false, description: Habilita una respuesta escrita independiente de los archivos .txt y .csv.}
+    maxAttempts: {type: [integer, 'null'], minimum: 1, maximum: 2147483647, description: Null indica intentos ilimitados.}
+    availableFrom: {type: [string, 'null'], format: date-time}
+    dueAt: {type: [string, 'null'], format: date-time}
+    availableUntil: {type: [string, 'null'], format: date-time}
+    status: {type: string, enum: [draft, published, hidden]}
+    publishedAt: {type: [string, 'null'], format: date-time, description: Instante de la primera publicación.}
+    version: {type: integer, minimum: 0}
+    canManage: {type: boolean}
+
+AssignmentCreate:
+  type: object
+  additionalProperties: false
+  required: [idempotencyKey, title, maxPoints]
+  properties:
+    idempotencyKey:
+      type: string
+      format: uuid
+      description: UUID estable del reintento acotado a institución, curso y autor. El servidor genera el ID de la tarea.
+    title: { $ref: '#/Assignment/properties/title' }
+    description: { $ref: '#/Assignment/properties/description' }
+    instructions: { $ref: '#/Assignment/properties/instructions' }
+    maxPoints: { $ref: '#/Assignment/properties/maxPoints' }
+    sectionId: { $ref: '#/Assignment/properties/sectionId' }
+    groupId: {type: [string, 'null'], format: uuid, description: Null u omitido elige el grupo predeterminado.}
+    allowedExtensions: &extensionInput
+      type: array
+      maxItems: 30
+      items: {type: string, pattern: '^\.?[A-Za-z0-9]{1,16}$'}
+    allowWrittenResponse: { $ref: '#/Assignment/properties/allowWrittenResponse' }
+    maxAttempts: { $ref: '#/Assignment/properties/maxAttempts' }
+    availableFrom: { $ref: '#/Assignment/properties/availableFrom' }
+    publish: {type: boolean, description: Con true publica en la misma transacción del guardado. Si se omite conserva el estado.}
+    confirmPastDue: {type: boolean, deprecated: true, description: Campo legado ignorado; las tareas nuevas y los cambios a plazos vencidos siempre se rechazan.}
+    dueAt: { $ref: '#/Assignment/properties/dueAt' }
+    availableUntil: { $ref: '#/Assignment/properties/availableUntil' }
+
+AssignmentUpdate:
+  type: object
+  additionalProperties: false
+  required: [expectedVersion]
+  properties:
+    expectedVersion: {type: integer, minimum: 0}
+    title: { $ref: '#/Assignment/properties/title' }
+    description: { $ref: '#/Assignment/properties/description' }
+    instructions: { $ref: '#/Assignment/properties/instructions' }
+    maxPoints: { $ref: '#/Assignment/properties/maxPoints' }
+    sectionId: { $ref: '#/Assignment/properties/sectionId' }
+    groupId: {type: [string, 'null'], format: uuid, description: Null elige el grupo predeterminado.}
+    allowedExtensions: *extensionInput
+    allowWrittenResponse: { $ref: '#/Assignment/properties/allowWrittenResponse' }
+    maxAttempts: { $ref: '#/Assignment/properties/maxAttempts' }
+    availableFrom: { $ref: '#/Assignment/properties/availableFrom' }
+    publish: {type: boolean, description: Con true publica en la misma transacción del guardado. Si se omite conserva el estado.}
+    confirmPastDue: {type: boolean, deprecated: true, description: Campo legado ignorado; las tareas nuevas y los cambios a plazos vencidos siempre se rechazan.}
+    dueAt: { $ref: '#/Assignment/properties/dueAt' }
+    availableUntil: { $ref: '#/Assignment/properties/availableUntil' }
+
+AssignmentVisibility:
+  type: object
+  additionalProperties: false
+  required: [expectedVersion, published]
+  properties:
+    expectedVersion: {type: integer, minimum: 0}
+    published: {type: boolean}
+
+AssignmentList:
+  type: object
+  additionalProperties: false
+  required: [items]
+  properties:
+    items:
+      type: array
+      items: { $ref: '#/Assignment' }
+
+EvaluationGroupList:
+  type: object
+  additionalProperties: false
+  required: [items]
+  properties:
+    items:
+      type: array
+      items: { $ref: './gradebook-groups.yaml#/GradeGroup' }

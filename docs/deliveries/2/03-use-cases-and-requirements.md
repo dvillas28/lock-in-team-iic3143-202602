@@ -5,6 +5,9 @@
 AcademiX cubre institución → curso → material Markdown → quiz → nota → publicación.
 Síntesis vigente del MVP; los flujos detallados anteriores quedan en Git (`a60f0ff`).
 Conserva CU-01–16, RF1–29 y RNF1–10 sin distribuirlos en anexos.
+Ampliación registrada, pendiente de implementación: [perfiles/altas formulario y CSV](../../planning/perfiles/requisitos.md)
+(CU-17–21, RF30–56, RNF11–20; Resend elegido; [backlog/borradores](../../planning/perfiles/backlog.md)).
+[Spec formal y pendientes](../../../specs/20261106-170457_perfiles-altas-usuarios/spec.md), sin implementar.
 [Alcance](02-scope.md), [actores y permisos](05-domain-model.md),
 [cuentas](../../guides/demo-accounts.md) y [evidencia del polish](../../backend/feedback-e2-validation.md).
 

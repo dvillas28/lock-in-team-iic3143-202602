@@ -1,7 +1,7 @@
 import type {CaseVariant} from './case-variants.ts';
 const v=(name:string,actor='AO',level:CaseVariant['level']='browser',smoke=false):CaseVariant=>({name,actor,level,tenant:'uc',projects:smoke?['chromium','firefox','webkit']:['chromium']});
 export const phaseFour:Record<string,readonly CaseVariant[]>={
- 'E2E-COURSE-001':['ST1','T1','AO'].map(a=>v(a,a,'browser',true)),
+ 'E2E-COURSE-001':['ST1','AS1','T1','AO'].map(a=>v(a,a,'browser',true)),
  'E2E-COURSE-002':[v('empty','MEMBER')],
  'E2E-COURSE-003':['malformed','missing'].map(n=>v(n,'ST1')),
  'E2E-COURSE-004':[v('revoked','ST1')],
@@ -52,7 +52,7 @@ Object.assign(phaseFour,{
  'E2E-CONTENT-005':[v('position-title','T1')],
  'E2E-CONTENT-006':[v('no-op','T1')],
  'E2E-CONTENT-007':['T1','AS1','ST1'].map(a=>v(a,a)),
- 'E2E-CONTENT-008':[v('markdown-editor','T1/ST1','browser',true)],
+ 'E2E-CONTENT-008':[v('markdown-editor','T1/ST1','browser',true),v('academic-files','T1/ST1/AS1','browser'),v('academic-layout','T1','browser')],
  'E2E-CONTENT-009':['T1','ST1','AS1'].flatMap(a=>['00','01','10','11'].map(f=>v(a+'-'+f,a,'browser',true))),
  'E2E-CONTENT-010':[v('material-publication','T1/ST1')],
  'E2E-CONTENT-011':['whitespace','nul','unicode','bytes'].map(n=>v(n,'T1')),

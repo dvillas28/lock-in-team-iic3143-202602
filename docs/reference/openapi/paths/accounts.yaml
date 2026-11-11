@@ -1,0 +1,634 @@
+/api/v1/me:
+  get:
+    tags:
+    - Accounts
+    operationId: getOwnProfile
+    summary: Consultar perfil global propio
+    x-permissions: User activo autenticado; cuenta global propia, sin requerir pertenencia institucional.
+    description: Identidad global propia o contexto institucional explícito; respuesta sin secretos y Cache-Control
+      no-store.
+    responses:
+      '200':
+        description: Operación completada.
+        headers: &id001
+          Cache-Control:
+            schema:
+              type: string
+              const: no-store
+          X-Content-Type-Options:
+            schema:
+              type: string
+              const: nosniff
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/accounts.yaml#/OwnProfile
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '409':
+        $ref: ../components/responses.yaml#/Conflict
+      '429':
+        $ref: ../components/responses.yaml#/TooManyRequests
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+  patch:
+    tags:
+    - Accounts
+    operationId: updateOwnProfile
+    summary: Editar nombre y descripción propios
+    x-permissions: User activo autenticado; cuenta global propia, sin requerir pertenencia institucional.
+    description: Exige expectedUpdatedAt exacto; edición obsoleta devuelve 409. Correo, roles, flags y estado no
+      son editables.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/accounts.yaml#/ProfileUpdate
+    responses:
+      '200':
+        description: Operación completada.
+        headers: *id001
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/accounts.yaml#/OwnProfile
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '409':
+        $ref: ../components/responses.yaml#/Conflict
+      '429':
+        $ref: ../components/responses.yaml#/TooManyRequests
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+      '413':
+        $ref: ../components/responses.yaml#/PayloadTooLarge
+      '415':
+        $ref: ../components/responses.yaml#/UnsupportedMediaType
+/api/v1/me/password:
+  post:
+    tags:
+    - Accounts
+    operationId: changeOwnPassword
+    summary: Cambiar contraseña e invalidar sesiones anteriores
+    x-permissions: User activo autenticado; cuenta global propia, sin requerir pertenencia institucional.
+    description: Contraseña actual incorrecta devuelve 400. Hash, versión y auditoría son atómicos. Éxito exige
+      nuevo login en todas las sesiones.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/accounts.yaml#/PasswordChange
+    responses:
+      '204':
+        description: Operación completada.
+        headers: *id001
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '409':
+        $ref: ../components/responses.yaml#/Conflict
+      '429':
+        $ref: ../components/responses.yaml#/TooManyRequests
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+      '413':
+        $ref: ../components/responses.yaml#/PayloadTooLarge
+      '415':
+        $ref: ../components/responses.yaml#/UnsupportedMediaType
+/api/v1/me/avatar:
+  get:
+    tags:
+    - Accounts
+    operationId: getOwnAvatar
+    summary: Consultar foto privada propia
+    x-permissions: User activo autenticado; cuenta global propia, sin requerir pertenencia institucional.
+    description: Identidad global propia o contexto institucional explícito; respuesta sin secretos y Cache-Control
+      no-store.
+    responses:
+      '200':
+        description: Foto normalizada del titular.
+        headers: *id001
+        content:
+          image/webp:
+            schema:
+              type: string
+              format: binary
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '404':
+        $ref: ../components/responses.yaml#/NotFound
+      '409':
+        $ref: ../components/responses.yaml#/Conflict
+      '429':
+        $ref: ../components/responses.yaml#/TooManyRequests
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+  put:
+    tags:
+    - Accounts
+    operationId: putOwnAvatar
+    summary: Subir o reemplazar foto propia
+    x-permissions: User activo autenticado; cuenta global propia, sin requerir pertenencia institucional.
+    description: Límite de archivo 2 MiB y entrada 16 MP; normaliza WebP 1024×1024. Fallos conservan referencia
+      previa. Integración deshabilitada devuelve 503 sin modificar datos.
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            $ref: ../components/schemas/accounts.yaml#/AvatarUpload
+    responses:
+      '200':
+        description: Operación completada.
+        headers: *id001
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/accounts.yaml#/OwnProfile
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '409':
+        $ref: ../components/responses.yaml#/Conflict
+      '413':
+        $ref: ../components/responses.yaml#/PayloadTooLarge
+      '415':
+        $ref: ../components/responses.yaml#/UnsupportedMediaType
+      '429':
+        $ref: ../components/responses.yaml#/TooManyRequests
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+  delete:
+    tags:
+    - Accounts
+    operationId: deleteOwnAvatar
+    summary: Eliminar foto propia
+    x-permissions: User activo autenticado; cuenta global propia, sin requerir pertenencia institucional.
+    description: Identidad global propia o contexto institucional explícito; respuesta sin secretos y Cache-Control
+      no-store.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/accounts.yaml#/AvatarDelete
+    responses:
+      '200':
+        description: Operación completada.
+        headers: *id001
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/accounts.yaml#/OwnProfile
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '409':
+        $ref: ../components/responses.yaml#/Conflict
+      '429':
+        $ref: ../components/responses.yaml#/TooManyRequests
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+      '413':
+        $ref: ../components/responses.yaml#/PayloadTooLarge
+      '415':
+        $ref: ../components/responses.yaml#/UnsupportedMediaType
+/api/v1/institution/{institutionSlug}/invitations:
+  parameters:
+  - &id002
+    $ref: ../components/parameters.yaml#/InstitutionSlug
+  get:
+    tags:
+    - Accounts
+    operationId: listAccountInvitations
+    summary: Listar invitaciones institucionales
+    x-permissions: User, institución y pertenencia activos; isAdmin OR isSuperAdmin vigente del tenant. No concede
+      roles académicos.
+    description: Identidad global propia o contexto institucional explícito; respuesta sin secretos y Cache-Control
+      no-store.
+    responses:
+      '200':
+        description: Operación completada.
+        headers: *id001
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/accounts.yaml#/InvitationList
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '403':
+        $ref: ../components/responses.yaml#/Forbidden
+      '404':
+        $ref: ../components/responses.yaml#/NotFound
+      '409':
+        $ref: ../components/responses.yaml#/Conflict
+      '429':
+        $ref: ../components/responses.yaml#/TooManyRequests
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+    parameters:
+    - $ref: ../components/parameters.yaml#/Cursor
+    - $ref: ../components/parameters.yaml#/Limit
+  post:
+    tags:
+    - Accounts
+    operationId: createAccountInvitation
+    summary: Crear invitación sin crear cuenta todavía
+    x-permissions: User, institución y pertenencia activos; isAdmin OR isSuperAdmin vigente del tenant. No concede
+      roles académicos.
+    description: Idempotency-Key obligatorio. Misma clave/cuerpo recupera resultado; cambio de cuerpo da 409. No
+      revela cuentas de otras instituciones ni crea User/membership antes de activación.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/accounts.yaml#/InvitationCreate
+    responses:
+      '201':
+        description: Operación completada.
+        headers: *id001
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/accounts.yaml#/AccountInvitation
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '403':
+        $ref: ../components/responses.yaml#/Forbidden
+      '404':
+        $ref: ../components/responses.yaml#/NotFound
+      '409':
+        $ref: ../components/responses.yaml#/Conflict
+      '429':
+        $ref: ../components/responses.yaml#/TooManyRequests
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+      '413':
+        $ref: ../components/responses.yaml#/PayloadTooLarge
+      '415':
+        $ref: ../components/responses.yaml#/UnsupportedMediaType
+    parameters:
+    - &id003
+      $ref: ../components/parameters.yaml#/AccountOperationKey
+/api/v1/institution/{institutionSlug}/invitations/{invitationId}/send:
+  parameters:
+  - *id002
+  - $ref: ../components/parameters.yaml#/InvitationId
+  post:
+    tags:
+    - Accounts
+    operationId: sendAccountInvitation
+    summary: Enviar invitación pendiente
+    x-permissions: User, institución y pertenencia activos; isAdmin OR isSuperAdmin vigente del tenant. No concede
+      roles académicos.
+    description: 'Red fuera de transacción. Sin correo configurado: 503 INTEGRATION_NOT_CONFIGURED, sin emitir ni
+      rotar código. accepted significa aceptación por proveedor, no entrega ni activación. Reenvío explícito separado
+      60 s; respuestas inciertas requieren rotación confirmada.'
+    responses:
+      '200':
+        description: Operación completada.
+        headers: *id001
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/accounts.yaml#/AccountInvitation
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '403':
+        $ref: ../components/responses.yaml#/Forbidden
+      '404':
+        $ref: ../components/responses.yaml#/NotFound
+      '409':
+        $ref: ../components/responses.yaml#/Conflict
+      '410':
+        $ref: ../components/responses.yaml#/Gone
+      '429':
+        $ref: ../components/responses.yaml#/TooManyRequests
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+    parameters:
+    - *id003
+/api/v1/institution/{institutionSlug}/invitations/{invitationId}/resend:
+  parameters:
+  - *id002
+  - $ref: ../components/parameters.yaml#/InvitationId
+  post:
+    tags:
+    - Accounts
+    operationId: resendAccountInvitation
+    summary: Reenviar con código nuevo e invalidar el anterior
+    x-permissions: User, institución y pertenencia activos; isAdmin OR isSuperAdmin vigente del tenant. No concede
+      roles académicos.
+    description: 'Red fuera de transacción. Sin correo configurado: 503 INTEGRATION_NOT_CONFIGURED, sin emitir ni
+      rotar código. accepted significa aceptación por proveedor, no entrega ni activación. Reenvío explícito separado
+      60 s; respuestas inciertas requieren rotación confirmada.'
+    responses:
+      '200':
+        description: Operación completada.
+        headers: *id001
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/accounts.yaml#/AccountInvitation
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '403':
+        $ref: ../components/responses.yaml#/Forbidden
+      '404':
+        $ref: ../components/responses.yaml#/NotFound
+      '409':
+        $ref: ../components/responses.yaml#/Conflict
+      '410':
+        $ref: ../components/responses.yaml#/Gone
+      '429':
+        $ref: ../components/responses.yaml#/TooManyRequests
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+    parameters:
+    - *id003
+/api/v1/institution/{institutionSlug}/invitations/{invitationId}/revoke:
+  parameters:
+  - *id002
+  - $ref: ../components/parameters.yaml#/InvitationId
+  post:
+    tags:
+    - Accounts
+    operationId: revokeAccountInvitation
+    summary: Revocar invitación pendiente
+    x-permissions: User, institución y pertenencia activos; isAdmin OR isSuperAdmin vigente del tenant. No concede
+      roles académicos.
+    description: Revocación institucional atómica y auditada; invalida activación sin cambiar cuentas existentes.
+    responses:
+      '200':
+        description: Operación completada.
+        headers: *id001
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/accounts.yaml#/AccountInvitation
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '403':
+        $ref: ../components/responses.yaml#/Forbidden
+      '404':
+        $ref: ../components/responses.yaml#/NotFound
+      '409':
+        $ref: ../components/responses.yaml#/Conflict
+      '410':
+        $ref: ../components/responses.yaml#/Gone
+      '429':
+        $ref: ../components/responses.yaml#/TooManyRequests
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+/api/v1/auth/invitations/activate:
+  post:
+    tags:
+    - Accounts
+    operationId: activateAccountInvitation
+    summary: Activar cuenta nueva mediante código de invitación
+    x-permissions: Código vigente de un uso; institución/emisor autorizados. Cuenta existente exige login del titular.
+    description: Solo POST consume el código y crea identidad/pertenencia sin flags ni matrículas. Cuenta existente
+      devuelve 409 INVITATION_LOGIN_REQUIRED. GET del enlace no activa. Sin login automático.
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/accounts.yaml#/InvitationActivation
+    responses:
+      '204':
+        description: Operación completada.
+        headers: *id001
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '409':
+        $ref: ../components/responses.yaml#/Conflict
+      '410':
+        $ref: ../components/responses.yaml#/Gone
+      '429':
+        $ref: ../components/responses.yaml#/TooManyRequests
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+      '413':
+        $ref: ../components/responses.yaml#/PayloadTooLarge
+      '415':
+        $ref: ../components/responses.yaml#/UnsupportedMediaType
+/api/v1/me/invitations/accept:
+  post:
+    tags:
+    - Accounts
+    operationId: acceptAccountInvitation
+    summary: Aceptar pertenencia con cuenta existente autenticada
+    x-permissions: User activo autenticado; cuenta global propia, sin requerir pertenencia institucional.
+    description: Token válido y correo del titular coincidente. Conserva contraseña, nombre y pertenencias; nunca
+      reactiva revocados ni crea Enrollment.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/accounts.yaml#/InvitationAcceptance
+    responses:
+      '204':
+        description: Operación completada.
+        headers: *id001
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '409':
+        $ref: ../components/responses.yaml#/Conflict
+      '410':
+        $ref: ../components/responses.yaml#/Gone
+      '429':
+        $ref: ../components/responses.yaml#/TooManyRequests
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+      '413':
+        $ref: ../components/responses.yaml#/PayloadTooLarge
+      '415':
+        $ref: ../components/responses.yaml#/UnsupportedMediaType
+/api/v1/institution/{institutionSlug}/user-imports/preview:
+  parameters:
+  - *id002
+  post:
+    tags:
+    - Accounts
+    operationId: previewUserImport
+    summary: Validar CSV efímero y crear vista previa
+    x-permissions: User, institución y pertenencia activos; isAdmin OR isSuperAdmin vigente del tenant. No concede
+      roles académicos.
+    description: Hasta 100 filas/256 KiB, UTF-8 name,email. Solo memoria y datos derivados mínimos; preview 24 h.
+      No crea invitaciones/cuentas. Errores por fila bloquean confirmación completa.
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            $ref: ../components/schemas/accounts.yaml#/ImportPreview
+    responses:
+      '201':
+        description: Operación completada.
+        headers: *id001
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/accounts.yaml#/UserImport
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '403':
+        $ref: ../components/responses.yaml#/Forbidden
+      '404':
+        $ref: ../components/responses.yaml#/NotFound
+      '409':
+        $ref: ../components/responses.yaml#/Conflict
+      '413':
+        $ref: ../components/responses.yaml#/PayloadTooLarge
+      '415':
+        $ref: ../components/responses.yaml#/UnsupportedMediaType
+      '429':
+        $ref: ../components/responses.yaml#/TooManyRequests
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+    parameters:
+    - *id003
+/api/v1/institution/{institutionSlug}/user-imports/{importId}:
+  parameters:
+  - *id002
+  - $ref: ../components/parameters.yaml#/ImportId
+  get:
+    tags:
+    - Accounts
+    operationId: getUserImport
+    summary: Consultar preview o recibo institucional por lote
+    x-permissions: User, institución y pertenencia activos; isAdmin OR isSuperAdmin vigente del tenant. No concede
+      roles académicos.
+    description: Identidad global propia o contexto institucional explícito; respuesta sin secretos y Cache-Control
+      no-store.
+    responses:
+      '200':
+        description: Operación completada.
+        headers: *id001
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/accounts.yaml#/UserImport
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '403':
+        $ref: ../components/responses.yaml#/Forbidden
+      '404':
+        $ref: ../components/responses.yaml#/NotFound
+      '409':
+        $ref: ../components/responses.yaml#/Conflict
+      '429':
+        $ref: ../components/responses.yaml#/TooManyRequests
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+/api/v1/institution/{institutionSlug}/user-imports/{importId}/confirm:
+  parameters:
+  - *id002
+  - $ref: ../components/parameters.yaml#/ImportId
+  post:
+    tags:
+    - Accounts
+    operationId: confirmUserImport
+    summary: Confirmar lote completo una sola vez
+    x-permissions: User, institución y pertenencia activos; isAdmin OR isSuperAdmin vigente del tenant. No concede
+      roles académicos.
+    description: importId identifica confirmación idempotente. Revalida todas las filas y permisos; conflicto da
+      rollback completo/409. DB confirma antes de enviar correo, que se coordina después. Tras depurar devuelve
+      410 sin recrear altas.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/accounts.yaml#/ImportConfirmation
+    responses:
+      '200':
+        description: Operación completada.
+        headers: *id001
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/accounts.yaml#/UserImport
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '403':
+        $ref: ../components/responses.yaml#/Forbidden
+      '404':
+        $ref: ../components/responses.yaml#/NotFound
+      '409':
+        $ref: ../components/responses.yaml#/Conflict
+      '410':
+        $ref: ../components/responses.yaml#/Gone
+      '429':
+        $ref: ../components/responses.yaml#/TooManyRequests
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable
+      '413':
+        $ref: ../components/responses.yaml#/PayloadTooLarge
+      '415':
+        $ref: ../components/responses.yaml#/UnsupportedMediaType

@@ -42,24 +42,46 @@ test('attempt SQL integrity: tenant FKs, serial uniqueness, state consistency an
  }finally{await pool.end();}
 });
 test('attempt migration upgrades populated authoring data, repeats, restarts and fails readiness without a required column',async()=>{
- const pool=await database();let app;try{
-  const f=await attemptFixture(pool);
-  const {runner}=await import('node-pg-migrate'),c=await pool.connect();
+ const {mkdtemp,copyFile,readdir,rm}=await import('node:fs/promises'),{tmpdir}=await import('node:os'),{join}=await import('node:path');
+ const {reset,testUrl,secrets}=await import('./helpers.mjs');
+ const {question}=await import('./quiz-fixtures.mjs');
+ const migration=await import('../../dist/commands/migrate.js'),{runner}=await import('node-pg-migrate');
+ const pool=await database(),dir=await mkdtemp(join(tmpdir(),'authoring-upgrade-')),saved=process.env.MIGRATION_DATABASE_URL;let app;
+ try{
+  // Build the historical eleven-migration revision first. Never down credential/account migrations.
+  const historic=(await readdir(new URL('../../migrations/',import.meta.url))).filter(file=>/^\d+.*\.sql$/.test(file)&&file<'20261107000100').sort();
+  assert.equal(historic.length,11);
+  for(const file of historic)await copyFile(new URL('../../migrations/'+file,import.meta.url),join(dir,file));
+  await reset(pool);process.env.MIGRATION_DATABASE_URL=testUrl();
+  assert.deepEqual(await migration.default.migrate(dir),{created:11,existing:0});
+  assert.equal((await cli('seeds/demo',secrets()).result).code,0);
+  const tenant=(await pool.query("SELECT id FROM institutions WHERE slug='uc'")).rows[0].id;
+  const course=randomUUID(),section=randomUUID(),quiz=randomUUID(),item=randomUUID();
+  await pool.query("INSERT INTO courses(id,institution_id,code,name,term,created_by) VALUES($1,$2,'M','Populated authoring','2026-2',$3)",[course,tenant,users.owner]);
+  await pool.query("INSERT INTO sections(id,institution_id,course_id,code) VALUES($1,$2,$3,'1')",[section,tenant,course]);
+  await pool.query("INSERT INTO enrollments(id,institution_id,section_id,user_id,role) VALUES($1,$2,$3,$4,'student')",[randomUUID(),tenant,section,users.revoked]);
+  await pool.query("INSERT INTO quizzes(id,institution_id,course_id,section_id,title,questions,created_by,published_at) VALUES($1,$2,$3,$4,'Populated quiz',$5,$6,now())",[quiz,tenant,course,section,JSON.stringify([{...question,id:randomUUID()}]),users.owner]);
+  await pool.query("INSERT INTO grade_items(id,institution_id,course_id,quiz_id,title) VALUES($1,$2,$3,$4,'Populated quiz')",[item,tenant,course,quiz]);
   const parentTables=['users','institutions','institution_memberships','courses','sections','enrollments','quizzes','grade_items','audit_events'];
-  const snapshot=()=>Promise.all(parentTables.map(async table=>(await pool.query(`SELECT * FROM ${table} ORDER BY id`)).rows));
-  const parent=await snapshot();
-  try{await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir:new URL('../../migrations/',import.meta.url).pathname,direction:'down',count:6,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});}finally{c.release();}
+  const snapshot=()=>Promise.all(parentTables.map(async table=>(await pool.query(`SELECT to_jsonb(t)-ARRAY['bio','avatar_key','credential_version','gradebook_grouped','gradebook_version','group_id','max_points','assignment_id'] AS row FROM ${table} t ORDER BY id`)).rows));
+  const parent=await snapshot(),c=await pool.connect();
+  try{const down=await runner({dbClient:c,schema:'public',migrationsSchema:'public',migrationsTable:'pgmigrations',dir,direction:'down',count:6,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});assert.equal(down.length,6);}finally{c.release();}
   assert.equal((await pool.query("SELECT to_regclass('public.quiz_attempts') AS table")).rows[0].table,null);
   assert.equal((await cli('commands/migrate').result).code,0);assert.deepEqual(await snapshot(),parent);
-  const id=await f.create();
+  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,22);
+  const profileDefaults=(await pool.query('SELECT bio,avatar_key,credential_version FROM users')).rows;
+  assert.ok(profileDefaults.every(row=>row.bio===null&&row.avatar_key===null&&row.credential_version===0));
+  const id=randomUUID();
+  await pool.query("INSERT INTO quiz_attempts(id,institution_id,course_id,quiz_id,section_id,student_id,attempt_number,status,answers,start_key) VALUES($1,$2,$3,$4,$5,$6,1,'in_progress','[]',$7)",[id,tenant,course,quiz,section,users.revoked,randomUUID()]);
   const before=(await pool.query('SELECT * FROM quiz_attempts')).rows;
   assert.equal((await cli('commands/migrate').result).code,0);
+  assert.equal((await cli('commands/provision-runtime').result).code,0);
   app=await http();assert.equal((await fetch(app.base+'/ready')).status,200);await app.close();app=await http();
   assert.deepEqual((await pool.query('SELECT * FROM quiz_attempts')).rows,before);
-  assert.equal((await pool.query('SELECT * FROM quizzes WHERE id=$1',[f.quizzes.section])).rowCount,1);
+  assert.equal((await pool.query('SELECT * FROM quizzes WHERE id=$1',[quiz])).rowCount,1);
   await pool.query('ALTER TABLE quiz_attempts RENAME COLUMN start_key TO unavailable_key');
   assert.equal((await fetch(app.base+'/ready')).status,503);
   await pool.query('ALTER TABLE quiz_attempts RENAME COLUMN unavailable_key TO start_key');
-  assert.equal((await fetch(app.base+'/ready')).status,200);assert.ok(id);
- }finally{if(app)await app.close();await pool.end();}
+  assert.equal((await fetch(app.base+'/ready')).status,200);
+ }finally{if(app)await app.close();if(saved===undefined)delete process.env.MIGRATION_DATABASE_URL;else process.env.MIGRATION_DATABASE_URL=saved;await rm(dir,{recursive:true,force:true});await pool.end();}
 });
