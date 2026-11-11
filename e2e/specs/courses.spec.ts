@@ -43,7 +43,7 @@ test('E2E-COURSE-005 directory loading failure and retry use current identity / 
  let release!:()=>void,entered!:()=>void;const gate=new Promise<void>(r=>release=r),started=new Promise<void>(r=>entered=r);let gets=0;
  const path='**/api/v1/institution/uc/courses';
  await page.route(path,async route=>{gets++;expect(route.request().method()).toBe('GET');const actual=await route.fetch();expect(actual.status()).toBe(200);entered();await gate;await route.fulfill({status:503,contentType:'application/problem+json',body:JSON.stringify({status:503,title:'Unavailable'})});});
- try{await page.getByRole('link',{name:'Mis cursos',exact:true}).click();await started;await expect(page.getByRole('status').filter({hasText:'Cargando contenido'})).toBeVisible();release();await expect(page.getByRole('button',{name:'Reintentar',exact:true})).toBeVisible();
+ try{await page.getByRole('link',{name:'Mis cursos',exact:true}).click();await started;await expect(page.getByRole('status').filter({hasText:'Cargando cursos…'})).toBeVisible();await expect(page.getByRole('heading',{name:'Mis cursos',level:1})).toBeVisible();release();await expect(page.getByRole('button',{name:'Reintentar',exact:true})).toBeVisible();
  await page.unroute(path);const response=page.waitForResponse(r=>r.url().endsWith('/courses')&&r.request().method()==='GET');await page.getByRole('button',{name:'Reintentar',exact:true}).click();expect((await response).status()).toBe(200);await expect(page.locator('a.course-card')).toHaveCount(2);expect(gets).toBe(1);expect(await securitySnapshot(e)).toEqual(before);
  }finally{release();}
 });
