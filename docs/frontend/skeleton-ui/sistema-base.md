@@ -45,10 +45,30 @@ no tiene estado ni hace peticiones, así que también puede usarse desde un `loa
 | Movimiento reducido | `animation: none` en la región y las barras: el skeleton es visible desde el primer frame, estático, con opacidad 1. La regla global de `app.css` (duración de 0,01 ms) por sí sola produciría destellos con una animación infinita. |
 | Temas | Verificado con `data-theme="dark"` (la app todavía no expone un selector de tema). |
 
+## Transiciones del curso (PR 2)
+
+- `CourseSectionSkeleton` (`components/courses/course-skeleton.tsx`): encabezado con el
+  `<h1>` real de la sección, código, periodo y nombre como placeholders, dos pestañas
+  como formas (las únicas que recibe todo rol: Módulos y Quizzes) y un área neutra. Sin
+  enlaces ni landmark `nav`; las pestañas que dependen del rol llegan con la navegación real.
+- `CourseRouteLoading` se usa en `app/courses/loading.tsx` y `app/courses/[courseId]/loading.tsx`.
+  Según la ruta, renderiza el mismo skeleton que la página (`/courses` y las pestañas
+  Módulos, Quizzes, Tareas, Mis notas, Libro de notas y Auditoría). En detalles, Secciones
+  y rutas desconocidas mantiene `LoadingState`, igual que sus páginas.
+- `useSkeletonDelay`: el `loading.tsx` y la página son árboles distintos. Al reemplazarse,
+  el skeleton entrante continúa el tiempo transcurrido (se mide en `useLayoutEffect`, en
+  el commit) en vez de reiniciar el retardo. Medido con la app real y una API simulada:
+  el skeleton de ruta es visible a los ~250 ms y el de la página lo reemplaza con un
+  retardo de −100 ms, sin parpadeo.
+- Los placeholders de `PageHeaderSkeleton` siguen el mismo retardo y pulso
+  (`.page-heading .skeleton`), y la región hereda `--skeleton-delay`.
+- Límite conocido: en pantallas angostas, los roles con más de dos pestañas hacen crecer
+  la fila de navegación al cargar (teléfono, docente: de 43 a 126 px). Se acepta para no
+  anticipar permisos.
+
 ## Pendiente para las siguientes PR
 
-- Confirmar el retardo de 200 ms con la latencia real de Render antes de aplicarlo a
-  las pestañas del curso (PR 2).
+- Confirmar el retardo de 200 ms con la latencia real de Render.
 - Llevar estas reglas a DESIGN.md cuando se divida ese archivo.
 - Retirar `.gradebook-sr-only`, `.assignment-sr-only` y `.content-sr-only` a favor de
   `.sr-only` en la PR de limpieza final.
