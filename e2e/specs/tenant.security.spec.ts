@@ -139,7 +139,7 @@ for(const code of [200,401])test(`E2E-TENANT-015 stale response discarded after 
   await route.fulfill({response}).catch(()=>{});
  });
  try {
-  await go(page,e.data.courses.C1,'/grades');await started;
+  await go(page,e.data.courses.C1,'/grades',{waitForData:false});await started;
   await page.getByRole('button',{name:'Cerrar sesión',exact:true}).click();await login(page,e,'ST2');release();
   await expect(page.getByText(e.data.actors.ST2.name,{exact:true})).toBeVisible();await expect(page.getByText(e.data.actors.ST1.name,{exact:true})).toHaveCount(0);
   await go(page,e.data.courses.C1,'/grades');await expect(page.getByRole('heading',{name:'Aún no hay notas publicadas',exact:true})).toBeVisible();
