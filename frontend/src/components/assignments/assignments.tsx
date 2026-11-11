@@ -6,8 +6,8 @@ import { useSession } from "../auth/session-provider.tsx";
 import { ContentNotices, useContentNotice } from "../content/content-notices.tsx";
 import { CourseNavigation } from "../courses/course-navigation.tsx";
 import { useResource } from "../courses/use-resource.ts";
-import { ErrorState, LoadingState } from "../route-states.tsx";
-import { CourseSectionSkeleton } from "../courses/course-skeleton.tsx";
+import { ErrorState } from "../route-states.tsx";
+import { AssignmentSkeleton } from "./assignment-skeleton.tsx";
 import { getCourse } from "../../lib/api/courses.ts";
 import { listSections } from "../../lib/api/sections.ts";
 import {
@@ -57,7 +57,7 @@ function Workspace({courseId,assignmentId,scope}:Route & {scope:string}) {
   });
   if (!user || !resource.data) return resource.error
     ? <ErrorState feedback={resource.error} onRetry={()=>void resource.reload()}/>
-    : assignmentId ? <LoadingState/> : <CourseSectionSkeleton title="Tareas"/>;
+    : <AssignmentSkeleton kind={assignmentId ? "detail" : "list"} courseId={courseId}/>;
   const {course,sections,groups,items} = resource.data;
   const item = assignmentId ? items[0] : undefined;
   const allowed = destinations(user,course,sections), whole = canAuthor(user,course,sections,null);

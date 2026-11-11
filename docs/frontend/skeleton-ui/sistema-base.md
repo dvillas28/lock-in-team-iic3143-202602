@@ -84,6 +84,15 @@ no tiene estado ni hace peticiones, así que también puede usarse desde un `loa
 - `quizzes/loading.tsx` y la página renderizan la misma composición.
 - Los E2E esperan `loaded()` (sin `.skeleton-region` en `main`), no un encabezado.
 
+## Tareas y entregas (PR 5)
+
+- `AssignmentSkeleton` (`components/assignments/assignment-skeleton.tsx`) cubre listado y detalle
+  sobre `CourseSectionSkeleton`; `assignments/loading.tsx` renderiza la misma composición.
+- El detalle conserva el enlace real «Volver a Tareas» (`lead`), fuera de la región oculta.
+- Entregas del docente, del estudiante y la revisión mantienen su título real; debajo, una
+  región con la geometría medida (tabla con `caption`, zona de entrega, formulario de nota).
+- Barras junto a un título real fuera de `.page-heading` usan `.skeleton-heading`.
+
 ## Pendiente para las siguientes PR
 
 - Confirmar el retardo de 200 ms con la latencia real de Render.
