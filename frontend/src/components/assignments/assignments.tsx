@@ -227,7 +227,7 @@ function Directory({items,href,now,staff,section,create,weights}:DirectoryProps)
           <h2 id={`${ids}-${key}`} className="serif">{group.title}</h2>
           <span className="assignment-group-meta hint tnum">
             {byGroup && group.weight!==undefined && <span>Ponderación: {points.format(group.weight)} %</span>}
-            <span>{group.items.length}<span className="assignment-sr-only"> {group.items.length===1 ? "tarea" : "tareas"}</span></span>
+            <span>{group.items.length}<span className="sr-only"> {group.items.length===1 ? "tarea" : "tareas"}</span></span>
           </span>
         </header>
         <ul className="assignment-list">{group.items.map(item=><li key={item.id}>

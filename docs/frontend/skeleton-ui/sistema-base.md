@@ -97,8 +97,6 @@ no tiene estado ni hace peticiones, así que también puede usarse desde un `loa
 
 - Confirmar el retardo de 200 ms con la latencia real de Render.
 - Llevar estas reglas a DESIGN.md cuando se divida ese archivo.
-- Retirar `.gradebook-sr-only`, `.assignment-sr-only` y `.content-sr-only` a favor de
-  `.sr-only` en la PR de limpieza final.
 
 ## Lectores y archivos (PR 6)
 
@@ -129,3 +127,22 @@ no tiene estado ni hace peticiones, así que también puede usarse desde un `loa
 - Medido (escritorio): filas, cabecera y anchos de columna del libro idénticos al real;
   Mis notas, auditoría y cuentas con alturas iguales. En móvil difieren solo filas cuyo
   contenido real se ajusta (auditoría, acciones de invitaciones) y la barra del docente.
+
+## Shell, sesión y limpieza final (PR 8)
+
+- `AppShellSkeleton` (`components/institutions/app-shell-skeleton.tsx`) reemplaza el estado
+  de `ProtectedInstitution` con sesión iniciada y contexto pendiente. Usa las clases del shell
+  real, aria-hidden y sin landmarks, enlaces, nombres, institución ni roles: solo la marca y
+  las dos filas que recibe todo miembro. Las superficies aparecen al instante; las barras
+  (`.skeleton-shell`) siguen el retardo. Anónimos, slug heredado y host incorrecto no lo usan.
+- Las guardas no cambian: `/login?next=`, `InstitutionAccessNotice`, `contextWarning`,
+  `fieldset.access-boundary` y el error de contexto (401/403/404/500) quitan el marco.
+- `LoadingState` es el fallback neutro: `SkeletonRegion` con «Cargando contenido…», sin
+  `<h1>`, controles, borde discontinuo ni `aria-busy`. Lo conservan las rutas sin geometría
+  conocida (detalles, slug heredado, redirecciones), la carga de la cuenta e `InstitutionUsers`
+  (no anticipa la vista administrativa). Las ramas `!context.user` restantes usan su skeleton.
+- `.sr-only` reemplaza a `.gradebook-`, `.assignment-`, `.content-` y `.quiz-sr-only`.
+- Medido: escritorio y móvil, el marco coincide con el shell real en barra lateral, insignia,
+  filas, encabezado y contenido; solo el pie lateral es más bajo (sin «Cerrar sesión»).
+  Sin scroll horizontal, sin parpadeo en respuestas de 150 ms y barras visibles en oscuro.
+- Pendiente: el `<h1>` de `ErrorState` se duplica dentro de vistas con título (estados vacíos).

@@ -1,8 +1,9 @@
-import { CircleAlert, FileQuestion, Inbox, LoaderCircle } from "lucide-react";
+import { CircleAlert, FileQuestion, Inbox } from "lucide-react";
 import Link from "next/link";
 import { useId, type ReactNode } from "react";
 
 import type { RouteFeedback } from "../lib/route-feedback.ts";
+import { Skeleton, SkeletonRegion } from "./skeletons.tsx";
 
 type StatePanelProps = Readonly<{
   title: string;
@@ -11,13 +12,12 @@ type StatePanelProps = Readonly<{
   children?: ReactNode;
   heading?: "h1" | "h2";
   role?: "status" | "alert";
-  busy?: boolean;
 }>;
 
-function StatePanel({ title, message, icon, children, heading: Heading = "h1", role, busy }: StatePanelProps) {
+function StatePanel({ title, message, icon, children, heading: Heading = "h1", role }: StatePanelProps) {
   const titleId = useId();
   return (
-    <section className="empty-zone panel stack" aria-labelledby={titleId} aria-busy={busy}>
+    <section className="empty-zone panel stack" aria-labelledby={titleId}>
       <div role={role} className="stack">
         <span aria-hidden="true">{icon}</span>
         <Heading id={titleId} className="serif">{title}</Heading>
@@ -28,8 +28,18 @@ function StatePanel({ title, message, icon, children, heading: Heading = "h1", r
   );
 }
 
+/**
+ * Neutral fallback for views whose geometry is unknown or not yet authorized: one announcement,
+ * no heading and no controls, and the same reveal delay and pulse as the contextual skeletons.
+ */
 export function LoadingState() {
-  return <StatePanel title="Cargando contenido" message="Espera un momento." icon={<LoaderCircle size={20} />} role="status" busy />;
+  return <SkeletonRegion label="Cargando contenido…">
+    <div className="card panel stack">
+      <Skeleton width="min(16rem, 60%)" />
+      <Skeleton width="90%" />
+      <Skeleton width="72%" />
+    </div>
+  </SkeletonRegion>;
 }
 
 export function EmptyState() {

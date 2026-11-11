@@ -13,6 +13,8 @@ import { AttemptReview } from "../src/components/attempts/attempt-review.tsx";
 import { AttemptDetail } from "../src/components/attempts/attempt-detail.tsx";
 import { CourseRouteLoading } from "../src/components/courses/course-route-loading.tsx";
 import { QuizSkeleton, quizSkeletonKind, type QuizSkeletonKind } from "../src/components/quizzes/quiz-skeleton.tsx";
+import { AppRouterContext, type AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime.js";
+import { SessionProvider } from "../src/components/auth/session-provider.tsx";
 import { mount } from "./fixtures/course-ui.ts";
 import { course, draft, id, reply } from "./fixtures/quizzes.ts";
 
@@ -47,9 +49,20 @@ test("every quiz and attempt view shows its skeleton, the same one its route fal
   }
 });
 
+test("without an institutional context each view draws its own skeleton, never the neutral fallback", () => {
+  const router: AppRouterInstance = { back() {}, forward() {}, refresh() {}, prefetch() {}, push() {}, replace() {}, bfcacheId: "test" };
+  for (const [kind, path, view] of views) {
+    const doc = parse(h(AppRouterContext.Provider, { value: router }, h(SessionProvider, null, view)));
+    assert.doesNotMatch(doc.body.textContent!, /Cargando contenido/, kind);
+    assert.equal(shape(doc), shape(path ? route(path) : parse(h(QuizSkeleton, { kind }))), `${kind}: same composition`);
+  }
+});
+
 test("routes outside the quiz views keep their own fallback", () => {
   for (const path of [`${base}/${quizId}/other`, `${base}/${quizId}/attempts/${attemptId}/x`, `/courses/${course.id}/assignments`]) assert.equal(quizSkeletonKind(path), undefined, path);
-  assert.equal(route(`${base}/${quizId}/other`).querySelector(".skeleton"), null);
+  const other = route(`${base}/${quizId}/other`);
+  assert.equal(other.querySelector(".academic-workspace, .skeleton-course-tabs, h1"), null, "neutral fallback only");
+  assert.equal(other.querySelector('[role="status"]')?.textContent, "Cargando contenido…");
 });
 
 test("the list hands over to the real directory, its empty state and the real tabs", async () => {

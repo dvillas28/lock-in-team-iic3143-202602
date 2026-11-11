@@ -75,7 +75,9 @@ test("list and detail show their skeleton, the same one their route fallback ren
 
 test("routes outside the assignment views keep their own fallback", () => {
   for (const path of [`${base}/${assignmentId}/other`, `/courses/${course.id}/assignmentsx`, `/courses/${course.id}/quizzes`]) assert.equal(assignmentSkeletonRoute(path), undefined, path);
-  assert.equal(route(`${base}/${assignmentId}/other`).querySelector(".skeleton"), null);
+  const other = route(`${base}/${assignmentId}/other`);
+  assert.equal(other.querySelector(".academic-workspace, .skeleton-course-tabs, h1"), null, "neutral fallback only");
+  assert.equal(other.querySelector('[role="status"]')?.textContent, "Cargando contenido…");
 });
 
 test("list and detail hand over to the real view without leftover placeholders", async () => {

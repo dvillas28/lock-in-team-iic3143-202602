@@ -11,7 +11,7 @@ import { getAttemptReview } from '../../lib/api/attempts.ts';
 import { gradebookCapabilities } from '../../lib/gradebook/capabilities.ts';
 import { attemptCapabilities } from '../../lib/attempts/capabilities.ts';
 import { ApiHttpError, ApiResponseError } from '../../lib/api/errors.ts';
-import { LoadingState, ErrorState } from '../route-states.tsx';
+import { ErrorState } from '../route-states.tsx';
 import { QuizSkeleton } from "../quizzes/quiz-skeleton.tsx";
 export function AttemptReview({ courseId, quizId, attemptId }: Readonly<{
     courseId: string;
@@ -31,7 +31,7 @@ export function AttemptReview({ courseId, quizId, attemptId }: Readonly<{
         return { course, quiz, attempt };
     });
     if (!context?.user) {
-        return <LoadingState />;
+        return <QuizSkeleton kind="review"/>;
     }
     if (r.error) {
         return <ErrorState feedback={r.error} onRetry={() => void r.reload()}/>;

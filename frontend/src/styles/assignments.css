@@ -100,10 +100,6 @@
 .assignment-schedule > .form-grid { grid-template-columns: repeat(auto-fit,minmax(min(100%, 260px),1fr)); }
 .assignment-date-controls { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; align-items: end; }
 .assignment-date-controls > .field-label { grid-column: 1 / -1; }
-.assignment-sr-only {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
-}
 .assignment-datetime-input { grid-column: 1 / -1; min-width: 0; }
 .assignment-datetime-input[aria-invalid="true"] { border-color: var(--danger); box-shadow: 0 0 0 1px var(--danger); }
 .assignment-delivery-grid input[aria-invalid="true"],

@@ -83,7 +83,7 @@ export function AssignmentFormatSelector({ value, error, invalid, required, onCh
         <ChevronDown size={16} aria-hidden="true"/>
       </button>
       {open && <fieldset className="assignment-format-options" aria-labelledby={`${id}-label`} aria-invalid={invalid || undefined}>
-        <legend className="assignment-sr-only">Selecciona uno o más formatos</legend>
+        <legend className="sr-only">Selecciona uno o más formatos</legend>
         {formatOptions.map(option => {
           const checked = option.extensions.every(extension => selected.has(extension));
           return <label className="assignment-format-option" key={option.label}>

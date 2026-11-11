@@ -6,7 +6,7 @@ import { CourseNavigation } from "../courses/course-navigation.tsx";
 import { capabilities } from "../../lib/courses/capabilities.ts";
 import { useSession } from "../auth/session-provider.tsx";
 import { useResource } from "../courses/use-resource.ts";
-import { ErrorState, LoadingState } from "../route-states.tsx";
+import { ErrorState } from "../route-states.tsx";
 import { CourseSectionSkeleton } from "../courses/course-skeleton.tsx";
 import { ModulesPending, ModulesSkeleton } from "./modules-skeleton.tsx";
 import { getCourse } from "../../lib/api/courses.ts";
@@ -61,7 +61,7 @@ function ModuleRow({ session, slug, parent, author, items, reload, disabled, mov
 }
 export function ModulesPanel({ courseId }: { courseId: string }) {
   const {state} = useSession();
-  if (!state.context?.user) return <LoadingState />;
+  if (!state.context?.user) return <CourseSectionSkeleton title="Módulos y material"><ModulesSkeleton /></CourseSectionSkeleton>;
   return <ContentNotices key={`${state.generation}:${state.context.slug}:${courseId}`}>
     <CourseContent courseId={courseId} />
   </ContentNotices>;
@@ -75,7 +75,7 @@ function CourseContent({ courseId }: { courseId: string }) {
   useRefreshOnReturn(result.reload, !!result.data && !result.refreshing);
   const mutation = useContentMutation(session);
   const [requested, setRequested] = useState({ id: "", revision: 0 });
-  if (!state.context?.user) return <LoadingState />;
+  if (!state.context?.user) return <CourseSectionSkeleton title="Módulos y material"><ModulesSkeleton /></CourseSectionSkeleton>;
   // Retry both reads: a connection loss fails the course and its modules together.
   if (courseError) return <ErrorState feedback={courseError} onRetry={() => { void reloadCourse(); if (result.error) void result.reload(); }} />;
   if (!course) return <CourseSectionSkeleton title="Módulos y material"><ModulesSkeleton /></CourseSectionSkeleton>;

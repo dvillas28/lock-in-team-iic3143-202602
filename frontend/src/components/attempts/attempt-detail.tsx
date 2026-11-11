@@ -19,7 +19,7 @@ import {getCourse} from "../../lib/api/courses.ts";
 import {ApiHttpError} from "../../lib/api/errors.ts";
 import {useSession} from "../auth/session-provider.tsx";
 import {useResource} from "../courses/use-resource.ts";
-import {ErrorState,LoadingState} from "../route-states.tsx";
+import {ErrorState} from "../route-states.tsx";
 import { QuizSkeleton } from "../quizzes/quiz-skeleton.tsx";
 import {useAttemptOperations} from "./use-attempt-operations.ts";
 import {AttemptReceipt,AttemptSubmitDialog,AttemptSubmitRecovery} from "./attempt-submit.tsx";
@@ -44,7 +44,7 @@ export function AttemptDetail({attemptId}:{attemptId:string}){
   const detail=attemptCapabilities(context.user,course,quiz,current).edit?await getAttemptQuestions(c,slug,current,course.id):quiz;
   return {attempt:current,quiz:detail,course};
  });
- if(!context?.user)return <LoadingState/>;
+ if(!context?.user)return <QuizSkeleton kind="attempt"/>;
  if(result.error)return <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/>;
  if(!result.data)return <QuizSkeleton kind="attempt"/>;
  if(!result.data.quiz||!result.data.course){

@@ -58,11 +58,13 @@ test("home delegates private content to the course directory", () => {
   assert.match(renderToStaticMarkup(createElement(EmptyState)), /aria-labelledby=/);
 });
 
-test("loading announces progress and marks the content as busy", () => {
+test("loading is a neutral fallback that announces progress once", () => {
   const html = renderToStaticMarkup(createElement(Loading));
-  assert.match(html, /aria-busy="true"/);
-  assert.match(html, /role="status"/);
-  assert.match(html, /Cargando contenido/);
+  assert.equal(html.match(/role="status"/g)?.length, 1);
+  assert.match(html, /<p role="status" class="sr-only">Cargando contenido…<\/p>/);
+  assert.match(html, /class="skeleton-content" aria-hidden="true"/);
+  // aria-busy would silence the status; a heading, link or dashed panel would read as content.
+  assert.doesNotMatch(html, /aria-busy|<h[1-6]|<a |<button|tabindex|empty-zone|Espera un momento/);
 });
 
 for (const [status, title, retryable] of [
