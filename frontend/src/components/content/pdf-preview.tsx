@@ -2,6 +2,7 @@
 
 import {useEffect,useRef,useState} from "react";
 import {ChevronLeft,ChevronRight,Minus,Plus,Scan} from "lucide-react";
+import {PdfSheetSkeleton} from "./document-skeleton.tsx";
 import type {PDFDocumentLoadingTask,PDFDocumentProxy,RenderTask,TextLayer} from "pdfjs-dist";
 
 export function PdfPreview({file}:{file:Blob}) {
@@ -80,6 +81,7 @@ export function PdfPreview({file}:{file:Blob}) {
  },[document,page,zoom,width,current]);
 
  if (failure) return <p className="notice" role="alert">{failure}</p>;
+ const pending=rendered!==current;
  return <section className="card pdf-preview" aria-label="Visor de PDF">
   <div className="pdf-toolbar">
    <div className="pdf-controls">
@@ -99,11 +101,13 @@ export function PdfPreview({file}:{file:Blob}) {
      onClick={()=>setZoom(1)}><Scan size={18} aria-hidden="true"/></button>
    </div>
   </div>
-  <div className="pdf-viewport" ref={viewport} tabIndex={0} role="region" aria-label="Página del documento" aria-busy={rendered!==current}>
-   {rendered!==current && <p className="pdf-loading" role="status">Cargando página…</p>}
-   <div className="pdf-sheet" ref={sheet} style={{visibility:rendered===current?"visible":"hidden"}}>
+  <div className="pdf-viewport" ref={viewport} tabIndex={0} role="region" aria-label="Página del documento" aria-busy={pending}>
+   {pending && <p className="pdf-loading" role="status">Cargando página…</p>}
+   {/* The paper stays in place while a page renders; only its canvas and text layer wait. */}
+   <div className={pending?"pdf-sheet is-pending":"pdf-sheet"} ref={sheet}>
     <canvas ref={canvas} aria-hidden="true"/>
     <div className="pdf-text-layer" ref={text}/>
+    {pending && <PdfSheetSkeleton/>}
    </div>
   </div>
  </section>;
