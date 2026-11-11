@@ -18,6 +18,7 @@ import { quizInput, type Authoring } from "../../lib/quizzes/validation.ts";
 import { ApiHttpError } from "../../lib/api/errors.ts";
 import { FieldError } from "../../lib/courses/validation.ts";
 import { ErrorState, LoadingState } from "../route-states.tsx";
+import { QuizSkeleton } from "./quiz-skeleton.tsx";
 import { QuizDraftForm, QuizDraftSave, QuizPublishSubmit, useQuizDraft, type PublishRequest } from "./quiz-draft-form.tsx";
 import { QuizLeaveGuard } from "./quiz-leave-guard.tsx";
 import { PublishedItem, QuizPublishDialog, usePublication } from "./quiz-publish.tsx";
@@ -36,7 +37,7 @@ export function QuizEditor({courseId,quizId,listQuery=""}:{courseId:string;quizI
   });
   if(!context?.user) return <LoadingState/>;
   if(result.error) return <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/>;
-  if(!result.data) return <LoadingState/>;
+  if(!result.data) return <QuizSkeleton kind="edit"/>;
   return <AuthoringForm key={scope} {...result.data} listQuery={listQuery}/>;
 }
 function AuthoringForm({course,sections,quiz,groups,groupsUnavailable,listQuery}:{course:Awaited<ReturnType<typeof getCourse>>;sections:Awaited<ReturnType<typeof listSections>>;quiz:Authoring;groups?:EvaluationGroup[];groupsUnavailable:boolean;listQuery:string}) {

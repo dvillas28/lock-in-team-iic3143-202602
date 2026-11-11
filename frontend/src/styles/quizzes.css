@@ -160,3 +160,8 @@
   .quiz-publish-actions .btn { flex: 1; justify-content: center; }
 }
 @media (prefers-reduced-motion: reduce) { .quiz-row-link { transition: none; } }
+
+/* Skeleton UI: medidas de los títulos reales (h2 de sección y de grupo), sin encabezados vacíos. */
+.quiz-group > header .skeleton-quiz-group-title { font-size: 20px; line-height: 1.2; }
+.skeleton-quiz-heading { font-size: 22px; line-height: 1.25; }
+.skeleton-field { gap: 6px; }

@@ -8,12 +8,14 @@ import { useSkeletonDelay } from "../use-skeleton-delay.ts";
  * real `<h1>`; course code, term and name are placeholders. Only the two tabs every role receives
  * (Módulos y material, Quizzes) are drawn, as plain shapes: role-dependent tabs appear with the
  * real navigation, and nothing here is a link. `children` replaces the neutral content area with
- * the section's own placeholder.
+ * the section's own placeholder. A title that is data (a quiz name) is a placeholder too, and then
+ * the view names what loads in `label`.
  */
-export function CourseSectionSkeleton({ title, children }: Readonly<{ title: string; children?: ReactNode }>) {
+type Props = Readonly<{ children?: ReactNode } & ({ title: string; label?: string } | { title?: undefined; label: string })>;
+export function CourseSectionSkeleton({ title, label, children }: Props) {
   return <div className="stack academic-workspace" ref={useSkeletonDelay<HTMLDivElement>()}>
     <PageHeaderSkeleton title={title} />
-    <SkeletonRegion label={`Cargando ${title.toLocaleLowerCase("es")}…`}>
+    <SkeletonRegion label={label ?? `Cargando ${title!.toLocaleLowerCase("es")}…`}>
       <div className="stack">
         <div className="course-navigation skeleton-course-tabs">
           <span className="course-tab"><Skeleton width="7.5rem" /></span>
