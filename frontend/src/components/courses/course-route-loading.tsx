@@ -3,6 +3,7 @@ import { usePathname } from "next/navigation";
 import { LoadingState } from "../route-states.tsx";
 import { CourseDirectorySkeleton } from "./course-directory.tsx";
 import { CourseSectionSkeleton } from "./course-skeleton.tsx";
+import { ModulesSkeleton } from "../content/modules-skeleton.tsx";
 
 /** Section titles that each page renders before its data; kept equal by `course-loading.test.ts`. */
 export const courseSectionTitles: Readonly<Record<string, string>> = {
@@ -24,5 +25,6 @@ export function CourseRouteLoading() {
   if (pathname === "/courses") return <CourseDirectorySkeleton />;
   const section = /^\/courses\/[^/]+\/([^/]+)$/.exec(pathname)?.[1];
   const title = section && Object.hasOwn(courseSectionTitles, section) ? courseSectionTitles[section] : undefined;
-  return title ? <CourseSectionSkeleton title={title} /> : <LoadingState />;
+  if (!title) return <LoadingState />;
+  return section === "modules" ? <CourseSectionSkeleton title={title}><ModulesSkeleton /></CourseSectionSkeleton> : <CourseSectionSkeleton title={title} />;
 }

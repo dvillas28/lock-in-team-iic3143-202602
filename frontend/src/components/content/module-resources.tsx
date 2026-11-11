@@ -6,7 +6,8 @@ import Link from "next/link";
 import {useResource} from "../courses/use-resource.ts";
 import {useRefreshOnReturn} from "./use-refresh-on-return.ts";
 import {useContentMutation} from "./content-notices.tsx";
-import {ErrorState,EmptyState,LoadingState} from "../route-states.tsx";
+import {ErrorState,EmptyState} from "../route-states.tsx";
+import {ResourcesPending} from "./modules-skeleton.tsx";
 import {deleteAcademicFile,listModuleResources,moveResource,unlinkModuleQuiz} from "../../lib/api/academic-files.ts";
 import type {Session} from "../../lib/auth/session.ts";
 import {fileExtension,formatBytes,type AcademicFile,type ModuleQuiz,type ModuleResource,type UploadLimits} from "../../lib/content/academic-files.ts";
@@ -87,7 +88,7 @@ export function ModuleResources({session,slug,parent,author,disabled,course,expa
   if (panel) panels.current?.querySelector<HTMLElement>(`[data-panel="${panel}"] input:not([type=hidden]),[data-panel="${panel}"] textarea`)?.focus();
  },[panel]);
  if (result.error&&!result.data) return <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/>;
- if (!result.data) return slow ? <LoadingState/> : <div className="resource-pending" aria-busy="true"/>;
+ if (!result.data) return slow ? <ResourcesPending/> : <div className="resource-pending" aria-busy="true"/>;
  const {items,limits}=result.data;
  const unavailable=disabled||!!result.error||!!result.refreshing||mutation.busy||!!mutation.uncertain;
  const row={session,slug,parent,author,disabled:unavailable,reload:result.reload};
