@@ -9,6 +9,7 @@ import { PathnameContext } from "next/dist/shared/lib/hooks-client-context.share
 import { SessionProvider, useSession } from "../src/components/auth/session-provider.tsx";
 import { LoginForm } from "../src/components/auth/login-form.tsx";
 import { ProtectedInstitution } from "../src/components/auth/protected-institution.tsx";
+import { ProtectedAccount } from "../src/components/accounts/protected-account.tsx";
 import InstitutionsPage from "../src/app/institutions/page.tsx";
 import Home from "../src/app/page.tsx";
 
@@ -437,4 +438,86 @@ test('name edits preserve the private draft while permission changes remount its
   isAdmin=true;await act(async()=>{ui.dom.window.dispatchEvent(new ui.dom.window.Event('focus'));await flush();});
   assert.equal(ui.doc.querySelector('input[name="private-draft"]')===input,false);assert.equal(ui.doc.querySelector<HTMLInputElement>('input[name="private-draft"]')!.value,'original');
  }finally{await ui.close();}
+});
+
+// Shell skeleton (PR 8): a decorative frame while the institutional context is unknown.
+const account={id,name:"Persona",email:"persona@example.test",bio:null,hasAvatar:false,updatedAt:"2026-11-07T12:00:00.000001Z",capabilities:{avatar:false,invitationEmail:false}};
+const admin=(slug="uc")=>({...user(slug),institutionMembership:{...user(slug).institutionMembership,isAdmin:true}});
+function assertShellSkeleton(doc:Document,slug="uc"){
+  const frame=doc.querySelector(".app-shell-skeleton");
+  assert.ok(frame,"shell skeleton while the context loads");
+  assert.equal(frame.textContent,"AcademiXCargando contenido…","only the product mark and one status: no names, institution or roles");
+  assert.deepEqual([...doc.querySelectorAll('[role="status"]')].map(e=>e.textContent),["Cargando contenido…"]);
+  assert.equal(doc.querySelector("a, button, input, select, textarea, [tabindex], fieldset"),null,"no links, controls or focus targets");
+  assert.equal(doc.querySelector("nav, aside, header, h1, h2, [aria-busy]"),null,"no landmarks or headings before access is known");
+  for(const part of frame.querySelectorAll(".skeleton-shell"))assert.equal(part.getAttribute("aria-hidden"),"true");
+  assert.equal(frame.querySelectorAll(".skeleton-shell .nav-item").length,2,"only rows every member receives");
+  assert.doesNotMatch(doc.body.textContent!,new RegExp(`PRIVATE_CONTENT|PROFILE_CONTENT|Persona|Usuarios institucionales|Institución|${slug}`,"i"));
+}
+
+for(const slug of ["uc","utfsm"]){
+  test(`${slug.toUpperCase()}: a pending context shows only the shell frame and the real shell replaces it`,async()=>{
+    let me:ReturnType<typeof deferred<Response>>|undefined=deferred<Response>();
+    const ui=await mount({url:`https://${slug}.academix.dvillasc.me/login`,reply:r=>r.method==="POST"?Response.json(login()):r.url.endsWith(`/institution/${slug}/me`)?(me?me.promise:Response.json(admin(slug))):
+      r.url.endsWith("/api/v1/me")?Response.json(account):Response.json({items:[institution("uc"),institution("utfsm")]})});
+    try{
+      await ui.submit();assert.equal(ui.path,"/courses");assertShellSkeleton(ui.doc,slug);
+      assert.ok(ui.requests.every(r=>!r.url.includes(`/institution/${slug==="uc"?"utfsm":"uc"}/`)),"no other tenant is consulted");
+      await act(async()=>{me!.resolve(Response.json(admin(slug)));await flush();});me=undefined;
+      assert.equal(ui.doc.querySelector(".app-shell-skeleton, .skeleton"),null);
+      assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);assert.match(ui.doc.body.textContent!,new RegExp(`Institución: ${slug.toUpperCase()}`));
+      assert.ok(ui.doc.querySelector('aside[aria-label="Contexto institucional"] a[href="/admin/users"]'),"role links arrive only with the real shell");
+      assert.equal(ui.doc.querySelector("a")?.textContent,"Saltar al contenido","keyboard order starts at the real skip link");
+      assert.ok(ui.doc.querySelector("fieldset.access-boundary:not([disabled])"));
+    }finally{await ui.close();}
+  });
+}
+
+for(const [status,title] of [[403,"Permisos insuficientes"],[404,"Recurso no disponible"],[500,"No se pudo completar la solicitud"]] as const){
+  test(`context ${status} replaces the shell frame with its error, and retry recovers`,async()=>{
+    let reply:Response|ReturnType<typeof deferred<Response>>=Response.json({detail:"PRIVATE_INTERNAL"},{status});
+    const ui=await mount({reply:r=>r.method==="POST"?Response.json(login()):r.url.endsWith("/institution/uc/me")?(reply instanceof Response?reply.clone():reply.promise):Response.json({items:[institution()]})});
+    try{
+      await ui.submit();assert.equal(ui.path,"/courses");
+      assert.equal(ui.doc.querySelector(".app-shell-skeleton, .skeleton, .skeleton-region"),null,"no skeleton survives an error");
+      assert.equal(ui.doc.querySelector('[role="alert"] h1')?.textContent,title);
+      assert.ok([...ui.doc.querySelectorAll("button")].some(b=>b.textContent==="Cerrar sesión"));
+      assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT|PRIVATE_INTERNAL|Contexto institucional/);
+      if(status!==500){assert.equal([...ui.doc.querySelectorAll("button")].some(b=>b.textContent==="Reintentar"),false);return;}
+      reply=deferred<Response>();await ui.click("Reintentar");assertShellSkeleton(ui.doc);
+      await act(async()=>{(reply as ReturnType<typeof deferred<Response>>).resolve(Response.json(user()));await flush();});
+      assert.equal(ui.doc.querySelector(".app-shell-skeleton"),null);assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+    }finally{await ui.close();}
+  });
+}
+
+test("context 401 leaves the shell frame for login without private content",async()=>{
+  const ui=await mount({reply:r=>r.method==="POST"?Response.json(login()):r.url.endsWith("/institution/uc/me")?Response.json({},{status:401}):Response.json({items:[institution()]})});
+  try{await ui.submit();assert.equal(ui.path,"/login");assert.equal(ui.doc.querySelector(".app-shell-skeleton, .skeleton"),null);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE_CONTENT|Contexto institucional/);}finally{await ui.close();}
+});
+
+test("anonymous, redirecting and wrong-institution states never draw the shell frame",async()=>{
+  const ui=await mount({url:"https://uc.academix.dvillasc.me/courses"});
+  try{
+    assert.equal(ui.path,"/login");assert.match(ui.dom.window.location.search,/next=%2Fcourses/);assert.equal(ui.doc.querySelector(".app-shell-skeleton"),null);
+    await ui.submit();assert.equal(ui.path,"/courses");
+    await ui.navigate("/institutions/utfsm");assert.match(ui.doc.body.textContent!,/Elige tu universidad para continuar/);assert.equal(ui.doc.querySelector(".app-shell-skeleton, .skeleton"),null);
+    await ui.navigate("/institutions/uc");assert.equal(ui.path,"/courses");assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+  }finally{await ui.close();}
+});
+
+test("Cursos and Perfil keep a shell: the profile reuses the real one, courses wait on the frame",async()=>{
+  let me:ReturnType<typeof deferred<Response>>|undefined;
+  const ui=await mount({reply:r=>r.method==="POST"?Response.json(login()):r.url.endsWith("/institution/uc/me")?(me?me.promise:Response.json(user())):
+    r.url.endsWith("/api/v1/me")?Response.json(account):Response.json({items:[institution()]})});
+  const courses=createElement(ProtectedInstitution,null,createElement("p",null,"PRIVATE_CONTENT"));
+  try{
+    await ui.submit();assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+    await ui.custom(createElement(ProtectedAccount,null,createElement("p",null,"PROFILE_CONTENT")));
+    assert.equal(ui.doc.querySelector(".app-shell-skeleton"),null);assert.match(ui.doc.body.textContent!,/PROFILE_CONTENT/);
+    assert.ok(ui.doc.querySelector('aside[aria-label="Contexto institucional"]'));
+    me=deferred<Response>();await ui.custom(courses);assertShellSkeleton(ui.doc);
+    await act(async()=>{me!.resolve(Response.json(user()));await flush();});me=undefined;
+    assert.equal(ui.doc.querySelector(".app-shell-skeleton"),null);assert.match(ui.doc.body.textContent!,/PRIVATE_CONTENT/);
+  }finally{await ui.close();}
 });

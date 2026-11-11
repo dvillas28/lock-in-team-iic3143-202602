@@ -140,6 +140,13 @@
 </div>
 </section>
 </div>
+<div class="skeleton-region" id="loading-courses" hidden>
+<p role="status" class="sr-only">Cargando cursos…</p>
+<div class="skeleton-content stack" aria-hidden="true">
+<section class="card panel stack"><p class="serif" style="font-size:21px;line-height:1.25"><span class="skeleton skeleton-line" style="inline-size:55%"></span></p><p><span class="skeleton skeleton-line" style="inline-size:80%"></span></p><p class="hint"><span class="skeleton skeleton-line" style="inline-size:45%"></span></p></section>
+<section class="card panel stack"><p class="serif" style="font-size:21px;line-height:1.25"><span class="skeleton skeleton-line" style="inline-size:55%"></span></p><p><span class="skeleton skeleton-line" style="inline-size:80%"></span></p><p class="hint"><span class="skeleton skeleton-line" style="inline-size:45%"></span></p></section>
+</div>
+</div>
 <div class="empty-zone panel" id="no-courses" hidden>
 <h2>Sin cursos visibles</h2>
 <p>No tienes una inscripción académica activa en esta institución.</p>
@@ -151,6 +158,7 @@
 <a class="btn btn-ghost" href="03-dashboard.html?role=assistant&amp;experience=non-admin" data-demo-profile>Ayudante · No admin</a>
 <a class="btn btn-ghost" href="03-dashboard.html?role=teacher&amp;experience=non-admin" data-demo-profile>Docente · No admin</a>
 <a class="btn btn-ghost" href="03-dashboard.html?state=empty" >Sin cursos</a>
+<a class="btn btn-ghost" href="03-dashboard.html?state=loading" >Cargando cursos</a>
 </div>
 </div>
 </main>
@@ -167,6 +175,7 @@
 </dialog>
 <script>
 if(new URLSearchParams(location.search).get('state')==='empty'){document.getElementById('student-courses').hidden=true;document.getElementById('no-courses').hidden=false;}
+if(new URLSearchParams(location.search).get('state')==='loading'){document.getElementById('student-courses').hidden=true;document.getElementById('loading-courses').hidden=false;}
 </script>
 </body>
 </html>

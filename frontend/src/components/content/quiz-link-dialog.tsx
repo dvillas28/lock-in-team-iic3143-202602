@@ -4,7 +4,8 @@ import { X } from "lucide-react";
 import Link from "next/link";
 import { useResource } from "../courses/use-resource.ts";
 import { useContentMutation } from "./content-notices.tsx";
-import { ErrorState, LoadingState } from "../route-states.tsx";
+import { ErrorState } from "../route-states.tsx";
+import { QuizChoicesPending } from "./modules-skeleton.tsx";
 import { useDelayedFlag } from "./use-delayed-flag.ts";
 import { linkModuleQuiz } from "../../lib/api/academic-files.ts";
 import { listCourseQuizzes } from "../../lib/api/quizzes.ts";
@@ -41,8 +42,8 @@ function Choices({ session, slug, parent, course, items, disabled, reload, onClo
       return await reload() ? "Cuestionario enlazado." : { message: "Enlace guardado. Usa Reintentar para consultar los recursos.", persistent: true };
     }, async () => { await reload(); return "Revisa los recursos actuales."; });
   }
-  if (result.error) return <ErrorState feedback={result.error} onRetry={() => void result.reload()} />;
-  if (!choices) return slow ? <LoadingState /> : <div className="resource-pending" aria-busy="true" />;
+  if (result.error) return <ErrorState headingLevel={3} feedback={result.error} onRetry={() => void result.reload()} />;
+  if (!choices) return slow ? <QuizChoicesPending /> : <div className="resource-pending" aria-busy="true" />;
   if (!choices.length) return <div className="stack">
     <p><strong>No hay cuestionarios para enlazar.</strong></p>
     <p className="hint">Los cuestionarios de tus secciones ya están en este módulo, o aún no has creado ninguno.</p>

@@ -1,15 +1,15 @@
 "use client";
 
 import {useEffect,useState} from "react";
-import Link from "next/link";
-import {ArrowLeft,Download,File,FileText,Image as ImageIcon} from "lucide-react";
+import {Download,File,FileText,Image as ImageIcon} from "lucide-react";
 import {fileBytes,getAcademicFile} from "../../lib/api/academic-files.ts";
 import {getCourseModule} from "../../lib/api/modules.ts";
 import {fileExtension,formatBytes,type AcademicFile} from "../../lib/content/academic-files.ts";
 import {getRouteFeedback} from "../../lib/route-feedback.ts";
 import {useSession} from "../auth/session-provider.tsx";
 import {useResource} from "../courses/use-resource.ts";
-import {ErrorState,LoadingState} from "../route-states.tsx";
+import {ErrorState} from "../route-states.tsx";
+import {DocumentSkeleton,PreviewSkeleton,ReaderReturn} from "./document-skeleton.tsx";
 import {PdfPreview} from "./pdf-preview.tsx";
 
 function ImagePreview({blob,name}:{blob:Blob;name:string}) {
@@ -26,7 +26,7 @@ function ImagePreview({blob,name}:{blob:Blob;name:string}) {
   return ()=>{active=false;URL.revokeObjectURL(url);};
  },[blob]);
  if (failure) return <p className="notice" role="alert">No se pudo mostrar la imagen. Puedes descargar el archivo.</p>;
- if (!image) return <LoadingState/>;
+ if (!image) return <PreviewSkeleton preview="image" label="Preparando la imagen…"/>;
  // Private blob URLs are already fetched through Session and cannot use the Next image optimizer.
  // eslint-disable-next-line @next/next/no-img-element
  return <div className="card image-preview"><img src={image.url} width={image.width} height={image.height} alt={name}/></div>;
@@ -44,7 +44,7 @@ function TextPreview({blob}:{blob:Blob}) {
   return ()=>{active=false;};
  },[blob]);
  if (failure) return <p className="notice" role="alert">No se pudo mostrar el texto. Puedes descargar el archivo.</p>;
- if (text===undefined) return <LoadingState/>;
+ if (text===undefined) return <PreviewSkeleton preview="text" label="Preparando el texto…"/>;
  return <div className="card reader-paper"><pre className="markdown-source">{text}</pre>
   {blob.size>textPreviewLimit && <p className="hint">La vista previa muestra el comienzo del archivo. Descárgalo para leer el resto.</p>}</div>;
 }
@@ -52,8 +52,8 @@ function TextPreview({blob}:{blob:Blob}) {
 function FilePreview({item,slug}:{item:AcademicFile;slug:string}) {
  const {session}=useSession();
  const result=useResource(session,`preview:${slug}:${item.id}`,c=>fileBytes(c,slug,item,false),false,fileTransferTimeoutMs);
- if (result.error) return <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/>;
- if (!result.data) return <LoadingState/>;
+ if (result.error) return <ErrorState headingLevel={2} feedback={result.error} onRetry={()=>void result.reload()}/>;
+ if (!result.data) return <PreviewSkeleton preview={item.preview??"text"} label="Cargando vista previa…"/>;
  if (item.preview==="pdf") return <PdfPreview file={result.data}/>;
  if (item.preview==="image") return <ImagePreview blob={result.data} name={item.title}/>;
  return <TextPreview blob={result.data}/>;
@@ -69,11 +69,12 @@ export function AcademicFileReader({courseId,moduleId,fileId}:{courseId:string;m
  },false);
  const [downloading,setDownloading]=useState(false);
  const [error,setError]=useState("");
- const back=<Link className="reader-return" href={`/courses/${courseId}/modules#module-${moduleId}`}>
-  <ArrowLeft size={16} aria-hidden="true"/>Volver a módulos{result.data && ` · ${result.data.parent.title}`}</Link>;
- if (!state.context?.user) return <LoadingState/>;
+ const back=<ReaderReturn courseId={courseId} moduleId={moduleId} parent={result.data?.parent.title}/>;
+ // Same article and return link while pending, so only the reader's own content is replaced.
+ const pending=<article className="material-reader academic-file-reader stack">{back}<DocumentSkeleton reader="file"/></article>;
+ if (!state.context?.user) return pending;
  if (result.error) return <article className="material-reader stack">{back}<ErrorState feedback={result.error} onRetry={()=>void result.reload()}/></article>;
- if (!result.data) return <LoadingState/>;
+ if (!result.data) return pending;
  const {item,parent}=result.data;
  const Icon=item.preview==="image"?ImageIcon:item.preview==="pdf"?FileText:File;
 

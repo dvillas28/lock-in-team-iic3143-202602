@@ -15,7 +15,8 @@ import { canAuthor, destinations } from "../../lib/quizzes/capabilities.ts";
 import { quizListQuery, type QuizFilters } from "../../lib/quizzes/list-location.ts";
 import { phaseGroups, phaseLabels, phaseOrder, publicationIssues, quizPhase, sortQuizzes, type QuizPhase } from "../../lib/quizzes/publication.ts";
 import type { Authoring, Summary } from "../../lib/quizzes/validation.ts";
-import { ErrorState, LoadingState } from "../route-states.tsx";
+import { ErrorState } from "../route-states.tsx";
+import { QuizSkeleton } from "./quiz-skeleton.tsx";
 import { ContentNotices, useContentNotice } from "../content/content-notices.tsx";
 import { quizCreationReceipt, quizPublicationReceipt } from "./quiz-created-receipt.ts";
 import { QuizPublishDialog, usePublication } from "./quiz-publish.tsx";
@@ -74,9 +75,9 @@ function QuizDirectory({ courseId, scope, slug, filters, createdId }: DirectoryP
 
   const base = `/courses/${courseId}/quizzes`;
   const suffix = quizListQuery(activeFilters);
-  if (!user) return <LoadingState/>;
+  if (!user) return <QuizSkeleton kind="list"/>;
   if (!directory) {
-    if (!result.error) return <LoadingState/>;
+    if (!result.error) return <QuizSkeleton kind="list"/>;
     const receipt = !result.accessDenied && quizCreationReceipt(session, courseId, createdId);
     return <div className="stack">
       {publishedReceipt && !result.accessDenied && <p className="notice success" role="status">«{publishedReceipt.title}» se publicó correctamente.</p>}

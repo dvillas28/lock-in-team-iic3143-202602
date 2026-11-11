@@ -3,7 +3,8 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useSession } from "../auth/session-provider.tsx";
 import { useResource } from "../courses/use-resource.ts";
 import { useContentNotice } from "../content/content-notices.tsx";
-import { ErrorState, LoadingState } from "../route-states.tsx";
+import { ErrorState } from "../route-states.tsx";
+import { TeacherSubmissionsSkeleton } from "./assignment-skeleton.tsx";
 import { publishAssignmentGrades, submissionRoster, type AssignmentPublication, type RosterEntry, type SubmissionScope } from "../../lib/api/submissions.ts";
 import { SubmissionReview } from "./submission-review.tsx";
 import { submissionError, uncertainResult } from "./submission-feedback.ts";
@@ -28,7 +29,7 @@ export function TeacherSubmissions({scope,maxPoints}:{scope:SubmissionScope;maxP
   return ()=>{modal.removeEventListener("close",unlock);unlock();};
  },[hasRoster]);
  const roster=resource.data;
- if (!roster) return resource.error ? <ErrorState feedback={resource.error} onRetry={()=>void resource.reload()}/> : <LoadingState/>;
+ if (!roster) return resource.error ? <ErrorState headingLevel={2} feedback={resource.error} onRetry={()=>void resource.reload()}/> : <TeacherSubmissionsSkeleton/>;
  const sections=new Map(roster.students.map(entry=>[entry.sectionId,entry.sectionCode]));
  const students=roster.students.filter(entry=>!section || entry.sectionId===section);
  const entry=students.find(entry=>studentKey(entry)===student);
@@ -84,7 +85,7 @@ export function TeacherSubmissions({scope,maxPoints}:{scope:SubmissionScope;maxP
     </select>
    </label>}
   </header>
-  {resource.error && <ErrorState feedback={resource.error} onRetry={()=>void resource.reload()}/>}
+  {resource.error && <ErrorState headingLevel={3} feedback={resource.error} onRetry={()=>void resource.reload()}/>}
   {!students.length ? <p className="hint">No hay estudiantes ni entregas en las secciones autorizadas.</p> : <>
    <div className="submission-master-detail">
     <div className="table-scroll" role="region" aria-label="Estados de entrega por estudiante">

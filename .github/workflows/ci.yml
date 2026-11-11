@@ -68,6 +68,7 @@ jobs:
     outputs:
       apps: ${{ steps.apps.outputs.list }}
       integration: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.integration == 'true' }}
+      backend: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.backend == 'true' }}
     steps:
       - uses: actions/checkout@v5
 
@@ -282,6 +283,113 @@ jobs:
           path: backend/coverage/lcov.info
           if-no-files-found: error
 
+  # Rehearses the deploy predeploy (migrations + runtime role) on a throwaway Neon branch copied
+  # from production, so a migration that breaks on real data blocks the release PR, not the deploy.
+  # Only dev -> main PRs from this repository (forks get no secrets) and manual runs.
+  # Decision and setup: docs/adr/neon-migration-rehearsal.md.
+  migration-rehearsal:
+    name: Migration rehearsal (Neon)
+    needs: changes
+    if: >-
+      needs.changes.outputs.backend == 'true' && (github.event_name == 'workflow_dispatch' ||
+      (github.base_ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Neon API key lives in this environment only: no other job can read it.
+    environment: neon-rehearsal
+    env:
+      NEON_BRANCH: ci-rehearsal-${{ github.event.pull_request.number || 'manual' }}-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Check Neon configuration
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
+          NEON_DATABASE: ${{ vars.NEON_DATABASE }}
+        run: |
+          for name in NEON_API_KEY NEON_PROJECT_ID NEON_DATABASE; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is missing in the neon-rehearsal environment (docs/adr/neon-migration-rehearsal.md)"
+              exit 1
+            fi
+          done
+          # Safety net if the delete step never runs (runner lost, job killed).
+          echo "NEON_EXPIRES_AT=$(date -u --date '+2 hours' +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+      - run: pnpm --dir backend install --frozen-lockfile
+      - run: pnpm --dir backend build
+
+      # Parent is the project's default branch: production. The owner URL comes back direct (not -pooler).
+      - name: Create Neon branch from production
+        id: branch
+        uses: neondatabase/create-branch-action@v6.4.0
+        with:
+          api_key: ${{ secrets.NEON_API_KEY }}
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch_name: ${{ env.NEON_BRANCH }}
+          database: ${{ vars.NEON_DATABASE }}
+          role: ${{ vars.NEON_OWNER_ROLE || 'neondb_owner' }}
+          ssl: verify-full
+          expires_at: ${{ env.NEON_EXPIRES_AT }}
+
+      # Neon keeps no password for roles created by SQL, and production's runtime secret stays in
+      # Render: academix_runtime gets a random password on this branch only. `created` guarantees the
+      # URL belongs to the branch this run just made, never to an existing (production) branch.
+      - name: Run predeploy against the branch
+        working-directory: backend
+        env:
+          CREATED: ${{ steps.branch.outputs.created }}
+          OWNER_URL: ${{ steps.branch.outputs.db_url }}
+          DEMO_DATA_ENABLED: "false"
+        run: |
+          set -euo pipefail
+          if [ "$CREATED" != "true" ]; then
+            echo "::error::Neon reused an existing branch named $NEON_BRANCH; refusing to touch it"
+            exit 1
+          fi
+          export RUNTIME_PASSWORD="$(openssl rand -hex 32)"
+          echo "::add-mask::$RUNTIME_PASSWORD"
+          # Keep only the URL parameters the backend accepts, with verified TLS.
+          { read -r MIGRATION_DATABASE_URL; read -r DATABASE_URL; } < <(node -e '
+            const owner = new URL(process.env.OWNER_URL);
+            owner.search = "?sslmode=verify-full";
+            const runtime = new URL(owner.href);
+            runtime.username = "academix_runtime";
+            runtime.password = process.env.RUNTIME_PASSWORD;
+            console.log(owner.href);
+            console.log(runtime.href);
+          ')
+          echo "::add-mask::$MIGRATION_DATABASE_URL"
+          echo "::add-mask::$DATABASE_URL"
+          export MIGRATION_DATABASE_URL DATABASE_URL
+          node -e '
+            const {Client} = require("pg");
+            const {operationalConfig} = require("./dist/database/config");
+            (async () => {
+              const admin = new Client(operationalConfig());
+              await admin.connect();
+              try {
+                const literal = (await admin.query("SELECT quote_literal($1) AS value", [process.env.RUNTIME_PASSWORD])).rows[0].value;
+                await admin.query(`ALTER ROLE academix_runtime PASSWORD ${literal}`);
+              } finally { await admin.end(); }
+            })().catch(error => { console.error(`::error::Could not set the rehearsal runtime password (${error.code ?? "connection"})`); process.exit(1); });
+          '
+          pnpm db:predeploy
+
+      - name: Delete Neon branch
+        if: always() && steps.branch.outputs.created == 'true'
+        uses: neondatabase/delete-branch-action@v3.2.1
+        with:
+          api_key: ${{ secrets.NEON_API_KEY }}
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch: ${{ steps.branch.outputs.branch_id }}
+
   # Static analysis of our own code; the quality gate only judges the code changed by the PR.
   # Runs when app code changed; backend coverage is attached only if integration ran.
   # Non-blocking: not listed in `result`, so a failed gate shows red on the PR without blocking it.
@@ -337,10 +445,11 @@ jobs:
 
   # Single required check: skipped matrix jobs never report their per-app check names.
   # `trivy` and `sonarqube` are left out on purpose: they report but do not block.
+  # `migration-rehearsal` is skipped outside dev -> main PRs, which counts as passing here.
   result:
     name: CI result
     if: always()
-    needs: [documentation, contracts, changes, checks, docker, backend-coverage]
+    needs: [documentation, contracts, changes, checks, docker, backend-coverage, migration-rehearsal]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any job failed or was cancelled

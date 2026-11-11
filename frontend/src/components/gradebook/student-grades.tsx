@@ -4,11 +4,11 @@ import { useSession } from "../auth/session-provider.tsx";
 import { useResource } from "../courses/use-resource.ts";
 import { CourseWorkspace } from "../courses/course-workspace.tsx";
 import { getStudentGrades } from "../../lib/api/gradebook.ts";
-import { LoadingState } from "../route-states.tsx";
+import { GradesPending, gradesSkeleton } from "./gradebook-skeleton.tsx";
 import { AcademicDate, ResourceFeedback } from "../academic/feedback.tsx";
 export function StudentGrades({ courseId }: Readonly<{ courseId: string }>) {
   return (
-    <CourseWorkspace courseId={courseId} title="Mis notas" active="/grades">
+    <CourseWorkspace courseId={courseId} title="Mis notas" active="/grades" skeleton={gradesSkeleton}>
       {() => <Grades courseId={courseId} />}
     </CourseWorkspace>
   );
@@ -26,7 +26,7 @@ function Grades({ courseId }: Readonly<{ courseId: string }>) {
     return r.error ? (
       <ResourceFeedback error={r.error} retry={() => void r.reload()} />
     ) : (
-      <LoadingState />
+      <GradesPending />
     );
   const d = r.data;
   return (

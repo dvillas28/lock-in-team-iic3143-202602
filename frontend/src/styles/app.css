@@ -230,6 +230,47 @@ textarea.field { resize: vertical; min-height: 88px; line-height: 1.55; }
   border-radius: var(--radius-lg);
   text-align: center;
 }
+/* Título de los estados vacío/error: mismo aspecto en cualquier nivel (h1 de ruta, h2–h4 anidados). */
+.empty-zone .state-title { font-size: 21px; font-weight: 600; line-height: 1.3; margin: 0; }
+
+/* ── Skeleton UI ──
+   Geometría de carga sobre las clases reales del contenido. Sin shimmer ni desplazamientos:
+   un retardo antiparpadeo y un pulso de opacidad sutil, ambos anulados con movimiento reducido.
+   El estado visible es el de base; la opacidad 0 existe solo mientras corre el retardo. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+/* El retardo se hereda: un skeleton que reemplaza a otro idéntico continúa su tiempo en vez de reiniciarlo. */
+.skeleton-region { animation: skeleton-reveal 1ms linear var(--skeleton-delay, 200ms) both; }
+/* Solo pulsan las barras: tarjetas, bordes y sombras reales quedan estables. */
+.skeleton-content .skeleton { animation: skeleton-pulse 1.8s ease-in-out var(--skeleton-delay, 200ms) infinite; }
+/* Barras junto a contenido real, fuera de la región (título, cabecera de tabla): mismo retardo y pulso. */
+:is(.page-heading, .skeleton-heading, .skeleton-rows, .skeleton-shell) .skeleton {
+  animation: skeleton-reveal 1ms linear var(--skeleton-delay, 200ms) both, skeleton-pulse 1.8s ease-in-out var(--skeleton-delay, 200ms) infinite;
+}
+.skeleton {
+  display: block; flex-shrink: 0; max-inline-size: 100%;
+  background: var(--skeleton); background-clip: content-box;
+}
+/* Una línea del contenedor tipográfico: la barra se dibuja centrada dentro de su caja de línea. */
+.skeleton-line { inline-size: 100%; block-size: 1.5em; block-size: 1lh; padding-block: 0.3em; border-radius: 8px; }
+.skeleton-block { border-radius: var(--radius-sm); }
+.skeleton-pill { block-size: 22px; border-radius: 999px; }
+.skeleton-heading-title { font-family: var(--font-eb-garamond), serif; font-size: 30px; line-height: 1.2; }
+/* Medidas de `.course-card h2`: sin un encabezado vacío, aunque esté oculto. */
+.skeleton-card-title { font-size: 22px; line-height: 1.25; }
+.skeleton-list { list-style: none; margin: 0; padding: 0; }
+.skeleton-list li { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-top: 1px solid var(--border); }
+.skeleton-list li:first-child { border-top: none; }
+.skeleton-list-copy { flex: 1; min-width: 0; display: grid; gap: 2px; font-size: 13px; }
+.skeleton-list-copy > :first-child { font-size: 16px; line-height: 1.3; }
+.skeleton-table { inline-size: 100%; }
+@keyframes skeleton-reveal { from { opacity: 0; } to { opacity: 1; } }
+@keyframes skeleton-pulse { 50% { opacity: 0.6; } }
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-region, .skeleton-content .skeleton, :is(.page-heading, .skeleton-heading, .skeleton-rows, .skeleton-shell) .skeleton { animation: none; }
+}
 
 /* ── Modal ── */
 .modal-backdrop {

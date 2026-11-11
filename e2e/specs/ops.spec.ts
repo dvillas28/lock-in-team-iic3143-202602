@@ -5,7 +5,7 @@ import {apiBase, preflight} from '../runner/settings.ts';
 import {command, launch, stop, ready} from '../runner/process.ts';
 import {prepareProfile} from '../data/profiles.ts';
 import {seed} from '../data/seed.ts';
-import {course, go} from '../helpers/browser.ts';
+import {go} from '../helpers/browser.ts';
 import {writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import pg from 'pg';
@@ -36,7 +36,7 @@ test('E2E-OPS-001 migrated runtime readiness / readiness @extended', async ({e})
 
 test('E2E-OPS-002 database unavailable and recovery / database-outage @regression', async ({e, actorPage}) => {
   const page = await actorPage('T1');
-  await course(page,e.data.courses.C1);
+  await go(page,e.data.courses.C1,'/quizzes');
   const before = await snapshot(e);
   try {
     await e.suspendDatabase();

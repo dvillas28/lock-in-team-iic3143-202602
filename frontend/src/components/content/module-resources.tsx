@@ -6,7 +6,8 @@ import Link from "next/link";
 import {useResource} from "../courses/use-resource.ts";
 import {useRefreshOnReturn} from "./use-refresh-on-return.ts";
 import {useContentMutation} from "./content-notices.tsx";
-import {ErrorState,EmptyState,LoadingState} from "../route-states.tsx";
+import {ErrorState,EmptyState} from "../route-states.tsx";
+import {ResourcesPending} from "./modules-skeleton.tsx";
 import {deleteAcademicFile,listModuleResources,moveResource,unlinkModuleQuiz} from "../../lib/api/academic-files.ts";
 import type {Session} from "../../lib/auth/session.ts";
 import {fileExtension,formatBytes,type AcademicFile,type ModuleQuiz,type ModuleResource,type UploadLimits} from "../../lib/content/academic-files.ts";
@@ -86,8 +87,8 @@ export function ModuleResources({session,slug,parent,author,disabled,course,expa
  useEffect(()=>{
   if (panel) panels.current?.querySelector<HTMLElement>(`[data-panel="${panel}"] input:not([type=hidden]),[data-panel="${panel}"] textarea`)?.focus();
  },[panel]);
- if (result.error&&!result.data) return <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/>;
- if (!result.data) return slow ? <LoadingState/> : <div className="resource-pending" aria-busy="true"/>;
+ if (result.error&&!result.data) return <ErrorState headingLevel={3} feedback={result.error} onRetry={()=>void result.reload()}/>;
+ if (!result.data) return slow ? <ResourcesPending/> : <div className="resource-pending" aria-busy="true"/>;
  const {items,limits}=result.data;
  const unavailable=disabled||!!result.error||!!result.refreshing||mutation.busy||!!mutation.uncertain;
  const row={session,slug,parent,author,disabled:unavailable,reload:result.reload};
@@ -116,7 +117,7 @@ export function ModuleResources({session,slug,parent,author,disabled,course,expa
  }
  return <div className="module-materials" aria-busy={result.refreshing}>
   {result.error && <><p role="alert">Consulta fallida. Se muestra la última lista disponible.</p>
-   <ErrorState feedback={result.error} onRetry={()=>void result.reload()}/></>}
+   <ErrorState headingLevel={3} feedback={result.error} onRetry={()=>void result.reload()}/></>}
   {mutation.message && <p role={mutation.confirmed?"status":"alert"}>{mutation.message}</p>}
   <div className="resource-toolbar"><span className="section-label">Materiales del módulo</span></div>
   {author && <div className="resource-creation">
@@ -134,7 +135,8 @@ export function ModuleResources({session,slug,parent,author,disabled,course,expa
     onClose={()=>{setPageOpen(false);trigger.current?.focus();}}/>
    <QuizLinkDialog open={quizOpen} {...row} course={course} items={items} onClose={()=>{setQuizOpen(false);trigger.current?.focus();}}/>
   </div>}
-  {!result.error&&!result.refreshing&&!items.length && <EmptyState/>}
+  {!result.error&&!result.refreshing&&!items.length && <EmptyState headingLevel={3} title="Este módulo no tiene materiales"
+   message={author ? "Usa «Añadir contenido» para sumar páginas, archivos o cuestionarios." : "Los materiales publicados de este módulo aparecerán aquí."}/>}
   <ul className="module-resource-list">
    {items.map((item,index)=><ResourceRow key={item.id} {...row} item={item} limits={limits} move={move} unlink={unlink} remove={remove}
     previous={items[index-1]?.id} next={items[index+1]?.id}/>)}

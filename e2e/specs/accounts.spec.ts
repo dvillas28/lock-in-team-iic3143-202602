@@ -1,7 +1,7 @@
 import {test,expect} from '../fixtures/test.ts';
 import {Api,status} from '../helpers/api.ts';
 import {origin,apiBase} from '../runner/settings.ts';
-import {stopTrace} from '../helpers/browser.ts';
+import {loaded,stopTrace} from '../helpers/browser.ts';
 import {createHash,randomBytes,randomUUID} from 'node:crypto';
 import type {Environment} from '../fixtures/environment.ts';
 import type {Page} from '@playwright/test';
@@ -46,7 +46,15 @@ test('E2E-ACCOUNT-003 institutional admin creates pending invitations / invitati
  const superadmin=await e.api('SA');status(await superadmin.post('invitations',{name:'Alta superadmin',email:'sa-'+e.namespace+'@example.test'},randomUUID()),201);
 });
 test('E2E-ACCOUNT-004 CSV validates then confirms atomically / csv-atomic @regression',async({e,actorPage})=>{
- const page=await actorPage('AO');await page.getByRole('link',{name:'Usuarios institucionales',exact:true}).click();await page.getByLabel('Archivo CSV',{exact:true}).setInputFiles({name:'invalid.csv',mimeType:'text/csv',buffer:Buffer.from('name,email\nAna,invalid\n')});await page.getByRole('button',{name:'Validar archivo',exact:true}).click();await expect(page.getByRole('button',{name:'Confirmar importación',exact:true})).toBeDisabled();
+ const page=await actorPage('AO');
+ await page.getByRole('link',{name:'Usuarios institucionales',exact:true}).click();
+ const file=page.getByLabel('Archivo CSV',{exact:true});
+ await expect(file).toBeEnabled();
+ await loaded(page);
+ await file.setInputFiles({name:'invalid.csv',mimeType:'text/csv',buffer:Buffer.from('name,email\nAna,invalid\n')});
+ await page.getByRole('button',{name:'Validar archivo',exact:true}).click();
+ await expect(page.getByRole('cell',{name:'Correo inválido',exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Confirmar importación',exact:true})).toBeDisabled();
  const emails=['csv-a-'+e.namespace+'@example.test','csv-b-'+e.namespace+'@example.test'];await page.getByLabel('Archivo CSV',{exact:true}).setInputFiles({name:'valid.csv',mimeType:'text/csv',buffer:Buffer.from('name,email\nAna,'+emails[0]+'\nDiego,'+emails[1]+'\n')});await page.getByRole('button',{name:'Validar archivo',exact:true}).click();await expect(page.getByRole('button',{name:'Confirmar importación',exact:true})).toBeEnabled();await page.getByRole('button',{name:'Confirmar importación',exact:true}).click();const confirmed=page.waitForResponse(r=>r.url().includes('/user-imports/')&&r.url().endsWith('/confirm'));await page.getByRole('button',{name:'¿Confirmar estas altas pendientes?',exact:true}).click();const response=await confirmed;expect(response.status()).toBe(200);
  await expect(page.getByRole('button',{name:'Continuar envíos pendientes',exact:true})).toBeDisabled();expect((await e.pool.query('SELECT count(*)::integer n FROM account_invitations WHERE normalized_email=ANY($1::text[])',[emails])).rows[0].n).toBe(2);
  const receipt=await response.json();expect(receipt.createdCount).toBe(2);const api=await e.api('AO');expect(status(await api.post('user-imports/'+receipt.id+'/confirm',{}),200).body.id).toBe(receipt.id);

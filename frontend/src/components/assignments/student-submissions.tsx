@@ -9,7 +9,8 @@ import type { Section } from "../../lib/courses/validation.ts";
 import { useSession } from "../auth/session-provider.tsx";
 import { useResource } from "../courses/use-resource.ts";
 import { useContentNotice } from "../content/content-notices.tsx";
-import { ErrorState, LoadingState } from "../route-states.tsx";
+import { ErrorState } from "../route-states.tsx";
+import { StudentSubmissionsSkeleton } from "./assignment-skeleton.tsx";
 import { AttemptHistory } from "./submission-evidence.tsx";
 import { ChileDate, points } from "./assignment-facts.tsx";
 import { submissionError, uncertainResult } from "./submission-feedback.ts";
@@ -35,7 +36,7 @@ export function StudentSubmissions({item,scope,sections,now}:{item:Assignment;sc
   return ()=>{modal.removeEventListener("close",unlock);unlock();};
  },[hasData]);
  const data=resource.data;
- if (!data) return resource.error ? <ErrorState feedback={resource.error} onRetry={()=>void resource.reload()}/> : <LoadingState/>;
+ if (!data) return resource.error ? <ErrorState headingLevel={2} feedback={resource.error} onRetry={()=>void resource.reload()}/> : <StudentSubmissionsSkeleton/>;
  const sectionId=data.sections.includes(chosen) ? chosen : data.sections[0];
  const status=assignmentState(item,now+data.clockOffset);
  const left=item.maxAttempts===null ? null : Math.max(0,item.maxAttempts-data.usedAttempts);
@@ -121,7 +122,7 @@ export function StudentSubmissions({item,scope,sections,now}:{item:Assignment;sc
    </div>
   </header>
   {data.grade && <PublishedResult grade={data.grade} attempt={data.attempts.find(a=>a.id===data.grade?.attemptId)?.attemptNumber} max={item.maxPoints}/>}
-  {resource.error && <ErrorState feedback={resource.error} onRetry={()=>void resource.reload()}/>}
+  {resource.error && <ErrorState headingLevel={3} feedback={resource.error} onRetry={()=>void resource.reload()}/>}
   {status==="upcoming" && <p className="notice">Puedes entregar desde <ChileDate value={item.availableFrom} empty=""/>.</p>}
   {status==="closed" && <p className="notice">La recepción de entregas está cerrada.</p>}
   {status==="late" && left!==0 && <p className="notice">El plazo de entrega venció. Los nuevos intentos quedarán marcados como atrasados.</p>}

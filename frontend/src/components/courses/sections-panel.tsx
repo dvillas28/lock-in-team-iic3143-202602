@@ -8,7 +8,8 @@ import type { Session } from "../../lib/auth/session.ts";
 import type { CurrentUser } from "../../lib/auth/validation.ts";
 import type { Course, Section } from "../../lib/courses/validation.ts";
 import { getSection } from "../../lib/api/sections.ts";
-import { EmptyState, ErrorState, LoadingState } from "../route-states.tsx";
+import { EmptyState, ErrorState } from "../route-states.tsx";
+import { SectionPending } from "./sections-skeleton.tsx";
 import { useResource } from "./use-resource.ts";
 export function SectionsPanel({ session, slug, user, course, items, management, onSaved }: {
   session: Session;
@@ -29,12 +30,13 @@ export function SectionsPanel({ session, slug, user, course, items, management, 
   const matches = manageable.filter(s => s.code.toLocaleLowerCase('es').includes(query.trim().toLocaleLowerCase('es')));
   if (!canManage) return <section className="stack section-overview">
     <h2 className="serif">{ownItems.length === 1 ? "Tu sección" : "Tus secciones"}</h2>
-    {!ownItems.length ? <EmptyState /> : <ul className="stack section-list card">{ownItems.map(s => <li key={s.id}><div><strong>Sección {s.code}</strong><p className="hint">{user.sectionMemberships.filter(m => m.courseId === course.id && m.sectionId === s.id).map(m => roleLabel(m.role)).join(" · ")}</p></div></li>)}</ul>}
+    {!ownItems.length ? <EmptyState headingLevel={3} title="No tienes secciones asignadas" message="Cuando te inscriban en una sección de este curso, aparecerá aquí." /> : <ul className="stack section-list card">{ownItems.map(s => <li key={s.id}><div><strong>Sección {s.code}</strong><p className="hint">{user.sectionMemberships.filter(m => m.courseId === course.id && m.sectionId === s.id).map(m => roleLabel(m.role)).join(" · ")}</p></div></li>)}</ul>}
   </section>;
   return <section className="stack section-overview">
     <div className="section-picker card">
       <h2 className="serif">Secciones del curso</h2>
-      {!manageable.length ? <EmptyState /> : <>
+      {!manageable.length ? <EmptyState headingLevel={3} title="No hay secciones para gestionar"
+        message={capabilities(user, course).configure ? "Crea la primera sección desde «Crear sección»." : "Este curso aún no tiene secciones dentro de tu alcance."} /> : <>
         <div className="section-picker-fields">
           <label className="field-label" htmlFor={filterId}>Buscar sección<input id={filterId} type="search" className="field" value={query} onInput={event => setQuery(event.currentTarget.value)} placeholder="Código de sección" /></label>
           <label className="field-label" htmlFor={pickerId}>Sección a gestionar<select id={pickerId} name="managedSection" className="field" value={active?.id ?? ""} onChange={event => { setSelected(event.currentTarget.value); setQuery(""); }}>
@@ -63,9 +65,9 @@ function SelectedSection({ session, slug, courseId, sectionId, user, course, onS
 }) {
   const result = useResource(session, `${slug}:${courseId}:${sectionId}`, c => getSection(c, slug, sectionId, courseId));
   if (result.error)
-    return <ErrorState feedback={result.error} onRetry={() => void result.reload()} />;
+    return <ErrorState headingLevel={3} feedback={result.error} onRetry={() => void result.reload()} />;
   if (!result.data)
-    return <LoadingState />;
+    return <SectionPending />;
   return <section className="stack section-workspace">
     <div className="section-workspace-meta"><p className="hint">Capacidad: {result.data.capacity ?? "Sin límite"}</p>{capabilities(user, course).configure && <details className="academic-disclosure"><summary>Configurar sección</summary><SectionForm key={result.data.code + result.data.capacity} session={session} slug={slug} courseId={courseId} section={result.data} onSaved={onSaved} /></details>}</div><ParticipantsPanel session={session} slug={slug} user={user} course={course} section={result.data} />
   </section>;

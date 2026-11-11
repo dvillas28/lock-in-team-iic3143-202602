@@ -22,7 +22,7 @@ test('E2E-RBAC-002 other owner needs contextual roles and cannot configure / oth
 });
 test('E2E-RBAC-003 ownership without teaching grants only administration / owner-only @regression',async ({e,actorPage})=>{
  const page=await actorPage('AO-ONLY'),api=await e.api('AO-ONLY'),c=e.data.courses.COWNER;
- await course(page,c);await expect(page.getByRole('link',{name:'Secciones y participantes',exact:true})).toBeVisible();await go(page,c,'/sections');await expect(page.getByRole('heading',{name:'Secciones y participantes',exact:true})).toBeVisible();status(await api.patch(`courses/${c}`,{name:'Owner configured'}),200);status(await api.post(`courses/${c}/sections`,{code:'owner-section'}),201);
+ await course(page,c);await expect(page.getByRole('navigation',{name:'Curso',exact:true}).getByRole('link',{name:'Secciones y participantes',exact:true})).toBeVisible();await go(page,c,'/sections');await expect(page.getByRole('heading',{name:'Secciones y participantes',exact:true})).toBeVisible();status(await api.patch(`courses/${c}`,{name:'Owner configured'}),200);status(await api.post(`courses/${c}/sections`,{code:'owner-section'}),201);
  const before=await securitySnapshot(e);
  for(const path of [`courses/${c}/modules`,`courses/${c}/quizzes`])status(await api.get(path),404);
  status(await api.get(`courses/${c}/gradebook`),403);status(await api.put(`courses/${c}/gradebook/weights`,weights(e)),403);
@@ -95,7 +95,7 @@ test('E2E-RBAC-011 assistant-student uses different own and staff projections / 
  const own=status(await api.get(`quiz-attempts/${a.id}`),200).body;expect(own).not.toHaveProperty('grade');expect(JSON.stringify(own)).not.toMatch(/isCorrect|pointsAwarded/);
  const staff=status(await api.get(`quizzes/${e.data.quizzes.Q1}/attempts`),200).body;expect(staff.items.find((r:any)=>r.id===a.id)).toHaveProperty('grade');expect(JSON.stringify(staff)).not.toMatch(/isCorrect|pointsAwarded/);
  status(await api.put(`quiz-attempts/${other.id}/answers`,{answers:[]}),403);
- await go(page,e.data.courses.C1,'/gradebook');await expect(page.getByRole('heading',{name:'Libro de notas',exact:true})).toBeVisible();
+ await go(page,e.data.courses.C1,'/gradebook');await expect(page.getByRole('heading',{name:'Libro de notas',exact:true})).toBeVisible();await expect(page.getByRole('navigation',{name:'Curso',exact:true})).toBeVisible();
 });
 test('E2E-RBAC-012 revoked teacher cannot retain cursor privilege / teacher-revocation @regression',async ({e,actorPage})=>{
  await e.graded();await e.graded('MULTI');const page=await actorPage('T1'),api=await e.api('T1');
@@ -108,7 +108,7 @@ test('E2E-RBAC-012 revoked teacher cannot retain cursor privilege / teacher-revo
 });
 test('E2E-RBAC-013 query display hints do not escalate student / visual-hints @regression',async ({e,actorPage})=>{
  const page=await actorPage('ST1'),api=await e.api('ST1'),c=e.data.courses.C1,before=await securitySnapshot(e);
- await compatibilityNavigate(page,`/courses/${c}?role=teacher&experience=admin`);await expect(page.getByRole('heading',{name:'Curso E2E C1',exact:true})).toBeVisible();await expect(page.getByText('Configurar curso',{exact:true})).toHaveCount(0);
+ await compatibilityNavigate(page,`/courses/${c}?role=teacher&experience=admin`);await expect(page.locator('main').getByText('Curso E2E C1',{exact:true}).first()).toBeVisible();await expect(page.getByText('Configurar curso',{exact:true})).toHaveCount(0);
  status(await api.post(`courses/${c}/quizzes`,{title:'attack',sectionId:e.data.sections.S1}),403);status(await api.post(`courses/${c}/gradebook/publications`,e.selection(),e.key()),403);
  await deniedUI(page,`/courses/${c}/quizzes/${e.data.quizzes.Q1}/authoring?role=teacher`);expect(await securitySnapshot(e)).toEqual(before);
 });

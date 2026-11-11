@@ -22,7 +22,7 @@ test('E2E-CONTENT-002 teachers of different sections edit one shared module / sh
 test('E2E-CONTENT-003 hide and republish module gates readers without changing material flag / module-publication @regression',async ({e,actorPage})=>{
  const teacher=await actorPage('T1'),student=await actorPage('ST1'),api=await e.api('T1'),m=e.data.modules.M1,r=e.data.materials.R1;await reader(student,e);await go(teacher,e.data.courses.C1,'/modules');const material=status(await api.get(`materials/${r}`),200).body;
  status(await api.post(`modules/${m}/publish`),200);const response=teacher.waitForResponse(x=>x.url().endsWith(`/modules/${m}/unpublish`));await teacher.getByRole('button',{name:'Ocultar módulo Unidad E2E M1',exact:true}).click();expect((await response).status()).toBe(200);const studentApi=await e.api('ST1');status(await studentApi.get(`modules/${m}`),404);status(await studentApi.get(`materials/${r}`),404);
- await compatibilityNavigate(student,`/courses/${e.data.courses.C1}/modules/${m}/materials/${r}`);await student.getByRole('link',{name:/^Volver a módulos/}).click();await expect(student).toHaveURL(url=>url.pathname===`/courses/${e.data.courses.C1}/modules`);await expect(student.getByRole('heading',{name:'Módulos y material',exact:true})).toBeVisible();await expect(student.getByRole('button',{name:'Unidad E2E M1',exact:true})).toHaveCount(0);
+ await compatibilityNavigate(student,`/courses/${e.data.courses.C1}/modules/${m}/materials/${r}`);await student.getByRole('link',{name:/^Volver a módulos/}).click();await expect(student).toHaveURL(url=>url.pathname===`/courses/${e.data.courses.C1}/modules`);await expect(student.getByRole('heading',{name:'Módulos y material',exact:true})).toBeVisible();await expect(student.getByRole('navigation',{name:'Curso',exact:true})).toBeVisible();await expect(student.getByRole('status').filter({hasText:'Cargando módulos'})).toHaveCount(0);await expect(student.getByRole('button',{name:'Unidad E2E M1',exact:true})).toHaveCount(0);
  const republish=teacher.waitForResponse(x=>x.url().endsWith(`/modules/${m}/publish`));await teacher.getByRole('button',{name:'Publicar módulo Unidad E2E M1',exact:true}).click();expect((await republish).status()).toBe(200);expect(status(await api.get(`materials/${r}`),200).body.publishedAt).toBe(material.publishedAt);const fresh=await actorPage('ST1');await reader(fresh,e);await expect(fresh.getByRole('heading',{name:'Lectura E2E R1',exact:true})).toBeVisible();expect(await e.count('audit_events',`resource_id='${m}'`)).toBe(2);
 });
 test('E2E-CONTENT-004 invalid and obsolete complete orders preserve the persisted collection / order-conflicts @extended',async ({e,actorPage})=>{
@@ -64,9 +64,27 @@ for(const actor of ['T1','ST1','AS1'])for(const flags of ['00','01','10','11'])t
  const persisted=(await e.pool.query('SELECT m.published_at IS NOT NULL mp,r.published_at IS NOT NULL rp FROM course_modules m JOIN materials r ON r.module_id=m.id WHERE r.id=$1',[r.id])).rows[0];expect(persisted).toEqual({mp:flags[0]==='1',rp:flags[1]==='1'});expect(await securitySnapshot(e)).toEqual(before);
 });
 test('E2E-CONTENT-010 hiding material withdraws direct reads and republishing restores original body / material-publication @regression',async ({e,actorPage})=>{
- const page=await actorPage('ST1'),teacher=await e.api('T1'),r=e.data.materials.R1,m=e.data.modules.M1,original=status(await teacher.get(`materials/${r}`),200).body;await reader(page,e);status(await teacher.post(`materials/${r}/unpublish`),200);
- await page.getByRole('link',{name:'Volver a módulos · Unidad E2E M1',exact:true}).click();await expect(page).toHaveURL(url=>url.pathname===`/courses/${e.data.courses.C1}/modules`);await expect(page.getByRole('heading',{name:'Módulos y material',exact:true})).toBeVisible();await expect(page.locator(`a[href$="/materials/${r}"]`)).toHaveCount(0);status(await (await e.api('ST1')).get(`materials/${r}`),404);await compatibilityNavigate(page,`/courses/${e.data.courses.C1}/modules/${m}/materials/${r}`);await expect(page.getByRole('heading',{name:'Recurso no disponible',exact:true})).toBeVisible();
- status(await teacher.post(`materials/${r}/publish`),200);const fresh=await actorPage('ST1');await reader(fresh,e);expect(status(await (await e.api('ST1')).get(`materials/${r}`),200).body.markdownBody).toBe(original.markdownBody);expect(await e.count('audit_events',`resource_id='${r}'`)).toBe(2);
+ const page=await actorPage('ST1'),teacher=await e.api('T1'),student=await e.api('ST1');
+ const course=e.data.courses.C1,module=e.data.modules.M1,material=e.data.materials.R1;
+ const original=status(await teacher.get(`materials/${material}`),200).body;
+ await reader(page,e);
+ status(await teacher.post(`materials/${material}/unpublish`),200);
+
+ await page.getByRole('link',{name:'Volver a módulos · Unidad E2E M1',exact:true}).click();
+ await expect(page).toHaveURL(url=>url.pathname===`/courses/${course}/modules`);
+ await expect(page.getByRole('heading',{name:'Módulos y material',exact:true})).toBeVisible();
+ await expect(page.getByRole('navigation',{name:'Curso',exact:true})).toBeVisible();
+ const panel=await modulePanel(page,e,module);
+ await expect(panel.getByRole('heading',{name:'Este módulo no tiene materiales',exact:true})).toBeVisible();
+ await expect(panel.locator(`a[href$="/materials/${material}"]`)).toHaveCount(0);
+ status(await student.get(`materials/${material}`),404);
+ await compatibilityNavigate(page,`/courses/${course}/modules/${module}/materials/${material}`);
+ await expect(page.getByRole('heading',{name:'Recurso no disponible',exact:true})).toBeVisible();
+
+ status(await teacher.post(`materials/${material}/publish`),200);
+ await reader(await actorPage('ST1'),e);
+ expect(status(await student.get(`materials/${material}`),200).body.markdownBody).toBe(original.markdownBody);
+ expect(await e.count('audit_events',`resource_id='${material}'`)).toBe(2);
 });
 for(const variant of ['whitespace','nul','unicode','bytes'])test(`E2E-CONTENT-011 Markdown validation uses complete UTF8 JSON bytes / ${variant} @extended`,async ({e,actorPage})=>{
  const page=await actorPage('T1'),api=await e.api('T1'),m=e.data.modules.M1,row=await modulePanel(page,e);await addContent(row,'Crear página');const form=row.getByRole('form',{name:'Crear página',exact:true}),before=await securitySnapshot(e);

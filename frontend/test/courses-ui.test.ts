@@ -10,10 +10,13 @@ import { mount } from "./fixtures/course-ui.ts";
 import { course, section, deferred, id, user, otherCourse } from "./fixtures/courses.ts";
 test("directory separates empty, loading, error and real summaries without N+1",async()=>{
  const d=deferred<Response>();const ui=await mount(h(CourseDirectory),()=>d.promise,"student");try{
- assert.match(ui.doc.body.textContent!,/Cargando/);await ui.settle(()=>d.resolve(Response.json({items:[course]})));
+ assert.equal(ui.doc.querySelector('[role="status"]')?.textContent,"Cargando cursos…");assert.equal(ui.doc.querySelectorAll('h1').length,1);
+ assert.ok(ui.doc.querySelector('.skeleton-content .course-grid .course-card'));assert.doesNotMatch(ui.doc.body.textContent!,/Espera un momento/);
+ await ui.settle(()=>d.resolve(Response.json({items:[course]})));
+ assert.equal(ui.doc.querySelector('.skeleton-region'),null);assert.equal(ui.doc.querySelectorAll('h1').length,1);
  assert.match(ui.doc.body.textContent!,/Desarrollo de software/);assert.equal(ui.doc.querySelector('a')?.getAttribute('href'),`/courses/${course.id}/modules`);assert.equal(ui.requests.filter(r=>r.url.includes('/courses')).length,1);
  }finally{await ui.close();}
- for(const [status,body,expected]of [[200,{items:[]},/Sin contenido/],[503,{},/No se pudo/],[404,{},/no disponible/]]as const){const u=await mount(h(CourseDirectory),()=>Response.json(body,{status}),"student");try{assert.match(u.doc.body.textContent!,expected);}finally{await u.close();}}
+ for(const [status,body,expected]of [[200,{items:[]},/Todavía no tienes cursos/],[503,{},/No se pudo/],[404,{},/no disponible/]]as const){const u=await mount(h(CourseDirectory),()=>Response.json(body,{status}),"student");try{assert.match(u.doc.body.textContent!,expected);}finally{await u.close();}}
 });
 test("section management discards stale resources on navigation and logout",async()=>{
  const d=deferred<Response>();const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>r.url.endsWith('/sections')?Response.json({items:[section]}):r.url.endsWith(course.id)?d.promise:Response.json({...course,id:id(11),name:"Nuevo"}),"multi");try{

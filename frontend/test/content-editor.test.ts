@@ -219,9 +219,9 @@ test("expanding a module does not flash a loading state for fast loads but expla
  const ui=await mount(view(),r=>r.url.endsWith("/resources")?pending.promise:Response.json(r.url.endsWith("/modules")?{items:[unit]}:course),"teacher");
  try{
   await ui.click("Unidad 1");
-  assert.doesNotMatch(ui.doc.body.textContent!,/Cargando contenido/);
+  assert.doesNotMatch(ui.doc.body.textContent!,/Cargando/);assert.equal(ui.doc.querySelector('.skeleton'),null);
   await ui.settle(()=>{pending.resolve(Response.json(resources(material)));});
-  assert.doesNotMatch(ui.doc.body.textContent!,/Cargando contenido/);
+  assert.doesNotMatch(ui.doc.body.textContent!,/Cargando/);assert.equal(ui.doc.querySelector('.skeleton'),null);
   assert.ok(ui.doc.querySelector('a[href$="/materials/'+material.id+'"]'));
  }finally{await ui.close();}
  const slow=deferred<Response>();
@@ -231,7 +231,9 @@ test("expanding a module does not flash a loading state for fast loads but expla
   await ui2.settle(()=>{});
   await new Promise(done=>setTimeout(done,450));
   await ui2.settle(()=>{});
-  assert.match(ui2.doc.body.textContent!,/Cargando contenido/);
+  assert.equal(ui2.doc.querySelector('#materials-'+unit.id+' [role="status"]')?.textContent,"Cargando materiales…");
+  assert.equal(ui2.doc.querySelectorAll('#materials-'+unit.id+' .skeleton-content .module-resource').length,2);
+  assert.equal(ui2.doc.querySelector('#materials-'+unit.id+' .skeleton-content :is(a,button,input)'),null);
  }finally{await ui2.close();}
 });
 const linkedQuiz=(quizId:string)=>({kind:"quiz" as const,id:id(77),moduleId:unit.id,title:"Ya enlazado",position:2,publishedAt:null,quizId,canUnlink:true});

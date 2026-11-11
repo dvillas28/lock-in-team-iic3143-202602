@@ -17,10 +17,13 @@ import {
   listSectionEnrollments,
   updateSectionEnrollment,
 } from "../../lib/api/enrollments.ts";
-import { EmptyState, ErrorState, LoadingState } from "../route-states.tsx";
+import { EmptyState, ErrorState } from "../route-states.tsx";
+import { RecordRowsSkeleton } from "../academic/record-skeleton.tsx";
+import { participantCell, participantColumns as columns } from "./sections-skeleton.tsx";
 import { EnrollmentForm } from "./enrollment-form.tsx";
 import { useMutation } from "./use-mutation.ts";
 import { useResource } from "./use-resource.ts";
+const caption = "Matrículas activas e históricas";
 export function ParticipantsPanel(props: {
   session: Session;
   slug: string;
@@ -147,14 +150,16 @@ function Participants({
         Participantes e historial · Sección {section.code}
       </h3>
       {result.error ? (
-        <ErrorState
+        <ErrorState headingLevel={4}
           feedback={result.error}
           onRetry={() => void result.reload()}
         />
       ) : !result.data ? (
-        <LoadingState />
+        <RecordRowsSkeleton label="Cargando participantes…" caption={caption} headers={columns} rows={3}
+          scroll="table-scroll participants-table" cell={participantCell} />
       ) : !result.data.items.length ? (
-        <EmptyState />
+        <EmptyState headingLevel={4} title="No hay participantes"
+          message="Esta sección aún no tiene matrículas. Usa «Asignar participante» para inscribir estudiantes o ayudantes." />
       ) : (
         <div
           ref={table}
@@ -164,13 +169,14 @@ function Participants({
           tabIndex={0}
         >
           <table className="data-table">
-            <caption>Matrículas activas e históricas</caption>
+            <caption>{caption}</caption>
             <thead>
               <tr>
-                <th scope="col">Persona</th>
-                <th scope="col">Rol</th>
-                <th scope="col">Estado</th>
-                <th scope="col">Acciones</th>
+                {columns.map((column) => (
+                  <th scope="col" key={column}>
+                    {column}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>

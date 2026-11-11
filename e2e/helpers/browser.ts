@@ -41,6 +41,10 @@ export async function showMenu(page: Page) {
   const button = page.getByRole('button',{name:'Abrir navegación',exact:true});
   if (await button.isVisible()) await button.click();
 }
+/** Headers, tabs and known table headers render before data; a page is loaded once no skeleton remains. */
+export async function loaded(page: Page) {
+  await expect(page.locator('main :is(.skeleton-region, .skeleton-rows)')).toHaveCount(0);
+}
 export async function course(page: Page, id: string) {
   if (!new URL(page.url()).pathname.startsWith(`/courses/${id}`)) {
     if (new URL(page.url()).pathname !== '/courses') {
@@ -50,8 +54,9 @@ export async function course(page: Page, id: string) {
   }
   await expect(page).toHaveURL(new RegExp(`/courses/${id}(?:/|$)`));
   await expect(page.getByRole('navigation',{name:'Curso',exact:true})).toBeVisible();
+  await loaded(page);
 }
-export async function go(page: Page, id: string, suffix = '') {
+export async function go(page: Page, id: string, suffix = '', {waitForData = true} = {}) {
   const path = `/courses/${id}${suffix}`;
   if (new URL(page.url()).pathname === path) return;
   await course(page,id);
@@ -64,6 +69,7 @@ export async function go(page: Page, id: string, suffix = '') {
     await page.locator('nav[aria-label="Navegación institucional"]').locator(`a[href="${path}"]`).click();
   }
   await expect(page).toHaveURL(new RegExp(path.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$'));
+  if (waitForData) await loaded(page);
 }
 
 /** Exercise compatibility/deep routes with Next's existing router when no UI link exposes them. */

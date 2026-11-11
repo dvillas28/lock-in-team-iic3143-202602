@@ -13,13 +13,14 @@ import { listQuizAttempts } from '../../lib/api/attempts.ts';
 import { gradebookCapabilities } from '../../lib/gradebook/capabilities.ts';
 import { ApiHttpError } from '../../lib/api/errors.ts';
 import type { Attempt } from '../../lib/attempts/validation.ts';
-import { LoadingState, ErrorState } from '../route-states.tsx';
+import { ErrorState } from '../route-states.tsx';
+import { QuizSkeleton } from "../quizzes/quiz-skeleton.tsx";
 export function AttemptList(props: Readonly<{
     courseId: string;
     quizId: string;
 }>) {
     const { state } = useSession();
-    return !state.context?.user ? <LoadingState /> : <List key={`${state.generation}:${JSON.stringify(state.context)}:${props.courseId}:${props.quizId}`} {...props}/>;
+    return !state.context?.user ? <QuizSkeleton kind="attempts"/> : <List key={`${state.generation}:${JSON.stringify(state.context)}:${props.courseId}:${props.quizId}`} {...props}/>;
 }
 function List({ courseId, quizId }: Readonly<{
     courseId: string;
@@ -48,7 +49,7 @@ function List({ courseId, quizId }: Readonly<{
         }}>Reiniciar filtros</button></div>;
     }
     if (!r.data) {
-        return <LoadingState />;
+        return <QuizSkeleton kind="attempts"/>;
     }
     const { quiz, sections, cap, page } = r.data;
     return <QuizWorkspace course={r.data.course} user={user} title={`Intentos · ${quiz.title}`}><div className="stack attempt-workspace"><Link className="text-link attempt-back" href={`/courses/${courseId}/quizzes/${quizId}`}><ArrowLeft size={16} aria-hidden="true"/>Volver al quiz</Link>

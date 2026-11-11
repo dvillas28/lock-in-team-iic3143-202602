@@ -6,7 +6,8 @@ import { useSession } from "../auth/session-provider.tsx";
 import { ContentNotices, useContentNotice } from "../content/content-notices.tsx";
 import { CourseNavigation } from "../courses/course-navigation.tsx";
 import { useResource } from "../courses/use-resource.ts";
-import { ErrorState, LoadingState } from "../route-states.tsx";
+import { ErrorState } from "../route-states.tsx";
+import { AssignmentSkeleton } from "./assignment-skeleton.tsx";
 import { getCourse } from "../../lib/api/courses.ts";
 import { listSections } from "../../lib/api/sections.ts";
 import {
@@ -55,7 +56,8 @@ function Workspace({courseId,assignmentId,scope}:Route & {scope:string}) {
     return {course,sections,groups,items};
   });
   if (!user || !resource.data) return resource.error
-    ? <ErrorState feedback={resource.error} onRetry={()=>void resource.reload()}/> : <LoadingState/>;
+    ? <ErrorState feedback={resource.error} onRetry={()=>void resource.reload()}/>
+    : <AssignmentSkeleton kind={assignmentId ? "detail" : "list"} courseId={courseId}/>;
   const {course,sections,groups,items} = resource.data;
   const item = assignmentId ? items[0] : undefined;
   const allowed = destinations(user,course,sections), whole = canAuthor(user,course,sections,null);
@@ -134,7 +136,7 @@ function Workspace({courseId,assignmentId,scope}:Route & {scope:string}) {
     </div></div>
     <CourseNavigation course={course} user={user} active="/assignments"/>
     {item && <Link className="text-link assignment-back" href={href}><ArrowLeft size={16} aria-hidden="true"/> Volver a Tareas</Link>}
-    {resource.error && <ErrorState feedback={resource.error} onRetry={()=>void resource.reload()}/>}
+    {resource.error && <ErrorState headingLevel={2} feedback={resource.error} onRetry={()=>void resource.reload()}/>}
     {item && editAllowed && !editing && <div className="actions">
       {uncertain?.operation.kind==="visibility" ? <button className="btn btn-primary" disabled={busy} onClick={()=>void run(uncertain.operation)}>Reintentar cambio de visibilidad</button> :
         <>
@@ -225,7 +227,7 @@ function Directory({items,href,now,staff,section,create,weights}:DirectoryProps)
           <h2 id={`${ids}-${key}`} className="serif">{group.title}</h2>
           <span className="assignment-group-meta hint tnum">
             {byGroup && group.weight!==undefined && <span>Ponderación: {points.format(group.weight)} %</span>}
-            <span>{group.items.length}<span className="assignment-sr-only"> {group.items.length===1 ? "tarea" : "tareas"}</span></span>
+            <span>{group.items.length}<span className="sr-only"> {group.items.length===1 ? "tarea" : "tareas"}</span></span>
           </span>
         </header>
         <ul className="assignment-list">{group.items.map(item=><li key={item.id}>

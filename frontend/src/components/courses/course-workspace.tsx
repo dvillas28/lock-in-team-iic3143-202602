@@ -5,18 +5,24 @@ import { useResource } from "./use-resource.ts";
 import { getCourse } from "../../lib/api/courses.ts";
 import type { Course } from "../../lib/courses/validation.ts";
 import { CourseNavigation } from "./course-navigation.tsx";
-import { ErrorState, LoadingState } from "../route-states.tsx";
+import { CourseSectionSkeleton } from "./course-skeleton.tsx";
+import { ErrorState } from "../route-states.tsx";
 
-/** Course identity/navigation outlive loading, filters and errors of a child resource. */
+/**
+ * Course identity/navigation outlive loading, filters and errors of a child resource. `skeleton` is
+ * the section body drawn under the header skeleton while the course loads (route fallback parity).
+ */
 export function CourseWorkspace({
   courseId,
   title,
   active,
+  skeleton,
   children,
 }: Readonly<{
   courseId: string;
   title: string;
   active: string;
+  skeleton?: ReactNode;
   children: (course: Course) => ReactNode;
 }>) {
   const { session, state } = useSession(),
@@ -26,7 +32,8 @@ export function CourseWorkspace({
   const course = useResource(session, scope, (c) =>
     getCourse(c, slug, courseId),
   );
-  if (!user) return <LoadingState />;
+  const pending = <CourseSectionSkeleton title={title}>{skeleton}</CourseSectionSkeleton>;
+  if (!user) return pending;
   if (course.error)
     return (
       <ErrorState
@@ -34,7 +41,7 @@ export function CourseWorkspace({
         onRetry={() => void course.reload()}
       />
     );
-  if (!course.data) return <LoadingState />;
+  if (!course.data) return pending;
   return (
     <div className="stack academic-workspace" key={scope}>
       <div className="page-heading">

@@ -11,7 +11,7 @@ for(const actor of ['ST1','AS1','T1','AO'])test(`E2E-COURSE-001 catalogue follow
  const memberships=status(await api.get('me'),200).body.sectionMemberships;
  for(const key of expected){const card=cards.filter({has:page.getByRole('heading',{name:'Curso E2E '+key,exact:true})});await expect(card).toContainText('E2E-'+key);await expect(card).toContainText('2026-2');await expect(card).toHaveAttribute('href',`/courses/${e.data.courses[key]}/modules`);for(const m of memberships.filter((m:any)=>m.courseId===e.data.courses[key]))await expect(card).toContainText(`Sección ${m.sectionCode} · ${({student:'Estudiante',teacher:'Docente',assistant:'Ayudante'} as Record<string,string>)[m.role]}`);}
  await page.setViewportSize({width:375,height:812});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);await page.setViewportSize({width:1440,height:900});
- await course(page,e.data.courses.C1);await expect(page.getByRole('heading',{name:'Módulos y material',exact:true})).toBeVisible();
+ await course(page,e.data.courses.C1);await expect(page.getByRole('heading',{name:'Módulos y material',exact:true})).toBeVisible();await expect(page.getByRole('navigation',{name:'Curso',exact:true})).toBeVisible();await expect(page.getByRole('status').filter({hasText:'Cargando módulos'})).toHaveCount(0);
  expect(status(await api.get(`courses/${e.data.courses.C1}`),200).body.createdBy).toBe(e.data.actors.AO.id);
  await page.getByRole('link',{name:'Mis cursos',exact:true}).click();await expect(page).toHaveURL(url=>url.pathname==='/courses');await course(page,e.data.courses.C1);
  await expect(page).toHaveURL(url=>url.pathname===`/courses/${e.data.courses.C1}/modules`);
@@ -20,7 +20,7 @@ for(const actor of ['ST1','AS1','T1','AO'])test(`E2E-COURSE-001 catalogue follow
  await expect(page).toHaveURL(url=>url.pathname===`/courses/${e.data.courses.C1}/modules`);
 });
 test('E2E-COURSE-002 empty directory remains empty after revalidation / empty @regression',async ({e,actorPage})=>{
- const page=await actorPage('MEMBER'),before=await securitySnapshot(e);await expect(page.getByRole('heading',{name:'Sin contenido para mostrar',exact:true})).toBeVisible();
+ const page=await actorPage('MEMBER'),before=await securitySnapshot(e);await expect(page.getByRole('heading',{level:2,name:'Todavía no tienes cursos',exact:true})).toBeVisible();
  expect(status(await (await e.api('MEMBER')).get('courses'),200).body.items).toEqual([]);expect((await focus(page)).status()).toBe(200);
  await expect(page.locator('a.course-card')).toHaveCount(0);expect(await securitySnapshot(e)).toEqual(before);
 });
@@ -43,7 +43,7 @@ test('E2E-COURSE-005 directory loading failure and retry use current identity / 
  let release!:()=>void,entered!:()=>void;const gate=new Promise<void>(r=>release=r),started=new Promise<void>(r=>entered=r);let gets=0;
  const path='**/api/v1/institution/uc/courses';
  await page.route(path,async route=>{gets++;expect(route.request().method()).toBe('GET');const actual=await route.fetch();expect(actual.status()).toBe(200);entered();await gate;await route.fulfill({status:503,contentType:'application/problem+json',body:JSON.stringify({status:503,title:'Unavailable'})});});
- try{await page.getByRole('link',{name:'Mis cursos',exact:true}).click();await started;await expect(page.getByRole('status').filter({hasText:'Cargando contenido'})).toBeVisible();release();await expect(page.getByRole('button',{name:'Reintentar',exact:true})).toBeVisible();
+ try{await page.getByRole('link',{name:'Mis cursos',exact:true}).click();await started;await expect(page.getByRole('status').filter({hasText:'Cargando cursos…'})).toBeVisible();await expect(page.getByRole('heading',{name:'Mis cursos',level:1})).toBeVisible();release();await expect(page.getByRole('button',{name:'Reintentar',exact:true})).toBeVisible();
  await page.unroute(path);const response=page.waitForResponse(r=>r.url().endsWith('/courses')&&r.request().method()==='GET');await page.getByRole('button',{name:'Reintentar',exact:true}).click();expect((await response).status()).toBe(200);await expect(page.locator('a.course-card')).toHaveCount(2);expect(gets).toBe(1);expect(await securitySnapshot(e)).toEqual(before);
  }finally{release();}
 });
@@ -64,7 +64,7 @@ test('E2E-COURSE-008 editor sends only changed metadata and fresh session sees i
  const page=await actorPage('AO'),api=await e.api('AO'),c=e.data.courses.C1;await go(page,c,'/sections');const form=await fillCourse(page,{code:'E2E-C1',name:'Curso editado',term:'2026-2'},true);
  const response=page.waitForResponse(r=>r.url().endsWith('/courses/'+c)&&r.request().method()==='PATCH');await submit(form,'Guardar curso');const r=await response;expect(r.status()).toBe(200);expect(r.request().postDataJSON()).toEqual({name:'Curso editado'});
  expect(status(await api.get(`courses/${c}`),200).body).toMatchObject({code:'E2E-C1',name:'Curso editado',term:'2026-2',createdBy:e.data.actors.AO.id});const events=(await e.pool.query("SELECT changes FROM audit_events WHERE action='course.updated' AND resource_id=$1",[c])).rows;expect(events).toHaveLength(1);expect(events[0].changes).toMatchObject({before:{name:'Curso E2E C1'},after:{name:'Curso editado'}});
- const fresh=await actorPage('AO');await course(fresh,c);await expect(fresh.getByRole('heading',{name:'Curso editado',exact:true})).toBeVisible();
+ const fresh=await actorPage('AO');await course(fresh,c);await expect(fresh.locator('main').getByText('Curso editado',{exact:true}).first()).toBeVisible();
 });
 test('E2E-COURSE-009 identical metadata preserves history / no-op @regression',async ({e,actorPage})=>{
  const api=await e.api('AO'),c=e.data.courses.C1,page=await actorPage('AO'),before=await securitySnapshot(e);status(await api.patch(`courses/${c}`,{name:'Curso E2E C1'}),200);expect(await securitySnapshot(e)).toEqual(before);

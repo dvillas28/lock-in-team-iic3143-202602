@@ -17,7 +17,8 @@ import type { Authoring, Summary } from "../../lib/quizzes/validation.ts";
 import { useSession } from "../auth/session-provider.tsx";
 import { useMutation } from "../courses/use-mutation.ts";
 import { useResource } from "../courses/use-resource.ts";
-import { ErrorState, LoadingState } from "../route-states.tsx";
+import { ErrorState } from "../route-states.tsx";
+import { QuizSkeleton } from "./quiz-skeleton.tsx";
 import { QuizWorkspace } from "./quiz-workspace.tsx";
 import { QuizDraftForm, QuizDraftSave, QuizPublishSubmit, useQuizDraft, type PublishRequest } from "./quiz-draft-form.tsx";
 import { rememberQuizCreation, rememberQuizPublication } from "./quiz-created-receipt.ts";
@@ -42,9 +43,9 @@ export function QuizCreate({ courseId, filters = emptyFilters }: { courseId: str
     const groups = await listEvaluationGroups(client, slug, courseId).catch(() => undefined);
     return { course, sections, allowed, wholeCourse, groups, user };
   });
-  if (!context?.user) return <LoadingState/>;
+  if (!context?.user) return <QuizSkeleton kind="create"/>;
   if (result.error) return <ErrorState feedback={result.error} onRetry={() => void result.reload()}/>;
-  if (!result.data) return <LoadingState/>;
+  if (!result.data) return <QuizSkeleton kind="create"/>;
   return <CreateForm key={scope} {...result.data} filters={filters}/>;
 }
 
