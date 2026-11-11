@@ -5,3 +5,5 @@
 .auth-password .field { min-width: 0; }
 .auth-password .icon-btn { flex-shrink: 0; }
 .access-boundary { border: 0; padding: 0; margin: 0; min-width: 0; }
+/* Editors drop to non-modal (z-index 30, content.css) while access is unverified; keep this recovery notice above them. */
+.access-notice { position: sticky; top: 0; z-index: 40; box-shadow: var(--shadow-float); }
