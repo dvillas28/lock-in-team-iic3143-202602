@@ -1,5 +1,7 @@
 # Skeleton UI: sistema base (PR 1)
 
+<!-- length-exception: acumula el registro de las nueve PR de la iniciativa sin dividir su historial -->
+
 [← Índice de la iniciativa](README.md) · Issue #280. Este documento complementa
 [DESIGN.md](../../../DESIGN.md) mientras ese archivo no pueda crecer: tiene 230 líneas,
 y el control de longitud de la CI rechaza modificar un documento de más de 200.
@@ -146,3 +148,21 @@ no tiene estado ni hace peticiones, así que también puede usarse desde un `loa
   filas, encabezado y contenido; solo el pie lateral es más bajo (sin «Cerrar sesión»).
   Sin scroll horizontal, sin parpadeo en respuestas de 150 ms y barras visibles en oscuro.
 - Pendiente: el `<h1>` de `ErrorState` se duplica dentro de vistas con título (estados vacíos).
+
+## Vacíos contextuales y encabezados (PR 9)
+
+- `ErrorState` y `NotFoundState` aceptan `headingLevel` (1 por defecto, para errores de ruta).
+  Los 18 usos anidados bajo un `<h1>` o un título de sección pasan el nivel siguiente: Mis
+  cursos, módulos y recursos, tareas y entregas, vista previa de archivos, «Mis intentos»,
+  enlazar cuestionario, secciones, participantes, invitaciones y miembros. Se conservan
+  `aria-labelledby`, `role="alert"`, textos, «Reintentar» y «Volver al inicio».
+- `EmptyState` acepta `title`, `message`, `action` y `headingLevel`; sin props mantiene el
+  texto genérico. Mis cursos, secciones (propias y gestionables), participantes y recursos
+  de módulo usan textos contextuales. Solo se nombran controles que el rol ya ve («Crear
+  curso», «Crear sección», «Asignar participante», «Añadir contenido»); no se agregan acciones.
+- `.state-title` iguala el aspecto del título (21 px, serif) en cualquier nivel; la jerarquía
+  la define la etiqueta, no el CSS. Condiciones de vacío, error y carga sin cambios.
+- Pruebas: `test/route-states.test.ts` (h1 global, anidado sin h1 duplicado, 403/404 sin
+  contenido privado y con retorno, 500 con reintento, vacío sin acciones no autorizadas,
+  carga distinta de vacío, UC y UTFSM); typecheck, lint, 534 tests y build. Medido en
+  escritorio y móvil, claro y oscuro: sin desborde y contraste ≥ 8,6:1.
