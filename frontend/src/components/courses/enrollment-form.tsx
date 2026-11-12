@@ -13,11 +13,11 @@ import { useMutation } from "./use-mutation.ts";
 export const SEARCH_DEBOUNCE_MS = 300;
 const minimumQuery = 2;
 /** Students first: it is the default and the most frequent assignment. */
-const roleOrder: Role[] = ["student", "assistant", "teacher"];
+export const roleOrder: Role[] = ["student", "assistant", "teacher"];
 /** Long addresses wrap after the «@» first, never mid-word when it can be avoided. */
-const Email = ({ value }: { value: string }) => { const at = value.lastIndexOf("@"); return at < 0 ? <>{value}</> : <>{value.slice(0, at + 1)}<wbr />{value.slice(at + 1)}</>; };
-const initials = (name: string) => name.trim().split(/\s+/).slice(0, 2).map(part => part[0]).join("").toLocaleUpperCase("es");
-const fullMessage = (owner: boolean) => owner
+export const Email = ({ value }: { value: string }) => { const at = value.lastIndexOf("@"); return at < 0 ? <>{value}</> : <>{value.slice(0, at + 1)}<wbr />{value.slice(at + 1)}</>; };
+export const initials = (name: string) => name.trim().split(/\s+/).slice(0, 2).map(part => part[0]).join("").toLocaleUpperCase("es");
+export const fullMessage = (owner: boolean) => owner
   ? "La sección no tiene cupos de estudiantes disponibles. Asigna otro rol o aumenta la capacidad en «Configurar sección»."
   : "La sección no tiene cupos de estudiantes disponibles. Asigna otro rol o pide al propietario del curso que aumente la capacidad.";
 
