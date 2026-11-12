@@ -33,6 +33,8 @@ Las API están vinculadas a controladores/contrato en [API](API.md); rutas compl
 | FL-ENROLL-01 | [Búsqueda institucional de participantes](flows/ENROLL.md) | I | [E2E-ENROLL-001](../catalog/enroll-01.md#e2e-enroll-001)–[E2E-ENROLL-006](../catalog/enroll-02.md#e2e-enroll-006) |
 <a id="fl-enroll-02"></a>
 | FL-ENROLL-02 | [Asignar cambiar revocar y reactivar roles](flows/ENROLL.md) | I | [E2E-ENROLL-007](../catalog/enroll-02.md#e2e-enroll-007)–[E2E-ENROLL-020](../catalog/enroll-04.md#e2e-enroll-020) |
+<a id="fl-enroll-03"></a>
+| FL-ENROLL-03 | [Roster de participantes activos](flows/ENROLL.md) | I | [E2E-ENROLL-021](../catalog/enroll-05.md#e2e-enroll-021) |
 <a id="fl-content-01"></a>
 | FL-CONTENT-01 | [Módulos compartidos y orden completo](flows/CONTENT.md) | I | [E2E-CONTENT-001](../catalog/content-01.md#e2e-content-001)–[E2E-CONTENT-007](../catalog/content-02.md#e2e-content-007) |
 <a id="fl-content-02"></a>

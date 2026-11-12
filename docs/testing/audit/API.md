@@ -1,6 +1,6 @@
 # Inventario API y cobertura por operación
 
-50 operaciones OpenAPI; cada una tiene controlador registrado y servicio en el commit base.
+51 operaciones OpenAPI; cada una tiene controlador registrado y servicio en el commit base.
 La correspondencia es estática: no afirmar conformidad runtime exhaustiva. Paths usan `I = /api/v1/institution/{institutionSlug}`.
 Éxito por contrato en columna HTTP; otros4xx/5xx se expanden con matriz errores/roles/tenant.
 Todos los endpoints institucionales participan en TENANT-008/009/010 y matriz ROLES, no solo el happy case listado.
@@ -50,6 +50,7 @@ Todos los endpoints institucionales participan en TENANT-008/009/010 y matriz RO
 | [listSectionEnrollments](../../../docs/reference/openapi/paths/sections.yaml#L163) | GET `I/sections/{sectionId}/enrollments` | 200, 400, 401, 403, 404, 500, 503 | [controller](../../../backend/src/enrollments/enrollments.controller.ts) | [E2E-ENROLL-018](../catalog/enroll-04.md#e2e-enroll-018) |
 | [createSectionEnrollment](../../../docs/reference/openapi/paths/sections.yaml#L198) | POST `I/sections/{sectionId}/enrollments` | 201, 400, 401, 403, 404, 409, 422, 200, 500, 503 | [controller](../../../backend/src/enrollments/enrollments.controller.ts) | [E2E-ENROLL-007](../catalog/enroll-02.md#e2e-enroll-007) |
 | [updateSectionEnrollment](../../../docs/reference/openapi/paths/sections.yaml#L259) | PATCH `I/sections/{sectionId}/enrollments/{enrollmentId}` | 200, 400, 401, 403, 404, 409, 422, 500, 503 | [controller](../../../backend/src/enrollments/enrollments.controller.ts) | [E2E-ENROLL-010](../catalog/enroll-02.md#e2e-enroll-010) |
+| [listSectionParticipants](../../../docs/reference/openapi/paths/participants.yaml#L8) | GET `I/sections/{sectionId}/participants` | 200, 400, 401, 404, 500, 503 | [controller](../../../backend/src/enrollments/section-participants.controller.ts) | [E2E-ENROLL-021](../catalog/enroll-05.md#e2e-enroll-021) |
 | [listCourseModules](../../../docs/reference/openapi/paths/sections.yaml#L307) | GET `I/courses/{courseId}/modules` | 200, 400, 401, 404, 500, 503 | [controller](../../../backend/src/modules/modules.controller.ts) | [E2E-CONTENT-007](../catalog/content-02.md#e2e-content-007) |
 | [createCourseModule](../../../docs/reference/openapi/paths/sections.yaml#L343) | POST `I/courses/{courseId}/modules` | 201, 400, 401, 403, 404, 409, 422, 500, 503, 413, 415 | [controller](../../../backend/src/modules/modules.controller.ts) | [E2E-CONTENT-001](../catalog/content-01.md#e2e-content-001) |
 | [reorderCourseModules](../../../docs/reference/openapi/paths/sections.yaml#L404) | PUT `I/courses/{courseId}/modules/order` | 200, 400, 401, 403, 404, 409, 422, 500, 503, 413, 415 | [controller](../../../backend/src/modules/modules.controller.ts) | [E2E-CONTENT-004](../catalog/content-01.md#e2e-content-004) |
