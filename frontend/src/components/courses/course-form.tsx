@@ -8,11 +8,14 @@ import { listSections } from "../../lib/api/sections.ts";
 import { useMutation } from "./use-mutation.ts";
 import { Field } from "./form-fields.tsx";
 import {CoursePeriod} from './course-period.tsx';
-export function CourseForm({ session, slug, course, onSaved }: {
+/** Inside an `AdminDialog` the dialog owns the title; the form adds Cancelar and reports completion. */
+export type DialogFormControls = { onDone: (message: string) => void; onCancel: () => void; onBusy: (busy: boolean) => void };
+export function CourseForm({ session, slug, course, onSaved, dialog }: {
   session: Session;
   slug: string;
   course?: Course;
   onSaved: () => Promise<unknown>;
+  dialog?: DialogFormControls;
 }) {
   const mutation = useMutation(session, {
     conflict: {message:'Ya existe un curso con ese código y período en esta institución. Cambia el código o el período.',errors:{code:'Este código ya está registrado para el período seleccionado.',term:'Selecciona otro período o cambia el código del curso.'}},
@@ -27,6 +30,8 @@ export function CourseForm({ session, slug, course, onSaved }: {
   useEffect(()=>{
     if(mutation.field && formRef.current) focusField(formRef.current,mutation.field);
   },[mutation.field,mutation.message]);
+  const onBusy = dialog?.onBusy;
+  useEffect(()=>{ onBusy?.(mutation.busy); },[onBusy,mutation.busy]);
   function blur(event: FocusEvent<HTMLFormElement>) {
     const control: EventTarget = event.target;
     if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement)) return;
@@ -62,7 +67,9 @@ export function CourseForm({ session, slug, course, onSaved }: {
       if (!current()) return;
       await onSaved();
       if (!course) await session.loadContext(slug);
-      return course ? "Curso actualizado." : "Curso creado.";
+      const done = course ? "Curso actualizado." : "Curso creado.";
+      dialog?.onDone(done);
+      return done;
     }, async (current) => {
       if (course) { await session.request(c=>getCourse(c,slug,course.id),current); return "Se consultó la configuración actual."; }
       const items = await session.request(c=>listCourses(c,slug),current);
@@ -71,14 +78,14 @@ export function CourseForm({ session, slug, course, onSaved }: {
     });
   }
   const errorCount = (['code','name','term','sectionCode','capacity'] as const).filter(field=>error(field)).length;
-  return <form ref={formRef} key={revision} aria-label={course ? "Configurar curso" : "Crear curso"} className="card panel stack" onSubmit={submit} onBlur={blur} onChange={event=>{
+  return <form ref={formRef} key={revision} aria-label={course ? "Configurar curso" : "Crear curso"} className={dialog ? "stack" : "card panel stack"} onSubmit={submit} onBlur={blur} onChange={event=>{
     mutation.clearErrors();
     const control: EventTarget=event.target;
     if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement)) return;
     const field=control.name.startsWith('term')?'term':control.name;
     setErrors(previous=>({...previous,[field]:undefined}));
   }} noValidate>
-    <h2>{course ? "Configurar curso propio" : "Crear curso"}</h2>
+    {!dialog && <h2>{course ? "Configurar curso propio" : "Crear curso"}</h2>}
     {errorCount>0 && <p className="notice" role="alert">Revisa {errorCount === 1 ? 'el campo marcado' : `los ${errorCount} campos marcados`}. Los datos que ingresaste se conservan.</p>}
     <fieldset disabled={mutation.busy || mutation.uncertain} className="stack">
       <div className="form-grid">
@@ -90,7 +97,10 @@ export function CourseForm({ session, slug, course, onSaved }: {
         <Field name="sectionCode" label="Código de sección inicial" maxLength={32} invalid={!!error('sectionCode')} error={error('sectionCode')} hint="Máximo 32 caracteres. Ej.: 1 o A-1. Letras, números y guiones."/>
         <Field name="capacity" label="Capacidad inicial" required={false} type="number" min={1} max={INITIAL_CAPACITY_MAX} invalid={!!error('capacity')} error={error('capacity')} hint="Deja vacío para no limitar la capacidad."/>
       </div>}
-      <button className="btn btn-primary" type="submit">{mutation.busy ? "Guardando…" : course ? "Guardar curso" : "Crear curso"}</button>
+      {dialog ? <div className="actions dialog-actions">
+        <button className="btn btn-ghost" type="button" onClick={dialog.onCancel}>Cancelar</button>
+        <button className="btn btn-primary" type="submit">{mutation.busy ? "Guardando…" : course ? "Guardar curso" : "Crear curso"}</button>
+      </div> : <button className="btn btn-primary" type="submit">{mutation.busy ? "Guardando…" : course ? "Guardar curso" : "Crear curso"}</button>}
     </fieldset>
     {mutation.message && <p role={mutation.confirmed ? 'status' : 'alert'}>{mutation.message}</p>}
   </form>;

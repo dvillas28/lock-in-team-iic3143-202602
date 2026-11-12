@@ -22,8 +22,12 @@ test("only authorized sections mount participant management; owner without teach
  for(const profile of ['owner','teacher','assistant','student','super','foreign']){
  const ui=await mount(h(CourseDetail,{courseId:course.id}),reply,profile);try{
  const allowed=['owner','teacher','foreign'].includes(profile);
- assert.equal(!!ui.doc.querySelector('select[name="managedSection"]'),allowed);
- if(allowed)await ui.select('select[name="managedSection"]',section.id);
+ // Owner manages two sections and gets the picker; a single authorized section is named by the bar alone.
+ assert.equal(!!ui.doc.querySelector('select[name="managedSection"]'),profile==='owner');
+ // The active section is named once: as the picker's value with several sections, as plain text with one.
+ const context=ui.doc.querySelector('.section-name')?.textContent??ui.doc.querySelector<HTMLSelectElement>('select[name="managedSection"]')?.selectedOptions[0]?.textContent??null;
+ assert.equal(context,allowed?'Sección 1':null);
+ if(profile==='owner'){assert.equal(ui.doc.querySelector('.section-toolbar input[type="search"]'),null,'two sections need no code filter');await ui.select('select[name="managedSection"]',section.id);}
  assert.equal(ui.requests.some(r=>r.url.includes('/enrollments')),allowed);
  if(profile==='owner'){assert.ok(ui.doc.querySelector('input[name="userId"]'));assert.equal(ui.doc.querySelector('input[name="search"]'),null);assert.ok(ui.requests.every(r=>!r.url.includes('/users')&&!r.url.includes('/memberships')));}
  if(profile==='teacher'||profile==='foreign'){assert.equal(ui.doc.querySelector('select[name="managedSection"] option[value="'+otherSection.id+'"]'),null);assert.equal(ui.requests.some(r=>r.url.includes(`${otherSection.id}/enrollments`)),false);}
@@ -45,16 +49,16 @@ test("history and sibling roles survive role successor, POST 200 and pagination 
 });
 test("revoke last teacher requires confirmation; cancel sends nothing",async()=>{
  const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>r.url.includes('/enrollments')?Response.json(r.method==='PATCH'?{...enrollment,role:'teacher',active:false}:page([{...enrollment,role:'teacher'}])):reply(r));try{
- await ui.select('select[name="managedSection"]',section.id);const dialog=ui.doc.querySelector('dialog') as HTMLDialogElement;
+ await ui.select('select[name="managedSection"]',section.id);const dialog=ui.doc.querySelector('dialog.participant-management') as HTMLDialogElement;
  dialog.showModal=()=>{dialog.setAttribute('open','');};dialog.close=()=>{dialog.removeAttribute('open');};
  await ui.click('Gestionar');await ui.click('Revocar Docente');assert.ok(dialog.hasAttribute('open'));
- await ui.settle(()=>dialog.dispatchEvent(new ui.dom.window.KeyboardEvent('keydown',{key:'Tab',shiftKey:true,bubbles:true,cancelable:true})));assert.equal(ui.doc.activeElement?.textContent,'Confirmar revocación');await ui.click('Cancelar');assert.equal(ui.requests.filter(r=>r.method==='PATCH').length,0);
+ await ui.settle(()=>dialog.dispatchEvent(new ui.dom.window.KeyboardEvent('keydown',{key:'Tab',shiftKey:true,bubbles:true,cancelable:true})));assert.equal(ui.doc.activeElement?.textContent,'Confirmar revocación');await ui.settle(()=>[...dialog.querySelectorAll('button')].find(b=>b.textContent==='Cancelar')!.click());assert.equal(ui.requests.filter(r=>r.method==='PATCH').length,0);
  await ui.click('Revocar Docente');await ui.click('Confirmar revocación');assert.equal(ui.requests.filter(r=>r.method==='PATCH').length,1);assert.deepEqual(await ui.requests.find(r=>r.method==='PATCH')!.json(),{active:false});
  }finally{await ui.close();}
 });
 test("search 404 is unavailable, not empty; stale searches and section completions discarded",async()=>{
  const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>r.url.includes('/users')?Response.json({},{status:404}):reply(r),'teacher');try{
- await ui.select('select[name="managedSection"]',section.id);await ui.submit('form[aria-label="Buscar participantes"]',{search:'María'});assert.doesNotMatch(ui.doc.body.textContent!,/Sin coincidencias/);assert.match(ui.doc.body.textContent!,/no está disponible/);
+ await ui.submit('form[aria-label="Buscar participantes"]',{search:'María'});assert.doesNotMatch(ui.doc.body.textContent!,/Sin coincidencias/);assert.match(ui.doc.body.textContent!,/no está disponible/);
  }finally{await ui.close();}
  const pending=deferred<Response>();const u=await mount(h(CourseDetail,{courseId:course.id}),r=>r.url.includes('/enrollments')?pending.promise:reply(r),'owner');try{
  await u.select('select[name="managedSection"]',section.id);await u.select('select[name="managedSection"]',otherSection.id);await u.settle(()=>pending.resolve(Response.json(page([enrollment]))));assert.doesNotMatch(u.doc.body.textContent!,/María/);
@@ -71,7 +75,7 @@ test("self revocation refreshes me and removes management; lost mutation is neve
 
 test("teacher search pagination preserves opaque cursor, excludes inactive destination and assigns chosen user",async()=>{
  const requests:Request[]=[];const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>{requests.push(r);if(r.url.includes('/users'))return Response.json(new URL(r.url).searchParams.has('cursor')?page([person]):page([{...person,active:false}], 'opaque+/='));if(r.url.includes('/enrollments')&&r.method==='POST')return Response.json(enrollment,{status:201});return reply(r);},'teacher');try{
- await ui.select('select[name="managedSection"]',section.id);await ui.submit('form[aria-label="Buscar participantes"]',{search:'María'});assert.equal(ui.doc.querySelector<HTMLButtonElement>('form[aria-label="Asignar rol"] button')?.disabled,true);
+ await ui.submit('form[aria-label="Buscar participantes"]',{search:'María'});assert.equal(ui.doc.querySelector<HTMLButtonElement>('form[aria-label="Asignar rol"] button')?.disabled,true);
  const inactive=Array.from(ui.doc.querySelectorAll<HTMLButtonElement>('button')).find(b=>b.textContent?.includes('(inactiva)'));assert.equal(inactive?.disabled,true);
  await ui.click('Más personas');assert.equal(new URL(requests.find(r=>r.url.includes('cursor='))!.url).searchParams.get('cursor'),'opaque+/=');
  await ui.click('María Pérez · maria@example.test');await ui.submit('form[aria-label="Asignar rol"]',{role:'assistant'});
@@ -80,7 +84,7 @@ test("teacher search pagination preserves opaque cursor, excludes inactive desti
 });
 test("search responses from older query cannot restore users",async()=>{
  const pending=deferred<Response>();const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>r.url.includes('/users')?(new URL(r.url).searchParams.get('search')==='vieja'?pending.promise:Response.json(page([]))):reply(r),'teacher');try{
- await ui.select('select[name="managedSection"]',section.id);await ui.submit('form[aria-label="Buscar participantes"]',{search:'vieja'});await ui.submit('form[aria-label="Buscar participantes"]',{search:'nueva'});
+ await ui.submit('form[aria-label="Buscar participantes"]',{search:'vieja'});await ui.submit('form[aria-label="Buscar participantes"]',{search:'nueva'});
  await ui.settle(()=>pending.resolve(Response.json(page([person]))));assert.equal(Array.from(ui.doc.querySelectorAll('button')).some(b=>b.textContent?.includes('María Pérez ·')),false);
  }finally{await ui.close();}
 });
@@ -98,7 +102,8 @@ test("teachers cannot manage teacher rows or offer the teacher role; nobody mana
  const self={...enrollment,id:id(40),user:{...person,id:id(1)},role:'teacher' as const},peer={...enrollment,id:id(41),role:'teacher' as const};
  for(const profile of ['teacher','ownerTeacher']){
   const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>r.url.includes('/enrollments')?Response.json(page([self,peer,enrollment])):reply(r),profile);try{
-  await ui.select('select[name="managedSection"]',section.id);
+  if(profile==='ownerTeacher')await ui.select('select[name="managedSection"]',section.id);
+  else assert.equal(ui.doc.querySelector('select[name="managedSection"]'),null);
   const row=(e:{id:string})=>ui.doc.querySelector(`[data-enrollment-id="${e.id}"]`)!;
   assert.equal(row(self).querySelector('button'),null);assert.match(row(self).textContent!,/Sin acciones/);
   assert.equal(!!row(peer).querySelector('button'),profile==='ownerTeacher');assert.ok(row(enrollment).querySelector('button'));
@@ -113,7 +118,7 @@ test("teachers cannot manage teacher rows or offer the teacher role; nobody mana
 test("owner sees a safe explanation when the last teacher cannot be revoked",async()=>{
  const teacher={...enrollment,role:'teacher' as const};
  const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>r.url.includes('/enrollments')?(r.method==='PATCH'?Response.json({code:'LAST_SECTION_TEACHER',detail:'PRIVATE'},{status:409}):Response.json(page([teacher]))):reply(r));try{
- await ui.select('select[name="managedSection"]',section.id);const dialog=ui.doc.querySelector('dialog') as HTMLDialogElement;dialog.showModal=()=>dialog.setAttribute('open','');dialog.close=()=>dialog.removeAttribute('open');
+ await ui.select('select[name="managedSection"]',section.id);const dialog=ui.doc.querySelector('dialog.participant-management') as HTMLDialogElement;dialog.showModal=()=>dialog.setAttribute('open','');dialog.close=()=>dialog.removeAttribute('open');
  await ui.click('Gestionar');await ui.click('Revocar Docente');await ui.click('Confirmar revocación');
  assert.match(dialog.textContent!,/al menos un docente activo/);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE/);assert.match(ui.doc.querySelector(`[data-enrollment-id="${teacher.id}"]`)!.textContent!,/Activa/);
  }finally{await ui.close();}
