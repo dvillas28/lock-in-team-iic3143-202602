@@ -7,6 +7,8 @@ import { lockContext,sectionScope,requirePermission } from "../courses/course-ac
 import { page,paginated } from "../courses/validation";
 const dto=(e:QueryResultRow)=>({id:e.id,sectionId:e.section_id,user:{id:e.user_id,email:e.email,name:e.name,active:e.user_active},role:e.role,active:e.active,createdAt:e.created_at});
 const snapshot=(e:QueryResultRow)=>({id:e.id,userId:e.user_id,sectionId:e.section_id,role:e.role,active:e.active});
+// Teacher enrollments are owner-only; teachers keep managing students and assistants of their section.
+const mayManage=(scope:{owner:boolean;roles:QueryResultRow[]},roles:string[])=>scope.owner || !roles.includes("teacher") && scope.roles.some(e=>e.role==="teacher");
 @Injectable()
 export class EnrollmentsService {
  constructor(private readonly database:DatabaseService,private readonly audit:AuditService) {}
@@ -27,7 +29,7 @@ export class EnrollmentsService {
  async create(actor:string,slug:string,section:string,user:string,role:string) {
   return this.database.withInstitution(actor,slug,async db=>{
    const m=await lockContext(db,actor,slug,[user]),scope=await sectionScope(db,m,section,true);
-   requirePermission(scope.owner || scope.roles.some(e=>e.role==="teacher"));
+   requirePermission(mayManage(scope,[role]));
    const existing=(await db.query("SELECT id FROM public.enrollments WHERE institution_id=$1 AND section_id=$2 AND user_id=$3 AND role=$4 AND active",[m.institution_id,section,user,role])).rows[0];
    if(existing)return {created:false,item:await this.result(db,existing.id)};
    const e=(await db.query("INSERT INTO public.enrollments(id,institution_id,section_id,user_id,role) VALUES($1,$2,$3,$4,$5) RETURNING *",[randomUUID(),m.institution_id,section,user,role])).rows[0];
@@ -43,6 +45,13 @@ export class EnrollmentsService {
    requirePermission(scope.owner || scope.roles.some(e=>e.role==="teacher"));
    const e=(await db.query("SELECT * FROM public.enrollments WHERE institution_id=$1 AND section_id=$2 AND id=$3 FOR UPDATE",[m.institution_id,section,id])).rows[0];
    if(!e)throw new NotFoundException();
+   requirePermission(mayManage(scope,[e.role,input.role??e.role]));
+   if(e.role==="teacher" && e.active && (input.active===false || input.role!==undefined && input.role!=="teacher")) {
+    requirePermission(e.user_id!==actor);
+    // The course lock taken by sectionScope serializes concurrent removals of the remaining teachers.
+    const others=(await db.query("SELECT count(*)::int AS n FROM public.enrollments WHERE institution_id=$1 AND section_id=$2 AND role='teacher' AND active AND id<>$3",[m.institution_id,section,id])).rows[0].n;
+    if(!others)throw new ConflictException({code:"LAST_SECTION_TEACHER"});
+   }
    let after:QueryResultRow=e;
    if(input.role!==undefined) {
     if(!e.active)throw new ConflictException();

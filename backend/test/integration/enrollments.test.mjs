@@ -29,7 +29,10 @@ test("US2 enrollment scopes, successor history, multi-role idempotency/concurren
   });
   assert.equal((await pool.query("SELECT active FROM enrollments WHERE id=$1",[student])).rows[0].active,false);
   assert.equal((await request(app,owner,path+"/"+student,"PATCH",{active:true})).status,200);
-  const successor=await request(app,owner,path+"/"+student,"PATCH",{role:"teacher"});assert.equal(successor.status,200);assert.notEqual(successor.body.id,student);
+  const promotion=(await pool.query("SELECT * FROM enrollments ORDER BY id")).rows;
+  assert.equal((await request(app,owner,path+"/"+student,"PATCH",{role:"teacher"})).status,403,"teacher cannot promote to teacher");
+  assert.deepEqual((await pool.query("SELECT * FROM enrollments ORDER BY id")).rows,promotion);
+  const successor=await request(app,other,path+"/"+student,"PATCH",{role:"teacher"});assert.equal(successor.status,200,"course owner promotes");assert.notEqual(successor.body.id,student);
   assert.equal((await request(app,owner,path+"/"+student,"PATCH",{active:true})).status,200);
   assert.equal((await request(app,owner,path+"/"+student,"PATCH",{role:"teacher",active:false})).status,400);
   await request(app,owner,path+"/"+student,"PATCH",{active:false});
@@ -43,8 +46,10 @@ test("US2 enrollment scopes, successor history, multi-role idempotency/concurren
   const page=await request(app,owner,path+"?limit=1");assert.equal(page.body.items.length,1);assert.equal(page.body.hasMore,true);
   assert.equal((await request(app,owner,path+"?limit=1&cursor="+page.body.nextCursor)).status,200);
   assert.equal((await request(app,owner,own+"?cursor="+page.body.nextCursor)).status,400);
-  assert.equal((await request(app,owner,own+"/"+f.teacher,"PATCH",{active:false})).status,200);
+  const self=(await pool.query("SELECT * FROM enrollments ORDER BY id")).rows;
+  assert.equal((await request(app,owner,own+"/"+f.teacher,"PATCH",{active:false})).status,403,"teacher cannot revoke self");
+  assert.deepEqual((await pool.query("SELECT * FROM enrollments ORDER BY id")).rows,self);
   assert.equal((await pool.query("SELECT created_by FROM courses WHERE id=$1",[f.own])).rows[0].created_by,users.owner);
-  assert.equal((await request(app,owner,own)).status,403);
+  assert.equal((await request(app,owner,own)).status,200,"teacher keeps access");
  }finally{if(app)await app.close();await pool.end();}
 });
