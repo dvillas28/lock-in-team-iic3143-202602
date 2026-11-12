@@ -317,6 +317,34 @@ export interface paths {
         patch: operations["updateSectionEnrollment"];
         trace?: never;
     };
+    "/api/v1/institution/{institutionSlug}/sections/{sectionId}/participants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                sectionId: components["parameters"]["SectionId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Listar participantes activos de una sección
+         * @description Roster de solo lectura para cualquier participante activo de la sección y el admin dueño. Incluye solo matrículas activas cuyo User y membership institucional siguen activos; agrupa roles múltiples por usuario. No expone correos, historial, auditoría ni indicadores administrativos. Sección ajena, de otra institución o sin Enrollment activo propio responde 404. La gestión sigue en listSectionEnrollments.
+         */
+        get: operations["listSectionParticipants"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/institution/{institutionSlug}/courses/{courseId}/modules": {
         parameters: {
             query?: never;
@@ -2429,6 +2457,18 @@ export interface components {
             role?: components["schemas"]["EnrollmentRole"];
             active?: boolean;
         };
+        /** @description Proyección mínima de un participante activo; sin correo, historial, auditoría ni indicadores administrativos. */
+        SectionParticipant: {
+            /** Format: uuid */
+            readonly userId: string;
+            name: string;
+            /** @description Roles activos del usuario en esta sección, ordenados teacher, assistant, student. Un usuario con varios roles aparece una sola vez. */
+            roles: components["schemas"]["EnrollmentRole"][];
+        };
+        SectionParticipantListResponse: {
+            /** @description Ordenado por rol principal (teacher, assistant, student), nombre e identificador. */
+            items: components["schemas"]["SectionParticipant"][];
+        };
         CourseModule: {
             /** Format: uuid */
             readonly id: string;
@@ -4318,6 +4358,40 @@ export interface operations {
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    listSectionParticipants: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                sectionId: components["parameters"]["SectionId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Participantes activos de la sección. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SectionParticipantListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
             500: components["responses"]["InternalError"];
             503: components["responses"]["ServiceUnavailable"];
         };
