@@ -120,8 +120,9 @@
     - Enrollments
     operationId: searchInstitutionUsers
     summary: Buscar participantes existentes de la institución
-    description: Reservado a teachers para seleccionar usuarios al gestionar memberships
-      académicas.
+    x-permissions: "Membership activa y teacher activo en la institución, o is_admin vigente y dueño (createdBy) de algún curso de la institución; los flags admin solos no bastan."
+    description: Reservado a quienes asignan memberships académicas (teacher activo o
+      admin dueño de un curso) para seleccionar usuarios activos de la institución.
     parameters:
     - $ref: ../components/parameters.yaml#/Search
     - $ref: ../components/parameters.yaml#/Cursor
