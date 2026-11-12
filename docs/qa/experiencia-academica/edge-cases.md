@@ -23,7 +23,7 @@ No representa una demostración de ausencia de cualquier defecto posible.
 | Búsqueda UI | Docente | Vacío, sin coincidencias, búsqueda repetida | Sin petición vacía; mensaje local; consulta repetible | participants | Corregido |
 | Búsqueda UI | Docente | Paginación y respuesta tardía | Conservar selección; descartar resultados antiguos | participants | Corregido |
 | Matrículas | Docente/admin | Asignación duplicada, múltiples roles, historial | Idempotencia sin duplicar; conservar sucesores/historia | enrollments, participants | Verificado |
-| Matrículas | Docente | Autorrevocación y último docente | Refrescar permisos y retirar controles | participants, enrollments | Verificado |
+| Matrículas | Docente | Autorrevocación y último docente | Bloqueados en backend (403/409); fila propia sin acciones | participants, enrollments | Corregido |
 | Cursos/secciones | Admin propietario | PATCH mínimo, capacidad cero, concurrencia | Guardar solo cambios, no inventar éxito | course-admin, course-workflow | Verificado |
 | Contenido | Docente/estudiante | Módulo e ítem publicados/ocultos | Visibilidad conjunta; estados independientes | content-publication, content-read | Verificado |
 | Contenido | Docente | Crear/reordenar, doble clic, red perdida | Conservar borrador; no repetir escritura incierta | content-editor, creation-reset | Verificado |

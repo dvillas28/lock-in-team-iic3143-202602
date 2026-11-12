@@ -38,6 +38,16 @@ Si además es teacher del curso ajeno, conserva solo el alcance docente ordinari
 Revocar is_admin retira creación/administración, pero conserva Enrollment y datos.
 Revocar membership o User impide todo acceso al contexto afectado.
 
+## Enmienda 2026-11-11: matrículas docentes
+
+Asignar, cambiar, revocar o reactivar una matrícula teacher exige ser el admin dueño
+(`is_admin` y `created_by`); `is_admin`/`is_super_admin` sin ownership no basta.
+Teacher conserva students/assistants de sus secciones. Nadie revoca ni cambia su
+propia matrícula teacher (403) y una sección no pierde su último teacher activo
+(409 `LAST_SECTION_TEACHER`): primero se asigna el reemplazo. El lock del curso
+serializa estas escrituras. Las secciones nuevas siguen pudiendo crearse sin teacher.
+Prevalece sobre "revocar después al último teacher" de cursos-roles y frontend-cursos.
+
 ## Concesión y auditoría
 
 El PM realiza onboarding por migración de datos versionada, creando Institution,

@@ -279,7 +279,7 @@ export interface paths {
         put?: never;
         /**
          * Crear una membership de sección
-         * @description Admin dueño o teacher activo de esta sección. Miembro destinatario provisionado y activo; roles múltiples distintos, historial preservado. Sin privilegios desde JWT o body.
+         * @description Admin dueño (cualquier rol) o teacher activo de esta sección (solo student/assistant; teacher responde 403). Miembro destinatario provisionado y activo; roles múltiples distintos, historial preservado. Sin privilegios desde JWT o body.
          */
         post: operations["createSectionEnrollment"];
         delete?: never;
@@ -312,7 +312,7 @@ export interface paths {
         head?: never;
         /**
          * Cambiar rol o desactivar una membership
-         * @description Admin dueño o teacher activo de esta sección. Miembro destinatario provisionado y activo; roles múltiples distintos, historial preservado. Sin privilegios desde JWT o body. Exactamente role o active. Cambio de rol devuelve sucesor (ID puede cambiar). Último teacher se puede revocar; el curso permanece.
+         * @description Admin dueño o teacher activo de esta sección; solo el dueño cambia, revoca o reactiva matrículas teacher o promueve a teacher (403). Miembro destinatario provisionado y activo; roles múltiples distintos, historial preservado. Sin privilegios desde JWT o body. Exactamente role o active. Cambio de rol devuelve sucesor (ID puede cambiar). Nadie revoca ni cambia su propia matrícula teacher (403); revocar o cambiar al último teacher activo responde 409 LAST_SECTION_TEACHER.
          */
         patch: operations["updateSectionEnrollment"];
         trace?: never;
@@ -2234,7 +2234,7 @@ export interface components {
             title: string;
             status: number;
             detail: string | null;
-            /** @description Código seguro de problema. Cuentas añaden INTEGRATION_NOT_CONFIGURED (503), INVITATION_LOGIN_REQUIRED (409), conflictos de edición y recursos temporales depurados (410); no incluir estado global de terceros ni errores crudos de proveedores. */
+            /** @description Código seguro de problema. Cuentas añaden INTEGRATION_NOT_CONFIGURED (503), INVITATION_LOGIN_REQUIRED (409), LAST_SECTION_TEACHER (409), conflictos de edición y recursos temporales depurados (410); no incluir estado global de terceros ni errores crudos de proveedores. */
             code: string;
             /** Format: uri-reference */
             instance: string | null;
