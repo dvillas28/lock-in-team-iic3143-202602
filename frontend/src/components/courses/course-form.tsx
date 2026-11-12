@@ -9,7 +9,8 @@ import { useMutation } from "./use-mutation.ts";
 import { Field } from "./form-fields.tsx";
 import {CoursePeriod} from './course-period.tsx';
 /** Inside an `AdminDialog` the dialog owns the title; the form adds Cancelar and reports completion. */
-export type DialogFormControls = { onDone: (message: string) => void; onCancel: () => void; onBusy: (busy: boolean) => void };
+/** `onDirty` lets a form report changes that are not typed input (a chosen search result). */
+export type DialogFormControls = { onDone: (message: string) => void; onCancel: () => void; onBusy: (busy: boolean) => void; onDirty?: (dirty: boolean) => void };
 export function CourseForm({ session, slug, course, onSaved, dialog }: {
   session: Session;
   slug: string;

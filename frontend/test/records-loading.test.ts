@@ -84,13 +84,13 @@ test("a managed section and its participants load under the real section bar and
     await ui.settle(() => sectionGate.release());
     const panel = ui.doc.querySelector('section[aria-label="Participantes"]')!;
     assert.equal(panel.querySelector("h2")!.textContent, "Participantes");
-    assertRows(panel, "Cargando participantes…", "Matrículas activas e históricas", ["Persona", "Rol", "Estado", "Acciones"]);
+    assertRows(panel, "Cargando participantes…", "Matrículas activas", ["Persona", "Rol", "Estado", "Acciones"]);
     assert.doesNotMatch(ui.doc.body.textContent!, generic);
     await ui.settle(() => rosterGate.release());
     assert.equal(ui.doc.querySelector(".skeleton, .skeleton-region, .skeleton-rows"), null);
     rosterGate.hold(); cursor = null;
     await ui.click("Más matrículas");
-    assertRows(ui.doc.querySelector('section[aria-label="Participantes"]')!, "Cargando participantes…", "Matrículas activas e históricas", ["Persona"]);
+    assertRows(ui.doc.querySelector('section[aria-label="Participantes"]')!, "Cargando participantes…", "Matrículas activas", ["Persona"]);
     assert.ok([...ui.doc.querySelectorAll("button")].some(b => b.textContent === "Primera página"), "pagination stays");
     await ui.settle(() => rosterGate.release());
     assert.equal(ui.doc.querySelector(".skeleton-rows"), null);

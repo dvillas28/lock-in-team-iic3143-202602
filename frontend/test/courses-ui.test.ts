@@ -54,7 +54,8 @@ test('section management preserves staff controls after removing summary',async(
     assert.equal(ui.doc.querySelector('.section-actions > .btn-primary')?.textContent,'Crear sección');
     for(const name of ['Configurar curso','Crear sección','Configurar sección']){const form=ui.doc.querySelector(`dialog form[aria-label="${name}"]`)!;assert.ok(form,name);assert.equal(form.querySelector('h2,h3'),null,name);assert.ok([...form.querySelectorAll('button')].some(b=>b.textContent==='Cancelar'),name);}
    }
-   assert.equal(ui.doc.querySelector('select[name="managedSection"], input[type="search"]'),null);
+   // The section bar draws no picker or code filter; the assignment dialog keeps its own person search.
+   assert.equal(ui.doc.querySelector('select[name="managedSection"], .section-toolbar input[type="search"]'),null);
    assert.doesNotMatch(ui.doc.body.textContent!,/secciones? disponibles?/);
    assert.equal(!!ui.doc.querySelector('form[aria-label="Crear sección"]'),profile!=='teacher');
    assert.equal(!!ui.doc.querySelector('form[aria-label="Configurar curso"]'),profile!=='teacher');

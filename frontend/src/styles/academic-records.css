@@ -216,30 +216,132 @@
   overflow: auto;
   font-size: 12px;
 }
-.participant-assignment {
-  max-width: 760px;
-  padding-block: 8px;
-}
-.participant-search {
+/* «Asignar participante»: the course-admin dialog shell with one search, its results, the chosen person and the role. */
+.academic-app .participants-heading {
   display: flex;
   flex-wrap: wrap;
-  align-items: end;
-  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
 }
-.participant-search > .stack {
-  flex: 1 1 240px;
+.academic-app .participants-heading h2 {
+  margin: 0;
 }
-.search-result-list {
-  list-style: none;
-  padding: 0;
+.academic-app .participants-heading > .btn {
+  min-height: 44px;
+}
+.academic-app .participants-views {
+  align-self: flex-start;
+}
+.academic-app .participants-views .tab-btn {
+  min-height: 38px;
+  padding-inline: 16px;
+}
+.assignment-field[hidden] {
+  display: none;
+}
+.assignment-search {
+  position: relative;
+}
+.assignment-search > svg {
+  position: absolute;
+  inset-inline-start: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-3);
+  pointer-events: none;
+}
+.assignment-search .field {
+  min-height: 44px;
+  padding-inline-start: 38px;
+}
+.assignment-results {
   display: grid;
   gap: 8px;
 }
-.search-result-list .btn {
+.assignment-results:empty {
+  display: none;
+}
+.assignment-result-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: min(40dvh, 18rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.assignment-result-list li + li {
+  border-top: 1px solid var(--border);
+}
+.assignment-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
-  justify-content: start;
-  text-align: left;
+  min-height: 52px;
+  padding: 8px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--text-1);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.assignment-result:hover:not(:disabled) {
+  background: var(--hover);
+}
+.assignment-result:focus-visible {
+  outline: 2px solid var(--primary-ink);
+  outline-offset: -2px;
+}
+.assignment-result:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.assignment-person {
+  display: grid;
+  flex: 1;
+  gap: 1px;
+  min-width: 0;
+}
+.assignment-person strong {
+  font-size: 14px;
+  font-weight: 600;
   overflow-wrap: anywhere;
+}
+.assignment-person span {
+  font-size: 12px;
+  color: var(--text-2);
+  overflow-wrap: break-word;
+}
+.assignment-selected {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--primary-ink);
+  border-radius: var(--radius-sm);
+  background: var(--primary-soft);
+}
+.assignment-selected .btn {
+  flex-shrink: 0;
+  min-height: 44px;
+}
+.assignment-empty,
+.assignment-notice,
+.assignment-notice p {
+  margin: 0;
+}
+.assignment-notice {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+.assignment-more {
+  justify-self: start;
+  min-height: 44px;
 }
 .field-error {
   display: block;
@@ -261,6 +363,10 @@
   }
   .academic-dialog {
     padding: 16px;
+  }
+  .academic-app .participants-heading > .btn,
+  .assignment-form .dialog-actions > .btn {
+    flex: 1 1 auto;
   }
 }
 

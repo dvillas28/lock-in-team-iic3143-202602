@@ -112,7 +112,8 @@ test("a teacher who does not own the course gets the section context without adm
   const ui = await mount(h(CourseDetail, { courseId: course.id }), api().reply, "teacher");
   try {
     assert.equal(ui.doc.querySelector(".section-toolbar .section-name")?.textContent, "Sección 1");
-    assert.equal(ui.doc.querySelector('select[name="managedSection"], .admin-dialog, .section-actions'), null);
+    // Course and section administration stay owner-only; the roster's own «Asignar participante» is not one of them.
+    assert.equal(ui.doc.querySelector('select[name="managedSection"], .section-toolbar .admin-dialog, .section-actions') === null, true);
   } finally { await ui.close(); }
 });
 
