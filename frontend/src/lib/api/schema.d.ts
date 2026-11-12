@@ -124,7 +124,7 @@ export interface paths {
         };
         /**
          * Buscar participantes existentes de la institución
-         * @description Reservado a teachers para seleccionar usuarios al gestionar memberships académicas.
+         * @description Reservado a quienes asignan memberships académicas (teacher activo o admin dueño de un curso) para seleccionar usuarios activos de la institución.
          */
         get: operations["searchInstitutionUsers"];
         put?: never;
@@ -251,7 +251,7 @@ export interface paths {
         head?: never;
         /**
          * Actualizar una sección
-         * @description Exige is_admin institucional vigente y dueño del curso. Teacher sin admin no configura secciones. Una capacidad numérica no puede bajar de la actual (409 SECTION_CAPACITY_DECREASE) ni de las matrículas activas (409 SECTION_CAPACITY_BELOW_ENROLLMENTS); null la deja ilimitada.
+         * @description Exige is_admin institucional vigente y dueño del curso. Teacher sin admin no configura secciones. Una capacidad numérica no puede bajar de la actual (409 SECTION_CAPACITY_DECREASE) ni de los estudiantes activos (409 SECTION_CAPACITY_BELOW_ENROLLMENTS); la capacidad cuenta cupos de estudiantes y teachers/assistants no los consumen; null la deja ilimitada.
          */
         patch: operations["updateSection"];
         trace?: never;
@@ -273,13 +273,13 @@ export interface paths {
         };
         /**
          * Listar memberships de una sección autorizada
-         * @description Admin dueño o teacher/assistant activo de esta sección; student no lista participantes.
+         * @description Admin dueño o teacher/assistant activo de esta sección; student no lista participantes. `status` separa las matrículas activas del historial; sin `status` se listan ambas.
          */
         get: operations["listSectionEnrollments"];
         put?: never;
         /**
          * Crear una membership de sección
-         * @description Admin dueño (cualquier rol) o teacher activo de esta sección (solo student/assistant; teacher responde 403). Miembro destinatario provisionado y activo; roles múltiples distintos, historial preservado. Sin privilegios desde JWT o body.
+         * @description Admin dueño (cualquier rol) o teacher activo de esta sección (solo student/assistant; teacher responde 403). Miembro destinatario provisionado y activo; roles múltiples distintos, historial preservado. Sin privilegios desde JWT o body. Un student nuevo requiere cupo si la sección tiene capacidad numérica (409 SECTION_FULL, sin escritura ni auditoría).
          */
         post: operations["createSectionEnrollment"];
         delete?: never;
@@ -312,7 +312,7 @@ export interface paths {
         head?: never;
         /**
          * Cambiar rol o desactivar una membership
-         * @description Admin dueño o teacher activo de esta sección; solo el dueño cambia, revoca o reactiva matrículas teacher o promueve a teacher (403). Miembro destinatario provisionado y activo; roles múltiples distintos, historial preservado. Sin privilegios desde JWT o body. Exactamente role o active. Cambio de rol devuelve sucesor (ID puede cambiar). Nadie revoca ni cambia su propia matrícula teacher (403); revocar o cambiar al último teacher activo responde 409 LAST_SECTION_TEACHER.
+         * @description Admin dueño o teacher activo de esta sección; solo el dueño cambia, revoca o reactiva matrículas teacher o promueve a teacher (403). Miembro destinatario provisionado y activo; roles múltiples distintos, historial preservado. Sin privilegios desde JWT o body. Exactamente role o active. Cambio de rol devuelve sucesor (ID puede cambiar). Nadie revoca ni cambia su propia matrícula teacher (403); revocar o cambiar al último teacher activo responde 409 LAST_SECTION_TEACHER. Cambiar a student o reactivar un student sin cupo responde 409 SECTION_FULL.
          */
         patch: operations["updateSectionEnrollment"];
         trace?: never;
@@ -2262,7 +2262,7 @@ export interface components {
             title: string;
             status: number;
             detail: string | null;
-            /** @description Código seguro de problema. Cuentas añaden INTEGRATION_NOT_CONFIGURED (503), INVITATION_LOGIN_REQUIRED (409), LAST_SECTION_TEACHER (409), SECTION_CAPACITY_DECREASE (409), SECTION_CAPACITY_BELOW_ENROLLMENTS (409), conflictos de edición y recursos temporales depurados (410); no incluir estado global de terceros ni errores crudos de proveedores. */
+            /** @description Código seguro de problema. Cuentas añaden INTEGRATION_NOT_CONFIGURED (503), INVITATION_LOGIN_REQUIRED (409), LAST_SECTION_TEACHER (409), SECTION_CAPACITY_DECREASE (409), SECTION_CAPACITY_BELOW_ENROLLMENTS (409), SECTION_FULL (409), conflictos de edición y recursos temporales depurados (410); no incluir estado global de terceros ni errores crudos de proveedores. */
             code: string;
             /** Format: uri-reference */
             instance: string | null;
@@ -4237,6 +4237,8 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Cantidad máxima de elementos a retornar. */
                 limit?: components["parameters"]["Limit"];
+                /** @description Filtra por vigencia (`active`) o historial revocado (`historical`). El cursor queda ligado al filtro. */
+                status?: "active" | "historical";
             };
             header?: never;
             path: {

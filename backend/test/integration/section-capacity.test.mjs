@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import {test} from "node:test";
 import {randomUUID} from "node:crypto";
 import {database,http,login} from "./helpers.mjs";
-import {coursesFixture,request} from "./course-fixtures.mjs";
+import {coursesFixture,users,request} from "./course-fixtures.mjs";
 
-test("section capacity: integers from 1, never below the current value or active enrollments, null stays unlimited",async()=>{
+test("section capacity: integers from 1, never below the current value or active students, null stays unlimited",async()=>{
  const pool=await database();let app;try{
   const f=await coursesFixture(pool);app=await http();const owner=await login(app,f.env);
   const patch=body=>request(app,owner,`uc/sections/${f.s1}`,"PATCH",body);
@@ -16,17 +16,20 @@ test("section capacity: integers from 1, never below the current value or active
   assert.equal((await request(app,owner,"uc/courses","POST",{code:"ZERO",name:"Zero",term:"2026-2",initialSection:{code:"1",capacity:0}})).status,400);
   assert.equal((await request(app,owner,`uc/courses/${f.own}/sections`,"POST",{code:"ONE",capacity:1})).status,201);
   assert.equal((await request(app,owner,`uc/courses/${f.own}/sections`,"POST",{code:"FREE",capacity:null})).status,201);
-  // s1 is unlimited with three active enrollments (teacher, student, assistant).
+  // s1 is unlimited with teacher, student and assistant active; a second student makes two seats taken.
+  // Capacity counts student seats only: the teacher and the assistant never consume one.
+  await f.add(f.s1,users.other,"student");
   const audited=await events();
-  const below=await patch({capacity:2});
+  const below=await patch({capacity:1});
   assert.equal(below.status,409);assert.equal(below.body.code,"SECTION_CAPACITY_BELOW_ENROLLMENTS");
   assert.equal(await stored(),null);assert.equal(await events(),audited,"a rejected change leaves no audit");
+  assert.equal((await patch({capacity:2})).body.capacity,2,"four active enrollments, two students: staff do not count");
   assert.equal((await patch({capacity:3})).body.capacity,3);
   const decrease=await patch({capacity:2});
   assert.equal(decrease.status,409);assert.equal(decrease.body.code,"SECTION_CAPACITY_DECREASE");assert.equal(await stored(),3);
   assert.equal((await patch({capacity:5})).body.capacity,5);
   assert.equal((await patch({capacity:null})).body.capacity,null,"unlimited is always allowed");
-  assert.equal((await patch({capacity:4})).body.capacity,4,"from unlimited, any value covering active enrollments");
+  assert.equal((await patch({capacity:4})).body.capacity,4,"from unlimited, any value covering active students");
   // Revoked enrollments do not count as active.
   await pool.query("UPDATE enrollments SET active=false WHERE section_id=$1 AND role<>'teacher'",[f.s1]);
   await patch({capacity:null});assert.equal((await patch({capacity:1})).body.capacity,1);

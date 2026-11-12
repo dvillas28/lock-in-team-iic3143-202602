@@ -53,3 +53,29 @@ test("US2 enrollment scopes, successor history, multi-role idempotency/concurren
   assert.equal((await request(app,owner,own)).status,200,"teacher keeps access");
  }finally{if(app)await app.close();await pool.end();}
 });
+
+test("enrollment list filters active and historical rows with independent cursors; without status it lists both",async()=>{
+ const pool=await database();let app;try{
+  const f=await coursesFixture(pool);app=await http();const owner=await login(app,f.env);
+  const path=`uc/sections/${f.s1}/enrollments`;
+  const assistant=(await request(app,owner,path,"POST",{userId:users.other,role:"assistant"})).body;
+  assert.equal((await request(app,owner,`${path}/${assistant.id}`,"PATCH",{active:false})).status,200);
+  assert.equal((await request(app,owner,path,"POST",{userId:users.other,role:"student"})).status,201);
+  const all=(await request(app,owner,path)).body.items,active=(await request(app,owner,`${path}?status=active`)).body.items,historical=(await request(app,owner,`${path}?status=historical`)).body.items;
+  assert.ok(active.length>0 && active.every(e=>e.active));
+  assert.deepEqual(historical.map(e=>e.id),[assistant.id]);
+  assert.deepEqual(all.map(e=>e.id).sort(),[...active,...historical].map(e=>e.id).sort(),"no status keeps the full roster");
+  // Each filter pages on its own: a cursor never crosses views.
+  const first=(await request(app,owner,`${path}?status=active&limit=1`)).body;
+  assert.equal(first.items.length,1);assert.ok(first.nextCursor,"two or more active rows page");
+  const cursor=encodeURIComponent(first.nextCursor);
+  const second=(await request(app,owner,`${path}?status=active&limit=1&cursor=${cursor}`)).body;
+  assert.ok(second.items.every(e=>e.active) && second.items[0].id!==first.items[0].id);
+  assert.equal((await request(app,owner,`${path}?status=historical&limit=1&cursor=${cursor}`)).status,400);
+  assert.equal((await request(app,owner,`${path}?limit=1&cursor=${cursor}`)).status,400);
+  for(const bad of ["invalid","ACTIVE",""])assert.equal((await request(app,owner,`${path}?status=${bad}`)).status,400);
+  assert.equal((await request(app,owner,`${path}?status=active&status=historical`)).status,400);
+  // The filter never widens access: other tenants and outsiders still get nothing.
+  assert.equal((await request(app,owner,`uc/sections/${f.s4}/enrollments?status=historical`)).status,404);
+ }finally{if(app)await app.close();await pool.end();}
+});
