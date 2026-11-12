@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { AuditService } from "../audit/audit.service";
-import { Injectable } from "@nestjs/common";
+import { ConflictException,Injectable } from "@nestjs/common";
 import type { QueryResultRow } from "pg";
 import { DatabaseService } from "../database/database.service";
 import { courseScope, sectionScope,lockContext,requirePermission } from "../courses/course-access";
@@ -34,6 +34,12 @@ export class SectionsService {
    const m=await lockContext(db,actor,slug),scope=await sectionScope(db,m,id,true);requirePermission(scope.owner);
    const before=sectionDto(scope.section),after={...before,...input};
    if(before.code===after.code && before.capacity===after.capacity)return before;
+   // A numeric capacity never shrinks below its current value nor below the active enrollments.
+   if(after.capacity!==null && after.capacity!==before.capacity){
+    if(before.capacity!==null && after.capacity<before.capacity)throw new ConflictException({code:"SECTION_CAPACITY_DECREASE"});
+    const active=(await db.query("SELECT count(*)::int AS n FROM public.enrollments WHERE institution_id=$1 AND section_id=$2 AND active",[m.institution_id,id])).rows[0].n;
+    if(after.capacity<active)throw new ConflictException({code:"SECTION_CAPACITY_BELOW_ENROLLMENTS"});
+   }
    const row=(await db.query("UPDATE public.sections SET code=$1,capacity=$2 WHERE institution_id=$3 AND id=$4 RETURNING *",[after.code,after.capacity,m.institution_id,id])).rows[0];
    await this.audit.record(db,{institutionId:m.institution_id,actorUserId:actor,courseId:row.course_id,sectionId:id,action:"section.updated",resourceType:"section",resourceId:id,before,after:sectionDto(row)});
    return sectionDto(row);

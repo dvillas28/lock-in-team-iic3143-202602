@@ -21,6 +21,7 @@ Section:
       minLength: 1
       maxLength: 32
     capacity:
+      description: Null es ilimitada. Admite 0 solo en registros previos a la regla de mínimo 1.
       type:
       - integer
       - 'null'
@@ -41,10 +42,11 @@ SectionCreate:
       minLength: 1
       maxLength: 32
     capacity:
+      description: Entero positivo; null mantiene la capacidad ilimitada.
       type:
       - integer
       - 'null'
-      minimum: 0
+      minimum: 1
       maximum: 2147483647
 SectionUpdate:
   type: object
@@ -56,10 +58,11 @@ SectionUpdate:
       minLength: 1
       maxLength: 32
     capacity:
+      description: Entero positivo; null mantiene la capacidad ilimitada.
       type:
       - integer
       - 'null'
-      minimum: 0
+      minimum: 1
       maximum: 2147483647
 SectionListResponse:
   type: object

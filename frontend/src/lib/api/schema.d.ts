@@ -251,7 +251,7 @@ export interface paths {
         head?: never;
         /**
          * Actualizar una sección
-         * @description Exige is_admin institucional vigente y dueño del curso. Teacher sin admin no configura secciones.
+         * @description Exige is_admin institucional vigente y dueño del curso. Teacher sin admin no configura secciones. Una capacidad numérica no puede bajar de la actual (409 SECTION_CAPACITY_DECREASE) ni de las matrículas activas (409 SECTION_CAPACITY_BELOW_ENROLLMENTS); null la deja ilimitada.
          */
         patch: operations["updateSection"];
         trace?: never;
@@ -2262,7 +2262,7 @@ export interface components {
             title: string;
             status: number;
             detail: string | null;
-            /** @description Código seguro de problema. Cuentas añaden INTEGRATION_NOT_CONFIGURED (503), INVITATION_LOGIN_REQUIRED (409), LAST_SECTION_TEACHER (409), conflictos de edición y recursos temporales depurados (410); no incluir estado global de terceros ni errores crudos de proveedores. */
+            /** @description Código seguro de problema. Cuentas añaden INTEGRATION_NOT_CONFIGURED (503), INVITATION_LOGIN_REQUIRED (409), LAST_SECTION_TEACHER (409), SECTION_CAPACITY_DECREASE (409), SECTION_CAPACITY_BELOW_ENROLLMENTS (409), conflictos de edición y recursos temporales depurados (410); no incluir estado global de terceros ni errores crudos de proveedores. */
             code: string;
             /** Format: uri-reference */
             instance: string | null;
@@ -2384,6 +2384,7 @@ export interface components {
         };
         SectionCreate: {
             code: string;
+            /** @description Entero positivo; null mantiene la capacidad ilimitada. */
             capacity?: number | null;
         };
         CourseCreate: {
@@ -2415,6 +2416,7 @@ export interface components {
             /** Format: uuid */
             readonly courseId: string;
             code: string;
+            /** @description Null es ilimitada. Admite 0 solo en registros previos a la regla de mínimo 1. */
             capacity: number | null;
             /** Format: date-time */
             readonly createdAt: string;
@@ -2424,6 +2426,7 @@ export interface components {
         };
         SectionUpdate: {
             code?: string;
+            /** @description Entero positivo; null mantiene la capacidad ilimitada. */
             capacity?: number | null;
         };
         /** @enum {string} */

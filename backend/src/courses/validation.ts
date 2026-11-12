@@ -19,7 +19,8 @@ export function text(value: unknown, max: number) {
 }
 export function capacity(value: unknown) {
   if(value===null || value===undefined) return null;
-  if(typeof value!=="number" || !Number.isInteger(value) || value<0 || value>2147483647) throw new BadRequestException();
+  // A numeric capacity admits at least one person; null keeps it unlimited. Legacy 0 rows stay readable.
+  if(typeof value!=="number" || !Number.isInteger(value) || value<1 || value>2147483647) throw new BadRequestException();
   return value;
 }
 export function role(value: unknown) {
