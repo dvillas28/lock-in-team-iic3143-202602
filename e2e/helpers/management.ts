@@ -2,9 +2,24 @@ import type {Page,Locator} from '@playwright/test';
 import {expect} from '@playwright/test';
 import type {Environment} from '../fixtures/environment.ts';
 import {go} from './browser.ts';
+/** Course administration opens as modals in Secciones; other disclosures remain `<details>`. */
+const dialogs=new Set(['Configurar curso','Crear sección','Configurar sección']);
 export async function disclose(page:Page,name:string) {
+ if(dialogs.has(name)){
+  const form=page.getByRole('dialog').getByRole('form',{name,exact:true});
+  if(!await form.isVisible())await page.getByRole('button',{name,exact:true}).click();
+  await expect(form).toBeVisible();return;
+ }
  const summary=page.locator('summary').filter({hasText:new RegExp('^'+name+'$')});
  if(!await summary.evaluate(s=>(s.parentElement as HTMLDetailsElement).open))await summary.click();
+}
+export const sectionPicker=(page:Page)=>page.getByRole('combobox',{name:'Sección',exact:true});
+/** The active section is named once: the picker's value with several sections, plain text with one. */
+export async function activeSection(page:Page,code:string) {
+ const picker=sectionPicker(page);
+ if(await picker.count())await expect(picker.locator('option:checked')).toHaveText('Sección '+code);
+ else await expect(page.locator('.section-toolbar .section-name')).toHaveText('Sección '+code);
+ await expect(page.getByRole('heading',{name:'Participantes',exact:true})).toBeVisible();
 }
 export async function addContent(scope:Locator,item:'Subir archivo'|'Crear página'|'Enlazar cuestionario') {
  await scope.getByRole('button',{name:'Añadir contenido',exact:true}).click();
@@ -12,9 +27,12 @@ export async function addContent(scope:Locator,item:'Subir archivo'|'Crear pági
 }
 export async function sections(page:Page,e:Environment,section=e.data.sections.S1,course=e.data.courses.C1) {
  await go(page,course,'/sections');
- const picker=page.getByRole('combobox',{name:'Sección a gestionar',exact:true});await expect(picker).toBeVisible();
- if(await picker.inputValue()!==section)await picker.selectOption(section);
- await expect(page.getByRole('heading',{name:/^Participantes e historial/})).toBeVisible();
+ const roster=page.getByRole('heading',{name:'Participantes',exact:true});await expect(roster).toBeVisible();
+ // The picker appears only with several manageable sections; a single one is named in the toolbar.
+ const picker=sectionPicker(page);
+ if(await picker.count()){if(await picker.inputValue()!==section)await picker.selectOption(section);}
+ else await expect(page.locator('.section-toolbar .section-name')).toBeVisible();
+ await expect(roster).toBeVisible();
 }
 export async function fillCourse(page:Page,input={code:'E2E-NEW',name:'Curso E2E nuevo',term:'2026-2'},edit=false) {
  await disclose(page,edit?'Configurar curso':'Crear curso');
