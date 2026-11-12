@@ -105,8 +105,8 @@ test("a nested 403 or 404 reveals nothing and keeps the return link", async () =
 });
 
 test("empty sections never offer creation to roles that cannot configure", async () => {
-  // The student state sits under «Tus secciones» (h2); the manager state follows the page h1 directly.
-  for (const [profile, title, create, level] of [["student", "No tienes secciones asignadas", false, 3], ["owner", "No hay secciones para gestionar", true, 2]] as const) {
+  // Both states follow the page h1 directly: the read-only roster has no section to title.
+  for (const [profile, title, create, level] of [["student", "No tienes secciones asignadas", false, 2], ["owner", "No hay secciones para gestionar", true, 2]] as const) {
     const ui = await mount(h(CourseDetail, { courseId: course.id }), r => r.url.endsWith("/sections") ? Response.json({ items: [] }) : Response.json(course), profile);
     try {
       assert.equal(ui.doc.querySelectorAll("h1").length, 1);
