@@ -5,7 +5,8 @@ import { CourseDetail } from "../src/components/courses/course-detail.tsx";
 import { listSectionEnrollments, createSectionEnrollment, updateSectionEnrollment, searchInstitutionUsers } from "../src/lib/api/enrollments.ts";
 import { createApiClient } from "../src/lib/api/client.ts";
 import { mount } from "./fixtures/course-ui.ts";
-import { assign, modalRuntime, open, roleSelect, assignForm, isOpen, confirm } from "./fixtures/assignment.ts";
+import { assign, modalRuntime, open, roleSelect, assignForm, isOpen, confirm, toast } from "./fixtures/assignment.ts";
+import { openManage, chooseRole, save, press, manageDialog, manageSelect, manageTitle, patches } from "./fixtures/management.ts";
 import { course, section, otherSection, enrollment, history, person, id, page, deferred } from "./fixtures/courses.ts";
 const reply=(r:Request)=>Response.json(r.url.includes('/users')?page([person]):r.url.endsWith('/sections')?{items:[section,otherSection]}:r.url.includes('/enrollments')?page([enrollment,history]):r.url.includes('/sections/')?section:course);
 test("enrollment API preserves returned successor, pagination and HTTP failures",async()=>{
@@ -42,19 +43,18 @@ test("history and sibling roles survive role successor, POST 200 and pagination 
  return Response.json(page(rows));
  });try{
  modalRuntime(ui);await ui.select('select[name="managedSection"]',section.id);assert.match(ui.doc.body.textContent!,/Histórica/);await assign(ui,'maría','María Pérez','assistant');
- await ui.settle(()=>ui.doc.querySelector<HTMLButtonElement>(`[data-enrollment-id="${enrollment.id}"] button`)!.click());
- await ui.submit(`form[aria-label="Cambiar rol ${enrollment.id}"]`,{role:'teacher'});
+ await openManage(ui,enrollment.id);await chooseRole(ui,'teacher');await save(ui);
  assert.match(ui.doc.body.textContent!,/Docente/);assert.equal(ui.doc.querySelectorAll('[data-enrollment-id]').length,3);
  assert.ok(ui.doc.querySelector(`[data-enrollment-id="${id(99)}"]`));
  }finally{await ui.close();}
 });
 test("revoke last teacher requires confirmation; cancel sends nothing",async()=>{
  const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>r.url.includes('/enrollments')?Response.json(r.method==='PATCH'?{...enrollment,role:'teacher',active:false}:page([{...enrollment,role:'teacher'}])):reply(r));try{
- await ui.select('select[name="managedSection"]',section.id);const dialog=ui.doc.querySelector('dialog.participant-management') as HTMLDialogElement;
- dialog.showModal=()=>{dialog.setAttribute('open','');};dialog.close=()=>{dialog.removeAttribute('open');};
- await ui.click('Gestionar');await ui.click('Revocar Docente');assert.ok(dialog.hasAttribute('open'));
- await ui.settle(()=>dialog.dispatchEvent(new ui.dom.window.KeyboardEvent('keydown',{key:'Tab',shiftKey:true,bubbles:true,cancelable:true})));assert.equal(ui.doc.activeElement?.textContent,'Confirmar revocación');await ui.settle(()=>[...dialog.querySelectorAll('button')].find(b=>b.textContent==='Cancelar')!.click());assert.equal(ui.requests.filter(r=>r.method==='PATCH').length,0);
- await ui.click('Revocar Docente');await ui.click('Confirmar revocación');assert.equal(ui.requests.filter(r=>r.method==='PATCH').length,1);assert.deepEqual(await ui.requests.find(r=>r.method==='PATCH')!.json(),{active:false});
+ modalRuntime(ui);await ui.select('select[name="managedSection"]',section.id);const dialog=manageDialog(ui);
+ await ui.click('Gestionar');await press(ui,'Revocar matrícula');assert.ok(dialog.hasAttribute('open'));assert.equal(manageTitle(ui),'Revocar matrícula');
+ assert.equal(ui.doc.activeElement?.textContent,'Cancelar','the safe choice is focused first');await press(ui,'Cancelar');assert.equal(patches(ui).length,0);assert.equal(manageTitle(ui),'Gestionar participante');
+ assert.equal(ui.doc.activeElement?.textContent,'Revocar matrícula','cancel returns to the revoke action');
+ await press(ui,'Revocar matrícula');await press(ui,'Confirmar revocación');assert.equal(patches(ui).length,1);assert.deepEqual(await patches(ui)[0].json(),{active:false});
  }finally{await ui.close();}
 });
 test("search 404 is unavailable, not empty; stale searches and section completions discarded",async()=>{
@@ -96,7 +96,7 @@ test("teachers cannot manage teacher rows or offer the teacher role; nobody mana
   const options=Array.from(roleSelect(ui).options).map(o=>o.value);
   assert.deepEqual(options,profile==='teacher'?['student','assistant']:['student','assistant','teacher']);
   await ui.settle(()=>row(enrollment).querySelector<HTMLButtonElement>('button')!.click());
-  const roles=Array.from(ui.doc.querySelectorAll<HTMLOptionElement>(`form[aria-label="Cambiar rol ${enrollment.id}"] option`)).map(o=>o.value);
+  const roles=Array.from(manageSelect(ui).options).map(o=>o.value);
   assert.equal(roles.includes('teacher'),profile==='ownerTeacher');assert.equal(ui.requests.filter(r=>r.url.includes('/enrollments')&&r.method!=='GET').length,0);
   }finally{await ui.close();}
  }
@@ -104,8 +104,8 @@ test("teachers cannot manage teacher rows or offer the teacher role; nobody mana
 test("owner sees a safe explanation when the last teacher cannot be revoked",async()=>{
  const teacher={...enrollment,role:'teacher' as const};
  const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>r.url.includes('/enrollments')?(r.method==='PATCH'?Response.json({code:'LAST_SECTION_TEACHER',detail:'PRIVATE'},{status:409}):Response.json(page([teacher]))):reply(r));try{
- await ui.select('select[name="managedSection"]',section.id);const dialog=ui.doc.querySelector('dialog.participant-management') as HTMLDialogElement;dialog.showModal=()=>dialog.setAttribute('open','');dialog.close=()=>dialog.removeAttribute('open');
- await ui.click('Gestionar');await ui.click('Revocar Docente');await ui.click('Confirmar revocación');
+ modalRuntime(ui);await ui.select('select[name="managedSection"]',section.id);const dialog=manageDialog(ui);
+ await ui.click('Gestionar');await press(ui,'Revocar matrícula');await press(ui,'Confirmar revocación');assert.ok(dialog.hasAttribute('open'),'a rejected revocation keeps the dialog open');
  assert.match(dialog.textContent!,/al menos un docente activo/);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE/);assert.match(ui.doc.querySelector(`[data-enrollment-id="${teacher.id}"]`)!.textContent!,/Activa/);
  }finally{await ui.close();}
 });
@@ -117,10 +117,11 @@ test("a change returning an existing target enrollment retains sibling roles and
  if(r.method==='PATCH'){changed=true;return Response.json(sibling);}
  return Response.json(page([{...enrollment,active:!changed},sibling,history]));
  });try{
- await ui.select('select[name="managedSection"]',section.id);await ui.settle(()=>ui.doc.querySelector<HTMLButtonElement>(`[data-enrollment-id="${enrollment.id}"] button`)!.click());await ui.submit(`form[aria-label="Cambiar rol ${enrollment.id}"]`,{role:'assistant'});
+ modalRuntime(ui);await ui.select('select[name="managedSection"]',section.id);await openManage(ui,enrollment.id);
+ assert.match(manageDialog(ui).textContent!,/También es Ayudante en esta sección/);await chooseRole(ui,'assistant');assert.match(manageDialog(ui).textContent!,/se mantendrá la existente/);await save(ui);
  assert.equal(ui.doc.querySelectorAll('[data-enrollment-id]').length,3);assert.equal(ui.doc.querySelectorAll(`[data-enrollment-id="${sibling.id}"]`).length,1);
  assert.match(ui.doc.querySelector(`[data-enrollment-id="${enrollment.id}"]`)!.textContent!,/Histórica/);
- assert.match(ui.doc.querySelector('section[aria-label="Participantes"] > p[role="status"]')!.textContent!,new RegExp(sibling.id));
+ assert.equal(toast(ui),'María Pérez ya era Ayudante: la matrícula como Estudiante pasó al Historial.');assert.doesNotMatch(ui.doc.body.textContent!,new RegExp(sibling.id),'no internal IDs in feedback');
  }finally{await ui.close();}
 });
 
