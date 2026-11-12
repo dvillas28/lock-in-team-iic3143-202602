@@ -25,6 +25,19 @@ export class EnrollmentsService {
 
  });
 }
+ // Read-only roster for every active participant of the section (owner included): one row per user, no email, history or audit data.
+ async participants(actor:string,slug:string,section:string) {
+  return this.database.withInstitution(actor,slug,async (db,m)=>{
+   await sectionScope(db,m,section);
+   const rank="CASE e.role WHEN 'teacher' THEN 0 WHEN 'assistant' THEN 1 ELSE 2 END";
+   const rows=(await db.query(`SELECT u.id,u.name,array_agg(e.role ORDER BY ${rank}) AS roles
+    FROM public.enrollments e JOIN public.users u ON u.id=e.user_id
+    JOIN public.institution_memberships im ON im.institution_id=e.institution_id AND im.user_id=e.user_id
+    WHERE e.institution_id=$1 AND e.section_id=$2 AND e.active AND u.active AND im.active
+    GROUP BY u.id,u.name ORDER BY min(${rank}),lower(u.name),u.id`,[m.institution_id,section])).rows;
+   return {items:rows.map(r=>({userId:r.id,name:r.name,roles:r.roles}))};
+  });
+ }
  private async result(db:PoolClient,id:string) {return dto((await db.query("SELECT e.*,u.email,u.name,u.active AS user_active FROM public.enrollments e JOIN public.users u ON u.id=e.user_id WHERE e.id=$1",[id])).rows[0]);}
  async create(actor:string,slug:string,section:string,user:string,role:string) {
   return this.database.withInstitution(actor,slug,async db=>{
