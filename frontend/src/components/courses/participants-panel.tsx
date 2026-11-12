@@ -24,6 +24,7 @@ import { EnrollmentForm } from "./enrollment-form.tsx";
 import { useMutation } from "./use-mutation.ts";
 import { useResource } from "./use-resource.ts";
 const caption = "Matrículas activas e históricas";
+const lastTeacher = "La sección debe conservar al menos un docente activo. Asigna primero a otro docente.";
 export function ParticipantsPanel(props: {
   session: Session;
   slug: string;
@@ -59,7 +60,12 @@ function Participants({
     `${slug}:${section.id}:${cursor ?? ""}`,
     (c) => listSectionEnrollments(c, slug, section.id, cursor),
   );
-  const mutation = useMutation(session);
+  const mutation = useMutation(session, { codes: { LAST_SECTION_TEACHER: lastTeacher } });
+  const can = capabilities(user, course, section);
+  // Mirrors the backend: teacher rows are owner-only and nobody revokes their own teacher enrollment.
+  const manageable = (e: Enrollment) =>
+    e.active && (e.role !== "teacher" || (can.teachers && e.user.id !== user.id));
+  const allowedRoles = can.teachers ? roles : roles.filter((r) => r !== "teacher");
   const dialog = useRef<HTMLDialogElement>(null);
   const cancel = useRef<HTMLButtonElement>(null);
   const trigger = useRef<HTMLElement | null>(null);
@@ -189,7 +195,7 @@ function Participants({
                   <td>{roleLabel(e.role)}</td>
                   <td>{e.active ? "Activa" : "Histórica"}</td>
                   <td>
-                    {e.active ? (
+                    {manageable(e) ? (
                       <button
                         type="button"
                         className="btn btn-ghost"
@@ -245,7 +251,8 @@ function Participants({
           session={session}
           slug={slug}
           sectionId={section.id}
-          search={capabilities(user, course, section).search}
+          search={can.search}
+          allowedRoles={allowedRoles}
           onSaved={saved}
         />
       </details>
@@ -341,7 +348,7 @@ function Participants({
                       onChange={(event) => setSelectedRole(event.currentTarget.value as Role)}
                       disabled={mutation.busy || mutation.uncertain}
                     >
-                      {roles.map((r) => (
+                      {allowedRoles.map((r) => (
                         <option key={r} value={r}>
                           {roleLabel(r)}
                         </option>

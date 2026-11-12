@@ -94,12 +94,28 @@ test("pagination shows history by enrollment ID and returns to initial cursor af
  await ui.submit('form[aria-label="Asignar rol"]',{userId:person.id,role:'student'});assert.ok(ui.doc.querySelector(`[data-enrollment-id="${enrollment.id}"]`));assert.equal(ui.doc.querySelector('button')?.textContent?.includes('Primera página'),false);
  }finally{await ui.close();}
 });
-test("actual self revocation refreshes me and teacher loses participant surface",async()=>{
- const self={...enrollment,user:{...person,id:id(1)},role:'teacher'};
- const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>{if(r.method==='PATCH'){ui.setActor('student');return Response.json({...self,active:false});}return r.url.includes('/enrollments')?Response.json(page([self])):reply(r);},'teacher');try{
+test("teachers cannot manage teacher rows or offer the teacher role; nobody manages their own teacher row",async()=>{
+ const self={...enrollment,id:id(40),user:{...person,id:id(1)},role:'teacher' as const},peer={...enrollment,id:id(41),role:'teacher' as const};
+ for(const profile of ['teacher','ownerTeacher']){
+  const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>r.url.includes('/enrollments')?Response.json(page([self,peer,enrollment])):reply(r),profile);try{
+  await ui.select('select[name="managedSection"]',section.id);
+  const row=(e:{id:string})=>ui.doc.querySelector(`[data-enrollment-id="${e.id}"]`)!;
+  assert.equal(row(self).querySelector('button'),null);assert.match(row(self).textContent!,/Sin acciones/);
+  assert.equal(!!row(peer).querySelector('button'),profile==='ownerTeacher');assert.ok(row(enrollment).querySelector('button'));
+  const options=Array.from(ui.doc.querySelectorAll<HTMLOptionElement>('form[aria-label="Asignar rol"] option')).map(o=>o.value);
+  assert.deepEqual(options,profile==='teacher'?['assistant','student']:['teacher','assistant','student']);
+  await ui.settle(()=>row(enrollment).querySelector<HTMLButtonElement>('button')!.click());
+  const roles=Array.from(ui.doc.querySelectorAll<HTMLOptionElement>(`form[aria-label="Cambiar rol ${enrollment.id}"] option`)).map(o=>o.value);
+  assert.equal(roles.includes('teacher'),profile==='ownerTeacher');assert.equal(ui.requests.filter(r=>r.url.includes('/enrollments')&&r.method!=='GET').length,0);
+  }finally{await ui.close();}
+ }
+});
+test("owner sees a safe explanation when the last teacher cannot be revoked",async()=>{
+ const teacher={...enrollment,role:'teacher' as const};
+ const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>r.url.includes('/enrollments')?(r.method==='PATCH'?Response.json({code:'LAST_SECTION_TEACHER',detail:'PRIVATE'},{status:409}):Response.json(page([teacher]))):reply(r));try{
  await ui.select('select[name="managedSection"]',section.id);const dialog=ui.doc.querySelector('dialog') as HTMLDialogElement;dialog.showModal=()=>dialog.setAttribute('open','');dialog.close=()=>dialog.removeAttribute('open');
- await ui.click('Gestionar');await ui.click('Revocar Docente');await ui.click('Confirmar revocación');assert.equal(ui.requests.filter(r=>r.url.endsWith('/me')).length,2);
- assert.equal(ui.doc.querySelector('section[aria-label="Participantes"]'),null);
+ await ui.click('Gestionar');await ui.click('Revocar Docente');await ui.click('Confirmar revocación');
+ assert.match(dialog.textContent!,/al menos un docente activo/);assert.doesNotMatch(ui.doc.body.textContent!,/PRIVATE/);assert.match(ui.doc.querySelector(`[data-enrollment-id="${teacher.id}"]`)!.textContent!,/Activa/);
  }finally{await ui.close();}
 });
 
