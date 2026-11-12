@@ -6,6 +6,8 @@ export function capabilities(user: CurrentUser, course?: CourseSummary | Course,
   const configure = !!(create && course && "createdBy" in course && course.createdBy === user.id);
   const teacher = active && user.sectionMemberships.some(m => m.role === "teacher" && m.courseId === course?.id && m.sectionId === section?.id && section?.courseId === course?.id);
   const sections = configure || active && user.sectionMemberships.some(m => m.role === "teacher" && m.courseId === course?.id);
+  // Read-only roster access: any active enrollment in the course. Never widens `sections`, which also gates administration.
+  const viewParticipants = sections || active && user.sectionMemberships.some(m => m.courseId === course?.id);
   // Only the admin owner assigns, changes or revokes teacher enrollments; teachers manage students and assistants.
-  return { create, configure, sections, manage: configure || teacher, teachers: configure, search: active && user.sectionMemberships.some(m => m.role === "teacher") };
+  return { create, configure, sections, viewParticipants, manage: configure || teacher, teachers: configure, search: active && user.sectionMemberships.some(m => m.role === "teacher") };
 }
