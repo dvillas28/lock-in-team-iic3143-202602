@@ -27,19 +27,19 @@ test('E2E-SECTION-002 new empty section and edit persist without invented teache
  const page=await actorPage('AO'),api=await e.api('AO'),c=e.data.courses.C1;await sections(page,e);await disclose(page,'Crear sección');const form=page.getByRole('form',{name:'Crear sección',exact:true});await form.getByLabel('Código de sección',{exact:true}).fill('3');
  const createdResponse=page.waitForResponse(r=>r.url().endsWith(`/courses/${c}/sections`)&&r.request().method()==='POST');await submit(form,'Crear sección');const r=await createdResponse;expect(r.status()).toBe(201);const created=await r.json();expect(r.headers().location).toContain(created.id);
  expect(status(await api.get(`sections/${created.id}`),200).body).toMatchObject({code:'3',capacity:null});expect(status(await api.get(`sections/${created.id}/enrollments`),200).body.items).toEqual([]);
- await sections(page,e,created.id);await disclose(page,'Configurar sección');const edit=page.getByRole('form',{name:'Configurar sección',exact:true});await edit.getByLabel('Código de sección',{exact:true}).fill('3B');await edit.getByLabel('Capacidad (vacío: sin límite)',{exact:true}).fill('25');const patched=page.waitForResponse(r=>r.url().endsWith('/sections/'+created.id)&&r.request().method()==='PATCH');await submit(edit,'Guardar sección');expect((await patched).status()).toBe(200);
- expect(status(await api.get(`sections/${created.id}`),200).body).toMatchObject({code:'3B',capacity:25});const fresh=await actorPage('AO');await sections(fresh,e,created.id);await expect(fresh.locator('main').getByText('Capacidad: 25',{exact:true})).toBeVisible();
+ await sections(page,e,created.id);await disclose(page,'Configurar sección');const edit=page.getByRole('form',{name:'Configurar sección',exact:true});await edit.getByLabel('Código de sección',{exact:true}).fill('3B');await edit.getByLabel('Cupos de estudiantes',{exact:true}).fill('25');const patched=page.waitForResponse(r=>r.url().endsWith('/sections/'+created.id)&&r.request().method()==='PATCH');await submit(edit,'Guardar sección');expect((await patched).status()).toBe(200);
+ expect(status(await api.get(`sections/${created.id}`),200).body).toMatchObject({code:'3B',capacity:25});const fresh=await actorPage('AO');await sections(fresh,e,created.id);await expect(fresh.locator('main').getByText('Cupos de estudiantes: 25',{exact:true})).toBeVisible();
  const events=(await e.pool.query('SELECT action FROM audit_events WHERE resource_id=$1 ORDER BY action',[created.id])).rows.map(r=>r.action);expect(events).toEqual(['section.created','section.updated']);
 });
 test('E2E-SECTION-003 capacity boundaries and duplicates reject without effects / boundaries @extended',async ({e,actorPage})=>{
  const page=await actorPage('AO'),api=await e.api('AO'),s=e.data.sections.S1;await sections(page,e);const before=await securitySnapshot(e);
  for(const capacity of [0,-1,0.5,2147483648,'0'])status(await api.patch(`sections/${s}`,{capacity}),400);
  status(await api.post(`courses/${e.data.courses.C1}/sections`,{code:'1',capacity:1}),409);status(await api.post(`courses/${e.data.courses.C1}/sections`,{code:'ZERO',capacity:0}),400);expect(await securitySnapshot(e)).toEqual(before);
- await disclose(page,'Configurar sección');const form=page.getByRole('form',{name:'Configurar sección',exact:true});await form.getByLabel('Capacidad (vacío: sin límite)',{exact:true}).fill('0');await submit(form,'Guardar sección');await expect(form.getByText('Ingresa un número entero mayor o igual a 1, o deja vacío para no limitarla.',{exact:true})).toBeVisible();await expect(page.getByRole('dialog')).toBeVisible();expect(await securitySnapshot(e)).toEqual(before);
+ await disclose(page,'Configurar sección');const form=page.getByRole('form',{name:'Configurar sección',exact:true});await form.getByLabel('Cupos de estudiantes',{exact:true}).fill('0');await submit(form,'Guardar sección');await expect(form.getByText('Ingresa un número entero mayor o igual a 1, o deja el campo vacío para que no haya límite.',{exact:true})).toBeVisible();await expect(page.getByRole('dialog')).toBeVisible();expect(await securitySnapshot(e)).toEqual(before);
  for(const capacity of [null,2147483647]){status(await api.patch(`sections/${s}`,{capacity}),200);expect(status(await api.get(`sections/${s}`),200).body.capacity).toBe(capacity);}
  expect(status(await api.patch(`sections/${s}`,{capacity:5}),409).body.code).toBe('SECTION_CAPACITY_DECREASE');status(await api.patch(`sections/${s}`,{capacity:null}),200);
  expect(status(await api.patch(`sections/${s}`,{capacity:1}),409).body.code).toBe('SECTION_CAPACITY_BELOW_ENROLLMENTS');status(await api.patch(`sections/${s}`,{capacity:2147483647}),200);
- const fresh=await actorPage('AO');await sections(fresh,e);await expect(fresh.locator('main').getByText('Capacidad: 2147483647',{exact:true})).toBeVisible();
+ const fresh=await actorPage('AO');await sections(fresh,e);await expect(fresh.locator('main').getByText('Cupos de estudiantes: 2147483647',{exact:true})).toBeVisible();
 });
 test('E2E-SECTION-004 local filter retains active section without matches / picker @regression',async ({e,actorPage})=>{
  // The code filter appears only past eight manageable sections, so the owner gets enough of them first.
@@ -53,10 +53,12 @@ test('E2E-SECTION-005 late participants from previous section never replace curr
  await page.route('**/sections/'+e.data.sections.S1+'/enrollments**',async route=>{const response=await route.fetch();expect(response.status()).toBe(200);entered();await gate;await route.fulfill({response}).catch(()=>{});});
  try{await go(page,e.data.courses.C1,'/sections',{waitForData:false});await started;await sectionPicker(page).selectOption(e.data.sections.S2);await expect(page.getByRole('table')).toContainText(e.data.actors.ST2.email);release();await expect(page.getByRole('table')).not.toContainText(e.data.actors.ST1.email);await activeSection(page,'2');expect(await securitySnapshot(e)).toEqual(before);}finally{release();}
 });
-// Assignment rules are unchanged in PR-3: capacity is still not checked when enrolling.
+// Capacity counts only student seats: a full section still accepts other academic roles.
 test('E2E-SECTION-006 capacity metadata does not block assignment / minimum-capacity @extended',async ({e,actorPage})=>{
- const api=await e.api('AO'),c=e.data.courses.C1,created=status(await api.post(`courses/${c}/sections`,{code:'ONE',capacity:1}),201).body;
- for(const actor of ['ST1','ST2'])status(await api.post(`sections/${created.id}/enrollments`,{userId:e.data.actors[actor].id,role:'student'}),201);
- expect(status(await api.get(`sections/${created.id}`),200).body.capacity).toBe(1);const rows=status(await api.get(`sections/${created.id}/enrollments`),200).body.items;expect(rows).toHaveLength(2);expect(rows.every((r:any)=>r.active&&r.role==='student')).toBe(true);
- const page=await actorPage('AO');await sections(page,e,created.id);await expect(page.locator('main').getByText('Capacidad: 1',{exact:true})).toBeVisible();for(const actor of ['ST1','ST2'])await expect(page.getByRole('table')).toContainText(e.data.actors[actor].email);
+ const api=await e.api('AO'),c=e.data.courses.C1,created=status(await api.post(`courses/${c}/sections`,{code:'ONE',capacity:1}),201).body,path=`sections/${created.id}/enrollments`;
+ status(await api.post(path,{userId:e.data.actors.ST1.id,role:'student'}),201);status(await api.post(path,{userId:e.data.actors.ST2.id,role:'assistant'}),201);
+ const before=await securitySnapshot(e);expect(status(await api.post(path,{userId:e.data.actors.AS1.id,role:'student'}),409).body.code).toBe('SECTION_FULL');expect(await securitySnapshot(e)).toEqual(before);
+ expect(status(await api.get(`sections/${created.id}`),200).body.capacity).toBe(1);const rows=status(await api.get(path),200).body.items;expect(rows).toHaveLength(2);expect(rows.every((r:any)=>r.active)).toBe(true);
+ expect(Object.fromEntries(rows.map((r:any)=>[r.user.id,r.role]))).toEqual({[e.data.actors.ST1.id]:'student',[e.data.actors.ST2.id]:'assistant'});
+ const page=await actorPage('AO');await sections(page,e,created.id);await expect(page.locator('main').getByText('Cupos de estudiantes: 1',{exact:true})).toBeVisible();for(const actor of ['ST1','ST2'])await expect(page.getByRole('table')).toContainText(e.data.actors[actor].email);
 });

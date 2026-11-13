@@ -87,12 +87,12 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 
 <a id="e2e-enroll-009"></a>
 
-## E2E-ENROLL-009 — Roles acumulados distintos
+## E2E-ENROLL-009 — Segundo rol activo rechazado
 
 - Módulo / flujo: ENROLL; [FL-ENROLL-02](../audit/FLOWS.md#fl-enroll-02).
 - Requisito: CU-04; RF10–12/25/26; RNF2/3; [fuente normativa](../../deliveries/2/03-use-cases-and-requirements.md).
 - Evidencia: [enrollments.service.ts](../../../backend/src/enrollments/enrollments.service.ts); [participant-search.service.ts](../../../backend/src/institutions/participant-search.service.ts); [participants-panel.tsx](../../../frontend/src/components/courses/participants-panel.tsx); [enrollment-form.tsx](../../../frontend/src/components/courses/enrollment-form.tsx).
-- Objetivo: Roles acumulados distintos; verificar las aserciones siguientes, sin inferir éxito solo por carga.
+- Objetivo: Segundo rol activo rechazado; verificar las aserciones siguientes, sin inferir éxito solo por carga.
 - Prioridad / criticidad: P0 / Crítica; categorías: multirol,integridad.
 - Rol / institución: T1; UC por defecto, UTFSM en escenarios cruzados según pasos.
 - Precondiciones / fixtures: WRITE; [diccionario](../E2E_TEST_DATA.md); manifest validado y namespace exclusivo.
@@ -100,12 +100,12 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Preparación: resolver variables del manifest; actor de UI hace login real en origen institucional (ANON no); navegar por Link tras login, salvo reload explícito.
 
 1. Asignar ST2 student S1.
-2. Añadir assistant al mismo usuario/sección.
-3. Login ST2 y comparar capacidades.
+2. Intentar añadir assistant al mismo usuario y sección.
+3. Seleccionar ST2 en el modal de asignación y abrir «Gestionar matrícula actual».
 
-- Interfaz esperada: Dos roles activos; capacidades por acción, no perfil único.
-- API esperada: 201 para rol distinto; /me devuelve ambos.
-- Persistencia / consistencia: Dos filas activas distintas, sin duplicar mismo rol.
+- Interfaz esperada: El modal ofrece gestionar la matrícula vigente.
+- API esperada: 409 SECTION_ROLE_ALREADY_ACTIVE para el rol distinto.
+- Persistencia / consistencia: La matrícula de estudiante y la auditoría conservan su estado.
 - Denegación: No teacher ni isAdmin implícitos.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
 - Dependencias: F1 entorno/seed listo; [fase F4](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.

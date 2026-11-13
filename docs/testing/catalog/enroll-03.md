@@ -6,24 +6,24 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 
 <a id="e2e-enroll-011"></a>
 
-## E2E-ENROLL-011 — Cambio hacia rol activo existente
+## E2E-ENROLL-011 — Reactivación rechazada cuando hay sucesor activo
 
 - Módulo / flujo: ENROLL; [FL-ENROLL-02](../audit/FLOWS.md#fl-enroll-02).
 - Requisito: CU-04; RF10–12/25/26; RNF2/3; [fuente normativa](../../deliveries/2/03-use-cases-and-requirements.md).
 - Evidencia: [enrollments.service.ts](../../../backend/src/enrollments/enrollments.service.ts); [participant-search.service.ts](../../../backend/src/institutions/participant-search.service.ts); [participants-panel.tsx](../../../frontend/src/components/courses/participants-panel.tsx); [enrollment-form.tsx](../../../frontend/src/components/courses/enrollment-form.tsx).
-- Objetivo: Cambio hacia rol activo existente; verificar las aserciones siguientes, sin inferir éxito solo por carga.
+- Objetivo: Reactivación rechazada cuando hay sucesor activo; verificar las aserciones siguientes, sin inferir éxito solo por carga.
 - Prioridad / criticidad: P1 / Alta; categorías: idempotencia,multirol.
 - Rol / institución: T1; UC por defecto, UTFSM en escenarios cruzados según pasos.
 - Precondiciones / fixtures: WRITE; [diccionario](../E2E_TEST_DATA.md); manifest validado y namespace exclusivo.
 - Entrada / operación: `/courses/{C1}/sections`; `listSectionEnrollments; createSectionEnrollment; updateSectionEnrollment`; [inventario](../audit/API.md).
 - Preparación: resolver variables del manifest; actor de UI hace login real en origen institucional (ANON no); navegar por Link tras login, salvo reload explícito.
 
-1. Preparar ST2 student+assistant S1.
-2. Cambiar student a assistant.
-3. Recorrer historial.
+1. Preparar ST2 como estudiante en S1.
+2. Cambiar su rol a ayudante e intentar reactivar la matrícula original.
+3. Revisar Activas e Historial.
 
-- Interfaz esperada: Reutiliza assistant activo; student histórico; sin tercer rol duplicado.
-- API esperada: 200 retorna enrollment assistant existente.
+- Interfaz esperada: Ayudante figura en Activas y Estudiante en Historial.
+- API esperada: El cambio devuelve 200 y la reactivación devuelve 409 SECTION_ROLE_ALREADY_ACTIVE.
 - Persistencia / consistencia: Un assistant activo, un student revocado y un evento de cambio.
 - Denegación: No violar unicidad activa.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
