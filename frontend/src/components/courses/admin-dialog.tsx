@@ -17,9 +17,37 @@ export function AdminDialog({ label, title, icon, primary = false, disabled = fa
   onDone: (message: string) => void;
   children: (controls: DialogFormControls) => ReactNode;
 }>) {
-  const dialog = useRef<HTMLDialogElement>(null), trigger = useRef<HTMLButtonElement>(null), keep = useRef<HTMLButtonElement>(null),
-    lastField = useRef<HTMLElement | null>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
   const [opening, setOpening] = useState(0), [open, setOpen] = useState(false);
+  return <>
+    <button ref={trigger} type="button" className={primary ? "btn btn-primary" : "btn btn-ghost"} aria-haspopup="dialog" disabled={disabled}
+      onClick={() => { setOpening(n => n + 1); setOpen(true); }}>
+      {icon}{label}
+    </button>
+    <AdminDialogFrame open={open} opening={opening} title={title} onDone={onDone} onClose={() => setOpen(false)}
+      onClosed={() => trigger.current?.focus()}>
+      {children}
+    </AdminDialogFrame>
+  </>;
+}
+
+/**
+ * The `AdminDialog` modal without its trigger, for dialogs opened from elsewhere (a table row).
+ * The owner keeps `open`; the frame asks to close through `onClose` and reports the native close
+ * through `onClosed`, where focus can return. Busy forms cannot be closed; dirty ones ask first.
+ */
+export function AdminDialogFrame({ open, opening, title, className, onDone, onClose, onClosed, children }: Readonly<{
+  open: boolean;
+  /** Changes on every opening, so each one starts with a fresh form. */
+  opening: number | string;
+  title: string;
+  className?: string;
+  onDone?: (message: string) => void;
+  onClose: () => void;
+  onClosed?: () => void;
+  children: (controls: DialogFormControls) => ReactNode;
+}>) {
+  const dialog = useRef<HTMLDialogElement>(null), keep = useRef<HTMLButtonElement>(null), lastField = useRef<HTMLElement | null>(null);
   const [dirty, setDirty] = useState(false), [confirming, setConfirming] = useState(false), [busy, setBusy] = useState(false);
   const titleId = useId();
   useEffect(() => { if (confirming) keep.current?.focus(); }, [confirming]);
@@ -29,37 +57,35 @@ export function AdminDialog({ label, title, icon, primary = false, disabled = fa
     if (open && !element?.open) element?.showModal?.();
     if (!open && element?.open) element.close?.();
   }, [open]);
-  function close() { setConfirming(false); setDirty(false); setOpen(false); }
+  function close() { setConfirming(false); setDirty(false); onClose(); }
   function request() {
     if (busy) return;
     if (dirty && !confirming) { setConfirming(true); return; }
     close();
   }
-  // `setBusy` is stable, so forms can report it from an effect.
-  const form: DialogFormControls = { onDone: message => { close(); onDone(message); }, onCancel: request, onBusy: setBusy, onDirty: setDirty };
-  return <>
-    <button ref={trigger} type="button" className={primary ? "btn btn-primary" : "btn btn-ghost"} aria-haspopup="dialog" disabled={disabled}
-      onClick={() => { setOpening(n => n + 1); setDirty(false); setConfirming(false); setOpen(true); }}>
-      {icon}{label}
-    </button>
-    <dialog ref={dialog} className="modal native-dialog academic-dialog admin-dialog" aria-labelledby={titleId}
-      onCancel={event => { event.preventDefault(); request(); }}
-      onClose={() => { setConfirming(false); setDirty(false); setOpen(false); trigger.current?.focus(); }}>
-      <div className="dialog-heading">
-        <h2 id={titleId}>{title}</h2>
-        <button type="button" className="btn btn-ghost" aria-label="Cerrar" onClick={request}><X size={18} aria-hidden="true" /></button>
+  // `setBusy` and `setDirty` are stable, so forms can report them from an effect.
+  const form: DialogFormControls = { onDone: message => { close(); onDone?.(message); }, onCancel: request, onBusy: setBusy, onDirty: setDirty };
+  return <dialog ref={dialog} className={`modal native-dialog academic-dialog admin-dialog${className ? ` ${className}` : ""}`} aria-labelledby={titleId}
+    aria-busy={busy || undefined}
+    onCancel={event => { event.preventDefault(); request(); }}
+    onClose={() => { setConfirming(false); setDirty(false); onClose(); onClosed?.(); }}>
+    <div className="dialog-heading">
+      <h2 id={titleId}>{title}</h2>
+      <button type="button" className="btn btn-ghost" aria-label="Cerrar" aria-disabled={busy || undefined} onClick={request}><X size={18} aria-hidden="true" /></button>
+    </div>
+    {/* Browsers fire a select's `input` before its `change`: re-rendering in between restores the controlled value
+        and undoes the first pick, so selects mark the form dirty on `change` only. */}
+    <div key={opening} className="stack" onInput={event => { if ((event.target as Element).tagName !== "SELECT") setDirty(true); }}
+      onChange={() => setDirty(true)}
+      onFocus={event => { lastField.current = event.target; }}>
+      {children(form)}
+    </div>
+    {confirming && <div className="discard-confirm" role="alert">
+      <p>Tienes cambios sin guardar. ¿Quieres descartarlos?</p>
+      <div className="actions">
+        <button ref={keep} type="button" className="btn btn-ghost" onClick={() => { setConfirming(false); lastField.current?.focus(); }}>Seguir editando</button>
+        <button type="button" className="btn btn-danger" onClick={close}>Descartar cambios</button>
       </div>
-      <div key={opening} className="stack" onInput={() => setDirty(true)} onChange={() => setDirty(true)}
-        onFocus={event => { lastField.current = event.target; }}>
-        {children(form)}
-      </div>
-      {confirming && <div className="discard-confirm" role="alert">
-        <p>Tienes cambios sin guardar. ¿Quieres descartarlos?</p>
-        <div className="actions">
-          <button ref={keep} type="button" className="btn btn-ghost" onClick={() => { setConfirming(false); lastField.current?.focus(); }}>Seguir editando</button>
-          <button type="button" className="btn btn-danger" onClick={close}>Descartar cambios</button>
-        </div>
-      </div>}
-    </dialog>
-  </>;
+    </div>}
+  </dialog>;
 }

@@ -4,6 +4,8 @@ import { createElement as h } from "react";
 import { CourseDetail } from "../src/components/courses/course-detail.tsx";
 import { mount } from "./fixtures/course-ui.ts";
 import { course, section, enrollment, history, id, page, deferred } from "./fixtures/courses.ts";
+import { modalRuntime } from "./fixtures/assignment.ts";
+import { manageDialog, manageSelect, manageTitle, manageButton, rowTrigger, chooseRole, save, press, escapeManage, patches } from "./fixtures/management.ts";
 
 const sections = Array.from({ length: 100 }, (_, index) => ({ ...section, id: id(300 + index), code: String(index + 1) }));
 const reply = (request: Request) => {
@@ -59,34 +61,36 @@ test('participant management opens outside the table; Escape restores focus and 
     return reply(request);
   });
   try {
-    const row = ui.doc.querySelector(`[data-enrollment-id="${enrollment.id}"]`)!;
-    const trigger = row.querySelector<HTMLButtonElement>('button')!;
+    modalRuntime(ui);
+    const trigger = rowTrigger(ui, enrollment.id);
     const table = ui.doc.querySelector('.participants-table')!;
     const content = table.innerHTML;
     assert.equal(table.querySelector('select, form, details'), null);
     assert.equal(ui.doc.querySelector(`[data-enrollment-id="${history.id}"] button`), null);
     await ui.settle(() => trigger.click());
-    const dialog = ui.doc.querySelector<HTMLDialogElement>('dialog.participant-management[open]')!;
-    assert.equal(dialog.querySelector('h2')!.textContent, 'Gestionar participante');
+    const dialog = manageDialog(ui);
+    assert.ok(dialog.open);
+    assert.equal(manageTitle(ui), 'Gestionar participante');
     assert.equal(table.contains(dialog), false);
     assert.equal(table.innerHTML, content);
-    assert.equal(ui.doc.activeElement?.textContent, 'Cerrar');
-    const select = dialog.querySelector('select')!, revoke = dialog.querySelector<HTMLButtonElement>('.btn-danger')!;
-    await ui.settle(() => { select.focus(); dialog.dispatchEvent(new ui.dom.window.KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true })); });
-    assert.ok(ui.doc.activeElement === revoke, 'Shift+Tab must wrap to revoke');
-    await ui.settle(() => dialog.dispatchEvent(new ui.dom.window.KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true })));
-    assert.ok(ui.doc.activeElement === select, 'Tab must wrap to role select');
-    await ui.settle(() => dialog.dispatchEvent(new ui.dom.window.Event('cancel', { cancelable: true })));
+    await ui.settle(() => {});
+    assert.ok(ui.doc.activeElement === manageSelect(ui), 'the role field is focused on open');
+    await escapeManage(ui);
     assert.equal(dialog.open, false);
     assert.ok(ui.doc.activeElement === trigger, 'Closing must restore trigger focus');
     await ui.settle(() => trigger.click());
-    await ui.submit(`form[aria-label="Cambiar rol ${enrollment.id}"]`, { role: 'teacher' });
+    await chooseRole(ui, 'teacher'); await save(ui);
     assert.match(dialog.textContent!, /incierto/i);
-    await ui.click('Cerrar'); await ui.settle(() => trigger.click());
-    assert.equal(dialog.querySelector<HTMLSelectElement>('select')!.disabled, true);
-    assert.equal(dialog.querySelector<HTMLSelectElement>('select')!.value, 'teacher');
-    await ui.submit(`form[aria-label="Cambiar rol ${enrollment.id}"]`, { role: 'teacher' });
-    assert.equal(ui.requests.filter(r => r.method === 'PATCH').length, 1);
+    await escapeManage(ui);
+    assert.ok(manageButton(ui, 'Descartar cambios'), 'the unsaved role asks before closing');
+    await press(ui, 'Descartar cambios');
+    assert.equal(dialog.open, false);
+    assert.match(ui.doc.querySelector('section[aria-label="Participantes"] > p[role="alert"]')!.textContent!, /incierto/i);
+    await ui.settle(() => trigger.click());
+    assert.equal(manageSelect(ui).disabled, true);
+    assert.equal(manageSelect(ui).value, 'teacher');
+    await save(ui);
+    assert.equal(patches(ui).length, 1);
   } finally { await ui.close(); }
 });
 
@@ -94,31 +98,36 @@ test('role rejection stays inside the dialog; pending double submits and stale s
   const pending = deferred<Response>();
   const ui = await mount(h(CourseDetail, { courseId: course.id }), request => request.method === 'PATCH' ? pending.promise : reply(request));
   try {
+    modalRuntime(ui);
     const trigger = ui.doc.querySelector<HTMLButtonElement>('.participants-table button')!;
     await ui.settle(() => trigger.click());
-    await ui.submit(`form[aria-label="Cambiar rol ${enrollment.id}"]`, { role: 'teacher' });
-    await ui.submit(`form[aria-label="Cambiar rol ${enrollment.id}"]`, { role: 'teacher' });
-    assert.equal(ui.requests.filter(r => r.method === 'PATCH').length, 1);
-    assert.equal(ui.doc.querySelector<HTMLSelectElement>('dialog.participant-management[open] select')!.disabled, true);
+    await chooseRole(ui, 'teacher');
+    await save(ui); await save(ui);
+    assert.equal(patches(ui).length, 1);
+    assert.equal(manageSelect(ui).disabled, true);
+    assert.equal(manageButton(ui, 'Guardando…')!.disabled, true);
+    await escapeManage(ui); await press(ui, 'Cerrar');
+    assert.ok(manageDialog(ui).open, 'a running write cannot be closed');
+    assert.equal(manageButton(ui, 'Descartar cambios'), undefined);
     await ui.settle(() => pending.resolve(Response.json({}, { status: 422 })));
-    const dialog = ui.doc.querySelector<HTMLDialogElement>('dialog.participant-management[open]')!;
+    const dialog = manageDialog(ui);
     assert.match(dialog.querySelector('[role="alert"]')!.textContent!, /Revisa los campos/);
-    assert.equal(dialog.querySelector<HTMLSelectElement>('select')!.disabled, false);
-    assert.equal(dialog.querySelector<HTMLSelectElement>('select')!.value, 'teacher');
+    assert.equal(manageSelect(ui).disabled, false);
+    assert.equal(manageSelect(ui).value, 'teacher');
     assert.equal(ui.doc.querySelector('.participants-table form'), null);
-    await ui.click('Cerrar');
+    await press(ui, 'Cancelar'); await press(ui, 'Descartar cambios');
     assert.ok(ui.doc.activeElement === trigger, 'Closing must restore trigger focus');
   } finally { await ui.close(); }
 
   const late = deferred<Response>();
   const second = await mount(h(CourseDetail, { courseId: course.id }), request => request.method === 'PATCH' ? late.promise : reply(request));
   try {
+    modalRuntime(second);
     await second.settle(() => second.doc.querySelector<HTMLButtonElement>('.participants-table button')!.click());
-    await second.submit(`form[aria-label="Cambiar rol ${enrollment.id}"]`, { role: 'teacher' });
-    await second.click('Cerrar');
+    await chooseRole(second, 'teacher'); await save(second);
     await second.select('select[name="managedSection"]', sections[98].id);
     await second.settle(() => late.resolve(Response.json({ ...enrollment, role: 'teacher' })));
     assert.equal(second.doc.querySelector('dialog[open]'), null);
-    assert.doesNotMatch(second.doc.querySelector('section[aria-label="Participantes"]')!.textContent!, /Rol actualizado|Matrícula confirmada/);
+    assert.equal(second.doc.querySelector('.content-notices .content-notice'), null);
   } finally { await second.close(); }
 });
