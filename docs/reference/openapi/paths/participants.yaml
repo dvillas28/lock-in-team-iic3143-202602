@@ -10,7 +10,8 @@
     summary: Listar participantes activos de una sección
     description: Roster de solo lectura para cualquier participante activo de la sección
       y el admin dueño. Incluye solo matrículas activas cuyo User y membership institucional
-      siguen activos; agrupa roles múltiples por usuario. No expone correos, historial,
+      siguen activos. Devuelve una fila por usuario con el rol en un arreglo por
+      compatibilidad. No expone correos, historial,
       auditoría ni indicadores administrativos. Sección ajena, de otra institución o
       sin Enrollment activo propio responde 404. La gestión sigue en listSectionEnrollments.
     responses:
