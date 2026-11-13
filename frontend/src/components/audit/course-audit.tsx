@@ -196,6 +196,7 @@ function Audit({ course }: Readonly<{ course: Course }>) {
               {input("actorUserId", "UUID actor", "text", 36)}
             </div>
             <div className="actions">
+              <button className="btn btn-ghost" type="button" disabled={busy} onClick={clear}>Limpiar campos</button>
               <button className="btn btn-primary" type="submit" disabled={busy}>Aplicar filtros</button>
             </div>
           </div>
