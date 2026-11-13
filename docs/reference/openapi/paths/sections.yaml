@@ -118,7 +118,9 @@
     x-permissions: "Membership activa, isAdmin vigente y createdBy=actor del curso."
     summary: Actualizar una sección
     description: Exige is_admin institucional vigente y dueño del curso. Teacher sin
-      admin no configura secciones.
+      admin no configura secciones. Una capacidad numérica no puede bajar de la actual
+      (409 SECTION_CAPACITY_DECREASE) ni de las matrículas activas (409
+      SECTION_CAPACITY_BELOW_ENROLLMENTS); null la deja ilimitada.
     requestBody:
       required: true
       content:

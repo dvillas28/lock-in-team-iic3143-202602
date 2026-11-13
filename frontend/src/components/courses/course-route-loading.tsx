@@ -23,7 +23,7 @@ export const courseSectionTitles: Readonly<Record<string, string>> = {
 /**
  * Route fallback for `/courses` and course sections. It renders the same skeleton the page shows
  * while its own data loads, so the transition reads as one state, including quiz, attempt and
- * assignment views and Secciones (whose title depends on the role, so it is a placeholder).
+ * assignment views and Secciones (whose static title lives in `sections-skeleton.tsx`).
  * Other detail pages and unknown paths keep the generic state their pages still use.
  */
 /** Section bodies the pages draw under the header skeleton; the others keep the neutral area. */

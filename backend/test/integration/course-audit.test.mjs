@@ -7,7 +7,7 @@ test("US2 audit owner precedence, teacher sections, filters, cursor and immutabi
  const pool=await database();let app;try{
   const f=await coursesFixture(pool);app=await http();const token=await login(app,f.env),other=await login(app,f.env,"UC");
   await request(app,token,`uc/courses/${f.own}`,"PATCH",{name:"renamed"});
-  await request(app,token,`uc/sections/${f.s1}`,"PATCH",{capacity:2});
+  await request(app,token,`uc/sections/${f.s1}`,"PATCH",{capacity:4});
   await request(app,token,`uc/sections/${f.s2}`,"PATCH",{capacity:3});
   const path=`uc/courses/${f.own}/audit-events`;
   const all=await request(app,token,path);assert.equal(all.status,200);assert.equal(all.body.items.length,3);assert.ok(all.body.items.some(e=>e.sectionId===null));assert.ok(all.body.items.some(e=>e.sectionId===f.s2));
@@ -15,7 +15,7 @@ test("US2 audit owner precedence, teacher sections, filters, cursor and immutabi
    before:{code:"A",name:"A",term:"2026-2",createdBy:users.owner},
    after:{code:"A",name:"renamed",term:"2026-2",createdBy:users.owner},
   });
-  for(const [sectionId,capacity] of [[f.s1,2],[f.s2,3]])assert.deepEqual(all.body.items.find(e=>e.resourceId===sectionId).changes,{
+  for(const [sectionId,capacity] of [[f.s1,4],[f.s2,3]])assert.deepEqual(all.body.items.find(e=>e.resourceId===sectionId).changes,{
    before:{code:sectionId===f.s1?"1":"2",capacity:null},after:{code:sectionId===f.s1?"1":"2",capacity},
   });
   assert.equal((await request(app,other,path)).status,403);

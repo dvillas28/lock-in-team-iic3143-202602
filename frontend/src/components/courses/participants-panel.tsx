@@ -152,11 +152,9 @@ function Participants({
   }
   return (
     <section className="stack" aria-label="Participantes">
-      <h3 className="serif">
-        Participantes e historial · Sección {section.code}
-      </h3>
+      <h2 className="serif">Participantes</h2>
       {result.error ? (
-        <ErrorState headingLevel={4}
+        <ErrorState headingLevel={3}
           feedback={result.error}
           onRetry={() => void result.reload()}
         />
@@ -164,7 +162,7 @@ function Participants({
         <RecordRowsSkeleton label="Cargando participantes…" caption={caption} headers={columns} rows={3}
           scroll="table-scroll participants-table" cell={participantCell} />
       ) : !result.data.items.length ? (
-        <EmptyState headingLevel={4} title="No hay participantes"
+        <EmptyState headingLevel={3} title="No hay participantes"
           message="Esta sección aún no tiene matrículas. Usa «Asignar participante» para inscribir estudiantes o ayudantes." />
       ) : (
         <div

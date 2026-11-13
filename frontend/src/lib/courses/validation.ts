@@ -27,8 +27,8 @@ export function capacity(value: string): number | null {
   if (!value.trim())
     return null;
   const n = Number(value);
-  if (!/^\d+$/.test(value.trim()) || !Number.isInteger(n) || n < 0 || n > 2147483647)
-    throw new FieldError("capacity", "Ingresa un entero entre 0 y 2147483647, o deja vacío.");
+  if (!/^\d+$/.test(value.trim()) || !Number.isInteger(n) || n < 1 || n > 2147483647)
+    throw new FieldError("capacity", "Ingresa un número entero mayor o igual a 1, o deja vacío para no limitarla.");
   return n;
 }
 export function changed<T extends object>(next: T, previous: Partial<T>): Partial<T> {

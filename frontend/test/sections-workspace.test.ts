@@ -25,14 +25,14 @@ test('one hundred sections mount one workspace; filtering preserves selection wi
       await ui.settle(() => { search.value = query; search.dispatchEvent(new ui.dom.window.Event('input', { bubbles: true })); });
       assert.equal(ui.doc.querySelector<HTMLSelectElement>('select[name="managedSection"]')!.value, sections[0].id);
       assert.equal(ui.requests.length, initialRequests);
-      assert.match(ui.doc.querySelector('section[aria-label="Participantes"] h3')!.textContent!, /Sección 1$/);
+      assert.match(ui.doc.querySelector('.participants-table[role="region"]')!.getAttribute('aria-label')!, /sección 1$/);
       assert.equal(ui.doc.querySelectorAll('select[name="managedSection"] option').length, query === '99' ? 2 : 1);
     }
     assert.match(ui.doc.body.textContent!, /No hay secciones que coincidan/);
     await ui.settle(() => { search.value = '99'; search.dispatchEvent(new ui.dom.window.Event('input', { bubbles: true })); });
     await ui.select('select[name="managedSection"]', sections[98].id);
     assert.equal(search.value, '');
-    assert.match(ui.doc.querySelector('section[aria-label="Participantes"] h3')!.textContent!, /Sección 99$/);
+    assert.match(ui.doc.querySelector('.participants-table[role="region"]')!.getAttribute('aria-label')!, /sección 99$/);
     assert.equal(ui.requests.filter(r => r.url.includes('/enrollments')).length, 2);
     assert.equal(ui.doc.querySelectorAll('section[aria-label="Participantes"]').length, 1);
   } finally { await ui.close(); }
@@ -45,7 +45,7 @@ test('abandoned section response cannot replace the selected workspace', async (
   try {
     await ui.select('select[name="managedSection"]', sections[98].id);
     await ui.settle(() => pending.resolve(Response.json(sections[0])));
-    assert.match(ui.doc.querySelector('section[aria-label="Participantes"] h3')!.textContent!, /Sección 99$/);
+    assert.match(ui.doc.querySelector('.participants-table[role="region"]')!.getAttribute('aria-label')!, /sección 99$/);
     assert.equal(ui.requests.some(r => r.url.includes(`${sections[0].id}/enrollments`)), false);
   } finally { await ui.close(); }
 });
@@ -66,7 +66,7 @@ test('participant management opens outside the table; Escape restores focus and 
     assert.equal(table.querySelector('select, form, details'), null);
     assert.equal(ui.doc.querySelector(`[data-enrollment-id="${history.id}"] button`), null);
     await ui.settle(() => trigger.click());
-    const dialog = ui.doc.querySelector<HTMLDialogElement>('dialog[open]')!;
+    const dialog = ui.doc.querySelector<HTMLDialogElement>('dialog.participant-management[open]')!;
     assert.equal(dialog.querySelector('h2')!.textContent, 'Gestionar participante');
     assert.equal(table.contains(dialog), false);
     assert.equal(table.innerHTML, content);
@@ -99,9 +99,9 @@ test('role rejection stays inside the dialog; pending double submits and stale s
     await ui.submit(`form[aria-label="Cambiar rol ${enrollment.id}"]`, { role: 'teacher' });
     await ui.submit(`form[aria-label="Cambiar rol ${enrollment.id}"]`, { role: 'teacher' });
     assert.equal(ui.requests.filter(r => r.method === 'PATCH').length, 1);
-    assert.equal(ui.doc.querySelector<HTMLSelectElement>('dialog[open] select')!.disabled, true);
+    assert.equal(ui.doc.querySelector<HTMLSelectElement>('dialog.participant-management[open] select')!.disabled, true);
     await ui.settle(() => pending.resolve(Response.json({}, { status: 422 })));
-    const dialog = ui.doc.querySelector<HTMLDialogElement>('dialog[open]')!;
+    const dialog = ui.doc.querySelector<HTMLDialogElement>('dialog.participant-management[open]')!;
     assert.match(dialog.querySelector('[role="alert"]')!.textContent!, /Revisa los campos/);
     assert.equal(dialog.querySelector<HTMLSelectElement>('select')!.disabled, false);
     assert.equal(dialog.querySelector<HTMLSelectElement>('select')!.value, 'teacher');
