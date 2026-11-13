@@ -1,3 +1,5 @@
+import {CalendarController} from "./calendar/calendar.controller";
+import {CalendarService} from "./calendar/calendar.service";
 import {SubmissionsController} from "./assignments/submissions.controller";
 import {SubmissionsService} from "./assignments/submissions.service";
 import {AssignmentReviewService} from "./assignments/assignment-review.service";
@@ -52,7 +54,7 @@ import { InstitutionsController } from "./institutions/institutions.controller";
   imports: [JwtModule.register({}),
     // shortcut: memory per instance; coordinate quotas before running multiple instances.
     ThrottlerModule.forRoot([{limit: 5, ttl: 60000, blockDuration: 60000}])],
-  providers: [SubmissionsService,AssignmentReviewService,AssignmentsService,AcademicFilesService,AcademicStorage,AccountsService,AccountIntegrations,InvitationsService,ImportsService,ParticipantSearchService, GradebookService, AttemptsService, QuizzesService, ModulesService, MaterialsService, EnrollmentsService, AuditService, MembershipAdminService, CoursesService, SectionsService, DatabaseService, AuthService, InstitutionsService, {provide: APP_GUARD, useClass: AuthGuard}, {provide: APP_GUARD, useClass: TenantGuard}],
-  controllers: [SubmissionsController,AssignmentsController,AcademicFilesController,AccountsController,InvitationsController,InvitationActivationController,ImportsController,GradebookController, AttemptsController, QuizzesController, ModulesController, MaterialsController, EnrollmentsController, SectionParticipantsController, AuditController, MembershipAdminController, CoursesController, SectionsController, HealthController, AuthController, InstitutionsController],
+  providers: [CalendarService,SubmissionsService,AssignmentReviewService,AssignmentsService,AcademicFilesService,AcademicStorage,AccountsService,AccountIntegrations,InvitationsService,ImportsService,ParticipantSearchService, GradebookService, AttemptsService, QuizzesService, ModulesService, MaterialsService, EnrollmentsService, AuditService, MembershipAdminService, CoursesService, SectionsService, DatabaseService, AuthService, InstitutionsService, {provide: APP_GUARD, useClass: AuthGuard}, {provide: APP_GUARD, useClass: TenantGuard}],
+  controllers: [CalendarController,SubmissionsController,AssignmentsController,AcademicFilesController,AccountsController,InvitationsController,InvitationActivationController,ImportsController,GradebookController, AttemptsController, QuizzesController, ModulesController, MaterialsController, EnrollmentsController, SectionParticipantsController, AuditController, MembershipAdminController, CoursesController, SectionsController, HealthController, AuthController, InstitutionsController],
 })
 export class AppModule {}
