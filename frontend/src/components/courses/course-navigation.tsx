@@ -6,11 +6,11 @@ import { capabilities } from '../../lib/courses/capabilities.ts';
 
 /** Receives an already authorized course; never fetches data for navigation. */
 export function CourseNavigation({ course, user, active }: Readonly<{ course: Course; user: CurrentUser; active: string }>) {
-  const base = `/courses/${course.id}`, cap = gradebookCapabilities(user, course);
+  const base = `/courses/${course.id}`, cap = gradebookCapabilities(user, course), access = capabilities(user, course);
   const links = [
     ['/modules', 'Módulos y material'], ['/quizzes', 'Quizzes'],
     ...(user.sectionMemberships.some(m => m.courseId === course.id && ['teacher','student'].includes(m.role)) ? [['/assignments', 'Tareas']] : []),
-    ...(capabilities(user, course).sections ? [['/sections', 'Secciones y participantes']] : []),
+    ...(access.viewParticipants ? [['/sections', 'Secciones y participantes']] : []),
     ...(cap.student ? [['/grades', 'Mis notas']] : []),
     ...(cap.book ? [['/gradebook', 'Libro de notas']] : []),
     ...(cap.audit ? [['/audit', 'Auditoría']] : []),

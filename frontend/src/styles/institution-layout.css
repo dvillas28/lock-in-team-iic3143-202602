@@ -63,10 +63,6 @@ fieldset.stack { border: 0; padding: 0; min-width: 0; }
 .academic-app .table-scroll { min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
 .academic-app .table-scroll .data-table :is(td, tbody th) { padding-block: 12px; }
 .academic-app .table-scroll:focus-visible { outline-offset: -3px; }
-.academic-app .section-list { gap: 0; }
-.academic-app .section-list > li { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center; gap: 12px; }
-.academic-app .section-list > li:last-child { border: 0; }
-.academic-app .section-list .hint { font-size: 12px; }
 .academic-app .content > .stack > a:first-child { align-self: start; font-size: 13px; color: var(--primary-ink); text-underline-offset: 3px; }
 @media (max-width: 760px) {
   .academic-app .sidebar { position: relative; overflow: visible; }
@@ -94,7 +90,6 @@ fieldset.stack { border: 0; padding: 0; min-width: 0; }
   .course-tab { padding: 8px; }
 }
 
-.academic-app .section-overview > h2 { font-size: 22px; font-weight: 600; }
 .academic-app .academic-disclosure h3 { font-family: var(--font-eb-garamond), serif; font-size: 18px; font-weight: 600; }
 
 /* Sections toolbar, the Tareas pattern: section context left, course actions right, 44px controls aligned on one baseline. */
@@ -115,7 +110,7 @@ fieldset.stack { border: 0; padding: 0; min-width: 0; }
 .academic-app :is(.section-toolbar, .admin-dialog) .field:focus-visible { outline: none; }
 /* The dialog itself is not a control; focus stays on its fields and buttons. */
 .academic-app .admin-dialog:focus, .academic-app .admin-dialog:focus-visible { outline: none; }
-.academic-app .section-name { display: flex; align-items: center; min-height: 44px; font-size: 15px; font-weight: 600; color: var(--text-1); overflow-wrap: anywhere; }
+.academic-app :is(.section-name, .section-current) { display: flex; align-items: center; min-height: 44px; font-size: 15px; font-weight: 600; color: var(--text-1); overflow-wrap: anywhere; }
 .academic-app .section-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-inline-start: auto; }
 .academic-app .section-toolbar-status { margin: 0; font-size: 12px; }
 /* The roster title names the area; the caption keeps the table's accessible name. */
@@ -133,6 +128,23 @@ fieldset.stack { border: 0; padding: 0; min-width: 0; }
 .academic-app .participant-management :is(.participant-identity, .field-label, [role="alert"]) { overflow-wrap: anywhere; }
 .academic-app .participant-management select { margin-top: 6px; }
 .academic-app .participant-pagination { margin-top: 0; }
+/* Read-only roster for students and assistants: one row per person, roles as text chips, no actions. */
+.academic-app .participants-readonly .participants-table :is(td, th) { vertical-align: middle; }
+.academic-app .participants-readonly tbody th { font-weight: 500; color: var(--text-1); }
+.academic-app .participants-readonly thead th:first-child { width: 60%; }
+/* Two short columns fit a 375px screen: no horizontal scroll, long names wrap instead. */
+.academic-app .participants-readonly .data-table { min-width: 0; }
+.academic-app .participant-name { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; overflow-wrap: anywhere; }
+.academic-app .participant-roles { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+/* Role filter: the shared segmented control (Tareas «Agrupar»), 44px touch height; four equal segments on phones. */
+.academic-app .participant-filter-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.academic-app .participant-filter-bar > .hint { margin: 0; }
+.academic-app .participant-filter { min-height: 44px; max-width: 100%; }
+.academic-app .participant-filter .tab-btn { min-height: 38px; }
+@media (max-width: 480px) {
+  .academic-app .participant-filter { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); width: 100%; }
+  .academic-app .participant-filter .tab-btn { padding-inline: 4px; font-size: 12px; }
+}
 @media (max-width: 760px) {
   .academic-app .section-toolbar > * { flex: 1 1 100%; }
   .academic-app .section-field-row > select.field { flex: 1 1 12rem; }

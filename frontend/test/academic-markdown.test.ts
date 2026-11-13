@@ -63,7 +63,8 @@ test('course tabs reflect effective capabilities and keep all links in the curre
     assert.equal(doc.querySelector('a[aria-current="page"]')?.textContent, 'Módulos y material');
     assert.equal([...doc.querySelectorAll('a')].every(a => a.getAttribute('href')!.startsWith(`/courses/${course.id}`)), true);
     const labels = doc.body.textContent!;
-    assert.equal(labels.includes('Secciones'), ['teacher','owner','ownerTeacher'].includes(profile));
+    // Enrolled students and assistants read their roster; administration still depends on `sections`.
+    assert.equal(labels.includes('Secciones'), ['student','assistant','teacher','owner','ownerTeacher'].includes(profile));
     assert.equal(labels.includes('Mis notas'), profile === 'student');
     assert.equal(labels.includes('Libro de notas'), ['teacher','assistant','ownerTeacher'].includes(profile));
     assert.equal(labels.includes('Auditoría'), ['teacher','owner','ownerTeacher'].includes(profile));

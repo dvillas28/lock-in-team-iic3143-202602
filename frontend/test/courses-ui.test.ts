@@ -89,9 +89,11 @@ test('section management preserves staff controls after removing summary',async(
  });
 
 test("course navigation retains each role's destinations with modules active and no summary",()=>{
+ // Enrolled students and assistants read their section roster; without an enrollment nobody gets it.
  const destinations:Record<string,string[]>={
-  student:['modules','quizzes','assignments','grades'],
-  assistant:['modules','quizzes','gradebook'],
+  student:['modules','quizzes','assignments','sections','grades'],
+  assistant:['modules','quizzes','sections','gradebook'],
+  super:['modules','quizzes'],
   teacher:['modules','quizzes','assignments','sections','gradebook','audit'],
   owner:['modules','quizzes','sections','audit'],
   multi:['modules','quizzes','assignments','sections','grades','gradebook','audit'],

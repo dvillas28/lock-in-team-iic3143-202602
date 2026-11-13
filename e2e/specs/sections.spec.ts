@@ -9,7 +9,18 @@ for(const actor of ['AO','T1','AS1','ST1'])test(`E2E-SECTION-001 section scope f
  const items=status(await api.get(`courses/${e.data.courses.C1}/sections`),200).body.items;
  expect(items.map((s:any)=>s.id).sort()).toEqual((owner?[e.data.sections.S1,e.data.sections.S2]:[e.data.sections.S1]).sort());status(await api.get(`sections/${e.data.sections.S2}`),owner?200:404);
  if(['AO','T1'].includes(actor)){await sections(page,e);const picker=sectionPicker(page);if(owner)await expect(picker.locator('option')).toHaveCount(2);else await expect(picker).toHaveCount(0);await expect(page.getByRole('searchbox',{name:'Buscar sección',exact:true})).toHaveCount(0);await activeSection(page,'1');if(!owner)await expect(page.getByRole('button',{name:/^(Configurar|Crear) /})).toHaveCount(0);}
- else{await showMenu(page);await page.getByRole('link',{name:'Mis cursos',exact:true}).click();await expect(page.locator(`main a[href="/courses/${e.data.courses.C1}/modules"]`)).toContainText('Sección 1');await course(page,e.data.courses.C1);await expect(page.getByRole('link',{name:'Secciones y participantes',exact:true})).toHaveCount(0);await expect(page.getByRole('table')).toHaveCount(0);}
+ else{await showMenu(page);await page.getByRole('link',{name:'Mis cursos',exact:true}).click();await expect(page.locator(`main a[href="/courses/${e.data.courses.C1}/modules"]`)).toContainText('Sección 1');await course(page,e.data.courses.C1);
+  // Enrolled students and assistants read their own roster through /participants, never the management list.
+  const reads:string[]=[];page.on('request',r=>{if(r.url().includes('/api/v1/'))reads.push(r.method()+' '+r.url());});
+  const roster=page.waitForResponse(r=>r.url().endsWith(`/sections/${e.data.sections.S1}/participants`));await page.getByRole('navigation',{name:'Curso',exact:true}).getByRole('link',{name:'Secciones y participantes',exact:true}).click();expect((await roster).status()).toBe(200);
+  await expect(page.getByRole('heading',{name:'Participantes',exact:true})).toBeVisible();await expect(sectionPicker(page)).toHaveCount(0);await expect(page.locator('.section-current')).toHaveText('Sección 1');
+  const table=page.getByRole('table',{name:'Participantes de la sección 1',exact:true});await expect(table.getByRole('rowheader').filter({hasText:e.data.actors[actor].name})).toContainText('Tú');await expect(table).not.toContainText('@');await expect(table).not.toContainText('Histórica');
+  await expect(page.locator('main').getByRole('button',{name:/^(Gestionar|Asignar|Configurar|Crear|Revocar)/})).toHaveCount(0);
+  // Local role filter: «Todos» by default; «Docentes» hides the student/assistant's own row without new requests.
+  const filter=page.getByRole('group',{name:'Filtrar por rol',exact:true}),before=reads.length;await expect(filter.getByRole('button',{name:'Todos',exact:true})).toHaveAttribute('aria-pressed','true');
+  await filter.getByRole('button',{name:'Docentes',exact:true}).click();await expect(page.getByRole('table',{name:'Participantes de la sección 1 · Docentes',exact:true}).getByRole('rowheader').filter({hasText:e.data.actors[actor].name})).toHaveCount(0);
+  await filter.getByRole('button',{name:'Todos',exact:true}).click();await expect(table.getByRole('rowheader').filter({hasText:e.data.actors[actor].name})).toHaveCount(1);expect(reads.length).toBe(before);
+  expect(reads.filter(r=>/\/enrollments|\/users(\?|$)/.test(r)||!r.startsWith('GET ')&&!r.includes('/auth/'))).toEqual([]);}
  expect(await securitySnapshot(e)).toEqual(before);
 });
 test('E2E-SECTION-002 new empty section and edit persist without invented teacher / create-edit @regression',async ({e,actorPage})=>{

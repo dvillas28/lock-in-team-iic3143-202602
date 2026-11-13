@@ -74,14 +74,14 @@ for (const kind of ['module'] as const) test(`${kind} keeps pending input, then 
   } finally { await ui.close(); }
 });
 
-test('student section context stays in course detail without a management link or useless open action', async () => {
-  const ui = await mount(h(CourseDetail, { courseId: course.id }), r => Response.json(r.url.endsWith('/sections') ? { items: [section, otherSection] } : course), 'student');
+test('student section context stays read-only: own section roster, no management action or foreign section', async () => {
+  const ui = await mount(h(CourseDetail, { courseId: course.id }), r => Response.json(r.url.endsWith('/participants') ? { items: [] } : r.url.endsWith('/sections') ? { items: [section, otherSection] } : course), 'student');
   try {
-    assert.match(ui.doc.body.textContent!, /Tu secciónSección 1Estudiante/);
-    assert.equal(ui.doc.querySelector('a[href$="/sections"]'), null);
+    assert.equal(ui.doc.querySelector('.section-current')?.textContent, 'Sección 1');
     assert.equal(ui.doc.querySelector('button,form'), null);
     assert.doesNotMatch(ui.doc.body.textContent!, /Capacidad|Secciones autorizadas|Sección 2/);
-    assert.equal(ui.requests.some(r => r.url.endsWith(`/sections/${section.id}`)), false);
+    assert.equal(ui.requests.some(r => r.url.endsWith(`/sections/${section.id}`) || r.url.includes('/enrollments')), false);
+    assert.deepEqual(ui.requests.filter(r => r.url.endsWith('/participants')).map(r => r.url.includes(section.id)), [true]);
   } finally { await ui.close(); }
 });
 

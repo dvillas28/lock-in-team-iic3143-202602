@@ -1,7 +1,7 @@
 "use client";
 import { Plus, Settings2, SlidersHorizontal } from "lucide-react";
-import { roleLabel } from "../../lib/courses/role-label.ts";
 import { ParticipantsPanel } from "./participants-panel.tsx";
+import { SectionParticipantsReadonly } from "./section-participants-readonly.tsx";
 import { SectionForm } from "./section-form.tsx";
 import { CourseForm } from "./course-form.tsx";
 import { AdminDialog } from "./admin-dialog.tsx";
@@ -51,10 +51,8 @@ export function SectionsPanel({ session, slug, user, course, items, management, 
   const searchable = manageable.length > sectionSearchThreshold;
   const term = searchable ? query.trim().toLocaleLowerCase('es') : "";
   const matches = manageable.filter(s => s.code.toLocaleLowerCase('es').includes(term));
-  if (!canManage) return <section className="stack section-overview">
-    <h2 className="serif">{ownItems.length === 1 ? "Tu sección" : "Tus secciones"}</h2>
-    {!ownItems.length ? <EmptyState headingLevel={3} title="No tienes secciones asignadas" message="Cuando te inscriban en una sección de este curso, aparecerá aquí." /> : <ul className="stack section-list card">{ownItems.map(s => <li key={s.id}><div><strong>Sección {s.code}</strong><p className="hint">{user.sectionMemberships.filter(m => m.courseId === course.id && m.sectionId === s.id).map(m => roleLabel(m.role)).join(" · ")}</p></div></li>)}</ul>}
-  </section>;
+  if (!canManage)
+    return <SectionParticipantsReadonly key={`${slug}:${course.id}`} session={session} slug={slug} user={user} course={course} sections={ownItems} />;
 
   const capacity = detail ? <span className="chip tnum">Capacidad: {detail.capacity ?? "Sin límite"}</span>
     : !result.error ? <Skeleton shape="pill" width="7.5rem" /> : null;
