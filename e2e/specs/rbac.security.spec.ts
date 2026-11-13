@@ -90,11 +90,11 @@ for(const {id,actor} of [{id:'E2E-RBAC-009',actor:'TS-SAME'},{id:'E2E-RBAC-010',
  await expect(page.getByRole('link',{name:'Continuar intento',exact:true})).toHaveCount(actor==='TS-SAME'?0:1);
  await expect(page.getByRole('button',{name:'Iniciar nuevo intento',exact:true})).toHaveCount(0);
 });
-test('E2E-RBAC-011 assistant-student uses different own and staff projections / assistant-student @regression',async ({e,actorPage})=>{
+test('E2E-RBAC-011 student and assistant scopes are evaluated per section / assistant-student @regression',async ({e,actorPage})=>{
  const a=await e.graded('AS-ST'),other=await e.attempt('ST1'),page=await actorPage('AS-ST'),api=await e.api('AS-ST');
  const own=status(await api.get(`quiz-attempts/${a.id}`),200).body;expect(own).not.toHaveProperty('grade');expect(JSON.stringify(own)).not.toMatch(/isCorrect|pointsAwarded/);
- const staff=status(await api.get(`quizzes/${e.data.quizzes.Q1}/attempts`),200).body;expect(staff.items.find((r:any)=>r.id===a.id)).toHaveProperty('grade');expect(JSON.stringify(staff)).not.toMatch(/isCorrect|pointsAwarded/);
- status(await api.put(`quiz-attempts/${other.id}/answers`,{answers:[]}),403);
+ const staff=status(await api.get(`quizzes/${e.data.quizzes.Q1}/attempts`),200).body;expect(staff.items.some((r:any)=>r.id===a.id||r.id===other.id)).toBe(false);expect(JSON.stringify(staff)).not.toMatch(/isCorrect|pointsAwarded/);
+ status(await api.put(`quiz-attempts/${other.id}/answers`,{answers:[]}),404);
  await go(page,e.data.courses.C1,'/gradebook');await expect(page.getByRole('heading',{name:'Libro de notas',exact:true})).toBeVisible();await expect(page.getByRole('navigation',{name:'Curso',exact:true})).toBeVisible();
 });
 test('E2E-RBAC-012 revoked teacher cannot retain cursor privilege / teacher-revocation @regression',async ({e,actorPage})=>{

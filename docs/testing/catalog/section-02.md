@@ -18,14 +18,14 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Entrada / operación: `/courses/{C1}/sections`; `listSections; getSection; createSection; updateSection`; [inventario](../audit/API.md).
 - Preparación: resolver variables del manifest; actor de UI hace login real en origen institucional (ANON no); navegar por Link tras login, salvo reload explícito.
 
-1. Crear sección capacidad 0.
-2. Asignar ST1 y ST2 activos.
-3. Consultar sección y participantes.
+1. Crear sección con capacidad 1.
+2. Asignar ST1 como Estudiante (ocupa el único cupo) y ST2 como Ayudante.
+3. Intentar un segundo Estudiante (AS1) y consultar sección y participantes.
 
-- Interfaz esperada: Capacidad 0 visible; asignación vigente no impone cupo automático.
-- API esperada: Enrollments 201/200 según preexistencia; no esperar 409 por cupo.
-- Persistencia / consistencia: Dos roles válidos y capacidad 0.
-- Denegación: Si requisito futuro exige cupo, requiere decisión; no inventarlo aquí.
+- Interfaz esperada: «Cupos de estudiantes: 1» visible; ST1 y ST2 en el listado.
+- API esperada: 201 para ST1 y ST2; 409 `SECTION_FULL` para el segundo Estudiante.
+- Persistencia / consistencia: dos matrículas activas (Estudiante y Ayudante), capacidad 1; el rechazo no escribe.
+- Denegación: la capacidad solo limita Estudiantes ([ADR](../../adr/section-capacity-student-seats.md)).
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
 - Dependencias: F1 entorno/seed listo; [fase F4](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador + comprobación API/SQL; extended (regression incluye smoke; extended incluye regression).

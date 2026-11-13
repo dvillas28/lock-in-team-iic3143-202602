@@ -7,6 +7,10 @@ import type { Session } from "../../lib/auth/session.ts";
 import { useTransientFeedback, type Feedback } from "../use-feedback.ts";
 type MutationMessages = {
   conflict?: {message: string; errors: Record<string,string>};
+  /** Safe messages for domain 409 codes the backend exposes. */
+  codes?: Record<string,string>;
+  /** Domain 409 codes that belong to one field: the message is shown next to it. */
+  codeFields?: Record<string,string>;
   fields?: Record<string,string>;
   onSuccess?: (message: string) => void;
 };
@@ -67,7 +71,8 @@ export function useMutation(session: Session, messages: MutationMessages = {}) {
           return messages.fields?.[name] ? [[name,messages.fields[name]]] : [];
         }));
         const conflict=error.status===409 && (!error.problem.code || ['CONFLICT','COURSE_ALREADY_EXISTS'].includes(error.problem.code)) ? messages.conflict : undefined;
-        setStatus({ busy: false, field: conflict ? Object.keys(conflict.errors)[0] : field, errors: conflict?.errors ?? errors, message: conflict?.message ?? (error.status === 409 ? "Conflicto: revisa el estado antes de cambiar los datos." : error.status === 413 ? "Revisa el tamaño total: JSON máximo 4096 bytes UTF-8. El formulario autorizado se conserva." : error.status === 400 || error.status === 422 ? "Revisa los campos y sus límites. El servidor rechazó los valores." : getRouteFeedback(error).message) });
+        const codeField = error.status === 409 ? messages.codeFields?.[error.problem.code ?? ""] : undefined;
+        setStatus({ busy: false, field: conflict ? Object.keys(conflict.errors)[0] : codeField ?? field, errors: conflict?.errors ?? errors, message: conflict?.message ?? (error.status === 409 ? messages.codes?.[error.problem.code ?? ""] ?? "Conflicto: revisa el estado antes de cambiar los datos." : error.status === 413 ? "Revisa el tamaño total: JSON máximo 4096 bytes UTF-8. El formulario autorizado se conserva." : error.status === 400 || error.status === 422 ? "Revisa los campos y sus límites. El servidor rechazó los valores." : getRouteFeedback(error).message) });
         locked.current = false;
         return;
       }

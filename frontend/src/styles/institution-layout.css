@@ -63,10 +63,6 @@ fieldset.stack { border: 0; padding: 0; min-width: 0; }
 .academic-app .table-scroll { min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
 .academic-app .table-scroll .data-table :is(td, tbody th) { padding-block: 12px; }
 .academic-app .table-scroll:focus-visible { outline-offset: -3px; }
-.academic-app .section-list { gap: 0; }
-.academic-app .section-list > li { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center; gap: 12px; }
-.academic-app .section-list > li:last-child { border: 0; }
-.academic-app .section-list .hint { font-size: 12px; }
 .academic-app .content > .stack > a:first-child { align-self: start; font-size: 13px; color: var(--primary-ink); text-underline-offset: 3px; }
 @media (max-width: 760px) {
   .academic-app .sidebar { position: relative; overflow: visible; }
@@ -94,23 +90,136 @@ fieldset.stack { border: 0; padding: 0; min-width: 0; }
   .course-tab { padding: 8px; }
 }
 
-.academic-app .section-overview > h2 { font-size: 22px; font-weight: 600; }
 .academic-app .academic-disclosure h3 { font-family: var(--font-eb-garamond), serif; font-size: 18px; font-weight: 600; }
 
-/* Section selection stays compact regardless of collection size. */
-.academic-app .section-picker { padding: 16px 20px; display: grid; gap: 12px; }
-.academic-app .section-picker h2 { font-size: 22px; font-weight: 600; }
-.academic-app .section-picker-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
-.academic-app .section-picker .field { margin-top: 6px; }
-.academic-app :is(.section-picker-footer, .section-workspace-meta) { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
-.academic-app :is(.section-picker-footer, .section-workspace-meta) > .hint { margin: 0; font-size: 12px; }
-.academic-app :is(.section-picker-footer, .section-workspace-meta) > details[open] { flex-basis: 100%; }
-.academic-app .section-workspace h3 { font-size: 22px; font-weight: 600; }
+/* Sections toolbar, the Tareas pattern: section context left, course actions right, 44px controls aligned on one baseline. */
+.academic-app .section-toolbar { display: flex; flex-wrap: wrap; align-items: end; gap: 12px 16px; }
+.academic-app .section-toolbar :is(.btn, .field) { min-height: 44px; }
+.academic-app .section-search { display: grid; gap: 4px; flex: 0 1 15rem; margin: 0; }
+.academic-app .section-field { display: grid; gap: 4px; min-width: 0; }
+.academic-app .section-field > .field-label { margin: 0; }
+.academic-app .section-field-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; min-width: 0; }
+.academic-app .section-field-row > select.field { width: auto; min-width: 10rem; max-width: 100%; }
+/* Selects here draw their chevron with tokens, so text, chevron and border keep a fixed rhythm. */
+.academic-app :is(.section-toolbar, .admin-dialog) select.field {
+  appearance: none; padding-inline-end: 40px; text-overflow: ellipsis;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-2) 50%), linear-gradient(135deg, var(--text-2) 50%, transparent 50%);
+  background-position: calc(100% - 20px) 50%, calc(100% - 15px) 50%; background-size: 5px 5px; background-repeat: no-repeat;
+}
+/* `.field:focus` already draws border and ring; the global outline would double it. */
+.academic-app :is(.section-toolbar, .admin-dialog) .field:focus-visible { outline: none; }
+/* The dialog itself is not a control; focus stays on its fields and buttons. */
+.academic-app .admin-dialog:focus, .academic-app .admin-dialog:focus-visible { outline: none; }
+.academic-app :is(.section-name, .section-current) { display: flex; align-items: center; min-height: 44px; font-size: 15px; font-weight: 600; color: var(--text-1); overflow-wrap: anywhere; }
+.academic-app .section-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-inline-start: auto; }
+.academic-app .section-toolbar-status { margin: 0; font-size: 12px; }
+/* The roster title names the area; the caption keeps the table's accessible name. */
+.academic-app .participants-table caption { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+/* Course administration modals reuse `.academic-dialog`; only field rhythm is tightened. */
+.academic-app .admin-dialog form, .academic-app .admin-dialog fieldset.stack { gap: 16px; }
+.academic-app .admin-dialog .stack:has(> .field-label) { gap: 6px; }
+.academic-app .admin-dialog .field-label { margin-bottom: 0; }
+.academic-app .admin-dialog .hint { font-size: 12px; }
+.academic-app .admin-dialog .discard-confirm { margin-top: 16px; }
 .academic-app .participants-table { max-height: min(52dvh, 512px); overflow: auto; overscroll-behavior: contain; }
 .academic-app .participants-table thead th { position: sticky; top: 0; z-index: 1; background: var(--surface); }
 .academic-app .participants-table td { vertical-align: top; }
-.academic-app .participant-management { width: min(440px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; }
-.academic-app .participant-management :is(.participant-identity, .field-label, [role="alert"]) { overflow-wrap: anywhere; }
-.academic-app .participant-management select { margin-top: 6px; }
-.academic-app .participant-pagination { margin-top: 0; }
-@media (max-width: 760px) { .academic-app .section-picker-fields { grid-template-columns: minmax(0, 1fr); } }
+/* «Gestionar participante»: the admin-dialog shell at a narrower width; one person, one field, one destructive step. */
+.academic-app .participant-management { width: min(520px, calc(100vw - 32px)); overscroll-behavior: contain; }
+.academic-app .participant-management :is(.field-label, [role="alert"], .hint) { overflow-wrap: anywhere; }
+.academic-app .management-person { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.academic-app .management-person .avatar { width: 40px; height: 40px; font-size: 14px; }
+.academic-app .management-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--muted); }
+.academic-app .management-facts dt { margin: 0; font-size: 12px; color: var(--text-2); }
+.academic-app .management-facts dd { margin: 2px 0 0; font-size: 14px; font-weight: 500; color: var(--text-1); overflow-wrap: anywhere; }
+.academic-app .management-others { margin: 0; }
+.academic-app .management-actions { flex-wrap: wrap; }
+.academic-app .management-actions > .management-revoke-action { margin-inline-end: auto; }
+.academic-app .management-warning { padding: 14px 16px; border: 1px solid var(--border); border-inline-start: 3px solid var(--danger); border-radius: var(--radius-sm); background: var(--danger-soft); color: var(--text-1); }
+.academic-app .management-warning p { margin: 0; }
+.academic-app .management-warning ul { display: grid; gap: 4px; margin: 10px 0 0; padding-inline-start: 18px; font-size: 13px; color: var(--text-2); }
+@media (max-width: 480px) {
+  .academic-app .management-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .academic-app .management-actions > .btn { flex: 1 1 auto; }
+  /* The destructive action leaves the save row on phones and sits last, full width. */
+  .academic-app .management-actions > .management-revoke-action { order: 1; flex-basis: 100%; margin-inline-end: 0; }
+}
+/* Admin rows remain one enrollment each, including when they reflow into a mobile list. */
+.academic-app .participants-admin-table { scroll-padding-block-start: 44px; }
+.academic-app .participants-admin-table .data-table {
+  min-width: 0;
+  table-layout: fixed;
+}
+.academic-app .participants-admin-table thead th:nth-child(n+2) { width: 7rem; }
+.academic-app .participants-admin-table thead th:nth-child(4) { width: 9rem; }
+.academic-app .participants-admin-table .data-table :is(td, tbody th) { vertical-align: middle; }
+.academic-app .participants-admin-table :is(td, th) { padding-inline: 12px; }
+.academic-app .participants-admin-table :is(thead th:nth-child(4), td:nth-child(4)) { text-align: end; }
+.academic-app .participants-admin-table .participant-identity { display: block; font-weight: 600; }
+.academic-app .participants-admin-table .participant-email { display: block; font-weight: 400; margin-block-start: 2px; }
+.academic-app .participants-admin-table :is(.participant-identity, .participant-email) { overflow-wrap: anywhere; }
+.academic-app .participants-admin-table .btn { padding-inline: 10px; }
+.academic-app .participant-history-note { margin: 0; }
+.academic-app .participant-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.academic-app .participant-pagination p { margin: 0; }
+.academic-app .participant-pagination .btn { padding-inline: 8px; }
+.academic-app .participants-admin :is(.btn, .tab-btn) { touch-action: manipulation; }
+.academic-app .participants-admin-table .btn,
+.academic-app .participant-pagination .btn,
+.academic-app .participants-admin .participants-views .tab-btn { min-height: 44px; }
+.academic-app .participant-pagination [aria-disabled="true"] {
+  opacity: .55;
+  cursor: default;
+  transform: none;
+  border-color: var(--border-strong);
+  color: var(--text-2);
+}
+@media (max-width: 760px) {
+  .academic-app .participants-admin-table { scroll-padding-block-start: 8px; }
+  .academic-app .participants-admin-table .data-table,
+  .academic-app .participants-admin-table tbody { display: block; }
+  .academic-app .participants-admin-table thead {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
+  }
+  .academic-app .participants-admin-table tbody tr {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    border-block-end: 1px solid var(--border);
+  }
+  .academic-app .participants-admin-table tbody tr:last-child { border-block-end: 0; }
+  .academic-app .participants-admin-table .data-table tbody :is(th, td) { padding: 0; border: 0; }
+  .academic-app .participants-admin-table tbody :is(th, td:first-child, td:nth-child(4)) { grid-column: 1 / -1; }
+  .academic-app .participants-admin-table td:nth-child(4) { text-align: start; }
+}
+/* Read-only roster for students and assistants: one row per person, roles as text chips, no actions. */
+.academic-app .participants-readonly .participants-table :is(td, th) { vertical-align: middle; }
+.academic-app .participants-readonly tbody th { font-weight: 500; color: var(--text-1); }
+.academic-app .participants-readonly thead th:first-child { width: 60%; }
+/* Two short columns fit a 375px screen: no horizontal scroll, long names wrap instead. */
+.academic-app .participants-readonly .data-table { min-width: 0; }
+.academic-app .participant-name { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; overflow-wrap: anywhere; }
+.academic-app .participant-roles { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+/* Role filter: the shared segmented control (Tareas «Agrupar»), 44px touch height; four equal segments on phones. */
+.academic-app .participant-filter-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.academic-app .participant-filter-bar > .hint { margin: 0; }
+.academic-app .participant-filter { min-height: 44px; max-width: 100%; }
+.academic-app .participant-filter .tab-btn { min-height: 38px; }
+@media (max-width: 480px) {
+  .academic-app .participant-filter { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); width: 100%; }
+  .academic-app .participant-filter .tab-btn { padding-inline: 4px; font-size: 12px; }
+}
+@media (max-width: 760px) {
+  .academic-app .section-toolbar > * { flex: 1 1 100%; }
+  .academic-app .section-field-row > select.field { flex: 1 1 12rem; }
+  .academic-app .section-actions { margin-inline-start: 0; }
+  .academic-app .section-actions > .btn { flex: 1 1 auto; }
+}

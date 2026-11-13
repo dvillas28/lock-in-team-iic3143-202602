@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import {test} from "node:test";
 import {database,http,login} from "./helpers.mjs";
 import {coursesFixture,request,users,failAudit,restoreAudit} from "./course-fixtures.mjs";
-export const newCourse=()=>({code:"NEW",name:"New course",term:"2026-2",initialSection:{code:"1",capacity:0}});
+export const newCourse=()=>({code:"NEW",name:"New course",term:"2026-2",initialSection:{code:"1",capacity:1}});
 test("US2 course/section creation, immutable server owner, exact validation and atomic last event",async()=>{
  const pool=await database();let app;try{
   const f=await coursesFixture(pool);app=await http();const owner=await login(app,f.env),other=await login(app,f.env,"UC");

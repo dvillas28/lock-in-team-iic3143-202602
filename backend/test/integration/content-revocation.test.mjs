@@ -23,6 +23,7 @@ test('US2 same JWT loses all four links on committed User/Institution/membership
 test('US2 role union: losing teacher retains student publication; another section retains reading',async()=>{
  const pool=await database();let app;try {
   const f=await contentFixture(pool,true);app=await http();const t=await tokens(app,f);
+  await f.add(f.s2,users.owner,'student');
   await f.add(f.s2,users.revoked,'student');
   await pool.query('UPDATE enrollments SET active=false WHERE user_id=$1 AND section_id=$2',[users.revoked,f.s1]);
   for(const path of routes(f))assert.equal((await request(app,t.student,path)).status,200);

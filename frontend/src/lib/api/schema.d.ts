@@ -124,7 +124,7 @@ export interface paths {
         };
         /**
          * Buscar participantes existentes de la institución
-         * @description Reservado a teachers para seleccionar usuarios al gestionar memberships académicas.
+         * @description Reservado a quienes asignan memberships académicas (teacher activo o admin dueño de un curso) para seleccionar usuarios activos de la institución.
          */
         get: operations["searchInstitutionUsers"];
         put?: never;
@@ -251,7 +251,7 @@ export interface paths {
         head?: never;
         /**
          * Actualizar una sección
-         * @description Exige is_admin institucional vigente y dueño del curso. Teacher sin admin no configura secciones.
+         * @description Exige is_admin institucional vigente y dueño del curso. Teacher sin admin no configura secciones. Una capacidad numérica no puede bajar de la actual (409 SECTION_CAPACITY_DECREASE) ni de los estudiantes activos (409 SECTION_CAPACITY_BELOW_ENROLLMENTS); la capacidad cuenta cupos de estudiantes y teachers/assistants no los consumen; null la deja ilimitada.
          */
         patch: operations["updateSection"];
         trace?: never;
@@ -273,13 +273,13 @@ export interface paths {
         };
         /**
          * Listar memberships de una sección autorizada
-         * @description Admin dueño o teacher/assistant activo de esta sección; student no lista participantes.
+         * @description Admin dueño o teacher/assistant activo de esta sección; student no lista participantes. `status` separa las matrículas activas del historial; sin `status` se listan ambas.
          */
         get: operations["listSectionEnrollments"];
         put?: never;
         /**
          * Crear una membership de sección
-         * @description Admin dueño o teacher activo de esta sección. Miembro destinatario provisionado y activo; roles múltiples distintos, historial preservado. Sin privilegios desde JWT o body.
+         * @description Admin dueño (cualquier rol) o teacher activo de esta sección (solo student/assistant; teacher responde 403). Miembro destinatario provisionado y activo. Una matrícula activa por persona y sección. Repetir el mismo rol devuelve la matrícula existente. Otro rol activo responde 409 SECTION_ROLE_ALREADY_ACTIVE. Un student nuevo requiere cupo si la sección tiene capacidad numérica (409 SECTION_FULL, sin escritura ni auditoría).
          */
         post: operations["createSectionEnrollment"];
         delete?: never;
@@ -312,9 +312,37 @@ export interface paths {
         head?: never;
         /**
          * Cambiar rol o desactivar una membership
-         * @description Admin dueño o teacher activo de esta sección. Miembro destinatario provisionado y activo; roles múltiples distintos, historial preservado. Sin privilegios desde JWT o body. Exactamente role o active. Cambio de rol devuelve sucesor (ID puede cambiar). Último teacher se puede revocar; el curso permanece.
+         * @description Admin dueño o teacher activo de esta sección; solo el dueño cambia, revoca o reactiva matrículas teacher o promueve a teacher (403). Miembro destinatario provisionado y activo. Exactamente role o active. Reactivar si ya existe otra matrícula activa responde 409 SECTION_ROLE_ALREADY_ACTIVE. Cambio de rol devuelve sucesor (ID puede cambiar). Nadie revoca ni cambia su propia matrícula teacher (403); revocar o cambiar al último teacher activo responde 409 LAST_SECTION_TEACHER. Cambiar a student o reactivar un student sin cupo responde 409 SECTION_FULL.
          */
         patch: operations["updateSectionEnrollment"];
+        trace?: never;
+    };
+    "/api/v1/institution/{institutionSlug}/sections/{sectionId}/participants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                sectionId: components["parameters"]["SectionId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Listar participantes activos de una sección
+         * @description Roster de solo lectura para cualquier participante activo de la sección y el admin dueño. Incluye solo matrículas activas cuyo User y membership institucional siguen activos. Devuelve una fila por usuario con el rol en un arreglo por compatibilidad. No expone correos, historial, auditoría ni indicadores administrativos. Sección ajena, de otra institución o sin Enrollment activo propio responde 404. La gestión sigue en listSectionEnrollments.
+         */
+        get: operations["listSectionParticipants"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/institution/{institutionSlug}/courses/{courseId}/modules": {
@@ -2234,7 +2262,7 @@ export interface components {
             title: string;
             status: number;
             detail: string | null;
-            /** @description Código seguro de problema. Cuentas añaden INTEGRATION_NOT_CONFIGURED (503), INVITATION_LOGIN_REQUIRED (409), conflictos de edición y recursos temporales depurados (410); no incluir estado global de terceros ni errores crudos de proveedores. */
+            /** @description Código seguro de problema. Cuentas añaden INTEGRATION_NOT_CONFIGURED (503), INVITATION_LOGIN_REQUIRED (409), LAST_SECTION_TEACHER (409), SECTION_CAPACITY_DECREASE (409), SECTION_CAPACITY_BELOW_ENROLLMENTS (409), SECTION_FULL (409), SECTION_ROLE_ALREADY_ACTIVE (409), conflictos de edición y recursos temporales depurados (410); no incluir estado global de terceros ni errores crudos de proveedores. */
             code: string;
             /** Format: uri-reference */
             instance: string | null;
@@ -2356,6 +2384,7 @@ export interface components {
         };
         SectionCreate: {
             code: string;
+            /** @description Entero positivo; null mantiene la capacidad ilimitada. */
             capacity?: number | null;
         };
         CourseCreate: {
@@ -2387,6 +2416,7 @@ export interface components {
             /** Format: uuid */
             readonly courseId: string;
             code: string;
+            /** @description Null es ilimitada. Admite 0 solo en registros previos a la regla de mínimo 1. */
             capacity: number | null;
             /** Format: date-time */
             readonly createdAt: string;
@@ -2396,6 +2426,7 @@ export interface components {
         };
         SectionUpdate: {
             code?: string;
+            /** @description Entero positivo; null mantiene la capacidad ilimitada. */
             capacity?: number | null;
         };
         /** @enum {string} */
@@ -2428,6 +2459,18 @@ export interface components {
         EnrollmentUpdate: {
             role?: components["schemas"]["EnrollmentRole"];
             active?: boolean;
+        };
+        /** @description Proyección mínima de un participante activo; sin correo, historial, auditoría ni indicadores administrativos. */
+        SectionParticipant: {
+            /** Format: uuid */
+            readonly userId: string;
+            name: string;
+            /** @description Rol académico activo del usuario en esta sección, representado como un arreglo para conservar el contrato. Durante la transición, el arreglo también puede contener roles activos previos pendientes de revisión. */
+            roles: components["schemas"]["EnrollmentRole"][];
+        };
+        SectionParticipantListResponse: {
+            /** @description Ordenado por rol principal (teacher, assistant, student), nombre e identificador. */
+            items: components["schemas"]["SectionParticipant"][];
         };
         CourseModule: {
             /** Format: uuid */
@@ -4194,6 +4237,10 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Cantidad máxima de elementos a retornar. */
                 limit?: components["parameters"]["Limit"];
+                /** @description Filtra por vigencia (`active`) o historial revocado (`historical`). El cursor queda ligado al filtro. */
+                status?: "active" | "historical";
+                /** @description Limita las matrículas a la persona indicada dentro de la sección autorizada. El cursor queda ligado a la persona. */
+                userId?: string;
             };
             header?: never;
             path: {
@@ -4318,6 +4365,40 @@ export interface operations {
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableEntity"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    listSectionParticipants: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+                sectionId: components["parameters"]["SectionId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Participantes activos de la sección. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SectionParticipantListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
             500: components["responses"]["InternalError"];
             503: components["responses"]["ServiceUnavailable"];
         };

@@ -1,7 +1,10 @@
 "use client";
-import { roleLabel } from "../../lib/courses/role-label.ts";
+import { Plus, Settings2, SlidersHorizontal } from "lucide-react";
 import { ParticipantsPanel } from "./participants-panel.tsx";
+import { SectionParticipantsReadonly } from "./section-participants-readonly.tsx";
 import { SectionForm } from "./section-form.tsx";
+import { CourseForm } from "./course-form.tsx";
+import { AdminDialog } from "./admin-dialog.tsx";
 import { capabilities } from "../../lib/courses/capabilities.ts";
 import { useId, useState } from "react";
 import type { Session } from "../../lib/auth/session.ts";
@@ -9,8 +12,18 @@ import type { CurrentUser } from "../../lib/auth/validation.ts";
 import type { Course, Section } from "../../lib/courses/validation.ts";
 import { getSection } from "../../lib/api/sections.ts";
 import { EmptyState, ErrorState } from "../route-states.tsx";
+import { Skeleton } from "../skeletons.tsx";
+import { useContentNotice } from "../content/content-notices.tsx";
 import { SectionPending } from "./sections-skeleton.tsx";
 import { useResource } from "./use-resource.ts";
+
+/** Below this many sections the native picker already scans well; the code filter only adds noise. */
+export const sectionSearchThreshold = 8;
+
+/**
+ * One toolbar, as in Tareas: the active section (named once, with its capacity and its own
+ * configuration) on the left, course actions on the right. Forms open as modals, so nothing moves.
+ */
 export function SectionsPanel({ session, slug, user, course, items, management, onSaved }: {
   session: Session;
   slug: string;
@@ -22,53 +35,63 @@ export function SectionsPanel({ session, slug, user, course, items, management, 
 }) {
   const [selected, setSelected] = useState(() => items.find(s => capabilities(user, course, s).manage)?.id ?? "");
   const [query, setQuery] = useState("");
-  const filterId = useId(), pickerId = useId();
-  const canManage = management && capabilities(user, course).sections;
+  const notify = useContentNotice();
+  const showNotice = (message: string) => notify?.(message);
+  const ids = useId();
+  const access = capabilities(user, course);
+  const canManage = management && access.sections;
   const ownItems = items.filter(s => user.sectionMemberships.some(m => m.courseId === course.id && m.sectionId === s.id));
-  const manageable = items.filter(s => capabilities(user, course, s).manage);
+  const manageable = canManage ? items.filter(s => capabilities(user, course, s).manage) : [];
   const active = manageable.find(s => s.id === selected) ?? manageable[0];
-  const matches = manageable.filter(s => s.code.toLocaleLowerCase('es').includes(query.trim().toLocaleLowerCase('es')));
-  if (!canManage) return <section className="stack section-overview">
-    <h2 className="serif">{ownItems.length === 1 ? "Tu sección" : "Tus secciones"}</h2>
-    {!ownItems.length ? <EmptyState headingLevel={3} title="No tienes secciones asignadas" message="Cuando te inscriban en una sección de este curso, aparecerá aquí." /> : <ul className="stack section-list card">{ownItems.map(s => <li key={s.id}><div><strong>Sección {s.code}</strong><p className="hint">{user.sectionMemberships.filter(m => m.courseId === course.id && m.sectionId === s.id).map(m => roleLabel(m.role)).join(" · ")}</p></div></li>)}</ul>}
-  </section>;
-  return <section className="stack section-overview">
-    <div className="section-picker card">
-      <h2 className="serif">Secciones del curso</h2>
-      {!manageable.length ? <EmptyState headingLevel={3} title="No hay secciones para gestionar"
-        message={capabilities(user, course).configure ? "Crea la primera sección desde «Crear sección»." : "Este curso aún no tiene secciones dentro de tu alcance."} /> : <>
-        <div className="section-picker-fields">
-          <label className="field-label" htmlFor={filterId}>Buscar sección<input id={filterId} type="search" className="field" value={query} onInput={event => setQuery(event.currentTarget.value)} placeholder="Código de sección" /></label>
-          <label className="field-label" htmlFor={pickerId}>Sección a gestionar<select id={pickerId} name="managedSection" className="field" value={active?.id ?? ""} onChange={event => { setSelected(event.currentTarget.value); setQuery(""); }}>
-            {active && !matches.some(s => s.id === active.id) && <optgroup label="Sección actual"><option value={active.id}>Sección {active.code}</option></optgroup>}
-            {matches.map(s => <option key={s.id} value={s.id}>Sección {s.code}</option>)}
-          </select></label>
-        </div>
-      </>}
-      <div className="section-picker-footer">
-        {!!manageable.length && <p className="hint" role="status">{query.trim() ? matches.length ? `${matches.length} ${matches.length === 1 ? "coincidencia" : "coincidencias"}. Selecciona una para cambiar de sección.` : "No hay secciones que coincidan. La sección actual se conserva." : `${manageable.length} ${manageable.length === 1 ? 'sección disponible' : 'secciones disponibles'}.`}</p>}
-        {capabilities(user, course).configure && <details className="academic-disclosure"><summary>Crear sección</summary><SectionForm session={session} slug={slug} courseId={course.id} onSaved={onSaved} /></details>}
-      </div>
-    </div>
-    {active && <SelectedSection key={`${active.id}:${active.code}:${active.capacity}`} session={session} slug={slug} courseId={course.id} sectionId={active.id} user={user} course={course} onSaved={onSaved} />}
-  </section>;
+  // Keyed by the section; a configuration save re-reads it in place (previous data stays meanwhile),
+  // so the trigger stays enabled and takes the focus back when the modal closes.
+  const result = useResource(session, `${slug}:${course.id}:${active?.id ?? ""}`,
+    c => active ? getSection(c, slug, active.id, course.id) : Promise.resolve(null));
+  const detail = result.data ?? undefined;
+  const searchable = manageable.length > sectionSearchThreshold;
+  const term = searchable ? query.trim().toLocaleLowerCase('es') : "";
+  const matches = manageable.filter(s => s.code.toLocaleLowerCase('es').includes(term));
+  if (!canManage)
+    return <SectionParticipantsReadonly key={`${slug}:${course.id}`} session={session} slug={slug} user={user} course={course} sections={ownItems} />;
 
-}
-function SelectedSection({ session, slug, courseId, sectionId, user, course, onSaved }: {
-  session: Session;
-  slug: string;
-  courseId: string;
-  sectionId: string;
-  user: CurrentUser;
-  course: Course;
-  onSaved: () => Promise<unknown>;
-}) {
-  const result = useResource(session, `${slug}:${courseId}:${sectionId}`, c => getSection(c, slug, sectionId, courseId));
-  if (result.error)
-    return <ErrorState headingLevel={3} feedback={result.error} onRetry={() => void result.reload()} />;
-  if (!result.data)
-    return <SectionPending />;
+  const capacity = detail ? <span className="chip tnum">Cupos de estudiantes: {detail.capacity ?? "Sin límite"}</span>
+    : !result.error ? <Skeleton shape="pill" width="7.5rem" /> : null;
   return <section className="stack section-workspace">
-    <div className="section-workspace-meta"><p className="hint">Capacidad: {result.data.capacity ?? "Sin límite"}</p>{capabilities(user, course).configure && <details className="academic-disclosure"><summary>Configurar sección</summary><SectionForm key={result.data.code + result.data.capacity} session={session} slug={slug} courseId={courseId} section={result.data} onSaved={onSaved} /></details>}</div><ParticipantsPanel session={session} slug={slug} user={user} course={course} section={result.data} />
+    <div className="section-toolbar">
+      {active && searchable && <label className="field-label section-search" htmlFor={`${ids}-search`}>Buscar sección
+        <input id={`${ids}-search`} type="search" className="field" value={query} onInput={event => setQuery(event.currentTarget.value)}
+          placeholder="Código de sección…" autoComplete="off" spellCheck={false} /></label>}
+      {active && <div className="section-field">
+        {manageable.length > 1 && <label className="field-label" htmlFor={`${ids}-section`}>Sección</label>}
+        <div className="section-field-row">
+          {manageable.length > 1
+            ? <select id={`${ids}-section`} name="managedSection" className="field" value={active.id}
+              onChange={event => { setSelected(event.currentTarget.value); setQuery(""); }}>
+              {!matches.some(s => s.id === active.id) && <optgroup label="Sección actual"><option value={active.id}>Sección {active.code}</option></optgroup>}
+              {matches.map(s => <option key={s.id} value={s.id}>Sección {s.code}</option>)}
+            </select>
+            : <p className="section-name">Sección {active.code}</p>}
+          {capacity}
+          {access.configure && <AdminDialog key={active.id} label="Configurar sección" title={`Configurar sección ${active.code}`}
+            icon={<SlidersHorizontal size={16} aria-hidden="true" />} disabled={!detail} onDone={showNotice}>
+            {dialog => detail && <SectionForm key={detail.id + detail.code + detail.capacity} session={session} slug={slug} courseId={course.id} section={detail} onSaved={async () => { await onSaved(); await result.reload(); }} dialog={dialog} />}
+          </AdminDialog>}
+        </div>
+      </div>}
+      {access.configure && <div className="section-actions">
+        <AdminDialog label="Configurar curso" title="Configurar curso" icon={<Settings2 size={16} aria-hidden="true" />} onDone={showNotice}>
+          {dialog => <CourseForm key={course.id + course.code + course.name + course.term} session={session} slug={slug} course={course} onSaved={onSaved} dialog={dialog} />}
+        </AdminDialog>
+        <AdminDialog label="Crear sección" title="Crear sección" icon={<Plus size={16} aria-hidden="true" />} primary onDone={showNotice}>
+          {dialog => <SectionForm session={session} slug={slug} courseId={course.id} onSaved={onSaved} dialog={dialog} />}
+        </AdminDialog>
+      </div>}
+    </div>
+    {active && searchable && <p className="hint section-toolbar-status" role="status">{term ? matches.length ? `${matches.length} ${matches.length === 1 ? "coincidencia" : "coincidencias"}. Selecciona una para cambiar de sección.` : "No hay secciones que coincidan. La sección actual se conserva." : `${manageable.length} secciones disponibles.`}</p>}
+    {!active ? <EmptyState headingLevel={2} title="No hay secciones para gestionar"
+      message={access.configure ? "Crea la primera sección desde «Crear sección»." : "Este curso aún no tiene secciones dentro de tu alcance."} />
+      : result.error ? <ErrorState headingLevel={2} feedback={result.error} onRetry={() => void result.reload()} />
+        : !detail ? <SectionPending />
+          : <ParticipantsPanel session={session} slug={slug} user={user} course={course} section={detail} />}
   </section>;
 }

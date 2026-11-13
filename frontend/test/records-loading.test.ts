@@ -49,12 +49,15 @@ const generic = /Cargando contenido|Espera un momento/;
 
 test("Secciones renders one neutral skeleton in the route and the page, the same for every role and tenant", async () => {
   const fallback = route(`/courses/${course.id}/sections`);
+  assert.deepEqual([...fallback.querySelectorAll("h1")].map(e => e.textContent), ["Secciones y participantes"]);
   assert.deepEqual(statuses(fallback), ["Cargando secciones…"]);
   const shapes = new Set<string>();
   for (const [profile, slug] of [["student", "uc"], ["assistant", "uc"], ["teacher", "uc"], ["owner", "uc"], ["teacher", "utfsm"]]) {
     const ui = await mount(h(CourseDetail, { courseId: course.id }), never, profile, slug);
     try {
-      assert.equal(ui.doc.querySelector("h1"), null, "the title depends on the role");
+      // Static title for every role, as in Módulos, Quizzes and Tareas; only course data are shapes.
+      assert.deepEqual([...ui.doc.querySelectorAll("h1")].map(e => e.textContent), ["Secciones y participantes"]);
+      assert.ok(ui.doc.querySelector("h1")!.closest('[aria-hidden="true"]') === null, "the title is announced");
       assert.deepEqual(statuses(ui.doc), ["Cargando secciones…"]);
       assert.equal(ui.doc.querySelector(".academic-workspace")!.querySelector("a, button, input, select, textarea, label, [tabindex], nav, details"), null);
       assert.doesNotMatch(ui.doc.body.textContent!, generic);
@@ -65,7 +68,7 @@ test("Secciones renders one neutral skeleton in the route and the page, the same
   assert.equal([...shapes][0], shape(fallback), "route and page draw the same composition");
 });
 
-test("a managed section and its participants load under the real picker and keep the roster header while paging", async () => {
+test("a managed section and its participants load under the real section bar and keep the roster header while paging", async () => {
   const detail = (r: Request) => /\/sections\/[^/]+$/.test(path(r));
   const roster = (r: Request) => r.url.includes("/enrollments");
   const sectionGate = gate(detail, () => Response.json(section));
@@ -74,20 +77,21 @@ test("a managed section and its participants load under the real picker and keep
   const ui = await mount(h(CourseDetail, { courseId: course.id }), r => detail(r) ? sectionGate.reply(r) : roster(r) ? rosterGate.reply(r) : r.url.endsWith("/sections") ? Response.json({ items: [section] }) : Response.json(course));
   try {
     assert.equal(ui.doc.querySelector("h1")?.textContent, "Secciones y participantes");
-    assert.ok(ui.doc.querySelector('select[name="managedSection"]'), "the picker is real");
+    assert.equal(ui.doc.querySelector(".section-toolbar .section-name")?.textContent, "Sección 1", "the section context is real");
+    assert.equal(ui.doc.querySelector(".section-toolbar .skeleton-pill")?.getAttribute("aria-hidden"), "true", "only capacity waits");
     assert.deepEqual(statuses(ui.doc).filter(s => s!.startsWith("Cargando")), ["Cargando sección…"]);
     assert.equal(ui.doc.querySelector(".skeleton-region")!.querySelector("button, input, select, details, a"), null);
     await ui.settle(() => sectionGate.release());
     const panel = ui.doc.querySelector('section[aria-label="Participantes"]')!;
-    assert.match(panel.querySelector("h3")!.textContent!, /Sección 1/);
-    assertRows(panel, "Cargando participantes…", "Matrículas activas e históricas", ["Persona", "Rol", "Estado", "Acciones"]);
+    assert.equal(panel.querySelector("h2")!.textContent, "Participantes");
+    assertRows(panel, "Cargando participantes…", "Matrículas activas", ["Persona", "Rol", "Estado", "Acciones"]);
     assert.doesNotMatch(ui.doc.body.textContent!, generic);
     await ui.settle(() => rosterGate.release());
     assert.equal(ui.doc.querySelector(".skeleton, .skeleton-region, .skeleton-rows"), null);
     rosterGate.hold(); cursor = null;
-    await ui.click("Más matrículas");
-    assertRows(ui.doc.querySelector('section[aria-label="Participantes"]')!, "Cargando participantes…", "Matrículas activas e históricas", ["Persona"]);
-    assert.ok([...ui.doc.querySelectorAll("button")].some(b => b.textContent === "Primera página"), "pagination stays");
+    await ui.click("Siguiente");
+    assertRows(ui.doc.querySelector('section[aria-label="Participantes"]')!, "Cargando participantes…", "Matrículas activas", ["Persona", "Rol", "Estado", "Acciones"]);
+    assert.ok([...ui.doc.querySelectorAll("button")].some(b => b.textContent === "Anterior"), "pagination stays");
     await ui.settle(() => rosterGate.release());
     assert.equal(ui.doc.querySelector(".skeleton-rows"), null);
   } finally { await ui.close(); }

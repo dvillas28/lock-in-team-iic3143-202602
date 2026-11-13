@@ -39,8 +39,25 @@ test('section management preserves staff controls after removing summary',async(
   try{
    assert.equal(ui.doc.querySelector('h1')?.textContent,'Secciones y participantes');
    assert.equal(ui.doc.querySelector('#course-overview-title'),null);
-   assert.match(ui.doc.body.textContent!,/Organiza las secciones del curso y sus participantes/);
-   assert.ok(ui.doc.querySelector('select[name="managedSection"]'));
+   assert.doesNotMatch(ui.doc.body.textContent!,/Organiza las secciones del curso/);
+   assert.equal(ui.doc.querySelector('.page-heading .section-label')?.textContent,`${course.code} · ${course.term}`);
+   assert.equal(ui.doc.querySelector('.page-heading .hint')?.textContent,course.name);
+   // One section: the bar names it and shows its capacity; no picker, counter or search is drawn.
+   assert.equal(ui.doc.querySelector('.section-toolbar .section-name')?.textContent,'Sección 1');
+   assert.match(ui.doc.querySelector('.section-toolbar .chip')!.textContent!,/^Cupos de estudiantes: /);
+   // The section is named once; the roster below is titled «Participantes», never repeating it.
+   assert.deepEqual([...ui.doc.querySelectorAll('h2')].filter(h=>!h.closest('dialog')).map(h=>h.textContent),['Participantes']);
+   // Owner actions open modals (Crear sección is the primary one); their forms carry no duplicate heading.
+   const triggers=[...ui.doc.querySelectorAll<HTMLButtonElement>('.section-toolbar button[aria-haspopup="dialog"]')].map(b=>b.textContent);
+   assert.deepEqual(triggers,profile==='teacher'?[]:['Configurar sección','Configurar curso','Crear sección']);
+   if(profile!=='teacher'){
+    assert.equal(ui.doc.querySelector('.section-actions > .btn-primary')?.textContent,'Crear sección');
+    for(const name of ['Configurar curso','Crear sección','Configurar sección']){const form=ui.doc.querySelector(`dialog form[aria-label="${name}"]`)!;assert.ok(form,name);assert.equal(form.querySelector('h2,h3'),null,name);assert.ok([...form.querySelectorAll('button')].some(b=>b.textContent==='Cancelar'),name);}
+   }
+   // The section bar draws no picker or code filter; the assignment dialog keeps its own person search.
+   assert.equal(ui.doc.querySelector('select[name="managedSection"], .section-toolbar input[type="search"]'),null);
+   assert.doesNotMatch(ui.doc.body.textContent!,/secciones? disponibles?/);
+   assert.equal(!!ui.doc.querySelector('form[aria-label="Crear sección"]'),profile!=='teacher');
    assert.equal(!!ui.doc.querySelector('form[aria-label="Configurar curso"]'),profile!=='teacher');
    assert.equal(ui.requests.filter(r=>r.url.includes('/enrollments')).length,1);
   }finally{await ui.close();}
@@ -72,9 +89,11 @@ test('section management preserves staff controls after removing summary',async(
  });
 
 test("course navigation retains each role's destinations with modules active and no summary",()=>{
+ // Enrolled students and assistants read their section roster; without an enrollment nobody gets it.
  const destinations:Record<string,string[]>={
-  student:['modules','quizzes','assignments','grades'],
-  assistant:['modules','quizzes','gradebook'],
+  student:['modules','quizzes','assignments','sections','grades'],
+  assistant:['modules','quizzes','sections','gradebook'],
+  super:['modules','quizzes'],
   teacher:['modules','quizzes','assignments','sections','gradebook','audit'],
   owner:['modules','quizzes','sections','audit'],
   multi:['modules','quizzes','assignments','sections','grades','gradebook','audit'],

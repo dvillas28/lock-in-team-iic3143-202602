@@ -13,10 +13,10 @@ test("DTO validation checks UUID, owner, relation and malformed lists",()=>{
  assert.throws(()=>v.section(section,id(99))); assert.throws(()=>v.courseList({}));
  assert.throws(()=>v.course({...course,id:id(11)},course.id));
 });
-test("forms trim Unicode, preserve null/zero and reject empty PATCH",()=>{
+test("forms trim Unicode, keep null as unlimited, reject capacity below 1 and empty PATCH",()=>{
  assert.equal(v.text(" 😀 ",1,"name"),"😀"); assert.throws(()=>v.text("😀😀",1,"name"));
- assert.equal(v.capacity(""),null);assert.equal(v.capacity("0"),0);assert.equal(v.capacity("2147483647"),2147483647);
- for(const x of ["-1","1.5","2147483648","bad"])assert.throws(()=>v.capacity(x));
+ assert.equal(v.capacity(""),null);assert.equal(v.capacity("1"),1);assert.equal(v.capacity("2147483647"),2147483647);
+ for(const x of ["0","-1","1.5","2147483648","bad"])assert.throws(()=>v.capacity(x));
  assert.throws(()=>v.changed({code:"x"},{code:"x"}));assert.deepEqual(v.changed({code:"y"},{code:"x"}),{code:"y"});
 });
 test("capabilities require active admin, confirmed ownership and contextual teacher",()=>{
@@ -24,6 +24,7 @@ test("capabilities require active admin, confirmed ownership and contextual teac
   const u=user(p),c=capabilities(u,course,section);
   assert.equal(c.configure,["owner","ownerTeacher"].includes(p));assert.equal(c.manage,["owner","ownerTeacher","foreign","teacher","multi"].includes(p));
   assert.equal(c.search,["ownerTeacher","foreign","teacher","multi"].includes(p));
+  assert.equal(c.teachers,["owner","ownerTeacher"].includes(p),"only the admin owner manages teacher enrollments");
   assert.equal(capabilities(u,undefined).configure,false);
   assert.equal(capabilities(u,{id:course.id,code:course.code,name:course.name,term:course.term}).configure,false);
  }

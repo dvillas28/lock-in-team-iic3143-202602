@@ -19,7 +19,7 @@ export async function coursesFixture(pool) {
  const add=async(section,user,role,tenant=tenants.uc)=>{
   const id=randomUUID();await pool.query("INSERT INTO enrollments(id,institution_id,section_id,user_id,role) VALUES($1,$2,$3,$4,$5)",[id,tenant,section,user,role]);return id;
  };
- const teacher=await add(s1,users.owner,"teacher");await add(s1,users.owner,"student");await add(s1,users.other,"assistant");await add(s3,users.owner,"teacher");
+ const teacher=await add(s1,users.owner,"teacher");await add(s1,users.other,"assistant");await add(s3,users.owner,"teacher");
  return {env,tenants,own,other,foreign,s1,s2,s3,s4,teacher,add};
 }
 export async function request(app,token,path,method="GET",body) {

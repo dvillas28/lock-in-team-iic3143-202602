@@ -6,24 +6,24 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 
 <a id="e2e-enroll-011"></a>
 
-## E2E-ENROLL-011 — Cambio hacia rol activo existente
+## E2E-ENROLL-011 — Reactivación rechazada cuando hay sucesor activo
 
 - Módulo / flujo: ENROLL; [FL-ENROLL-02](../audit/FLOWS.md#fl-enroll-02).
 - Requisito: CU-04; RF10–12/25/26; RNF2/3; [fuente normativa](../../deliveries/2/03-use-cases-and-requirements.md).
 - Evidencia: [enrollments.service.ts](../../../backend/src/enrollments/enrollments.service.ts); [participant-search.service.ts](../../../backend/src/institutions/participant-search.service.ts); [participants-panel.tsx](../../../frontend/src/components/courses/participants-panel.tsx); [enrollment-form.tsx](../../../frontend/src/components/courses/enrollment-form.tsx).
-- Objetivo: Cambio hacia rol activo existente; verificar las aserciones siguientes, sin inferir éxito solo por carga.
+- Objetivo: Reactivación rechazada cuando hay sucesor activo; verificar las aserciones siguientes, sin inferir éxito solo por carga.
 - Prioridad / criticidad: P1 / Alta; categorías: idempotencia,multirol.
 - Rol / institución: T1; UC por defecto, UTFSM en escenarios cruzados según pasos.
 - Precondiciones / fixtures: WRITE; [diccionario](../E2E_TEST_DATA.md); manifest validado y namespace exclusivo.
 - Entrada / operación: `/courses/{C1}/sections`; `listSectionEnrollments; createSectionEnrollment; updateSectionEnrollment`; [inventario](../audit/API.md).
 - Preparación: resolver variables del manifest; actor de UI hace login real en origen institucional (ANON no); navegar por Link tras login, salvo reload explícito.
 
-1. Preparar ST2 student+assistant S1.
-2. Cambiar student a assistant.
-3. Recorrer historial.
+1. Preparar ST2 como estudiante en S1.
+2. Cambiar su rol a ayudante e intentar reactivar la matrícula original.
+3. Revisar Activas e Historial.
 
-- Interfaz esperada: Reutiliza assistant activo; student histórico; sin tercer rol duplicado.
-- API esperada: 200 retorna enrollment assistant existente.
+- Interfaz esperada: Ayudante figura en Activas y Estudiante en Historial.
+- API esperada: El cambio devuelve 200 y la reactivación devuelve 409 SECTION_ROLE_ALREADY_ACTIVE.
 - Persistencia / consistencia: Un assistant activo, un student revocado y un evento de cambio.
 - Denegación: No violar unicidad activa.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
@@ -60,26 +60,26 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 
 <a id="e2e-enroll-013"></a>
 
-## E2E-ENROLL-013 — Autorrevocación último teacher permitido
+## E2E-ENROLL-013 — Autorrevocación docente y último teacher bloqueados
 
 - Módulo / flujo: ENROLL; [FL-ENROLL-02](../audit/FLOWS.md#fl-enroll-02).
 - Requisito: CU-04; RF10–12/25/26; RNF2/3; [fuente normativa](../../deliveries/2/03-use-cases-and-requirements.md).
 - Evidencia: [enrollments.service.ts](../../../backend/src/enrollments/enrollments.service.ts); [participant-search.service.ts](../../../backend/src/institutions/participant-search.service.ts); [participants-panel.tsx](../../../frontend/src/components/courses/participants-panel.tsx); [enrollment-form.tsx](../../../frontend/src/components/courses/enrollment-form.tsx).
-- Objetivo: Autorrevocación último teacher permitido; verificar las aserciones siguientes, sin inferir éxito solo por carga.
+- Objetivo: Autorrevocación docente y último teacher bloqueados; verificar las aserciones siguientes, sin inferir éxito solo por carga.
 - Prioridad / criticidad: P0 / Crítica; categorías: authz,regresión.
 - Rol / institución: T1; UC por defecto, UTFSM en escenarios cruzados según pasos.
 - Precondiciones / fixtures: REVOKE; [diccionario](../E2E_TEST_DATA.md); manifest validado y namespace exclusivo.
 - Entrada / operación: `/courses/{C1}/sections`; `listSectionEnrollments; createSectionEnrollment; updateSectionEnrollment`; [inventario](../audit/API.md).
 - Preparación: resolver variables del manifest; actor de UI hace login real en origen institucional (ANON no); navegar por Link tras login, salvo reload explícito.
 
-1. T1 teacher único S1 abre gestión propia.
-2. Revoca teacher y vuelve al foco.
-3. Intenta editar contenido/participantes.
+1. T1 teacher único S1 abre gestión: su fila docente no ofrece acciones.
+2. T1 intenta revocarse o cambiar su rol por API.
+3. AO (dueño) intenta revocar o degradar al último teacher por API y UI.
 
-- Interfaz esperada: Se retiran acciones; curso e historia permanecen; no bloqueo mínimo docente inventado.
-- API esperada: PATCH autorizado 200; futuras escrituras 403/404 según scope residual.
-- Persistencia / consistencia: Enrollment histórico; no borrado del curso.
-- Denegación: No usar UI vieja después de auto-revocación.
+- Interfaz esperada: Fila propia «Sin acciones»; AO ve aviso de que la sección debe conservar un docente.
+- API esperada: autorrevocación 403; último teacher 409 `LAST_SECTION_TEACHER`.
+- Persistencia / consistencia: matrícula docente sigue activa; sin eventos ni cambios parciales.
+- Denegación: T1 conserva acceso; ningún cambio de rol elude la protección.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
 - Dependencias: F1 entorno/seed listo; [fase F4](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador + comprobación API/SQL; regression (regression incluye smoke; extended incluye regression).

@@ -6,7 +6,7 @@ import {runtimeDatabase} from './helpers.mjs';
 import audit from '../../dist/audit/audit.service.js';
 import {database,http} from './helpers.mjs';
 import {attemptFixture,tokens,request,path,users,state} from './attempt-fixtures.mjs';
-test('live permissions, historical section, accumulated roles, teacher and tenant isolation',async()=>{
+test('live permissions, historical section, independent roles, teacher and tenant isolation',async()=>{
  const pool=await database();let app;try{
   const f=await attemptFixture(pool);app=await http();const t=await tokens(app,f),id=await f.create(),p=path(id);
   await f.add(f.s1,users.inactive,'assistant');
@@ -23,16 +23,17 @@ test('live permissions, historical section, accumulated roles, teacher and tenan
   assert.equal((await request(app,t.owner,p+'/cancel','POST')).status,204);
  }finally{if(app)await app.close();await pool.end();}
 });
-test('same JWT revalidates user, institution, membership and enrollment; assistant+student allowed, teacher+student blocked',async()=>{
+test('same JWT revalidates user, institution, membership and enrollment; student history and teacher start blocked',async()=>{
  const pool=await database();let app;try{
   const f=await attemptFixture(pool);app=await http();const t=await tokens(app,f),id=await f.create(),p=path(id);
-  await f.add(f.s1,users.revoked,'assistant');assert.ok(!('grade' in (await request(app,t.student,p)).body));
+  await f.add(f.s2,users.revoked,'assistant');assert.ok(!('grade' in (await request(app,t.student,p)).body));
   for(const [table,column,idValue,status] of [['users','id',users.revoked,401],['institutions','id',f.tenants.uc,404],['institution_memberships','user_id',users.revoked,404],['enrollments','user_id',users.revoked,404]]){
    await pool.query(`UPDATE ${table} SET active=false WHERE ${column}=$1`,[idValue]);const before=await state(pool);
    for(const [suffix,method,body,key] of [['','GET'],['/answers','PUT',{answers:[]}],['/cancel','POST'],['/submit','POST',undefined,'revoked']])
     assert.equal((await request(app,t.student,p+suffix,method,body,key)).status,status);
    assert.deepEqual(await state(pool),before);await pool.query(`UPDATE ${table} SET active=true WHERE ${column}=$1`,[idValue]);
   }
+  await pool.query("UPDATE enrollments SET active=false WHERE user_id=$1 AND section_id=$2 AND active",[users.revoked,f.s1]);
   await f.add(f.s1,users.revoked,'teacher');
   assert.ok([403,404].includes((await request(app,t.student,p+'/answers','PUT',{answers:[]})).status));
   assert.equal((await request(app,t.student,f.startPath,'POST',undefined,'blocked')).status,403);

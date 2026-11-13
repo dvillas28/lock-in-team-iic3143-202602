@@ -19,9 +19,9 @@ Flags y roles se consultan en /me y se revalidan en API en cada operación.
 | AS1 | assistant S1 | Seguimiento sin pauta ni escritura |
 | ST1 | student S1 | Propietario de intentos/notas, elegible para Q1 |
 | ST2 | student S2; sin S1 en tests asignación | Identidad ajena y target inscripción |
-| TS-SAME | teacher+student S1; no admin | Acceso a pauta impide rendir Q1 |
+| TS-SAME | teacher S1; no admin | Acceso a pauta impide rendir Q1 |
 | TS-CROSS | teacher S2+student S1; no admin | Puede rendir Q1 S1 sin acceder pauta |
-| AS-ST | assistant+student S1 | Proyección propia vs staff |
+| AS-ST | assistant S2, student S1 | Proyección propia vs staff |
 | MULTI | User global: studentS1 UC, teacherFS1 UTFSM | Cambios de tenant/roles sin duplicar User |
 | MEMBER | Membership UC sin roles/flags | Vacío de cursos; delegación futura |
 | NONE | User activo sin memberships | Login global válido, contexto404 |

@@ -17,6 +17,7 @@ test('writes revalidate tenant, active teacher, historical sections and revoked 
  assert.equal((await request(app,t.teacher,path+'/gradebook/publications','POST',body,'scope')).status,404);
  await pool.query('UPDATE institution_memberships SET active=false WHERE institution_id=$1 AND user_id=$2',[f.tenants.uc,users.revoked]);
  assert.equal((await request(app,t.owner,path+'/gradebook/publications','POST',body,'revoked-recipient')).status,200);
+ await f.add(f.s1,users.other,"assistant");
  const mixed=await request(app,t.teacher,path+'/gradebook');assert.equal(mixed.status,200);assert.equal(mixed.body.items.length,2);
  assert.equal((await request(app,t.teacher,path+'/gradebook/publications','POST',{gradeItemIds:[f.items.second],sectionIds:[f.s2],studentIds:[users.revoked]},'mixed-teacher')).status,200);
  }finally{if(app)await app.close();await pool.end();}

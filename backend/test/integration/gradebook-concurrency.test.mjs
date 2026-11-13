@@ -35,7 +35,7 @@ test('revoked teacher while waiting Course is rejected after the lock, no public
  await blocker.query('BEGIN');await blocker.query('SELECT id FROM courses WHERE id=$1 FOR UPDATE',[f.own]);
  await blocker.query("UPDATE enrollments SET active=false WHERE user_id=$1 AND role='teacher'",[users.other]);
  const pending=request(app,t.teacher,coursePath(f)+'/gradebook/publications','POST',selection(f),'revoked');await waitForLock(pool,'SELECT * FROM public.courses%');
- await blocker.query('COMMIT');assert.equal((await pending).status,403);assert.equal((await pool.query('SELECT * FROM grade_publications')).rowCount,0);
+ await blocker.query('COMMIT');assert.equal((await pending).status,404);assert.equal((await pool.query('SELECT * FROM grade_publications')).rowCount,0);
  }finally{await blocker.query('ROLLBACK');blocker.release();if(app)await app.close();await pool.end();}
 });
 for(const ownFirst of [true,false])test(`same actor key across courses, ${ownFirst?'own':'other'} first, receipt barrier`,async()=>{

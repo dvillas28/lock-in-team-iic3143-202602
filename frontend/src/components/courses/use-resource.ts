@@ -37,5 +37,10 @@ export function useResource<T>(session: Session, resource: string, load: (client
     }
   }, [session, resource, preserve, timeoutMs]);
   useEffect(() => { void reload(); const counter = sequence; return () => { counter.current++; }; }, [reload]);
-  return { ...(state.key === resource ? state : {}), reload };
+  function updateData(update: (data: T) => T) {
+    setState(previous => previous.key === resource && previous.data !== undefined
+      ? { ...previous, data: update(previous.data) }
+      : previous);
+  }
+  return { ...(state.key === resource ? state : {}), reload, updateData };
 }

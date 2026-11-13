@@ -72,12 +72,12 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Entrada / operación: `/courses/{C1}/sections`; `listSectionEnrollments; createSectionEnrollment; updateSectionEnrollment`; [inventario](../audit/API.md).
 - Preparación: resolver variables del manifest; actor de UI hace login real en origen institucional (ANON no); navegar por Link tras login, salvo reload explícito.
 
-1. Cargar 21+ matrículas incluyendo históricas.
-2. Avanzar/Primera página.
+1. Cargar 21+ matrículas activas y 21+ históricas.
+2. Avanzar/Primera página en «Activas» y en «Historial».
 3. Revocar docente y pedir cursor anterior.
 
-- Interfaz esperada: Orden sin omisiones/duplicados; tras revocación se limpia alcance.
-- API esperada: limit default20 max100; cursor inválido/limit0/101 400; acceso revalidado.
+- Interfaz esperada: cada vista pagina por separado, sin omisiones/duplicados; tras revocación se limpia alcance.
+- API esperada: limit default20 max100; `status=active|historical` filtra y sin `status` lista todo; cursor inválido/limit0/101/status inválido 400; acceso revalidado.
 - Persistencia / consistencia: Sin cambios excepto revocación de fixture.
 - Denegación: No historial de otra sección/tenant.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
@@ -111,3 +111,30 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Dependencias: F1 entorno/seed listo; [fase F4](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador real; extended (regression incluye smoke; extended incluye regression).
 - Estado del test: Validado localmente; ver [evidencia](../execution/VALIDATION.md).
+
+<a id="e2e-enroll-020"></a>
+
+## E2E-ENROLL-020 — Teacher no gestiona matrículas docentes
+
+- Módulo / flujo: ENROLL; [FL-ENROLL-02](../audit/FLOWS.md#fl-enroll-02).
+- Requisito: CU-04; RF10–12/25/26; RNF2/3; [fuente normativa](../../deliveries/2/03-use-cases-and-requirements.md).
+- Evidencia: [enrollments.service.ts](../../../backend/src/enrollments/enrollments.service.ts); [participants-panel.tsx](../../../frontend/src/components/courses/participants-panel.tsx).
+- Objetivo: Solo el admin dueño asigna, cambia, revoca o reactiva teachers; teacher gestiona students/assistants.
+- Prioridad / criticidad: P0 / Crítica; categorías: authz,regresión.
+- Rol / institución: T1 y AO; UC.
+- Precondiciones / fixtures: WRITE; [diccionario](../E2E_TEST_DATA.md); manifest validado y namespace exclusivo.
+- Entrada / operación: `/courses/{C1}/sections`; `createSectionEnrollment; updateSectionEnrollment`; [inventario](../audit/API.md).
+- Preparación: resolver variables del manifest; login real en origen institucional.
+
+1. T1 asigna teacher, promueve ST2 y revoca/degrada a AO por API.
+2. AO asigna y revoca a ST2 como teacher; T1 intenta reactivarlo.
+3. T1 abre la gestión de S1.
+
+- Interfaz esperada: fila teacher ajena sin acciones; student propio gestionable.
+- API esperada: T1 403 en todas las operaciones docentes; AO 201/200.
+- Persistencia / consistencia: denegaciones sin cambios ni eventos; historial conservado.
+- Denegación: `is_admin` sin ownership no amplía permisos docentes.
+- Limpieza: cerrar contextos; datos históricos quedan en namespace del test.
+- Dependencias: F1 entorno/seed listo; [fase F4](../E2E_MASTER_PLAN.md#fases); fixture independiente.
+- Nivel / suite: E2E navegador + comprobación API/SQL; regression.
+- Estado del test: Pendiente de validación en GitHub Actions.

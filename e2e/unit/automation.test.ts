@@ -17,7 +17,7 @@ test('named selections derive all variants from authoritative catalogue without 
  const projects=['chromium','firefox','webkit'];
  assert.equal(suiteIds('smoke').length,22);
  assert.equal(expectedKeys('smoke',projects).length,158);
- assert.equal(expectedKeys('extended',projects).length,525);
+ assert.equal(expectedKeys('extended',projects).length,527);
  assert.equal(selection(['--suite=smoke']).suite,'smoke');
  assert.throws(()=>selection(['--suite=smoke','--grep','AUTH']));
  assert.throws(()=>selection(['--suite=invalid']));

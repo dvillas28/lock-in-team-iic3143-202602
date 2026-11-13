@@ -18,7 +18,7 @@ test('E2E-AUDIT-004 cursor cannot preserve grade access after teaching revocatio
  const api=await e.api('AO'),path=`courses/${e.data.courses.C1}/audit-events`,page=await actorPage('AO');
  const first=status(await api.get(path+'?resourceType=grade&limit=1'),200).body;expect(first.items).toHaveLength(1);expect(first.nextCursor).toBeTruthy();
  await go(page,e.data.courses.C1,'/audit');
- status(await api.patch(`sections/${e.data.sections.S1}/enrollments/${e.id('enrollment/S1/AO/teacher')}`,{active:false}),200);
+ status(await api.patch(`sections/${e.data.sections.S1}/enrollments/${e.id('enrollment/S1/AO/teacher')}`,{active:false}),403);await e.pool.query('UPDATE enrollments SET active=false WHERE id=$1',[e.id('enrollment/S1/AO/teacher')]);
  const next=status(await api.get(path+'?resourceType=grade&limit=1&cursor='+encodeURIComponent(first.nextCursor)),200).body;expect(next.items).toEqual([]);
  const refreshed=page.waitForResponse(r=>r.url().endsWith('/me'));await page.evaluate(()=>window.dispatchEvent(new Event('focus')));await refreshed;
  const visible=await pages(api,path);expect(visible.every(r=>r.resourceType!=='grade')).toBe(true);expect(visible.length).toBeGreaterThan(0);

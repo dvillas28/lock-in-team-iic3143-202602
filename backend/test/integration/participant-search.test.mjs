@@ -21,7 +21,12 @@ test('institutional participant search: runtime HTTP, literal text, pagination, 
   assert.equal(second.status,200); assert.notEqual(second.body.items[0].id,response.data.items[0].id);
   assert.equal(second.body.hasMore,false); assert.equal(second.body.nextCursor,null);
   assert.equal((await search(`search=another&cursor=${cursor}`)).status,400);
+  // users.other is an assistant in s1 and the admin owner of course B: without the admin flag it is an assistant only.
+  await pool.query('UPDATE institution_memberships SET is_admin=false WHERE institution_id=$1 AND user_id=$2',[f.tenants.uc,users.other]);
   assert.equal((await search('search=demo',assistant)).status,403);
+  await pool.query('UPDATE institution_memberships SET is_admin=true WHERE institution_id=$1 AND user_id=$2',[f.tenants.uc,users.other]);
+  assert.equal((await search('search=demo',assistant)).status,200,'the admin owner of a course searches without a teacher role');
+  await pool.query('UPDATE enrollments SET active=false WHERE section_id=$1 AND user_id=$2 AND active',[f.s1,users.other]);
   await f.add(f.s1,users.other,'teacher');
   assert.equal((await search(`search=demo&cursor=${cursor}`,assistant)).status,400);
   assert.equal((await search('search=no-match')).body.items.length,0);
@@ -30,7 +35,10 @@ test('institutional participant search: runtime HTTP, literal text, pagination, 
   assert.equal((await search('search=%25_')).body.items.length,1);
   assert.equal((await search('search=%C3%81LVARO')).body.items[0].id,users.other);
   assert.equal((await search('search=%27%20OR%201%3D1--')).body.items.length,0);
+  // In UTFSM the owner owns no course: admin and superadmin flags alone never open the search.
+  await pool.query('UPDATE institution_memberships SET is_admin=true,is_super_admin=true WHERE institution_id=$1 AND user_id=$2',[f.tenants.utfsm,users.owner]);
   assert.equal((await search('search=demo',owner,'utfsm')).status,403);
+  await pool.query('UPDATE institution_memberships SET is_admin=false,is_super_admin=false WHERE institution_id=$1 AND user_id=$2',[f.tenants.utfsm,users.owner]);
   await f.add(f.s4,users.owner,'teacher',f.tenants.utfsm);
   const foreign = await search('search=demo',owner,'utfsm'); assert.equal(foreign.status,200);
   assert.ok(foreign.body.items.some(u=>u.id===users.foreign)); assert.ok(!foreign.body.items.some(u=>u.id===users.other));
@@ -40,9 +48,14 @@ test('institutional participant search: runtime HTTP, literal text, pagination, 
   await pool.query('UPDATE users SET active=true WHERE id=$1',[users.other]);
   await pool.query('UPDATE institution_memberships SET active=false WHERE institution_id=$1 AND user_id=$2',[f.tenants.uc,users.other]);
   assert.equal((await search('search=%25_')).body.items.length,0);
-  // Owner is both admin and superadmin; neither flag substitutes for an active teacher role.
+  // Without a teacher role, the admin owner of a course still searches: it assigns in its own sections.
   await pool.query("UPDATE enrollments SET active=false WHERE institution_id=$1 AND user_id=$2 AND role='teacher'",[f.tenants.uc,users.owner]);
+  const ownerOnly = await search('search=demo');
+  assert.equal(ownerOnly.status,200); assert.ok(!ownerOnly.body.items.some(u=>u.id===users.foreign||u.id===users.inactive),'still tenant-scoped and active-only');
+  // Course ownership needs the current admin flag; superadmin alone does not substitute for it.
+  await pool.query('UPDATE institution_memberships SET is_admin=false WHERE institution_id=$1 AND user_id=$2',[f.tenants.uc,users.owner]);
   assert.equal((await search('search=demo')).status,403);
+  await pool.query('UPDATE institution_memberships SET is_admin=true WHERE institution_id=$1 AND user_id=$2',[f.tenants.uc,users.owner]);
   await f.add(f.s1,users.owner,'teacher');
   await pool.query('UPDATE institution_memberships SET active=false WHERE institution_id=$1 AND user_id=$2',[f.tenants.uc,users.owner]);
   assert.equal((await search('search=demo')).status,404);

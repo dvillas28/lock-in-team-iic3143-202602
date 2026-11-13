@@ -8,6 +8,7 @@ test('historical section scope, owner teacher, admin revocation and immutable sa
  const pool=await database();let app;try{
   const f=await gradebookFixture(pool);app=await http();const t=await tokens(app,f),path=coursePath(f)+'/audit-events';
   await pool.query("UPDATE enrollments SET active=false WHERE user_id=$1 AND section_id=$2 AND role='teacher'",[users.other,f.s2]);
+  await pool.query("UPDATE enrollments SET active=false WHERE user_id=$1 AND section_id=$2 AND active",[users.inactive,f.s2]);
   await f.add(f.s2,users.inactive,'teacher');
   await pool.query("UPDATE enrollments SET active=false WHERE user_id=$1 AND role='student'",[users.revoked]);
   const events=[];
@@ -45,6 +46,7 @@ test('historical section scope, owner teacher, admin revocation and immutable sa
   const r=await request(app,foreign,foreignPath);assert.equal(r.status,200);assert.deepEqual(r.body.items.map(e=>e.id),[foreignId]);
   assert.equal((await request(app,foreign,foreignPath+'?cursor='+cursor)).status,400);
   assert.deepEqual(await snapshot(pool),before);assert.deepEqual((await pool.query('SELECT * FROM quiz_attempts ORDER BY id')).rows,attempts);
+  await f.add(f.s2,users.owner,"student");
   await pool.query("UPDATE enrollments SET active=false WHERE user_id=$1 AND role='teacher'",[users.owner]);
   assert.equal((await request(app,t.owner,path)).status,403);
  }finally{if(app)await app.close();await pool.end();}

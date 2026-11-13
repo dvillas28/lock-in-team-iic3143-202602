@@ -27,6 +27,7 @@ import {MaterialsService} from "./materials/materials.service";
 import {MaterialsController} from "./materials/materials.controller";
 import { EnrollmentsService } from "./enrollments/enrollments.service";
 import { EnrollmentsController } from "./enrollments/enrollments.controller";
+import { SectionParticipantsController } from "./enrollments/section-participants.controller";
 import { AuditController } from "./audit/audit.controller";
 import { AuditService } from "./audit/audit.service";
 import { MembershipAdminService } from "./institutions/membership-admin.service";
@@ -52,6 +53,6 @@ import { InstitutionsController } from "./institutions/institutions.controller";
     // shortcut: memory per instance; coordinate quotas before running multiple instances.
     ThrottlerModule.forRoot([{limit: 5, ttl: 60000, blockDuration: 60000}])],
   providers: [SubmissionsService,AssignmentReviewService,AssignmentsService,AcademicFilesService,AcademicStorage,AccountsService,AccountIntegrations,InvitationsService,ImportsService,ParticipantSearchService, GradebookService, AttemptsService, QuizzesService, ModulesService, MaterialsService, EnrollmentsService, AuditService, MembershipAdminService, CoursesService, SectionsService, DatabaseService, AuthService, InstitutionsService, {provide: APP_GUARD, useClass: AuthGuard}, {provide: APP_GUARD, useClass: TenantGuard}],
-  controllers: [SubmissionsController,AssignmentsController,AcademicFilesController,AccountsController,InvitationsController,InvitationActivationController,ImportsController,GradebookController, AttemptsController, QuizzesController, ModulesController, MaterialsController, EnrollmentsController, AuditController, MembershipAdminController, CoursesController, SectionsController, HealthController, AuthController, InstitutionsController],
+  controllers: [SubmissionsController,AssignmentsController,AcademicFilesController,AccountsController,InvitationsController,InvitationActivationController,ImportsController,GradebookController, AttemptsController, QuizzesController, ModulesController, MaterialsController, EnrollmentsController, SectionParticipantsController, AuditController, MembershipAdminController, CoursesController, SectionsController, HealthController, AuthController, InstitutionsController],
 })
 export class AppModule {}

@@ -48,8 +48,10 @@ test("configuration PATCH sends only changed fields and immutable ownership neve
  });try{
  await ui.submit('form[aria-label="Configurar curso"]',{name:'Nuevo nombre'});assert.deepEqual(await ui.requests.find(r=>r.method==='PATCH')!.json(),{name:'Nuevo nombre'});
  await ui.submit('form[aria-label="Configurar curso"]');assert.match(ui.doc.body.textContent!,/No hay cambios/);assert.equal(ui.requests.filter(r=>r.method==='PATCH').length,1);
- await ui.select('select[name="managedSection"]',section.id);await ui.submit('form[aria-label="Configurar sección"]',{capacity:'0'});assert.deepEqual(await ui.requests.filter(r=>r.method==='PATCH')[1].json(),{capacity:0});
- assert.match(ui.doc.body.textContent!,/Capacidad: 0/);
+ assert.equal(ui.doc.querySelector('select[name="managedSection"]'),null,'one section needs no picker');await ui.submit('form[aria-label="Configurar sección"]',{capacity:'0'});assert.equal(ui.requests.filter(r=>r.method==='PATCH').length,1,'zero never leaves the form');
+ assert.match(ui.doc.querySelector('form[aria-label="Configurar sección"] .field-error')!.textContent!,/mayor o igual a 1/);
+ await ui.submit('form[aria-label="Configurar sección"]',{capacity:'5'});assert.deepEqual(await ui.requests.filter(r=>r.method==='PATCH')[1].json(),{capacity:5});
+ assert.equal(ui.doc.querySelector('.section-toolbar .chip')!.textContent,'Cupos de estudiantes: 5');
  }finally{await ui.close();}
 });
 test("invalid inputs announce associated errors and never send a mutation",async()=>{

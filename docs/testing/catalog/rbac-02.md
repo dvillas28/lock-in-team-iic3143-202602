@@ -87,19 +87,19 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 
 <a id="e2e-rbac-009"></a>
 
-## E2E-RBAC-009 — Teacher más student con acceso a pauta no rinde
+## E2E-RBAC-009 — Docente de la sección no rinde como estudiante
 
 - Módulo / flujo: RBAC; [FL-RBAC-02](../audit/FLOWS.md#fl-rbac-02).
 - Requisito: CU-04/08/13/15/16; RF11/25/27/29; RNF2; [fuente normativa](../../deliveries/2/03-use-cases-and-requirements.md).
 - Evidencia: [course-access.ts](../../../backend/src/courses/course-access.ts); [quiz-access.ts](../../../backend/src/quizzes/quiz-access.ts); [gradebook-access.ts](../../../backend/src/gradebook/gradebook-access.ts).
-- Objetivo: Teacher más student con acceso a pauta no rinde; verificar las aserciones siguientes, sin inferir éxito solo por carga.
+- Objetivo: Docente de la sección no rinde como estudiante; verificar las aserciones siguientes, sin inferir éxito solo por carga.
 - Prioridad / criticidad: P0 / Crítica; categorías: multirol,seguridad.
 - Rol / institución: TS-SAME; UC por defecto, UTFSM en escenarios cruzados según pasos.
 - Precondiciones / fixtures: BASE; [diccionario](../E2E_TEST_DATA.md); manifest validado y namespace exclusivo.
 - Entrada / operación: `/courses/{C1}/quizzes/{Q1}; /attempts/{A1}`; `getQuizAuthoringView; startQuizAttempt; getQuizAttempt; listQuizAttempts`; [inventario](../audit/API.md).
 - Preparación: resolver variables del manifest; actor de UI hace login real en origen institucional (ANON no); navegar por Link tras login, salvo reload explícito.
 
-1. Login con teacher+student S1.
+1. Login como docente de S1.
 2. Abrir Q1/pauta.
 3. Intentar start Q1 S1 por API.
 

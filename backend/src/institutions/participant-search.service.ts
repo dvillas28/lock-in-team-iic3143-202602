@@ -9,10 +9,13 @@ export class ParticipantSearchService {
 
   async search(actor: string, slug: string, query: Record<string, unknown>) {
     return this.database.withInstitution(actor, slug, async (db, member) => {
-      const teacher = await db.query(`SELECT 1 FROM public.enrollments
-        WHERE institution_id=$1 AND user_id=$2 AND role='teacher' AND active LIMIT 1`,
-      [member.institution_id, actor]);
-      requirePermission(teacher.rows.length > 0);
+      // Searching serves who may assign: an active teacher, or the admin owner of a course of this
+      // institution (assigns in its own sections without a teacher enrollment). Admin flags alone never qualify.
+      const assigner = await db.query(`SELECT 1 FROM public.enrollments
+        WHERE institution_id=$1 AND user_id=$2 AND role='teacher' AND active
+        UNION ALL SELECT 1 FROM public.courses WHERE institution_id=$1 AND created_by=$2 AND $3::boolean LIMIT 1`,
+      [member.institution_id, actor, member.is_admin]);
+      requirePermission(assigner.rows.length > 0);
       // The existing contract has no search maximum; SQL parameters treat input literally.
       const search = text(query.search, 2147483647);
       const p = page(query, JSON.stringify(['users', member.institution_id, actor, search.toLowerCase()]), ['search']);

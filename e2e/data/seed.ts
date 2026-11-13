@@ -81,8 +81,8 @@ async function seedClient(db: import('pg').PoolClient, namespace: string, passwo
     const memberships: [string,string,string,string][] = [
       ['uc','S1','AO','teacher'],['uc','S1','T1','teacher'],['uc','S2','T2','teacher'],['uc','S1','AS1','assistant'],
       ['uc','S1','ST1','student'],['uc','S2','ST2','student'],['uc','S1','MULTI','student'],
-      ['uc','S1','TS-SAME','teacher'],['uc','S1','TS-SAME','student'],['uc','S2','TS-CROSS','teacher'],['uc','S1','TS-CROSS','student'],
-      ['uc','S1','AS-ST','assistant'],['uc','S1','AS-ST','student'],['uc','S21','AO','teacher'],['uc','S21','T1','teacher'],
+      ['uc','S1','TS-SAME','teacher'],['uc','S2','TS-CROSS','teacher'],['uc','S1','TS-CROSS','student'],
+      ['uc','S2','AS-ST','assistant'],['uc','S1','AS-ST','student'],['uc','S21','AO','teacher'],['uc','S21','T1','teacher'],
       ['uc','S3','AX','teacher'],['uc','SEMPTY','AO','teacher'],['uc','SEMPTY','T1','teacher'],['uc','SEMPTY','ST1','student'],
       ['uc','SOWNERST','AO-ST','student'],['uc','SOWNERST','T1','teacher'],
       ['utfsm','FS1','FAO','teacher'],['utfsm','FS1','FT1','teacher'],['utfsm','FS1','FAS1','assistant'],

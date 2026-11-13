@@ -1,0 +1,38 @@
+/api/v1/institution/{institutionSlug}/sections/{sectionId}/participants:
+  parameters:
+  - $ref: ../components/parameters.yaml#/InstitutionSlug
+  - $ref: ../components/parameters.yaml#/SectionId
+  get:
+    tags:
+    - Enrollments
+    operationId: listSectionParticipants
+    x-permissions: "Membership activa; dueño admin o Enrollment activo propio (teacher, assistant o student) en esta sección. Solo lectura."
+    summary: Listar participantes activos de una sección
+    description: Roster de solo lectura para cualquier participante activo de la sección
+      y el admin dueño. Incluye solo matrículas activas cuyo User y membership institucional
+      siguen activos. Devuelve una fila por usuario con el rol en un arreglo por
+      compatibilidad. No expone correos, historial,
+      auditoría ni indicadores administrativos. Sección ajena, de otra institución o
+      sin Enrollment activo propio responde 404. La gestión sigue en listSectionEnrollments.
+    responses:
+      '200':
+        description: Participantes activos de la sección.
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/sections.yaml#/SectionParticipantListResponse
+        headers:
+          Cache-Control:
+            schema:
+              type: string
+              const: no-store
+      '400':
+        $ref: ../components/responses.yaml#/BadRequest
+      '401':
+        $ref: ../components/responses.yaml#/Unauthorized
+      '404':
+        $ref: ../components/responses.yaml#/NotFound
+      '500':
+        $ref: ../components/responses.yaml#/InternalError
+      '503':
+        $ref: ../components/responses.yaml#/ServiceUnavailable

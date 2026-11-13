@@ -15,14 +15,16 @@ Estado efectivo por ficha en[el ledger](../execution/VALIDATION.md). Las variant
 | [E2E-ENROLL-006 — Paginación y búsqueda tardía](enroll-02.md#e2e-enroll-006) | FL-ENROLL-01 | P1 | regression | B |
 | [E2E-ENROLL-007 — Asignar participante existente y persistir](enroll-02.md#e2e-enroll-007) | FL-ENROLL-02 | P1 | regression | B |
 | [E2E-ENROLL-008 — Asignación duplicada es idempotente](enroll-02.md#e2e-enroll-008) | FL-ENROLL-02 | P1 | regression | M |
-| [E2E-ENROLL-009 — Roles acumulados distintos](enroll-02.md#e2e-enroll-009) | FL-ENROLL-02 | P0 | regression | B |
+| [E2E-ENROLL-009 — Segundo rol activo rechazado](enroll-02.md#e2e-enroll-009) | FL-ENROLL-02 | P0 | regression | B |
 | [E2E-ENROLL-010 — Cambio de rol conserva predecesor histórico](enroll-02.md#e2e-enroll-010) | FL-ENROLL-02 | P1 | regression | B |
-| [E2E-ENROLL-011 — Cambio hacia rol activo existente](enroll-03.md#e2e-enroll-011) | FL-ENROLL-02 | P1 | regression | M |
+| [E2E-ENROLL-011 — Reactivación rechazada cuando hay sucesor activo](enroll-03.md#e2e-enroll-011) | FL-ENROLL-02 | P1 | regression | M |
 | [E2E-ENROLL-012 — Revocar mediante confirmación](enroll-03.md#e2e-enroll-012) | FL-ENROLL-02 | P0 | regression | B |
-| [E2E-ENROLL-013 — Autorrevocación último teacher permitido](enroll-03.md#e2e-enroll-013) | FL-ENROLL-02 | P0 | regression | M |
+| [E2E-ENROLL-013 — Autorrevocación docente y último teacher bloqueados](enroll-03.md#e2e-enroll-013) | FL-ENROLL-02 | P0 | regression | M |
 | [E2E-ENROLL-014 — Reactivar matrícula por API sin UI](enroll-03.md#e2e-enroll-014) | FL-ENROLL-02 | P1 | regression | M |
 | [E2E-ENROLL-015 — Payload estricto y rol inválido](enroll-03.md#e2e-enroll-015) | FL-ENROLL-02 | P2 | regression | M |
 | [E2E-ENROLL-016 — Rol en matrícula inactiva y no-op](enroll-04.md#e2e-enroll-016) | FL-ENROLL-02 | P2 | regression | M |
 | [E2E-ENROLL-017 — Dos asignaciones concurrentes mismo rol](enroll-04.md#e2e-enroll-017) | FL-ENROLL-02 | P1 | extended | M |
 | [E2E-ENROLL-018 — Páginas de historial y actor revocado](enroll-04.md#e2e-enroll-018) | FL-ENROLL-02 | P1 | regression | M |
 | [E2E-ENROLL-019 — Diálogo y PATCH pendiente al cambiar sección](enroll-04.md#e2e-enroll-019) | FL-ENROLL-02 | P0 | extended | B |
+| [E2E-ENROLL-020 — Teacher no gestiona matrículas docentes](enroll-04.md#e2e-enroll-020) | FL-ENROLL-02 | P0 | regression | M |
+| [E2E-ENROLL-021 — Roster mínimo de participantes activos](enroll-05.md#e2e-enroll-021) | FL-ENROLL-03 | P0 | regression | H |

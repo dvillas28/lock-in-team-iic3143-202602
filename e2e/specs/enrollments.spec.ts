@@ -1,7 +1,7 @@
 import {test,expect} from '../fixtures/test.ts';
 import {status} from '../helpers/api.ts';
 import {course} from '../helpers/browser.ts';
-import {sections,disclose,search,selectPerson,assign,participant,focus,extraPeople} from '../helpers/management.ts';
+import {activeSection,sections,sectionPicker,search,selectPerson,assign,assignment,result,results,chosen,participant,focus,extraPeople,rosterView} from '../helpers/management.ts';
 import {pages,securitySnapshot} from '../helpers/security.ts';
 import type {Environment} from '../fixtures/environment.ts';
 const prepare=async(e:Environment,role='student')=>status(await (await e.api('T1')).post(`sections/${e.data.sections.S1}/enrollments`,{userId:e.data.actors.ST2.id,role}),201).body;
@@ -9,38 +9,42 @@ const manage=async(page:import('@playwright/test').Page,id:string)=>{await parti
 
 for(const variant of ['name','uppercase-email','unicode'])test(`E2E-ENROLL-001 search identity literally by name email and Unicode / ${variant} @regression`,async ({e,actorPage})=>{
  const page=await actorPage('T1');await sections(page,e);const before=await securitySnapshot(e),q=variant==='name'?'ST2':variant==='uppercase-email'?e.data.actors.ST2.email.toUpperCase():'José';
- await search(page,q);await page.getByRole('button',{name:e.data.actors.ST2.name+' · '+e.data.actors.ST2.email,exact:true}).click();await expect(page.getByRole('form',{name:'Asignar rol',exact:true}).getByRole('status')).toContainText(e.data.actors.ST2.email);
+ await search(page,q);await result(page,e.data.actors.ST2.name,e.data.actors.ST2.email).click();await expect(chosen(page)).toContainText(e.data.actors.ST2.email);
  const api=await e.api('T1'),rows=status(await api.get('users?search='+encodeURIComponent(q)),200).body.items;expect(rows.some((r:any)=>r.id===e.data.actors.ST2.id)).toBe(true);expect(rows.some((r:any)=>r.id===e.data.actors.FST1.id)).toBe(false);expect(await securitySnapshot(e)).toEqual(before);
 });
 test('E2E-ENROLL-002 blank search makes no request and no-match recovers / empty-search @regression',async ({e,actorPage})=>{
  const page=await actorPage('T1');await sections(page,e);let gets=0;page.on('request',r=>{if(r.url().includes('/users?'))gets++;});const api=await e.api('T1'),before=await securitySnapshot(e);
- await search(page,'   ');await expect(page.getByRole('status').filter({hasText:'Escribe un nombre o correo'})).toBeVisible();expect(gets).toBe(0);status(await api.get('users'),400);status(await api.get('users?search='),400);
- await search(page,'InexistenteE2E');await expect(page.getByRole('status').filter({hasText:'Sin coincidencias.'})).toBeVisible();expect(status(await api.get('users?search=InexistenteE2E'),200).body.items).toEqual([]);
- await selectPerson(page,e);await expect(page.getByRole('button',{name:'Asignar rol',exact:true})).toBeEnabled();expect(await securitySnapshot(e)).toEqual(before);
+ await search(page,'   ');await expect(page.getByRole('dialog').getByText('Escribe al menos 2 caracteres',{exact:false})).toBeVisible();expect(gets).toBe(0);status(await api.get('users'),400);status(await api.get('users?search='),400);
+ await search(page,'InexistenteE2E');await expect(page.getByRole('dialog').getByRole('status').filter({hasText:'No hay personas activas que coincidan'})).toBeVisible();expect(status(await api.get('users?search=InexistenteE2E'),200).body.items).toEqual([]);
+ await selectPerson(page,e);await expect((await assignment(page)).getByRole('button',{name:'Asignar participante',exact:true})).toBeEnabled();expect(await securitySnapshot(e)).toEqual(before);
 });
 for(const [variant,literal] of [['percent','%'],['underscore','_'],['quote',"'"],['sql-text',"' OR 1=1 --"]])test(`E2E-ENROLL-003 special search characters stay literal / ${variant} @extended`,async ({e,actorPage})=>{
  const name='Literal '+literal+' user';await e.pool.query('UPDATE users SET name=$1 WHERE id=$2',[name,e.data.actors.MEMBER.id]);const page=await actorPage('T1');await sections(page,e);const before=await securitySnapshot(e),api=await e.api('T1');
- const rows=status(await api.get('users?search='+encodeURIComponent(literal)),200).body.items;expect(rows.map((r:any)=>r.id)).toEqual([e.data.actors.MEMBER.id]);await search(page,literal);await expect(page.locator('.search-result-list button')).toHaveText([name+' · '+e.data.actors.MEMBER.email]);await search(page,'ST2');await expect(page.locator('.search-result-list')).toContainText(e.data.actors.ST2.email);expect(await securitySnapshot(e)).toEqual(before);
+ const rows=status(await api.get('users?search='+encodeURIComponent(literal)),200).body.items;expect(rows.map((r:any)=>r.id)).toEqual([e.data.actors.MEMBER.id]);await search(page,literal);await expect(results(page).locator('.assignment-result strong')).toHaveText([name]);await expect(results(page)).toContainText(e.data.actors.MEMBER.email);await search(page,'ST2');await expect(results(page)).toContainText(e.data.actors.ST2.email);expect(await securitySnapshot(e)).toEqual(before);
 });
 test('E2E-ENROLL-004 paginated directory contains only active institution members / directory @regression',async ({e,actorPage})=>{
  await extraPeople(e);const page=await actorPage('T1');await sections(page,e);const api=await e.api('T1'),before=await securitySnapshot(e);
  const expected=(await e.pool.query('SELECT u.id FROM users u JOIN institution_memberships m ON m.user_id=u.id WHERE m.institution_id=$1 AND m.active AND u.active',[e.data.tenants.uc])).rows.map(r=>r.id).sort(),all=await pages(api,'users?search=E2E');expect(all.map(r=>r.id).sort()).toEqual(expected);
- await search(page,'E2E');const visible:string[]=[];await expect(page.locator('.search-result-list')).toBeVisible();
- for(let i=0;i<5;i++){visible.push(...await page.locator('.search-result-list button').allTextContents());const more=page.getByRole('button',{name:'Más personas',exact:true});if(!await more.isVisible())break;const next=page.waitForResponse(r=>r.url().includes('/users?')&&r.url().includes('cursor='));await more.click();const response=await next;expect(response.status()).toBe(200);const body=await response.json();await expect(page.locator('.search-result-list')).toContainText(body.items[0].email);}
+ await search(page,'E2E');await expect(results(page)).toBeVisible();
+ // Pages append to one list: load them all, then read each person once.
+ for(let i=0;i<5;i++){const more=page.getByRole('button',{name:'Mostrar más personas',exact:true});if(!await more.isVisible())break;const next=page.waitForResponse(r=>r.url().includes('/users?')&&r.url().includes('cursor='));await more.click();const response=await next;expect(response.status()).toBe(200);const body=await response.json();await expect(results(page)).toContainText(body.items[0].email);}
+ const visible=await results(page).locator('.assignment-result').allTextContents();
  expect(visible).toHaveLength(expected.length);expect(new Set(visible).size).toBe(expected.length);for(const actor of ['INACTIVE','REVOKED','FST1'])expect(visible.some(s=>s.includes(e.data.actors[actor].email))).toBe(false);expect(await securitySnapshot(e)).toEqual(before);
 });
-for(const actor of ['SA','AO-ONLY','AS1','ST1'])test(`E2E-ENROLL-005 directory permission requires teaching somewhere in institution / ${actor} @regression`,async ({e,actorPage})=>{
- const page=await actorPage(actor),api=await e.api(actor),before=await securitySnapshot(e);status(await api.get('users?search=E2E'),403);status(await (await e.api('T2')).get('users?search=E2E'),200);
- if(actor==='AO-ONLY'){await sections(page,e,e.data.sections.SOWNER,e.data.courses.COWNER);await disclose(page,'Asignar participante');await expect(page.getByLabel('UUID de persona existente',{exact:true})).toBeVisible();await expect(page.getByRole('form',{name:'Buscar participantes',exact:true})).toHaveCount(0);}
- else{await expect(page.getByRole('form',{name:'Buscar participantes',exact:true})).toHaveCount(0);}
+for(const actor of ['SA','AO-ONLY','AS1','ST1'])test(`E2E-ENROLL-005 directory permission requires teaching or owning a course in the institution / ${actor} @regression`,async ({e,actorPage})=>{
+ // The admin owner assigns in its own sections without a teacher role, so it searches; admin flags alone never do.
+ const page=await actorPage(actor),api=await e.api(actor),before=await securitySnapshot(e);status(await api.get('users?search=E2E'),actor==='AO-ONLY'?200:403);status(await (await e.api('T2')).get('users?search=E2E'),200);
+ if(actor==='AO-ONLY'){await sections(page,e,e.data.sections.SOWNER,e.data.courses.COWNER);await search(page,'E2E');await expect(results(page)).toBeVisible();await expect(page.getByLabel('UUID de persona existente',{exact:true})).toHaveCount(0);}
+ else{await expect(page.getByRole('button',{name:'Asignar participante',exact:true})).toHaveCount(0);}
  expect(await securitySnapshot(e)).toEqual(before);
 });
-test('E2E-ENROLL-006 pagination preserves selection and newer search discards late results / pagination-late @regression',async ({e,actorPage})=>{
- await extraPeople(e);const page=await actorPage('T1');await sections(page,e);await search(page,'E2E');await page.getByRole('button',{name:e.data.actors.ST2.name+' · '+e.data.actors.ST2.email,exact:true}).click();
- const selected=page.getByRole('form',{name:'Asignar rol',exact:true}).getByRole('status'),next=page.waitForResponse(r=>r.url().includes('/users?')&&r.url().includes('cursor='));await page.getByRole('button',{name:'Más personas',exact:true}).click();expect((await next).status()).toBe(200);await expect(selected).toContainText(e.data.actors.ST2.email);
+test('E2E-ENROLL-006 pagination keeps loaded results selectable and newer search discards late results / pagination-late @regression',async ({e,actorPage})=>{
+ await extraPeople(e);const page=await actorPage('T1');await sections(page,e);await search(page,'E2E');
+ const next=page.waitForResponse(r=>r.url().includes('/users?')&&r.url().includes('cursor='));await page.getByRole('button',{name:'Mostrar más personas',exact:true}).click();expect((await next).status()).toBe(200);
+ await result(page,e.data.actors.ST2.name,e.data.actors.ST2.email).click();await expect(chosen(page)).toContainText(e.data.actors.ST2.email);
  let release!:()=>void,entered!:()=>void;const gate=new Promise<void>(r=>release=r),started=new Promise<void>(r=>entered=r);const before=await securitySnapshot(e);
  await page.route('**/users?**',async route=>{if(new URL(route.request().url()).searchParams.get('search')!=='MEMBER'){await route.continue();return;}const response=await route.fetch();expect(response.status()).toBe(200);entered();await gate;await route.fulfill({response}).catch(()=>{});});
- try{await search(page,'MEMBER');await started;await search(page,e.data.actors.ST1.email);await expect(page.locator('.search-result-list')).toContainText(e.data.actors.ST1.email);release();await expect(page.locator('.search-result-list button')).toHaveCount(1);await expect(page.locator('.search-result-list')).not.toContainText(e.data.actors.MEMBER.email);await expect(selected).toHaveText('Selecciona una persona de los resultados.');expect(await securitySnapshot(e)).toEqual(before);}finally{release();}
+ try{await search(page,'MEMBER');await started;await search(page,e.data.actors.ST1.email);await expect(results(page)).toContainText(e.data.actors.ST1.email);release();await expect(results(page).locator('.assignment-result')).toHaveCount(1);await expect(results(page)).not.toContainText(e.data.actors.MEMBER.email);await expect(chosen(page)).toHaveCount(0);expect(await securitySnapshot(e)).toEqual(before);}finally{release();}
 });
 test('E2E-ENROLL-007 UI assignment persists and a new student session sees scope / assign @regression',async ({e,actorPage})=>{
  const page=await actorPage('T1');await sections(page,e);const response=page.waitForResponse(r=>r.url().endsWith(`/sections/${e.data.sections.S1}/enrollments`)&&r.request().method()==='POST');await assign(page,e);const r=await response;expect(r.status()).toBe(201);const row=await r.json();expect(r.headers().location).toContain(row.id);await expect(participant(page,row.id)).toContainText('Activa');
@@ -51,56 +55,131 @@ test('E2E-ENROLL-008 repeated assignment returns same row without new event / re
  const row=await prepare(e),api=await e.api('T1'),before=await securitySnapshot(e);const replay=status(await api.post(`sections/${e.data.sections.S1}/enrollments`,{userId:e.data.actors.ST2.id,role:'student'}),200).body;expect(replay.id).toBe(row.id);expect(await securitySnapshot(e)).toEqual(before);
  const page=await actorPage('T1');await sections(page,e);await expect(participant(page,row.id)).toContainText('Estudiante');expect((await pages(api,`sections/${e.data.sections.S1}/enrollments`)).filter(r=>r.user.id===e.data.actors.ST2.id&&r.active)).toHaveLength(1);
 });
-test('E2E-ENROLL-009 different roles accumulate without replacing existing row / multiple-roles @regression',async ({e,actorPage})=>{
- const student=await prepare(e),page=await actorPage('T1');await sections(page,e);const response=page.waitForResponse(r=>r.url().endsWith('/enrollments')&&r.request().method()==='POST');await assign(page,e,'ST2','assistant');const r=await response;expect(r.status()).toBe(201);const assistant=await r.json();expect(assistant.id).not.toBe(student.id);await expect(participant(page,student.id)).toContainText('Activa');await expect(participant(page,assistant.id)).toContainText('Ayudante');
- const fresh=await actorPage('ST2');await course(fresh,e.data.courses.C1);const me=status(await (await e.api('ST2')).get('me'),200).body;expect(me.sectionMemberships.filter((r:any)=>r.sectionId===e.data.sections.S1).map((r:any)=>r.role).sort()).toEqual(['assistant','student']);
+test('E2E-ENROLL-009 second roles in the same section are rejected / multiple-roles @regression',async ({e,actorPage})=>{
+ const student=await prepare(e),api=await e.api('T1'),before=await securitySnapshot(e);
+ const rejected=status(await api.post(`sections/${e.data.sections.S1}/enrollments`,{userId:e.data.actors.ST2.id,role:'assistant'}),409);
+ expect(rejected.body.code).toBe('SECTION_ROLE_ALREADY_ACTIVE');
+ const page=await actorPage('T1');
+ await sections(page,e);
+ await selectPerson(page,e,'ST2');
+ await expect(page.getByRole('dialog')).toContainText('ya tiene una matrícula activa');
+ await page.getByRole('button',{name:'Gestionar matrícula actual'}).click();
+ await expect(page.getByRole('dialog',{name:'Gestionar participante'})).toContainText('Estudiante');
+ await expect(participant(page,student.id)).toContainText('Estudiante');
+ expect(await securitySnapshot(e)).toEqual(before);
 });
 test('E2E-ENROLL-010 UI role change creates successor and preserves academic history / successor @regression',async ({e,actorPage})=>{
- const old=await prepare(e);await e.graded('ST2');const history=(await e.pool.query('SELECT * FROM grades ORDER BY id')).rows,page=await actorPage('T1');await sections(page,e);const peer=await actorPage('ST2');const dialog=await manage(page,old.id);await dialog.getByRole('combobox').selectOption('assistant');const response=page.waitForResponse(r=>r.url().endsWith('/enrollments/'+old.id)&&r.request().method()==='PATCH');await dialog.getByRole('button',{name:'Cambiar rol',exact:true}).click();const r=await response;expect(r.status()).toBe(200);const successor=await r.json();expect(successor.id).not.toBe(old.id);await expect(participant(page,old.id)).toContainText('Histórica');await expect(participant(page,successor.id)).toContainText('Activa');
+ const old=await prepare(e);await e.graded('ST2');const history=(await e.pool.query('SELECT * FROM grades ORDER BY id')).rows,page=await actorPage('T1');await sections(page,e);const peer=await actorPage('ST2');const dialog=await manage(page,old.id);await dialog.getByRole('combobox').selectOption('assistant');const response=page.waitForResponse(r=>r.url().endsWith('/enrollments/'+old.id)&&r.request().method()==='PATCH');await dialog.getByRole('button',{name:'Guardar cambios',exact:true}).click();const r=await response;expect(r.status()).toBe(200);const successor=await r.json();expect(successor.id).not.toBe(old.id);await expect(participant(page,old.id)).toHaveCount(0);await expect(participant(page,successor.id)).toContainText('Activa');await rosterView(page,'Historial');await expect(participant(page,old.id)).toContainText('Histórica');await rosterView(page,'Activas');
  await focus(peer);expect(status(await (await e.api('ST2')).get('me'),200).body.sectionMemberships.filter((x:any)=>x.sectionId===e.data.sections.S1).map((x:any)=>x.role)).toEqual(['assistant']);expect((await e.pool.query('SELECT * FROM grades ORDER BY id')).rows).toEqual(history);
  const changes=(await e.pool.query("SELECT changes FROM audit_events WHERE resource_id=$1 AND action='enrollment.roleChanged'",[old.id])).rows;expect(changes).toHaveLength(1);expect(changes[0].changes).toMatchObject({before:{id:old.id,role:'student',active:true},after:{id:successor.id,role:'assistant',active:true}});
 });
-test('E2E-ENROLL-011 role change reuses already active successor / existing-successor @regression',async ({e,actorPage})=>{
- const old=await prepare(e),assistant=await prepare(e,'assistant'),api=await e.api('T1'),result=status(await api.patch(`sections/${e.data.sections.S1}/enrollments/${old.id}`,{role:'assistant'}),200).body;expect(result.id).toBe(assistant.id);const rows=(await pages(api,`sections/${e.data.sections.S1}/enrollments`)).filter(r=>r.user.id===e.data.actors.ST2.id);expect(rows).toHaveLength(2);expect(rows.filter(r=>r.active).map(r=>r.id)).toEqual([assistant.id]);
- const page=await actorPage('T1');await sections(page,e);await expect(participant(page,old.id)).toContainText('Histórica');await expect(participant(page,assistant.id)).toContainText('Activa');expect(await e.count('audit_events',`action='enrollment.roleChanged' AND resource_id='${old.id}'`)).toBe(1);
+test('E2E-ENROLL-011 an active successor prevents historical reactivation / existing-successor @regression',async ({e,actorPage})=>{
+ const old=await prepare(e),api=await e.api('T1'),path=`sections/${e.data.sections.S1}/enrollments`;
+ const assistant=status(await api.patch(`${path}/${old.id}`,{role:'assistant'}),200).body;
+ const before=await securitySnapshot(e);
+ expect(status(await api.patch(`${path}/${old.id}`,{active:true}),409).body.code).toBe('SECTION_ROLE_ALREADY_ACTIVE');
+ expect(await securitySnapshot(e)).toEqual(before);
+ const page=await actorPage('T1');
+ await sections(page,e);
+ await expect(participant(page,assistant.id)).toContainText('Activa');
+ await expect(participant(page,old.id)).toHaveCount(0);
+ await rosterView(page,'Historial');
+ await expect(participant(page,old.id)).toContainText('Histórica');
 });
 test('E2E-ENROLL-012 cancelling confirmation does not write and confirmed revocation preserves grades / confirmation @regression',async ({e,actorPage})=>{
  const row=await prepare(e);await e.graded('ST2');const history=(await e.pool.query('SELECT * FROM grades ORDER BY id')).rows,page=await actorPage('T1');await sections(page,e);const peer=await actorPage('ST2');let patches=0;page.on('request',r=>{if(r.method()==='PATCH')patches++;});const before=await securitySnapshot(e),dialog=await manage(page,row.id);
- await dialog.getByRole('button',{name:'Revocar Estudiante',exact:true}).click();await dialog.getByRole('button',{name:'Cancelar',exact:true}).click();expect(patches).toBe(0);expect(await securitySnapshot(e)).toEqual(before);
- await dialog.getByRole('button',{name:'Revocar Estudiante',exact:true}).click();const response=page.waitForResponse(r=>r.url().endsWith('/enrollments/'+row.id)&&r.request().method()==='PATCH');await dialog.getByRole('button',{name:'Confirmar revocación',exact:true}).click();expect((await response).status()).toBe(200);await expect(participant(page,row.id)).toContainText('Histórica');expect(patches).toBe(1);await focus(peer);const api=await e.api('ST2');expect(status(await api.get('me'),200).body.sectionMemberships.some((x:any)=>x.sectionId===e.data.sections.S1)).toBe(false);status(await api.get(`quizzes/${e.data.quizzes.Q1}`),404);expect((await e.pool.query('SELECT * FROM grades ORDER BY id')).rows).toEqual(history);
+ await dialog.getByRole('button',{name:'Revocar matrícula',exact:true}).click();await dialog.getByRole('button',{name:'Cancelar',exact:true}).click();expect(patches).toBe(0);expect(await securitySnapshot(e)).toEqual(before);
+ await dialog.getByRole('button',{name:'Revocar matrícula',exact:true}).click();const response=page.waitForResponse(r=>r.url().endsWith('/enrollments/'+row.id)&&r.request().method()==='PATCH');await dialog.getByRole('button',{name:'Confirmar revocación',exact:true}).click();expect((await response).status()).toBe(200);await expect(participant(page,row.id)).toHaveCount(0);await rosterView(page,'Historial');await expect(participant(page,row.id)).toContainText('Histórica');expect(patches).toBe(1);await focus(peer);const api=await e.api('ST2');expect(status(await api.get('me'),200).body.sectionMemberships.some((x:any)=>x.sectionId===e.data.sections.S1)).toBe(false);status(await api.get(`quizzes/${e.data.quizzes.Q1}`),404);expect((await e.pool.query('SELECT * FROM grades ORDER BY id')).rows).toEqual(history);
 });
-test('E2E-ENROLL-013 last teacher may revoke self while retaining academic history / self-revocation @regression',async ({e,actorPage})=>{
- await e.pool.query("UPDATE enrollments SET active=false WHERE section_id=$1 AND role='teacher' AND user_id<>$2",[e.data.sections.S1,e.data.actors.T1.id]);await e.graded();const page=await actorPage('T1');await sections(page,e);const before=(await e.pool.query('SELECT * FROM grades ORDER BY id')).rows,dialog=await manage(page,e.id('enrollment/S1/T1/teacher'));
- await dialog.getByRole('button',{name:'Revocar Docente',exact:true}).click();const response=page.waitForResponse(r=>r.request().method()==='PATCH');await dialog.getByRole('button',{name:'Confirmar revocación',exact:true}).click();expect((await response).status()).toBe(200);await focus(page);const api=await e.api('T1');status(await api.patch(`materials/${e.data.materials.R1}`,{title:'attack'}),404);status(await api.get(`sections/${e.data.sections.S1}/enrollments`),404);expect((await e.pool.query('SELECT count(*)::int n FROM enrollments WHERE section_id=$1 AND active AND role=$2',[e.data.sections.S1,'teacher'])).rows[0].n).toBe(0);expect((await e.pool.query('SELECT * FROM grades ORDER BY id')).rows).toEqual(before);await expect(page.getByRole('button',{name:/^Gestionar /})).toHaveCount(0);
+test('E2E-ENROLL-013 teacher cannot revoke self and owner cannot remove the last teacher / self-revocation @regression',async ({e,actorPage})=>{
+ await e.pool.query("UPDATE enrollments SET active=false WHERE section_id=$1 AND role='teacher' AND user_id<>$2",[e.data.sections.S1,e.data.actors.T1.id]);const own=e.id('enrollment/S1/T1/teacher'),path=`sections/${e.data.sections.S1}/enrollments/${own}`;
+ const page=await actorPage('T1');await sections(page,e);await expect(participant(page,own)).toContainText('Sin acciones');await expect(participant(page,own).getByRole('button')).toHaveCount(0);
+ const before=await securitySnapshot(e),api=await e.api('T1');for(const body of [{active:false},{role:'student'}])status(await api.patch(path,body),403);expect(await securitySnapshot(e)).toEqual(before);
+ const owner=await e.api('AO');for(const body of [{active:false},{role:'assistant'}])expect(status(await owner.patch(path,body),409).body.code).toBe('LAST_SECTION_TEACHER');expect(await securitySnapshot(e)).toEqual(before);
+ expect((await e.pool.query('SELECT count(*)::int n FROM enrollments WHERE section_id=$1 AND active AND role=$2',[e.data.sections.S1,'teacher'])).rows[0].n).toBe(1);status(await api.get(`sections/${e.data.sections.S1}/enrollments`),200);
+ const ao=await actorPage('AO');await sections(ao,e);const dialog=await manage(ao,own);await dialog.getByRole('button',{name:'Revocar matrícula',exact:true}).click();const response=ao.waitForResponse(r=>r.request().method()==='PATCH');await dialog.getByRole('button',{name:'Confirmar revocación',exact:true}).click();expect((await response).status()).toBe(409);await expect(dialog.getByRole('alert')).toContainText('al menos un docente activo');expect(await securitySnapshot(e)).toEqual(before);
+});
+test('E2E-ENROLL-020 non-owner teacher cannot assign, promote, revoke or reactivate teachers / teacher-enrollments @regression',async ({e,actorPage})=>{
+ const row=await prepare(e),api=await e.api('T1'),path=`sections/${e.data.sections.S1}/enrollments`,peer=e.id('enrollment/S1/AO/teacher'),before=await securitySnapshot(e);
+ status(await api.post(path,{userId:e.data.actors.ST2.id,role:'teacher'}),403);status(await api.patch(`${path}/${row.id}`,{role:'teacher'}),403);
+ for(const body of [{active:false},{role:'student'}])status(await api.patch(`${path}/${peer}`,body),403);expect(await securitySnapshot(e)).toEqual(before);
+ const ownerApi=await e.api('AO'), added=status(await ownerApi.patch(`${path}/${row.id}`,{role:'teacher'}),200).body;status(await ownerApi.patch(`${path}/${added.id}`,{role:'student'}),200);const revoked=await securitySnapshot(e);status(await api.patch(`${path}/${added.id}`,{active:true}),403);expect(await securitySnapshot(e)).toEqual(revoked);
+ const page=await actorPage('T1');await sections(page,e);await expect(participant(page,peer).getByRole('button')).toHaveCount(0);await expect(page.getByRole('button',{name:`Gestionar ${e.data.actors.ST2.name}, Estudiante`,exact:true})).toBeVisible();
 });
 test('E2E-ENROLL-014 API reactivation restores historical row without inventing UI action / reactivation @regression',async ({e,actorPage})=>{
- const row=await prepare(e),api=await e.api('T1'),path=`sections/${e.data.sections.S1}/enrollments/${row.id}`;status(await api.patch(path,{active:false}),200);const page=await actorPage('T1');await sections(page,e);await expect(participant(page,row.id)).toContainText('Sin acciones');
+ const row=await prepare(e),api=await e.api('T1'),path=`sections/${e.data.sections.S1}/enrollments/${row.id}`;status(await api.patch(path,{active:false}),200);const page=await actorPage('T1');await sections(page,e);await rosterView(page,'Historial');await expect(participant(page,row.id)).toContainText('Histórica');
  expect(status(await api.patch(path,{active:true}),200).body).toMatchObject({id:row.id,active:true});const fresh=await actorPage('T1');await sections(fresh,e);await expect(participant(fresh,row.id)).toContainText('Activa');expect(status(await (await e.api('ST2')).get('me'),200).body.sectionMemberships.some((r:any)=>r.sectionId===e.data.sections.S1&&r.role==='student')).toBe(true);expect(await e.count('audit_events',`action='enrollment.activeChanged' AND resource_id='${row.id}'`)).toBe(2);
 });
 test('E2E-ENROLL-015 strict role payloads reject before mutation / strict-payload @extended',async ({e,actorPage})=>{
  const row=await prepare(e),api=await e.api('T1'),path=`sections/${e.data.sections.S1}/enrollments`,before=await securitySnapshot(e);
  for(const body of [{},{role:'owner'},{active:'false'},{role:'student',active:false},{userId:e.data.actors.ST1.id}])status(await api.patch(path+'/'+row.id,body),400);
  for(const body of [{userId:'bad',role:'student'},{userId:e.data.actors.ST1.id,role:'admin'},{userId:e.data.actors.ST1.id,role:'student',active:true}])status(await api.post(path,body),400);expect(await securitySnapshot(e)).toEqual(before);
- const page=await actorPage('T1');await sections(page,e);await disclose(page,'Asignar participante');const form=page.getByRole('form',{name:'Asignar rol',exact:true});await expect(form.getByRole('button',{name:'Asignar rol',exact:true})).toBeDisabled();expect(await form.getByRole('combobox').locator('option').evaluateAll(os=>os.map(o=>(o as HTMLOptionElement).value))).toEqual(['teacher','assistant','student']);
+ const page=await actorPage('T1');await sections(page,e);const form=await assignment(page);expect(await form.getByRole('combobox',{name:'Rol académico',exact:true}).locator('option').evaluateAll(os=>os.map(o=>(o as HTMLOptionElement).value))).toEqual(['student','assistant']);
+ let posts=0;page.on('request',r=>{if(r.method()==='POST'&&r.url().endsWith('/enrollments'))posts++;});await form.getByRole('button',{name:'Asignar participante',exact:true}).click();await expect(form.getByText('Busca y selecciona a la persona que quieres asignar.',{exact:true})).toBeVisible();expect(posts).toBe(0);
 });
 test('E2E-ENROLL-016 inactive role change conflicts and identical transitions emit no event / inactive-noop @regression',async ({e,actorPage})=>{
- const row=await prepare(e),api=await e.api('T1'),path=`sections/${e.data.sections.S1}/enrollments/`;status(await api.patch(path+row.id,{active:false}),200);const before=await securitySnapshot(e);status(await api.patch(path+row.id,{role:'assistant'}),409);status(await api.patch(path+row.id,{active:false}),200);status(await api.patch(path+e.id('enrollment/S1/T1/teacher'),{role:'teacher'}),200);expect(await securitySnapshot(e)).toEqual(before);
- const page=await actorPage('T1');await sections(page,e);await expect(participant(page,row.id)).toContainText('Histórica');await expect(participant(page,row.id).getByRole('button')).toHaveCount(0);
+ const row=await prepare(e),api=await e.api('T1'),path=`sections/${e.data.sections.S1}/enrollments/`;status(await api.patch(path+row.id,{active:false}),200);const before=await securitySnapshot(e);status(await api.patch(path+row.id,{role:'assistant'}),409);status(await api.patch(path+row.id,{active:false}),200);status(await api.patch(path+e.id('enrollment/S1/T1/teacher'),{role:'teacher'}),403);expect(await securitySnapshot(e)).toEqual(before);
+ const page=await actorPage('T1');await sections(page,e);await expect(participant(page,row.id)).toHaveCount(0);await rosterView(page,'Historial');await expect(participant(page,row.id)).toContainText('Histórica');await expect(participant(page,row.id).getByRole('button')).toHaveCount(0);
 });
 test('E2E-ENROLL-017 concurrent UI assignments share one enrollment and audit event / concurrent @extended',async ({e,actorPage})=>{
- const a=await actorPage('T1'),b=await actorPage('T1');for(const page of [a,b]){await sections(page,e);await selectPerson(page,e);await page.getByRole('form',{name:'Asignar rol',exact:true}).getByRole('combobox').selectOption('student');}
+ const a=await actorPage('T1'),b=await actorPage('T1');for(const page of [a,b]){await sections(page,e);await selectPerson(page,e);await (await assignment(page)).getByRole('combobox',{name:'Rol académico',exact:true}).selectOption('student');}
  let entered=0,release!:()=>void;const gate=new Promise<void>(r=>release=r),path=`**/sections/${e.data.sections.S1}/enrollments`;
  for(const page of [a,b])await page.route(path,async route=>{if(route.request().method()!=='POST'){await route.continue();return;}if(++entered===2)release();await gate;await route.continue();});
  const responses=[a,b].map(page=>page.waitForResponse(r=>r.url().endsWith('/enrollments')&&r.request().method()==='POST'));
- try{await Promise.all([a,b].map(page=>page.getByRole('button',{name:'Asignar rol',exact:true}).click()));const rs=await Promise.all(responses);expect(rs.map(r=>r.status()).sort()).toEqual([200,201]);const rows=await Promise.all(rs.map(r=>r.json()));expect(rows[0].id).toBe(rows[1].id);for(const page of [a,b])await expect(participant(page,rows[0].id)).toContainText('Activa');expect(await e.count('audit_events',`action='enrollment.created' AND resource_id='${rows[0].id}'`)).toBe(1);}finally{release();}
+ try{await Promise.all([a,b].map(page=>page.getByRole('dialog').getByRole('button',{name:'Asignar participante',exact:true}).click()));const rs=await Promise.all(responses);expect(rs.map(r=>r.status()).sort()).toEqual([200,201]);const rows=await Promise.all(rs.map(r=>r.json()));expect(rows[0].id).toBe(rows[1].id);for(const page of [a,b])await expect(participant(page,rows[0].id)).toContainText('Activa');expect(await e.count('audit_events',`action='enrollment.created' AND resource_id='${rows[0].id}'`)).toBe(1);}finally{release();}
 });
 test('E2E-ENROLL-018 history pagination is complete and revalidates revoked actor / history-pages @regression',async ({e,actorPage})=>{
- await extraPeople(e,24,true);const page=await actorPage('T1'),api=await e.api('T1'),path=`sections/${e.data.sections.S1}/enrollments`;await sections(page,e);await expect(page.locator('tr[data-enrollment-id]')).toHaveCount(20);const first=status(await api.get(path),200).body;expect(first.items).toHaveLength(20);expect(first.nextCursor).toBeTruthy();
- const expected=(await e.pool.query('SELECT id FROM enrollments WHERE section_id=$1',[e.data.sections.S1])).rows.map(r=>r.id).sort();expect((await pages(api,path)).map(r=>r.id).sort()).toEqual(expected);const seen=await page.locator('tr[data-enrollment-id]').evaluateAll(rs=>rs.map(r=>r.getAttribute('data-enrollment-id')));await page.getByRole('button',{name:'Más matrículas',exact:true}).click();await expect(page.locator('tr[data-enrollment-id]')).toHaveCount(expected.length-20);const rest=await page.locator('tr[data-enrollment-id]').evaluateAll(rs=>rs.map(r=>r.getAttribute('data-enrollment-id')));expect([...seen,...rest].sort()).toEqual(expected);await page.getByRole('button',{name:'Primera página',exact:true}).click();await expect(page.locator('tr[data-enrollment-id]')).toHaveCount(20);
+ await extraPeople(e,48,true);const page=await actorPage('T1'),api=await e.api('T1'),path=`sections/${e.data.sections.S1}/enrollments`;await sections(page,e);await expect(page.locator('tr[data-enrollment-id]')).toHaveCount(20);const first=status(await api.get(path),200).body;expect(first.items).toHaveLength(20);expect(first.nextCursor).toBeTruthy();
+ const expected=(await e.pool.query('SELECT id FROM enrollments WHERE section_id=$1',[e.data.sections.S1])).rows.map(r=>r.id).sort();expect((await pages(api,path)).map(r=>r.id).sort()).toEqual(expected);
+ // The UI pages each view on its own: active enrollments first, revoked ones under «Historial».
+ for(const [view,active] of [['Activas',true],['Historial',false]] as const){
+  if(!active)await rosterView(page,view);
+  const ids=(await e.pool.query('SELECT id FROM enrollments WHERE section_id=$1 AND active=$2',[e.data.sections.S1,active])).rows.map(r=>r.id).sort();expect(ids.length).toBeGreaterThan(20);expect(ids.length).toBeLessThanOrEqual(40);
+  expect((await pages(api,path+'?status='+(active?'active':'historical'))).map(r=>r.id).sort()).toEqual(ids);
+  await expect(page.locator('tr[data-enrollment-id]')).toHaveCount(20);const seen=await page.locator('tr[data-enrollment-id]').evaluateAll(rs=>rs.map(r=>r.getAttribute('data-enrollment-id')));await page.getByRole('button',{name:'Siguiente',exact:true}).click();await expect(page.locator('tr[data-enrollment-id]')).toHaveCount(ids.length-20);const rest=await page.locator('tr[data-enrollment-id]').evaluateAll(rs=>rs.map(r=>r.getAttribute('data-enrollment-id')));expect([...seen,...rest].sort()).toEqual(ids);
+  const pager=page.getByRole('navigation',{name:/Páginas de matrículas/});
+  await expect(pager.getByRole('status')).toHaveText('Página 2');
+  await expect(pager.getByRole('button',{name:'Siguiente'})).toBeDisabled();
+  await pager.getByRole('button',{name:'Anterior'}).click();
+  await expect(page.locator('tr[data-enrollment-id]')).toHaveCount(20);
+  expect(await page.locator('tr[data-enrollment-id]').evaluateAll(rs=>rs.map(r=>r.getAttribute('data-enrollment-id')))).toEqual(seen);
+  await expect(pager.getByRole('status')).toHaveText('Página 1');
+ }
+ // The compact view keeps the same enrollment rows and controls in both themes.
+ await page.setViewportSize({width:375,height:812});
+ const roster=page.getByRole('table',{name:'Matrículas históricas'});
+ await expect(roster.getByRole('columnheader',{name:'Acciones'})).toHaveCount(0);
+ await expect(roster.getByRole('button')).toHaveCount(0);
+ for(const theme of ['dark','light']){
+  await page.getByRole('button',{name:'Cambiar tema',exact:true}).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme',theme);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  expect(await roster.evaluate(el=>el.parentElement!.scrollWidth<=el.parentElement!.clientWidth)).toBe(true);
+ }
+ await rosterView(page,'Activas');
+ const trigger=page.getByRole('table',{name:'Matrículas activas'}).getByRole('button',{name:/^Gestionar /}).first();
+ await expect(trigger).toBeVisible();
+ expect((await trigger.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+ await trigger.press('Enter');
+ await expect(page.getByRole('dialog',{name:'Gestionar participante',exact:true})).toBeVisible();
+ await page.keyboard.press('Escape');
+ await expect(trigger).toBeFocused();
+ status(await api.get(path+'?status=invalid'),400);
  for(const limit of ['0','101'])status(await api.get(path+'?limit='+limit),400);status(await api.get(path+'?cursor=invalid'),400);status(await (await e.api('AO')).patch(path+'/'+e.id('enrollment/S1/T1/teacher'),{active:false}),200);status(await api.get(path+'?cursor='+encodeURIComponent(first.nextCursor)),404);await focus(page);await expect(page.getByRole('table')).toHaveCount(0);
 });
-test('E2E-ENROLL-019 closing pending role dialog and changing section discards old feedback / late-patch @extended',async ({e,actorPage})=>{
+test('E2E-ENROLL-019 a pending role change cannot be dismissed, writes once and toasts without IDs / late-patch @extended',async ({e,actorPage})=>{
  const row=await prepare(e),page=await actorPage('AO'),api=await e.api('AO');await sections(page,e);const other=(await e.pool.query('SELECT * FROM enrollments WHERE section_id=$1 ORDER BY id',[e.data.sections.S2])).rows;let patches=0,release!:()=>void,entered!:()=>void;const gate=new Promise<void>(r=>release=r),started=new Promise<void>(r=>entered=r);
  await page.route('**/sections/*/enrollments/*',async route=>{if(route.request().method()!=='PATCH'){await route.continue();return;}patches++;expect(route.request().url()).toContain('/sections/'+e.data.sections.S1+'/');const response=await route.fetch();expect(response.status()).toBe(200);entered();await gate;await route.fulfill({response}).catch(()=>{});});
- try{const dialog=await manage(page,row.id);await dialog.getByRole('combobox').selectOption('assistant');await dialog.getByRole('button',{name:'Cambiar rol',exact:true}).click();await started;await dialog.getByRole('button',{name:'Cerrar',exact:true}).click();await page.getByRole('combobox',{name:'Sección a gestionar',exact:true}).selectOption(e.data.sections.S2);await expect(page.getByRole('table')).toContainText(e.data.actors.ST2.email);release();await expect(page.getByRole('heading',{name:'Participantes e historial · Sección 2',exact:true})).toBeVisible();await expect(page.getByRole('dialog')).toHaveCount(0);await expect(page.getByRole('status').filter({hasText:'Matrícula confirmada:'})).toHaveCount(0);expect(patches).toBe(1);expect((await e.pool.query('SELECT * FROM enrollments WHERE section_id=$1 ORDER BY id',[e.data.sections.S2])).rows).toEqual(other);expect((await pages(api,`sections/${e.data.sections.S1}/enrollments`)).filter(r=>r.user.id===e.data.actors.ST2.id&&r.active).map(r=>r.role)).toEqual(['assistant']);}finally{release();}
+ try{const dialog=await manage(page,row.id);await dialog.getByRole('combobox').selectOption('assistant');await dialog.getByRole('button',{name:'Guardar cambios',exact:true}).click();await started;await expect(dialog.getByRole('button',{name:'Guardando…',exact:true})).toBeDisabled();await page.keyboard.press('Escape');await dialog.getByRole('button',{name:'Cerrar',exact:true}).click();await expect(dialog).toBeVisible();await expect(dialog.getByText('Tienes cambios sin guardar')).toHaveCount(0);release();await expect(page.getByRole('dialog')).toHaveCount(0);const notice=page.locator('.content-notices');await expect(notice).toContainText('ahora es Ayudante');await expect(notice).not.toContainText(row.id);await sectionPicker(page).selectOption(e.data.sections.S2);await activeSection(page,'2');await expect(page.getByRole('table')).toContainText(e.data.actors.ST2.email);expect(patches).toBe(1);expect((await e.pool.query('SELECT * FROM enrollments WHERE section_id=$1 ORDER BY id',[e.data.sections.S2])).rows).toEqual(other);expect((await pages(api,`sections/${e.data.sections.S1}/enrollments`)).filter(r=>r.user.id===e.data.actors.ST2.id&&r.active).map(r=>r.role)).toEqual(['assistant']);}finally{release();}
+});
+test('E2E-ENROLL-021 students and assistants read a minimal active roster of their own section only / participants-roster @regression',async ({e})=>{
+ const path=(s:string)=>`sections/${s}/participants`,S1=e.data.sections.S1,history=await prepare(e);status(await (await e.api('T1')).patch(`sections/${S1}/enrollments/${history.id}`,{active:false}),200);
+ for(const actor of ['REVOKED','INACTIVE'])await e.pool.query('INSERT INTO enrollments(id,institution_id,section_id,user_id,role) VALUES(gen_random_uuid(),$1,$2,$3,$4)',[e.data.tenants.uc,S1,e.data.actors[actor].id,'student']);
+ const rank="CASE e.role WHEN 'teacher' THEN 0 WHEN 'assistant' THEN 1 ELSE 2 END",expected=(await e.pool.query(`SELECT u.id AS "userId",u.name,array_agg(e.role ORDER BY ${rank}) AS roles FROM enrollments e JOIN users u ON u.id=e.user_id JOIN institution_memberships m ON m.institution_id=e.institution_id AND m.user_id=e.user_id WHERE e.section_id=$1 AND e.active AND u.active AND m.active GROUP BY u.id,u.name ORDER BY min(${rank}),lower(u.name),u.id`,[S1])).rows,before=await securitySnapshot(e);
+ for(const actor of ['ST1','AS1','T1']){const body=status(await (await e.api(actor)).get(path(S1)),200).body;expect(body).toEqual({items:expected});expect(JSON.stringify(body)).not.toMatch(/@|email|createdAt|isAdmin/);}
+ const ids=expected.map((p:any)=>p.userId);for(const actor of ['ST2','REVOKED','INACTIVE','FST1'])expect(ids).not.toContain(e.data.actors[actor].id);expect(expected.find((p:any)=>p.userId===e.data.actors['TS-SAME'].id).roles).toEqual(['teacher']);
+ // Login throttling caps each API process at five fixture logins; a fresh API keeps the cross-scope logins real.
+ await e.restartApi();const st1=await e.api('ST1');status(await st1.get(path(e.data.sections.S2)),404);status(await (await e.api('ST2')).get(path(S1)),404);status(await (await e.api('FST1','utfsm')).get(path(S1)),404);status(await (await e.api('FST1','utfsm')).get(path(e.data.sections.FS1)),200);status(await (await e.api('MULTI','utfsm')).get(path(S1)),404);
+ status(await st1.get(`sections/${S1}/enrollments`),403);status(await st1.post(path(S1),{userId:e.data.actors.ST1.id,role:'teacher'}),404);status(await st1.patch(path(S1),{role:'teacher'}),404);expect(await securitySnapshot(e)).toEqual(before);
+ status(await (await e.api('T1')).patch(`sections/${S1}/enrollments/${e.id('enrollment/S1/ST1/student')}`,{active:false}),200);status(await st1.get(path(S1)),404);
 });
