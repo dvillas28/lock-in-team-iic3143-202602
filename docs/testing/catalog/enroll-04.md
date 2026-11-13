@@ -72,12 +72,12 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 - Entrada / operación: `/courses/{C1}/sections`; `listSectionEnrollments; createSectionEnrollment; updateSectionEnrollment`; [inventario](../audit/API.md).
 - Preparación: resolver variables del manifest; actor de UI hace login real en origen institucional (ANON no); navegar por Link tras login, salvo reload explícito.
 
-1. Cargar 21+ matrículas incluyendo históricas.
-2. Avanzar/Primera página.
+1. Cargar 21+ matrículas activas y 21+ históricas.
+2. Avanzar/Primera página en «Activas» y en «Historial».
 3. Revocar docente y pedir cursor anterior.
 
-- Interfaz esperada: Orden sin omisiones/duplicados; tras revocación se limpia alcance.
-- API esperada: limit default20 max100; cursor inválido/limit0/101 400; acceso revalidado.
+- Interfaz esperada: cada vista pagina por separado, sin omisiones/duplicados; tras revocación se limpia alcance.
+- API esperada: limit default20 max100; `status=active|historical` filtra y sin `status` lista todo; cursor inválido/limit0/101/status inválido 400; acceso revalidado.
 - Persistencia / consistencia: Sin cambios excepto revocación de fixture.
 - Denegación: No historial de otra sección/tenant.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.

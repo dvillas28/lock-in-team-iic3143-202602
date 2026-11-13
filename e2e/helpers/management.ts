@@ -2,8 +2,8 @@ import type {Page,Locator} from '@playwright/test';
 import {expect} from '@playwright/test';
 import type {Environment} from '../fixtures/environment.ts';
 import {go} from './browser.ts';
-/** Course administration opens as modals in Secciones; other disclosures remain `<details>`. */
-const dialogs=new Set(['Configurar curso','Crear sección','Configurar sección']);
+/** Course administration and participant assignment open as modals in Secciones; other disclosures remain `<details>`. */
+const dialogs=new Set(['Configurar curso','Crear sección','Configurar sección','Asignar participante']);
 export async function disclose(page:Page,name:string) {
  if(dialogs.has(name)){
   const form=page.getByRole('dialog').getByRole('form',{name,exact:true});
@@ -46,18 +46,35 @@ export async function period(form:Locator,term:string) {
  const [year,semester]=term.split('-');
  await form.getByLabel('Año',{exact:true}).selectOption(year);await form.getByLabel('Semestre',{exact:true}).selectOption(semester);
 }
-export async function search(page:Page,query:string) {
- await disclose(page,'Asignar participante');const form=page.getByRole('form',{name:'Buscar participantes',exact:true});
- await form.getByLabel('Nombre o correo de participante',{exact:true}).fill(query);await form.getByRole('button',{name:'Buscar',exact:true}).click();
+/** The «Asignar participante» modal form; opening it is idempotent. */
+export async function assignment(page:Page) {
+ await disclose(page,'Asignar participante');return page.getByRole('dialog').getByRole('form',{name:'Asignar participante',exact:true});
 }
+/** Person search inside the modal: Enter searches at once (typing alone waits for a short pause). */
+export async function search(page:Page,query:string) {
+ const form=await assignment(page);
+ if(await form.locator('.assignment-selected').isVisible())await form.getByRole('button',{name:/^Cambiar persona/}).click();
+ const input=form.getByLabel('Buscar persona',{exact:true});await input.fill(query);await input.press('Enter');
+}
+/** A search result, named by its person: «Seleccionar a <name>, <email>…». */
+export const result=(page:Page,name:string,email:string)=>page.getByRole('dialog').getByRole('button',{name:new RegExp('^Seleccionar a '+literal(name)+', '+literal(email))});
+export const results=(page:Page)=>page.getByRole('dialog').locator('.assignment-result-list');
+export const chosen=(page:Page)=>page.getByRole('dialog').locator('.assignment-selected');
+const literal=(text:string)=>text.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 export const participant=(page:Page,id:string)=>page.locator(`tr[data-enrollment-id="${id}"]`);
+/** The roster shows active enrollments; revoked or replaced ones live under «Historial». */
+export async function rosterView(page:Page,view:'Activas'|'Historial') {
+ const button=page.getByRole('region',{name:'Participantes',exact:true}).getByRole('button',{name:view,exact:true});
+ await button.click();await expect(button).toHaveAttribute('aria-pressed','true');
+}
 export async function selectPerson(page:Page,e:Environment,actor='ST2') {
  await search(page,e.data.actors[actor].email);
- await page.getByRole('button',{name:e.data.actors[actor].name+' · '+e.data.actors[actor].email,exact:true}).click();
+ await result(page,e.data.actors[actor].name,e.data.actors[actor].email).click();
+ await expect(chosen(page)).toContainText(e.data.actors[actor].email);
 }
 export async function assign(page:Page,e:Environment,actor='ST2',role='student') {
- await selectPerson(page,e,actor);const form=page.getByRole('form',{name:'Asignar rol',exact:true});
- await form.getByRole('combobox',{name:'Rol',exact:true}).selectOption(role);await form.getByRole('button',{name:'Asignar rol',exact:true}).click();
+ await selectPerson(page,e,actor);const form=await assignment(page);
+ await form.getByRole('combobox',{name:'Rol académico',exact:true}).selectOption(role);await form.getByRole('button',{name:'Asignar participante',exact:true}).click();
 }
 export async function focus(page:Page) {
  const refreshed=page.waitForResponse(r=>r.url().endsWith('/me'));await page.evaluate(()=>window.dispatchEvent(new Event('focus')));return refreshed;

@@ -36,7 +36,7 @@ export function AdminDialog({ label, title, icon, primary = false, disabled = fa
     close();
   }
   // `setBusy` is stable, so forms can report it from an effect.
-  const form: DialogFormControls = { onDone: message => { close(); onDone(message); }, onCancel: request, onBusy: setBusy };
+  const form: DialogFormControls = { onDone: message => { close(); onDone(message); }, onCancel: request, onBusy: setBusy, onDirty: setDirty };
   return <>
     <button ref={trigger} type="button" className={primary ? "btn btn-primary" : "btn btn-ghost"} aria-haspopup="dialog" disabled={disabled}
       onClick={() => { setOpening(n => n + 1); setDirty(false); setConfirming(false); setOpen(true); }}>

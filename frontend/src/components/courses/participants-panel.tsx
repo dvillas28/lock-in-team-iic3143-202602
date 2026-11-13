@@ -1,6 +1,6 @@
 "use client";
 import { useFeedbackState } from "../use-feedback.ts";
-import { UserRoundCog } from "lucide-react";
+import { UserPlus, UserRoundCog } from "lucide-react";
 import { roleLabel } from "../../lib/courses/role-label.ts";
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import type { Session } from "../../lib/auth/session.ts";
@@ -16,14 +16,20 @@ import { capabilities } from "../../lib/courses/capabilities.ts";
 import {
   listSectionEnrollments,
   updateSectionEnrollment,
+  type EnrollmentStatus,
 } from "../../lib/api/enrollments.ts";
 import { EmptyState, ErrorState } from "../route-states.tsx";
 import { RecordRowsSkeleton } from "../academic/record-skeleton.tsx";
 import { participantCell, participantColumns as columns } from "./sections-skeleton.tsx";
 import { EnrollmentForm } from "./enrollment-form.tsx";
+import { AdminDialog } from "./admin-dialog.tsx";
+import { useContentNotice } from "../content/content-notices.tsx";
 import { useMutation } from "./use-mutation.ts";
 import { useResource } from "./use-resource.ts";
-const caption = "Matrículas activas e históricas";
+const views: { status: EnrollmentStatus; label: string; caption: string }[] = [
+  { status: "active", label: "Activas", caption: "Matrículas activas" },
+  { status: "historical", label: "Historial", caption: "Matrículas históricas" },
+];
 const lastTeacher = "La sección debe conservar al menos un docente activo. Asigna primero a otro docente.";
 export function ParticipantsPanel(props: {
   session: Session;
@@ -55,11 +61,19 @@ function Participants({
   section: Section;
 }) {
   const [cursor, setCursor] = useState<string>();
+  // The roster opens on active enrollments; revoked or replaced ones live in their own view.
+  const [view, setView] = useState<EnrollmentStatus>("active");
+  const caption = views.find((v) => v.status === view)!.caption;
   const result = useResource(
     session,
-    `${slug}:${section.id}:${cursor ?? ""}`,
-    (c) => listSectionEnrollments(c, slug, section.id, cursor),
+    `${slug}:${section.id}:${view}:${cursor ?? ""}`,
+    (c) => listSectionEnrollments(c, slug, section.id, cursor, undefined, view),
   );
+  function show(next: EnrollmentStatus) {
+    if (next === view) return;
+    setView(next);
+    setCursor(undefined);
+  }
   const mutation = useMutation(session, { codes: { LAST_SECTION_TEACHER: lastTeacher } });
   const can = capabilities(user, course, section);
   // Mirrors the backend: teacher rows are owner-only and nobody revokes their own teacher enrollment.
@@ -77,17 +91,23 @@ function Participants({
   const [confirming, setConfirming] = useState(false);
   const [feedbackTargetId, setFeedbackTargetId] = useState<string>();
   const [receipt, setReceipt] = useFeedbackState();
+  const notify = useContentNotice();
   useEffect(() => {
     if (target) {
       if (!dialog.current?.open) dialog.current?.showModal();
       cancel.current?.focus();
     }
   }, [target, confirming]);
-  async function saved(enrollment: Enrollment) {
-    setReceipt(enrollment.id);
-    if (cursor) setCursor(undefined);
+  async function refresh(enrollment: Enrollment) {
+    // A new assignment is active: show it there, wherever the roster was.
+    if (view !== "active") show("active");
+    else if (cursor) setCursor(undefined);
     else await result.reload();
     if (enrollment.user.id === user.id) await session.loadContext(slug);
+  }
+  async function saved(enrollment: Enrollment) {
+    setReceipt(enrollment.id);
+    await refresh(enrollment);
   }
   async function update(
     enrollment: Enrollment,
@@ -152,7 +172,26 @@ function Participants({
   }
   return (
     <section className="stack" aria-label="Participantes">
-      <h2 className="serif">Participantes</h2>
+      {/* The assignment action lives in the heading, so the table never moves it. */}
+      <div className="participants-heading">
+        <h2 className="serif">Participantes</h2>
+        <AdminDialog label="Asignar participante" title="Asignar participante" primary
+          icon={<UserPlus size={16} aria-hidden="true" />} onDone={message => notify?.(message)}>
+          {controls => <EnrollmentForm session={session} slug={slug} section={section} allowedRoles={allowedRoles}
+            active={view === "active" ? result.data?.items.filter(e => e.active) ?? [] : []} owner={can.teachers} onSaved={refresh} dialog={controls} />}
+        </AdminDialog>
+      </div>
+      <div className="tab-group participants-views" role="group" aria-label="Matrículas">
+        {views.map((v) => (
+          <button key={v.status} type="button" className={`tab-btn${view === v.status ? " active" : ""}`}
+            aria-pressed={view === v.status} onClick={() => show(v.status)}>
+            {v.label}
+          </button>
+        ))}
+      </div>
+      {view === "historical" && (
+        <p className="hint">Matrículas revocadas o reemplazadas por un cambio de rol. Se conservan como registro y no se editan.</p>
+      )}
       {result.error ? (
         <ErrorState headingLevel={3}
           feedback={result.error}
@@ -162,8 +201,13 @@ function Participants({
         <RecordRowsSkeleton label="Cargando participantes…" caption={caption} headers={columns} rows={3}
           scroll="table-scroll participants-table" cell={participantCell} />
       ) : !result.data.items.length ? (
-        <EmptyState headingLevel={3} title="No hay participantes"
-          message="Esta sección aún no tiene matrículas. Usa «Asignar participante» para inscribir estudiantes o ayudantes." />
+        view === "historical" ? (
+          <EmptyState headingLevel={3} title="Sin historial"
+            message="Esta sección no tiene matrículas revocadas ni cambios de rol." />
+        ) : (
+          <EmptyState headingLevel={3} title="No hay participantes"
+            message="Esta sección no tiene matrículas activas. Usa «Asignar participante» para inscribir estudiantes o ayudantes." />
+        )
       ) : (
         <div
           ref={table}
@@ -243,17 +287,6 @@ function Participants({
       {!target && mutation.message && (
         <p role={mutation.confirmed ? "status" : "alert"}>{mutation.message}</p>
       )}
-      <details className="academic-disclosure">
-        <summary>Asignar participante</summary>
-        <EnrollmentForm
-          session={session}
-          slug={slug}
-          sectionId={section.id}
-          search={can.search}
-          allowedRoles={allowedRoles}
-          onSaved={saved}
-        />
-      </details>
       <dialog
         ref={dialog}
         className="modal native-dialog panel participant-management"

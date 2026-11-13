@@ -41,7 +41,7 @@ Problem:
       description: >-
         Código seguro de problema. Cuentas añaden INTEGRATION_NOT_CONFIGURED (503),
         INVITATION_LOGIN_REQUIRED (409), LAST_SECTION_TEACHER (409),
-        SECTION_CAPACITY_DECREASE (409), SECTION_CAPACITY_BELOW_ENROLLMENTS (409), conflictos de edición y recursos temporales
+        SECTION_CAPACITY_DECREASE (409), SECTION_CAPACITY_BELOW_ENROLLMENTS (409), SECTION_FULL (409), conflictos de edición y recursos temporales
         depurados (410); no incluir estado global de terceros ni errores crudos de proveedores.
     instance:
       type: [string, 'null']
