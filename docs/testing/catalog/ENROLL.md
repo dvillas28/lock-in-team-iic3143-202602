@@ -27,3 +27,4 @@ Estado efectivo por ficha en[el ledger](../execution/VALIDATION.md). Las variant
 | [E2E-ENROLL-018 — Páginas de historial y actor revocado](enroll-04.md#e2e-enroll-018) | FL-ENROLL-02 | P1 | regression | M |
 | [E2E-ENROLL-019 — Diálogo y PATCH pendiente al cambiar sección](enroll-04.md#e2e-enroll-019) | FL-ENROLL-02 | P0 | extended | B |
 | [E2E-ENROLL-020 — Teacher no gestiona matrículas docentes](enroll-04.md#e2e-enroll-020) | FL-ENROLL-02 | P0 | regression | M |
+| [E2E-ENROLL-021 — Roster mínimo de participantes activos](enroll-05.md#e2e-enroll-021) | FL-ENROLL-03 | P0 | regression | H |

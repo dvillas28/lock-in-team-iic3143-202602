@@ -27,3 +27,15 @@ Estados: Creación activa; role change revoca predecesor y devuelve sucesor; act
 - Dependencias: identidad/contexto para privados; curso/sección según manifest; mutaciones y audit dentro de la misma transacción.
 - Clasificación: integrada estáticamente; sin nueva ejecución runtime. API sin pantalla propia se identifica en cada ficha H/O.
 - Casos: [ENROLL](../../catalog/ENROLL.md); cada ficha precisa pasos y persistencia.
+
+## FL-ENROLL-03 — Roster de participantes activos
+- Requisito: CU-04; RF12/25/26; RNF1/2/3; [fuente](../../../deliveries/2/03-use-cases-and-requirements.md).
+- Ruta frontend: sin pantalla propia hasta PR-7.
+- Endpoints/operaciones: listSectionParticipants; resolver path/método en [API](../API.md).
+- Roles: Consultar owner admin o cualquier Enrollment activo propio (teacher/assistant/student) de la sección; sin escritura.
+- Precondiciones: entorno efímero listo, BASE válida, actor activo con scope de la ficha.
+- Datos: WRITE+REVOKE; [definiciones](../../E2E_TEST_DATA.md).
+- Estados: solo matrículas activas con User y membership activos; roles múltiples agrupados; historial excluido.
+- Dependencias: identidad/contexto; sección según manifest; sin mutaciones ni auditoría.
+- Clasificación: Complemento HTTP; API sin pantalla propia.
+- Casos: [ENROLL](../../catalog/ENROLL.md); cada ficha precisa pasos y persistencia.

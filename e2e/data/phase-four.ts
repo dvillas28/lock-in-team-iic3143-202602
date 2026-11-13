@@ -43,6 +43,7 @@ Object.assign(phaseFour,{
  'E2E-ENROLL-018':[v('history-pages','T1')],
  'E2E-ENROLL-019':[v('late-patch','AO')],
  'E2E-ENROLL-020':[v('teacher-enrollments','T1')],
+ 'E2E-ENROLL-021':[v('participants-roster','ST1','companion')],
 });
 
 Object.assign(phaseFour,{
