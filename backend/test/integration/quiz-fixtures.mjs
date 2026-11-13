@@ -4,6 +4,7 @@ export {tokens,request,users,waitForLock};
 export const question={prompt:'Pregunta centinela privada',position:1,points:2.5,alternatives:[{id:'a',text:'Alternativa centinela',isCorrect:true},{id:'b',text:'Otra opción',isCorrect:false}]};
 export async function quizFixture(pool,seed=false) {
  const f=await contentFixture(pool);
+ await pool.query("UPDATE enrollments SET active=false WHERE section_id=$1 AND user_id=$2 AND active",[f.s1,users.other]);
  await f.add(f.s1,users.other,'teacher');
  const make=async({course=f.own,tenant=f.tenants.uc,section=f.s1,published=false,creator=users.owner,questions=[{...question,id:randomUUID()}]}={})=>{
   const id=randomUUID();await pool.query(`INSERT INTO quizzes(id,institution_id,course_id,section_id,title,questions,created_by,published_at)

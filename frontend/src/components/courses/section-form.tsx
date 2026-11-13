@@ -6,9 +6,9 @@ import { text, capacity, changed, FieldError, type Section } from "../../lib/cou
 import { createSection, updateSection, listSections } from "../../lib/api/sections.ts";
 import { useMutation } from "./use-mutation.ts";
 import { Field } from "./form-fields.tsx";
-const belowEnrollments = "La capacidad no puede ser menor que las matrículas activas de la sección.";
+const belowEnrollments = "El límite de cupos debe cubrir a todos los estudiantes con matrícula activa en la sección.";
 const decreaseMessage = (section?: Section) => section?.capacity != null
-  ? `No puedes reducir la capacidad. Ingresa ${section.capacity} o más, o deja vacío para no limitarla.`
+  ? `No puedes reducir la capacidad. Ingresa ${section.capacity} o más, o deja el campo vacío para que no haya límite.`
   : "No puedes reducir la capacidad configurada.";
 export function SectionForm({ session, slug, courseId, section, onSaved, dialog }: {
   session: Session;
@@ -22,6 +22,9 @@ export function SectionForm({ session, slug, courseId, section, onSaved, dialog 
     codes: { SECTION_CAPACITY_DECREASE: decreaseMessage(section), SECTION_CAPACITY_BELOW_ENROLLMENTS: belowEnrollments },
     codeFields: { SECTION_CAPACITY_DECREASE: "capacity", SECTION_CAPACITY_BELOW_ENROLLMENTS: "capacity" },
   });
+  const limitHint = section?.capacity
+    ? `Si mantienes un límite, el mínimo es ${section.capacity}.`
+    : "Para fijar un límite, ingresa un entero desde 1.";
   const onBusy = dialog?.onBusy;
   useEffect(() => { onBusy?.(mutation.busy); }, [onBusy, mutation.busy]);
   const formRef = useRef<HTMLFormElement>(null);
@@ -36,7 +39,7 @@ export function SectionForm({ session, slug, courseId, section, onSaved, dialog 
     // A number input reports letters or "e" as an empty value: never read that as «sin límite».
     const capacityInput = element.elements.namedItem("capacity") as HTMLInputElement | null;
     await mutation.run(async (current) => {
-      if (capacityInput?.validity.badInput) throw new FieldError("capacity", "Ingresa un número entero mayor o igual a 1, o deja vacío para no limitarla.");
+      if (capacityInput?.validity.badInput) throw new FieldError("capacity", "Ingresa un número entero mayor o igual a 1, o deja el campo vacío para que no haya límite.");
       const body = { code: text(form.get("code"), 32, "code"), capacity: capacity(String(form.get("capacity") ?? "")) };
       if (section && section.capacity !== null && body.capacity !== null && body.capacity < section.capacity)
         throw new FieldError("capacity", decreaseMessage(section));
@@ -62,8 +65,8 @@ export function SectionForm({ session, slug, courseId, section, onSaved, dialog 
     <fieldset className="stack" disabled={mutation.busy || mutation.uncertain}>
       <div className="form-grid">
         <Field name="code" label="Código de sección" value={section?.code} invalid={mutation.field === 'code'} error={mutation.field === 'code' ? mutation.message : undefined} />
-        <Field name="capacity" label="Capacidad (vacío: sin límite)" value={section?.capacity?.toString()} required={false} type="number" min={Math.max(1, section?.capacity ?? 1)}
-          hint={!section ? "Entero desde 1." : section.capacity ? `Solo puede aumentar: mínimo ${section.capacity}.` : "Entero desde 1, no menor que las matrículas activas."}
+        <Field name="capacity" label="Cupos de estudiantes" value={section?.capacity?.toString()} required={false} type="number" min={Math.max(1, section?.capacity ?? 1)}
+          hint={`Solo cuentan las matrículas activas como Estudiante. Deja el campo vacío para permitir cupos ilimitados. ${limitHint}`}
           invalid={mutation.field === 'capacity'} error={mutation.field === 'capacity' ? mutation.message : undefined} />
       </div>
       {dialog ? <div className="actions dialog-actions">

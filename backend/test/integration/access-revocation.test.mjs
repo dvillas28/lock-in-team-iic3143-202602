@@ -50,7 +50,7 @@ test("institutional flags and academic roles refresh with an existing JWT",async
   assert.equal((await request(app,token,"uc/me")).body.institutionMembership.isSuperAdmin,true);
   await pool.query("UPDATE institution_memberships SET is_admin=false,is_super_admin=false WHERE user_id=$1 AND institution_id=$2",[users.owner,f.tenants.uc]);
   const me=(await request(app,token,"uc/me")).body;
-  assert.equal(me.institutionMembership.isAdmin,false);assert.equal(me.institutionMembership.isSuperAdmin,false);assert.equal(me.sectionMemberships.length,3);
+  assert.equal(me.institutionMembership.isAdmin,false);assert.equal(me.institutionMembership.isSuperAdmin,false);assert.equal(me.sectionMemberships.length,2);
   await pool.query("UPDATE enrollments SET active=false WHERE user_id=$1",[users.owner]);
   assert.deepEqual((await request(app,token,"uc/me")).body.sectionMemberships,[]);
  }finally{if(app)await app.close();await pool.end();}

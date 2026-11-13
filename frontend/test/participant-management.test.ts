@@ -59,7 +59,7 @@ test("the dialog shows identity, section, current role and status, with labelled
     const select = manageSelect(ui), label = dialog.querySelector(`label[for="${select.id}"]`)!;
     assert.equal(label.textContent, "Rol académico");
     assert.equal(select.selectedOptions[0].textContent, "Docente (actual)");
-    assert.match(ui.doc.getElementById(select.getAttribute("aria-describedby")!)!.textContent!, /Elige otro rol/);
+    assert.match(ui.doc.getElementById(select.getAttribute("aria-describedby")!)!.textContent!, /un rol activo por sección.*pasa al Historial/);
     assert.doesNotMatch(dialog.textContent!, new RegExp(teacher.id), "no internal IDs in the dialog");
     assert.equal(dialog.querySelector("form")!.getAttribute("aria-label"), "Gestionar participante");
   } finally { await ui.close(); }
@@ -90,7 +90,7 @@ test("one native pick (input, then change) selects the role at the first attempt
 });
 
 test("saving a role change patches only that enrollment, updates both views and toasts without IDs", async () => {
-  const { ui, backend } = await owner([enrollment, sibling]);
+  const { ui, backend } = await owner([enrollment]);
   try {
     await openManage(ui, enrollment.id);
     const submit = manageButton(ui, "Guardar cambios")!;
@@ -109,16 +109,46 @@ test("saving a role change patches only that enrollment, updates both views and 
     const successor = backend.rows().find(e => e.active && e.role === "teacher")!;
     assert.ok(ui.doc.activeElement === rowTrigger(ui, successor.id), "focus moves to the successor row");
     assert.equal(ui.doc.querySelector(`[data-enrollment-id="${enrollment.id}"]`), null, "the old row leaves Activas");
-    assert.ok(ui.doc.querySelector(`[data-enrollment-id="${sibling.id}"]`), "sibling roles are untouched");
     await ui.click("Historial");
     assert.match(ui.doc.querySelector(`[data-enrollment-id="${enrollment.id}"]`)!.textContent!, /Histórica/);
     assert.equal(ui.requests.filter(r => r.method === "GET" && r.url.includes("/me")).length > 0, true);
   } finally { await ui.close(); }
 });
 
+test("Activas reflects a confirmed role change while the roster refresh is pending", async () => {
+  const next: Enrollment = { ...enrollment, id: id(94), role: "assistant" };
+  const refresh = deferred<Response>();
+  let changed = false;
+  const backend = server([enrollment]);
+  const ui = await mount(h(CourseDetail, { courseId: course.id }), r => {
+    if (r.url.includes("/enrollments") && r.method === "PATCH") {
+      changed = true;
+      return Response.json(next);
+    }
+    if (r.url.includes("/enrollments") && changed) return refresh.promise;
+    return backend.reply(r);
+  }, "teacher");
+  try {
+    modalRuntime(ui);
+    await openManage(ui, enrollment.id);
+    await chooseRole(ui, "assistant");
+    await save(ui);
+    assert.equal(ui.doc.querySelector('.participants-views [aria-pressed="true"]')?.textContent, "Activas");
+    assert.equal(rowTrigger(ui, enrollment.id), null);
+    assert.match(rowTrigger(ui, next.id).getAttribute("aria-label")!, /Ayudante/);
+    await ui.settle(() => refresh.resolve(Response.json(page([next]))));
+    assert.equal(isManaging(ui), false);
+    assert.equal(ui.doc.querySelectorAll(`[data-enrollment-id="${next.id}"]`).length, 1);
+  } finally {
+    refresh.resolve(Response.json(page([next])));
+    await ui.close();
+  }
+});
+
 test("permission, capacity, gone and conflict errors are specific and stay next to their cause", async () => {
   const cases: [number, string | undefined, RegExp, boolean][] = [
     [403, undefined, /Solo el propietario del curso administra matrículas docentes/, false],
+    [409, "SECTION_ROLE_ALREADY_ACTIVE", /ya tiene otra matrícula activa/, true],
     [409, "SECTION_FULL", /no tiene cupos de estudiantes disponibles/, true],
     [404, undefined, /ya no existe en la sección/, false],
     [409, undefined, /cambió mientras la editabas/, false],

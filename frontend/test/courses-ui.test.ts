@@ -44,7 +44,7 @@ test('section management preserves staff controls after removing summary',async(
    assert.equal(ui.doc.querySelector('.page-heading .hint')?.textContent,course.name);
    // One section: the bar names it and shows its capacity; no picker, counter or search is drawn.
    assert.equal(ui.doc.querySelector('.section-toolbar .section-name')?.textContent,'Sección 1');
-   assert.match(ui.doc.querySelector('.section-toolbar .chip')!.textContent!,/^Capacidad: /);
+   assert.match(ui.doc.querySelector('.section-toolbar .chip')!.textContent!,/^Cupos de estudiantes: /);
    // The section is named once; the roster below is titled «Participantes», never repeating it.
    assert.deepEqual([...ui.doc.querySelectorAll('h2')].filter(h=>!h.closest('dialog')).map(h=>h.textContent),['Participantes']);
    // Owner actions open modals (Crear sección is the primary one); their forms carry no duplicate heading.

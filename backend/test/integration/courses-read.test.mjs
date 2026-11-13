@@ -11,14 +11,14 @@ test("US1: owner, academic roles, hidden tenants, multiple roles and live revoca
   assert.equal((await get(other,`uc/sections/${f.s2}`)).status,404);
   assert.equal((await get(owner,`uc/courses/${f.own}/sections`)).body.items.length,2);
   assert.equal((await get(other,`uc/courses/${f.own}/sections`)).body.items.length,1);
-  const me=(await get(owner,"uc/me")).body;assert.equal(me.institutionMembership.isAdmin,true);assert.equal(me.institutionMembership.isSuperAdmin,true);assert.equal(me.sectionMemberships.length,3);
+  const me=(await get(owner,"uc/me")).body;assert.equal(me.institutionMembership.isAdmin,true);assert.equal(me.institutionMembership.isSuperAdmin,true);assert.equal(me.sectionMemberships.length,2);
   assert.ok(me.sectionMemberships.every(m=>m.sectionCode === "1"));
   await pool.query("UPDATE sections SET code='UC-2' WHERE id=$1",[f.s2]);
   await pool.query("UPDATE sections SET code='UTFSM-1' WHERE id=$1",[f.s4]);
   await f.add(f.s2,users.owner,"assistant");
   await f.add(f.s4,users.owner,"student",f.tenants.utfsm);
   const uc=(await get(owner,"uc/me")).body.sectionMemberships;
-  assert.equal(uc.length,4);
+  assert.equal(uc.length,3);
   assert.ok(uc.some(m=>m.sectionId===f.s2 && m.sectionCode==='UC-2' && m.role==='assistant'));
   assert.ok(uc.every(m=>m.sectionId!==f.s4));
   assert.deepEqual((await get(owner,"utfsm/me")).body.sectionMemberships,[{courseId:f.foreign,sectionId:f.s4,sectionCode:'UTFSM-1',role:'student'}]);
@@ -55,7 +55,7 @@ test("US1 independent academic roles and institutional flags keep their own scop
    assert.equal((await request(app,token,course,"PATCH",{name:"denied"})).status,403);
    assert.equal((await request(app,token,section+"/enrollments")).status,role==="student"?403:200);
    assert.equal((await request(app,token,course+"/audit-events")).status,role==="teacher"?200:403);
-   assert.equal((await request(app,token,section+"/enrollments","POST",{userId:users.other,role:"student"})).status,role==="teacher"?201:403);
+   assert.equal((await request(app,token,section+"/enrollments","POST",{userId:users.other,role:"student"})).status,role==="teacher"?409:403);
    await pool.query("UPDATE enrollments SET active=false WHERE id=$1",[enrollment]);
    assert.equal((await request(app,token,course)).status,404);
   }

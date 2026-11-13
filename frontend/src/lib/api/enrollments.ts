@@ -3,8 +3,9 @@ import type { components } from "./schema";
 import { path, pagination, page, enrollment, person, roles, isId, text } from "../courses/validation.ts";
 export type EnrollmentStatus = "active" | "historical";
 /** Without `status` the roster mixes active and revoked enrollments; with it, each view paginates on its own. */
-export async function listSectionEnrollments(client: ApiClient, slug: string, sectionId: string, cursor?: string, limit = 20, status?: EnrollmentStatus) {
-  const result = await client.GET("/api/v1/institution/{institutionSlug}/sections/{sectionId}/enrollments", { params: { path: { ...path(slug, { sectionId }), sectionId }, query: { ...pagination(cursor, limit), ...(status ? { status } : {}) } } });
+export async function listSectionEnrollments(client: ApiClient, slug: string, sectionId: string, cursor?: string, limit = 20, status?: EnrollmentStatus, userId?: string) {
+  if (userId !== undefined && !isId(userId)) throw new TypeError("Persona inválida.");
+  const result = await client.GET("/api/v1/institution/{institutionSlug}/sections/{sectionId}/enrollments", { params: { path: { ...path(slug, { sectionId }), sectionId }, query: { ...pagination(cursor, limit), ...(status ? { status } : {}), ...(userId ? { userId } : {}) } } });
   return page(result.data, v => enrollment(v, sectionId));
 }
 export async function createSectionEnrollment(client: ApiClient, slug: string, sectionId: string, body: components["schemas"]["EnrollmentCreate"]) {

@@ -182,6 +182,14 @@
         enum:
         - active
         - historical
+    - name: userId
+      in: query
+      required: false
+      description: Limita las matrículas a la persona indicada dentro de la sección autorizada.
+        El cursor queda ligado a la persona.
+      schema:
+        type: string
+        format: uuid
     responses:
       '200':
         description: Memberships de la sección.
@@ -214,8 +222,9 @@
     summary: Crear una membership de sección
     description: Admin dueño (cualquier rol) o teacher activo de esta sección (solo
       student/assistant; teacher responde 403). Miembro destinatario
-      provisionado y activo; roles múltiples distintos, historial preservado. Sin
-      privilegios desde JWT o body. Un student nuevo requiere cupo si la sección tiene
+      provisionado y activo. Una matrícula activa por persona y sección. Repetir
+      el mismo rol devuelve la matrícula existente. Otro rol activo responde
+      409 SECTION_ROLE_ALREADY_ACTIVE. Un student nuevo requiere cupo si la sección tiene
       capacidad numérica (409 SECTION_FULL, sin escritura ni auditoría).
     requestBody:
       required: true
@@ -277,8 +286,8 @@
     summary: Cambiar rol o desactivar una membership
     description: Admin dueño o teacher activo de esta sección; solo el dueño cambia,
       revoca o reactiva matrículas teacher o promueve a teacher (403). Miembro destinatario
-      provisionado y activo; roles múltiples distintos, historial preservado. Sin
-      privilegios desde JWT o body. Exactamente role o active. Cambio de rol devuelve
+      provisionado y activo. Exactamente role o active. Reactivar si ya existe otra
+      matrícula activa responde 409 SECTION_ROLE_ALREADY_ACTIVE. Cambio de rol devuelve
       sucesor (ID puede cambiar). Nadie revoca ni cambia su propia matrícula teacher
       (403); revocar o cambiar al último teacher activo responde 409 LAST_SECTION_TEACHER.
       Cambiar a student o reactivar un student sin cupo responde 409 SECTION_FULL.

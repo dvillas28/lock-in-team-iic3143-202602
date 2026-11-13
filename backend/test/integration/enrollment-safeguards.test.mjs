@@ -12,7 +12,9 @@ test("teacher enrollments are owner-only; self, last teacher and history are pro
   const owner=await login(app,f.env),teacher=await login(app,f.env,"UC"),member=randomUUID();
   await pool.query("INSERT INTO users(id,email,name,password_hash) SELECT $1,'safeguard@example.test','Participante',password_hash FROM users WHERE id=$2",[member,users.other]);
   await pool.query("INSERT INTO institution_memberships(id,institution_id,user_id) VALUES($1,$2,$3)",[randomUUID(),f.tenants.uc,member]);
-  const s1=`uc/sections/${f.s1}/enrollments`,s3=`uc/sections/${f.s3}/enrollments`,peer=await f.add(f.s1,users.other,"teacher");
+  const s1=`uc/sections/${f.s1}/enrollments`,s3=`uc/sections/${f.s3}/enrollments`;
+  await pool.query("UPDATE enrollments SET active=false WHERE section_id=$1 AND user_id=$2 AND active",[f.s1,users.other]);
+  const peer=await f.add(f.s1,users.other,"teacher");
   const denied=async(token,path,method,body,status=403)=>{const before=await state(pool),r=await request(app,token,path,method,body);assert.equal(r.status,status,`${method} ${path} ${JSON.stringify(body)}`);assert.deepEqual(await state(pool),before);return r;};
   // Rule A/C: a non-owner teacher (even with is_admin) cannot touch teacher enrollments, including self and no-ops.
   for(const body of [{active:false},{role:"assistant"},{role:"teacher"}])await denied(teacher,`${s1}/${peer}`,"PATCH",body);
@@ -20,12 +22,15 @@ test("teacher enrollments are owner-only; self, last teacher and history are pro
   await denied(teacher,s1,"POST",{userId:member,role:"teacher"});
   await denied(teacher,s1,"POST",{userId:users.owner,role:"teacher"});
   // Rule D: teachers keep managing students and assistants of their section.
-  const student=(await request(app,teacher,s1,"POST",{userId:member,role:"student"})),assistant=await request(app,teacher,s1,"POST",{userId:member,role:"assistant"});
-  assert.deepEqual([student.status,assistant.status],[201,201]);
+  const student=await request(app,teacher,s1,"POST",{userId:member,role:"student"});
+  assert.equal(student.status,201);
+  const conflict=await denied(teacher,s1,"POST",{userId:member,role:"assistant"},409);
+  assert.equal(conflict.body.code,"SECTION_ROLE_ALREADY_ACTIVE");
   await denied(teacher,`${s1}/${student.body.id}`,"PATCH",{role:"teacher"});
-  await denied(teacher,`${s1}/${assistant.body.id}`,"PATCH",{role:"teacher"});
   const others=(await pool.query("SELECT id,active FROM enrollments WHERE user_id<>$1 ORDER BY id",[member])).rows;
-  assert.equal((await request(app,teacher,`${s1}/${student.body.id}`,"PATCH",{active:false})).status,200);
+  const assistant=await request(app,teacher,`${s1}/${student.body.id}`,"PATCH",{role:"assistant"});
+  assert.equal(assistant.status,200);
+  await denied(teacher,`${s1}/${assistant.body.id}`,"PATCH",{role:"teacher"});
   const demoted=await request(app,teacher,`${s1}/${assistant.body.id}`,"PATCH",{role:"student"});assert.equal(demoted.status,200);assert.notEqual(demoted.body.id,assistant.body.id);
   assert.equal((await request(app,teacher,`${s1}/${demoted.body.id}`,"PATCH",{active:false})).status,200);
   // Rule E: revocations keep every row as history and do not touch other people's active roles.
@@ -58,8 +63,8 @@ test("teacher enrollments are owner-only; self, last teacher and history are pro
   // A valid revocation by the owner removes the revoked teacher's write permission but keeps the row.
   assert.equal((await request(app,owner,`${s1}/${peer}`,"PATCH",{active:false})).status,200);
   assert.equal((await pool.query("SELECT active FROM enrollments WHERE id=$1",[peer])).rows[0].active,false);
-  await denied(teacher,s1,"POST",{userId:member,role:"student"});
-  assert.equal((await request(app,teacher,s1)).status,200,"assistant role keeps read access");
+  await denied(teacher,s1,"POST",{userId:member,role:"student"},404);
+  assert.equal((await request(app,teacher,s1)).status,404,"revoked teacher loses access to the section");
   assert.equal((await pool.query("SELECT count(*)::int AS n FROM audit_events WHERE resource_id=$1 AND action='enrollment.activeChanged'",[peer])).rows[0].n,1);
  }finally{if(app)await app.close();await pool.end();}
 });

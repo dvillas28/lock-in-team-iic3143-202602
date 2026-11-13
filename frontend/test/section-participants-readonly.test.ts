@@ -92,7 +92,7 @@ for (const profile of ["student", "assistant"]) test(`${profile} reads one roste
     assert.equal(ui.doc.querySelectorAll(".participants-readonly :is(form, dialog, input, details, [role=dialog])").length, 0);
     assert.deepEqual([...ui.doc.querySelectorAll<HTMLButtonElement>(".participants-readonly button")].map(b => [b.textContent, b.type, !!b.closest(".participant-filter")]),
       ["Todos", "Docentes", "Ayudantes", "Estudiantes"].map(label => [label, "button", true]));
-    assert.doesNotMatch(text, /@|Histórica|Revocar|Gestionar|Asignar|Configurar|Crear sección|Capacidad/);
+    assert.doesNotMatch(text, /@|Histórica|Revocar|Gestionar|Asignar|Configurar|Crear sección|Capacidad|Cupos de estudiantes/);
     assert.doesNotMatch(text, uuid);
     // Only the selected section's roster is read, never the administrative lists.
     assert.deepEqual(ui.requests.filter(participants).map(r => new URL(r.url).pathname), [`/api/v1/institution/uc/sections/${section.id}/participants`]);

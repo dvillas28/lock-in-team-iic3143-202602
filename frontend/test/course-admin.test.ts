@@ -51,7 +51,7 @@ test("configuration PATCH sends only changed fields and immutable ownership neve
  assert.equal(ui.doc.querySelector('select[name="managedSection"]'),null,'one section needs no picker');await ui.submit('form[aria-label="Configurar sección"]',{capacity:'0'});assert.equal(ui.requests.filter(r=>r.method==='PATCH').length,1,'zero never leaves the form');
  assert.match(ui.doc.querySelector('form[aria-label="Configurar sección"] .field-error')!.textContent!,/mayor o igual a 1/);
  await ui.submit('form[aria-label="Configurar sección"]',{capacity:'5'});assert.deepEqual(await ui.requests.filter(r=>r.method==='PATCH')[1].json(),{capacity:5});
- assert.equal(ui.doc.querySelector('.section-toolbar .chip')!.textContent,'Capacidad: 5');
+ assert.equal(ui.doc.querySelector('.section-toolbar .chip')!.textContent,'Cupos de estudiantes: 5');
  }finally{await ui.close();}
 });
 test("invalid inputs announce associated errors and never send a mutation",async()=>{

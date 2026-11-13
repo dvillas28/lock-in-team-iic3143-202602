@@ -6,6 +6,7 @@ import { CourseDetail } from "../src/components/courses/course-detail.tsx";
 import { SEARCH_DEBOUNCE_MS } from "../src/components/courses/enrollment-form.tsx";
 import { mount } from "./fixtures/course-ui.ts";
 import { course, section, otherSection, enrollment, person, id, page, deferred } from "./fixtures/courses.ts";
+import { isManaging, manageSelect } from "./fixtures/management.ts";
 import { assign, assignDialog, confirm, escape, fieldErrors, isOpen, modalRuntime, open, pick, results, role, roleSelect, searchInput, submitButton, toast, trigger, type } from "./fixtures/assignment.ts";
 
 const luis = { id: id(5), name: "Luis Soto", email: "luis@example.test", active: true };
@@ -73,7 +74,7 @@ test("search, select, assign: one POST, modal closes, roster reloads in place, t
     assert.deepEqual(await posts(ui)[0].json(), { userId: luis.id, role: "assistant" });
     assert.equal(isOpen(ui), false);
     assert.equal(toast(ui), "Luis Soto se asignó como Ayudante.");
-    assert.equal(rosterReads(ui), reads + 1, "roster refreshed without reloading the page");
+    assert.equal(rosterReads(ui), reads + 2, "the lookup and the roster refresh stay in place");
     assert.ok(ui.doc.querySelector(`[data-enrollment-id="${enrollment.id}"]`));
     assert.equal(ui.doc.activeElement, trigger(ui));
     assert.doesNotMatch(ui.doc.querySelector('section[aria-label="Participantes"]')!.textContent!, /Matrícula confirmada/, "no banner pushes the table");
@@ -147,7 +148,7 @@ test("pagination appends without duplicates, keeps the opaque cursor and the arr
   } finally { await ui.close(); }
 });
 
-test("confirming without a person, or with a role the person already holds, explains it next to the field and writes nothing", async () => {
+test("assignment directs an already enrolled person to manage the current role", async () => {
   const ui = await mount(h(CourseDetail, { courseId: course.id }), server(undefined, [enrollment]), "teacher");
   try {
     modalRuntime(ui); await open(ui);
@@ -156,12 +157,58 @@ test("confirming without a person, or with a role the person already holds, expl
     assert.equal(searchInput(ui).getAttribute("aria-invalid"), "true");
     await type(ui, "pérez");
     assert.match(results(ui)[0].textContent!, /Estudiante/, "known roles are flagged in the results");
-    await pick(ui, "María Pérez"); await confirm(ui);
-    assert.deepEqual(fieldErrors(ui), ["María Pérez ya tiene una matrícula activa como Estudiante. Elige otro rol."]);
-    assert.equal(roleSelect(ui).getAttribute("aria-invalid"), "true");
+    await pick(ui, "María Pérez");
+    assert.match(assignDialog(ui).textContent!, /ya tiene una matrícula activa.*usa «Gestionar matrícula actual»\./);
+    assert.equal(assignDialog(ui).querySelector('button[type="submit"]'), null);
+    await confirm(ui);
     assert.equal(posts(ui).length, 0);
-    await role(ui, "assistant");
-    assert.deepEqual(fieldErrors(ui), [], "changing the role clears the error");
+    await ui.click("Gestionar matrícula actual");
+    assert.equal(isOpen(ui), false);
+    assert.equal(isManaging(ui), true);
+    assert.equal(manageSelect(ui).value, "student");
+  } finally { await ui.close(); }
+});
+
+test("a non-owner teacher sees no management button for an enrolled teacher and is told so", async () => {
+  const teacher = { ...enrollment, role: "teacher" };
+  const ui = await mount(h(CourseDetail, { courseId: course.id }), server(undefined, [teacher]), "teacher");
+  try {
+    modalRuntime(ui); await open(ui); await type(ui, "pérez"); await pick(ui, "María Pérez");
+    assert.match(assignDialog(ui).textContent!, /ya tiene una matrícula activa en la sección y no puedes cambiar su rol\./);
+    assert.doesNotMatch(assignDialog(ui).textContent!, /Gestionar matrícula/);
+    assert.equal(assignDialog(ui).querySelector('button[type="submit"]'), null);
+    await confirm(ui);
+    assert.equal(posts(ui).length, 0);
+  } finally { await ui.close(); }
+});
+
+test("an active enrollment outside the roster page opens its management dialog", async () => {
+  const ui = await mount(h(CourseDetail, { courseId: course.id }), server(r => {
+    const url = new URL(r.url);
+    return url.pathname.endsWith("/enrollments") && url.searchParams.get("userId") === person.id
+      ? Response.json(page([enrollment]))
+      : undefined;
+  }), "teacher");
+  try {
+    modalRuntime(ui); await open(ui); await type(ui, "pérez"); await pick(ui, "María Pérez");
+    assert.equal(ui.doc.querySelector(`[data-enrollment-id="${enrollment.id}"]`), null);
+    await ui.click("Gestionar matrícula actual");
+    assert.ok(isManaging(ui));
+    assert.equal(manageSelect(ui).value, "student");
+    assert.equal(posts(ui).length, 0);
+  } finally { await ui.close(); }
+});
+
+test("assignment displays the active role conflict returned for an enrollment outside the loaded page", async () => {
+  const ui = await mount(h(CourseDetail, { courseId: course.id }), server(r => r.method === "POST"
+    ? Response.json({ code: "SECTION_ROLE_ALREADY_ACTIVE" }, { status: 409 })
+    : undefined), "teacher");
+  try {
+    modalRuntime(ui);
+    await assign(ui, "pérez", "María Pérez", "assistant");
+    assert.match(fieldErrors(ui)[0], /ya tiene una matrícula activa.*usa «Gestionar matrícula actual»\./);
+    assert.equal(posts(ui).length, 1);
+    assert.ok(isOpen(ui));
   } finally { await ui.close(); }
 });
 
@@ -349,7 +396,7 @@ test("the roster opens on active enrollments; Historial lists revoked ones read-
     assert.equal(row.querySelector("button"), null, "history is never managed");
     assert.equal(panel().querySelector(`[data-enrollment-id="${enrollment.id}"]`), null, "active rows stay in Activas");
     assert.equal(panel().querySelector("caption")!.textContent, "Matrículas históricas");
-    assert.match(panel().textContent!, /se conservan como registro/i);
+    assert.match(panel().textContent!, /registro de solo lectura/i);
     // A new assignment is active, so the roster returns to Activas to show it.
     await assign(ui, "soto", "Luis Soto");
     assert.equal(posts(ui).length, 1);

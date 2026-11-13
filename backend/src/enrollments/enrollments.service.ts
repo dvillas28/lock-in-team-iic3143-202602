@@ -4,7 +4,7 @@ import type { QueryResultRow,PoolClient } from "pg";
 import { DatabaseService } from "../database/database.service";
 import { AuditService } from "../audit/audit.service";
 import { lockContext,sectionScope,requirePermission } from "../courses/course-access";
-import { page,paginated } from "../courses/validation";
+import { page,paginated,uuid } from "../courses/validation";
 import { requireStudentSeat } from "../sections/section-capacity";
 const dto=(e:QueryResultRow)=>({id:e.id,sectionId:e.section_id,user:{id:e.user_id,email:e.email,name:e.name,active:e.user_active},role:e.role,active:e.active,createdAt:e.created_at});
 const snapshot=(e:QueryResultRow)=>({id:e.id,userId:e.user_id,sectionId:e.section_id,role:e.role,active:e.active});
@@ -20,16 +20,19 @@ export class EnrollmentsService {
   // Optional view filter: active roster or revoked history; absent keeps the full list.
   const status=query.status===undefined?null:query.status;
   if(status!==null && status!=="active" && status!=="historical")throw new BadRequestException();
-  const p=page(query,JSON.stringify(["enrollments",m.institution_id,section,actor,status]),["status"]);
+  const userId=query.userId===undefined?null:uuid(query.userId);
+  const scopeKey=["enrollments",m.institution_id,section,actor,status];
+  if(userId)scopeKey.push(userId);
+  const p=page(query,JSON.stringify(scopeKey),["status","userId"]);
   const rows=(await db.query(`SELECT e.*,u.email,u.name,u.active AS user_active,
    to_char(e.created_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS cursor_date
    FROM public.enrollments e JOIN public.users u ON u.id=e.user_id WHERE e.institution_id=$1 AND e.section_id=$2
-   AND ($3::timestamptz IS NULL OR (e.created_at,e.id)>($3::timestamptz,$4::uuid)) AND ($6::boolean IS NULL OR e.active=$6) ORDER BY e.created_at,e.id LIMIT $5`,[m.institution_id,section,p.date,p.id,p.limit+1,status===null?null:status==="active"])).rows;
+   AND ($7::uuid IS NULL OR e.user_id=$7) AND ($3::timestamptz IS NULL OR (e.created_at,e.id)>($3::timestamptz,$4::uuid)) AND ($6::boolean IS NULL OR e.active=$6) ORDER BY e.created_at,e.id LIMIT $5`,[m.institution_id,section,p.date,p.id,p.limit+1,status===null?null:status==="active",userId])).rows;
   const result=paginated(rows,p,r=>r.cursor_date);return {...result,items:result.items.map(dto)};
 
  });
 }
- // Read-only roster for every active participant of the section (owner included): one row per user, no email, history or audit data.
+ // Keep roles as an array for existing readers and for unresolved pre-migration enrollments.
  async participants(actor:string,slug:string,section:string) {
   return this.database.withInstitution(actor,slug,async (db,m)=>{
    await sectionScope(db,m,section);
@@ -42,6 +45,13 @@ export class EnrollmentsService {
    return {items:rows.map(r=>({userId:r.id,name:r.name,roles:r.roles}))};
   });
  }
+ private async requireNoActiveEnrollment(db:PoolClient,institutionId:string,sectionId:string,userId:string,except?:string) {
+  const {rowCount}=await db.query(
+   "SELECT 1 FROM public.enrollments WHERE institution_id=$1 AND section_id=$2 AND user_id=$3 AND active AND ($4::uuid IS NULL OR id<>$4) LIMIT 1",
+   [institutionId,sectionId,userId,except ?? null],
+  );
+  if(rowCount)throw new ConflictException({code:"SECTION_ROLE_ALREADY_ACTIVE"});
+ }
  private async result(db:PoolClient,id:string) {return dto((await db.query("SELECT e.*,u.email,u.name,u.active AS user_active FROM public.enrollments e JOIN public.users u ON u.id=e.user_id WHERE e.id=$1",[id])).rows[0]);}
  async create(actor:string,slug:string,section:string,user:string,role:string) {
   return this.database.withInstitution(actor,slug,async db=>{
@@ -49,6 +59,7 @@ export class EnrollmentsService {
    requirePermission(mayManage(scope,[role]));
    const existing=(await db.query("SELECT id FROM public.enrollments WHERE institution_id=$1 AND section_id=$2 AND user_id=$3 AND role=$4 AND active",[m.institution_id,section,user,role])).rows[0];
    if(existing)return {created:false,item:await this.result(db,existing.id)};
+   await this.requireNoActiveEnrollment(db,m.institution_id,section,user);
    if(role==="student")await requireStudentSeat(db,m.institution_id,scope.section);
    const e=(await db.query("INSERT INTO public.enrollments(id,institution_id,section_id,user_id,role) VALUES($1,$2,$3,$4,$5) RETURNING *",[randomUUID(),m.institution_id,section,user,role])).rows[0];
    await this.audit.record(db,{institutionId:m.institution_id,actorUserId:actor,courseId:scope.course.id,sectionId:section,action:"enrollment.created",resourceType:"enrollment",resourceId:e.id,before:null,after:snapshot(e)});
@@ -75,6 +86,7 @@ export class EnrollmentsService {
     if(!e.active)throw new ConflictException();
     if(e.role===input.role)return this.result(db,id);
     const existing=(await db.query("SELECT * FROM public.enrollments WHERE institution_id=$1 AND section_id=$2 AND user_id=$3 AND role=$4 AND active",[m.institution_id,section,e.user_id,input.role])).rows[0];
+    if(!existing)await this.requireNoActiveEnrollment(db,m.institution_id,section,e.user_id,id);
     // Becoming a student takes a seat unless an active student enrollment already holds one.
     if(input.role==="student" && !existing)await requireStudentSeat(db,m.institution_id,scope.section);
     await db.query("UPDATE public.enrollments SET active=false WHERE id=$1",[id]);
@@ -82,7 +94,10 @@ export class EnrollmentsService {
    } else {
     if(e.active===input.active)return this.result(db,id);
     // Reactivating a student enrollment takes a seat like a new one.
-    if(input.active && e.role==="student")await requireStudentSeat(db,m.institution_id,scope.section);
+    if(input.active) {
+     await this.requireNoActiveEnrollment(db,m.institution_id,section,e.user_id);
+     if(e.role==="student")await requireStudentSeat(db,m.institution_id,scope.section);
+    }
     after=(await db.query("UPDATE public.enrollments SET active=$1 WHERE id=$2 RETURNING *",[input.active,id])).rows[0];
    }
    await this.audit.record(db,{institutionId:m.institution_id,actorUserId:actor,courseId:scope.course.id,sectionId:section,action:input.role===undefined?"enrollment.activeChanged":"enrollment.roleChanged",resourceType:"enrollment",resourceId:id,before:snapshot(e),after:snapshot(after)});

@@ -166,8 +166,9 @@ SectionParticipant:
       type: array
       minItems: 1
       uniqueItems: true
-      description: Roles activos del usuario en esta sección, ordenados teacher, assistant,
-        student. Un usuario con varios roles aparece una sola vez.
+      description: Rol académico activo del usuario en esta sección, representado como
+        un arreglo para conservar el contrato. Durante la transición, el arreglo
+        también puede contener roles activos previos pendientes de revisión.
       items:
         $ref: '#/EnrollmentRole'
 SectionParticipantListResponse:

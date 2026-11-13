@@ -18,7 +18,7 @@ const signIn=async(app,f,id)=>{
 test("section participants: minimal active roster for students and assistants, scoped, read-only",async()=>{
  const pool=await database();let app;try{
   const f=await coursesFixture(pool);app=await http();
-  // s1 (course A, owner=MULTI): MULTI teacher+student, demo-uc assistant.
+  // s1 (course A, owner=MULTI): MULTI teacher, demo-uc assistant.
   const student=await member(pool,f,"Estudiante Activo"),peer=await member(pool,f,"ana Compañera"),former=await member(pool,f,"Ex Estudiante");
   await f.add(f.s1,student,"student");await f.add(f.s1,peer,"student");await f.add(f.s2,peer,"student");
   const history=await f.add(f.s1,former,"student");await pool.query("UPDATE enrollments SET active=false WHERE id=$1",[history]);
@@ -27,7 +27,7 @@ test("section participants: minimal active roster for students and assistants, s
   await f.add(f.s4,users.foreign,"teacher",f.tenants.utfsm);
   const before=await state(pool);
   const expected=[
-   {userId:users.owner,name:"demo-multi",roles:["teacher","student"]},
+   {userId:users.owner,name:"demo-multi",roles:["teacher"]},
    {userId:users.other,name:"demo-uc",roles:["assistant"]},
    {userId:peer,name:"ana Compañera",roles:["student"]},
    {userId:student,name:"Estudiante Activo",roles:["student"]},

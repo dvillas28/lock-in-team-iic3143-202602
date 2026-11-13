@@ -9,8 +9,8 @@ export const sectionsTitle = "Secciones y participantes";
 export const participantColumns = ["Persona", "Rol", "Estado", "Acciones"] as const;
 /** Name over e-mail, as in the loaded rows; the action column stays a plain line, never a button. */
 export const participantCell: RecordCell = (column, row) => column === 0
-  ? <><Skeleton width={row % 2 ? "7rem" : "9rem"} /><p className="hint"><Skeleton width="11rem" /></p></>
-  : <Skeleton width={column === 3 ? "4.5rem" : "5rem"} />;
+  ? <><Skeleton width={row % 2 ? "min(100%, 7rem)" : "min(100%, 9rem)"} /><p className="hint"><Skeleton width="min(100%, 11rem)" /></p></>
+  : <Skeleton shape={column === 3 ? undefined : "pill"} width={column === 3 ? "4.5rem" : "5rem"} />;
 const rows = [0, 1, 2];
 
 /**
@@ -35,7 +35,7 @@ export function SectionPending() {
     <SkeletonRegion label="Cargando sección…">
       <div className="stack">
         <p className="skeleton-section-heading"><Skeleton width="8rem" /></p>
-        <div className="table-scroll participants-table"><table className="data-table skeleton-table">
+        <div className="table-scroll participants-table participants-admin-table"><table className="data-table skeleton-table">
           <caption><Skeleton width="min(20rem, 80%)" /></caption>
           <thead><tr>{participantColumns.map(column => <th key={column}><Skeleton width="4.5rem" /></th>)}</tr></thead>
           <tbody>{rows.map(row => <tr key={row}>{participantColumns.map((column, index) => <td key={column}>{participantCell(index, row)}</td>)}</tr>)}</tbody>

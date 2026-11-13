@@ -16,9 +16,14 @@ test("section capacity: integers from 1, never below the current value or active
   assert.equal((await request(app,owner,"uc/courses","POST",{code:"ZERO",name:"Zero",term:"2026-2",initialSection:{code:"1",capacity:0}})).status,400);
   assert.equal((await request(app,owner,`uc/courses/${f.own}/sections`,"POST",{code:"ONE",capacity:1})).status,201);
   assert.equal((await request(app,owner,`uc/courses/${f.own}/sections`,"POST",{code:"FREE",capacity:null})).status,201);
-  // s1 is unlimited with teacher, student and assistant active; a second student makes two seats taken.
+  // s1 is unlimited with a teacher and an assistant active. Add two students.
   // Capacity counts student seats only: the teacher and the assistant never consume one.
-  await f.add(f.s1,users.other,"student");
+  for (let i=1;i<=2;i++) {
+   const student=randomUUID();
+   await pool.query("INSERT INTO users(id,email,name,password_hash) SELECT $1,$2,$2,password_hash FROM users WHERE id=$3",[student,`section-seat-${i}@example.test`,users.owner]);
+   await pool.query("INSERT INTO institution_memberships(id,institution_id,user_id) VALUES($1,$2,$3)",[randomUUID(),f.tenants.uc,student]);
+   await f.add(f.s1,student,"student");
+  }
   const audited=await events();
   const below=await patch({capacity:1});
   assert.equal(below.status,409);assert.equal(below.body.code,"SECTION_CAPACITY_BELOW_ENROLLMENTS");

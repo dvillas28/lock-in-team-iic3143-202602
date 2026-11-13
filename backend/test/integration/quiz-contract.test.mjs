@@ -51,6 +51,8 @@ test('US2 reusable attempt eligibility uses live student scope and the exact aut
   await pool.query("UPDATE enrollments SET active=false WHERE user_id=$1 AND role='student'",[users.revoked]);
   await assert.rejects(eligible(users.revoked,f.quizzes.section,f.s1),e=>e.getStatus()===404);
   await pool.query('UPDATE institution_memberships SET is_admin=false WHERE user_id=$1 AND institution_id=$2',[users.owner,f.tenants.uc]);
-  await eligible(users.owner,f.quizzes.global,f.s1);
+  // One active role per section: the owner teaches s1 and studies only in s2.
+  await assert.rejects(eligible(users.owner,f.quizzes.global,f.s1),e=>e.getStatus()===403);
+  await eligible(users.owner,f.quizzes.global,f.s2);
  }finally{await runtime?.onApplicationShutdown();await pool.end();}
 });

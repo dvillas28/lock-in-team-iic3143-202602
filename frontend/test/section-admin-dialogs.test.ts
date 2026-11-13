@@ -102,7 +102,7 @@ test("Configurar sección edits the selected section only and reflects the saved
     const patch = ui.requests.find(r => r.method === "PATCH")!;
     assert.ok(patch.url.endsWith(otherSection.id), "only the selected section is written");
     assert.equal(dialogOf(ui, "Configurar sección").hasAttribute("open"), false);
-    assert.equal(ui.doc.querySelector(".section-toolbar .chip")!.textContent, "Capacidad: 25");
+    assert.equal(ui.doc.querySelector(".section-toolbar .chip")!.textContent, "Cupos de estudiantes: 25");
     assert.equal(ui.doc.querySelector(".content-notices .content-notice")!.textContent, "Sección actualizada.");
     assert.ok(ui.doc.activeElement === open, "focus returns to Configurar sección after saving");
   } finally { await ui.close(); }
@@ -146,7 +146,12 @@ test("capacity rejects zero, negatives, decimals, text and decreases next to the
   try {
     modalRuntime(second);
     await second.settle(() => trigger(second, "Configurar sección").click());
-    assert.match(second.doc.querySelector('dialog form[aria-label="Configurar sección"]')!.textContent!, /Solo puede aumentar: mínimo 30/);
+    const form = second.doc.querySelector('dialog form[aria-label="Configurar sección"]')!;
+    const cups = form.querySelector('input[name="capacity"]')!;
+    const hint = second.doc.getElementById(cups.getAttribute("aria-describedby")!)!;
+    assert.equal(form.querySelector(`label[for="${cups.id}"]`)?.textContent, "Cupos de estudiantes");
+    assert.match(hint.textContent!, /Solo cuentan las matrículas activas como Estudiante/);
+    assert.match(hint.textContent!, /Si mantienes un límite, el mínimo es 30/);
     await second.submit('dialog form[aria-label="Configurar sección"]', { capacity: "20" });
     assert.match(fieldError(second), /No puedes reducir la capacidad. Ingresa 30 o más/);
     assert.equal(second.requests.some(r => r.method === "PATCH"), false);
@@ -160,13 +165,13 @@ test("the server keeps capacity above active enrollments; unlimited stays allowe
     await ui.settle(() => trigger(ui, "Configurar sección").click());
     const dialog = dialogOf(ui, "Configurar sección");
     await ui.submit('dialog form[aria-label="Configurar sección"]', { capacity: "2" });
-    assert.match(fieldError(ui), /no puede ser menor que las matrículas activas/);
+    assert.match(fieldError(ui), /debe cubrir a todos los estudiantes con matrícula activa/);
     assert.ok(dialog.hasAttribute("open"), "a rejected write keeps the modal open");
     assert.equal(ui.doc.querySelector(".content-notice"), null, "errors stay in the form, not in a toast");
     await ui.submit('dialog form[aria-label="Configurar sección"]', { capacity: "" , code: "1B" });
     assert.deepEqual(await ui.requests.filter(r => r.method === "PATCH").at(-1)!.json(), { code: "1B" }, "empty keeps it unlimited");
     assert.equal(dialog.hasAttribute("open"), false);
-    assert.equal(ui.doc.querySelector(".section-toolbar .chip")!.textContent, "Capacidad: Sin límite");
+    assert.equal(ui.doc.querySelector(".section-toolbar .chip")!.textContent, "Cupos de estudiantes: Sin límite");
   } finally { await ui.close(); }
 });
 

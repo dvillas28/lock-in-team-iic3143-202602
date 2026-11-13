@@ -6,26 +6,26 @@ Las variables se resuelven desde el manifest del test, nunca IDs o credenciales 
 
 <a id="e2e-rbac-011"></a>
 
-## E2E-RBAC-011 — Assistant y student acumulan capacidades diferenciadas
+## E2E-RBAC-011 — Ayudante y estudiante tienen alcance por sección
 
 - Módulo / flujo: RBAC; [FL-RBAC-02](../audit/FLOWS.md#fl-rbac-02).
 - Requisito: CU-04/08/13/15/16; RF11/25/27/29; RNF2; [fuente normativa](../../deliveries/2/03-use-cases-and-requirements.md).
 - Evidencia: [course-access.ts](../../../backend/src/courses/course-access.ts); [quiz-access.ts](../../../backend/src/quizzes/quiz-access.ts); [gradebook-access.ts](../../../backend/src/gradebook/gradebook-access.ts).
-- Objetivo: Assistant y student acumulan capacidades diferenciadas; verificar las aserciones siguientes, sin inferir éxito solo por carga.
+- Objetivo: Ayudante y estudiante tienen alcance por sección; verificar las aserciones siguientes, sin inferir éxito solo por carga.
 - Prioridad / criticidad: P0 / Crítica; categorías: multirol,privacidad.
 - Rol / institución: AS-ST; UC por defecto, UTFSM en escenarios cruzados según pasos.
 - Precondiciones / fixtures: BASE; [diccionario](../E2E_TEST_DATA.md); manifest validado y namespace exclusivo.
 - Entrada / operación: `/courses/{C1}/quizzes/{Q1}; /attempts/{A1}`; `getQuizAuthoringView; startQuizAttempt; getQuizAttempt; listQuizAttempts`; [inventario](../audit/API.md).
 - Preparación: resolver variables del manifest; actor de UI hace login real en origen institucional (ANON no); navegar por Link tras login, salvo reload explícito.
 
-1. Login assistant+student S1.
+1. Login de estudiante en S1 y ayudante en S2.
 2. Abrir intento propio por ruta propia.
 3. Abrir seguimiento staff de mismo quiz e intentar escribir otro intento.
 
-- Interfaz esperada: Ruta propia sin nota/corrección; staff puede agregar nota autorizada, nunca isCorrect.
-- API esperada: GET propio proyección student; staff list proyecta assistant; otro intento no editable.
+- Interfaz esperada: La ruta propia aplica la vista estudiante. El libro de notas usa el alcance de ayudante en S2.
+- API esperada: GET propio proyecta student. El listado de ayudante excluye los intentos de S1.
 - Persistencia / consistencia: Solo intento propio puede cambiar.
-- Denegación: No filtrar notas staff como si solo existiera student.
+- Denegación: El rol de ayudante en S2 no permite editar ni consultar otros intentos de S1.
 - Limpieza: cerrar contextos y cancelar interceptores; datos históricos quedan en namespace del test; destruir solo stack/DB propiedad runId al finalizar suite.
 - Dependencias: F1 entorno/seed listo; [fase F3](../E2E_MASTER_PLAN.md#fases); fixture independiente, sin depender de ejecutar otro caso.
 - Nivel / suite: E2E navegador + comprobación API/SQL; regression (regression incluye smoke; extended incluye regression).
