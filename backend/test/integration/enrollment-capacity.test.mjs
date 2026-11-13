@@ -20,12 +20,14 @@ const counts=async(pool,section)=>(await pool.query(`SELECT count(*) FILTER (WHE
 test("enrollment capacity: student seats only, unlimited stays open, full sections reject without writing",async()=>{
  const pool=await database();let app;try{
   const f=await coursesFixture(pool);app=await http();const owner=await login(app,f.env),teacher=await login(app,f.env,"UC");
+  await pool.query("UPDATE enrollments SET active=false WHERE section_id=$1 AND user_id=$2 AND active",[f.s1,users.other]);
   await f.add(f.s1,users.other,"teacher");
-  const [a,b,c,d]=await members(pool,f,4);
+  const [a,b,c,d,existing]=await members(pool,f,5);
+  await f.add(f.s1,existing,"student");
   const enroll=(token,section,userId,role)=>request(app,token,`uc/sections/${section}/enrollments`,"POST",{userId,role});
   // Unlimited: s2 has no capacity and accepts any number of students.
   for(const id of [a,b,c])assert.equal((await enroll(owner,f.s2,id,"student")).status,201);
-  // s1 already holds one active student (owner) next to a teacher and an assistant: capacity 2 leaves one seat.
+  // s1 already holds one active student next to a teacher and an assistant: capacity 2 leaves one seat.
   assert.equal((await request(app,owner,`uc/sections/${f.s1}`,"PATCH",{capacity:2})).status,200,"staff do not count against the capacity");
   assert.equal((await enroll(teacher,f.s1,a,"student")).status,201);
   const before=await counts(pool,f.s1);
@@ -55,12 +57,13 @@ test("enrollment capacity: student seats only, unlimited stays open, full sectio
 test("enrollment capacity: role changes and reactivations cannot bypass a full section",async()=>{
  const pool=await database();let app;try{
   const f=await coursesFixture(pool);app=await http();const owner=await login(app,f.env);
-  const [a,b]=await members(pool,f,2);
+  const [a,b,existing]=await members(pool,f,3);
+  await f.add(f.s1,existing,"student");
   const enroll=(userId,role)=>request(app,owner,`uc/sections/${f.s1}/enrollments`,"POST",{userId,role});
   const patch=(id,body)=>request(app,owner,`uc/sections/${f.s1}/enrollments/${id}`,"PATCH",body);
   await request(app,owner,`uc/sections/${f.s1}`,"PATCH",{capacity:2});
   const student=(await enroll(a,"student")).body,assistant=(await enroll(b,"assistant")).body;
-  // Full (owner + a). Promoting an assistant to student needs a seat; the assistant row survives the rejection.
+  // Full (existing + a). Promoting an assistant to student needs a seat; the assistant row survives the rejection.
   let before=await counts(pool,f.s1);
   const promote=await patch(assistant.id,{role:"student"});
   assert.equal(promote.status,409);assert.equal(promote.body.code,"SECTION_FULL");
@@ -90,10 +93,12 @@ test("enrollment capacity: role changes and reactivations cannot bypass a full s
 test("enrollment capacity: concurrent requests never exceed the last seat",async()=>{
  const pool=await database();let app;try{
   const f=await coursesFixture(pool);app=await http();const owner=await login(app,f.env),teacher=await login(app,f.env,"UC");
+  await pool.query("UPDATE enrollments SET active=false WHERE section_id=$1 AND user_id=$2 AND active",[f.s1,users.other]);
   await f.add(f.s1,users.other,"teacher");
-  const ids=await members(pool,f,6);
+  const [existing,...ids]=await members(pool,f,7);
+  await f.add(f.s1,existing,"student");
   await request(app,owner,`uc/sections/${f.s1}`,"PATCH",{capacity:3});
-  // One student (owner) holds a seat: two remain for six simultaneous students from two actors.
+  // One student holds a seat: two remain for six simultaneous students from two actors.
   const responses=await Promise.all(ids.map((userId,i)=>request(app,i%2?teacher:owner,`uc/sections/${f.s1}/enrollments`,"POST",{userId,role:"student"})));
   assert.deepEqual(responses.map(r=>r.status).sort(),[201,201,409,409,409,409]);
   assert.ok(responses.filter(r=>r.status===409).every(r=>r.body.code==="SECTION_FULL"));

@@ -25,6 +25,6 @@ test('role/flag revocation on a later page reduces scope; own view never shows a
  const first=await request(app,t.owner,path+'/gradebook?limit=1');assert.equal(first.body.hasMore,true);
  await pool.query('UPDATE institution_memberships SET is_admin=false WHERE institution_id=$1 AND user_id=$2',[f.tenants.uc,users.owner]);
  const second=await request(app,t.owner,path+'/gradebook?cursor='+first.body.nextCursor);assert.equal(second.status,200);assert.deepEqual(second.body.items,[]);
- await pool.query("UPDATE enrollments SET active=false WHERE user_id=$1 AND role='teacher'",[users.owner]);assert.equal((await request(app,t.owner,path+'/gradebook')).status,403);
+ await pool.query("UPDATE enrollments SET active=false WHERE user_id=$1 AND role='teacher'",[users.owner]);assert.equal((await request(app,t.owner,path+'/gradebook')).status,404);
  }finally{if(app)await app.close();await pool.end();}
 });

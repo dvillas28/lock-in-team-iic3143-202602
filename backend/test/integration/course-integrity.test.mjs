@@ -18,7 +18,7 @@ test("foundation: defaults, cross-tenant FKs, history, actor evidence, uniquenes
   ]) await assert.rejects(pool.query(sql,args));
   for(const after of [{},{source:null,operationId:null,operatorRef:null},{source:"operatorMigration",operationId:"op",operatorRef:null}])
    await assert.rejects(pool.query("INSERT INTO audit_events(id,institution_id,action,resource_type,resource_id,changes) VALUES($1,$2,\u0027membership.onboarded\u0027,\u0027institutionMembership\u0027,$3,$4)",[randomUUID(),f.tenants.uc,(await pool.query("SELECT id FROM institution_memberships WHERE institution_id=$1 LIMIT 1",[f.tenants.uc])).rows[0].id,{after}]));
-  const results=await Promise.allSettled([f.add(f.s2,users.owner,"teacher"),f.add(f.s2,users.owner,"teacher")]);assert.equal(results.filter(r=>r.status==="fulfilled").length,1);
+  const results=await Promise.allSettled([f.add(f.s2,users.owner,"teacher"),f.add(f.s2,users.owner,"student")]);assert.equal(results.filter(r=>r.status==="fulfilled").length,1);
   const before=(await pool.query("SELECT * FROM courses ORDER BY id")).rows;assert.equal((await cli("commands/migrate").result).code,0);assert.deepEqual((await pool.query("SELECT * FROM courses ORDER BY id")).rows,before);
  }finally{await pool.end();}
 });
@@ -38,7 +38,7 @@ test("populated identity schema upgrades without changing identities or membersh
   assert.deepEqual(after[1].map(({bio,avatar_key,credential_version,...u})=>{
    assert.equal(bio,null);assert.equal(avatar_key,null);assert.equal(credential_version,0);return u;
   }),before[1]);
-  assert.equal((await pool.query('SELECT count(*)::int AS count FROM pgmigrations')).rows[0].count,22);
+  assert.equal((await pool.query("SELECT count(*)::int AS count FROM pgmigrations WHERE name='20261112000100_one_active_section_role'")).rows[0].count,1);
   assert.deepEqual(after[2].map(({is_admin,is_super_admin,...m})=>{assert.equal(is_admin,false);assert.equal(is_super_admin,false);return m;}),before[2]);
  }finally{if(saved===undefined)delete process.env.MIGRATION_DATABASE_URL;else process.env.MIGRATION_DATABASE_URL=saved;await rm(dir,{recursive:true,force:true});await pool.end();}
 });
@@ -114,4 +114,31 @@ test("in-flight authorized write finishes before a waiting revocation; next requ
   assert.equal((await request(app,token,`uc/courses/${f.own}`,"PATCH",{name:"denied"})).status,403);
   assert.equal((await pool.query("SELECT * FROM audit_events")).rowCount,1);
  }finally{await blocker.query("ROLLBACK");blocker.release();if(app)await app.close();await pool.end();}
+});
+
+test("single-role migration stops on legacy duplicates and preserves all enrollments", async()=>{
+ const pool=await database();const {runner}=await import("node-pg-migrate");
+ const {fileURLToPath}=await import("node:url");
+ const dir=fileURLToPath(new URL("../../migrations/",import.meta.url));
+ try {
+  const f=await coursesFixture(pool),client=await pool.connect();
+  try {
+   const migrate=direction=>runner({dbClient:client,dir,schema:"public",migrationsSchema:"public",
+    migrationsTable:"pgmigrations",file:"20261112000100_one_active_section_role",direction,
+    count:1,singleTransaction:true,logger:{debug(){},info(){},warn(){},error(){}}});
+   await migrate("down");
+   const legacy=await f.add(f.s1,users.owner,"student");
+   const rows=()=>pool.query("SELECT * FROM enrollments ORDER BY id").then(result=>result.rows);
+   const before=await rows();
+   await assert.rejects(migrate("up"),/multiple active roles/);
+   assert.deepEqual(await rows(),before);
+   assert.equal((await pool.query("SELECT to_regclass('public.enrollments_one_active_section_role_idx') idx")).rows[0].idx,null);
+   await pool.query("UPDATE enrollments SET active=false WHERE id=$1",[legacy]);
+   await migrate("up");
+   assert.equal((await rows()).length,before.length);
+   await assert.rejects(f.add(f.s1,users.owner,"assistant"),/23505/);
+   await assert.rejects(pool.query("UPDATE enrollments SET active=true WHERE id=$1",[legacy]),/23505/);
+   assert.ok(await f.add(f.s2,users.owner,"student"));
+  } finally {client.release();}
+ } finally {await pool.end();}
 });

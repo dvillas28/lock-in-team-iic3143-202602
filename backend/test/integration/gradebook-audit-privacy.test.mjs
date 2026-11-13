@@ -8,6 +8,7 @@ test('owner student without teacher submits legitimately but cannot read own or 
  const pool=await database();let app;try{
   const f=await gradebookFixture(pool);app=await http();const t=await tokens(app,f),base=coursePath(f),audit=base+'/audit-events';
   await pool.query("UPDATE enrollments SET active=false WHERE user_id=$1 AND role='teacher'",[users.owner]);
+  await f.add(f.s1,users.owner,"student");
   const start=await request(app,t.owner,f.startPath,'POST',{},randomUUID());assert.equal(start.status,201);
   const attempt=`uc/quiz-attempts/${start.body.id}`;
   assert.equal((await request(app,t.owner,attempt+'/submit','POST',{},randomUUID())).status,200);

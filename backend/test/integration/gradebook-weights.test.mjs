@@ -41,7 +41,7 @@ test('ordinary teacher can change course weights without admin or ownership; rev
   assert.ok([403,404].includes((await request(app,t.student,path+'/gradebook/weights','PUT',input)).status));
   assert.equal((await request(app,t.teacher,`utfsm/courses/${f.own}/gradebook/weights`,'PUT',input)).status,404);
   await pool.query("UPDATE enrollments SET active=false WHERE user_id=$1 AND role='teacher'",[users.other]);
-  assert.equal((await request(app,t.teacher,path+'/gradebook/weights','PUT',input)).status,403);
+  assert.equal((await request(app,t.teacher,path+'/gradebook/weights','PUT',input)).status,404);
   assert.deepEqual(await snapshot(pool),before);
  }finally{if(app)await app.close();await pool.end();}
 });

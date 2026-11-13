@@ -26,6 +26,7 @@ test('institutional participant search: runtime HTTP, literal text, pagination, 
   assert.equal((await search('search=demo',assistant)).status,403);
   await pool.query('UPDATE institution_memberships SET is_admin=true WHERE institution_id=$1 AND user_id=$2',[f.tenants.uc,users.other]);
   assert.equal((await search('search=demo',assistant)).status,200,'the admin owner of a course searches without a teacher role');
+  await pool.query('UPDATE enrollments SET active=false WHERE section_id=$1 AND user_id=$2 AND active',[f.s1,users.other]);
   await f.add(f.s1,users.other,'teacher');
   assert.equal((await search(`search=demo&cursor=${cursor}`,assistant)).status,400);
   assert.equal((await search('search=no-match')).body.items.length,0);
