@@ -12,9 +12,10 @@ export type ManagementChange = { role: Role } | { active: false };
 
 /** The consequence of the selected role, in one sentence; the backend still decides. */
 function consequence(enrollment: Enrollment, role: Role, others: readonly Role[], section: Section) {
-  if (role === enrollment.role) return "Elige otro rol para habilitar «Guardar cambios».";
+  if (role === enrollment.role) return "Cada persona tiene un rol activo por sección. Al cambiarlo, la matrícula anterior pasa al Historial.";
   if (others.includes(role))
     return `Ya es ${roleLabel(role)} en esta sección: esta matrícula pasará al Historial y se mantendrá la existente.`;
+  if (others.length) return "La persona ya tiene otros roles activos en esta sección. Revísalos antes de asignar un rol distinto.";
   const seat = role === "student"
     ? section.capacity === null ? " Ocupará un cupo de estudiante; la sección no tiene límite."
       : section.capacity === 1 ? " Ocupará el único cupo de estudiante de la sección." : ` Ocupará uno de los ${section.capacity} cupos de estudiantes.`

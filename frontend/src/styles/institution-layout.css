@@ -144,7 +144,62 @@ fieldset.stack { border: 0; padding: 0; min-width: 0; }
   /* The destructive action leaves the save row on phones and sits last, full width. */
   .academic-app .management-actions > .management-revoke-action { order: 1; flex-basis: 100%; margin-inline-end: 0; }
 }
-.academic-app .participant-pagination { margin-top: 0; }
+/* Admin rows remain one enrollment each, including when they reflow into a mobile list. */
+.academic-app .participants-admin-table { scroll-padding-block-start: 44px; }
+.academic-app .participants-admin-table .data-table {
+  min-width: 0;
+  table-layout: fixed;
+}
+.academic-app .participants-admin-table thead th:nth-child(n+2) { width: 7rem; }
+.academic-app .participants-admin-table thead th:nth-child(4) { width: 9rem; }
+.academic-app .participants-admin-table .data-table :is(td, tbody th) { vertical-align: middle; }
+.academic-app .participants-admin-table :is(td, th) { padding-inline: 12px; }
+.academic-app .participants-admin-table :is(thead th:nth-child(4), td:nth-child(4)) { text-align: end; }
+.academic-app .participants-admin-table .participant-identity { display: block; font-weight: 600; }
+.academic-app .participants-admin-table .participant-email { display: block; font-weight: 400; margin-block-start: 2px; }
+.academic-app .participants-admin-table :is(.participant-identity, .participant-email) { overflow-wrap: anywhere; }
+.academic-app .participants-admin-table .btn { padding-inline: 10px; }
+.academic-app .participant-history-note { margin: 0; }
+.academic-app .participant-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.academic-app .participant-pagination p { margin: 0; }
+.academic-app .participant-pagination .btn { padding-inline: 8px; }
+.academic-app .participants-admin :is(.btn, .tab-btn) { touch-action: manipulation; }
+.academic-app .participants-admin-table .btn,
+.academic-app .participant-pagination .btn,
+.academic-app .participants-admin .participants-views .tab-btn { min-height: 44px; }
+.academic-app .participant-pagination [aria-disabled="true"] {
+  opacity: .55;
+  cursor: default;
+  transform: none;
+  border-color: var(--border-strong);
+  color: var(--text-2);
+}
+@media (max-width: 760px) {
+  .academic-app .participants-admin-table { scroll-padding-block-start: 8px; }
+  .academic-app .participants-admin-table .data-table,
+  .academic-app .participants-admin-table tbody { display: block; }
+  .academic-app .participants-admin-table thead {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
+  }
+  .academic-app .participants-admin-table tbody tr {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    border-block-end: 1px solid var(--border);
+  }
+  .academic-app .participants-admin-table tbody tr:last-child { border-block-end: 0; }
+  .academic-app .participants-admin-table .data-table tbody :is(th, td) { padding: 0; border: 0; }
+  .academic-app .participants-admin-table tbody :is(th, td:first-child, td:nth-child(4)) { grid-column: 1 / -1; }
+  .academic-app .participants-admin-table td:nth-child(4) { text-align: start; }
+}
 /* Read-only roster for students and assistants: one row per person, roles as text chips, no actions. */
 .academic-app .participants-readonly .participants-table :is(td, th) { vertical-align: middle; }
 .academic-app .participants-readonly tbody th { font-weight: 500; color: var(--text-1); }

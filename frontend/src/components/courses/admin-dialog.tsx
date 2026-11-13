@@ -8,13 +8,14 @@ import type { DialogFormControls } from "./course-form.tsx";
  * focus back to the trigger, fresh form per opening) plus the page editor's discard confirmation,
  * so Cancelar, the close button and Escape never drop typed changes silently or interrupt a write.
  */
-export function AdminDialog({ label, title, icon, primary = false, disabled = false, onDone, children }: Readonly<{
+export function AdminDialog({ label, title, icon, primary = false, disabled = false, onDone, onClosed, children }: Readonly<{
   label: string;
   title: string;
   icon: ReactNode;
   primary?: boolean;
   disabled?: boolean;
   onDone: (message: string) => void;
+  onClosed?: () => void;
   children: (controls: DialogFormControls) => ReactNode;
 }>) {
   const trigger = useRef<HTMLButtonElement>(null);
@@ -25,7 +26,7 @@ export function AdminDialog({ label, title, icon, primary = false, disabled = fa
       {icon}{label}
     </button>
     <AdminDialogFrame open={open} opening={opening} title={title} onDone={onDone} onClose={() => setOpen(false)}
-      onClosed={() => trigger.current?.focus()}>
+      onClosed={() => { trigger.current?.focus(); onClosed?.(); }}>
       {children}
     </AdminDialogFrame>
   </>;

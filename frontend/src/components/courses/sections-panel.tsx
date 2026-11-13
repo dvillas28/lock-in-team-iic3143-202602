@@ -54,7 +54,7 @@ export function SectionsPanel({ session, slug, user, course, items, management, 
   if (!canManage)
     return <SectionParticipantsReadonly key={`${slug}:${course.id}`} session={session} slug={slug} user={user} course={course} sections={ownItems} />;
 
-  const capacity = detail ? <span className="chip tnum">Capacidad: {detail.capacity ?? "Sin límite"}</span>
+  const capacity = detail ? <span className="chip tnum">Cupos de estudiantes: {detail.capacity ?? "Sin límite"}</span>
     : !result.error ? <Skeleton shape="pill" width="7.5rem" /> : null;
   return <section className="stack section-workspace">
     <div className="section-toolbar">
