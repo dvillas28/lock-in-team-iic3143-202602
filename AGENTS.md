@@ -18,6 +18,10 @@ publication, and gradebook. Delivery 2 defines the current MVP.
   not block working with an existing spec.
 - Branch names should follow `<type>/<short-name>` using `feat`, `fix`, `docs`,
   `test`, `refactor`, `chore`, `style`, `perf`, `ci`, or `build`.
+- Write every commit message (subject and body), PR title and PR description
+  in Spanish. Keep the Conventional Commits type and scope as they are
+  (`fix(e2e): reparar ...`): the release workflow reads them to compute the
+  version. See [git-flow](docs/guides/git-flow.md#tipos).
 - `.specify/feature.json` is a local-only pointer and must not be committed.
 
 ## CodeGraph
