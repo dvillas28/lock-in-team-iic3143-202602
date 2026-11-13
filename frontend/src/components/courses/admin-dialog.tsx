@@ -3,6 +3,8 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { X } from "lucide-react";
 import type { DialogFormControls } from "./course-form.tsx";
 
+const FOCUSABLE = "button:not(:disabled), a[href], input:not(:disabled):not([type=hidden]), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex='-1'])";
+
 /**
  * Course administration in a native modal: the `ModuleDialog` shell (trigger, `.dialog-heading`,
  * focus back to the trigger, fresh form per opening) plus the page editor's discard confirmation,
@@ -68,6 +70,16 @@ export function AdminDialogFrame({ open, opening, title, className, onDone, onCl
   const form: DialogFormControls = { onDone: message => { close(); onDone?.(message); }, onCancel: request, onBusy: setBusy, onDirty: setDirty };
   return <dialog ref={dialog} className={`modal native-dialog academic-dialog admin-dialog${className ? ` ${className}` : ""}`} aria-labelledby={titleId}
     aria-busy={busy || undefined}
+    onKeyDown={event => {
+      if (event.key !== "Tab") return;
+      // Keep keyboard focus inside the modal instead of escaping to the browser chrome.
+      const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(FOCUSABLE))
+        .filter(control => control.getClientRects().length > 0);
+      const first = controls[0], last = controls.at(-1);
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    }}
     onCancel={event => { event.preventDefault(); request(); }}
     onClose={() => { setConfirming(false); setDirty(false); onClose(); onClosed?.(); }}>
     <div className="dialog-heading">
