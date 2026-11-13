@@ -35,14 +35,13 @@ test("only authorized sections mount participant management; nobody searches peo
  if(profile==='teacher'||profile==='foreign'){assert.equal(ui.doc.querySelector('select[name="managedSection"] option[value="'+otherSection.id+'"]'),null);assert.equal(ui.requests.some(r=>r.url.includes(`${otherSection.id}/enrollments`)),false);}
  }finally{await ui.close();}}
 });
-test("history and sibling roles survive role successor, POST 200 and pagination reset",async()=>{
+test("a role change preserves the previous enrollment and existing history",async()=>{
  let rows: import("../src/lib/courses/validation.ts").Enrollment[]=[enrollment,history];const ui=await mount(h(CourseDetail,{courseId:course.id}),async r=>{
  if(!r.url.includes('/enrollments'))return reply(r);
- if(r.method==='POST')return Response.json(enrollment);
  if(r.method==='PATCH'){rows=[{...enrollment,active:false},history,{...enrollment,id:id(99),role:'teacher'}];return Response.json(rows[2]);}
  return Response.json(page(rows));
  });try{
- modalRuntime(ui);await ui.select('select[name="managedSection"]',section.id);assert.match(ui.doc.body.textContent!,/Histórica/);await assign(ui,'maría','María Pérez','assistant');
+ modalRuntime(ui);await ui.select('select[name="managedSection"]',section.id);assert.match(ui.doc.body.textContent!,/Histórica/);
  await openManage(ui,enrollment.id);await chooseRole(ui,'teacher');await save(ui);
  assert.match(ui.doc.body.textContent!,/Docente/);assert.equal(ui.doc.querySelectorAll('[data-enrollment-id]').length,3);
  assert.ok(ui.doc.querySelector(`[data-enrollment-id="${id(99)}"]`));
@@ -67,22 +66,100 @@ test("search 404 is unavailable, not empty; stale searches and section completio
  }finally{await u.close();}
 });
 test("self revocation refreshes me and removes management; lost mutation is never retried",async()=>{
- let lost=true;const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>{if(r.url.includes('/enrollments')&&r.method==='POST'){if(lost)throw new Error('lost');return Response.json(enrollment);}return reply(r);});try{
+ let lost=true;const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>{if(r.url.includes('/enrollments')){if(r.method==='POST'){if(lost)throw new Error('lost');return Response.json(enrollment);}return Response.json(page([]));}return reply(r);});try{
  modalRuntime(ui);await ui.select('select[name="managedSection"]',section.id);await assign(ui,'maría','María Pérez','assistant');assert.match(ui.doc.body.textContent!,/incierto/i);assert.ok(isOpen(ui));lost=false;
  await confirm(ui);assert.equal(ui.requests.filter(r=>r.url.includes('/enrollments')&&r.method==='POST').length,1);
  await ui.actor('student');assert.equal(ui.doc.querySelector(assignForm),null);
  }finally{await ui.close();}
 });
 
-test("pagination shows history by enrollment ID and returns to initial cursor after mutation",async()=>{
- const ui=await mount(h(CourseDetail,{courseId:course.id}),r=>{
- if(!r.url.includes('/enrollments'))return reply(r);
- if(r.method==='POST')return Response.json(enrollment);
- return Response.json(new URL(r.url).searchParams.has('cursor')?page([history]):page([enrollment],'next'));
- });try{
- modalRuntime(ui);await ui.select('select[name="managedSection"]',section.id);await ui.click('Más matrículas');assert.ok(ui.doc.querySelector(`[data-enrollment-id="${history.id}"]`));
- await assign(ui,'maría','María Pérez','assistant');assert.ok(ui.doc.querySelector(`[data-enrollment-id="${enrollment.id}"]`));assert.equal(ui.doc.querySelector('button')?.textContent?.includes('Primera página'),false);
- }finally{await ui.close();}
+test("assignment resets the active cursor trail", async () => {
+ let saved = false;
+ const initial = {...enrollment, id: id(79), user: {...person, id: id(78)}};
+ const second = {...enrollment, id: id(81), role: "teacher", user: {...person, id: id(80)}};
+ const ui = await mount(h(CourseDetail,{courseId:course.id}), r => {
+  if (!r.url.includes('/enrollments')) return reply(r);
+  if (r.method === 'POST') { saved = true; return Response.json(enrollment); }
+  if (new URL(r.url).searchParams.has('userId')) return Response.json(page([]));
+  return Response.json(new URL(r.url).searchParams.has('cursor') ? page([second]) : page([saved ? enrollment : initial], 'next'));
+ });
+ try {
+  modalRuntime(ui);
+  await ui.select('select[name="managedSection"]', section.id);
+  await ui.click('Siguiente');
+  assert.ok(ui.doc.querySelector(`[data-enrollment-id="${second.id}"]`));
+  await assign(ui,'maría','María Pérez','assistant');
+  assert.ok(ui.doc.querySelector(`[data-enrollment-id="${enrollment.id}"]`));
+  assert.equal(ui.doc.querySelector('.participant-pagination [role="status"]')?.textContent, 'Página 1');
+  assert.equal(ui.doc.querySelector('.participant-pagination button')?.getAttribute('aria-disabled'), 'true');
+  assert.equal(new URL(ui.requests.filter(r => r.method === 'GET' && r.url.includes('/enrollments')).at(-1)!.url).searchParams.get('cursor'), null);
+ } finally { await ui.close(); }
+});
+
+test("three pages go back one at a time; historical cursors and late responses stay isolated", async () => {
+ const late = deferred<Response>();
+ const queries: [string | null, string | null][] = [];
+ const active = [enrollment, {...enrollment, id: id(82)}, {...enrollment, id: id(83)}];
+ let hold = false;
+ const ui = await mount(h(CourseDetail,{courseId:course.id}), r => {
+  if (!r.url.includes('/enrollments')) return reply(r);
+  const params = new URL(r.url).searchParams;
+  const view = params.get('status'), cursor = params.get('cursor');
+  queries.push([view, cursor]);
+  if (view === 'historical') return Response.json(cursor ? page([]) : page([history], 'past'));
+  if (cursor === 'two' && hold) return late.promise;
+  return Response.json(cursor === 'three' ? page([active[2]]) : cursor === 'two' ? page([active[1]], 'three') : page([active[0]], 'two'));
+ });
+ try {
+  await ui.select('select[name="managedSection"]', section.id);
+  const shown = () => Array.from(ui.doc.querySelectorAll('[data-enrollment-id]'), row => row.getAttribute('data-enrollment-id'));
+  await ui.click('Siguiente');
+  await ui.click('Siguiente');
+  assert.deepEqual(shown(), [active[2].id]);
+  assert.equal(ui.doc.querySelector('.participant-pagination [role="status"]')?.textContent, 'Página 3');
+  await ui.click('Anterior');
+  assert.deepEqual(shown(), [active[1].id]);
+  await ui.click('Anterior');
+  assert.deepEqual(shown(), [active[0].id]);
+  assert.deepEqual(queries, [['active', null], ['active', 'two'], ['active', 'three'], ['active', 'two'], ['active', null]]);
+  hold = true;
+  await ui.click('Siguiente');
+  assert.deepEqual(shown(), []);
+  await ui.click('Historial');
+  assert.deepEqual(shown(), [history.id]);
+  assert.deepEqual([...ui.doc.querySelectorAll('.participants-admin-table thead th')].map(th => th.textContent), ['Persona', 'Rol', 'Estado']);
+  assert.equal(ui.doc.querySelector('.participants-admin-table tbody button'), null);
+  await ui.settle(() => late.resolve(Response.json(page([active[1]], 'three'))));
+  assert.deepEqual(shown(), [history.id]);
+  await ui.click('Siguiente');
+  assert.deepEqual(queries.slice(-2), [['historical', null], ['historical', 'past']]);
+  assert.match(ui.doc.body.textContent!, /No hay matrículas en esta página/);
+  await ui.click('Activas');
+  assert.deepEqual(queries.at(-1), ['active', null]);
+  assert.deepEqual(shown(), [active[0].id]);
+ } finally { await ui.close(); }
+});
+
+test("a later page error offers retry and keeps a route back to the first page", async () => {
+ let failed = true;
+ const ui = await mount(h(CourseDetail,{courseId:course.id}), r => {
+  if (!r.url.includes('/enrollments')) return reply(r);
+  const cursor = new URL(r.url).searchParams.get('cursor');
+  return cursor
+   ? failed ? Response.json({}, {status: 503}) : Response.json(page([{...enrollment, id: id(89)}]))
+   : Response.json(page([enrollment], 'next'));
+ });
+ try {
+  await ui.select('select[name="managedSection"]', section.id);
+  await ui.click('Siguiente');
+  assert.ok(ui.doc.querySelector('.participants-admin [role="alert"]'));
+  assert.equal(ui.doc.querySelector('.participant-pagination button')?.getAttribute('aria-disabled'), 'false');
+  failed = false;
+  await ui.click('Reintentar');
+  assert.ok(ui.doc.querySelector(`[data-enrollment-id="${id(89)}"]`));
+  await ui.click('Anterior');
+  assert.ok(ui.doc.querySelector(`[data-enrollment-id="${enrollment.id}"]`));
+ } finally { await ui.close(); }
 });
 test("teachers cannot manage teacher rows or offer the teacher role; nobody manages their own teacher row",async()=>{
  const self={...enrollment,id:id(40),user:{...person,id:id(1)},role:'teacher' as const},peer={...enrollment,id:id(41),role:'teacher' as const};
