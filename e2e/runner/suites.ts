@@ -10,7 +10,7 @@ for(const file of readdirSync(resolve(root,'docs/testing/catalog')).filter(f=>/^
  if(catalogue[id]||!/^P[0-3]$/.test(cols[3])||!['smoke','regression','extended'].includes(cols[4]))throw new Error('Invalid or duplicate catalogue row');
  catalogue[id]={priority:cols[3],suite:cols[4] as Suite};
 }
-if(Object.keys(catalogue).length!==254||Object.keys(caseDefinitions).some(id=>!catalogue[id]))throw new Error('Catalogue/manifest mismatch');
+if(Object.keys(catalogue).length!==255||Object.keys(caseDefinitions).some(id=>!catalogue[id]))throw new Error('Catalogue/manifest mismatch');
 export function suiteIds(suite:Suite){return Object.keys(catalogue).filter(id=>suite==='extended'||catalogue[id].suite==='smoke'||suite==='regression'&&catalogue[id].suite==='regression');}
 export function expectedKeys(suite:Suite,projects:readonly string[]){return suiteIds(suite).flatMap(id=>caseDefinitions[id].flatMap(v=>v.projects.filter(p=>projects.includes(p)).map(p=>`${id}/${v.name}/${p}`))).sort();}
 export function selection(input:string[]){const args=[...input],named=args.find(a=>a.startsWith('--suite='));let suite:Suite|'custom'='custom';

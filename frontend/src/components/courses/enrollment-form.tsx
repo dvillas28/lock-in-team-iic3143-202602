@@ -8,12 +8,13 @@ import { useMutation } from "./use-mutation.ts";
 import { useResource } from "./use-resource.ts";
 import { Field } from "./form-fields.tsx";
 
-export function EnrollmentForm({ session, slug, sectionId, search, onSaved }: {
+export function EnrollmentForm({ session, slug, sectionId, search, onSaved, allowedRoles = roles }: {
   session: Session;
   slug: string;
   sectionId: string;
   search: boolean;
   onSaved: (saved: Enrollment) => Promise<void>;
+  allowedRoles?: readonly Role[];
 }) {
   const [query, setQuery] = useState("");
   const [searchRevision, setSearchRevision] = useState(0);
@@ -52,7 +53,7 @@ export function EnrollmentForm({ session, slug, sectionId, search, onSaved }: {
     <form aria-label="Asignar rol" className="stack" noValidate onSubmit={submit}>
       <fieldset className="stack" disabled={mutation.busy || mutation.uncertain}>
         {search ? <p role="status">{selected ? `Persona seleccionada: ${selected.name} · ${selected.email}` : 'Selecciona una persona de los resultados.'}</p> : <Field name="userId" label="UUID de persona existente" invalid={mutation.field === 'userId'} error={mutation.field === 'userId' ? mutation.message : undefined} />}
-        <label className="field-label">Rol<select className="field" name="role" aria-invalid={mutation.field === 'role' || undefined} aria-describedby={mutation.field === 'role' ? messageId : undefined}>{roles.map(role => <option key={role} value={role}>{roleLabel(role)}</option>)}</select>
+        <label className="field-label">Rol<select className="field" name="role" aria-invalid={mutation.field === 'role' || undefined} aria-describedby={mutation.field === 'role' ? messageId : undefined}>{allowedRoles.map(role => <option key={role} value={role}>{roleLabel(role)}</option>)}</select>
         </label>
         <button className="btn btn-primary" type="submit" disabled={search && !selected}>Asignar rol</button>
       </fieldset>{mutation.message && <p id={messageId} role={mutation.confirmed ? 'status' : 'alert'}>{mutation.message}</p>}</form>

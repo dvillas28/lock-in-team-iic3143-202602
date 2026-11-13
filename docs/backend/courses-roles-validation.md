@@ -9,7 +9,7 @@ base academix_cursos_test; helpers borran su schema public.
 
 - User global sin roles administrativos; flags independientes en membership.
 - Admin institucional crea cursos; dueño único e inmutable administra los propios.
-- Teacher gestiona participantes de su sección; assistant lee; student no lista.
+- Teacher gestiona students/assistants de su sección; teachers solo el dueño; assistant lee; student no lista.
 - Creación confirma curso, primera sección, teacher inicial y tres eventos juntos.
 - Enrollment admite roles distintos; cambio crea sucesor, revocación conserva historia.
 - Admin dueño prevalece sobre teacher al consultar auditoría, incluso sin sección.

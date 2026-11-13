@@ -196,9 +196,10 @@
     tags:
     - Enrollments
     operationId: createSectionEnrollment
-    x-permissions: "Membership activa; dueño admin o teacher activo de esta sección; destinatario con User y membership activos."
+    x-permissions: "Membership activa; dueño admin, o teacher activo de esta sección solo para student/assistant; destinatario con User y membership activos."
     summary: Crear una membership de sección
-    description: Admin dueño o teacher activo de esta sección. Miembro destinatario
+    description: Admin dueño (cualquier rol) o teacher activo de esta sección (solo
+      student/assistant; teacher responde 403). Miembro destinatario
       provisionado y activo; roles múltiples distintos, historial preservado. Sin
       privilegios desde JWT o body.
     requestBody:
@@ -257,12 +258,14 @@
     tags:
     - Enrollments
     operationId: updateSectionEnrollment
-    x-permissions: "Membership activa; dueño admin o teacher activo de esta sección; cambios de rol conservan historia y auditoría."
+    x-permissions: "Membership activa; dueño admin, o teacher activo de esta sección solo sobre student/assistant; cambios de rol conservan historia y auditoría."
     summary: Cambiar rol o desactivar una membership
-    description: Admin dueño o teacher activo de esta sección. Miembro destinatario
+    description: Admin dueño o teacher activo de esta sección; solo el dueño cambia,
+      revoca o reactiva matrículas teacher o promueve a teacher (403). Miembro destinatario
       provisionado y activo; roles múltiples distintos, historial preservado. Sin
       privilegios desde JWT o body. Exactamente role o active. Cambio de rol devuelve
-      sucesor (ID puede cambiar). Último teacher se puede revocar; el curso permanece.
+      sucesor (ID puede cambiar). Nadie revoca ni cambia su propia matrícula teacher
+      (403); revocar o cambiar al último teacher activo responde 409 LAST_SECTION_TEACHER.
     requestBody:
       required: true
       content:

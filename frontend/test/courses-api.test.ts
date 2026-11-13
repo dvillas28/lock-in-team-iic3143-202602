@@ -24,6 +24,7 @@ test("capabilities require active admin, confirmed ownership and contextual teac
   const u=user(p),c=capabilities(u,course,section);
   assert.equal(c.configure,["owner","ownerTeacher"].includes(p));assert.equal(c.manage,["owner","ownerTeacher","foreign","teacher","multi"].includes(p));
   assert.equal(c.search,["ownerTeacher","foreign","teacher","multi"].includes(p));
+  assert.equal(c.teachers,["owner","ownerTeacher"].includes(p),"only the admin owner manages teacher enrollments");
   assert.equal(capabilities(u,undefined).configure,false);
   assert.equal(capabilities(u,{id:course.id,code:course.code,name:course.name,term:course.term}).configure,false);
  }
