@@ -68,6 +68,30 @@ Notas:
 | `HEALTHCHECK` frontend (contenedor aislado) | `healthy` |
 | Trivy repo + imágenes sobre `63a1121` | 0 hallazgos |
 
+## Ejecución en GitHub Actions
+
+El mismo antes/después, con el workflow del curso
+([`trivy-manual.yml`](../../../../.github/workflows/trivy-manual.yml): solo
+vulnerabilidades, dependencias de producción) ejecutado a mano en GitHub.
+
+| Run | Rama | Commit | Hallazgos | Evidencia |
+| --- | --- | --- | --- | --- |
+| [#2](https://github.com/dvillas28/lock-in-team-iic3143-202602/actions/runs/43425746281) | `main` | `cdc42bf` | 3 MEDIUM (`qs`, `glob`, `minimatch`) | [captura](actions/run-2-main/resumen.png) · [reporte](actions/run-2-main/trivy-report.json) |
+| [#3](https://github.com/dvillas28/lock-in-team-iic3143-202602/actions/runs/43429080868) | `fix/trivy-entrega-4` | `4b12066` | 0 | [captura](actions/run-3-fix/resumen.png) · [reporte](actions/run-3-fix/trivy-report.json) |
+
+Los commits difieren de los cortes locales, pero el código es el mismo:
+
+- `cdc42bf` es el merge de `dev` a `main` (PR #311). Su árbol es idéntico al de
+  `fb8aa50` (`git diff cdc42bf fb8aa50` vacío); el merge solo crea otro commit.
+- `4b12066` es el tip de la rama: contiene `63a1121` y solo agrega este reporte.
+
+Los reportes JSON se descargaron con `gh run download <id> -n trivy-report`,
+porque el artifact de Actions expira a los 14 días.
+
+![Run #2 en main: 3 MEDIUM](actions/run-2-main/resumen.png)
+
+![Run #3 en fix/trivy-entrega-4: 0 hallazgos](actions/run-3-fix/resumen.png)
+
 ## Archivos
 
 | Archivo | Contenido |
@@ -78,6 +102,7 @@ Notas:
 | [`despues/repo.txt`](despues/repo.txt) · [`despues/repo.json`](despues/repo.json) | Repo en `63a1121`. |
 | [`despues/imagen-backend.json`](despues/imagen-backend.json) | Imagen backend en `63a1121`. |
 | [`despues/imagen-frontend.json`](despues/imagen-frontend.json) | Imagen frontend en `63a1121`. |
+| [`actions/`](actions/) | Captura y artifact `trivy-report` de los runs #2 y #3. |
 
 Los `.txt` son la salida en tabla de Trivy; los `.json`, el reporte completo.
 Las imágenes del corte "después" no tienen `.txt`: sin hallazgos, la tabla
