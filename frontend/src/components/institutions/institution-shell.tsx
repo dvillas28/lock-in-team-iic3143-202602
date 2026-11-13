@@ -13,6 +13,7 @@ type InstitutionShellProps = Readonly<{
     actions?: ReactNode;
     avatar?: ReactNode;
     pathname?: string;
+    floating?: ReactNode;
 }>;
 function pageTitle(pathname: string) {
     if (pathname === '/profile') return 'Mi perfil';
@@ -60,7 +61,7 @@ function pageTitle(pathname: string) {
 function toggleTheme() {
     document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
 }
-export function InstitutionShell({ institutionSlug, institutionName, actions, avatar, children, user, pathname = "/courses" }: InstitutionShellProps) {
+export function InstitutionShell({ institutionSlug, institutionName, actions, avatar, children, user, floating, pathname = "/courses" }: InstitutionShellProps) {
     const homePath = institutionSlug ? institutionHomePath(institutionSlug) : '/#instituciones';
     const homeLabel = institutionSlug ? 'Mis cursos' : 'Instituciones';
     const profilePage = pathname === '/profile';
@@ -83,7 +84,7 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, av
       window.addEventListener('keydown', onEscape);
       return () => window.removeEventListener('keydown', onEscape);
     }, [menuOpen]);
-    return (<div className={`app academic-app${menuOpen ? ' menu-open' : ''}`}>
+    return (<div className={`app academic-app${menuOpen ? ' menu-open' : ''}${floating ? ' has-floating' : ''}`}>
       <a href="#main-content" className="btn btn-primary skip-link">Saltar al contenido</a>
       <aside className="sidebar" aria-label={institutionSlug ? "Contexto institucional" : "Mi cuenta"}>
         <div className="sidebar-top">
@@ -142,5 +143,6 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, av
           {children}
         </main>
       </div>
+      {floating}
     </div>);
 }
