@@ -55,3 +55,15 @@ export const auditResources: Record<string, string> = {
   gradebook: "Libro de notas",
   gradeItem: "Evaluación",
 };
+
+export type AuditTone = "primary" | "success" | "danger" | "warning" | "accent" | "neutral";
+/** Groups contractual actions into a visual family; never used to authorize anything. */
+export function auditFamily(action: string): { label: string; tone: AuditTone } {
+  const verb = action.split(".").at(-1) ?? "";
+  if (/^(grade|gradebook)\./.test(action) || verb === "graded") return { label: "Calificación", tone: "accent" };
+  if (verb === "published") return { label: "Publicación", tone: "success" };
+  if (verb === "deleted" || verb === "cancelled") return { label: verb === "deleted" ? "Eliminación" : "Cancelación", tone: "danger" };
+  if (verb === "unpublished" || verb === "quizUnlinked") return { label: "Retiro", tone: "warning" };
+  if (/^(created|submitted|started|quizLinked)$/.test(verb)) return { label: "Creación", tone: "primary" };
+  return { label: "Edición", tone: "neutral" };
+}
