@@ -24,6 +24,7 @@ import "@/styles/assignments.css";
 import "@/styles/attempts.css";
 import "@/styles/landing.css";
 import "@/styles/accounts.css";
+import "@/styles/audit.css";
 import "@/styles/calendar.css";
 
 export const metadata: Metadata = {

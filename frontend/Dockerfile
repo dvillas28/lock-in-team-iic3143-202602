@@ -27,8 +27,10 @@ ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 
+# Alpine fixes can land before the node image is rebuilt (zlib CVE-2026-4738), so upgrade OS packages.
 # The app runs with plain node; the bundled package managers only add vulnerable dependencies.
-RUN rm -rf /usr/local/lib/node_modules /opt/yarn-* \
+RUN apk upgrade --no-cache \
+  && rm -rf /usr/local/lib/node_modules /opt/yarn-* \
   /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg
 
 RUN addgroup --system --gid 1001 nodejs \
@@ -41,5 +43,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 USER nextjs
 
 EXPOSE 3000
+
+# Manual redirects: "/" may send to an institution origin that is not reachable from inside the container.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD ["node", "-e", "fetch(`http://127.0.0.1:${process.env.PORT}/`, { redirect: 'manual' }).then((r) => process.exit(r.status < 400 ? 0 : 1), () => process.exit(1))"]
 
 CMD ["node", "server.js"]

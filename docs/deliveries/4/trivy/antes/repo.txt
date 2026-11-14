@@ -1,0 +1,66 @@
+
+Report Summary
+
+┌─────────────────────────┬────────────┬─────────────────┬─────────┬───────────────────┐
+│         Target          │    Type    │ Vulnerabilities │ Secrets │ Misconfigurations │
+├─────────────────────────┼────────────┼─────────────────┼─────────┼───────────────────┤
+│ backend/pnpm-lock.yaml  │    pnpm    │        3        │    -    │         -         │
+├─────────────────────────┼────────────┼─────────────────┼─────────┼───────────────────┤
+│ frontend/pnpm-lock.yaml │    pnpm    │        0        │    -    │         -         │
+├─────────────────────────┼────────────┼─────────────────┼─────────┼───────────────────┤
+│ backend/Dockerfile      │ dockerfile │        -        │    -    │         1         │
+├─────────────────────────┼────────────┼─────────────────┼─────────┼───────────────────┤
+│ frontend/Dockerfile     │ dockerfile │        -        │    -    │         1         │
+└─────────────────────────┴────────────┴─────────────────┴─────────┴───────────────────┘
+Legend:
+- '-': Not scanned
+- '0': Clean (no security findings detected)
+
+
+backend/pnpm-lock.yaml (pnpm)
+=============================
+Total: 3 (UNKNOWN: 0, LOW: 0, MEDIUM: 3, HIGH: 0, CRITICAL: 0)
+
+┌───────────┬─────────────────┬──────────┬────────┬───────────────────┬───────────────┬──────────────────────────────────────────────────────────────┐
+│  Library  │  Vulnerability  │ Severity │ Status │ Installed Version │ Fixed Version │                            Title                             │
+├───────────┼─────────────────┼──────────┼────────┼───────────────────┼───────────────┼──────────────────────────────────────────────────────────────┤
+│ glob      │ CVE-2026-118773 │ MEDIUM   │ fixed  │ 13.0.6            │ 14.0.2        │ glob: glob: Denial of Service (DoS) via incomplete traversal │
+│           │                 │          │        │                   │               │ cancellation                                                 │
+│           │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-118773                  │
+├───────────┼─────────────────┤          │        ├───────────────────┼───────────────┼──────────────────────────────────────────────────────────────┤
+│ minimatch │ CVE-2026-118764 │          │        │ 10.2.6            │ 11.0.1        │ minimatch: minimatch: Denial of Service via crafted glob     │
+│           │                 │          │        │                   │               │ pattern expansion                                            │
+│           │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-118764                  │
+├───────────┼─────────────────┤          │        ├───────────────────┼───────────────┼──────────────────────────────────────────────────────────────┤
+│ qs        │ CVE-2026-110816 │          │        │ 6.16.0            │ 6.16.1        │ qs: qs: Denial of Service via unhandled exception during     │
+│           │                 │          │        │                   │               │ array serialization                                          │
+│           │                 │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2026-110816                  │
+└───────────┴─────────────────┴──────────┴────────┴───────────────────┴───────────────┴──────────────────────────────────────────────────────────────┘
+
+backend/Dockerfile (dockerfile)
+===============================
+Tests: 27 (SUCCESSES: 26, FAILURES: 1)
+Failures: 1 (UNKNOWN: 0, LOW: 1, MEDIUM: 0, HIGH: 0, CRITICAL: 0)
+
+DS-0026 (LOW): Add HEALTHCHECK instruction in your Dockerfile
+════════════════════════════════════════
+You should add HEALTHCHECK instruction in your docker container images to perform the health check on running containers.
+
+See https://avd.aquasec.com/misconfig/ds-0026
+────────────────────────────────────────
+
+
+
+frontend/Dockerfile (dockerfile)
+================================
+Tests: 27 (SUCCESSES: 26, FAILURES: 1)
+Failures: 1 (UNKNOWN: 0, LOW: 1, MEDIUM: 0, HIGH: 0, CRITICAL: 0)
+
+DS-0026 (LOW): Add HEALTHCHECK instruction in your Dockerfile
+════════════════════════════════════════
+You should add HEALTHCHECK instruction in your docker container images to perform the health check on running containers.
+
+See https://avd.aquasec.com/misconfig/ds-0026
+────────────────────────────────────────
+
+
