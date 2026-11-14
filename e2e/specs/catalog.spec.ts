@@ -5,7 +5,7 @@ import {join} from 'node:path';
 import {root} from '../runner/settings.ts';
 
 // Published OpenAPI operations; update when docs/reference/openapi adds or removes one.
-const OPERATIONS=97;
+const OPERATIONS=98;
 
 const catalogue=test.extend<{catalogue:Awaited<ReturnType<typeof catalog>>}>({
   catalogue:[async ({},use)=>{const c=await catalog();try{await use(c);}finally{await c.close();}},{timeout:120000}],

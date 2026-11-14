@@ -11,6 +11,8 @@ import { useSession } from "./session-provider.tsx";
 import { SessionActions } from "./session-actions.tsx";
 import { watchContextAccess } from "../../lib/auth/context-events.ts";
 import { InstitutionAccessNotice } from "./institution-access-notice.tsx";
+import { CalendarFab } from "../calendar/calendar-fab.tsx";
+import { showsCalendarButton } from "../../lib/calendar/calendar.ts";
 
 export function ProtectedInstitution({ slug: legacySlug, children }: Readonly<{ slug?: string; children?: ReactNode }>) {
   const { session, state, origin } = useSession();
@@ -38,7 +40,8 @@ export function ProtectedInstitution({ slug: legacySlug, children }: Readonly<{ 
   if (context?.error) return <main className="content"><SessionActions /><ErrorState feedback={context.error} onRetry={() => void session.loadContext(slug!)} /></main>;
   // Authenticated on a valid host, context pending: a decorative frame until access is confirmed.
   if (!validHost || !slug || !context?.user) return <AppShellSkeleton />;
-  return <InstitutionShell key={`${state.generation}:${slug}:${JSON.stringify([context.user.institutionMembership,context.user.sectionMemberships])}`} pathname={pathname} institutionSlug={slug} institutionName={context.user.institutionMembership.institution.name} user={context.user} avatar={<AccountAvatar name={context.user.name}/>} actions={<SessionActions />}>
+  const calendar = showsCalendarButton(context.user, pathname);
+  return <InstitutionShell key={`${state.generation}:${slug}:${JSON.stringify([context.user.institutionMembership,context.user.sectionMemberships])}`} pathname={pathname} institutionSlug={slug} institutionName={context.user.institutionMembership.institution.name} user={context.user} avatar={<AccountAvatar name={context.user.name}/>} actions={<SessionActions />} floating={calendar ? <CalendarFab slug={slug} /> : undefined}>
     {state.contextWarning && <div className="notice access-notice" role="alert">
       <p>No se pudo verificar tu acceso. Puedes consultar el contenido; confirma la conexión antes de guardar cambios.</p>
       <button type="button" className="btn btn-ghost" onClick={() => void session.loadContext(slug)}>Verificar acceso</button>

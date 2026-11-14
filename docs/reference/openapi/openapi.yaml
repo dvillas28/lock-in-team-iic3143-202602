@@ -40,6 +40,8 @@ tags:
   description: Ponderaciones, notas, publicación y promedios derivados.
 - name: Audit
   description: Consulta inmutable del historial académico sensible.
+- name: Calendar
+  description: Plazos agregados de quizzes y tareas del actor.
 - name: Accounts
   description: Perfil global propio, invitaciones institucionales e importaciones efímeras.
 paths:
@@ -175,6 +177,8 @@ paths:
     $ref: ./paths/accounts.yaml#/~1api~1v1~1institution~1{institutionSlug}~1user-imports~1{importId}
   /api/v1/institution/{institutionSlug}/user-imports/{importId}/confirm:
     $ref: ./paths/accounts.yaml#/~1api~1v1~1institution~1{institutionSlug}~1user-imports~1{importId}~1confirm
+  /api/v1/institution/{institutionSlug}/calendar:
+    $ref: ./paths/calendar.yaml#/~1api~1v1~1institution~1{institutionSlug}~1calendar
   /api/v1/institution/{institutionSlug}/courses/{courseId}/assignments:
     $ref: ./paths/assignments.yaml#/~1api~1v1~1institution~1{institutionSlug}~1courses~1{courseId}~1assignments
   /api/v1/institution/{institutionSlug}/courses/{courseId}/assignments/{assignmentId}:
