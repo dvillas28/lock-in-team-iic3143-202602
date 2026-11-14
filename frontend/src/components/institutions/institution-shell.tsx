@@ -1,5 +1,5 @@
 "use client";
-import { ChevronRight, ClipboardList, FileText, FolderOpen, GraduationCap, Home, Menu, Moon, Shield, Sun, X, UserRound, Users } from "lucide-react";
+import { CalendarDays, ChevronRight, ClipboardList, FileText, FolderOpen, GraduationCap, Home, Menu, Moon, Shield, Sun, X, UserRound, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { CurrentUser } from "../../lib/auth/validation.ts";
@@ -13,11 +13,13 @@ type InstitutionShellProps = Readonly<{
     actions?: ReactNode;
     avatar?: ReactNode;
     pathname?: string;
+    floating?: ReactNode;
 }>;
 function pageTitle(pathname: string) {
     if (pathname === '/profile') return 'Mi perfil';
     if (pathname === '/profile/security') return 'Seguridad';
     if (pathname === '/admin/users') return 'Usuarios institucionales';
+    if (pathname === '/calendar') return 'Calendario';
     if (pathname.endsWith('/grades')) {
         return 'Mis notas';
     }
@@ -60,10 +62,12 @@ function pageTitle(pathname: string) {
 function toggleTheme() {
     document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
 }
-export function InstitutionShell({ institutionSlug, institutionName, actions, avatar, children, user, pathname = "/courses" }: InstitutionShellProps) {
+export function InstitutionShell({ institutionSlug, institutionName, actions, avatar, children, user, floating, pathname = "/courses" }: InstitutionShellProps) {
     const homePath = institutionSlug ? institutionHomePath(institutionSlug) : '/#instituciones';
     const homeLabel = institutionSlug ? 'Mis cursos' : 'Instituciones';
     const profilePage = pathname === '/profile';
+    const calendarPage = pathname === '/calendar';
+    const hasCalendar = !!institutionSlug && !!user?.sectionMemberships.some(m => m.role === 'teacher' || m.role === 'student');
     const securityPage = pathname === '/profile/security';
     const [menuOpen, setMenuOpen] = useState(false);
     const menuButton = useRef<HTMLButtonElement>(null);
@@ -83,7 +87,7 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, av
       window.addEventListener('keydown', onEscape);
       return () => window.removeEventListener('keydown', onEscape);
     }, [menuOpen]);
-    return (<div className={`app academic-app${menuOpen ? ' menu-open' : ''}`}>
+    return (<div className={`app academic-app${menuOpen ? ' menu-open' : ''}${floating ? ' has-floating' : ''}`}>
       <a href="#main-content" className="btn btn-primary skip-link">Saltar al contenido</a>
       <aside className="sidebar" aria-label={institutionSlug ? "Contexto institucional" : "Mi cuenta"}>
         <div className="sidebar-top">
@@ -105,6 +109,7 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, av
             <Home size={16} aria-hidden="true"/>
             {homeLabel}
           </Link>
+          {hasCalendar && <Link href="/calendar" className={`nav-item${calendarPage ? ' active' : ''}`} aria-current={calendarPage ? 'page' : undefined} onClick={()=>setMenuOpen(false)}><CalendarDays size={16} aria-hidden="true"/>Calendario</Link>}
           <Link href="/profile" className={`nav-item${profilePage ? ' active' : ''}`} aria-current={profilePage ? 'page' : undefined} onClick={()=>setMenuOpen(false)}><UserRound size={16} aria-hidden="true"/>Mi perfil</Link>
           {(profilePage || securityPage) && <Link href="/profile/security" className={`nav-item${securityPage ? ' active' : ''}`} aria-current={securityPage ? 'page' : undefined} onClick={()=>setMenuOpen(false)}><Shield size={16} aria-hidden="true"/>Seguridad</Link>}
           {user && (user.institutionMembership.isAdmin || user.institutionMembership.isSuperAdmin) && <Link href="/admin/users" className={`nav-item${pathname === '/admin/users' ? ' active' : ''}`} aria-current={pathname === '/admin/users' ? 'page' : undefined} onClick={()=>setMenuOpen(false)}><Users size={16} aria-hidden="true"/>Usuarios institucionales</Link>}
@@ -142,5 +147,6 @@ export function InstitutionShell({ institutionSlug, institutionName, actions, av
           {children}
         </main>
       </div>
+      {floating}
     </div>);
 }

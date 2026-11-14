@@ -37,7 +37,9 @@
   "pnpm": {
     "overrides": {
       "body-parser": "^2.4.0",
-      "multer": "^2.5.0"
+      "multer": "^2.5.0",
+      "node-pg-migrate>glob": "^14.0.2",
+      "qs": "^6.16.1"
     }
   },
   "devDependencies": {

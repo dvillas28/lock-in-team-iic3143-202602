@@ -1,0 +1,32 @@
+CalendarEvent:
+  type: object
+  additionalProperties: false
+  required: [id, kind, title, course, sectionId, status, viewerRole, startsAt, dueAt, closesAt]
+  properties:
+    id: {type: string, format: uuid, description: ID del quiz o de la tarea.}
+    kind: {type: string, enum: [quiz, assignment]}
+    title: {type: string, minLength: 1, maxLength: 200}
+    course:
+      type: object
+      additionalProperties: false
+      required: [id, code, name]
+      properties:
+        id: {type: string, format: uuid}
+        code: {type: string}
+        name: {type: string}
+    sectionId: {type: [string, 'null'], format: uuid, description: Null identifica el curso completo.}
+    status: {type: string, enum: [draft, published, hidden], description: Estudiantes solo reciben published.}
+    viewerRole: {type: string, enum: [teacher, student], description: Rol del actor en el curso del evento.}
+    startsAt: {type: [string, 'null'], format: date-time, description: Apertura del quiz o inicio de la tarea.}
+    dueAt: {type: [string, 'null'], format: date-time, description: Entrega de la tarea; siempre null en quizzes.}
+    closesAt: {type: [string, 'null'], format: date-time, description: Cierre del quiz o de recepción de la tarea.}
+CalendarEventList:
+  type: object
+  additionalProperties: false
+  required: [from, to, events]
+  properties:
+    from: {type: string, format: date-time}
+    to: {type: string, format: date-time}
+    events:
+      type: array
+      items: {$ref: '#/CalendarEvent'}
