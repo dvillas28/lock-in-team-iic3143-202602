@@ -20,8 +20,7 @@
   flex: 1 1 240px;
   max-width: 360px;
 }
-.academic-toolbar .field,
-.audit-filters .field {
+.academic-toolbar .field {
   margin-top: 6px;
 }
 .academic-toolbar .actions,
@@ -77,7 +76,6 @@
   min-width: 128px;
 }
 .gradebook-table small,
-.audit-table small,
 .selection-group small {
   display: block;
   font-size: 12px;
@@ -176,45 +174,6 @@
 }
 .academic-dialog .publication-selection-hint {
   margin: -2px 0 0;
-}
-.audit-filters .form-grid {
-  align-items: start;
-}
-.audit-filter-summary {
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-.audit-filter-summary .chip {
-  white-space: normal;
-}
-.audit-table :is(td, th) {
-  vertical-align: top;
-}
-.audit-event-detail {
-  min-width: 170px;
-  max-width: 420px;
-}
-.audit-event-detail summary {
-  cursor: pointer;
-  color: var(--primary-ink);
-}
-.audit-event-detail dl {
-  font-size: 12px;
-  overflow-wrap: anywhere;
-  margin-top: 12px;
-}
-.audit-event-detail dt {
-  font-weight: 600;
-  margin-top: 8px;
-}
-.audit-event-detail dd {
-  margin: 0;
-}
-.audit-event-detail pre {
-  max-width: 380px;
-  max-height: 280px;
-  overflow: auto;
-  font-size: 12px;
 }
 /* «Asignar participante»: the course-admin dialog shell with one search, its results, the chosen person and the role. */
 .academic-app .participants-heading {

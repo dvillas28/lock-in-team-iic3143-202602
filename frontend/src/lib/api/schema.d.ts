@@ -1966,6 +1966,33 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/institution/{institutionSlug}/calendar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Listar plazos de quizzes y tareas del actor
+         * @description Agrega quizzes y tareas de los cursos donde el actor es docente o estudiante activo, con la misma visibilidad de los listados por curso. Incluye eventos con alguna fecha en [from, to). Ayudantes y administradores sin matrícula reciben una lista vacía. El rango máximo es de 100 días.
+         */
+        get: operations["listCalendarEvents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/institution/{institutionSlug}/courses/{courseId}/assignments": {
         parameters: {
             query?: never;
@@ -3295,6 +3322,59 @@ export interface components {
             rows: components["schemas"]["ImportRow"][];
         };
         ImportConfirmation: Record<string, never>;
+        CalendarEvent: {
+            /**
+             * Format: uuid
+             * @description ID del quiz o de la tarea.
+             */
+            id: string;
+            /** @enum {string} */
+            kind: "quiz" | "assignment";
+            title: string;
+            course: {
+                /** Format: uuid */
+                id: string;
+                code: string;
+                name: string;
+            };
+            /**
+             * Format: uuid
+             * @description Null identifica el curso completo.
+             */
+            sectionId: string | null;
+            /**
+             * @description Estudiantes solo reciben published.
+             * @enum {string}
+             */
+            status: "draft" | "published" | "hidden";
+            /**
+             * @description Rol del actor en el curso del evento.
+             * @enum {string}
+             */
+            viewerRole: "teacher" | "student";
+            /**
+             * Format: date-time
+             * @description Apertura del quiz o inicio de la tarea.
+             */
+            startsAt: string | null;
+            /**
+             * Format: date-time
+             * @description Entrega de la tarea; siempre null en quizzes.
+             */
+            dueAt: string | null;
+            /**
+             * Format: date-time
+             * @description Cierre del quiz o de recepción de la tarea.
+             */
+            closesAt: string | null;
+        };
+        CalendarEventList: {
+            /** Format: date-time */
+            from: string;
+            /** Format: date-time */
+            to: string;
+            events: components["schemas"]["CalendarEvent"][];
+        };
         Assignment: {
             /** Format: uuid */
             id: string;
@@ -7001,6 +7081,43 @@ export interface operations {
             413: components["responses"]["PayloadTooLarge"];
             415: components["responses"]["UnsupportedMediaType"];
             429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    listCalendarEvents: {
+        parameters: {
+            query: {
+                /** @description Inicio inclusivo en UTC con sufijo Z. */
+                from: string;
+                /** @description Fin exclusivo en UTC con sufijo Z. */
+                to: string;
+            };
+            header?: never;
+            path: {
+                /**
+                 * @description Slug de la Institution solicitada. Solo identifica contexto; el backend
+                 *     valida que la identidad tenga una InstitutionMembership activa.
+                 * @example uc
+                 */
+                institutionSlug: components["parameters"]["InstitutionSlug"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operación completada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarEventList"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
             500: components["responses"]["InternalError"];
             503: components["responses"]["ServiceUnavailable"];
         };

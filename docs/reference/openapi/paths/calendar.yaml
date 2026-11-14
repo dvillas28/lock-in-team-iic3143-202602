@@ -1,0 +1,28 @@
+/api/v1/institution/{institutionSlug}/calendar:
+  parameters:
+    - $ref: '../components/parameters.yaml#/InstitutionSlug'
+  get:
+    tags: [Calendar]
+    operationId: listCalendarEvents
+    summary: Listar plazos de quizzes y tareas del actor
+    description: Agrega quizzes y tareas de los cursos donde el actor es docente o estudiante activo, con la misma visibilidad de los listados por curso. Incluye eventos con alguna fecha en [from, to). Ayudantes y administradores sin matrícula reciben una lista vacía. El rango máximo es de 100 días.
+    parameters:
+      - {name: from, in: query, required: true, schema: {type: string, format: date-time}, description: Inicio inclusivo en UTC con sufijo Z.}
+      - {name: to, in: query, required: true, schema: {type: string, format: date-time}, description: Fin exclusivo en UTC con sufijo Z.}
+    responses:
+      '200':
+        description: Operación completada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/calendar.yaml#/CalendarEventList'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '500':
+        $ref: '../components/responses.yaml#/InternalError'
+      '503':
+        $ref: '../components/responses.yaml#/ServiceUnavailable'

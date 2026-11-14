@@ -27,7 +27,7 @@ for(const actor of ['ST1','AS1','SA'])test(`E2E-AUDIT-005 academic audit denies 
  await e.graded();await e.publish();const page=await actorPage(actor),api=await e.api(actor),before=await securitySnapshot(e);
  status(await api.get(`courses/${e.data.courses.C1}/audit-events`),actor==='SA'?404:403);
  status(await (await e.api('T1')).get(`courses/${e.data.courses.C1}/audit-events`),200);
- await deniedUI(page,`/courses/${e.data.courses.C1}/audit`);await expect(page.getByRole('table')).toHaveCount(0);expect(await securitySnapshot(e)).toEqual(before);
+ await deniedUI(page,`/courses/${e.data.courses.C1}/audit`);await expect(page.locator('button.audit-row')).toHaveCount(0);expect(await securitySnapshot(e)).toEqual(before);
 });
 test('E2E-AUDIT-008 audit snapshots omit answers marking keys and credentials / snapshots @regression',async ({e,actorPage})=>{
  const api=await e.api('AO'),q=status(await api.post(`courses/${e.data.courses.C1}/quizzes`,{title:'Audit metadata',sectionId:e.data.sections.S1,questions:[{position:1,prompt:'SECRET_QUESTION',points:1,alternatives:[{id:'a',text:'SECRET_CORRECT',isCorrect:true},{id:'b',text:'B',isCorrect:false}]}]}),201).body;

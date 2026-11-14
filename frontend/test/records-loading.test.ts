@@ -144,22 +144,33 @@ test("Mis notas draws the summary and table shapes without anticipating any resu
   } finally { await ui.close(); }
 });
 
-test("audit keeps its filters, caption and columns while a page loads", async () => {
+/** The audit timeline skeleton announces one status and hides day cards with no actionable rows. */
+function assertTimeline(doc: Document) {
+  const region = doc.querySelector('section[aria-label="Actividad del curso"] .skeleton-region')!;
+  assert.ok(region, "timeline skeleton");
+  assert.deepEqual([...region.querySelectorAll('[role="status"]')].map(e => e.textContent), ["Cargando actividad…"]);
+  const content = region.querySelector(".skeleton-content")!;
+  assert.equal(content.getAttribute("aria-hidden"), "true");
+  assert.ok(content.querySelector(".audit-day .audit-row .skeleton"));
+  assert.equal(content.querySelector("a, button, input, select, textarea, [tabindex]"), null);
+}
+
+test("audit keeps its filters and pager while a page loads", async () => {
   let next = true;
   const events = gate(r => path(r).endsWith("/audit-events"), () => Response.json({ ...auditPage, hasMore: next, nextCursor: next ? "next" : null }));
   const ui = await mount(h(CourseAudit, { courseId: course.id }), r => path(r).endsWith("/audit-events") ? events.reply(r) : records(r), "owner");
   try {
     assert.ok(ui.doc.querySelector('form[aria-label="Filtros de auditoría"]'));
-    assertRows(ui.doc, "Cargando actividad…", "Historial de actividad del curso", ["Fecha", "Actor", "Acción", "Recurso", "Sección histórica", "Cambios"]);
-    assert.ok(ui.doc.querySelector(".skeleton-rows table.audit-table"));
+    assertTimeline(ui.doc);
     await ui.settle(() => events.release());
-    assert.equal(ui.doc.querySelector(".skeleton-rows"), null);
+    assert.equal(ui.doc.querySelector(".skeleton-region"), null);
+    assert.ok(ui.doc.querySelector("button.audit-row"));
     events.hold(); next = false;
     await ui.click("Siguiente");
-    assertRows(ui.doc, "Cargando actividad…", "Historial de actividad del curso", ["Fecha"]);
+    assertTimeline(ui.doc);
     assert.ok(ui.doc.querySelector('nav[aria-label="Páginas de auditoría"]'));
     await ui.settle(() => events.release());
-    assert.equal(ui.doc.querySelector(".skeleton-rows"), null);
+    assert.equal(ui.doc.querySelector(".skeleton-region"), null);
   } finally { await ui.close(); }
 });
 

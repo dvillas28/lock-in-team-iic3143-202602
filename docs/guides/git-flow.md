@@ -32,6 +32,9 @@ docs/update-roadmap
 - `ci`: cambios de integracion continua.
 - `build`: build system, dependencias o empaquetado.
 
+Commits (asunto y cuerpo), títulos y descripciones de PR se escriben en español;
+solo el tipo y el scope siguen esta lista: `fix(e2e): reparar la suite del push a dev`.
+
 ## Flujo Corto
 
 ```bash

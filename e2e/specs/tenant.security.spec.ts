@@ -4,6 +4,7 @@ import {login,course,go} from '../helpers/browser.ts';
 import {origin} from '../runner/settings.ts';
 import {academic,topology,securitySnapshot,deniedUI,courseInput} from '../helpers/security.ts';
 import pg from 'pg';
+import type {Page} from '@playwright/test';
 
 for(const slug of ['uc','utfsm'])test(`E2E-TENANT-001 institution membership bounds global identity / ${slug} @smoke`,async ({e,actorPage})=>{
  const own=topology(e,slug),other=slug==='uc'?'utfsm':'uc';const page=await actorPage(own.student,slug);
@@ -55,14 +56,20 @@ for(const {id,separate} of [{id:'E2E-TENANT-005',separate:false},{id:'E2E-TENANT
  if(foreign){status(await (await e.api(actor,'utfsm')).get('me'),200);await course(foreign,e.data.courses.F1);await expect(foreign.getByText(e.data.actors[actor].name,{exact:true})).toBeVisible();}
  status(await new Api().request('/api/v1/auth/login','POST',{email:e.data.actors[actor].email,password:e.password}),200);
 });
+// History traversal can land on a route the SPA redirects at once (e.g. /grades -> /login);
+// that redirect aborts the pending navigation, so wait only for commit and tolerate the abort.
+const traverse=async (nav:Promise<unknown>,page:Page)=>{
+ await nav.catch((err:unknown)=>{if(!/ERR_ABORTED|frame was detached/.test(String(err)))throw err;});
+ await page.waitForLoadState('domcontentloaded').catch(()=>{});
+};
 test('E2E-TENANT-007 cross-origin history does not revive private state / history @regression',async ({e,actorPage})=>{
  const page=await actorPage('MULTI');await go(page,e.data.courses.C1,'/grades');await page.goto(origin('utfsm')+'/courses');
  await login(page,e,'MULTI','utfsm');await course(page,e.data.courses.F1);
  let reached=false;
- for(let i=0;i<6;i++){await page.goBack();if(new URL(page.url()).origin===origin()){reached=true;break;}}
+ for(let i=0;i<6;i++){await traverse(page.goBack({waitUntil:'commit'}),page);if(new URL(page.url()).origin===origin()){reached=true;break;}}
  expect(reached).toBe(true);await expect(page).toHaveURL(url=>url.origin===origin() && url.pathname==='/login');
  await expect(page.getByText(e.data.actors.MULTI.name,{exact:true})).toHaveCount(0);
- await page.goForward();await expect(page).toHaveURL(url=>url.origin===origin('utfsm') && url.pathname==='/login');
+ await traverse(page.goForward({waitUntil:'commit'}),page);await expect(page).toHaveURL(url=>url.origin===origin('utfsm') && url.pathname==='/login');
  await expect(page.getByText('Curso E2E C1',{exact:true})).toHaveCount(0);
 });
 for(const slug of ['uc','utfsm'])for(const role of ['teacher','student','assistant','owner','superadmin'])test(`E2E-TENANT-008 foreign identifiers never reveal resources / ${slug}-${role} @smoke`,async ({e,actorPage})=>{
