@@ -20,6 +20,24 @@ const events = [event(70), event(71, { kind: "quiz", title: "Control 1", dueAt: 
 const reply = (r: Request) => new URL(r.url).pathname.endsWith("/calendar") ? Response.json({ from: "", to: "", events })
   : new URL(r.url).pathname.endsWith("/courses") ? Response.json({ items: [{ ...course }, { ...otherCourse }] }) : Response.json({});
 
+async function selectDeadlineDay(ui: Awaited<ReturnType<typeof mount>>, root: ParentNode) {
+  const selector = `button[data-day="${day}"]`;
+  let target = root.querySelector<HTMLButtonElement>(selector);
+  if (!target) {
+    const first = root.querySelector<HTMLButtonElement>("button[data-day]")?.dataset.day;
+    assert.ok(first);
+    const direction = day < first ? "anterior" : "siguiente";
+    const navigation = root.querySelector<HTMLButtonElement>(`button[aria-label^="Mes ${direction}"]`);
+    assert.ok(navigation);
+    await ui.settle(() => navigation.click());
+    target = root.querySelector<HTMLButtonElement>(selector);
+  }
+  assert.ok(target);
+  // JSDOM no enfoca automáticamente el botón al hacer click, a diferencia del navegador.
+  await ui.settle(() => { target.focus(); target.click(); });
+  return target;
+}
+
 function withFrames<T>(run: () => Promise<T>) {
   const previous = [globalThis.requestAnimationFrame, globalThis.cancelAnimationFrame] as const;
   globalThis.requestAnimationFrame = callback => { callback(0); return 0; };
@@ -39,9 +57,8 @@ test("calendar FAB shows upcoming deadlines, opens a keyboard mini calendar and 
     assert.equal(fab.getAttribute("aria-expanded"), "true");
     assert.equal(dialog.querySelector(".calendar-grid")?.getAttribute("role"), "grid");
     assert.equal(dialog.querySelector('a[aria-label="Expandir a calendario completo"]')?.getAttribute("href"), "/calendar");
-    const target = dialog.querySelector<HTMLButtonElement>(`button[data-day="${day}"]`)!;
+    const target = await selectDeadlineDay(ui, dialog);
     assert.match(target.getAttribute("aria-label")!, /2 plazos/);
-    await ui.settle(() => target.click());
     const links = [...dialog.querySelectorAll<HTMLAnchorElement>(".calendar-agenda-link")];
     assert.deepEqual(links.map(a => a.textContent).sort(), ["Control 1", "Tarea 70"]);
     assert.ok(links.some(a => a.getAttribute("href") === `/courses/${course.id}/assignments/${id(70)}`));
@@ -62,7 +79,7 @@ test("calendar page filters by type and course and lists the selected day", () =
   const ui = await mount(h(CalendarPage), reply, "multi");
   try {
     assert.equal(ui.doc.querySelector("h1")?.textContent, "Calendario");
-    await ui.settle(() => ui.doc.querySelector<HTMLButtonElement>(`button[data-day="${day}"]`)!.click());
+    await selectDeadlineDay(ui, ui.doc);
     const titles = () => [...ui.doc.querySelectorAll(".calendar-side .calendar-agenda-link")].map(a => a.textContent).sort();
     assert.deepEqual(titles(), ["Control 1", "Tarea 70"]);
     await ui.click("Quizzes");
