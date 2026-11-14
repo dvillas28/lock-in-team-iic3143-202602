@@ -27,9 +27,9 @@
   font-size: 12px; font-weight: 600; line-height: 1;
 }
 
-/* Un aviso no puede quedar detrás del FAB, sobre todo en vistas móviles.
-   Se eleva solo cuando el shell muestra el acceso flotante al calendario. */
-.has-floating .content-notices { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+/* Los avisos mantienen su posición inferior (también en móvil) y reciben
+   prioridad de interacción sobre el calendario flotante mientras están visibles. */
+.has-floating .content-notices { z-index: 60; }
 
 /* ── Popover ── */
 .calendar-popover {
