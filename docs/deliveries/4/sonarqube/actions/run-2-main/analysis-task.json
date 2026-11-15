@@ -1,0 +1,19 @@
+{
+  "id": "2294a020-0309-4069-804f-1e778d8ead65",
+  "type": "REPORT",
+  "componentId": "1a95c6ee-9f31-4957-b1de-44f9d76efb58",
+  "componentKey": "ci-project",
+  "componentName": "AcademiX",
+  "componentQualifier": "TRK",
+  "analysisId": "220b22f5-edbf-429b-8215-95b41ac0a4da",
+  "status": "SUCCESS",
+  "submittedAt": "2026-11-15T17:12:45+0000",
+  "submitterLogin": "admin",
+  "startedAt": "2026-11-15T17:12:46+0000",
+  "executedAt": "2026-11-15T17:12:51+0000",
+  "executionTimeMs": 4392,
+  "hasScannerContext": true,
+  "warningCount": 0,
+  "warnings": [],
+  "infoMessages": []
+}
