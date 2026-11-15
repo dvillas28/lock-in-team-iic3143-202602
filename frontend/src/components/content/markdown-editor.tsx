@@ -3,6 +3,7 @@ import { useRef, useState, type KeyboardEvent } from "react";
 import { Bold, Heading2, Heading3, Italic, Link2, List, ListOrdered } from "lucide-react";
 import { markdownEdit, type EditAction } from "../../lib/content/markdown-edit.ts";
 import { AcademicMarkdown } from "./academic-markdown.tsx";
+import { ScrollRegion } from "../scroll-region.tsx";
 
 const tools: { action: EditAction; label: string; Icon: typeof Bold }[] = [
   { action: "h2", label: "Título", Icon: Heading2 },
@@ -52,8 +53,8 @@ export function MarkdownEditor({ name, defaultValue, value, onInput, onBlur, lab
     </div>
     <textarea ref={field} className="field page-editor-area" name={name} defaultValue={defaultValue} hidden={preview} aria-labelledby={labelId}
       aria-describedby={describedBy} aria-invalid={invalid || undefined} onInput={event => onInput(event.currentTarget.value)} onBlur={onBlur} onKeyDown={shortcut} />
-    {preview && <div className="page-editor-preview field" aria-label="Vista previa de la página" tabIndex={0}>
+    {preview && <ScrollRegion className="page-editor-preview field" label="Vista previa de la página">
       {value.trim() ? <AcademicMarkdown source={value} /> : <p className="hint">Aún no hay contenido para mostrar.</p>}
-    </div>}
+    </ScrollRegion>}
   </div>;
 }

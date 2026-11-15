@@ -63,7 +63,7 @@ export function AttemptCancelMenu({ ops, state, allowed }: { ops: AttemptOperati
       onKeyDown={event => { if (event.key === "ArrowDown") { event.preventDefault(); setOpen(true); } }}>
       <MoreHorizontal size={18} aria-hidden="true"/>
     </button>
-    {open && <div className="card attempt-menu-list" role="menu" id={menuId} aria-label="Acciones del intento" onKeyDown={onMenuKey}>
+    {open && <div className="card attempt-menu-list" role="menu" id={menuId} aria-label="Acciones del intento" tabIndex={-1} onKeyDown={onMenuKey}>
       <button ref={item} type="button" role="menuitem" className="attempt-menu-item attempt-menu-danger"
         onClick={() => { setOpen(false); setConfirming(true); }}>
         <XCircle size={16} aria-hidden="true"/>Cancelar intento

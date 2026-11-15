@@ -28,6 +28,7 @@ import { AdminDialog, AdminDialogFrame } from "./admin-dialog.tsx";
 import { useContentNotice } from "../content/content-notices.tsx";
 import { useMutation } from "./use-mutation.ts";
 import { useResource } from "./use-resource.ts";
+import { ScrollRegion } from "../scroll-region.tsx";
 const views: { status: EnrollmentStatus; label: string; caption: string }[] = [
   { status: "active", label: "Activas", caption: "Matrículas activas" },
   { status: "historical", label: "Historial", caption: "Matrículas históricas" },
@@ -259,13 +260,13 @@ function Participants({
               message="Esta sección no tiene matrículas activas. Usa «Asignar participante» para agregar una matrícula." />
           )
         ) : (
-          <div
+          <ScrollRegion
             ref={table}
             className="table-scroll participants-table participants-admin-table"
-            role="region"
-            aria-label={`Participantes de la sección ${section.code}`}
-            tabIndex={0}
+            label={`Participantes de la sección ${section.code}`}
           >
+            {/* Explicit table roles: the mobile layout sets display:block/grid on the table, which drops native
+                table semantics in some browsers. Sonar S6843 reads td as interactive, so those lines carry NOSONAR. */}
             <table className="data-table" role="table">
               <caption>{caption}</caption>
               <thead role="rowgroup">
@@ -284,9 +285,9 @@ function Participants({
                       <span className="participant-identity">{e.user.name}</span>
                       <span className="hint participant-email">{e.user.email}</span>
                     </th>
-                    <td role="cell"><span className="chip chip-primary">{roleLabel(e.role)}</span></td>
-                    <td role="cell"><span className={e.active ? "chip chip-success" : "chip"}>{e.active ? "Activa" : "Histórica"}</span></td>
-                    {!historical && <td role="cell">
+                    <td role="cell" /* NOSONAR typescript:S6843 */><span className="chip chip-primary">{roleLabel(e.role)}</span></td>
+                    <td role="cell" /* NOSONAR typescript:S6843 */><span className={e.active ? "chip chip-success" : "chip"}>{e.active ? "Activa" : "Histórica"}</span></td>
+                    {!historical && <td role="cell" /* NOSONAR typescript:S6843 */>
                       {manageable(e) ? (
                         <button
                           type="button"
@@ -310,7 +311,7 @@ function Participants({
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollRegion>
         )}
         {(paged || canAdvance) && (
           <nav className="participant-pagination" aria-label={`Páginas de ${caption.toLowerCase()}`}>

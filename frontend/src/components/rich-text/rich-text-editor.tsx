@@ -26,6 +26,9 @@ export function RichTextEditor({ id, labelId, groupLabel, describedBy, tools, va
   const field = useRef<HTMLDivElement>(null), saved = useRef<Range | null>(null);
   const [active, setActive] = useState<Record<string, boolean>>({});
   const [linking, setLinking] = useState<{ address: string; error?: string; editing: boolean }>();
+  const linkField = useRef<HTMLInputElement>(null), linkOpen = !!linking;
+  // The address row opens on a toolbar click, so focus moves there on purpose (not on page load).
+  useEffect(() => { if (linkOpen) linkField.current?.focus(); }, [linkOpen]);
 
   useEffect(() => {
     const input = field.current;
@@ -122,7 +125,7 @@ export function RichTextEditor({ id, labelId, groupLabel, describedBy, tools, va
     </div>
     {linking && <div className="rich-link-row" role="group" aria-label="Enlace">
       <label className="field-label" htmlFor={`${id ?? "rich"}-link`}>Dirección del enlace</label>
-      <input id={`${id ?? "rich"}-link`} className="field" type="url" value={linking.address} autoFocus aria-invalid={linking.error ? true : undefined}
+      <input ref={linkField} id={`${id ?? "rich"}-link`} className="field" type="url" value={linking.address} aria-invalid={linking.error ? true : undefined}
         onChange={event => setLinking({ ...linking, address: event.target.value, error: undefined })}
         onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); applyLink(); } if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); closeLink(); } }} />
       <button type="button" className="btn btn-primary" onClick={applyLink}>Aplicar</button>

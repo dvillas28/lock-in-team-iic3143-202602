@@ -10,6 +10,13 @@ type ApiClientOptions = {
   fetch?: typeof globalThis.fetch;
 };
 
+/** Linear scan: a regex like /\/+$/ backtracks on long runs of slashes. */
+function withoutTrailingSlashes(value: string) {
+  let end = value.length;
+  while (end > 0 && value[end - 1] === "/") end--;
+  return value.slice(0, end);
+}
+
 export function createApiClient({
   baseUrl,
   getToken,
@@ -34,7 +41,7 @@ export function createApiClient({
   }
 
   const client = createClient<paths>({
-    baseUrl: url.replace(/\/+$/, ""),
+    baseUrl: withoutTrailingSlashes(url),
     fetch: fetcher,
     cache: "no-store",
     credentials: "omit",
