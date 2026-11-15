@@ -19,7 +19,7 @@ export const phaseFour:Record<string,readonly CaseVariant[]>={
  'E2E-SECTION-003':[v('boundaries')],
  'E2E-SECTION-004':[v('picker')],
  'E2E-SECTION-005':[v('late-response')],
- 'E2E-SECTION-006':[v('zero-capacity')],
+ 'E2E-SECTION-006':[v('minimum-capacity')],
 };
 
 Object.assign(phaseFour,{

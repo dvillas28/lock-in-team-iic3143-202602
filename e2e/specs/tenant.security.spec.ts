@@ -43,7 +43,7 @@ test('E2E-TENANT-004 invalid missing and inactive institution / slugs @regressio
  status(await new Api(token,'missing').get('me'),404);
  await e.pool.query('UPDATE institutions SET active=false WHERE slug=$1',['uc']);status(await new Api(token).get('me'),404);
  await e.pool.query('UPDATE institutions SET active=true WHERE slug=$1',['uc']);
- await course(page,e.data.courses.C1);await expect(page.getByRole('heading',{name:'Curso E2E C1',exact:true})).toBeVisible();
+ await course(page,e.data.courses.C1);await expect(page.getByRole('heading',{level:1,name:'Módulos y material',exact:true})).toBeVisible();await expect(page.locator('main .page-heading').getByText('Curso E2E C1',{exact:true})).toBeVisible();
 });
 for(const {id,separate} of [{id:'E2E-TENANT-005',separate:false},{id:'E2E-TENANT-006',separate:true}])test(`${id} membership revocation retains only authorized context / ${separate?'other-active':'revoked'} @regression`,async ({e,actorPage})=>{
  const actor=separate?'MULTI':'ST1',page=await actorPage(actor);let foreign:import('@playwright/test').Page|undefined;
