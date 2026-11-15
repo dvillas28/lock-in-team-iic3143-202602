@@ -9,17 +9,22 @@ sin secretos), mismo `sonar-project.properties` que el CI.
 | Antes | GitHub Actions, run [#2](https://github.com/dvillas28/lock-in-team-iic3143-202602/actions/runs/43738811618) | `6758fa9` (`main`) | OK | 25 | 91.7 % | 20 364 |
 | Antes | Local | `1218c72` (`dev`) | OK | 25 | 91.7 % | 20 364 |
 | Después | Local | `76bc4b9` (`fix/sonarqube-entrega-4`) | OK | **0** | 91.7 % | 20 389 |
+| Después | GitHub Actions, run [#5](https://github.com/dvillas28/lock-in-team-iic3143-202602/actions/runs/43759129460) | `a7a8cf5` (`ci/sonarqube-run-entrega-4`) | OK | **0** | 91.7 % | 20 389 |
 
 `6758fa9` y `1218c72` tienen el mismo árbol (`git diff` vacío): el run de
 Actions y el análisis local reportan los mismos 25 issues en las mismas líneas.
 Eso valida que la réplica local es equivalente al workflow.
 
-## Por qué el "después" es local
+## El "después" en Actions y en local
 
 [`sonarqube-manual.yml`](../../../../.github/workflows/sonarqube-manual.yml) solo
-corre sobre la rama predeterminada (`main`), así que no puede ejecutarse sobre
-esta rama. [`script/sonar-local.sh`](script/sonar-local.sh) replica sus pasos con
-la misma imagen y el mismo proyecto:
+corre sobre la rama predeterminada (`main`): lanzado desde esta rama, el job
+queda *skipped* (runs #3 y #4). Para el run #5 se usó una rama desechable,
+`ci/sonarqube-run-entrega-4`: `0d929f4` más un único commit que quita esa
+condición `if:` del workflow, sin tocar código. Se borró tras el run y no se mergeó.
+
+Además, [`script/sonar-local.sh`](script/sonar-local.sh) replica los pasos del
+workflow con la misma imagen y el mismo proyecto:
 
 1. SonarQube en Docker y PostgreSQL 17 efímero.
 2. Cobertura de backend (unitarios + integración) y de frontend, igual que el workflow.
@@ -29,7 +34,7 @@ la misma imagen y el mismo proyecto:
 Única diferencia: los datos de SonarQube van en `tmpfs`, porque con el disco del
 equipo sobre 90 % Elasticsearch no crea índices. No cambia el análisis.
 
-Tras el merge a `main`, el run manual del workflow debería mostrar 0 issues.
+El run #5 y el análisis local coinciden: gate OK, 0 issues, 91.7 % y 20 389 ncloc.
 
 ## Issues y corrección
 
@@ -74,6 +79,7 @@ En total quedan 4 supresiones explícitas, cada una con su motivo en el código.
 | Cobertura backend + frontend (dentro del análisis) | Sin fallos; cobertura 91.7 % |
 | E2E `regression` en Chromium (`pnpm --dir e2e run test:regression`) | 265/266 |
 | SonarQube local sobre `76bc4b9` | Gate OK, 0 issues |
+| SonarQube en Actions, run #5 (`a7a8cf5`) | Gate OK, 0 issues |
 
 La única falla E2E es E2E-TENANT-007 (historial entre orígenes), que no toca
 pantallas modificadas. Con `--repeat-each=3` pasa 1/3 en esta rama y 0/3 en
@@ -84,11 +90,14 @@ pantallas modificadas. Con `--repeat-each=3` pasa 1/3 en esta rama y 0/3 en
 | Carpeta | Contenido |
 | --- | --- |
 | [`actions/run-2-main/`](actions/run-2-main/) | Artifact `sonarqube-reports` del run #2 y su [captura](actions/run-2-main/resumen.png). |
+| [`actions/run-5-ci/`](actions/run-5-ci/) | Artifact `sonarqube-reports` del run #5 y su [captura](actions/run-5-ci/resumen.png). |
 | [`antes/`](antes/) | Análisis local sobre `1218c72`. |
 | [`despues/`](despues/) | Análisis local sobre `76bc4b9`. |
 | [`script/`](script/) | Réplica local del workflow (`sonar-local.sh`, `sonar-api.py`). |
 
 ![Run #2 en main: gate OK, 25 issues](actions/run-2-main/resumen.png)
+
+![Run #5 en ci/sonarqube-run-entrega-4: gate OK, 0 issues](actions/run-5-ci/resumen.png)
 
 ## Cómo reproducir
 
