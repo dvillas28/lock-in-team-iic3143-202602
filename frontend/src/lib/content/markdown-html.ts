@@ -101,7 +101,7 @@ function list(el: Element): string {
       if (name === "ul" || name === "ol") nested.push(list(child as Element));
       else text.appendChild(child.cloneNode(true));
     }
-    const content = inline(text).replace(/\s+$/, "");
+    const content = inline(text).trimEnd();
     if (!content && !nested.length) return "";
     const lines = [marker + content.split("\n").join("\n" + pad)];
     for (const block of nested) lines.push(block.split("\n").map(line => pad + line).join("\n"));

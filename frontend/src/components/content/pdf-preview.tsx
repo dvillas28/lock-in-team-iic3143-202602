@@ -3,6 +3,7 @@
 import {useEffect,useRef,useState} from "react";
 import {ChevronLeft,ChevronRight,Minus,Plus,Scan} from "lucide-react";
 import {PdfSheetSkeleton} from "./document-skeleton.tsx";
+import {ScrollRegion} from "../scroll-region.tsx";
 import type {PDFDocumentLoadingTask,PDFDocumentProxy,RenderTask,TextLayer} from "pdfjs-dist";
 
 export function PdfPreview({file}:{file:Blob}) {
@@ -101,14 +102,15 @@ export function PdfPreview({file}:{file:Blob}) {
      onClick={()=>setZoom(1)}><Scan size={18} aria-hidden="true"/></button>
    </div>
   </div>
-  <div className="pdf-viewport" ref={viewport} tabIndex={0} role="region" aria-label="Página del documento" aria-busy={pending}>
+  <ScrollRegion className="pdf-viewport" ref={viewport} label="Página del documento" aria-busy={pending}>
    {pending && <p className="pdf-loading" role="status">Cargando página…</p>}
    {/* The paper stays in place while a page renders; only its canvas and text layer wait. */}
    <div className={pending?"pdf-sheet is-pending":"pdf-sheet"} ref={sheet}>
-    <canvas ref={canvas} aria-hidden="true"/>
+    {/* No aria-hidden: an empty canvas exposes nothing, and the text layer carries the readable text. */}
+    <canvas ref={canvas}/>
     <div className="pdf-text-layer" ref={text}/>
     {pending && <PdfSheetSkeleton/>}
    </div>
-  </div>
+  </ScrollRegion>
  </section>;
 }

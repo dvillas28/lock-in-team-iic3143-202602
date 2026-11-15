@@ -1,6 +1,7 @@
 import Markdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { markdownUrl } from '../../lib/content/markdown-policy.ts';
+import { ScrollRegion } from '../scroll-region.tsx';
 
 const components: Components = {
   h1: ({ children }) => <h2>{children}</h2>,
@@ -15,8 +16,8 @@ const components: Components = {
   },
   // Do not spread props: src/srcSet must never reach the DOM or trigger a request.
   img: ({ alt }) => alt ? <span className="academic-image-alt">{alt}</span> : null,
-  table: ({ children }) => <div className="academic-table-scroll" role="region" aria-label="Tabla del material" tabIndex={0}><table>{children}</table></div>,
-  pre: ({ children }) => <pre tabIndex={0}>{children}</pre>,
+  table: ({ children }) => <ScrollRegion className="academic-table-scroll" label="Tabla del material"><table>{children}</table></ScrollRegion>,
+  pre: ({ children }) => <ScrollRegion as="pre" label="Bloque de código">{children}</ScrollRegion>,
 };
 
 /** HTML stays literal (no raw-HTML plugin); all resource URLs use one policy. */

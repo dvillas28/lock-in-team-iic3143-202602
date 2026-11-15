@@ -1,0 +1,23 @@
+{
+  "component": {
+    "key": "ci-project",
+    "name": "AcademiX",
+    "qualifier": "TRK",
+    "measures": [
+      {
+        "metric": "coverage",
+        "value": "91.7",
+        "bestValue": false
+      },
+      {
+        "metric": "duplicated_lines_density",
+        "value": "0.0",
+        "bestValue": true
+      },
+      {
+        "metric": "ncloc",
+        "value": "20364"
+      }
+    ]
+  }
+}

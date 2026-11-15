@@ -6,6 +6,7 @@ import { CourseWorkspace } from "../courses/course-workspace.tsx";
 import { getStudentGrades } from "../../lib/api/gradebook.ts";
 import { GradesPending, gradesSkeleton } from "./gradebook-skeleton.tsx";
 import { AcademicDate, ResourceFeedback } from "../academic/feedback.tsx";
+import { ScrollRegion } from "../scroll-region.tsx";
 export function StudentGrades({ courseId }: Readonly<{ courseId: string }>) {
   return (
     <CourseWorkspace courseId={courseId} title="Mis notas" active="/grades" skeleton={gradesSkeleton}>
@@ -68,12 +69,7 @@ function Grades({ courseId }: Readonly<{ courseId: string }>) {
           </p>
         </section>
       ) : (
-        <div
-          className="table-scroll"
-          role="region"
-          aria-label="Notas publicadas"
-          tabIndex={0}
-        >
+        <ScrollRegion className="table-scroll" label="Notas publicadas">
           <table className="data-table">
             <caption>Resultados propios publicados</caption>
             <thead>
@@ -110,7 +106,7 @@ function Grades({ courseId }: Readonly<{ courseId: string }>) {
               ))}
             </tbody>
           </table>
-        </div>
+        </ScrollRegion>
       )}
     </div>
   );

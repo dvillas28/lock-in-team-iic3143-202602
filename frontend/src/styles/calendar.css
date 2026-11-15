@@ -17,9 +17,8 @@
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--primary); color: var(--on-primary); border: 1px solid transparent;
   box-shadow: var(--shadow-float); cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
 }
-.calendar-fab:hover { background: var(--primary-hover); transform: translateY(-1px); }
+.calendar-fab:hover { background: var(--primary-hover); }
 .calendar-fab-badge {
   position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; padding: 0 5px;
   border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
@@ -30,6 +29,20 @@
 /* Los avisos mantienen su posición inferior (también en móvil) y reciben
    prioridad de interacción sobre el calendario flotante mientras están visibles. */
 .has-floating .content-notices { z-index: 60; }
+
+/* El aviso es más bajo que el FAB con su badge, así que el botón asomaría por
+   detrás. Mientras haya un aviso visible el botón se oculta (el popover abierto
+   se mantiene) y vuelve al cerrarse el aviso.
+   El movimiento solo se aplica si el usuario no pidió reducirlo. */
+.has-floating:has(.content-notice) .calendar-fab { opacity: 0; visibility: hidden; pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .calendar-fab { transition: background 0.15s ease, transform 0.15s ease, opacity 0.15s ease, visibility 0s; }
+  .calendar-fab:hover { transform: translateY(-1px); }
+  .has-floating:has(.content-notice) .calendar-fab {
+    transform: scale(0.85);
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0s linear 0.15s;
+  }
+}
 
 /* ── Popover ── */
 .calendar-popover {

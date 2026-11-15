@@ -33,12 +33,12 @@ export function AddContentMenu({ onSelect, triggerRef, disabled }: Readonly<{
     else if (event.key === "End") go(list.length - 1);
     else if (event.key === "Tab") setOpen(false);
   }
-  return <div className="add-content" ref={root} onKeyDown={keys}>
+  return <div className="add-content" ref={root}>
     <button ref={triggerRef} type="button" className="btn btn-primary" aria-haspopup="menu" aria-expanded={open} disabled={disabled}
-      onClick={() => setOpen(value => !value)}>
+      onClick={() => setOpen(value => !value)} onKeyDown={keys}>
       <Plus size={16} aria-hidden="true" />Añadir contenido<ChevronDown size={14} aria-hidden="true" />
     </button>
-    {open && <div className="add-content-menu card" role="menu" aria-label="Añadir contenido">
+    {open && <div className="add-content-menu card" role="menu" aria-label="Añadir contenido" tabIndex={-1} onKeyDown={keys}>
       {actions.map(({ id, label, hint, Icon }) => <button key={id} type="button" role="menuitem" className="add-content-item"
         onClick={() => { setOpen(false); onSelect(id); }}>
         <Icon size={18} aria-hidden="true" /><span><strong>{label}</strong><small>{hint}</small></span>

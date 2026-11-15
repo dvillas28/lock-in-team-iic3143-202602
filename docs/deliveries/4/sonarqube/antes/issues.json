@@ -1,0 +1,1221 @@
+{
+  "total": 25,
+  "issues": [
+    {
+      "key": "12f78993-1977-4324-93f8-c4a5b159feab",
+      "rule": "typescript:S7737",
+      "severity": "MINOR",
+      "component": "ci-project:frontend/src/components/calendar/use-calendar.ts",
+      "project": "ci-project",
+      "line": 11,
+      "hash": "ea8f9ad1e761dc86f9735619858fe582",
+      "textRange": {
+        "startLine": 11,
+        "endLine": 11,
+        "startOffset": 60,
+        "endOffset": 82
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Do not use an object literal as default for parameter `filter`.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "141788398+matiaraos@users.noreply.github.com",
+      "tags": [
+        "editable-source",
+        "confusing",
+        "pitfall"
+      ],
+      "creationDate": "2026-11-14T02:53:52+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "5487ca3e-1844-4e1f-98a1-366371b37b53",
+      "rule": "typescript:S6843",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/courses/participants-panel.tsx",
+      "project": "ci-project",
+      "line": 287,
+      "hash": "83034647e45051fd51e50ae66b411534",
+      "textRange": {
+        "startLine": 287,
+        "endLine": 287,
+        "startOffset": 24,
+        "endOffset": 35
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Interactive elements should not be assigned non-interactive roles.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-11-13T01:33:39+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "16a776ac-a4f9-401b-9f6e-89404da25b3a",
+      "rule": "typescript:S6843",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/courses/participants-panel.tsx",
+      "project": "ci-project",
+      "line": 288,
+      "hash": "d75ce095f8dd0b69ac32b76db66fa85f",
+      "textRange": {
+        "startLine": 288,
+        "endLine": 288,
+        "startOffset": 24,
+        "endOffset": 35
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Interactive elements should not be assigned non-interactive roles.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-11-13T01:33:39+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "35eba273-f2ce-4516-88a2-e203c992d78e",
+      "rule": "typescript:S6843",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/courses/participants-panel.tsx",
+      "project": "ci-project",
+      "line": 289,
+      "hash": "70336946cf8ff24299e14de4eb2af4ae",
+      "textRange": {
+        "startLine": 289,
+        "endLine": 289,
+        "startOffset": 40,
+        "endOffset": 51
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Interactive elements should not be assigned non-interactive roles.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-11-13T01:33:39+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "c6d0eb63-91ab-46c8-ae86-8c54c34679d9",
+      "rule": "typescript:S6845",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/courses/section-participants-readonly.tsx",
+      "project": "ci-project",
+      "line": 83,
+      "hash": "fd4334483760d34a0409458f1b0ba4da",
+      "textRange": {
+        "startLine": 83,
+        "endLine": 83,
+        "startOffset": 121,
+        "endOffset": 133
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "`tabIndex` should only be declared on interactive elements.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-11-13T01:33:38+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "f99b02c2-1692-46c4-bfab-7d1710da3423",
+      "rule": "typescript:S6845",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/accounts/institution-users.tsx",
+      "project": "ci-project",
+      "line": 29,
+      "hash": "d1d2ffa1a4fa293e591ec56921bea102",
+      "textRange": {
+        "startLine": 29,
+        "endLine": 29,
+        "startOffset": 1128,
+        "endOffset": 1140
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "`tabIndex` should only be declared on interactive elements.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-11-11T22:17:10+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "0459a683-ba77-4b15-b3c0-7b6ed09db5a4",
+      "rule": "typescript:S6845",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/content/pdf-preview.tsx",
+      "project": "ci-project",
+      "line": 104,
+      "hash": "9b2ae73ffc43087c6fc2606bad6d81f5",
+      "textRange": {
+        "startLine": 104,
+        "endLine": 104,
+        "startOffset": 47,
+        "endOffset": 59
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "`tabIndex` should only be declared on interactive elements.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-11-11T13:49:21+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "8bf75be8-fc2a-409c-a14e-067d3ab9591f",
+      "rule": "typescript:S6848",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/content/add-content-menu.tsx",
+      "project": "ci-project",
+      "line": 36,
+      "hash": "7cbc415d3ae0be2fbab6c5164a6de126",
+      "textRange": {
+        "startLine": 36,
+        "endLine": 36,
+        "startOffset": 9,
+        "endOffset": 66
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-11-10T23:54:47+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "f331eeaa-e30f-4926-a3b7-9aaf6c278213",
+      "rule": "typescript:S6845",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/content/markdown-editor.tsx",
+      "project": "ci-project",
+      "line": 55,
+      "hash": "45318ce8543d4e7d8f6b3e0e556aa250",
+      "textRange": {
+        "startLine": 55,
+        "endLine": 55,
+        "startOffset": 98,
+        "endOffset": 110
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "`tabIndex` should only be declared on interactive elements.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-11-10T23:54:47+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "3dcf60fc-a12a-44a0-8406-2b7c1123142e",
+      "rule": "typescript:S9379",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/rich-text/rich-text-editor.tsx",
+      "project": "ci-project",
+      "line": 125,
+      "hash": "089d2a8a45600e973ba7142b5aa13ad8",
+      "textRange": {
+        "startLine": 125,
+        "endLine": 125,
+        "startOffset": 94,
+        "endOffset": 103
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove this \"autoFocus\" attribute, as it can reduce usability and accessibility for users.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-11-10T23:54:47+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "32c7d848-26cf-40b6-9742-a6e2b84f303f",
+      "rule": "typescript:S8786",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/lib/content/markdown-html.ts",
+      "project": "ci-project",
+      "line": 104,
+      "hash": "8ef9fa93a00600ef8c9492b3a084f81a",
+      "textRange": {
+        "startLine": 104,
+        "endLine": 104,
+        "startOffset": 41,
+        "endOffset": 47
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Simplify this regular expression to reduce its runtime, as it has super-linear performance due to backtracking.",
+      "effort": "20min",
+      "debt": "20min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "regex",
+        "performance"
+      ],
+      "creationDate": "2026-11-10T23:54:47+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "EFFICIENT",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "401b2d42-7926-43d5-be33-7854664be424",
+      "rule": "typescript:S6852",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/attempts/attempt-cancel.tsx",
+      "project": "ci-project",
+      "line": 66,
+      "hash": "8d515c64678a356dc6db28df4d73560c",
+      "textRange": {
+        "startLine": 66,
+        "endLine": 66,
+        "startOffset": 13,
+        "endOffset": 133
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Elements with the 'menu' interactive role must be focusable.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-11-10T23:30:33+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "f4fb08f1-0af6-463e-b856-a3b86de33102",
+      "rule": "typescript:S7773",
+      "severity": "MINOR",
+      "component": "ci-project:frontend/src/lib/quizzes/publication.ts",
+      "project": "ci-project",
+      "line": 14,
+      "hash": "18d9117181bd9a043c33476798fe3130",
+      "textRange": {
+        "startLine": 14,
+        "endLine": 14,
+        "startOffset": 67,
+        "endOffset": 70
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Prefer `Number.NaN` over `NaN`.",
+      "effort": "2min",
+      "debt": "2min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "convention",
+        "es2015",
+        "editable-source"
+      ],
+      "creationDate": "2026-11-10T23:30:32+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": true,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "dc0a4bbe-adf0-44e8-aec1-4ec27aa14b56",
+      "rule": "typescript:S6845",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/accounts/institution-users.tsx",
+      "project": "ci-project",
+      "line": 78,
+      "hash": "eb1b5b6bf25fbc88cffe41773537d9ac",
+      "textRange": {
+        "startLine": 78,
+        "endLine": 78,
+        "startOffset": 87,
+        "endOffset": 99
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "`tabIndex` should only be declared on interactive elements.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "141788398+matiaraos@users.noreply.github.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-11-10T15:08:57+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "5522a8f8-00c4-4cbe-ad4a-ed2c1441d8fa",
+      "rule": "typescript:S6825",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/content/pdf-preview.tsx",
+      "project": "ci-project",
+      "line": 108,
+      "hash": "884b96c89d8e78b95d0cfae9d56c4c5e",
+      "textRange": {
+        "startLine": 108,
+        "endLine": 108,
+        "startOffset": 4,
+        "endOffset": 45
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "aria-hidden=\"true\" must not be set on focusable elements.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-11-09T16:15:19+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "220a4fb7-c3d8-4aa4-89e7-b12dac47cc9a",
+      "rule": "typescript:S6845",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/accounts/csv-import.tsx",
+      "project": "ci-project",
+      "line": 50,
+      "hash": "2f576b2ff7658662d1445aaeb8d4189a",
+      "textRange": {
+        "startLine": 50,
+        "endLine": 50,
+        "startOffset": 2427,
+        "endOffset": 2439
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "`tabIndex` should only be declared on interactive elements.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "141788398+matiaraos@users.noreply.github.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-11-09T01:36:33+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "b5098fdb-7df5-49a0-ac7c-b639fa3ba408",
+      "rule": "typescript:S6845",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/attempts/attempt-list.tsx",
+      "project": "ci-project",
+      "line": 63,
+      "hash": "e22efb2dc0ea6c5e0bd3cbb414806b72",
+      "textRange": {
+        "startLine": 63,
+        "endLine": 63,
+        "startOffset": 239,
+        "endOffset": 251
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "`tabIndex` should only be declared on interactive elements.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "141788398+matiaraos@users.noreply.github.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-10-30T21:44:22+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "919541fd-1916-4c20-a70c-7b4e5d0dc517",
+      "rule": "typescript:S6845",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/attempts/attempt-review.tsx",
+      "project": "ci-project",
+      "line": 46,
+      "hash": "9f22ab67f78de465d350e2c626e284bc",
+      "textRange": {
+        "startLine": 46,
+        "endLine": 46,
+        "startOffset": 189,
+        "endOffset": 201
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "`tabIndex` should only be declared on interactive elements.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "141788398+matiaraos@users.noreply.github.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-10-30T21:44:22+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "af3acf0d-649b-4423-90a3-e040353b38f0",
+      "rule": "typescript:S6845",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/courses/participants-panel.tsx",
+      "project": "ci-project",
+      "line": 267,
+      "hash": "fcc59cbcf1fd5f1bab2932f3c300423b",
+      "textRange": {
+        "startLine": 267,
+        "endLine": 267,
+        "startOffset": 12,
+        "endOffset": 24
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "`tabIndex` should only be declared on interactive elements.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-10-27T04:19:49+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "34079a78-4245-48bc-941e-f8fa2c46f2a1",
+      "rule": "typescript:S6845",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/gradebook/course-gradebook.tsx",
+      "project": "ci-project",
+      "line": 241,
+      "hash": "fcc59cbcf1fd5f1bab2932f3c300423b",
+      "textRange": {
+        "startLine": 241,
+        "endLine": 241,
+        "startOffset": 14,
+        "endOffset": 26
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "`tabIndex` should only be declared on interactive elements.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-10-27T04:19:49+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "8619267f-94ff-4c58-98ad-0ef67c15ce56",
+      "rule": "typescript:S6845",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/gradebook/student-grades.tsx",
+      "project": "ci-project",
+      "line": 75,
+      "hash": "fcc59cbcf1fd5f1bab2932f3c300423b",
+      "textRange": {
+        "startLine": 75,
+        "endLine": 75,
+        "startOffset": 10,
+        "endOffset": 22
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "`tabIndex` should only be declared on interactive elements.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-10-27T04:19:49+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "2363e338-58bb-4107-bf1c-5304dea83521",
+      "rule": "typescript:S6845",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/content/academic-markdown.tsx",
+      "project": "ci-project",
+      "line": 18,
+      "hash": "43b940995fbfa7e7c080d915f2e65b0a",
+      "textRange": {
+        "startLine": 18,
+        "endLine": 18,
+        "startOffset": 112,
+        "endOffset": 124
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "`tabIndex` should only be declared on interactive elements.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-10-26T14:00:17+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "64d8a3d0-64f2-430c-8499-247c8fd4b8cb",
+      "rule": "typescript:S6845",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/components/content/academic-markdown.tsx",
+      "project": "ci-project",
+      "line": 19,
+      "hash": "20dd3a94b7158b683c401dca197ab6b6",
+      "textRange": {
+        "startLine": 19,
+        "endLine": 19,
+        "startOffset": 30,
+        "endOffset": 42
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "`tabIndex` should only be declared on interactive elements.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "accessibility",
+        "react"
+      ],
+      "creationDate": "2026-10-26T14:00:17+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CONVENTIONAL",
+      "cleanCodeAttributeCategory": "CONSISTENT",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "d7d96cda-9338-45b1-aa84-85c3c0dd7092",
+      "rule": "typescript:S7737",
+      "severity": "MINOR",
+      "component": "ci-project:frontend/src/lib/api/attempts.ts",
+      "project": "ci-project",
+      "line": 91,
+      "hash": "a8463b2b06a8d54bb2ef3aa2eb92b33a",
+      "textRange": {
+        "startLine": 91,
+        "endLine": 91,
+        "startOffset": 80,
+        "endOffset": 98
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Do not use an object literal as default for parameter `expected`.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "sebastian.palma.masabeu@hotmail.com",
+      "tags": [
+        "editable-source",
+        "confusing",
+        "pitfall"
+      ],
+      "creationDate": "2026-10-22T16:56:42+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        },
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    },
+    {
+      "key": "ab9ddc5b-281b-4ab3-bc48-0c6d472ecf1d",
+      "rule": "typescript:S8786",
+      "severity": "MAJOR",
+      "component": "ci-project:frontend/src/lib/api/client.ts",
+      "project": "ci-project",
+      "line": 37,
+      "hash": "2756be75026fb613802a0d0667a513e9",
+      "textRange": {
+        "startLine": 37,
+        "endLine": 37,
+        "startOffset": 25,
+        "endOffset": 31
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Simplify this regular expression to reduce its runtime, as it has super-linear performance due to backtracking.",
+      "effort": "20min",
+      "debt": "20min",
+      "author": "juliancontrerasleon@outlook.com",
+      "tags": [
+        "regex",
+        "performance"
+      ],
+      "creationDate": "2026-10-15T14:44:27+0000",
+      "updateDate": "2026-11-15T18:09:48+0000",
+      "type": "CODE_SMELL",
+      "scope": "MAIN",
+      "quickFixAvailable": false,
+      "messageFormattings": [],
+      "codeVariants": [],
+      "cleanCodeAttribute": "EFFICIENT",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "issueStatus": "OPEN",
+      "prioritizedRule": false,
+      "fromSonarQubeUpdate": false,
+      "internalTags": [],
+      "linkedTicketStatus": "NOT_LINKED"
+    }
+  ]
+}
