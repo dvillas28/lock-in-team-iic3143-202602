@@ -9,6 +9,7 @@ import { EmptyState, ErrorState } from "../route-states.tsx";
 import { RecordRowsSkeleton, type RecordCell } from "../academic/record-skeleton.tsx";
 import { Skeleton } from "../skeletons.tsx";
 import { useResource } from "./use-resource.ts";
+import { ScrollRegion } from "../scroll-region.tsx";
 
 export const readonlyColumns = ["Persona", "Rol"] as const;
 type RoleFilter = Role | "all";
@@ -80,7 +81,7 @@ export function SectionParticipantsReadonly({ session, slug, user, course, secti
                 <p className="hint tnum" role="status">{shown!.length} {shown!.length === 1 ? "participante" : "participantes"}</p>
               </div>
               {!shown!.length ? <div id={`${ids}-roster`}><EmptyState headingLevel={3} title={filterEmpty} /></div>
-              : <div id={`${ids}-roster`} className="table-scroll participants-table" role="region" aria-label={caption} tabIndex={0}>
+              : <ScrollRegion id={`${ids}-roster`} className="table-scroll participants-table" label={caption}>
               <table className="data-table">
                 <caption>{caption}</caption>
                 <thead><tr>{readonlyColumns.map(column => <th scope="col" key={column}>{column}</th>)}</tr></thead>
@@ -89,7 +90,7 @@ export function SectionParticipantsReadonly({ session, slug, user, course, secti
                   <td><ul className="participant-roles" aria-label={`Roles de ${p.name}`}>{p.roles.map(role => <li key={role} className="chip">{roleLabel(role)}</li>)}</ul></td>
                 </tr>)}</tbody>
               </table>
-            </div>}
+            </ScrollRegion>}
             </>}
     </section>
   </section>;

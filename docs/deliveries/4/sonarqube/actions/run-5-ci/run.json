@@ -1,0 +1,13 @@
+{
+  "repository": "dvillas28/lock-in-team-iic3143-202602",
+  "ref": "refs/heads/ci/sonarqube-run-entrega-4",
+  "sha": "a7a8cf5a8c56cb4a2b2b3777949d94e9f7cbb53d",
+  "run_id": "43759129460",
+  "image": "sonarqube:26.10.0.133078-community",
+  "server": {
+    "id": "147B411E-AaHg7sBGHeWFdK_w932x",
+    "version": "26.10.0.133078",
+    "status": "UP"
+  },
+  "ephemeral": true
+}

@@ -22,6 +22,7 @@ import { GradeCorrection } from "./grade-correction.tsx";
 import type { GradeGroup, GradeItem, GradeResult } from "../../lib/gradebook/validation.ts";
 import { ContentNotices } from "../content/content-notices.tsx";
 import { GradePublication } from "./grade-publication.tsx";
+import { ScrollRegion } from "../scroll-region.tsx";
 export function CourseGradebook({ courseId }: Readonly<{ courseId: string }>) {
   return (
     <CourseWorkspace
@@ -234,11 +235,9 @@ function BookResults({
               {book.items.length === 1 ? "registro" : "registros"} en esta
               página · El promedio considera solo notas publicadas.
             </p>
-            <div
+            <ScrollRegion
               className="table-scroll gradebook-table"
-              role="region"
-              aria-label="Libro de notas con desplazamiento"
-              tabIndex={0}
+              label="Libro de notas con desplazamiento"
             >
               <table className="data-table">
                 <caption>Resultados por estudiante y sección histórica</caption>
@@ -304,7 +303,7 @@ function BookResults({
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollRegion>
           </>
         )}
       </section>

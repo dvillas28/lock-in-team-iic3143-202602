@@ -11,7 +11,7 @@ export const phaseGroups: Record<QuizPhase, string> = {
   draft: "Borradores", scheduled: "Programados", open: "Disponibles", closed: "Cerrados",
 };
 
-const time = (value: string | null) => value ? Date.parse(value) : NaN;
+const time = (value: string | null) => value ? Date.parse(value) : Number.NaN;
 
 export function quizPhase(quiz: Pick<Summary, "status" | "opensAt" | "closesAt">, now: number): QuizPhase {
   if (quiz.status === "draft") return "draft";

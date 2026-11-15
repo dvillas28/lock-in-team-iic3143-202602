@@ -11,6 +11,7 @@ import type { Invitation } from '../../lib/accounts/validation.ts';
 import type { Session } from '../../lib/auth/session.ts';
 import { accountMessage } from './feedback.ts';
 import { CsvImport } from './csv-import.tsx';
+import { ScrollRegion } from "../scroll-region.tsx";
 const inviteColumns=['Persona','Activación','Correo','Acciones'] as const,inviteCaption='Invitaciones de esta institución';
 const memberColumns=['Nombre','Correo','Permisos institucionales'] as const,memberCaption='Miembros activos de esta institución';
 /** Name over e-mail and status over expiry, as in the loaded rows; actions stay a plain line, never a button. */
@@ -26,7 +27,7 @@ function Users({session,slug,emailAvailable}:{session:Session;slug:string;emailA
  const [inviteCursor,setInviteCursor]=useState<string>();
  const invites=useResource(session,`invitations:${slug}:${inviteCursor??''}`,c=>listInvitations(c,slug,inviteCursor));
  const reload=async()=>{await invites.reload();};
- return <div className="stack"><div className="page-heading"><div><p className="section-label">Administración institucional</p><h1>Usuarios institucionales</h1><p>Invita personas a esta institución. El alta no asigna cursos ni permisos administrativos.</p></div></div>{!emailAvailable&&<p className="notice" role="status">El envío de correo está temporalmente no disponible. Puedes registrar invitaciones e importar usuarios; los correos permanecerán pendientes.</p>}<InvitationForm session={session} slug={slug} onSaved={reload}/><section className="card panel stack"><h2>Invitaciones</h2><button className="btn btn-ghost" onClick={()=>void invites.reload()}>Actualizar invitaciones</button>{invites.error?<ErrorState headingLevel={3} feedback={invites.error} onRetry={()=>void invites.reload()}/>:!invites.data?<RecordRowsSkeleton label="Cargando invitaciones…" caption={inviteCaption} headers={inviteColumns} rows={3} scroll="account-table-wrap" cell={inviteCell}/>:invites.data.items.length===0?<p>No hay invitaciones en esta página.</p>:<div className="account-table-wrap" role="region" aria-label="Desplazar invitaciones" tabIndex={0}><table className="data-table"><caption>{inviteCaption}</caption><thead><tr>{inviteColumns.map(column=><th scope="col" key={column}>{column}</th>)}</tr></thead><tbody>{invites.data.items.map(invite=><InvitationRow key={invite.id} session={session} slug={slug} invite={invite} emailAvailable={emailAvailable} onSaved={reload}/>)}</tbody></table></div>}<div className="state-actions">{inviteCursor&&<button className="btn btn-ghost" onClick={()=>setInviteCursor(undefined)}>Primera página</button>}{invites.data?.nextCursor&&<button className="btn btn-ghost" onClick={()=>setInviteCursor(invites.data!.nextCursor!)}>Siguientes invitaciones</button>}</div></section><CsvImport session={session} slug={slug} emailAvailable={emailAvailable} onConfirmed={reload}/><ActiveMembers session={session} slug={slug}/></div>;
+ return <div className="stack"><div className="page-heading"><div><p className="section-label">Administración institucional</p><h1>Usuarios institucionales</h1><p>Invita personas a esta institución. El alta no asigna cursos ni permisos administrativos.</p></div></div>{!emailAvailable&&<p className="notice" role="status">El envío de correo está temporalmente no disponible. Puedes registrar invitaciones e importar usuarios; los correos permanecerán pendientes.</p>}<InvitationForm session={session} slug={slug} onSaved={reload}/><section className="card panel stack"><h2>Invitaciones</h2><button className="btn btn-ghost" onClick={()=>void invites.reload()}>Actualizar invitaciones</button>{invites.error?<ErrorState headingLevel={3} feedback={invites.error} onRetry={()=>void invites.reload()}/>:!invites.data?<RecordRowsSkeleton label="Cargando invitaciones…" caption={inviteCaption} headers={inviteColumns} rows={3} scroll="account-table-wrap" cell={inviteCell}/>:invites.data.items.length===0?<p>No hay invitaciones en esta página.</p>:<ScrollRegion className="account-table-wrap" label="Desplazar invitaciones"><table className="data-table"><caption>{inviteCaption}</caption><thead><tr>{inviteColumns.map(column=><th scope="col" key={column}>{column}</th>)}</tr></thead><tbody>{invites.data.items.map(invite=><InvitationRow key={invite.id} session={session} slug={slug} invite={invite} emailAvailable={emailAvailable} onSaved={reload}/>)}</tbody></table></ScrollRegion>}<div className="state-actions">{inviteCursor&&<button className="btn btn-ghost" onClick={()=>setInviteCursor(undefined)}>Primera página</button>}{invites.data?.nextCursor&&<button className="btn btn-ghost" onClick={()=>setInviteCursor(invites.data!.nextCursor!)}>Siguientes invitaciones</button>}</div></section><CsvImport session={session} slug={slug} emailAvailable={emailAvailable} onConfirmed={reload}/><ActiveMembers session={session} slug={slug}/></div>;
 }
 function ActiveMembers({session,slug}:{session:Session;slug:string}) {
  const [search,setSearch]=useState('');
@@ -75,7 +76,7 @@ function ActiveMembers({session,slug}:{session:Session;slug:string}) {
   {members.error ? <ErrorState headingLevel={3} feedback={members.error} onRetry={()=>void members.reload()}/>
    : !members.data ? <RecordRowsSkeleton label="Cargando miembros…" caption={memberCaption} headers={memberColumns} scroll="account-table-wrap"/>
    : !members.data.items.length ? <p role="status">{search||permission ? 'No hay coincidencias. Prueba otro nombre, correo o permiso.' : 'No hay miembros activos para mostrar.'}</p>
-   : <div className="account-table-wrap" role="region" aria-label="Desplazar miembros" tabIndex={0}>
+   : <ScrollRegion className="account-table-wrap" label="Desplazar miembros">
     <table className="data-table">
      <caption>{memberCaption}</caption>
      <thead><tr>{memberColumns.map(column=><th scope="col" key={column}>{column}</th>)}</tr></thead>
@@ -84,7 +85,7 @@ function ActiveMembers({session,slug}:{session:Session;slug:string}) {
       <td>{[member.isAdmin?'Administración':null,member.isSuperAdmin?'Superadministración':null].filter(Boolean).join(', ')||'Miembro'}</td>
      </tr>)}</tbody>
     </table>
-   </div>}
+   </ScrollRegion>}
   <nav className="academic-footer" aria-label="Páginas de miembros activos">
    <span className="hint tnum" role="status">Página {cursors.length+1}</span>
    <div className="actions">

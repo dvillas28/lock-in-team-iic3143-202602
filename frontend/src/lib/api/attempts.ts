@@ -88,7 +88,8 @@ export async function startAttempt(c: ApiClient, slug: string, quizId: string, s
     const r = await c.POST("/api/v1/institution/{institutionSlug}/sections/{sectionId}/quizzes/{quizId}/attempts", { params: { path: { institutionSlug: p.institutionSlug, quizId, sectionId }, header: key(idempotencyKey) } });
     return attemptDto(r.data, { quizId, sectionId, studentId });
 }
-export async function getAttempt(c: ApiClient, slug: string, attemptId: string, expected: Expected = { staff: true }) {
+const staffView: Expected = { staff: true };
+export async function getAttempt(c: ApiClient, slug: string, attemptId: string, expected: Expected = staffView) {
     const r = await c.GET("/api/v1/institution/{institutionSlug}/quiz-attempts/{attemptId}", { params: { path: { ...path(slug, { attemptId }), attemptId } } });
     return attemptDto(r.data, { ...expected, id: attemptId });
 }

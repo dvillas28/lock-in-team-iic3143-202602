@@ -7,8 +7,10 @@ import { useResource } from "../courses/use-resource.ts";
 
 export type CalendarFilter = Readonly<{ kind: "all" | CalendarEvent["kind"]; course: string }>;
 
+const allEvents: CalendarFilter = { kind: "all", course: "" };
+
 /** Month navigation, selection and data for one institution's calendar. */
-export function useCalendar(session: Session, slug: string, filter: CalendarFilter = { kind: "all", course: "" }) {
+export function useCalendar(session: Session, slug: string, filter: CalendarFilter = allEvents) {
   const [now] = useState(() => Date.now());
   const [today] = useState(() => todayChile(new Date(now)));
   const [selected, setSelected] = useState(today);
