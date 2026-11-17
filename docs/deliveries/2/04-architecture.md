@@ -1,5 +1,7 @@
 # Arquitectura actual de AcademiX
 
+> Corte histórico E2. Para la entrega final, consultar [arquitectura E4](../4/arquitectura.md).
+
 Revisión documental 2026-10-29, E2 C6. Configuración existente en el corte
 7f4334a; este polish no despliega ni acredita estado remoto.
 Fuente: [render.yaml](../../../render.yaml) y [ADR Render](../../adr/deploy-on-render.md).
