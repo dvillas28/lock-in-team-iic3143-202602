@@ -1,5 +1,7 @@
 # 06-data-model: modelo y catálogo
 
+> Corte histórico E2. El [modelo E4](../4/modelo-datos.md) incorpora las migraciones posteriores y sustituye las reglas desactualizadas de este documento.
+
 Contenido histórico conservado íntegro en partes, con decisión vigente de cursos y roles.
 
 - [Parte 1](06-data-model-part-1.md)
