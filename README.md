@@ -1,6 +1,6 @@
 # Métricas del tablero
 
-Snapshots: 38 (2026-10-11 a 2026-11-17).
+Snapshots: 39 (2026-10-11 a 2026-11-18).
 
 ## Avance
 
