@@ -31,12 +31,22 @@ Presupuesto orientativo solicitado para completar cada entregable completo, incl
 
 - El CSV tiene `Real (h)` en seis de las 13 issues cerradas de la línea base: #172 (0,5), #174 (0,1), #178 (5), #199 (0,1), #215 (0,1) y #217 (0,1). Son **5,9 h registradas**; la fuente no especifica un método de cronometraje. Las siete restantes carecen de valor consultable en ese snapshot.
 - Los comentarios de cierre de [#185](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/185), [#194](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/194), [#210](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/210) y [#211](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/211) aportan aproximaciones retrospectivas de 4, 4, 4 y 0,5 h respectivamente. No hay un total efectivo auditable para las 26 tarjetas.
-- En el snapshot, esas cuatro issues figuraban en Todo; #204 figuraba In progress. GitHub entrega el estado de las issues en vivo. La consulta directa del Project fue rechazada por falta de `read:project`.
-- Para #200/#214, el operador debe contrastar `Status` con las issues y conciliar las semanas 6 y 7. Solo incorporar `Real (h)` con el respaldo de cada responsable. Preservar fechas de transición observadas. [Reglas del tablero](../../../guides/board-metrics.md).
+### Revisión directa del Project · 21/11
+
+Con la autorización renovada se consultó y editó [lock-in-LMS, Project 3](https://github.com/users/dvillas28/projects/3). El corte de las 19:09 UTC incluye las 55 issues presentes en las semanas 6 y 7, también las incorporadas después de E3. Cada fila conserva estado, estimación, horas registradas y aproximación retrospectiva si existe. [Planilla comparativa por issue](evidencia/project-semanas-6-7.csv).
+
+| Semana | Issues | Estimación disponible | Real (h) registrado | Issues sin Real (h) | Aproximaciones de cierre aparte |
+| --- | ---: | --- | --- | ---: | --- |
+| 6 | 42 | 128,5 h en 39 issues | 53,2 h en 21 issues | 21 | #194 · 4 h |
+| 7 | 13 | 37 h en 13 issues | 0,2 h en 2 issues | 11 | #210 · 4 h y #211 · 0,5 h |
+
+Las 50 issues ya cerradas de estas semanas figuraban en Done. Las cinco abiertas eran #200, #207, #213, #214 y #216. La conciliación de gestión usa este corte, el reparto estimado y los riesgos aceptados. Los 32 valores ausentes de Real (h) quedan identificados por tarjeta; impiden calcular un desvío global. No se trasladaron estimaciones a ese campo. [Reglas del tablero](../../../guides/board-metrics.md).
+
+Tras la conciliación se verificaron [#200](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/200#issuecomment-7067826226), [#213](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/213#issuecomment-7067827672) y [#214](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/214#issuecomment-7067826929) cerradas y en Done. El CSV conserva el corte previo para que los cambios sean trazables.
 
 ## Revisión operativa de riesgos · #206
 
-Responsables derivados del registro E2 y de las asignaciones de E4. La aceptación por cada responsable sigue pendiente. [Registro de riesgos](../../2/07-risks.md) · [pruebas y contingencias](operacion-demo.md).
+Responsables derivados del registro E2 y de las asignaciones de E4. El 21/11 el equipo confirmó la revisión por los responsables y su aceptación de las acciones de esta tabla. [Registro de riesgos](../../2/07-risks.md) · [pruebas y contingencias](operacion-demo.md).
 
 | Riesgo y observación | Responsable de revisión | Acción comprobable |
 | --- | --- | --- |

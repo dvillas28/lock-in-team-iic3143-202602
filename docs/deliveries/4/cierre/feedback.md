@@ -15,7 +15,7 @@
 
 ## Procesos revisados contra el MVP
 
-Los [modelos BPMN de E1](../../1/bpmn/README.md) conservan el diseño inicial. La lámina 12 actualiza las ramas de cancelación y publicación con los resultados del [ciclo académico](evidencia/remote-cycle.json) y la [matriz por caso](alcance-final.md).
+Los [modelos BPMN de E1](../../1/bpmn/README.md) conservan el diseño inicial. Los anexos 12–14 representan intento y publicación, acceso por rol y el recorrido desde la tarea hasta la nota con los resultados del [ciclo académico](evidencia/remote-cycle.json) y la [matriz por caso](alcance-final.md).
 
 - **00–02**. La pertenencia institucional y el rol de sección se comprueban por separado. Superadmin puede delegar administración; el permiso administrativo por sí solo no publica notas.
 - **03–04 y 07**. La corrección produce un borrador. La publicación explícita corresponde al docente. El ayudante consulta el libro y el estudiante ve solo sus resultados publicados.

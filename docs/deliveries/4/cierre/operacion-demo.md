@@ -34,6 +34,12 @@ Student está matriculado. Existe un módulo, Markdown, TXT, quiz y nota publica
 Las claves se mantienen fuera de Git. Los IDs de recursos están en el JSON del ejercicio.
 No reutilizar la misma nota publicada para demostrar una publicación nueva: preparar otra evaluación.
 
+## Acceso de operación
+
+El equipo confirmó servicios web en Render y PostgreSQL en Neon. GitHub permite consultar el [SHA y el estado de ambos despliegues](evidencia/deploys-render.json). El 21/11, la sesión local de Render devolvió token vencido al listar servicios. La sesión de trabajo tampoco disponía de cliente autenticado o conexión directa configurada a Neon. El acceso público por navegador y API sí se ejercitó.
+
+Para operación autorizada, consultar la [guía de Render](../../../guides/render-deploy.md), el [ADR de Neon](../../../adr/neon-database.md) y el [procedimiento de migración probado](../../../guides/render-to-neon-data-migration.md).
+
 ## Secuencia por rol
 
 1. **D1 · Acceso:** abrir UC y UTFSM; sesiones independientes de docente/admin, estudiante y ayudante.

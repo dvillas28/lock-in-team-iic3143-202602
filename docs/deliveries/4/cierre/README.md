@@ -1,7 +1,7 @@
 # Cierre E4 — Índice de evidencias
 
 Corte: **21/11/2026**. Base funcional comprobada: **v0.13.1 / 7d4b666**.
-El [PDF de exposición](../ppt/main.pdf) contiene ocho láminas principales y cuatro anexos. El [guion](../ppt/guion.md) reserva veinte minutos para la demostración y el cierre.
+El [PDF de exposición](../ppt/main.pdf) contiene ocho láminas principales y seis anexos. El [guion](../ppt/guion.md) reserva veinte minutos para la demostración y el cierre.
 Fuentes: [enunciado actualizado](../enunciado_e4.pdf) y [feedback E3/Tom](../meeting_feedback.md).
 
 ## Material para evaluación
@@ -14,6 +14,7 @@ Fuentes: [enunciado actualizado](../enunciado_e4.pdf) y [feedback E3/Tom](../mee
 | [Contenido de calidad](calidad-para-ppt.md) | Texto/tablas para 2 slides: Sonar, Trivy, pruebas y rendimiento. | #212, #208 |
 | [PDF y guion](../ppt/README.md) | Presentación, fuentes, instrucciones de compilación y demo en 30 minutos. | #204, #208 |
 | [Correcciones E1–E3](feedback.md) | Feedback y procesos actualizados. | #205 |
+| [Preguntas para la retrospectiva](retrospectiva.md) | Decisiones por sprint, efecto observado y preguntas para acordar conclusiones. | #207 |
 | [Gestión](gestion.md) | Conciliación de cortes, esfuerzo y responsables. | #200, #206, #213, #214 |
 | [Reviewer](reviewer.md) | Alcance observado y clasificación de comentarios reales. | #173, #203 |
 | [Ensayo en producción](ensayo-remoto.md) y [respaldo local](respaldo-local.md) | Recorridos efectivamente ejecutados y límites por entorno. | #209 |
@@ -46,8 +47,8 @@ Fuentes: [enunciado actualizado](../enunciado_e4.pdf) y [feedback E3/Tom](../mee
 - **Operación**. El equipo confirmó Render y PostgreSQL en Neon. GitHub registra ambos [despliegues exitosos en 7d4b666](evidencia/deploys-render.json). Usar el dominio Render comprobado de la API.
 - **Presentadores**. Cronometrar la exposición con cambios de rol y conmutación al respaldo. La medición automática de un recorrido excluye explicaciones y coordinación entre personas.
 - **Calidad**. Mantener visible el gate fallido de #329 y revisar la [corrección del reviewer](https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/332) y observar sus comentarios tras la integración.
-- **Gestión**. Contrastar las semanas 6–7 con el Project y registrar horas efectivas únicamente con respaldo. El token carece de acceso a Project.
-- **Equipo**. Realizar retrospectiva, validar acciones con los responsables de riesgos, enviar el PDF el día de exposición y completar evaluación de pares.
+- **Planilla**. El [balance conciliado](gestion.md) conserva los campos sin registro. Para calcular esfuerzo real total harían falta datos adicionales de los responsables.
+- **Equipo**. Realizar retrospectiva, enviar el PDF el día de exposición y completar evaluación de pares.
 
 ## Manejo de evidencia
 

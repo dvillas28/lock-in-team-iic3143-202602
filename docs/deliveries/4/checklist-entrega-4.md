@@ -6,10 +6,10 @@ El [índice de evidencias](cierre/README.md) reúne PDF, anexos, pruebas y limit
 
 ## Exigencias de la entrega
 
-- [x] **E4-01 · Arquitectura y datos.** [PDF](ppt/main.pdf), láminas 2–3; procesos revisados en el [anexo](cierre/feedback.md) y lámina 12.
+- [x] **E4-01 · Arquitectura y datos.** [PDF](ppt/main.pdf), láminas 2–3; procesos revisados en el [anexo](cierre/feedback.md) y láminas 12–14.
 - [x] **E4-02 · Calidad.** [PDF](ppt/main.pdf), láminas 4–5 y anexos 9–10, con reportes de ambos gates.
-- [ ] **E4-03 · Plan.** Alcance y estimaciones conciliados en [gestión](cierre/gestion.md). Quedan campos y cierre semanal del Project.
-- [ ] **E4-04 · Retrospectiva:** aciertos, errores, qué no repetirían y aprendizajes de ingeniería con efectos concretos, en **1–2 diapositivas** (pp. 77, 79).
+- [x] **E4-03 · Plan.** La lámina 6 resume compromiso, resultado y pendientes. El [balance del Project](cierre/gestion.md) contrasta alcance y esfuerzo de las semanas 6–7 e identifica las horas sin registro.
+- [ ] **E4-04 · Retrospectiva:** aciertos, errores, qué no repetirían y aprendizajes de ingeniería con efectos concretos, en la lámina 7. Los [temas y preguntas para la reunión](cierre/retrospectiva.md) quedan sujetos a las conclusiones del equipo (pp. 77, 79).
 - [ ] **E4-05 · Demo en vivo:** demostrar **todos** los casos de uso comprometidos, con acceso al repositorio para revisión (pp. 77, 80).
 - [x] **E4-06 · Material corregido.** La [matriz E1–E3](cierre/feedback.md) vincula cada observación con las correcciones, las fuentes del semestre y las láminas correspondientes. El envío al curso se controla en E4-07.
 - [ ] **E4-07 · Presentación:** PPT o PDF final, exposición de **aprox. 30 minutos** y envío el mismo día, como máximo al presentar (pp. 80, 83).
@@ -18,8 +18,8 @@ El [índice de evidencias](cierre/README.md) reúne PDF, anexos, pruebas y limit
 ## Comprobaciones para cerrar el compromiso de E3
 
 - [x] **C-01 · Alcance:** [matriz caso de uso → estado → evidencia → demo](cierre/alcance-final.md); archivos P2 incluidos y ampliaciones identificadas. No acredita ensayo completo de cada fila.
-- [ ] **C-02 · Versión:** release desde `main`, despliegue y pruebas identificados por commit; acreditar aislamiento y permisos BE/FE/E2E.
-- [ ] **C-03 · Operación:** comprobar base vigente, cuentas/datos, servicios externos utilizados y recorrido remoto; ensayar con respaldo local de la misma versión.
+- [x] **C-02 · Versión.** [Despliegues de frontend y backend](cierre/evidencia/deploys-render.json) y [E2E extended](https://github.com/dvillas28/lock-in-team-iic3143-202602/actions/runs/43852844221) sobre 7d4b666; [pruebas de rol y aislamiento](cierre/ensayo-remoto.md).
+- [x] **C-03 · Operación para la demo.** Render y Neon confirmados, [recorrido remoto](cierre/ensayo-remoto.md) y [respaldo local compatible](cierre/respaldo-local.md) aceptados en #206 y #209. Se excluyó el envío efectivo de correo del ensayo.
 
 Estos tres controles operacionalizan el [compromiso E3](../3/ppt/dvillas28/10-plan-mvp/frames.tex); no agregan funcionalidades exigidas por la pauta.
 
