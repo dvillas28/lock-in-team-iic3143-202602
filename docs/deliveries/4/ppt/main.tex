@@ -1,146 +1,218 @@
 \documentclass[aspectratio=169,10pt]{beamer}
-
 \usetheme{Boadilla}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[spanish,es-noshorthands]{babel}
-\usepackage{graphicx}
-\usepackage{tabularx}
-\usepackage{booktabs}
-\usepackage{xcolor}
-\usepackage{tikz}
-\usepackage{array}
-
-\usetikzlibrary{arrows.meta,positioning,fit,calc,shapes.geometric}
-
-\definecolor{academixnavy}{HTML}{18324F}
-\definecolor{academixblue}{HTML}{2563EB}
-\definecolor{academixteal}{HTML}{0F766E}
-\definecolor{academixamber}{HTML}{B7791F}
-\definecolor{academixgreen}{HTML}{15803D}
-\definecolor{academixred}{HTML}{B91C1C}
-\definecolor{academixbg}{HTML}{F8FAFC}
-\definecolor{academixsoftblue}{HTML}{EFF6FF}
-\definecolor{academixsoftteal}{HTML}{F0FDFA}
-\definecolor{academixsoftamber}{HTML}{FFFBEB}
-\definecolor{academixline}{HTML}{CBD5E1}
-\definecolor{academixslate}{HTML}{475569}
-\definecolor{academixmuted}{HTML}{64748B}
-
-\setbeamercolor{structure}{fg=academixnavy}
-\setbeamercolor{frametitle}{fg=academixnavy,bg=academixbg}
-\setbeamercolor{title}{fg=academixnavy}
-\setbeamercolor{block title}{fg=white,bg=academixnavy}
-\setbeamercolor{block body}{fg=black,bg=academixbg}
-\setbeamercolor{alerted text}{fg=academixamber}
+\usepackage{lmodern,graphicx,tikz}
+\usetikzlibrary{arrows.meta,calc}
 \setbeamertemplate{navigation symbols}{}
-\setbeamertemplate{footline}[frame number]
-\setbeamerfont{frametitle}{size=\large,series=\bfseries}
-\setbeamerfont{title}{series=\bfseries}
-
-\newcommand{\repo}{https://github.com/dvillas28/lock-in-team-iic3143-202602/blob/docs/cierre-e4-operacion/docs/deliveries/4}
-\newcommand{\fuente}[2]{\par\vfill{\scriptsize\color{academixteal}\href{\repo/#1}{#2 $\nearrow$}}}
-\newcommand{\fila}[2]{\begin{block}{#1}#2\end{block}}
-\title{AcademiX}
-\subtitle{De una evaluación a una nota publicada}
-\author{Equipo Lock In}
-\institute{IIC3143 · Entrega 4}
-\date{Corte funcional del 21 de noviembre de 2026}
+\setbeamertemplate{footline}{}
+\definecolor{navy}{HTML}{18324F}
+\definecolor{blue}{HTML}{2563EB}
+\definecolor{teal}{HTML}{0F766E}
+\definecolor{amber}{HTML}{875700}
+\definecolor{red}{HTML}{A33137}
+\definecolor{slate}{HTML}{475569}
+\definecolor{line}{HTML}{CBD5E1}
+\definecolor{sky}{HTML}{EFF6FF}
+\definecolor{sea}{HTML}{EAF6F3}
+\definecolor{sand}{HTML}{FBF1D8}
+\definecolor{rose}{HTML}{F8EAEB}
+\definecolor{paper}{HTML}{F6F8FA}
+\newcommand{\repo}{https://github.com/dvillas28/lock-in-team-iic3143-202602/blob/5a46608f037494036b551da35eb051ac74f1e9fb/docs/deliveries/4}
+\newcommand{\ev}{../cierre/evidencia/}
+\tikzset{edge/.style={-{Stealth[length=2mm]},slate,line width=.7pt},box/.style={draw=line,rounded corners=3pt,fill=white,align=center,minimum height=.7cm,inner sep=4pt,text=navy,font=\small},hint/.style={font=\scriptsize,text=slate,fill=white,inner sep=2pt}}
+\newenvironment{sheet}{\begin{tikzpicture}[remember picture,overlay,shift={(current page.north west)},x=1cm,y=-1cm]}{\end{tikzpicture}}
+\newcommand{\txt}[5]{\node[anchor=north west,inner sep=0pt,align=left,text=#4,font=#3] at (#1,#2) {#5};}
+\newcommand{\panel}[5]{\fill[#5,rounded corners=4pt] (#1,#2) rectangle (#3,#4);}
+\newcommand{\head}[2]{\txt{.65}{.38}{\scriptsize\bfseries}{teal}{#1}\txt{.61}{.88}{\LARGE\bfseries}{navy}{#2}}
+\newcommand{\foot}[2]{\draw[line] (.65,8.27)--(15.35,8.27);\txt{.65}{8.42}{\scriptsize}{teal}{\href{\repo/#1}{#2 $\nearrow$}}\node[anchor=north east,text=slate,font=\scriptsize] at (15.38,8.35){AcademiX \enspace / \enspace \insertframenumber};}
+\newcommand{\shot}[4]{\node[anchor=north west,inner sep=0] at (#1,#2){\includegraphics[width=#3cm]{#4}};}
+\newcommand{\crop}[6]{\begin{scope}\clip (#1,#2) rectangle ++(#3,#4);\node[anchor=north west,inner sep=0] at (#1,#2){\includegraphics[width=#5cm]{#6}};\end{scope}}
 \begin{document}
-\begin{frame}\titlepage\end{frame}
-\begin{frame}{Dos instituciones comparten la aplicación y la base}
-\centering
-\begin{tikzpicture}[node distance=6mm and 8mm,box/.style={draw=academixnavy,rounded corners,fill=academixsoftblue,align=center,minimum height=1cm},>=Stealth]
-\node[box](u){Navegador\\UC / UTFSM};
-\node[box,right=of u](f){Next.js\\Render};
-\node[box,right=of f](a){API NestJS\\JWT + rol};
-\node[box,right=of a](d){PostgreSQL\\RLS + claves compuestas};
-\draw[->](u)--(f);\draw[->](f)--(a);\draw[->](a)--(d);
-\draw[->](u.south) -- ++(0,-.5) -| (a.south);
-\end{tikzpicture}
-\fila{Frontera de acceso}{La API comprueba pertenencia, sección y permisos. La transacción fija el contexto institucional para las políticas de PostgreSQL.}
-S3 almacena binarios privados y Resend tramita invitaciones según configuración. El equipo confirma Render y Neon. GitHub registra ambos despliegues en 7d4b666.
-\fuente{arquitectura.md}{Arquitectura y despliegue · backend v0.13.1 / 7d4b666}
-\end{frame}
-\begin{frame}{El modelo conserva quién puede ver cada calificación}
-\centering
-\begin{tikzpicture}[box/.style={draw=academixnavy,fill=academixsoftblue,rounded corners,minimum width=2cm,minimum height=.7cm},>=Stealth]
-\foreach \x/\y/\n/\t in {0/2/i/Institución,3/2/c/Curso,6/2/q/Quiz o tarea,9/2/g/Ítem,0/0/u/Usuario,3/0/s/Sección,6/0/e/Matrícula,9/0/n/Nota}{
-\node[box] (\n) at (\x,\y) {\t};}
-\foreach \a/\b in {i/c,c/q,q/g,c/s,s/e,g/n}{\draw[->](\a)--(\b);}
-\draw[->](u.south) -- ++(0,-.4) -| (e.south);
-\end{tikzpicture}
-\fila{Lectura del modelo}{Un curso tiene varias secciones. La matrícula vincula una persona con una sección y un rol. Cada ítem tiene un único origen y puede reunir varias notas con historial de revisión.}
-\fuente{modelo-datos.md}{Diagrama ER, cardinalidades y claves · 23 migraciones / 24 tablas de aplicación}
-\end{frame}
-\begin{frame}{Calidad del código en tres cortes}
-\fila{SonarQube manual · 15/11}{25 avisos abiertos antes y 0 después. Cobertura global 91,7\%. Cuatro supresiones justificadas preservan accesibilidad.}
-\fila{SonarCloud · PR \#329}{Gate fallido. Mantenibilidad del código nuevo D, con A exigida. 99 code smells abiertos en el análisis. Cobertura nueva 90,9\%, fiabilidad y seguridad A.}
-\fila{Trivy · 13/11}{Repositorio: 3 MEDIUM y 2 configuraciones LOW corregidas. Imágenes: 4 MEDIUM en backend y 1 en frontend, luego 0. Se excluyen dependencias de desarrollo.}
-\fuente{cierre/calidad-para-ppt.md}{Pruebas de integración y frontend · E2E extended del 16/11: 527 instancias en tres navegadores}
-\end{frame}
-\begin{frame}{El login móvil y la navegación privada miden cosas distintas}
-\begin{columns}\column{.50\textwidth}\textbf{Una muestra en Lighthouse}\par\medskip\includegraphics[width=\linewidth]{lh.png}
-\column{.47\textwidth}
-\textbf{Login UC · tres navegaciones}\\
-Medianas: rendimiento 100, accesibilidad 100, LCP 1,05 s, TBT 47 ms y CLS 0. Buenas prácticas 96 por favicon 404.\medskip
-
-\textbf{Cursos a módulos · sesión UC}\\
-1,63 s hasta red inactiva, TBT 0 y CLS 0. Interacción observada de unos 101 ms. Los modos de Lighthouse producen métricas distintas.
-\end{columns}
-\fuente{cierre/rendimiento.md}{Captura de una muestra · Chrome 157 / Lighthouse 13.6 · producción, 21/11 · reportes HTML y JSON}
-\end{frame}
-\begin{frame}{Plan final: el ciclo académico llegó a producción}
-\fila{Compromiso verificado en UC y UTFSM}{En cursos nuevos, el estudiante descargó el material, canceló un intento y completó otro. Vio el 7,0 después de publicar. El ensayo por interfaz incluyó tarea escrita, corrección, auditoría y aislamiento.}
-\fila{Decisión de alcance}{Archivos era el primer recorte de E3. Se conservó tras decidir almacenamiento privado: un TXT de 52 bytes volvió idéntico en ambos tenants.}
-\fila{Gestión abierta}{De 26 tarjetas (77 h presupuestadas), 13 estaban cerradas al iniciar la revisión y 13 abiertas (34 h estimadas). Las 2 h adicionales del tablero eran del ensayo E3. Quedan retrospectiva, exposición conjunta cronometrada y cierre del Project.}
-\fuente{cierre/alcance-final.md}{Matriz por caso, ampliaciones y exclusiones}
-\end{frame}
-\begin{frame}{Tres decisiones para discutir en la retrospectiva}
-\fila{Publicar de forma explícita}{El ciclo remoto produjo una nota correcta que permaneció oculta. Conviene comprobar visibilidad con ambos roles además de comprobar el valor numérico.}
-\fila{Preservar navegación por teclado}{Trece elementos desplazables motivaron un componente común. El informe Sonar documenta la excepción y la prueba de accesibilidad que le da sentido.}
-\fila{Medir dentro de la sesión}{Recargar una página privada devolvía al login. El recorrido SPA permitió medir cursos a módulos conservando la identidad.}
-\fuente{cierre/README.md}{Interpretaciones técnicas propuestas · conclusiones del equipo pendientes de retrospectiva}
-\end{frame}
-\begin{frame}{Demo en vivo · seguir una nota desde su origen}
-\fila{Administración y docencia}{Elegir institución, crear curso y sección, matricular, publicar módulo con archivo y abrir una evaluación.}
-\fila{Estudiante y ayudante}{Leer material, descargar, cancelar un intento y completar otro. Entregar tarea. Comparar permisos del ayudante y del docente.}
-\fila{Publicación y control}{Corregir, configurar libro, publicar, verificar promedio y auditoría. Contrastar UC y UTFSM, recorrer altas y perfil con cuentas de ensayo.}
-\fuente{ppt/guion.md}{Guion cronometrable · ventanas por rol · usar datos nuevos}
-\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\fill[navy] (0,0) rectangle (16,9);
+\txt{.78}{.68}{\small\bfseries}{white}{IIC3143 \enspace / \enspace ENTREGA 4}
+\txt{.7}{2.32}{\fontsize{34}{38}\selectfont\bfseries}{white}{AcademiX}
+\txt{.78}{4.05}{\Large}{white}{De una evaluación\\a una nota publicada}
+\txt{.79}{7.80}{\small}{white}{Equipo Lock In \enspace · \enspace 21 noviembre 2026}
+\panel{8.15}{1.54}{15.48}{7.06}{white}
+\crop{8.35}{1.76}{6.93}{5.00}{6.93}{\ev uc-ensayo-nota.png}
+\txt{8.39}{6.55}{\scriptsize\bfseries}{teal}{VISTA DEL ESTUDIANTE \enspace / \enspace UC}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ARQUITECTURA}{Render, Neon y servicios externos}
+\panel{.65}{1.8}{15.35}{2.60}{paper}
+\txt{.93}{2.04}{\small\bfseries}{navy}{GitHub Actions \quad $\rightarrow$ \quad checks sobre \texttt{main} \quad $\rightarrow$ \quad Render Blueprint \quad $\rightarrow$ \quad v0.13.1 · \texttt{7d4b666}}
+\panel{4.26}{2.88}{9.60}{7.82}{sky}
+\txt{4.56}{3.10}{\scriptsize\bfseries}{blue}{RENDER \enspace / \enspace DOS SERVICIOS DOCKER}
+\node[box,text width=2.5cm] (web) at (2.02,4.15){\textbf{Navegador}\\UC / UTFSM};
+\node[box,text width=3.6cm] (fe) at (6.96,4.15){\textbf{Frontend · Next.js}\\Dominios institucionales};
+\node[box,text width=3.6cm] (api) at (6.96,6.66){\textbf{API modular · NestJS}\\JWT, rol y sección};
+\node[box,fill=sea,text width=3.12cm] (db) at (13.60,3.77){\textbf{Neon · PostgreSQL}\\RLS y claves compuestas};
+\node[box,fill=sea,text width=3.12cm] (s3) at (13.60,5.53){\textbf{S3 privado}\\Fotos, material, entregas};
+\node[box,fill=sea,text width=3.12cm] (mail) at (13.60,7.30){\textbf{Resend}\\Invitaciones};
+\draw[edge] (web)--node[above,hint]{HTTPS}(fe);
+\draw[edge] (web.south)|-node[pos=.71,above,hint]{REST / JWT}(api.west);
+\draw[edge] (fe)--node[right,hint]{Cliente API en servidor}(api);
+\draw[edge] (api.east)--(10.14,6.66)|-(db.west);
+\draw[edge] (10.14,6.66)|-(s3.west);
+\draw[edge] (10.14,6.66)|-(mail.west);
+\txt{10.26}{3.37}{\scriptsize}{slate}{SQL / TLS}
+\txt{10.26}{5.15}{\scriptsize}{slate}{SDK}
+\txt{10.26}{6.91}{\scriptsize}{slate}{HTTPS}
+\foot{arquitectura.md}{Arquitectura final, proveedores, fronteras y evidencia de despliegue}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{MODELO DE DATOS}{De la pertenencia institucional al historial de notas}
+\panel{.65}{1.85}{15.35}{3.29}{paper}
+\txt{.94}{2.13}{\large\bfseries}{navy}{24 tablas}
+\txt{4.02}{2.13}{\large\bfseries}{teal}{20 con FORCE RLS}
+\txt{10.45}{2.17}{\normalsize}{navy}{Claves con \texttt{institution\_id}}
+\node[box,fill=sky] (im) at (2.20,3.98){Par usuario / institución};
+\node[box,fill=sky] (m) at (2.20,5.19){Pertenencia};
+\node[box] (c) at (5.4,5.19){Curso};
+\node[box] (s) at (5.4,3.98){Sección};
+\node[box] (e) at (8.65,3.98){Matrícula + rol};
+\node[box] (m1) at (5.4,6.48){Módulo};
+\node[box] (mt) at (5.4,7.56){Material};
+\node[box,fill=sea] (q) at (8.65,5.19){Quiz o tarea};
+\node[box,fill=sea] (i) at (11.56,5.19){Ítem};
+\node[box,fill=sea] (g) at (11.56,6.48){Grupo};
+\node[box,fill=sand] (n) at (14.3,5.19){Nota};
+\node[box,fill=sand] (r) at (14.3,6.48){Revisión};
+\foreach \a/\b in {m/c,c/s,s/e,c/m1,m1/mt,c/q,g/i,i/n,n/r}{\draw[edge](\a)--node[pos=.50,hint]{1:N}(\b);}
+\draw[edge] (im)--node[hint]{único}(m);\draw[edge] (q)--node[hint]{0..1}(i);
+\draw[edge] (m.south)--(2.20,5.84)--(.36,5.84)--(.36,3.43)--(8.65,3.43)--(e.north);
+\foot{modelo-datos.md}{Relaciones principales · 23 migraciones · inventario y cardinalidades completas}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{PRÁCTICAS Y ESTADO DEL CÓDIGO}{Tres controles, tres resultados}
+\panel{.65}{1.9}{5.24}{6.68}{sea}\panel{5.52}{1.9}{10.20}{6.68}{sky}\panel{10.48}{1.9}{15.35}{6.68}{rose}
+\txt{.93}{2.26}{\small\bfseries}{teal}{SonarQube manual}\txt{.93}{3.18}{\Huge\bfseries}{navy}{25 $\to$ 0}
+\txt{.94}{4.52}{\normalsize}{navy}{avisos globales} \txt{.94}{5.46}{\small}{navy}{91,7\% de cobertura\\15 noviembre}
+\txt{5.80}{2.26}{\small\bfseries}{blue}{Trivy}\txt{5.80}{3.18}{\Huge\bfseries}{navy}{5 $\to$ 0}
+\txt{5.80}{4.52}{\normalsize}{navy}{hallazgos en repositorio} \txt{5.80}{5.46}{\small}{navy}{Imágenes: 4 + 1 $\to$ 0\\Excluye dependencias dev}
+\txt{10.76}{2.26}{\small\bfseries}{red}{SonarCloud · PR \#329}\txt{10.76}{3.18}{\Huge\bfseries}{red}{D}
+\txt{10.76}{4.52}{\normalsize}{navy}{mantenibilidad · gate fallido} \txt{10.76}{5.46}{\small}{navy}{99 code smells abiertos\\90,9\% cobertura nueva}
+\txt{.75}{7.10}{\normalsize\bfseries}{navy}{Integración con PostgreSQL \quad + \quad pruebas frontend \quad + \quad 527 instancias E2E}
+\foot{cierre/calidad-para-ppt.md}{Reportes por corte y SHA · capturas en anexos 9 y 10}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{RENDIMIENTO FRONTEND}{Login público y navegación dentro de la sesión}
+\panel{.65}{1.87}{9.30}{7.72}{paper}\panel{9.58}{1.87}{15.35}{7.72}{sea}
+\txt{.97}{2.19}{\small\bfseries}{navy}{UC · LOGIN MÓVIL}\shot{.99}{2.92}{7.95}{lh.png}
+\txt{.99}{5.13}{\LARGE\bfseries}{navy}{1,05 s}\txt{4.05}{5.13}{\LARGE\bfseries}{navy}{47 ms}\txt{7.32}{5.13}{\LARGE\bfseries}{navy}{0}
+\txt{1.05}{5.98}{\small}{slate}{LCP}\txt{4.00}{5.98}{\small}{slate}{TBT}\txt{7.35}{5.98}{\small}{slate}{CLS}
+\txt{1.00}{6.87}{\small}{slate}{Medianas de 3 muestras · favicon 404}
+\txt{9.93}{2.19}{\small\bfseries}{teal}{UC · CURSOS $\to$ MÓDULOS}
+\txt{9.92}{3.09}{\Huge\bfseries}{navy}{1,63 s}\txt{9.96}{4.39}{\normalsize}{navy}{hasta red inactiva}
+\txt{9.96}{5.47}{\small}{slate}{TBT 0 ms \enspace · \enspace CLS 0} \txt{9.96}{6.26}{\small}{slate}{Interacción observada\\$\approx$101 ms}
+\foot{cierre/rendimiento.md}{Lighthouse 13.6 / Chrome 157 · producción, 21/11 · modos y reportes originales}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{PLAN FINAL}{El ciclo académico llegó a los dos tenants}
+\panel{.65}{1.88}{8.05}{7.78}{sky}\panel{8.31}{1.88}{15.35}{7.78}{paper}
+\txt{1.02}{2.24}{\small\bfseries}{blue}{COMPROMISO E3 · SEMANAS 5--7}
+\txt{1.02}{3.05}{\Huge\bfseries}{navy}{77 h}\txt{3.85}{3.52}{\large}{navy}{estimadas · 26 tarjetas}
+\txt{1.02}{4.63}{\small\bfseries}{navy}{Presupuesto semanal}
+\fill[blue] (1.02,5.35) rectangle (2.18,5.83);
+\fill[teal] (2.23,5.35) rectangle (3.47,5.83);
+\fill[navy] (3.52,5.35) rectangle (7.50,5.83);
+\txt{1.02}{6.06}{\small}{navy}{S5 · 14 h}\txt{2.87}{6.06}{\small}{navy}{S6 · 15 h}\txt{5.42}{6.06}{\small}{navy}{S7 · 48 h}
+\txt{1.02}{7.00}{\scriptsize}{slate}{Las 2 h de ensayo de E3 pertenecían a la semana 4.}
+\txt{8.70}{2.26}{\small\bfseries}{teal}{ENTREGADO}\txt{8.70}{2.86}{\large\bfseries}{navy}{Curso $\to$ evaluación $\to$ nota}
+\txt{8.70}{4.04}{\small\bfseries}{teal}{DECISIÓN}\txt{8.70}{4.65}{\large\bfseries}{navy}{Mantener archivos (P2)}
+\txt{8.70}{5.95}{\small\bfseries}{amber}{PENDIENTE}\txt{8.70}{6.54}{\large\bfseries}{navy}{Retrospectiva y revisión final}
+\foot{cierre/gestion.md}{Balance por responsable y tarjeta · estimaciones, registros y riesgos}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{RETROSPECTIVA · PARA DISCUTIR}{¿Qué repetiríamos y qué cambiaríamos?}
+\panel{.65}{1.88}{15.35}{3.53}{sea}\panel{.65}{3.78}{15.35}{5.43}{sky}\panel{.65}{5.68}{15.35}{7.33}{sand}
+\txt{.99}{2.21}{\large\bfseries}{navy}{Conservar el foco}\txt{6.04}{2.24}{\normalsize}{navy}{13 regiones con scroll \quad $\rightarrow$ \quad un componente}
+\txt{.99}{4.12}{\large\bfseries}{navy}{Verificar con dos roles}\txt{6.04}{4.15}{\normalsize}{navy}{Nota 7,0 en borrador \quad $\rightarrow$ \quad visible al publicar}
+\txt{.99}{6.03}{\large\bfseries}{navy}{Medir la sesión}\txt{6.04}{6.06}{\normalsize}{navy}{Cursos $\to$ módulos \quad $\rightarrow$ \quad 1,63 s hasta red inactiva}
+\foot{cierre/retrospectiva.md}{Preguntas y evidencia técnica para la reunión · conclusiones del equipo pendientes}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{DEMO EN VIVO}{Del módulo al promedio, por rol}
+\panel{.65}{1.82}{8.49}{7.78}{paper}
+\crop{.86}{2.05}{7.40}{5.20}{7.40}{\ev lighthouse-authenticated-page.png}
+\txt{.92}{7.28}{\scriptsize\bfseries}{teal}{MÓDULOS Y MATERIAL · SESIÓN UC}
+\txt{8.96}{2.07}{\small\bfseries}{blue}{ADMINISTRACIÓN}\txt{8.96}{2.57}{\large}{navy}{Alta · curso · sección · roles}
+\txt{8.96}{3.48}{\small\bfseries}{blue}{DOCENCIA}\txt{8.96}{3.98}{\large}{navy}{Material · quiz · tarea}
+\txt{8.96}{4.89}{\small\bfseries}{blue}{ESTUDIANTE Y AYUDANTE}\txt{8.96}{5.39}{\large}{navy}{Cancelar · entregar · consultar}
+\txt{8.96}{6.30}{\small\bfseries}{blue}{PUBLICACIÓN}\txt{8.96}{6.80}{\large}{navy}{Nota · promedio · auditoría}
+\foot{ppt/guion.md}{UC y UTFSM · perfiles, ventanas, permisos y datos nuevos en el guion}
+\end{sheet}\end{frame}
 \appendix
-\begin{frame}{Anexo · SonarQube Community}
-\begin{columns}[T]\column{.48\textwidth}\textbf{Antes · 6758fa9}\\\includegraphics[width=\linewidth]{s1.png}
-\column{.48\textwidth}\textbf{Después · a7a8cf5}\\\includegraphics[width=\linewidth]{s2.png}\end{columns}
-\fuente{sonarqube/README.md}{Actions · runs 2 y 5 · 15/11 · mismo proyecto manual; la PR 329 tiene su propio gate}
-\end{frame}
-\begin{frame}{Anexo · vulnerabilidades de dependencias en Trivy}
-\begin{columns}[T]\column{.48\textwidth}\textbf{Antes · cdc42bf}\\\includegraphics[height=4.8cm]{t1.png}
-\column{.48\textwidth}\textbf{Después · 4b12066}\\\includegraphics[height=4.8cm]{t2.png}\end{columns}
-\fuente{trivy/README.md}{Acciones manuales 2 y 3 · 13/11 · informe con misconfiguraciones e imágenes por separado}
-\end{frame}
-\begin{frame}{Anexo · resultado visible para el estudiante}
-\begin{columns}
-\column{.61\textwidth}\includegraphics[width=\linewidth]{../cierre/evidencia/uc-ensayo-nota.png}
-\column{.35\textwidth}\textbf{Quizzes y tareas al 50\%}\\
-El quiz recibió 7,0 y la tarea 5,5. El promedio parcial mostrado fue 6,3 en UC y UTFSM.
-\end{columns}
-\fuente{cierre/ensayo-remoto.md}{Ensayo UI en ambos tenants · captura UC, 21/11 · backend 7d4b666}
-\end{frame}
-\begin{frame}{Anexo · decisiones del proceso académico}
-\centering
-\begin{tikzpicture}[x=2.9cm,y=1.15cm,box/.style={draw=academixnavy,fill=academixsoftblue,rounded corners,align=center,minimum width=2.1cm,minimum height=.75cm},>=Stealth]
-\node[box](a) at (0,0){Estudiante\\inicia intento};
-\node[box](b) at (1,0){Guarda\\respuestas};
-\node[box](c) at (2,.85){Cancela};
-\node[box](d) at (3.5,.85){Fin sin nota};
-\node[box](e) at (2,-.65){Envía};
-\node[box](f) at (3.5,-.65){Corrección automática\\Nota oculta};
-\node[box](g) at (3.5,-2){Docente publica\\selección};
-\node[box](h) at (1.5,-2){Estudiante consulta\\resultado y promedio};
-\foreach \a/\b in {a/b,b/c,c/d,b/e,e/f,f/g,g/h}{\draw[->](\a)--(\b);}
-\end{tikzpicture}
-\par\medskip La publicación deja un evento de auditoría. El ayudante puede consultar el libro dentro de su sección.
-\fuente{cierre/feedback.md}{Procesos del semestre, correcciones de alcance y fuentes}
-\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ANEXO · SONARQUBE COMMUNITY}{Avisos del análisis manual, antes y después}
+\txt{.84}{2.05}{\large\bfseries}{navy}{Antes}\txt{3.00}{2.16}{\small}{slate}{6758fa9}
+\txt{8.32}{2.05}{\large\bfseries}{teal}{Después}\txt{11.15}{2.16}{\small}{slate}{a7a8cf5}
+\shot{.84}{2.88}{6.78}{s1.png}\shot{8.34}{2.88}{6.78}{s2.png}
+\foot{sonarqube/README.md}{SonarQube manual · 15/11 · Actions 2 y 5 · justificación de cuatro supresiones de accesibilidad}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ANEXO · TRIVY}{Dependencias del repositorio, antes y después}
+\txt{.84}{2.05}{\large\bfseries}{navy}{Antes}\txt{3.00}{2.16}{\small}{slate}{cdc42bf}
+\txt{8.32}{2.05}{\large\bfseries}{teal}{Después}\txt{11.15}{2.16}{\small}{slate}{4b12066}
+\shot{.84}{2.85}{6.72}{t1.png}\shot{8.34}{2.85}{6.72}{t2.png}
+\foot{trivy/README.md}{Trivy · 13/11 · Actions 2 y 3 · informe completo de repositorio e imágenes}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ANEXO · RESULTADO DEL ENSAYO}{Dos evaluaciones publicadas en UC y UTFSM}
+\shot{.75}{1.91}{9.29}{\ev uc-ensayo-nota.png}
+\panel{10.52}{1.95}{15.34}{7.79}{sand}
+\txt{10.96}{2.38}{\small\bfseries}{amber}{PROMEDIO PARCIAL}\txt{10.90}{3.26}{\Huge\bfseries}{navy}{6,3}
+\txt{10.96}{5.07}{\large}{navy}{Quiz \enspace 7,0} \txt{10.96}{5.87}{\large}{navy}{Tarea \enspace 5,5}
+\txt{10.96}{6.97}{\small}{slate}{Peso de cada grupo: 50\%}
+\foot{cierre/ensayo-remoto.md}{Vista del estudiante UC · ensayo del 21/11 · mismo promedio observado en UTFSM}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ANEXO · PROCESO REVISADO}{¿Cuándo puede ver la nota el estudiante?}
+\panel{.65}{2.06}{15.35}{4.60}{sky}\panel{.65}{4.78}{15.35}{7.53}{sea}
+\txt{.90}{2.30}{\scriptsize\bfseries}{blue}{ESTUDIANTE}\txt{.90}{5.02}{\scriptsize\bfseries}{teal}{SISTEMA Y DOCENTE}
+\node[box](a) at (2.0,3.44){Inicia intento};\node[box](b) at (5.03,3.44){Guarda};\node[box](c) at (8.10,2.88){Cancela};\node[box](d) at (11.88,2.88){Fin sin nota};
+\node[box](e) at (8.10,4.00){Envía};\node[box](f) at (8.10,6.04){Corrección automática};\node[box](g) at (11.88,6.04){Publica selección};\node[box,fill=sand](h) at (13.56,4.00){Ve nota y promedio};
+\foreach \a/\b in {a/b,b/c,c/d,b/e,e/f,f/g}{\draw[edge](\a)--(\b);}
+\draw[edge](g.east)-|(h.south);
+\txt{8.00}{6.80}{\scriptsize}{slate}{Nota oculta}\txt{11.20}{6.80}{\scriptsize}{slate}{Evento de auditoría}
+\foot{cierre/feedback.md}{Procesos E1--E4 · permisos del ayudante y trazabilidad de las correcciones}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ANEXO · ACCESO Y ROLES}{¿Qué puede hacer cada persona en un curso?}
+\panel{.65}{1.88}{15.35}{3.32}{paper}
+\node[box,fill=sky] (actor) at (2.13,2.60){Sesión válida};
+\node[box,fill=sky] (miembro) at (6.03,2.60){Pertenencia activa};
+\node[box,fill=sea] (permiso) at (10.13,2.60){Permiso sobre el recurso};
+\node[box,fill=sand] (acceso) at (13.91,2.60){Acceso};
+\foreach \a/\b in {actor/miembro,miembro/permiso,permiso/acceso}{\draw[edge](\a)--(\b);}
+\txt{.90}{3.93}{\small\bfseries}{teal}{ADMINISTRACIÓN}\txt{5.02}{3.88}{\large}{navy}{Crea cursos y asigna participantes.}
+\draw[line] (.88,4.61)--(15.03,4.61);
+\txt{.90}{4.97}{\small\bfseries}{teal}{DOCENTE}\txt{5.02}{4.92}{\large}{navy}{Corrige y publica en su sección.}
+\draw[line] (.88,5.65)--(15.03,5.65);
+\txt{.90}{6.01}{\small\bfseries}{teal}{AYUDANTE}\txt{5.02}{5.96}{\large}{navy}{Consulta el libro de la sección.}
+\draw[line] (.88,6.69)--(15.03,6.69);
+\txt{.90}{7.05}{\small\bfseries}{teal}{ESTUDIANTE}\txt{5.02}{7.00}{\large}{navy}{Consulta sus resultados publicados.}
+\foot{cierre/ensayo-remoto.md}{Acceso por tenant y rol · el ensayo rechazó el curso de la otra institución}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ANEXO · TAREAS Y ENTREGAS}{De la entrega escrita a la nota publicada}
+\panel{.65}{1.85}{15.36}{3.76}{sky}
+\panel{.65}{3.98}{15.36}{5.96}{sea}
+\panel{.65}{6.18}{15.36}{7.98}{sand}
+\txt{.92}{2.08}{\scriptsize\bfseries}{blue}{DOCENTE}\txt{.92}{4.21}{\scriptsize\bfseries}{teal}{ESTUDIANTE}\txt{.92}{6.40}{\scriptsize\bfseries}{amber}{LIBRO DE NOTAS}
+\node[box] (t) at (2.6,3.05){Publica tarea};
+\node[box] (z) at (4.32,5.18){Entrega respuesta};
+\node[box] (cal) at (7.48,3.02){Califica · 8/10};
+\node[box] (sel) at (11.64,3.02){Publica selección};
+\node[box] (bor) at (7.48,7.14){Borrador};
+\node[box] (pub) at (11.64,7.14){Nota publicada};
+\node[box] (vis) at (13.42,5.17){Ve la nota · 5,5};
+\draw[edge](t.south)|-(z.west);\draw[edge](z.east)--(5.91,5.18)|-(cal.west);
+\draw[edge](cal.south)--(bor.north);\draw[edge](bor.east)--(9.56,7.14)|-(sel.west);
+\draw[edge](sel.south)--(pub.north);\draw[edge](pub.east)-|(vis.south);
+\foot{cierre/ensayo-remoto.md}{Ensayo remoto UC y UTFSM · registro de la entrega, corrección y publicación}
+\end{sheet}\end{frame}
 \end{document}
