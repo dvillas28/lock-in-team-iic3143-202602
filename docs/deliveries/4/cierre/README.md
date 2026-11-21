@@ -45,7 +45,7 @@ Fuentes: [enunciado actualizado](../enunciado_e4.pdf) y [feedback E3/Tom](../mee
 
 - **Operación**. Confirmar proveedor de base, referencia del frontend y servicios externos desde la consola del operador. Usar el dominio Render comprobado de la API.
 - **Presentadores**. Cronometrar la exposición con cambios de rol y conmutación al respaldo. La medición automática de un recorrido excluye explicaciones y coordinación entre personas.
-- **Calidad**. Mantener visible el gate fallido de #329 y corregir por separado el falso positivo del reviewer con pruebas de regresión.
+- **Calidad**. Mantener visible el gate fallido de #329 y revisar la [corrección del reviewer](https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/332) y observar sus comentarios tras la integración.
 - **Gestión**. Contrastar las semanas 6–7 con el Project y registrar horas efectivas únicamente con respaldo. El token carece de acceso a Project.
 - **Equipo**. Realizar retrospectiva, validar acciones con los responsables de riesgos, enviar el PDF el día de exposición y completar evaluación de pares.
 

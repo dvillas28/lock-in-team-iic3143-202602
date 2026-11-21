@@ -11,7 +11,7 @@ El [índice de evidencias](cierre/README.md) reúne PDF, anexos, pruebas y limit
 - [ ] **E4-03 · Plan.** Alcance y estimaciones conciliados en [gestión](cierre/gestion.md). Quedan campos y cierre semanal del Project.
 - [ ] **E4-04 · Retrospectiva:** aciertos, errores, qué no repetirían y aprendizajes de ingeniería con efectos concretos, en **1–2 diapositivas** (pp. 77, 79).
 - [ ] **E4-05 · Demo en vivo:** demostrar **todos** los casos de uso comprometidos, con acceso al repositorio para revisión (pp. 77, 80).
-- [ ] **E4-06 · Material corregido:** entregar todo lo producido durante el curso con feedback incorporado; enlazar correcciones y anexos (p. 78).
+- [x] **E4-06 · Material corregido.** La [matriz E1–E3](cierre/feedback.md) vincula cada observación con las correcciones, las fuentes del semestre y las láminas correspondientes. El envío al curso se controla en E4-07.
 - [ ] **E4-07 · Presentación:** PPT o PDF final, exposición de **aprox. 30 minutos** y envío el mismo día, como máximo al presentar (pp. 80, 83).
 - [ ] **E4-08 · Pares:** completar evaluación individual por el formulario del curso (pp. 81–82).
 
