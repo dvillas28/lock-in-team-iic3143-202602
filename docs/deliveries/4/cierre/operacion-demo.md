@@ -1,7 +1,7 @@
 # Operación y preparación de la demo E4
 
 Comprobaciones del **21/11/2026**, UTC en los JSON; hora de Chile UTC−3.
-[Alcance](alcance-final.md) · [Rendimiento](rendimiento.md) · [Plan](task_plan.md).
+[Alcance](alcance-final.md) · [Rendimiento](rendimiento.md) · [Presentación](../ppt/README.md).
 
 ## Resultado comprobado
 

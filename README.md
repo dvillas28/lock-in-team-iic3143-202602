@@ -3,7 +3,7 @@
 Proyecto grupal de Desarrollo de Software: LMS universitario con cursos semestrales,
 material, evaluaciones autocorregidas, publicación de notas y seguimiento del estudiante.
 El corte de entrega E4 es v0.13.1 / `7d4b666`; el [paquete de cierre](docs/deliveries/4/cierre/README.md)
-reúne alcance, evidencia remota y rendimiento comprobados el 21/11/2026.
+reúne el [PDF de exposición](docs/deliveries/4/ppt/main.pdf), el [guion](docs/deliveries/4/ppt/guion.md) y la evidencia del corte del 21/11/2026.
 
 ## Flujo principal
 

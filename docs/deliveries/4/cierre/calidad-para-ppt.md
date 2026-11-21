@@ -1,7 +1,5 @@
 # Calidad — Contenido listo para 2 diapositivas E4
-
-Este contenido atiende #212 y el feedback E3. La integración visual al PPT/PDF
-permanece en #208. Referencias extensas y límites se dejan en anexos.
+Las diapositivas 4 y 5 y los anexos 9 y 10 del [PDF](../ppt/main.pdf) presentan estos resultados.
 
 ## Slide 1 · Qué mejoró y cómo lo verificamos
 
@@ -21,7 +19,7 @@ alcance; el informe registra hallazgos al incluirlas. Sonar conserva cuatro supr
 justificadas de accesibilidad. No atribuir 91,7 % a una medición nueva del 21/11.
 Los análisis no son todos del mismo SHA: conservar commits y fechas de cada tabla fuente.
 
-**CI no está completamente verde:** en el [run de #329](https://github.com/dvillas28/lock-in-team-iic3143-202602/actions/runs/43773395044), `CI result`, integración/coverage y frontend aprobaron, pero **SonarCloud quality gate falló**. No confundir el gate de la auditoría manual con el de SonarCloud en esa PR. [API del gate](evidencia/sonarcloud-pr329-gate.json): mantenibilidad nueva rating D (4), exigida A (1); cobertura nueva 90,9 % supera 80 %, fiabilidad y seguridad A. [Consulta de issues](evidencia/sonarcloud-pr329-issues.json): 99 hallazgos abiertos en ese corte. Pendiente resolver o explicar la diferencia de análisis/perfil; no extrapolar «0 issues» manuales a SonarCloud.
+**CI no está completamente verde:** en el [run de #329](https://github.com/dvillas28/lock-in-team-iic3143-202602/actions/runs/43773395044), `CI result`, integración/coverage y frontend aprobaron, pero **SonarCloud quality gate falló**. No confundir el gate de la auditoría manual con el de SonarCloud en esa PR. [API del gate](evidencia/sonarcloud-pr329-gate.json): mantenibilidad nueva rating D (4), exigida A (1); cobertura nueva 90,9 % supera 80 %, fiabilidad y seguridad A. [Consulta de issues](evidencia/sonarcloud-pr329-issues.json): 99 hallazgos abiertos en ese corte. El [JSON del gate manual](../sonarqube/despues/quality-gate.json) devuelve OK con la lista de condiciones vacía. El gate de PR sí evalúa umbrales sobre código nuevo, entre ellos mantenibilidad A. Cambian el servidor, el corte y las condiciones evaluadas. Los informes no acreditan perfiles de reglas idénticos ni permiten atribuir cada diferencia a una regla concreta.
 
 ## Slide 2 · Rendimiento y operación del producto
 

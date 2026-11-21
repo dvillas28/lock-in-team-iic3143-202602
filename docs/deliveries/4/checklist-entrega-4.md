@@ -1,14 +1,14 @@
 # Entrega 4 — Checklist de cierre
 
-Fuente: [PDF del curso](../01b-Proyecto%20%28miercoles%2012%20de%20agosto%29%20%281%29.pdf), páginas 75–84 del archivo.
+Fuente vigente: [enunciado E4](enunciado_e4.pdf), diapositivas 77–83.
 Corte: **21/11/2026**. [Diagnóstico y prioridades](reporte-brechas-entrega-4.md).
 Marcar únicamente con evidencia final incorporada; avances parciales están en el diagnóstico.
 
 ## Exigencias de la entrega
 
-- [ ] **E4-01 · Arquitectura y datos:** diagramas finales coherentes con el producto entregado, en **1–2 diapositivas**; procesos corregidos en anexos (p. 77). Base documental lista: [arquitectura](arquitectura.md) y [modelo](modelo-datos.md); falta integrar al PPT y revisar anexos de procesos.
-- [ ] **E4-02 · Calidad:** prácticas, tests y estado del código; explicar cómo aseguran la calidad del MVP, en **1–2 diapositivas** (p. 77).
-- [ ] **E4-03 · Plan cerrado:** comparar último compromiso con terminado/pendiente; responder «¿alcanzaron?» y explicar decisiones, en **1–2 diapositivas** (p. 77).
+- [x] **E4-01 · Arquitectura y datos.** [PDF](ppt/main.pdf), láminas 2–3; procesos revisados en el [anexo](cierre/feedback.md) y lámina 12.
+- [x] **E4-02 · Calidad.** [PDF](ppt/main.pdf), láminas 4–5 y anexos 9–10, con reportes de ambos gates.
+- [ ] **E4-03 · Plan.** Alcance y estimaciones conciliados en [gestión](cierre/gestion.md). Quedan campos y cierre semanal del Project.
 - [ ] **E4-04 · Retrospectiva:** aciertos, errores, qué no repetirían y aprendizajes de ingeniería con efectos concretos, en **1–2 diapositivas** (pp. 77, 79).
 - [ ] **E4-05 · Demo en vivo:** demostrar **todos** los casos de uso comprometidos, con acceso al repositorio para revisión (pp. 77, 80).
 - [ ] **E4-06 · Material corregido:** entregar todo lo producido durante el curso con feedback incorporado; enlazar correcciones y anexos (p. 78).

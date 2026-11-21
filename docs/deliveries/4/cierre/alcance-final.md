@@ -55,6 +55,6 @@ Secuencia `D` corresponde al recorrido de [operación](operacion-demo.md).
 
 - No se comprometen IA/chat/RAG, quizzes en vivo, integraciones con calendarios externos, HA ni restauración individual de notas.
 - No se atribuye a `/ready` la confirmación del proveedor físico de base; Neon requiere evidencia del operador/configuración remota.
-- [Arquitectura](../arquitectura.md) y [modelo](../modelo-datos.md) se llevan a 1–2 slides; procesos corregidos van en anexo.
-- Falta cerrar retrospectiva, PPT/PDF, ensayo completo y horas confirmadas. Esta matriz no sustituye esos entregables.
-- E3 contiene cifras distintas (79 h/27 tarjetas y 77 h/26): no reutilizarlas como balance final ni sumar estimaciones retrospectivas a horas medidas.
+- [Arquitectura](../arquitectura.md) y [modelo](../modelo-datos.md) están integrados en la [presentación](../ppt/main.pdf).
+- Línea base conciliada de E4: 77 h estimadas en 26 tarjetas. La diferencia de 2 h correspondía al ensayo de E3 (#166). El [balance por persona y tarjeta](gestion.md) separa presupuesto, valores registrados y aproximaciones retrospectivas.
+- La retrospectiva queda pendiente de la sesión del equipo. El [guion](../ppt/guion.md) especifica el recorrido de exposición.
