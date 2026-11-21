@@ -4,7 +4,7 @@
 
 ## Entorno y versión
 
-Compose levantó PostgreSQL 17 y construyó ambas imágenes desde el checkout de la PR en `6cf28e3`. Los árboles Git de backend (`cc0c4e0`) y frontend (`001aea5`) coinciden con los de `7d4b666`. También coincide el [Compose](../../../../docker-compose.yml). La API local devuelve `0.1.0` y commit nulo por configuración. La equivalencia se verificó con Git. El SHA del frontend remoto sigue pendiente.
+Compose levantó PostgreSQL 17 y construyó ambas imágenes desde el checkout de la PR en `6cf28e3`. Los árboles Git de backend (`cc0c4e0`) y frontend (`001aea5`) coinciden con los de `7d4b666`. También coincide el [Compose](../../../../docker-compose.yml). La API local devuelve `0.1.0` y commit nulo por configuración. La equivalencia se verificó con Git. GitHub registra el [despliegue frontend](evidencia/deploys-render.json) en ese mismo SHA.
 
 Se creó una base independiente. El bootstrap creó cinco cuentas por institución, el superadmin local delegó administración por la API y la seed de presentación pasó por `check`, `preview`, `apply` y `verify`. Quedaron tres cursos y cuatro secciones por institución. PostgreSQL solo se expone a la red interna de Compose. Los puertos web y API escuchan en el loopback de esta máquina. Los archivos se almacenan en un volumen local y el correo está desactivado. [Seed y controles](../../../DEMO_SEED_RENDER.md).
 

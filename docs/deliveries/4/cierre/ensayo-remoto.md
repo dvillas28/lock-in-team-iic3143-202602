@@ -1,6 +1,6 @@
 # Ensayo por interfaz en UC y UTFSM
 
-21/11/2026, Chrome de escritorio con Playwright sobre los dominios públicos. Backend v0.13.1, `7d4b666`. La referencia del frontend requiere confirmación del operador. Se usaron contextos independientes por institución y rol. Este ensayo técnico incluye esperas de red, inspección y reintentos de automatización. Falta cronometrar la exposición oral del equipo.
+21/11/2026, Chrome de escritorio con Playwright sobre los dominios públicos. Backend v0.13.1, `7d4b666`. GitHub registra [ambos despliegues](evidencia/deploys-render.json) en ese SHA. Se usaron contextos independientes por institución y rol. Este ensayo técnico incluye esperas de red, inspección y reintentos de automatización. Falta cronometrar la exposición oral del equipo.
 
 | Institución | Curso creado por interfaz | ID |
 | --- | --- | --- |
@@ -29,6 +29,6 @@ Tiempos acumulados desde el inicio del navegador, redondeados al segundo. Las do
 
 Capturas de Mis notas con curso sintético, pesos, puntajes por grupo y promedio: [UC](evidencia/uc-ensayo-nota.png) y [UTFSM](evidencia/utfsm-ensayo-nota.png). El recorrido usó la cuenta administradora que quedó matriculada como docente al crear cada curso. El login de la cuenta docente independiente consta en [accesos previos](evidencia/access.json).
 
-No se enviaron correos ni se cambiaron credenciales o fotos compartidas. La confirmación de entrega de correo y el SHA frontend siguen pendientes. Para repetir la publicación, crear otro curso o evaluación sintéticos.
+No se enviaron correos ni se cambiaron credenciales o fotos compartidas. El envío de correo quedó fuera del ensayo. Para repetir la publicación, crear otro curso o evaluación sintéticos.
 
 Los cursos de validación anteriores y sus calificaciones se conservaron. [Ciclo API previo](evidencia/remote-cycle.json) · [Matriz CU y ampliaciones](alcance-final.md).

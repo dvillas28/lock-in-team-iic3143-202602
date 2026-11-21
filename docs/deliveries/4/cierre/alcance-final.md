@@ -9,7 +9,7 @@ Fuentes: [plan E3](../../3/ppt/dvillas28/10-plan-mvp/frames.tex),
 - Backend remoto: **v0.13.1**, commit `7d4b666e379aedaec86eb6fd3d4e7a9d518a184a`, confirmado por `/health`.
 - [Release](https://github.com/dvillas28/lock-in-team-iic3143-202602/releases/tag/v0.13.1) y [merge #329](https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/329).
 - La documentación de arquitectura/datos de [#330](https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/330) está en `dev` y se reutiliza en esta rama. Todavía no forma parte de la release desplegada.
-- Frontend remoto: dominios UC/UTFSM funcionales. No expone SHA verificable en esta revisión; no se atribuye identidad de commit por inferencia.
+- Frontend remoto: dominios UC/UTFSM funcionales. El último [deploy registrado](evidencia/deploys-render.json) figura exitoso en 7d4b666.
 - **Material en archivos se incluye:** había ADR e implementación antes del 15/11 y hoy pasó carga/descarga real en ambos tenants. La condición de E3 para excluirlo ya no aplica.
 - Perfiles/altas, tareas/entregas, grupos/revisiones y calendario son ampliaciones implementadas. Sus límites operativos se explicitan abajo; no se presentan como pendientes futuros prometidos.
 - Antes del ensayo, mantener este corte funcional. Si cambia código, repetir las comprobaciones afectadas y registrar otro SHA.
@@ -56,7 +56,7 @@ Para la verificación posterior por interfaz, consultar [ensayo remoto por insti
 ## Exclusiones y entrega material
 
 - No se comprometen IA/chat/RAG, quizzes en vivo, integraciones con calendarios externos, HA ni restauración individual de notas.
-- No se atribuye a `/ready` la confirmación del proveedor físico de base; Neon requiere evidencia del operador/configuración remota.
+- El equipo confirmó PostgreSQL en Neon y el servicio en Render.
 - [Arquitectura](../arquitectura.md) y [modelo](../modelo-datos.md) están integrados en la [presentación](../ppt/main.pdf).
 - Línea base conciliada de E4: 77 h estimadas en 26 tarjetas. La diferencia de 2 h correspondía al ensayo de E3 (#166). El [balance por persona y tarjeta](gestion.md) separa presupuesto, valores registrados y aproximaciones retrospectivas.
 - La retrospectiva queda pendiente de la sesión del equipo. El [guion](../ppt/guion.md) especifica el recorrido de exposición.

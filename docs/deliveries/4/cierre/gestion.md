@@ -40,7 +40,7 @@ Responsables derivados del registro E2 y de las asignaciones de E4. La aceptaci�
 
 | Riesgo y observación | Responsable de revisión | Acción comprobable |
 | --- | --- | --- |
-| R-09/19 · Despertar API de ~27 s, alias DNS fallido, proveedor DB y SHA frontend pendientes | Daniel Villaseñor, Sebastián Palma | Precalentar ambos dominios y verificar health/ready; identificar despliegues en consola y conmutar a local si falla. |
+| R-09/19 · Despertar API de ~27 s, alias DNS fallido, Render y Neon confirmados, despliegues registrados en 7d4b666 | Daniel Villaseñor, Sebastián Palma | Precalentar ambos dominios y verificar health/ready; identificar despliegues en consola y conmutar a local si falla. |
 | R-01/13 · Aislamiento e historial | Sebastián Palma | Usar solo datos nuevos, comprobar separación UC/UTFSM, publicación y evento de auditoría. |
 | R-11/15 · Acceso por rol y descarga | Julián Contreras, Matías Araos, Sebastián Palma | Verificar vistas de estudiante y ayudante, descarga autorizada y bytes en nuevos datos de ensayo. |
 | R-10/16 · Gate de mantenibilidad y falsas alarmas del reviewer | Daniel Villaseñor, Daniel Fierro | Exponer los cortes por separado y validar alertas contra contrato; mantener revisión humana. |

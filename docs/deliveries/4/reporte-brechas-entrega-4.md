@@ -10,7 +10,7 @@ Corte histórico del diagnóstico: **16/11/2026**, commit `7d4b666`. Base: [E3](
 - [Paquete de cierre](cierre/README.md): matriz de alcance, operación real y Lighthouse con capturas.
 - v0.13.1/7d4b666 confirmado por health; ready 200. Ciclo académico y archivos TXT pasaron en ambos tenants.
 - E2E extended sobre main, run [43852844221](https://github.com/dvillas28/lock-in-team-iic3143-202602/actions/runs/43852844221), terminó aprobado el 16/11: 527 instancias, tres navegadores. Actualiza el resultado parcial citado abajo; no prueba ausencia permanente de flakiness.
-- [PDF y guion](ppt/README.md), [ensayo remoto](cierre/ensayo-remoto.md), [respaldo probado](cierre/respaldo-local.md) y [esfuerzo estimado por responsable](cierre/gestion.md) incorporados. Quedan la exposición cronometrada con el equipo, la retrospectiva, los campos del Project y la confirmación del operador sobre DB y frontend.
+- [PDF y guion](ppt/README.md), [ensayo remoto](cierre/ensayo-remoto.md), [respaldo probado](cierre/respaldo-local.md) y [esfuerzo estimado por responsable](cierre/gestion.md) incorporados. Quedan la exposición cronometrada con el equipo, la retrospectiva, los campos del Project y la aceptación de riesgos por sus responsables.
 
 ## Brechas históricas al 16/11 y condición de cierre
 

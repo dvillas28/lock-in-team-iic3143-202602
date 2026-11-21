@@ -54,10 +54,10 @@ No reutilizar la misma nota publicada para demostrar una publicación nueva: pre
 | `api.dvillasc.me` no resuelve DNS. | Usar `https://academix-backend-lr8x.onrender.com`; no cambiar DNS a última hora. | Equipo. |
 | La guía antigua espera códigos/datos que han cambiado. | Usar IDs/códigos observados hoy y revisar el curso seleccionado antes del ensayo. No resembrar ni sobrescribir datos. | Presentador de demo. |
 | Sesión en memoria y límite de login. | No recargar vistas privadas; reservar sesiones por rol y evitar más de cinco logins por minuto/IP. | Presentadores. |
-| Resend y proveedor físico DB no inspeccionados hoy. | Operador confirma configuración y prueba opt-in si se va a demostrar envío. Sin destinatario autorizado no enviar correo. | Dani. |
+| El equipo confirmó Neon. El envío de correo quedó fuera del recorrido. | Operador confirma configuración y prueba opt-in si se va a demostrar envío. Sin destinatario autorizado no enviar correo. | Dani. |
 | Respaldo local comprobado con el árbol funcional de la release. | Abrir [instrucciones y resultados](respaldo-local.md) y practicar el cambio de ventana durante la exposición. | Equipo. |
 | SonarCloud quality gate de #329 falló aunque CI result aprobó. | Revisar causas; no presentar todo CI como verde. Auditoría manual y E2E tienen sus propios resultados. | Dani / calidad. |
-| Frontend sin SHA público verificable. | Operador conserva referencia del deploy frontend y la compara con el corte aprobado. | Dani. |
+| Frontend y backend registrados en 7d4b666. | [Registro de despliegues](evidencia/deploys-render.json), ambos con estado success. | Dani. |
 
 El [ensayo UI remoto](ensayo-remoto.md) y el [ensayo local](respaldo-local.md) registran los pasos ejecutados después del ciclo API inicial. Queda cronometrar la presentación conjunta.
 No se ejecutaron redeploys, migraciones productivas, purgas ni envíos de correo.

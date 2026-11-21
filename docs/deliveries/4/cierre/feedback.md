@@ -9,7 +9,7 @@
 | E2 · cardinalidades, roles, admin/superadmin y creación de cuentas | UML y ER corregidos, roles restringidos por CHECK, administración separada de docencia. [Feedback original](../../2/15-feedback-e2.md), [PR #160](https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/160), [modelo actualizado](../modelo-datos.md). | 2–3, demo |
 | E3 · mostrar mejora Sonar y Trivy | Comparación fechada por SHA y capturas de los runs. Gate de #329 explicado por separado. [Calidad](calidad-para-ppt.md). | 4, 9–10 |
 | E3 · métricas frontend y captura Lighthouse | Tres navegaciones UC y recorrido privado; reporte completo y capturas. [Rendimiento](rendimiento.md). | 5 |
-| E3 · proveedores y disponibilidad de la demo | Ciclo remoto por institución, tiempos fríos/calientes y responsables. [Operación](operacion-demo.md). Confirmación física pendiente. | 2, 8 |
+| E3 · proveedores y disponibilidad de la demo | Ciclo remoto por institución, tiempos fríos/calientes y responsables. [Operación](operacion-demo.md). Render y Neon confirmados por el equipo. | 2, 8 |
 | E3 · aprendizajes concretos | Tres decisiones con resultados observables. Reunión y validación colectiva pendientes. [Guion](../ppt/guion.md). | 7 |
 | Tom · un idioma en commits | Español exigido en commits y PR. Ejemplo de aplicación en esta [PR de cierre](https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/331). | Anexo documental |
 
