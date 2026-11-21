@@ -1,0 +1,275 @@
+[
+  {
+    "slug": "uc",
+    "role": "teacher",
+    "observedAt": "2026-11-21T17:58:48.583Z",
+    "errors": [],
+    "api": [
+      {
+        "endpoint": "courses",
+        "status": 200,
+        "items": 3
+      },
+      {
+        "endpoint": "courses/e928ef44-cc08-4c49-8087-0e41aa85de34/modules",
+        "status": 200,
+        "items": 3
+      },
+      {
+        "endpoint": "courses/e928ef44-cc08-4c49-8087-0e41aa85de34/quizzes",
+        "status": 200,
+        "items": 2
+      },
+      {
+        "endpoint": "courses/e928ef44-cc08-4c49-8087-0e41aa85de34/assignments",
+        "status": 200,
+        "items": 1
+      },
+      {
+        "endpoint": "courses/e928ef44-cc08-4c49-8087-0e41aa85de34/gradebook",
+        "status": 200,
+        "items": 1
+      }
+    ],
+    "loginStatus": 200,
+    "loginElapsedMs": 2230,
+    "url": "https://uc.academix.dvillasc.me/courses",
+    "headings": [
+      "Mis cursos"
+    ],
+    "links": [],
+    "courses": [
+      {
+        "id": "e928ef44-cc08-4c49-8087-0e41aa85de34",
+        "code": "DEMO-UC-201",
+        "name": "Programación y Algoritmos · Demostración"
+      },
+      {
+        "id": "2d0e186e-3cf2-4361-8cc8-db09d0132b02",
+        "code": "DEMO-UC-301",
+        "name": "Fundamentos de Datos · Demostración"
+      },
+      {
+        "id": "5811126a-dc26-4adf-a8d6-7386af3bab4f",
+        "code": "IIC3898",
+        "name": "Desarrollo de Software"
+      }
+    ],
+    "courseId": "e928ef44-cc08-4c49-8087-0e41aa85de34"
+  },
+  {
+    "slug": "uc",
+    "role": "student",
+    "observedAt": "2026-11-21T17:58:54.242Z",
+    "errors": [],
+    "api": [
+      {
+        "endpoint": "courses",
+        "status": 200,
+        "items": 2
+      },
+      {
+        "endpoint": "courses/e928ef44-cc08-4c49-8087-0e41aa85de34/modules",
+        "status": 200,
+        "items": 2
+      },
+      {
+        "endpoint": "courses/e928ef44-cc08-4c49-8087-0e41aa85de34/quizzes",
+        "status": 200,
+        "items": 2
+      },
+      {
+        "endpoint": "courses/e928ef44-cc08-4c49-8087-0e41aa85de34/assignments",
+        "status": 200,
+        "items": 1
+      },
+      {
+        "endpoint": "courses/e928ef44-cc08-4c49-8087-0e41aa85de34/my-grades",
+        "status": 200,
+        "items": 1
+      }
+    ],
+    "loginStatus": 200,
+    "loginElapsedMs": 1955,
+    "url": "https://uc.academix.dvillasc.me/courses",
+    "headings": [
+      "Mis cursos"
+    ],
+    "links": [],
+    "courses": [
+      {
+        "id": "e928ef44-cc08-4c49-8087-0e41aa85de34",
+        "code": "DEMO-UC-201",
+        "name": "Programación y Algoritmos · Demostración"
+      },
+      {
+        "id": "5811126a-dc26-4adf-a8d6-7386af3bab4f",
+        "code": "IIC3898",
+        "name": "Desarrollo de Software"
+      }
+    ],
+    "courseId": "e928ef44-cc08-4c49-8087-0e41aa85de34"
+  },
+  {
+    "slug": "utfsm",
+    "role": "teacher",
+    "observedAt": "2026-11-21T17:58:59.458Z",
+    "errors": [],
+    "api": [
+      {
+        "endpoint": "courses",
+        "status": 200,
+        "items": 5
+      },
+      {
+        "endpoint": "courses/094644ea-f207-451d-803f-6216c6fbbdcc/modules",
+        "status": 200,
+        "items": 3
+      },
+      {
+        "endpoint": "courses/094644ea-f207-451d-803f-6216c6fbbdcc/quizzes",
+        "status": 200,
+        "items": 5
+      },
+      {
+        "endpoint": "courses/094644ea-f207-451d-803f-6216c6fbbdcc/assignments",
+        "status": 200,
+        "items": 0
+      },
+      {
+        "endpoint": "courses/094644ea-f207-451d-803f-6216c6fbbdcc/gradebook",
+        "status": 200,
+        "items": 5
+      }
+    ],
+    "loginStatus": 200,
+    "loginElapsedMs": 2232,
+    "url": "https://utfsm.academix.dvillasc.me/courses",
+    "headings": [
+      "Mis cursos"
+    ],
+    "links": [],
+    "courses": [
+      {
+        "id": "094644ea-f207-451d-803f-6216c6fbbdcc",
+        "code": "DEMO-UTFSM-101",
+        "name": "Sistemas Distribuidos · Demostración"
+      },
+      {
+        "id": "eee50c13-bb75-4a65-8576-b8f478fc5a7e",
+        "code": "DEMO-UTFSM-201",
+        "name": "Estructuras de Datos · Demostración"
+      },
+      {
+        "id": "accd0b3d-5cce-4159-8b47-c14a603990a6",
+        "code": "DEMO-UTFSM-301",
+        "name": "Redes de Computadores · Demostración"
+      },
+      {
+        "id": "67690fa9-0651-4508-959e-3dabef9a7df9",
+        "code": "IIC2145",
+        "name": "Desarrollo"
+      },
+      {
+        "id": "f6412a02-7602-4759-942b-f26f9c581c83",
+        "code": "IIC3103",
+        "name": "Taller de integración"
+      }
+    ],
+    "courseId": "094644ea-f207-451d-803f-6216c6fbbdcc"
+  },
+  {
+    "slug": "utfsm",
+    "role": "student",
+    "observedAt": "2026-11-21T17:59:04.704Z",
+    "errors": [],
+    "api": [
+      {
+        "endpoint": "courses",
+        "status": 200,
+        "items": 5
+      },
+      {
+        "endpoint": "courses/094644ea-f207-451d-803f-6216c6fbbdcc/modules",
+        "status": 200,
+        "items": 2
+      },
+      {
+        "endpoint": "courses/094644ea-f207-451d-803f-6216c6fbbdcc/quizzes",
+        "status": 200,
+        "items": 5
+      },
+      {
+        "endpoint": "courses/094644ea-f207-451d-803f-6216c6fbbdcc/assignments",
+        "status": 200,
+        "items": 0
+      },
+      {
+        "endpoint": "courses/094644ea-f207-451d-803f-6216c6fbbdcc/my-grades",
+        "status": 200,
+        "items": 1
+      }
+    ],
+    "loginStatus": 200,
+    "loginElapsedMs": 2255,
+    "url": "https://utfsm.academix.dvillasc.me/courses",
+    "headings": [
+      "Mis cursos",
+      "Sistemas Distribuidos · Demostración",
+      "Estructuras de Datos · Demostración",
+      "Redes de Computadores · Demostración",
+      "Desarrollo",
+      "Taller de integración"
+    ],
+    "links": [
+      {
+        "text": "DEMO-2026-2DEMO-UTFSM-101Sistemas Distribuidos · DemostraciónSección 1 · EstudianteAbrir curso",
+        "href": "/courses/094644ea-f207-451d-803f-6216c6fbbdcc/modules"
+      },
+      {
+        "text": "DEMO-2026-2DEMO-UTFSM-201Estructuras de Datos · DemostraciónSección 1 · EstudianteAbrir curso",
+        "href": "/courses/eee50c13-bb75-4a65-8576-b8f478fc5a7e/modules"
+      },
+      {
+        "text": "DEMO-2026-2DEMO-UTFSM-301Redes de Computadores · DemostraciónSección 1 · EstudianteAbrir curso",
+        "href": "/courses/accd0b3d-5cce-4159-8b47-c14a603990a6/modules"
+      },
+      {
+        "text": "2026-2IIC2145DesarrolloSección 1 · EstudianteAbrir curso",
+        "href": "/courses/67690fa9-0651-4508-959e-3dabef9a7df9/modules"
+      },
+      {
+        "text": "2026-2IIC3103Taller de integraciónSección 1 · EstudianteAbrir curso",
+        "href": "/courses/f6412a02-7602-4759-942b-f26f9c581c83/modules"
+      }
+    ],
+    "courses": [
+      {
+        "id": "094644ea-f207-451d-803f-6216c6fbbdcc",
+        "code": "DEMO-UTFSM-101",
+        "name": "Sistemas Distribuidos · Demostración"
+      },
+      {
+        "id": "eee50c13-bb75-4a65-8576-b8f478fc5a7e",
+        "code": "DEMO-UTFSM-201",
+        "name": "Estructuras de Datos · Demostración"
+      },
+      {
+        "id": "accd0b3d-5cce-4159-8b47-c14a603990a6",
+        "code": "DEMO-UTFSM-301",
+        "name": "Redes de Computadores · Demostración"
+      },
+      {
+        "id": "67690fa9-0651-4508-959e-3dabef9a7df9",
+        "code": "IIC2145",
+        "name": "Desarrollo"
+      },
+      {
+        "id": "f6412a02-7602-4759-942b-f26f9c581c83",
+        "code": "IIC3103",
+        "name": "Taller de integración"
+      }
+    ],
+    "courseId": "094644ea-f207-451d-803f-6216c6fbbdcc"
+  }
+]

@@ -1,0 +1,52 @@
+{
+  "observedAt": "2026-11-21T18:01:29.417Z",
+  "mode": "snapshot and timespan; no page reload",
+  "url": "https://uc.academix.dvillasc.me/courses/e928ef44-cc08-4c49-8087-0e41aa85de34/modules",
+  "elapsedMs": 1633,
+  "sessionPreserved": true,
+  "steps": [
+    {
+      "name": "Mis cursos — sesión real",
+      "categories": {
+        "performance": 0,
+        "accessibility": 1,
+        "best-practices": 1,
+        "seo": 1,
+        "agentic-browsing": 1
+      },
+      "metrics": {}
+    },
+    {
+      "name": "Abrir módulos de un curso — navegación SPA autenticada",
+      "categories": {
+        "performance": 1,
+        "best-practices": 0.95
+      },
+      "metrics": {
+        "total-blocking-time": {
+          "value": 0,
+          "display": "0 ms"
+        },
+        "cumulative-layout-shift": {
+          "value": 0,
+          "display": "0"
+        },
+        "interaction-to-next-paint": {
+          "value": 101.222,
+          "display": "100 ms"
+        }
+      }
+    },
+    {
+      "name": "Módulos y material — sesión real",
+      "categories": {
+        "performance": 0,
+        "accessibility": 1,
+        "best-practices": 1,
+        "seo": 1,
+        "agentic-browsing": 1
+      },
+      "metrics": {}
+    }
+  ]
+}

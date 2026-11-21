@@ -1,7 +1,7 @@
 # Entrega 4 — Checklist de cierre
 
 Fuente: [PDF del curso](../01b-Proyecto%20%28miercoles%2012%20de%20agosto%29%20%281%29.pdf), páginas 75–84 del archivo.
-Corte: **16/11/2026**. [Diagnóstico y prioridades](reporte-brechas-entrega-4.md).
+Corte: **21/11/2026**. [Diagnóstico y prioridades](reporte-brechas-entrega-4.md).
 Marcar únicamente con evidencia final incorporada; avances parciales están en el diagnóstico.
 
 ## Exigencias de la entrega
@@ -17,7 +17,7 @@ Marcar únicamente con evidencia final incorporada; avances parciales están en 
 
 ## Comprobaciones para cerrar el compromiso de E3
 
-- [ ] **C-01 · Alcance:** matriz caso de uso → estado → evidencia → paso de demo. Resolver explícitamente archivos P2 y cualquier compromiso agregado después de E3.
+- [x] **C-01 · Alcance:** [matriz caso de uso → estado → evidencia → demo](cierre/alcance-final.md); archivos P2 incluidos y ampliaciones identificadas. No acredita ensayo completo de cada fila.
 - [ ] **C-02 · Versión:** release desde `main`, despliegue y pruebas identificados por commit; acreditar aislamiento y permisos BE/FE/E2E.
 - [ ] **C-03 · Operación:** comprobar base vigente, cuentas/datos, servicios externos utilizados y recorrido remoto; ensayar con respaldo local de la misma versión.
 

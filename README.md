@@ -2,7 +2,8 @@
 
 Proyecto grupal de Desarrollo de Software: LMS universitario con cursos semestrales,
 material, evaluaciones autocorregidas, publicación de notas y seguimiento del estudiante.
-El alcance vigente corresponde a la Entrega 2.
+El corte de entrega E4 es v0.13.1 / `7d4b666`; el [paquete de cierre](docs/deliveries/4/cierre/README.md)
+reúne alcance, evidencia remota y rendimiento comprobados el 21/11/2026.
 
 ## Flujo principal
 
@@ -10,7 +11,7 @@ El alcance vigente corresponde a la Entrega 2.
 Curso -> Módulos -> Material -> Quiz autocorregido -> Nota -> Publicación -> Promedio
 ```
 
-## Alcance inicial
+## Alcance entregado y evidencia
 
 - PostgreSQL compartida, aislamiento lógico por Institution y RLS mínima.
 - Contexto HTTP: `/api/v1/institution/{institutionSlug}/...`.
@@ -19,12 +20,13 @@ Curso -> Módulos -> Material -> Quiz autocorregido -> Nota -> Publicación -> P
 - Quizzes de alternativas, intentos, calificación automática y auditoría.
 - Ponderaciones, publicación explícita y libro de notas.
 - Experiencias de estudiante y docente.
+- Perfiles, invitaciones institucionales y altas por CSV.
+- Archivos privados, tareas/entregas, grupos y revisiones de notas; calendario de plazos.
 
-Fuera del MVP: calendarios externos, quizzes en vivo, corrección manual compleja,
-IA/chat/RAG, analítica avanzada y altas generales de usuarios por API.
-Archivos binarios y su proveedor de object storage requieren otra misión.
-Extensión especificada, sin implementación: [perfiles y altas institucionales](specs/20261106-170457_perfiles-altas-usuarios/spec.md),
-con [alcance acotado](docs/adr/institutional-account-lifecycle.md) y decisiones de remitente/limpieza resueltas; DNS y ejecución técnica pendientes.
+Fuera del MVP: calendarios externos, quizzes en vivo, IA/chat/RAG y analítica avanzada.
+Las altas tienen autorización institucional y activación; no hay signup general abierto.
+La [matriz final](docs/deliveries/4/cierre/alcance-final.md) separa implementación,
+pruebas y operación externa; incluye límites y pasos pendientes del ensayo final.
 
 ## Interfaces y diseño
 
@@ -43,7 +45,8 @@ Fuentes canónicas: `mockups/assets/tokens.css` y `mockups/assets/app.css`.
 - [Índice](docs/README.md): estructura viva del repositorio.
 - Pruebas E2E: [qué probamos y fases](docs/testing/E2E_MASTER_PLAN.md) · [cómo ejecutarlas](docs/testing/E2E_README.md).
 - [Misiones backend](docs/backend/README.md): cobertura CU/RF/RNF y dependencias.
-- [Entrega 2](docs/deliveries/2/README.md): arquitectura vigente.
+- [Entrega 4](docs/deliveries/4/cierre/README.md): estado final, arquitectura/datos y evidencia.
+- [Entrega 2](docs/deliveries/2/README.md): antecedentes y requisitos.
 - [PostgreSQL compartida](docs/adr/adopt-shared-postgresql-multitenancy.md).
 - [Contexto y RLS](docs/adr/institution-context-and-database-isolation.md).
 - [OpenAPI](docs/reference/openapi/README.md) y [cliente frontend](docs/guides/frontend-api-client.md).

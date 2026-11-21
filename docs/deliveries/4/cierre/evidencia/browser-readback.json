@@ -1,0 +1,50 @@
+[
+  {
+    "slug": "uc",
+    "observedAt": "2026-11-21T18:05:22.522Z",
+    "pages": [
+      {
+        "name": "modules",
+        "url": "https://uc.academix.dvillasc.me/courses/13d99c92-59a6-4545-b19a-9e966d6e3376/modules",
+        "headings": [
+          "Módulos y material"
+        ]
+      },
+      {
+        "name": "grades",
+        "url": "https://uc.academix.dvillasc.me/courses/13d99c92-59a6-4545-b19a-9e966d6e3376/grades",
+        "headings": [
+          "Mis notas",
+          "Promedio parcial",
+          "Resultados por grupo"
+        ],
+        "publishedQuizVisible": true
+      }
+    ],
+    "errors": [],
+    "passed": true
+  },
+  {
+    "slug": "utfsm",
+    "observedAt": "2026-11-21T18:05:28.561Z",
+    "pages": [
+      {
+        "name": "modules",
+        "url": "https://utfsm.academix.dvillasc.me/courses/964fec5a-b7fb-4c6c-85e5-d79c5d126bc0/modules",
+        "headings": []
+      },
+      {
+        "name": "grades",
+        "url": "https://utfsm.academix.dvillasc.me/courses/964fec5a-b7fb-4c6c-85e5-d79c5d126bc0/grades",
+        "headings": [
+          "Mis notas",
+          "Promedio parcial",
+          "Resultados por grupo"
+        ],
+        "publishedQuizVisible": true
+      }
+    ],
+    "errors": [],
+    "passed": true
+  }
+]

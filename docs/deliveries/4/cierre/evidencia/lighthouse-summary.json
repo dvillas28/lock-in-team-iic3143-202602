@@ -1,0 +1,132 @@
+{
+  "runs": [
+    {
+      "file": "lighthouse-uc-login-desktop.report.json",
+      "url": "https://uc.academix.dvillasc.me/login",
+      "observedAt": "2026-11-21T18:04:31.685Z",
+      "formFactor": "desktop",
+      "lighthouseVersion": "13.6.0",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
+      "categories": {
+        "performance": 100,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100,
+        "agentic-browsing": 100
+      },
+      "metrics": {
+        "first-contentful-paint": 619.0450000000001,
+        "largest-contentful-paint": 619.0450000000001,
+        "total-blocking-time": 0,
+        "cumulative-layout-shift": 0.002240171613694073,
+        "speed-index": 851.0128934172342
+      },
+      "warnings": [],
+      "runtimeError": null
+    },
+    {
+      "file": "lighthouse-uc-login-mobile-2.report.json",
+      "url": "https://uc.academix.dvillasc.me/login",
+      "observedAt": "2026-11-21T18:01:58.180Z",
+      "formFactor": "mobile",
+      "lighthouseVersion": "13.6.0",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
+      "categories": {
+        "performance": 100,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100,
+        "agentic-browsing": 100
+      },
+      "metrics": {
+        "first-contentful-paint": 1052.203,
+        "largest-contentful-paint": 1052.203,
+        "total-blocking-time": 43,
+        "cumulative-layout-shift": 0,
+        "speed-index": 1202.3883600018964
+      },
+      "warnings": [],
+      "runtimeError": null
+    },
+    {
+      "file": "lighthouse-uc-login-mobile-3.report.json",
+      "url": "https://uc.academix.dvillasc.me/login",
+      "observedAt": "2026-11-21T18:02:54.072Z",
+      "formFactor": "mobile",
+      "lighthouseVersion": "13.6.0",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
+      "categories": {
+        "performance": 100,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100,
+        "agentic-browsing": 100
+      },
+      "metrics": {
+        "first-contentful-paint": 1097.159,
+        "largest-contentful-paint": 1097.159,
+        "total-blocking-time": 47,
+        "cumulative-layout-shift": 0,
+        "speed-index": 1200.8184299962284
+      },
+      "warnings": [],
+      "runtimeError": null
+    },
+    {
+      "file": "lighthouse-uc-login-mobile.report.json",
+      "url": "https://uc.academix.dvillasc.me/login",
+      "observedAt": "2026-11-21T17:57:42.898Z",
+      "formFactor": "mobile",
+      "lighthouseVersion": "13.6.0",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
+      "categories": {
+        "performance": 100,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100,
+        "agentic-browsing": 100
+      },
+      "metrics": {
+        "first-contentful-paint": 1049.537,
+        "largest-contentful-paint": 1049.537,
+        "total-blocking-time": 50,
+        "cumulative-layout-shift": 0,
+        "speed-index": 1272.498159685116
+      },
+      "warnings": [],
+      "runtimeError": null
+    },
+    {
+      "file": "lighthouse-utfsm-login-mobile.report.json",
+      "url": "https://utfsm.academix.dvillasc.me/login",
+      "observedAt": "2026-11-21T18:05:25.392Z",
+      "formFactor": "mobile",
+      "lighthouseVersion": "13.6.0",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
+      "categories": {
+        "performance": 100,
+        "accessibility": 100,
+        "best-practices": 96,
+        "seo": 100,
+        "agentic-browsing": 100
+      },
+      "metrics": {
+        "first-contentful-paint": 1046.104,
+        "largest-contentful-paint": 1046.104,
+        "total-blocking-time": 68,
+        "cumulative-layout-shift": 0,
+        "speed-index": 1191.7858639984636
+      },
+      "warnings": [],
+      "runtimeError": null
+    }
+  ],
+  "ucMobileSamples": 3,
+  "ucMobileMedians": {
+    "first-contentful-paint": 1052.203,
+    "largest-contentful-paint": 1052.203,
+    "total-blocking-time": 47,
+    "cumulative-layout-shift": 0,
+    "speed-index": 1202.3883600018964
+  }
+}

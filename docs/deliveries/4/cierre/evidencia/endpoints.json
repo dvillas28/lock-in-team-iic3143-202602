@@ -1,0 +1,60 @@
+[
+  {
+    "url": "https://academix-backend-lr8x.onrender.com/health",
+    "observed_at": "2026-11-21T17:56:56Z",
+    "status": 200,
+    "final_url": "https://academix-backend-lr8x.onrender.com/health",
+    "content_type": "application/json; charset=utf-8",
+    "elapsed_ms": 27303,
+    "bytes": 165,
+    "body": {
+      "status": "ok",
+      "version": "0.13.1",
+      "commit": "7d4b666e379aedaec86eb6fd3d4e7a9d518a184a",
+      "deployedAt": "2026-11-21T17:57:16.325Z",
+      "timestamp": "2026-11-21T17:57:24.125Z"
+    }
+  },
+  {
+    "url": "https://academix-backend-lr8x.onrender.com/ready",
+    "observed_at": "2026-11-21T17:56:56Z",
+    "status": 200,
+    "final_url": "https://academix-backend-lr8x.onrender.com/ready",
+    "content_type": "application/json; charset=utf-8",
+    "elapsed_ms": 27406,
+    "bytes": 15,
+    "body": {
+      "status": "ok"
+    }
+  },
+  {
+    "url": "https://api.dvillasc.me/health",
+    "observed_at": "2026-11-21T17:56:56Z",
+    "error": "<urlopen error [Errno -2] Name or service not known>",
+    "elapsed_ms": 200
+  },
+  {
+    "url": "https://api.dvillasc.me/ready",
+    "observed_at": "2026-11-21T17:56:56Z",
+    "error": "<urlopen error [Errno -2] Name or service not known>",
+    "elapsed_ms": 200
+  },
+  {
+    "url": "https://uc.academix.dvillasc.me/login",
+    "observed_at": "2026-11-21T17:56:56Z",
+    "status": 200,
+    "final_url": "https://uc.academix.dvillasc.me/login",
+    "content_type": "text/html; charset=utf-8",
+    "elapsed_ms": 12715,
+    "bytes": 7544
+  },
+  {
+    "url": "https://utfsm.academix.dvillasc.me/login",
+    "observed_at": "2026-11-21T17:56:56Z",
+    "status": 200,
+    "final_url": "https://utfsm.academix.dvillasc.me/login",
+    "content_type": "text/html; charset=utf-8",
+    "elapsed_ms": 12715,
+    "bytes": 7544
+  }
+]
