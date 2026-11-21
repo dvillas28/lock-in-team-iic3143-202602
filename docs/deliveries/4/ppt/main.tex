@@ -19,14 +19,12 @@
 \definecolor{sand}{HTML}{FBF1D8}
 \definecolor{rose}{HTML}{F8EAEB}
 \definecolor{paper}{HTML}{F6F8FA}
-\newcommand{\repo}{https://github.com/dvillas28/lock-in-team-iic3143-202602/blob/5a46608f037494036b551da35eb051ac74f1e9fb/docs/deliveries/4}
 \newcommand{\ev}{../cierre/evidencia/}
 \tikzset{edge/.style={-{Stealth[length=2mm]},slate,line width=.7pt},box/.style={draw=line,rounded corners=3pt,fill=white,align=center,minimum height=.7cm,inner sep=4pt,text=navy,font=\small},hint/.style={font=\scriptsize,text=slate,fill=white,inner sep=2pt}}
 \newenvironment{sheet}{\begin{tikzpicture}[remember picture,overlay,shift={(current page.north west)},x=1cm,y=-1cm]}{\end{tikzpicture}}
 \newcommand{\txt}[5]{\node[anchor=north west,inner sep=0pt,align=left,text=#4,font=#3] at (#1,#2) {#5};}
 \newcommand{\panel}[5]{\fill[#5,rounded corners=4pt] (#1,#2) rectangle (#3,#4);}
 \newcommand{\head}[2]{\txt{.65}{.38}{\scriptsize\bfseries}{teal}{#1}\txt{.61}{.88}{\LARGE\bfseries}{navy}{#2}}
-\newcommand{\foot}[2]{\draw[line] (.65,8.27)--(15.35,8.27);\txt{.65}{8.42}{\scriptsize}{teal}{\href{\repo/#1}{#2 $\nearrow$}}\node[anchor=north east,text=slate,font=\scriptsize] at (15.38,8.35){AcademiX \enspace / \enspace \insertframenumber};}
 \newcommand{\shot}[4]{\node[anchor=north west,inner sep=0] at (#1,#2){\includegraphics[width=#3cm]{#4}};}
 \newcommand{\crop}[6]{\begin{scope}\clip (#1,#2) rectangle ++(#3,#4);\node[anchor=north west,inner sep=0] at (#1,#2){\includegraphics[width=#5cm]{#6}};\end{scope}}
 \begin{document}
@@ -42,8 +40,7 @@
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{ARQUITECTURA}{Render, Neon y servicios externos}
-\panel{.65}{1.8}{15.35}{2.60}{paper}
-\txt{.93}{2.04}{\small\bfseries}{navy}{GitHub Actions \quad $\rightarrow$ \quad checks sobre \texttt{main} \quad $\rightarrow$ \quad Render Blueprint \quad $\rightarrow$ \quad v0.13.1 · \texttt{7d4b666}}
+\begin{scope}[yshift=.22cm]
 \panel{4.26}{2.88}{9.60}{7.82}{sky}
 \txt{4.56}{3.10}{\scriptsize\bfseries}{blue}{RENDER \enspace / \enspace DOS SERVICIOS DOCKER}
 \node[box,text width=2.5cm] (web) at (2.02,4.15){\textbf{Navegador}\\UC / UTFSM};
@@ -61,14 +58,11 @@
 \txt{10.26}{3.37}{\scriptsize}{slate}{SQL / TLS}
 \txt{10.26}{5.15}{\scriptsize}{slate}{SDK}
 \txt{10.26}{6.91}{\scriptsize}{slate}{HTTPS}
-\foot{arquitectura.md}{Arquitectura final, proveedores, fronteras y evidencia de despliegue}
+\end{scope}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{MODELO DE DATOS}{De la pertenencia institucional al historial de notas}
-\panel{.65}{1.85}{15.35}{3.29}{paper}
-\txt{.94}{2.13}{\large\bfseries}{navy}{24 tablas}
-\txt{4.02}{2.13}{\large\bfseries}{teal}{20 con FORCE RLS}
-\txt{10.45}{2.17}{\normalsize}{navy}{Claves con \texttt{institution\_id}}
+\begin{scope}[yshift=.50cm]
 \node[box,fill=sky] (im) at (2.20,3.98){Par usuario / institución};
 \node[box,fill=sky] (m) at (2.20,5.19){Pertenencia};
 \node[box] (c) at (5.4,5.19){Curso};
@@ -84,7 +78,7 @@
 \foreach \a/\b in {m/c,c/s,s/e,c/m1,m1/mt,c/q,g/i,i/n,n/r}{\draw[edge](\a)--node[pos=.50,hint]{1:N}(\b);}
 \draw[edge] (im)--node[hint]{único}(m);\draw[edge] (q)--node[hint]{0..1}(i);
 \draw[edge] (m.south)--(2.20,5.84)--(.36,5.84)--(.36,3.43)--(8.65,3.43)--(e.north);
-\foot{modelo-datos.md}{Relaciones principales · 23 migraciones · inventario y cardinalidades completas}
+\end{scope}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{PRÁCTICAS Y ESTADO DEL CÓDIGO}{Tres controles, tres resultados}
@@ -96,7 +90,6 @@
 \txt{10.76}{2.26}{\small\bfseries}{red}{SonarCloud · PR \#329}\txt{10.76}{3.18}{\Huge\bfseries}{red}{D}
 \txt{10.76}{4.52}{\normalsize}{navy}{mantenibilidad · gate fallido} \txt{10.76}{5.46}{\small}{navy}{99 code smells abiertos\\90,9\% cobertura nueva}
 \txt{.75}{7.10}{\normalsize\bfseries}{navy}{Integración con PostgreSQL \quad + \quad pruebas frontend \quad + \quad 527 instancias E2E}
-\foot{cierre/calidad-para-ppt.md}{Reportes por corte y SHA · capturas en anexos 9 y 10}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{RENDIMIENTO FRONTEND}{Login público y navegación dentro de la sesión}
@@ -108,7 +101,6 @@
 \txt{9.93}{2.19}{\small\bfseries}{teal}{UC · CURSOS $\to$ MÓDULOS}
 \txt{9.92}{3.09}{\Huge\bfseries}{navy}{1,63 s}\txt{9.96}{4.39}{\normalsize}{navy}{hasta red inactiva}
 \txt{9.96}{5.47}{\small}{slate}{TBT 0 ms \enspace · \enspace CLS 0} \txt{9.96}{6.26}{\small}{slate}{Interacción observada\\$\approx$101 ms}
-\foot{cierre/rendimiento.md}{Lighthouse 13.6 / Chrome 157 · producción, 21/11 · modos y reportes originales}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{PLAN FINAL}{El ciclo académico llegó a los dos tenants}
@@ -124,7 +116,6 @@
 \txt{8.70}{2.26}{\small\bfseries}{teal}{ENTREGADO}\txt{8.70}{2.86}{\large\bfseries}{navy}{Curso $\to$ evaluación $\to$ nota}
 \txt{8.70}{4.04}{\small\bfseries}{teal}{DECISIÓN}\txt{8.70}{4.65}{\large\bfseries}{navy}{Mantener archivos (P2)}
 \txt{8.70}{5.95}{\small\bfseries}{amber}{PENDIENTE}\txt{8.70}{6.54}{\large\bfseries}{navy}{Retrospectiva y revisión final}
-\foot{cierre/gestion.md}{Balance por responsable y tarjeta · estimaciones, registros y riesgos}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{RETROSPECTIVA · PARA DISCUTIR}{¿Qué repetiríamos y qué cambiaríamos?}
@@ -132,7 +123,6 @@
 \txt{.99}{2.21}{\large\bfseries}{navy}{Conservar el foco}\txt{6.04}{2.24}{\normalsize}{navy}{13 regiones con scroll \quad $\rightarrow$ \quad un componente}
 \txt{.99}{4.12}{\large\bfseries}{navy}{Verificar con dos roles}\txt{6.04}{4.15}{\normalsize}{navy}{Nota 7,0 en borrador \quad $\rightarrow$ \quad visible al publicar}
 \txt{.99}{6.03}{\large\bfseries}{navy}{Medir la sesión}\txt{6.04}{6.06}{\normalsize}{navy}{Cursos $\to$ módulos \quad $\rightarrow$ \quad 1,63 s hasta red inactiva}
-\foot{cierre/retrospectiva.md}{Preguntas y evidencia técnica para la reunión · conclusiones del equipo pendientes}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{DEMO EN VIVO}{Del módulo al promedio, por rol}
@@ -143,7 +133,6 @@
 \txt{8.96}{3.48}{\small\bfseries}{blue}{DOCENCIA}\txt{8.96}{3.98}{\large}{navy}{Material · quiz · tarea}
 \txt{8.96}{4.89}{\small\bfseries}{blue}{ESTUDIANTE Y AYUDANTE}\txt{8.96}{5.39}{\large}{navy}{Cancelar · entregar · consultar}
 \txt{8.96}{6.30}{\small\bfseries}{blue}{PUBLICACIÓN}\txt{8.96}{6.80}{\large}{navy}{Nota · promedio · auditoría}
-\foot{ppt/guion.md}{UC y UTFSM · perfiles, ventanas, permisos y datos nuevos en el guion}
 \end{sheet}\end{frame}
 \appendix
 \begin{frame}[plain]\begin{sheet}
@@ -151,14 +140,12 @@
 \txt{.84}{2.05}{\large\bfseries}{navy}{Antes}\txt{3.00}{2.16}{\small}{slate}{6758fa9}
 \txt{8.32}{2.05}{\large\bfseries}{teal}{Después}\txt{11.15}{2.16}{\small}{slate}{a7a8cf5}
 \shot{.84}{2.88}{6.78}{s1.png}\shot{8.34}{2.88}{6.78}{s2.png}
-\foot{sonarqube/README.md}{SonarQube manual · 15/11 · Actions 2 y 5 · justificación de cuatro supresiones de accesibilidad}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{ANEXO · TRIVY}{Dependencias del repositorio, antes y después}
 \txt{.84}{2.05}{\large\bfseries}{navy}{Antes}\txt{3.00}{2.16}{\small}{slate}{cdc42bf}
 \txt{8.32}{2.05}{\large\bfseries}{teal}{Después}\txt{11.15}{2.16}{\small}{slate}{4b12066}
 \shot{.84}{2.85}{6.72}{t1.png}\shot{8.34}{2.85}{6.72}{t2.png}
-\foot{trivy/README.md}{Trivy · 13/11 · Actions 2 y 3 · informe completo de repositorio e imágenes}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{ANEXO · RESULTADO DEL ENSAYO}{Dos evaluaciones publicadas en UC y UTFSM}
@@ -167,7 +154,6 @@
 \txt{10.96}{2.38}{\small\bfseries}{amber}{PROMEDIO PARCIAL}\txt{10.90}{3.26}{\Huge\bfseries}{navy}{6,3}
 \txt{10.96}{5.07}{\large}{navy}{Quiz \enspace 7,0} \txt{10.96}{5.87}{\large}{navy}{Tarea \enspace 5,5}
 \txt{10.96}{6.97}{\small}{slate}{Peso de cada grupo: 50\%}
-\foot{cierre/ensayo-remoto.md}{Vista del estudiante UC · ensayo del 21/11 · mismo promedio observado en UTFSM}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{ANEXO · PROCESO REVISADO}{¿Cuándo puede ver la nota el estudiante?}
@@ -178,7 +164,6 @@
 \foreach \a/\b in {a/b,b/c,c/d,b/e,e/f,f/g}{\draw[edge](\a)--(\b);}
 \draw[edge](g.east)-|(h.south);
 \txt{8.00}{6.80}{\scriptsize}{slate}{Nota oculta}\txt{11.20}{6.80}{\scriptsize}{slate}{Evento de auditoría}
-\foot{cierre/feedback.md}{Procesos E1--E4 · permisos del ayudante y trazabilidad de las correcciones}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{ANEXO · ACCESO Y ROLES}{¿Qué puede hacer cada persona en un curso?}
@@ -195,7 +180,6 @@
 \txt{.90}{6.01}{\small\bfseries}{teal}{AYUDANTE}\txt{5.02}{5.96}{\large}{navy}{Consulta el libro de la sección.}
 \draw[line] (.88,6.69)--(15.03,6.69);
 \txt{.90}{7.05}{\small\bfseries}{teal}{ESTUDIANTE}\txt{5.02}{7.00}{\large}{navy}{Consulta sus resultados publicados.}
-\foot{cierre/ensayo-remoto.md}{Acceso por tenant y rol · el ensayo rechazó el curso de la otra institución}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{ANEXO · TAREAS Y ENTREGAS}{De la entrega escrita a la nota publicada}
@@ -213,6 +197,5 @@
 \draw[edge](t.south)|-(z.west);\draw[edge](z.east)--(5.91,5.18)|-(cal.west);
 \draw[edge](cal.south)--(bor.north);\draw[edge](bor.east)--(9.56,7.14)|-(sel.west);
 \draw[edge](sel.south)--(pub.north);\draw[edge](pub.east)-|(vis.south);
-\foot{cierre/ensayo-remoto.md}{Ensayo remoto UC y UTFSM · registro de la entrega, corrección y publicación}
 \end{sheet}\end{frame}
 \end{document}

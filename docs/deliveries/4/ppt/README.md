@@ -6,7 +6,7 @@
 
 | Bloque | Láminas | Apoyo para presentar |
 | --- | --- | --- |
-| Arquitectura y datos | 2–3 | El flujo de despliegue de [E3](../../3/ppt/dvillas28/07-cicd/frames.tex) sitúa el diagrama de [arquitectura final](../arquitectura.md). El [modelo](../modelo-datos.md) detalla cardinalidades y reglas. |
+| Arquitectura y datos | 2–3 | El diagrama de [arquitectura final](../arquitectura.md) muestra los servicios y sus conexiones. El [modelo](../modelo-datos.md) detalla cardinalidades y reglas. |
 | Prácticas, pruebas y calidad | 4–5 | SonarQube manual, Trivy y gate de PR por separado. Captura real de Lighthouse y métricas de navegación autenticada. |
 | Plan, decisiones y pendientes | 6 | Línea base E3, alcance entregado y pendientes del equipo. |
 | Retrospectiva | 7 | Tres decisiones con efectos observados. Las conclusiones de la reunión quedan en [#207](https://github.com/dvillas28/lock-in-team-iic3143-202602/issues/207). |
@@ -15,4 +15,4 @@
 
 ## Compilación
 
-Desde esta carpeta, ejecutar `latexmk -pdf -halt-on-error main.tex` y luego `latexmk -c main.tex`. Usa pdfLaTeX, Beamer y TikZ. Las ocho láminas principales acompañan la exposición; los seis anexos quedan disponibles para preguntas. Los enlaces del PDF apuntan al corte de evidencia revisado. El envío al curso y la evaluación individual corresponden al equipo.
+Desde esta carpeta, ejecutar `latexmk -pdf -halt-on-error main.tex` y luego `latexmk -c main.tex`. Usa pdfLaTeX, Beamer y TikZ. Las ocho láminas principales acompañan la exposición; los seis anexos quedan disponibles para preguntas. Los reportes y las fuentes de las láminas están en el [índice de evidencias](../cierre/README.md). El envío al curso y la evaluación individual corresponden al equipo.
