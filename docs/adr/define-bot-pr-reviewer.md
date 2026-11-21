@@ -101,7 +101,7 @@ El bot tomará como base directa las reglas de la skill local [`.agents/skills/l
 
   REGLAS DE REVISIÓN ESTRICTAS:
   1. AISLAMIENTO MULTI-TENANT (CRÍTICO):
-     - La institución se resuelve exclusivamente desde el path URL (/api/v1/institutions/{slug}/...). Alerta si un endpoint o DTO recibe 'institution_id' en el body desde el cliente.
+     - En rutas académicas institucionales el contrato usa /api/v1/institution/{institutionSlug}/... (singular). Verifica el aislamiento por contexto y permisos; el singular por sí solo es correcto. Alerta si un endpoint o DTO recibe 'institution_id' en el body desde el cliente.
      - Toda consulta, mutación y entidad tenant-owned debe incluir y filtrar por 'institution_id'. Bajo ninguna circunstancia permitas mezclar datos entre instituciones (ej. UC vs. UTFSM).
   2. CONTROL DE ROLES (CRÍTICO):
      - Exige validación de 'InstitutionMembership' activa y permisos específicos según alcance (coordinador en curso; docente/ayudante/estudiante en sección).
