@@ -2,7 +2,7 @@
 
 Fuente vigente: [enunciado E4](enunciado_e4.pdf), diapositivas 77–83.
 Corte: **21/11/2026**. [Diagnóstico y prioridades](reporte-brechas-entrega-4.md).
-Marcar únicamente con evidencia final incorporada; avances parciales están en el diagnóstico.
+El [índice de evidencias](cierre/README.md) reúne PDF, anexos, pruebas y limitaciones. El diagnóstico conserva el corte histórico.
 
 ## Exigencias de la entrega
 

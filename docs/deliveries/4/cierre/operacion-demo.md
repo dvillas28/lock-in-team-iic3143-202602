@@ -34,7 +34,7 @@ Student está matriculado. Existe un módulo, Markdown, TXT, quiz y nota publica
 Las claves se mantienen fuera de Git. Los IDs de recursos están en el JSON del ejercicio.
 No reutilizar la misma nota publicada para demostrar una publicación nueva: preparar otra evaluación.
 
-## Guion operativo para el ensayo de mañana
+## Secuencia por rol
 
 1. **D1 · Acceso:** abrir UC y UTFSM; sesiones independientes de docente/admin, estudiante y ayudante.
 2. **D2 · Estructura:** abrir el curso de demo elegido, sección y participantes. Confirmar roles antes de comenzar.
@@ -55,10 +55,9 @@ No reutilizar la misma nota publicada para demostrar una publicación nueva: pre
 | La guía antigua espera códigos/datos que han cambiado. | Usar IDs/códigos observados hoy y revisar el curso seleccionado antes del ensayo. No resembrar ni sobrescribir datos. | Presentador de demo. |
 | Sesión en memoria y límite de login. | No recargar vistas privadas; reservar sesiones por rol y evitar más de cinco logins por minuto/IP. | Presentadores. |
 | Resend y proveedor físico DB no inspeccionados hoy. | Operador confirma configuración y prueba opt-in si se va a demostrar envío. Sin destinatario autorizado no enviar correo. | Dani. |
-| Respaldo local todavía no ejercitado en este turno. | Levantar **la misma versión**, comprobar login y flujo, probar cambio de ventana/red antes del ensayo. | Equipo. |
+| Respaldo local comprobado con el árbol funcional de la release. | Abrir [instrucciones y resultados](respaldo-local.md) y practicar el cambio de ventana durante la exposición. | Equipo. |
 | SonarCloud quality gate de #329 falló aunque CI result aprobó. | Revisar causas; no presentar todo CI como verde. Auditoría manual y E2E tienen sus propios resultados. | Dani / calidad. |
 | Frontend sin SHA público verificable. | Operador conserva referencia del deploy frontend y la compara con el corte aprobado. | Dani. |
 
-El feedback advierte una consecuencia crítica si falla la demo. El respaldo local
-requiere ensayo; no reemplaza la exigencia de demostrar los casos comprometidos.
+El [ensayo UI remoto](ensayo-remoto.md) y el [ensayo local](respaldo-local.md) registran los pasos ejecutados después del ciclo API inicial. Queda cronometrar la presentación conjunta.
 No se ejecutaron redeploys, migraciones productivas, purgas ni envíos de correo.

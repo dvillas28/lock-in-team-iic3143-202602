@@ -1,12 +1,12 @@
 # Guion de exposición y demo
 
-Duración objetivo de 30 minutos. Los tramos son presupuestos para el presentador. Las mediciones de ejecución se registran en el [ensayo](../cierre/ensayo-remoto.md). Mantener abiertas las sesiones privadas por rol en contextos separados, en UC y UTFSM. Reservar cursos nuevos por institución y dos evaluaciones por curso. Abrir health y ready antes de exponer. Mantener a mano el [respaldo local](../cierre/respaldo-local.md).
+Duración objetivo de 30 minutos. Los tramos son presupuestos para el presentador. Las mediciones de ejecución se registran en el [ensayo](../cierre/ensayo-remoto.md). Mantener abiertas las sesiones privadas por rol en contextos separados, en UC y UTFSM. Reservar cursos nuevos por institución y dos evaluaciones por curso. Abrir health y ready antes de exponer. Escalonar los ingresos para evitar el límite de autenticación. Mantener a mano el [respaldo local](../cierre/respaldo-local.md).
 
 | Minuto | Diapositiva | Qué decir o hacer y qué debe verse |
 | --- | --- | --- |
 | 0–1 | 1 | Presentar la pregunta del MVP. ¿Puede un estudiante recibir su nota sin ver resultados ajenos ni borradores? |
 | 1–3 | 2–3 | Seguir el JWT hasta la transacción con RLS. Mostrar dónde se unen usuario, institución y sección. Seguir un quiz hasta la nota y su revisión. |
-| 3–5 | 4 | Explicar qué detectó cada capa. Contrastar la cobertura global manual con el gate sobre código nuevo en #329. Mencionar la exclusión de dependencias de desarrollo de Trivy. |
+| 3–5 | 4 | Explicar cómo se complementan integración con PostgreSQL real, pruebas frontend y E2E en tres navegadores. El reviewer informa y la persona revisora decide. Contrastar la cobertura global manual con el gate sobre código nuevo en #329. Mencionar la exclusión de dependencias de desarrollo de Trivy. |
 | 5–6 | 5 | Leer medianas del login. Explicar por qué se instrumentó el cambio de ruta dentro de la sesión y por qué recargar sesga la medición. |
 | 6–8 | 6 | Mostrar compromiso y recorte previsto. Explicar cómo se validó el archivo. Consultar esfuerzo por responsable en el anexo de gestión. |
 | 8–10 | 7 | Relacionar cada decisión con una observación. Distinguir interpretaciones respaldadas por datos y conclusiones aún pendientes de la reunión. |

@@ -64,4 +64,4 @@ Identidad, perfil y su auditoría son globales por usuario; no se les asigna un 
 | Límites | Dos servicios web; sin colas, caché distribuida, réplicas o HA configuradas. El throttling reside en memoria por instancia. |
 
 Fuentes operativas: [Neon](../../adr/neon-database.md), [guía Render](../../guides/render-deploy.md), [aceptación Resend](../../planning/perfiles/evidencia.md), [S3](../../planning/academic-files/s3.md).
-El 21/11 health confirmó v0.13.1/7d4b666 y ready respondió 200; pasó el ciclo académico remoto en UC/UTFSM. Falta confirmar proveedor DB, referencia de deploy frontend y ensayo/respaldo. El diagrama representa configuración, no disponibilidad continua.
+El 21/11 health confirmó v0.13.1/7d4b666 y ready respondió 200; pasó el ciclo académico remoto en UC/UTFSM. El [respaldo local](cierre/respaldo-local.md) y el [ensayo remoto](cierre/ensayo-remoto.md) registran los recorridos por navegador. Falta confirmar proveedor DB y referencia de deploy frontend. El diagrama representa configuración, no disponibilidad continua.
