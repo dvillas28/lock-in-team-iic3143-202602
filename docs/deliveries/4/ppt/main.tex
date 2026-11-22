@@ -113,27 +113,24 @@
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{CORE WEB VITALS}{Carga, respuesta y estabilidad en AcademiX}
-\panel{.65}{1.87}{5.45}{6.32}{paper}\panel{5.60}{1.87}{10.40}{6.32}{paper}\panel{10.55}{1.87}{15.35}{6.32}{paper}
-\txt{.97}{2.17}{\small\bfseries}{teal}{LCP \enspace · \enspace CARGA}
-\txt{.97}{2.66}{\small}{slate}{¿Cuándo aparece lo principal?}
-\txt{.97}{3.24}{\Huge\bfseries}{navy}{1,06 s}
-\txt{.97}{4.37}{\small\bfseries}{teal}{BUENO \enspace $\le$ 2,5 s}
-\blk{.97}{4.98}{4.20}{\footnotesize}{Login UC en celular. En el portal: 3,2 s, \textcolor{amber}{\textbf{mejorable}}: el título se pinta al hidratar.}
-\txt{5.92}{2.17}{\small\bfseries}{teal}{INP \enspace · \enspace RESPUESTA}
-\txt{5.92}{2.66}{\small}{slate}{¿Cuánto tarda en reaccionar?}
-\txt{5.92}{3.24}{\Huge\bfseries}{navy}{44 ms}
-\txt{5.92}{4.37}{\small\bfseries}{teal}{BUENO \enspace $\le$ 200 ms}
-\blk{5.92}{4.98}{4.20}{\footnotesize}{Teclear y clics reales en el login, en celular. En sesión de estudiante: 32 ms.}
-\txt{10.87}{2.17}{\small\bfseries}{teal}{CLS \enspace · \enspace ESTABILIDAD}
-\txt{10.87}{2.66}{\small}{slate}{¿Se mueve el contenido?}
-\txt{10.87}{3.24}{\Huge\bfseries}{navy}{0,022}
-\txt{10.87}{4.37}{\small\bfseries}{teal}{BUENO \enspace $\le$ 0,1}
-\blk{10.87}{4.98}{4.20}{\footnotesize}{Login UC en celular. El aviso inferior se acomoda cuando aparece el formulario.}
-\panel{.65}{6.52}{7.92}{8.48}{sea}\panel{8.07}{6.52}{15.35}{8.48}{sand}
-\txt{.97}{6.80}{\small\bfseries}{teal}{CÓMO MEDIMOS}
-\blk{.97}{7.28}{6.70}{\footnotesize}{Lighthouse 13.6 con celular simulado, mediana de 5. INP con interacciones reales: TBT no lo reemplaza. Laboratorio, no usuarios reales.}
-\txt{8.39}{6.80}{\small\bfseries}{amber}{REPORTE EN CADA PR}
-\blk{8.39}{7.28}{6.70}{\footnotesize}{GitHub Actions compara \texttt{dev} con el PR: Web Vitals, peso del JS, axe-core y Lighthouse.}
+\panel{.65}{1.87}{5.45}{5.92}{paper}\panel{5.60}{1.87}{10.40}{5.92}{paper}\panel{10.55}{1.87}{15.35}{5.92}{paper}
+\txt{.97}{2.22}{\small\bfseries}{teal}{LCP \enspace · \enspace CARGA}
+\txt{.97}{2.86}{\Huge\bfseries}{navy}{1,06 s}
+\txt{.97}{4.02}{\small\bfseries}{teal}{BUENO · $\le$ 2,5 s}
+\blk{.97}{4.70}{4.20}{\footnotesize}{Login UC en móvil. Página de inicio (\texttt{/}): 3,2 s, \textcolor{amber}{\textbf{mejorable}}.}
+\txt{5.92}{2.22}{\small\bfseries}{teal}{INP \enspace · \enspace RESPUESTA}
+\txt{5.92}{2.86}{\Huge\bfseries}{navy}{44 ms}
+\txt{5.92}{4.02}{\small\bfseries}{teal}{BUENO · $\le$ 200 ms}
+\blk{5.92}{4.70}{4.20}{\footnotesize}{Interacciones reales en el login móvil. En sesión de estudiante: 32 ms.}
+\txt{10.87}{2.22}{\small\bfseries}{teal}{CLS \enspace · \enspace ESTABILIDAD}
+\txt{10.87}{2.86}{\Huge\bfseries}{navy}{0,022}
+\txt{10.87}{4.02}{\small\bfseries}{teal}{BUENO · $\le$ 0,1}
+\blk{10.87}{4.70}{4.20}{\footnotesize}{Login UC en móvil. Leve desplazamiento del aviso inferior.}
+\panel{.65}{6.17}{7.92}{8.13}{sea}\panel{8.07}{6.17}{15.35}{8.13}{sand}
+\txt{.97}{6.47}{\small\bfseries}{teal}{CÓMO MEDIMOS}
+\blk{.97}{6.95}{6.70}{\footnotesize}{LCP y CLS: Lighthouse 13.6, emulación móvil, mediana de 5 cargas. INP: interacciones reales, mediana de 5 recorridos. Resultados de laboratorio.}
+\txt{8.39}{6.47}{\small\bfseries}{amber}{REPORTE AUTOMÁTICO POR PR}
+\blk{8.39}{6.95}{6.70}{\footnotesize}{GitHub Actions compara cada PR con \texttt{dev}: rendimiento, tamaño del JavaScript y accesibilidad, con Lighthouse, web-vitals, size-limit y axe-core.}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{PLAN FINAL}{Cumplimos el plan en la UC y la UTFSM}
