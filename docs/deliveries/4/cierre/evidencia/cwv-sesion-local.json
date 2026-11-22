@@ -1,0 +1,161 @@
+{
+ "measuredAt": "2026-11-22",
+ "scenario": "Local: build de producción del PR #333 (src igual a dev), backend Docker local, Chrome 158 sin throttling 1440x900; estudiante UC: login, Mis cursos, abrir módulos de un curso; web-vitals inyectado",
+ "runs": [
+  {
+   "run": 1,
+   "path": "/courses/:courseId/modules",
+   "vitals": {
+    "TTFB": {
+     "value": 39.5,
+     "rating": "good",
+     "element": null
+    },
+    "FCP": {
+     "value": 128,
+     "rating": "good",
+     "element": null
+    },
+    "LCP": {
+     "value": 128,
+     "rating": "good",
+     "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+    },
+    "CLS": {
+     "value": 0.0020564075360082305,
+     "rating": "good",
+     "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+    },
+    "INP": {
+     "value": 40,
+     "rating": "good",
+     "element": "#email"
+    }
+   }
+  },
+  {
+   "run": 2,
+   "path": "/courses/:courseId/modules",
+   "vitals": {
+    "TTFB": {
+     "value": 7.5,
+     "rating": "good",
+     "element": null
+    },
+    "FCP": {
+     "value": 68,
+     "rating": "good",
+     "element": null
+    },
+    "LCP": {
+     "value": 68,
+     "rating": "good",
+     "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+    },
+    "CLS": {
+     "value": 0.0020564075360082305,
+     "rating": "good",
+     "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+    },
+    "INP": {
+     "value": 48,
+     "rating": "good",
+     "element": "#email"
+    }
+   }
+  },
+  {
+   "run": 3,
+   "path": "/courses/:courseId/modules",
+   "vitals": {
+    "TTFB": {
+     "value": 4.600000023841858,
+     "rating": "good",
+     "element": null
+    },
+    "FCP": {
+     "value": 68,
+     "rating": "good",
+     "element": null
+    },
+    "LCP": {
+     "value": 68,
+     "rating": "good",
+     "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+    },
+    "CLS": {
+     "value": 0.0020564075360082305,
+     "rating": "good",
+     "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+    },
+    "INP": {
+     "value": 24,
+     "rating": "good",
+     "element": "#email"
+    }
+   }
+  },
+  {
+   "run": 4,
+   "path": "/courses/:courseId/modules",
+   "vitals": {
+    "TTFB": {
+     "value": 4.5999999940395355,
+     "rating": "good",
+     "element": null
+    },
+    "FCP": {
+     "value": 68,
+     "rating": "good",
+     "element": null
+    },
+    "LCP": {
+     "value": 68,
+     "rating": "good",
+     "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+    },
+    "CLS": {
+     "value": 0.0020564075360082305,
+     "rating": "good",
+     "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+    },
+    "INP": {
+     "value": 32,
+     "rating": "good",
+     "element": "#email"
+    }
+   }
+  },
+  {
+   "run": 5,
+   "path": "/courses/:courseId/modules",
+   "vitals": {
+    "TTFB": {
+     "value": 4.699999988079071,
+     "rating": "good",
+     "element": null
+    },
+    "FCP": {
+     "value": 56,
+     "rating": "good",
+     "element": null
+    },
+    "LCP": {
+     "value": 56,
+     "rating": "good",
+     "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+    },
+    "CLS": {
+     "value": 0.0020564075360082305,
+     "rating": "good",
+     "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+    },
+    "INP": {
+     "value": 24,
+     "rating": "good",
+     "element": "#email"
+    }
+   }
+  }
+ ]
+}

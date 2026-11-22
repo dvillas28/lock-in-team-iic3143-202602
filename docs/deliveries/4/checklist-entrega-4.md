@@ -6,10 +6,10 @@ El [índice de evidencias](cierre/README.md) reúne PDF, anexos, pruebas y limit
 
 ## Exigencias de la entrega
 
-- [x] **E4-01 · Arquitectura y datos.** [PDF](ppt/main.pdf), láminas 2–3 y modelo completo en el anexo 16; procesos revisados en el [anexo](cierre/feedback.md) y láminas 13–15.
-- [x] **E4-02 · Calidad.** [PDF](ppt/main.pdf), láminas 4–5 y anexos 10–11, con reportes de ambos gates.
-- [x] **E4-03 · Plan.** La lámina 6 resume compromiso, resultado, ampliaciones y exclusiones; no queda pendiente del compromiso funcional. El [balance del Project](cierre/gestion.md) contrasta alcance y esfuerzo de las semanas 6–7 e identifica las horas sin registro.
-- [ ] **E4-04 · Retrospectiva:** aciertos, errores, qué no repetirían y aprendizajes de ingeniería con efectos concretos, en las láminas 7–8. Los [temas y preguntas para la reunión](cierre/retrospectiva.md) quedan sujetos a las conclusiones del equipo (pp. 77, 79).
+- [x] **E4-01 · Arquitectura y datos.** [PDF](ppt/main.pdf), láminas 2–3 y modelo completo en el anexo 17; procesos revisados en el [anexo](cierre/feedback.md) y láminas 14–16.
+- [x] **E4-02 · Calidad.** [PDF](ppt/main.pdf), láminas 4–6 y anexos 11–12, con reportes de ambos gates y Core Web Vitals.
+- [x] **E4-03 · Plan.** La lámina 7 resume compromiso, resultado, ampliaciones y exclusiones; no queda pendiente del compromiso funcional. El [balance del Project](cierre/gestion.md) contrasta alcance y esfuerzo de las semanas 6–7 e identifica las horas sin registro.
+- [ ] **E4-04 · Retrospectiva:** aciertos, errores, qué no repetirían y aprendizajes de ingeniería con efectos concretos, en las láminas 8–9. Los [temas y preguntas para la reunión](cierre/retrospectiva.md) quedan sujetos a las conclusiones del equipo (pp. 77, 79).
 - [ ] **E4-05 · Demo en vivo:** demostrar **todos** los casos de uso comprometidos, con acceso al repositorio para revisión (pp. 77, 80).
 - [x] **E4-06 · Material corregido.** La [matriz E1–E3](cierre/feedback.md) vincula cada observación con las correcciones, las fuentes del semestre y las láminas correspondientes. El envío al curso se controla en E4-07.
 - [ ] **E4-07 · Presentación:** PPT o PDF final, exposición de **aprox. 30 minutos** y envío el mismo día, como máximo al presentar (pp. 80, 83).

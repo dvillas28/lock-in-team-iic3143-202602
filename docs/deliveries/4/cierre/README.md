@@ -10,7 +10,7 @@ Fuentes: [enunciado actualizado](../enunciado_e4.pdf) y [feedback E3/Tom](../mee
 | --- | --- | --- |
 | [Alcance y matriz](alcance-final.md) | Compromiso → resultado → evidencia → paso de demo; ampliaciones y exclusiones. | #213, #216 |
 | [Operación y riesgos](operacion-demo.md) | Resultados remotos, cuentas por rol sin claves, datos sintéticos y guion del ensayo. | #206, #209 |
-| [Rendimiento](rendimiento.md) | Lighthouse público/privado, métricas, capturas para PPT y límites. | #212 |
+| [Rendimiento](rendimiento.md) | Lighthouse público/privado, Core Web Vitals, reporte por PR, capturas para PPT y límites. | #212 |
 | [Contenido de calidad](calidad-para-ppt.md) | Texto/tablas para 2 slides: Sonar, Trivy, pruebas y rendimiento. | #212, #208 |
 | [PDF y guion](../ppt/README.md) | Presentación, fuentes, instrucciones de compilación y demo en 30 minutos. | #204, #208 |
 | [Correcciones E1–E3](feedback.md) | Feedback y procesos actualizados. | #205 |
@@ -26,6 +26,7 @@ Fuentes: [enunciado actualizado](../enunciado_e4.pdf) y [feedback E3/Tom](../mee
 | CU-01–16 · 6, 8, 11 | Producción UC/UTFSM, 21/11, backend 7d4b666, cuentas demo por rol | [Crear, responder y publicar por API](evidencia/remote-cycle.json); [ver módulos y notas en navegador](evidencia/browser-readback.json). Distinción por caso en la matriz. |
 | Operación · 2 y 8 | Mismo corte, cliente externo | [Consultar endpoints](evidencia/endpoints.json) y [repetir con CORS](evidencia/warm-cors.json); 200 en health/ready. Muestras puntuales. |
 | Frontend · 5 | Producción 21/11, visitante y estudiante UC, deploy frontend 7d4b666 | [Navegaciones públicas](evidencia/lighthouse-summary.json) y [flujo privado](evidencia/authenticated-flow-summary.json); metodología y límites de las mediciones de laboratorio en [rendimiento](rendimiento.md). |
+| Core Web Vitals · 6 | CI del PR #333 y sesión local, 22/11; visitante y estudiante UC | [Comparación dev/PR](https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/333#issuecomment-7082528370), [mediciones CI](evidencia/cwv-ci-pr.json) y [sesión](evidencia/cwv-sesion-local.json). Laboratorio; método en [rendimiento](rendimiento.md#core-web-vitals-y-reporte-por-pr). |
 | Sonar y Trivy · 4, 9–10 | Análisis manual/Actions del 15 y 13/11 respectivamente; perfil y SHA por informe | [SonarQube](../sonarqube/README.md) y [Trivy](../trivy/README.md) comparan árboles identificados, con JSON y capturas. |
 | SonarCloud · 4 | PR #329, análisis de PR, código nuevo | [Gate fallido](evidencia/sonarcloud-pr329-gate.json) y [99 avisos abiertos](evidencia/sonarcloud-pr329-issues.json). No se atribuyen las diferencias a una regla particular sin comparar perfiles. |
 | Pruebas · 4 | CI main 7d4b666, 16/11 | [Run extended](https://github.com/dvillas28/lock-in-team-iic3143-202602/actions/runs/43852844221), 527 instancias en tres navegadores. |

@@ -45,13 +45,34 @@ conservando la sesión real del estudiante UC. No se simula autenticación ni se
 - No comparar el score performance del timespan con el de navegación pública: sus métricas y pesos difieren.
 - Los snapshots no miden rendimiento de carga. El generador muestra score performance 0 sin métricas; no se interpreta como fallo ni como medición comparable.
 
+## Core Web Vitals y reporte por PR
+
+Medición **22/11/2026** del [PR #333](https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/333).
+Su workflow construye `dev` y el PR con la misma configuración, los mide en el mismo
+runner y [comenta la comparación](https://github.com/dvillas28/lock-in-team-iic3143-202602/pull/333#issuecomment-7082528370).
+Lighthouse 13.6.0, Chrome 157, perfil móvil simulado y mediana de 5 corridas.
+Datos: [dev](evidencia/cwv-ci-dev.json) y [PR](evidencia/cwv-ci-pr.json). La interfaz no cambia.
+
+| Métrica | Qué mide | Resultado (PR) | Escenario |
+| --- | --- | --- | --- |
+| LCP | Cuándo aparece el contenido principal | 1,06 s, bueno | Login UC móvil |
+| LCP | Ídem | 3,19 s, mejorable | Portal público: el título se pinta tras hidratar |
+| INP | Respuesta a teclado y clics reales | 44 ms, bueno | Login UC móvil, timespan de Lighthouse |
+| INP | Ídem, con `web-vitals` | 32 ms, bueno | Sesión de estudiante local, login → curso ([5 muestras](evidencia/cwv-sesion-local.json)) |
+| CLS | Desplazamientos inesperados | 0,022, bueno | Login UC móvil: el aviso inferior se acomoda |
+
+- TBT (107 ms en el login) se informa aparte como métrica de laboratorio; no reemplaza a INP.
+- Todo es laboratorio: un guion, no usuarios. AcademiX no recolecta métricas de campo.
+- La sesión local usa backend Docker y localhost; no mide red ni cold start de producción.
+- El reporte también compara JS del cliente (754 kB gzip), axe-core (0 violaciones) y puntajes.
+
 ## Disponibilidad y límites
 
 El primer acceso API tardó ~27 s; la lectura posterior dio health 171 ms y ready
 199 ms. [Datos completos](evidencia/endpoints.json), [warm](evidencia/warm-cors.json).
 Lighthouse del login no mide el coste de despertar la API ni la corrección de notas.
-No hay prueba de carga, disponibilidad continua, métricas de campo ni comparación
-histórica de frontend: no se inventa un «antes» de Lighthouse.
+No hay prueba de carga, disponibilidad continua ni métricas de campo. Desde el PR #333
+cada PR compara su frontend con `dev`; antes no hay histórico ni se inventa un «antes».
 
 ## Reproducción mínima
 

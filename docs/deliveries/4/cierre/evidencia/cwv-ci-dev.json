@@ -1,0 +1,312 @@
+{
+ "measuredAt": "2026-11-22T16:58:08.086Z",
+ "runs": 5,
+ "routes": [
+  {
+   "id": "portal",
+   "label": "Portal público",
+   "url": "http://localhost:3000/"
+  },
+  {
+   "id": "login",
+   "label": "Login UC",
+   "url": "http://uc.localhost:3000/login"
+  }
+ ],
+ "lighthouse": {
+  "portal": [
+   {
+    "audits": {
+     "largest-contentful-paint": 3446.238,
+     "cumulative-layout-shift": 0,
+     "total-blocking-time": 590,
+     "first-contentful-paint": 1065.119,
+     "speed-index": 1209.2137148553525,
+     "server-response-time": 9
+    },
+    "scores": {
+     "performance": 76,
+     "accessibility": 100,
+     "best-practices": 96,
+     "seo": 100
+    }
+   },
+   {
+    "audits": {
+     "largest-contentful-paint": 3034.2160000000003,
+     "cumulative-layout-shift": 0.0042278957876761124,
+     "total-blocking-time": 108,
+     "first-contentful-paint": 1063.108,
+     "speed-index": 1063.108,
+     "server-response-time": 5
+    },
+    "scores": {
+     "performance": 94,
+     "accessibility": 100,
+     "best-practices": 96,
+     "seo": 100
+    }
+   },
+   {
+    "audits": {
+     "largest-contentful-paint": 3191.4344,
+     "cumulative-layout-shift": 0.005447291665505027,
+     "total-blocking-time": 107,
+     "first-contentful-paint": 1067.2172,
+     "speed-index": 1067.2172,
+     "server-response-time": 3
+    },
+    "scores": {
+     "performance": 93,
+     "accessibility": 100,
+     "best-practices": 96,
+     "seo": 100
+    }
+   },
+   {
+    "audits": {
+     "largest-contentful-paint": 3190.9983999999995,
+     "cumulative-layout-shift": 0.005447291665505027,
+     "total-blocking-time": 111,
+     "first-contentful-paint": 1064.9992,
+     "speed-index": 1064.9992,
+     "server-response-time": 3
+    },
+    "scores": {
+     "performance": 92,
+     "accessibility": 100,
+     "best-practices": 96,
+     "seo": 100
+    }
+   },
+   {
+    "audits": {
+     "largest-contentful-paint": 3176.992,
+     "cumulative-layout-shift": 0.0042278957876761124,
+     "total-blocking-time": 97,
+     "first-contentful-paint": 1064.996,
+     "speed-index": 1064.996,
+     "server-response-time": 3
+    },
+    "scores": {
+     "performance": 93,
+     "accessibility": 100,
+     "best-practices": 96,
+     "seo": 100
+    }
+   }
+  ],
+  "login": [
+   {
+    "audits": {
+     "largest-contentful-paint": 1064.0478,
+     "cumulative-layout-shift": 0.02187597609095246,
+     "total-blocking-time": 107.5,
+     "first-contentful-paint": 1064.0478,
+     "speed-index": 1064.0478,
+     "server-response-time": 3
+    },
+    "scores": {
+     "performance": 99,
+     "accessibility": 100,
+     "best-practices": 96,
+     "seo": 100
+    }
+   },
+   {
+    "audits": {
+     "largest-contentful-paint": 1061.2992,
+     "cumulative-layout-shift": 0.02187597609095246,
+     "total-blocking-time": 107,
+     "first-contentful-paint": 1061.2992,
+     "speed-index": 1061.2992,
+     "server-response-time": 3
+    },
+    "scores": {
+     "performance": 99,
+     "accessibility": 100,
+     "best-practices": 96,
+     "seo": 100
+    }
+   },
+   {
+    "audits": {
+     "largest-contentful-paint": 1064.311,
+     "cumulative-layout-shift": 0.02187597609095246,
+     "total-blocking-time": 96,
+     "first-contentful-paint": 1064.311,
+     "speed-index": 1064.311,
+     "server-response-time": 2
+    },
+    "scores": {
+     "performance": 99,
+     "accessibility": 100,
+     "best-practices": 96,
+     "seo": 100
+    }
+   },
+   {
+    "audits": {
+     "largest-contentful-paint": 1061.042,
+     "cumulative-layout-shift": 0.02187597609095246,
+     "total-blocking-time": 103,
+     "first-contentful-paint": 1061.042,
+     "speed-index": 1061.042,
+     "server-response-time": 2
+    },
+    "scores": {
+     "performance": 99,
+     "accessibility": 100,
+     "best-practices": 96,
+     "seo": 100
+    }
+   },
+   {
+    "audits": {
+     "largest-contentful-paint": 1065.1552,
+     "cumulative-layout-shift": 0.02187597609095246,
+     "total-blocking-time": 109,
+     "first-contentful-paint": 1065.1552,
+     "speed-index": 1065.1552,
+     "server-response-time": 3
+    },
+    "scores": {
+     "performance": 99,
+     "accessibility": 100,
+     "best-practices": 96,
+     "seo": 100
+    }
+   }
+  ]
+ },
+ "interaction": [
+  {
+   "inp": 64.231,
+   "tbt": 0.8049999999999997,
+   "cls": 0
+  },
+  {
+   "inp": 42.112,
+   "tbt": 0,
+   "cls": 0
+  },
+  {
+   "inp": 43.052,
+   "tbt": 0,
+   "cls": 0
+  },
+  {
+   "inp": 37.708,
+   "tbt": 0,
+   "cls": 0
+  },
+  {
+   "inp": 41.423,
+   "tbt": 0,
+   "cls": 0
+  }
+ ],
+ "webVitals": [
+  {
+   "LCP": {
+    "value": 92,
+    "rating": "good",
+    "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+   },
+   "CLS": {
+    "value": 0.009994140625,
+    "rating": "good",
+    "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+   },
+   "INP": {
+    "value": 8,
+    "rating": "good",
+    "element": "#email"
+   }
+  },
+  {
+   "LCP": {
+    "value": 104,
+    "rating": "good",
+    "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+   },
+   "CLS": {
+    "value": 0.009994140625,
+    "rating": "good",
+    "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+   },
+   "INP": {
+    "value": 24,
+    "rating": "good",
+    "element": "#email"
+   }
+  },
+  {
+   "LCP": {
+    "value": 76,
+    "rating": "good",
+    "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+   },
+   "CLS": {
+    "value": 0.009994140625,
+    "rating": "good",
+    "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+   },
+   "INP": {
+    "value": 24,
+    "rating": "good",
+    "element": "#email"
+   }
+  },
+  {
+   "LCP": {
+    "value": 92,
+    "rating": "good",
+    "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+   },
+   "CLS": {
+    "value": 0.009994140625,
+    "rating": "good",
+    "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+   },
+   "INP": {
+    "value": 16,
+    "rating": "good",
+    "element": "#email"
+   }
+  },
+  {
+   "LCP": {
+    "value": 96,
+    "rating": "good",
+    "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+   },
+   "CLS": {
+    "value": 0.009994140625,
+    "rating": "good",
+    "element": "html>body>main.auth-content.content>section.auth-panel.card.panel.stack>p.hint"
+   },
+   "INP": {
+    "value": 16,
+    "rating": "good",
+    "element": "#email"
+   }
+  }
+ ],
+ "axe": {
+  "portal": {
+   "passes": 39,
+   "violations": []
+  },
+  "login": {
+   "passes": 33,
+   "violations": []
+  }
+ },
+ "javascript": {
+  "gzipBytes": 754996,
+  "files": 86
+ },
+ "chrome": "Chrome/157.0.8103.78",
+ "lighthouseVersion": "13.6.0"
+}
