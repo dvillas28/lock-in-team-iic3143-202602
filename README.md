@@ -1,20 +1,20 @@
 # Métricas del tablero
 
-Snapshots: 42 (2026-10-11 a 2026-11-21).
+Snapshots: 43 (2026-10-11 a 2026-11-22).
 
 ## Avance
 
 |  | Alcance | Terminado | % |
 | --- | --- | --- | --- |
-| Tarjetas | 157 | 140 | 89 |
-| Horas estimadas | 529.0 | 482.0 | 91 |
+| Tarjetas | 157 | 155 | 99 |
+| Horas estimadas | 529.0 | 522.0 | 99 |
 
 ## Tiempos (días)
 
 | Métrica | n | Mediana | Promedio | Máximo |
 | --- | --- | --- | --- | --- |
-| Lead time (creada → Done) | 114 | 1.1 | 4.1 | 23.0 |
-| Cycle time (In progress → Done) | 28 | 3.9 | 3.0 | 5.9 |
+| Lead time (creada → Done) | 129 | 1.9 | 6.0 | 23.0 |
+| Cycle time (In progress → Done) | 29 | 3.9 | 3.4 | 12.8 |
 
 El cycle time solo cuenta tarjetas que algún snapshot vio en In progress. Los drafts que ya estaban en Done en su primer snapshot no tienen fecha de término y quedan fuera.
 
@@ -29,36 +29,36 @@ Tarjetas conciliadas o registradas después de hechas (26): cuentan en el avance
 | Semana 2 E3 | 14 | 11 | 43.0 | 26.0 | 0.70 |
 | Semana 3 E3 | 31 | 30 | 132.0 | 45.6 | 0.35 |
 | Semana 4 E3 | 14 | 13 | 46.0 | 22.0 | 0.67 |
-| Semana 5 E4 | 26 | 24 | 116.5 | 23.6 | 0.56 |
-| Semana 6 E4 | 42 | 37 | 128.5 | 53.2 | 1.07 |
-| Semana 7 E4 | 17 | 3 | 56.0 | 0.2 | 0.05 |
+| Semana 5 E4 | 26 | 26 | 116.5 | 23.6 | 0.56 |
+| Semana 6 E4 | 42 | 42 | 128.5 | 53.2 | 1.07 |
+| Semana 7 E4 | 17 | 11 | 56.0 | 0.2 | 0.05 |
 
 Real / estimado usa solo tarjetas terminadas con ambos campos; sobre 1 significa que se subestimó.
 
-Tarjetas en Done sin Real (h): 38.
+Tarjetas en Done sin Real (h): 53.
 
 ## Por tipo
 
 | Tipo | Tarjetas | Terminadas | Estimado (h) |
 | --- | --- | --- | --- |
 | feat | 65 | 63 | 324.0 |
-| docs | 33 | 24 | 92.0 |
-| ci | 22 | 18 | 48.5 |
-| chore | 19 | 12 | 37.0 |
+| docs | 33 | 31 | 92.0 |
+| ci | 22 | 20 | 48.5 |
+| chore | 19 | 15 | 37.0 |
 | (vacío) | 10 | 10 | 0.0 |
-| fix | 7 | 6 | 19.5 |
-| test | 6 | 3 | 27.0 |
+| fix | 7 | 7 | 19.5 |
+| test | 6 | 5 | 27.0 |
 | build | 4 | 4 | 11.0 |
 
 ## Por área
 
 | Área | Tarjetas | Terminadas | Estimado (h) |
 | --- | --- | --- | --- |
-| BE | 38 | 34 | 202.0 |
-| FE | 37 | 35 | 167.0 |
-| DOC | 23 | 14 | 57.0 |
-| CI | 21 | 16 | 44.5 |
-| PREP | 18 | 14 | 52.0 |
+| BE | 38 | 36 | 202.0 |
+| FE | 37 | 36 | 167.0 |
+| DOC | 23 | 20 | 57.0 |
+| CI | 21 | 19 | 44.5 |
+| PREP | 18 | 17 | 52.0 |
 | INF | 13 | 11 | 21.5 |
 | (vacío) | 10 | 10 | 0.0 |
 | INST | 6 | 6 | 15.0 |
