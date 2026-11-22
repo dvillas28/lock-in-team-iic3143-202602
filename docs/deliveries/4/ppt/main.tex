@@ -86,48 +86,61 @@
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{PRÁCTICAS Y ESTADO DEL CÓDIGO}{Qué mejoramos en E4: auditar, corregir y separar}
-\panel{.65}{1.85}{5.24}{6.40}{sea}\panel{5.52}{1.85}{10.20}{6.40}{sky}\panel{10.48}{1.85}{15.35}{6.40}{paper}
-\txt{.93}{2.10}{\small\bfseries}{teal}{SonarQube · auditoría 15/11}\txt{.93}{2.62}{\Huge\bfseries}{navy}{25 $\to$ 0}
-\txt{.94}{3.55}{\footnotesize}{slate}{code smells · cobertura 91,7\%}
-\blk{.94}{4.10}{4.05}{\footnotesize}{\bpt\texttt{ScrollRegion}: 13 regiones con scroll, accesibles por teclado\\[2pt]\bpt Regex lineales y foco explícito\\[2pt]\bpt Réplica local del workflow}
-\txt{5.80}{2.10}{\small\bfseries}{blue}{Trivy · auditoría 13/11}\txt{5.80}{2.62}{\Huge\bfseries}{navy}{10 $\to$ 0}
-\txt{5.81}{3.55}{\footnotesize}{slate}{repo + imágenes · sin HIGH}
-\blk{5.81}{4.10}{4.10}{\footnotesize}{\bpt Overrides de \texttt{qs} y \texttt{glob}: 3 CVE de DoS\\[2pt]\bpt \texttt{apk upgrade} de \texttt{zlib} en la imagen base\\[2pt]\bpt \texttt{HEALTHCHECK} en ambos Dockerfile}
-\txt{10.76}{2.10}{\small\bfseries}{navy}{CI · \#222 y \#257}\txt{10.76}{2.78}{\Large\bfseries}{navy}{Gates separados}
-\txt{10.77}{3.55}{\footnotesize}{slate}{visibles, no bloqueantes}
-\blk{10.77}{4.10}{4.30}{\footnotesize}{\bpt Trivy en un job propio por app\\[2pt]\bpt Sonar y Trivy fuera de \texttt{CI result}\\[2pt]\bpt Workflows manuales para auditar antes de la demo}
-\panel{.65}{6.62}{15.35}{7.30}{rose}
-\txt{.93}{6.85}{\footnotesize\bfseries}{red}{LÍMITE CONOCIDO}\txt{3.95}{6.85}{\footnotesize}{navy}{SonarCloud en \#329: mantenibilidad D en código nuevo (99 code smells del frontend)}
-\txt{.75}{7.65}{\normalsize\bfseries}{navy}{Integración con PostgreSQL \quad + \quad pruebas frontend \quad + \quad 527 instancias E2E}
+\panel{.65}{1.85}{5.24}{8.10}{sea}\panel{5.52}{1.85}{10.20}{8.10}{sky}\panel{10.48}{1.85}{15.35}{8.10}{paper}
+\txt{.93}{2.28}{\small\bfseries}{teal}{SonarQube}\txt{.93}{2.98}{\Huge\bfseries}{navy}{25 $\to$ 0}
+\txt{.94}{4.04}{\footnotesize}{slate}{code smells · cobertura 91,7\%}
+\blk{.94}{4.85}{4.05}{\footnotesize}{\bpt\texttt{ScrollRegion}: 13 regiones con scroll, accesibles por teclado\\[7pt]\bpt Regex lineales y foco explícito\\[7pt]\bpt Réplica local del workflow}
+\txt{5.80}{2.28}{\small\bfseries}{blue}{Trivy}\txt{5.80}{2.98}{\Huge\bfseries}{navy}{10 $\to$ 0}
+\txt{5.81}{4.04}{\footnotesize}{slate}{Repositorio e imágenes\\Sin hallazgos de severidad alta}
+\blk{5.81}{4.85}{4.10}{\footnotesize}{\bpt Overrides de \texttt{qs} y \texttt{glob}: 3 CVE de DoS\\[7pt]\bpt \texttt{apk upgrade} de \texttt{zlib} en la imagen base\\[7pt]\bpt \texttt{HEALTHCHECK} en ambos Dockerfile}
+\txt{10.76}{2.28}{\small\bfseries}{navy}{Integración continua}\txt{10.76}{3.14}{\Large\bfseries}{navy}{Gates separados}
+\txt{10.77}{4.04}{\footnotesize}{slate}{visibles, no bloqueantes}
+\blk{10.77}{4.85}{4.30}{\footnotesize}{\bpt Trivy en un job propio por app\\[7pt]\bpt Sonar y Trivy fuera de \texttt{CI result}\\[7pt]\bpt Workflows manuales para auditar antes de la demo}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{RENDIMIENTO FRONTEND}{Login público y navegación dentro de la sesión}
 \panel{.65}{1.87}{9.30}{7.72}{paper}\panel{9.58}{1.87}{15.35}{7.72}{sea}
-\txt{.97}{2.19}{\small\bfseries}{navy}{UC · LOGIN MÓVIL}\shot{.99}{2.92}{7.95}{lh.png}
-\txt{.99}{5.13}{\LARGE\bfseries}{navy}{1,05 s}\txt{4.05}{5.13}{\LARGE\bfseries}{navy}{47 ms}\txt{7.32}{5.13}{\LARGE\bfseries}{navy}{0}
-\txt{1.05}{5.98}{\small}{slate}{LCP}\txt{4.00}{5.98}{\small}{slate}{TBT}\txt{7.35}{5.98}{\small}{slate}{CLS}
-\txt{1.00}{6.87}{\small}{slate}{Medianas de 3 muestras · favicon 404}
+\txt{.97}{2.19}{\small\bfseries}{navy}{UC · LOGIN MÓVIL}\txt{4.23}{2.19}{\small}{slate}{Mediana de 3 mediciones}
+\shot{.99}{2.92}{7.95}{lh.png}
+\txt{.99}{5.02}{\Huge\bfseries}{navy}{1,05 s}
+\txt{.99}{6.09}{\normalsize}{navy}{hasta que apareció el contenido principal (LCP)}
+\txt{.99}{7.00}{\small}{slate}{Bloqueo total: 47 ms \quad Cambio de diseño (CLS): 0}
 \txt{9.93}{2.19}{\small\bfseries}{teal}{UC · CURSOS $\to$ MÓDULOS}
-\txt{9.92}{3.09}{\Huge\bfseries}{navy}{1,63 s}\txt{9.96}{4.39}{\normalsize}{navy}{hasta red inactiva}
-\txt{9.96}{5.47}{\small}{slate}{TBT 0 ms \enspace · \enspace CLS 0} \txt{9.96}{6.26}{\small}{slate}{Interacción observada\\$\approx$101 ms}
+\txt{9.93}{2.86}{\small}{slate}{Sesión de estudiante en escritorio}
+\txt{9.92}{3.68}{\Huge\bfseries}{navy}{1,63 s}
+\txt{9.93}{4.96}{\normalsize}{navy}{desde el clic hasta que la red\\quedó inactiva}
+\txt{9.93}{6.53}{\small}{slate}{Bloqueo total: 0 ms\\Cambio de diseño (CLS): 0}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
-\head{PLAN FINAL}{El ciclo académico llegó a los dos tenants}
-\panel{.65}{1.88}{8.05}{7.78}{sky}\panel{8.31}{1.88}{15.35}{7.78}{paper}
-\txt{1.02}{2.24}{\small\bfseries}{blue}{COMPROMISO E3 · SEMANAS 5--7}
-\txt{1.02}{3.05}{\Huge\bfseries}{navy}{77 h}\txt{3.85}{3.52}{\large}{navy}{estimadas · 26 tarjetas}
-\txt{1.02}{4.63}{\small\bfseries}{navy}{Presupuesto semanal}
-\fill[blue] (1.02,5.35) rectangle (2.18,5.83);
-\fill[teal] (2.23,5.35) rectangle (3.47,5.83);
-\fill[navy] (3.52,5.35) rectangle (7.50,5.83);
-\txt{1.02}{6.06}{\small}{navy}{S5 · 14 h}\txt{2.87}{6.06}{\small}{navy}{S6 · 15 h}\txt{5.42}{6.06}{\small}{navy}{S7 · 48 h}
-\txt{1.02}{7.00}{\scriptsize}{slate}{Las 2 h de ensayo de E3 pertenecían a la semana 4.}
-\txt{8.70}{2.14}{\scriptsize\bfseries}{teal}{ENTREGADO \enspace · \enspace CU-01 A CU-16 EN UC Y UTFSM}\txt{8.70}{2.50}{\large\bfseries}{navy}{Curso $\to$ evaluación $\to$ nota}
-\txt{8.70}{3.30}{\scriptsize\bfseries}{teal}{DECISIÓN}\txt{8.70}{3.62}{\large\bfseries}{navy}{Incluir archivos (P2)}
-\txt{8.70}{4.42}{\scriptsize\bfseries}{blue}{MÁS ALLÁ DEL COMPROMISO}
-\blk{8.70}{4.74}{6.40}{\footnotesize}{Calendario de plazos \enspace·\enspace skeletons de carga\\Auditoría en línea de tiempo\\Tareas y entregas \enspace·\enspace grupos de notas\\Perfiles y altas por CSV}
-\txt{8.70}{6.30}{\scriptsize\bfseries}{amber}{PENDIENTE DEL COMPROMISO}\txt{8.70}{6.62}{\large\bfseries}{navy}{Ninguno}
-\txt{10.45}{6.70}{\scriptsize}{slate}{Fuera por decisión: IA/chat,\\quizzes en vivo, calendarios externos}
+\head{PLAN FINAL}{Cumplimos el plan en la UC y la UTFSM}
+\panel{.65}{1.82}{7.13}{7.34}{paper}
+\panel{7.36}{1.82}{15.35}{3.49}{navy}
+\panel{7.36}{3.68}{15.35}{7.34}{sea}
+\panel{.65}{7.59}{15.35}{8.48}{sand}
+\txt{.98}{2.18}{\small\bfseries}{slate}{PLAN DE TRABAJO · SEMANAS 5--7}
+\txt{.98}{2.70}{\LARGE\bfseries}{navy}{77 h}\txt{3.00}{2.94}{\small}{navy}{estimadas en 26 tareas}
+\txt{.98}{3.67}{\small\bfseries}{navy}{Horas previstas por semana}
+\fill[blue] (.98,4.22) rectangle (2.09,4.51);
+\fill[teal] (2.14,4.22) rectangle (3.33,4.51);
+\fill[navy] (3.38,4.22) rectangle (6.87,4.51);
+\txt{.98}{4.72}{\small}{navy}{S5 · 14 h}\txt{2.77}{4.72}{\small}{navy}{S6 · 15 h}\txt{5.36}{4.72}{\small}{navy}{S7 · 48 h}
+\txt{.98}{5.55}{\small\bfseries}{teal}{Decisión sobre archivos}
+\blk{.98}{6.01}{5.85}{\small}{Mantuvimos la carga y descarga de archivos en los módulos.}
+\txt{.98}{7.88}{\small\bfseries}{amber}{Fuera del plan}
+\txt{3.52}{7.88}{\small}{slate}{Chat con IA, evaluaciones en vivo e integración con calendarios externos.}
+\txt{7.71}{2.02}{\large\bfseries}{white}{Compromiso cumplido}
+\txt{7.71}{2.66}{\small}{white}{Acceder al curso, consultar material, rendir quizzes\\y publicar o consultar notas.}
+\txt{7.71}{3.95}{\normalsize\bfseries}{teal}{Funciones adicionales}
+\txt{7.71}{4.59}{\small}{navy}{\bpt Calendario de plazos}
+\txt{11.68}{4.59}{\small}{navy}{\bpt Notas ponderadas}
+\txt{7.71}{5.13}{\small}{navy}{\bpt Quizzes en módulos}
+\txt{11.68}{5.13}{\small}{navy}{\bpt Notas revisadas}
+\txt{7.71}{5.67}{\small}{navy}{\bpt Entregas con archivos}
+\txt{11.68}{5.67}{\small}{navy}{\bpt Edición de perfiles}
+\txt{7.71}{6.21}{\small}{navy}{\bpt Calificación de tareas}
+\txt{11.68}{6.21}{\small}{navy}{\bpt Altas por CSV}
+\txt{7.71}{6.75}{\small}{navy}{\bpt Historial de auditoría}
+\txt{11.68}{6.75}{\small}{navy}{\bpt Indicadores de carga}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{ANÁLISIS DEL PROCESO · 1/2}{Decisiones que funcionaron}
@@ -149,7 +162,7 @@
 \txt{.99}{2.18}{\scriptsize\bfseries}{red}{NO REPETIR}
 \blk{.99}{2.48}{4.30}{\small\bfseries}{Un solo proveedor, sin respaldo de datos}
 \blk{5.55}{2.22}{4.75}{\footnotesize}{Railway cayó con la base (22/10); después venció la de Render. Dos migraciones en dos semanas.}
-\blk{10.55}{2.22}{4.55}{\footnotesize}{Respaldo y migración ensayada desde el inicio, como la rama de Neon de \#282.}
+\blk{10.55}{2.22}{4.55}{\footnotesize}{Respaldo y migración ensayada desde el inicio, como en el ensayo con una rama de Neon.}
 \txt{.99}{3.73}{\scriptsize\bfseries}{red}{NO REPETIR}
 \blk{.99}{4.03}{4.30}{\small\bfseries}{Bloqueo de CI acoplado a la UI y al modelo}
 \blk{5.55}{3.77}{4.75}{\footnotesize}{Cambios de UI y del modelo rompieron E2E: cinco reparaciones entre el 10 y el 15/11.}
@@ -176,14 +189,14 @@
 \appendix
 \begin{frame}[plain]\begin{sheet}
 \head{ANEXO · SONARQUBE COMMUNITY}{Avisos del análisis manual, antes y después}
-\txt{.84}{2.05}{\large\bfseries}{navy}{Antes}\txt{3.00}{2.16}{\small}{slate}{6758fa9}
-\txt{8.32}{2.05}{\large\bfseries}{teal}{Después}\txt{11.15}{2.16}{\small}{slate}{a7a8cf5}
+\txt{.84}{2.05}{\large\bfseries}{navy}{Antes}
+\txt{8.32}{2.05}{\large\bfseries}{teal}{Después}
 \shot{.84}{2.88}{6.78}{s1.png}\shot{8.34}{2.88}{6.78}{s2.png}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{ANEXO · TRIVY}{Dependencias del repositorio, antes y después}
-\txt{.84}{2.05}{\large\bfseries}{navy}{Antes}\txt{3.00}{2.16}{\small}{slate}{cdc42bf}
-\txt{8.32}{2.05}{\large\bfseries}{teal}{Después}\txt{11.15}{2.16}{\small}{slate}{4b12066}
+\txt{.84}{2.05}{\large\bfseries}{navy}{Antes}
+\txt{8.32}{2.05}{\large\bfseries}{teal}{Después}
 \shot{.84}{2.85}{6.72}{t1.png}\shot{8.34}{2.85}{6.72}{t2.png}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
@@ -279,6 +292,23 @@
 \draw[edge] (qz.east|-0,3.14)--node[hint,pos=.42]{0..1}(gi.west|-0,3.14);
 \draw[edge] (ag.east)-|(11.92,3.38)--(gi.west|-0,3.38);
 \draw[edge] (qa.east)--(gr.west);
-\blk{.65}{7.92}{14.70}{\scriptsize}{\textcolor{slate}{Nombres físicos, corte \texttt{7d4b666} (23 migraciones). Flecha: 1:N del padre al hijo; \texttt{0..1}: un ítem por quiz o tarea. Cada nota referencia un intento de quiz o de tarea. \texttt{grade\_publications} y \texttt{audit\_events} cuelgan de curso e institución. 20 tablas institucionales con \texttt{FORCE RLS}.}}
 \end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ANEXO · MODELO DE DATOS}{Diagrama entidad-relación completo}
+\node[inner sep=0] at (8,5.12){\includegraphics[width=15.15cm,height=7.2cm,keepaspectratio]{modelo-er-completo.pdf}};
+\end{sheet}\end{frame}
+\newcommand{\relaciones}[2]{
+\begin{frame}[plain]\begin{sheet}
+\head{ANEXO · RELACIONES DEL MODELO}{#2}
+\node[inner sep=0] at (8,5.12){\includegraphics[page=#1,width=15.15cm,height=7.2cm,keepaspectratio]{modelo-datos-final.pdf}};
+\end{sheet}\end{frame}}
+\relaciones{1}{Usuarios y pertenencias}
+\relaciones{2}{Invitaciones e importaciones}
+\relaciones{3}{Cursos, secciones y matrículas}
+\relaciones{4}{Módulos y materiales}
+\relaciones{5}{Quizzes e intentos}
+\relaciones{6}{Tareas, entregas y archivos}
+\relaciones{7}{Grupos e ítems del libro}
+\relaciones{8}{Notas y revisiones}
+\relaciones{9}{Publicación, auditoría y operación}
 \end{document}
