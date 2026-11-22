@@ -27,7 +27,11 @@
 \newcommand{\head}[2]{\txt{.65}{.38}{\scriptsize\bfseries}{teal}{#1}\txt{.61}{.88}{\LARGE\bfseries}{navy}{#2}}
 \newcommand{\shot}[4]{\node[anchor=north west,inner sep=0] at (#1,#2){\includegraphics[width=#3cm]{#4}};}
 \newcommand{\crop}[6]{\begin{scope}\clip (#1,#2) rectangle ++(#3,#4);\node[anchor=north west,inner sep=0] at (#1,#2){\includegraphics[width=#5cm]{#6}};\end{scope}}
+\newcommand{\blk}[5]{\node[anchor=north west,inner sep=0pt,align=left,text width=#3cm,text=navy,font=#4] at (#1,#2) {#5};}
+\newcommand{\bpt}{\textcolor{teal}{\textbullet}~}
+\tikzset{tbl/.style={box,font=\ttfamily\fontsize{7}{8}\selectfont,minimum height=.48cm,inner sep=3pt}}
 \begin{document}
+\lefthyphenmin=62 \righthyphenmin=62 \hyphenpenalty=10000 \exhyphenpenalty=10000
 \begin{frame}[plain]\begin{sheet}
 \fill[navy] (0,0) rectangle (16,9);
 \txt{.78}{.68}{\small\bfseries}{white}{IIC3143 \enspace / \enspace ENTREGA 4}
@@ -81,15 +85,20 @@
 \end{scope}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
-\head{PRÁCTICAS Y ESTADO DEL CÓDIGO}{Tres controles, tres resultados}
-\panel{.65}{1.9}{5.24}{6.68}{sea}\panel{5.52}{1.9}{10.20}{6.68}{sky}\panel{10.48}{1.9}{15.35}{6.68}{rose}
-\txt{.93}{2.26}{\small\bfseries}{teal}{SonarQube manual}\txt{.93}{3.18}{\Huge\bfseries}{navy}{25 $\to$ 0}
-\txt{.94}{4.52}{\normalsize}{navy}{avisos globales} \txt{.94}{5.46}{\small}{navy}{91,7\% de cobertura\\15 noviembre}
-\txt{5.80}{2.26}{\small\bfseries}{blue}{Trivy}\txt{5.80}{3.18}{\Huge\bfseries}{navy}{5 $\to$ 0}
-\txt{5.80}{4.52}{\normalsize}{navy}{hallazgos en repositorio} \txt{5.80}{5.46}{\small}{navy}{Imágenes: 4 + 1 $\to$ 0\\Excluye dependencias dev}
-\txt{10.76}{2.26}{\small\bfseries}{red}{SonarCloud · PR \#329}\txt{10.76}{3.18}{\Huge\bfseries}{red}{D}
-\txt{10.76}{4.52}{\normalsize}{navy}{mantenibilidad · gate fallido} \txt{10.76}{5.46}{\small}{navy}{99 code smells abiertos\\90,9\% cobertura nueva}
-\txt{.75}{7.10}{\normalsize\bfseries}{navy}{Integración con PostgreSQL \quad + \quad pruebas frontend \quad + \quad 527 instancias E2E}
+\head{PRÁCTICAS Y ESTADO DEL CÓDIGO}{Qué mejoramos en E4: auditar, corregir y separar}
+\panel{.65}{1.85}{5.24}{6.40}{sea}\panel{5.52}{1.85}{10.20}{6.40}{sky}\panel{10.48}{1.85}{15.35}{6.40}{paper}
+\txt{.93}{2.10}{\small\bfseries}{teal}{SonarQube · auditoría 15/11}\txt{.93}{2.62}{\Huge\bfseries}{navy}{25 $\to$ 0}
+\txt{.94}{3.55}{\footnotesize}{slate}{code smells · cobertura 91,7\%}
+\blk{.94}{4.10}{4.05}{\footnotesize}{\bpt\texttt{ScrollRegion}: 13 regiones con scroll, accesibles por teclado\\[2pt]\bpt Regex lineales y foco explícito\\[2pt]\bpt Réplica local del workflow}
+\txt{5.80}{2.10}{\small\bfseries}{blue}{Trivy · auditoría 13/11}\txt{5.80}{2.62}{\Huge\bfseries}{navy}{10 $\to$ 0}
+\txt{5.81}{3.55}{\footnotesize}{slate}{repo + imágenes · sin HIGH}
+\blk{5.81}{4.10}{4.10}{\footnotesize}{\bpt Overrides de \texttt{qs} y \texttt{glob}: 3 CVE de DoS\\[2pt]\bpt \texttt{apk upgrade} de \texttt{zlib} en la imagen base\\[2pt]\bpt \texttt{HEALTHCHECK} en ambos Dockerfile}
+\txt{10.76}{2.10}{\small\bfseries}{navy}{CI · \#222 y \#257}\txt{10.76}{2.78}{\Large\bfseries}{navy}{Gates separados}
+\txt{10.77}{3.55}{\footnotesize}{slate}{visibles, no bloqueantes}
+\blk{10.77}{4.10}{4.30}{\footnotesize}{\bpt Trivy en un job propio por app\\[2pt]\bpt Sonar y Trivy fuera de \texttt{CI result}\\[2pt]\bpt Workflows manuales para auditar antes de la demo}
+\panel{.65}{6.62}{15.35}{7.30}{rose}
+\txt{.93}{6.85}{\footnotesize\bfseries}{red}{LÍMITE CONOCIDO}\txt{3.95}{6.85}{\footnotesize}{navy}{SonarCloud en \#329: mantenibilidad D en código nuevo (99 code smells del frontend)}
+\txt{.75}{7.65}{\normalsize\bfseries}{navy}{Integración con PostgreSQL \quad + \quad pruebas frontend \quad + \quad 527 instancias E2E}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{RENDIMIENTO FRONTEND}{Login público y navegación dentro de la sesión}
@@ -113,16 +122,46 @@
 \fill[navy] (3.52,5.35) rectangle (7.50,5.83);
 \txt{1.02}{6.06}{\small}{navy}{S5 · 14 h}\txt{2.87}{6.06}{\small}{navy}{S6 · 15 h}\txt{5.42}{6.06}{\small}{navy}{S7 · 48 h}
 \txt{1.02}{7.00}{\scriptsize}{slate}{Las 2 h de ensayo de E3 pertenecían a la semana 4.}
-\txt{8.70}{2.26}{\small\bfseries}{teal}{ENTREGADO}\txt{8.70}{2.86}{\large\bfseries}{navy}{Curso $\to$ evaluación $\to$ nota}
-\txt{8.70}{4.04}{\small\bfseries}{teal}{DECISIÓN}\txt{8.70}{4.65}{\large\bfseries}{navy}{Mantener archivos (P2)}
-\txt{8.70}{5.95}{\small\bfseries}{amber}{PENDIENTE}\txt{8.70}{6.54}{\large\bfseries}{navy}{Retrospectiva y revisión final}
+\txt{8.70}{2.14}{\scriptsize\bfseries}{teal}{ENTREGADO \enspace · \enspace CU-01 A CU-16 EN UC Y UTFSM}\txt{8.70}{2.50}{\large\bfseries}{navy}{Curso $\to$ evaluación $\to$ nota}
+\txt{8.70}{3.30}{\scriptsize\bfseries}{teal}{DECISIÓN}\txt{8.70}{3.62}{\large\bfseries}{navy}{Incluir archivos (P2)}
+\txt{8.70}{4.42}{\scriptsize\bfseries}{blue}{MÁS ALLÁ DEL COMPROMISO}
+\blk{8.70}{4.74}{6.40}{\footnotesize}{Calendario de plazos \enspace·\enspace skeletons de carga\\Auditoría en línea de tiempo\\Tareas y entregas \enspace·\enspace grupos de notas\\Perfiles y altas por CSV}
+\txt{8.70}{6.30}{\scriptsize\bfseries}{amber}{PENDIENTE DEL COMPROMISO}\txt{8.70}{6.62}{\large\bfseries}{navy}{Ninguno}
+\txt{10.45}{6.70}{\scriptsize}{slate}{Fuera por decisión: IA/chat,\\quizzes en vivo, calendarios externos}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
-\head{RETROSPECTIVA · PARA DISCUTIR}{¿Qué repetiríamos y qué cambiaríamos?}
-\panel{.65}{1.88}{15.35}{3.53}{sea}\panel{.65}{3.78}{15.35}{5.43}{sky}\panel{.65}{5.68}{15.35}{7.33}{sand}
-\txt{.99}{2.21}{\large\bfseries}{navy}{Conservar el foco}\txt{6.04}{2.24}{\normalsize}{navy}{13 regiones con scroll \quad $\rightarrow$ \quad un componente}
-\txt{.99}{4.12}{\large\bfseries}{navy}{Verificar con dos roles}\txt{6.04}{4.15}{\normalsize}{navy}{Nota 7,0 en borrador \quad $\rightarrow$ \quad visible al publicar}
-\txt{.99}{6.03}{\large\bfseries}{navy}{Medir la sesión}\txt{6.04}{6.06}{\normalsize}{navy}{Cursos $\to$ módulos \quad $\rightarrow$ \quad 1,63 s hasta red inactiva}
+\head{ANÁLISIS DEL PROCESO · 1/2}{Decisiones que funcionaron}
+\panel{.65}{1.85}{15.35}{3.75}{sea}\panel{.65}{3.95}{15.35}{5.85}{sky}\panel{.65}{6.05}{15.35}{7.95}{sky}
+\txt{.99}{2.12}{\scriptsize\bfseries}{teal}{LO QUE HICIMOS BIEN}
+\blk{.99}{2.48}{4.70}{\normalsize\bfseries}{Recortar el alcance al flujo docente--estudiante}
+\blk{6.10}{2.18}{8.90}{\small}{Roles y administración quedaron en lo mínimo; el esfuerzo fue a lo que usan docente y estudiante: quiz, corrección automática y notas.}
+\txt{.99}{4.22}{\scriptsize\bfseries}{blue}{ACIERTO}
+\blk{.99}{4.58}{4.70}{\normalsize\bfseries}{Una vertical end-to-end antes que lo derivado}
+\blk{6.10}{4.28}{8.90}{\small}{En E3 ya funcionaba curso $\to$ quiz $\to$ nota publicada. Tareas, grupos de notas, calendario y perfiles se montaron después sobre ese flujo, sin rehacerlo.}
+\txt{.99}{6.32}{\scriptsize\bfseries}{blue}{ACIERTO}
+\blk{.99}{6.68}{4.70}{\normalsize\bfseries}{Revertir el sharding a esquema compartido con RLS}
+\blk{6.10}{6.38}{8.90}{\small}{Base por universidad, registry y \texttt{x-tenant} se reemplazaron en 3 días (26/09 $\to$ 29/09), antes de construir encima. Aislamiento probado desde la semana 3.}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ANÁLISIS DEL PROCESO · 2/2}{Lo que cambiaríamos}
+\txt{.99}{1.68}{\scriptsize\bfseries}{slate}{DECISIÓN}\txt{5.55}{1.68}{\scriptsize\bfseries}{slate}{QUÉ PASÓ}\txt{10.55}{1.68}{\scriptsize\bfseries}{slate}{LO HARÍAMOS DISTINTO}
+\panel{.65}{2.00}{15.35}{3.40}{rose}\panel{.65}{3.55}{15.35}{4.95}{rose}\panel{.65}{5.10}{15.35}{6.50}{sand}\panel{.65}{6.65}{15.35}{8.05}{sand}
+\txt{.99}{2.18}{\scriptsize\bfseries}{red}{NO REPETIR}
+\blk{.99}{2.48}{4.30}{\small\bfseries}{Un solo proveedor, sin respaldo de datos}
+\blk{5.55}{2.22}{4.75}{\footnotesize}{Railway cayó con la base (22/10); después venció la de Render. Dos migraciones en dos semanas.}
+\blk{10.55}{2.22}{4.55}{\footnotesize}{Respaldo y migración ensayada desde el inicio, como la rama de Neon de \#282.}
+\txt{.99}{3.73}{\scriptsize\bfseries}{red}{NO REPETIR}
+\blk{.99}{4.03}{4.30}{\small\bfseries}{Bloqueo de CI acoplado a la UI y al modelo}
+\blk{5.55}{3.77}{4.75}{\footnotesize}{Cambios de UI y del modelo rompieron E2E: cinco reparaciones entre el 10 y el 15/11.}
+\blk{10.55}{3.77}{4.55}{\footnotesize}{Bloquear con unitarias, integración y contrato; E2E amplio antes del release.}
+\txt{.99}{5.28}{\scriptsize\bfseries}{amber}{ERROR}
+\blk{.99}{5.58}{4.30}{\small\bfseries}{Postergar la administración y el onboarding}
+\blk{5.55}{5.32}{4.75}{\footnotesize}{Altas y cuentas se especificaron el 06/11; la demo dependía de seeds.}
+\blk{10.55}{5.32}{4.55}{\footnotesize}{Diseñar desde el inicio cómo entra la universidad y quién concede acceso.}
+\txt{.99}{6.83}{\scriptsize\bfseries}{amber}{ERROR}
+\blk{.99}{7.13}{4.30}{\small\bfseries}{Bot revisor con reglas escritas a mano}
+\blk{5.55}{6.87}{4.75}{\footnotesize}{Reglas desactualizadas: 3 de 3 alertas calibradas eran falsas, y sus fallas quedaban en verde.}
+\blk{10.55}{6.87}{4.55}{\footnotesize}{Reglas desde OpenAPI y ADR, fallas visibles y medición desde el primer sprint.}
 \end{sheet}\end{frame}
 \begin{frame}[plain]\begin{sheet}
 \head{DEMO EN VIVO}{Del módulo al promedio, por rol}
@@ -197,5 +236,49 @@
 \draw[edge](t.south)|-(z.west);\draw[edge](z.east)--(5.91,5.18)|-(cal.west);
 \draw[edge](cal.south)--(bor.north);\draw[edge](bor.east)--(9.56,7.14)|-(sel.west);
 \draw[edge](sel.south)--(pub.north);\draw[edge](pub.east)-|(vis.south);
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ANEXO · MODELO DE DATOS COMPLETO}{24 tablas agrupadas por dominio}
+\panel{.65}{1.62}{4.21}{7.75}{sky}\panel{4.36}{1.62}{7.92}{7.75}{paper}\panel{8.07}{1.62}{11.63}{7.75}{sea}\panel{11.78}{1.62}{15.34}{5.92}{sand}\panel{11.78}{6.07}{15.34}{7.75}{rose}
+\txt{.85}{1.78}{\scriptsize\bfseries}{blue}{IDENTIDAD Y ALTAS}\txt{4.56}{1.78}{\scriptsize\bfseries}{navy}{CURSOS Y CONTENIDO}
+\txt{8.27}{1.78}{\scriptsize\bfseries}{teal}{EVALUACIONES}\txt{11.98}{1.78}{\scriptsize\bfseries}{amber}{LIBRO DE NOTAS}
+\txt{11.98}{6.22}{\tiny\bfseries}{red}{AUDITORÍA Y OPERACIÓN}
+\node[tbl] (us) at (2.43,2.45){users};
+\node[tbl] (me) at (2.43,3.25){institution\_memberships};
+\node[tbl] (in) at (2.43,4.05){institutions};
+\node[tbl] (ai) at (2.43,4.85){account\_invitations};
+\node[tbl] (ui) at (2.43,5.65){user\_imports};
+\node[tbl] (ur) at (2.43,6.45){user\_import\_rows};
+\node[tbl] (as) at (2.43,7.25){account\_security\_events};
+\node[tbl] (co) at (6.14,3.25){courses};
+\node[tbl] (se) at (6.14,4.05){sections};
+\node[tbl] (en) at (6.14,4.85){enrollments};
+\node[tbl] (cm) at (6.14,5.65){course\_modules};
+\node[tbl] (ma) at (6.14,6.45){materials};
+\node[tbl] (qz) at (9.85,3.25){quizzes};
+\node[tbl] (qa) at (9.85,4.05){quiz\_attempts};
+\node[tbl] (ag) at (9.85,5.65){assignments};
+\node[tbl] (aa) at (9.85,6.45){assignment\_attempts};
+\node[tbl] (af) at (9.85,7.25){assignment\_attempt\_files};
+\node[tbl] (gg) at (13.56,2.45){grade\_groups};
+\node[tbl] (gi) at (13.56,3.25){grade\_items};
+\node[tbl] (gr) at (13.56,4.05){grades};
+\node[tbl] (rv) at (13.56,4.85){grade\_revisions};
+\node[tbl] (gp) at (13.56,5.50){grade\_publications};
+\node[tbl] (ae) at (13.56,6.72){audit\_events};
+\node[tbl] (dd) at (13.56,7.32){demo\_data\_runs};
+\foreach \a/\b in {us/me,in/me,in/ai,ui/ur,co/se,se/en,cm/ma,qz/qa,ag/aa,aa/af,gg/gi,gi/gr,gr/rv}{\draw[edge](\a)--(\b);}
+\draw[edge] (us.west)-|(.80,7.25)--(as.west);
+\draw[edge] (me.east)--(4.08,3.25)|-(ui.east);
+\draw[edge] (me.east)--(co.west);
+\draw[edge] (me.east)--(en.west);
+\draw[edge] (co.east)--(7.80,3.25)|-(cm.east);
+\draw[edge] (7.80,3.25)--(qz.west);
+\draw[edge] (7.80,5.65)--(ag.west);
+\draw[edge] (7.80,3.25)|-(gg.west);
+\draw[edge] (qz.east|-0,3.14)--node[hint,pos=.42]{0..1}(gi.west|-0,3.14);
+\draw[edge] (ag.east)-|(11.92,3.38)--(gi.west|-0,3.38);
+\draw[edge] (qa.east)--(gr.west);
+\blk{.65}{7.92}{14.70}{\scriptsize}{\textcolor{slate}{Nombres físicos, corte \texttt{7d4b666} (23 migraciones). Flecha: 1:N del padre al hijo; \texttt{0..1}: un ítem por quiz o tarea. Cada nota referencia un intento de quiz o de tarea. \texttt{grade\_publications} y \texttt{audit\_events} cuelgan de curso e institución. 20 tablas institucionales con \texttt{FORCE RLS}.}}
 \end{sheet}\end{frame}
 \end{document}

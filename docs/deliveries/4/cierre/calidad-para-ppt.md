@@ -1,5 +1,5 @@
 # Calidad — Contenido listo para 2 diapositivas E4
-Las diapositivas 4 y 5 y los anexos 9 y 10 del [PDF](../ppt/main.pdf) presentan estos resultados.
+Las diapositivas 4 y 5 y los anexos 10 y 11 del [PDF](../ppt/main.pdf) presentan estos resultados.
 
 ## Slide 1 · Qué mejoró y cómo lo verificamos
 
