@@ -1,0 +1,118 @@
+name: Reporte de rendimiento
+
+# Builds `dev` (the PR base) and the PR with the same configuration, measures both on the same runner
+# (Lighthouse, lab INP, axe-core, size-limit) and comments whether each metric improves, stays or worsens.
+# Informative: not part of `CI result`, so it never blocks a merge.
+on:
+  pull_request:
+    branches: [dev]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/performance-report.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: performance-report-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  measure:
+    name: Medir dev y el PR
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # Runs PR code: read-only token and no secrets.
+    permissions:
+      contents: read
+    env:
+      # Public build values only: local origins so the portal and the UC login render without a backend.
+      NEXT_PUBLIC_PORTAL_ORIGIN: http://localhost:3000
+      NEXT_PUBLIC_INSTITUTION_ORIGINS: '{"http://uc.localhost:3000":"uc","http://utfsm.localhost:3000":"utfsm"}'
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_TELEMETRY_DISABLED: "1"
+      CHROME_PATH: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: pr
+          persist-credentials: false
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: pr/package.json
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: |
+            pr/frontend/pnpm-lock.yaml
+            base/frontend/pnpm-lock.yaml
+
+      - name: Build de dev
+        run: |
+          pnpm --dir base/frontend install --frozen-lockfile
+          pnpm --dir base/frontend build
+      - name: Build del PR
+        run: |
+          pnpm --dir pr/frontend install --frozen-lockfile
+          pnpm --dir pr/frontend build
+
+      # The PR's tooling measures both builds, so dev and the PR use the same Lighthouse, Chrome and routes.
+      - name: Medir dev
+        run: node pr/frontend/scripts/performance-measure.mjs base/frontend medicion-dev.json
+      - name: Medir el PR
+        run: node pr/frontend/scripts/performance-measure.mjs pr/frontend medicion-pr.json
+
+      - name: Armar el reporte
+        if: ${{ !cancelled() }}
+        run: |
+          node pr/frontend/scripts/performance-report.mjs medicion-dev.json medicion-pr.json > reporte.md
+          cat reporte.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: reporte-rendimiento
+          path: |
+            reporte.md
+            medicion-dev.json
+            medicion-pr.json
+          retention-days: 14
+          if-no-files-found: warn
+
+  # Separate job: write access to comments, but it only reads the Markdown artifact and runs no PR code.
+  # Fork PRs get a read-only token; they keep the report in the run summary.
+  comment:
+    name: Comentar en el PR
+    needs: measure
+    if: ${{ !cancelled() && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: reporte-rendimiento
+      - name: Crear o actualizar el comentario
+        uses: actions/github-script@v7
+        env:
+          MEASURE_RESULT: ${{ needs.measure.result }}
+        with:
+          script: |
+            const fs = require('fs')
+            const marker = '<!-- reporte-rendimiento -->'
+            const body = fs.existsSync('reporte.md')
+              ? fs.readFileSync('reporte.md', 'utf8')
+              : `${marker}\n## Rendimiento de este PR frente a \`dev\`\n\n⚠️ No se pudo medir (job: ${process.env.MEASURE_RESULT}). Revisen el log del workflow **Reporte de rendimiento**; no se publican valores sin medición.`
+            const { owner, repo } = context.repo
+            const issue_number = context.issue.number
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number })
+            const previous = comments.find((c) => c.user?.type === 'Bot' && c.body?.includes(marker))
+            if (previous) await github.rest.issues.updateComment({ owner, repo, comment_id: previous.id, body })
+            else await github.rest.issues.createComment({ owner, repo, issue_number, body })
