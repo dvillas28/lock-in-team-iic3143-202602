@@ -1,0 +1,426 @@
+---
+config:
+  theme: base
+  themeVariables:
+    primaryColor: "#eff6f7"
+    primaryTextColor: "#18324f"
+    primaryBorderColor: "#65968f"
+    lineColor: "#405e75"
+    fontFamily: DejaVu Sans, sans-serif
+---
+erDiagram
+    direction LR
+    account_invitations {
+        uuid id PK
+        uuid institution_id FK
+        varchar(254) normalized_email "character varying(254)"
+        varchar(200) invited_name "character varying(200)"
+        uuid created_by FK
+        varchar(12) status "character varying(12)"
+        varchar(64) token_hash "character varying(64)"
+        timestamptz(6) expires_at "timestamp(6) with time zone"
+        timestamptz(6) accepted_at "timestamp(6) with time zone"
+        timestamptz(6) revoked_at "timestamp(6) with time zone"
+        uuid accepted_user_id FK
+        timestamptz(6) closed_at "timestamp(6) with time zone"
+        timestamptz(6) pii_purged_at "timestamp(6) with time zone"
+        uuid operation_key
+        varchar(64) input_fingerprint "character varying(64)"
+        timestamptz(6) created_at "timestamp(6) with time zone"
+        varchar(16) delivery_status "character varying(16)"
+        integer delivery_version
+        uuid delivery_key
+        varchar(200) provider_email_id "character varying(200)"
+        integer delivery_attempts
+        timestamptz(6) delivery_started_at "timestamp(6) with time zone"
+        timestamptz(6) last_delivery_at "timestamp(6) with time zone"
+        varchar(64) last_delivery_error_code "character varying(64)"
+    }
+    account_security_events {
+        uuid id PK
+        uuid user_id FK
+        uuid actor_user_id FK
+        varchar(40) action "character varying(40)"
+        timestamptz(6) occurred_at "timestamp(6) with time zone"
+        jsonb metadata
+    }
+    assignment_attempt_files {
+        uuid id PK
+        uuid institution_id FK
+        uuid attempt_id FK
+        text file_key
+        varchar(480) file_name "character varying(480)"
+        varchar(120) media_type "character varying(120)"
+        integer byte_size
+        text sha256
+        integer position
+    }
+    assignment_attempts {
+        uuid id PK
+        uuid institution_id FK
+        uuid course_id FK
+        uuid assignment_id FK
+        uuid section_id FK
+        uuid student_id FK
+        integer attempt_number
+        timestamptz(6) submitted_at "timestamp(6) with time zone"
+        boolean is_late
+        text written_response
+        integer file_count
+        uuid submit_key
+        text submit_digest
+    }
+    assignments {
+        uuid id PK
+        uuid institution_id FK
+        uuid course_id FK
+        uuid section_id FK
+        varchar(2000) description "character varying(2000)"
+        varchar(10000) instructions "character varying(10000)"
+        timestamptz(6) available_from "timestamp(6) with time zone"
+        timestamptz(6) due_at "timestamp(6) with time zone"
+        timestamptz(6) available_until "timestamp(6) with time zone"
+        text[] allowed_extensions
+        integer max_attempts
+        text status
+        timestamptz(6) published_at "timestamp(6) with time zone"
+        integer version
+        uuid created_by FK
+        text create_digest
+        uuid creation_key
+        boolean allow_written_response
+    }
+    audit_events {
+        uuid id PK
+        uuid institution_id FK
+        uuid actor_user_id FK
+        varchar(64) action "character varying(64)"
+        varchar(32) resource_type "character varying(32)"
+        uuid resource_id
+        uuid course_id FK
+        uuid section_id FK
+        timestamptz(6) occurred_at "timestamp(6) with time zone"
+        jsonb changes
+    }
+    course_modules {
+        uuid id PK
+        uuid institution_id FK
+        uuid course_id FK
+        varchar(200) title "character varying(200)"
+        integer position
+        timestamptz(6) published_at "timestamp(6) with time zone"
+    }
+    courses {
+        uuid id PK
+        uuid institution_id FK
+        varchar(32) code "character varying(32)"
+        varchar(200) name "character varying(200)"
+        varchar(16) term "character varying(16)"
+        uuid created_by FK
+        timestamptz(6) created_at "timestamp(6) with time zone"
+        timestamptz(6) grade_items_locked_at "timestamp(6) with time zone"
+        boolean gradebook_grouped
+        integer gradebook_version
+    }
+    demo_data_runs {
+        text version PK
+        text input_fingerprint
+        text operator_ref
+        jsonb result
+        timestamptz applied_at "timestamp with time zone"
+    }
+    enrollments {
+        uuid id PK
+        uuid institution_id FK
+        uuid section_id FK
+        uuid user_id FK
+        varchar(16) role "character varying(16)"
+        boolean active
+        timestamptz(6) created_at "timestamp(6) with time zone"
+    }
+    grade_groups {
+        uuid id PK
+        uuid institution_id FK
+        uuid course_id FK
+        varchar(200) title "character varying(200)"
+        numeric weight_percent "numeric(5,2)"
+        integer position
+        text default_kind
+    }
+    grade_items {
+        uuid id PK
+        uuid institution_id FK
+        uuid course_id FK
+        uuid quiz_id FK
+        varchar(200) title "character varying(200)"
+        numeric weight_percent "numeric(5,2)"
+        timestamptz(6) created_at "timestamp(6) with time zone"
+        uuid group_id FK
+        numeric max_points "numeric(8,2)"
+        uuid assignment_id FK
+    }
+    grade_publications {
+        uuid id PK
+        uuid institution_id FK
+        uuid course_id FK
+        uuid actor_user_id FK
+        text idempotency_key
+        jsonb request
+        integer published_count
+        timestamptz(6) published_at "timestamp(6) with time zone"
+    }
+    grade_revisions {
+        uuid id PK
+        uuid institution_id FK
+        uuid grade_id FK
+        uuid actor_user_id FK
+        uuid previous_revision_id FK
+        text reason
+        numeric score_points "numeric(8,2)"
+        numeric score_percent "numeric(5,2)"
+        numeric grade_value "numeric(3,1)"
+        timestamptz(6) created_at "timestamp(6) with time zone"
+        uuid assignment_attempt_id FK
+        varchar(4000) feedback "character varying(4000)"
+    }
+    grades {
+        uuid id PK
+        uuid institution_id FK
+        uuid grade_item_id FK
+        uuid quiz_id FK
+        uuid student_id FK
+        uuid section_id FK
+        uuid attempt_id FK
+        numeric score_percent "numeric(5,2)"
+        numeric grade_value "numeric(3,1)"
+        timestamptz(6) published_at "timestamp(6) with time zone"
+        timestamptz(6) created_at "timestamp(6) with time zone"
+        timestamptz(6) updated_at "timestamp(6) with time zone"
+        uuid assignment_id FK
+        uuid assignment_attempt_id FK
+        numeric assignment_points "numeric(8,2)"
+        varchar(4000) feedback "character varying(4000)"
+    }
+    institution_memberships {
+        uuid id PK
+        uuid institution_id FK
+        uuid user_id FK
+        boolean active
+        timestamptz(6) created_at "timestamp(6) with time zone"
+        timestamptz(6) updated_at "timestamp(6) with time zone"
+        boolean is_admin
+        boolean is_super_admin
+    }
+    institutions {
+        uuid id PK
+        varchar(63) slug "character varying(63)"
+        varchar(200) name "character varying(200)"
+        boolean active
+        timestamptz(6) created_at "timestamp(6) with time zone"
+        timestamptz(6) updated_at "timestamp(6) with time zone"
+    }
+    materials {
+        uuid id PK
+        uuid institution_id FK
+        uuid module_id FK
+        varchar(200) title "character varying(200)"
+        varchar(16) kind "character varying(16)"
+        text markdown_body
+        timestamptz(6) published_at "timestamp(6) with time zone"
+        uuid created_by FK
+        integer position
+        text file_key
+        text file_name
+        uuid upload_id
+        character(64) upload_digest
+        text media_type
+        integer byte_size
+        uuid quiz_id FK
+        uuid quiz_course_id FK
+    }
+    quiz_attempts {
+        uuid id PK
+        uuid institution_id FK
+        uuid course_id FK
+        uuid quiz_id FK
+        uuid section_id FK
+        uuid student_id FK
+        integer attempt_number
+        varchar(16) status "character varying(16)"
+        timestamptz(6) started_at "timestamp(6) with time zone"
+        timestamptz(6) submitted_at "timestamp(6) with time zone"
+        timestamptz(6) cancelled_at "timestamp(6) with time zone"
+        jsonb answers
+        numeric score_points "numeric(8,2)"
+        numeric score_percent "numeric(5,2)"
+        numeric grade_value "numeric(3,1)"
+        text start_key
+        text submit_key
+    }
+    quizzes {
+        uuid id PK
+        uuid institution_id FK
+        uuid course_id FK
+        uuid section_id FK
+        varchar(200) title "character varying(200)"
+        varchar(10000) instructions "character varying(10000)"
+        timestamptz(6) opens_at "timestamp(6) with time zone"
+        timestamptz(6) closes_at "timestamp(6) with time zone"
+        integer max_attempts
+        timestamptz(6) published_at "timestamp(6) with time zone"
+        uuid created_by FK
+        jsonb questions
+        uuid group_id FK
+    }
+    sections {
+        uuid id PK
+        uuid institution_id FK
+        uuid course_id FK
+        varchar(32) code "character varying(32)"
+        integer capacity
+        timestamptz(6) created_at "timestamp(6) with time zone"
+    }
+    user_import_rows {
+        uuid id PK
+        uuid institution_id FK
+        uuid import_id FK
+        integer row_number
+        varchar(200) name "character varying(200)"
+        varchar(254) normalized_email "character varying(254)"
+        varchar(24) validation_code "character varying(24)"
+        varchar(8) outcome "character varying(8)"
+        uuid invitation_id FK
+    }
+    user_imports {
+        uuid id PK
+        uuid institution_id FK
+        uuid created_by FK
+        varchar(12) status "character varying(12)"
+        uuid operation_key
+        varchar(64) input_fingerprint "character varying(64)"
+        integer total_rows
+        integer created_count
+        integer skipped_count
+        timestamptz(6) created_at "timestamp(6) with time zone"
+        timestamptz(6) expires_at "timestamp(6) with time zone"
+        timestamptz(6) confirmed_at "timestamp(6) with time zone"
+        timestamptz(6) pii_purged_at "timestamp(6) with time zone"
+    }
+    users {
+        uuid id PK
+        varchar(254) email "character varying(254)"
+        varchar(255) password_hash "character varying(255)"
+        varchar(200) name "character varying(200)"
+        boolean active
+        timestamptz(6) created_at "timestamp(6) with time zone"
+        timestamptz(6) updated_at "timestamp(6) with time zone"
+        varchar(500) bio "character varying(500)"
+        varchar(512) avatar_key "character varying(512)"
+        integer credential_version
+    }
+    %% institution_memberships(institution_id) -> institutions(id)
+    institutions ||..o{ institution_memberships : "institution_id"
+    %% institution_memberships(user_id) -> users(id)
+    users ||..o{ institution_memberships : "user_id"
+    %% courses(institution_id, created_by) -> institution_memberships(institution_id, user_id)
+    institution_memberships ||..o{ courses : "created_by"
+    %% sections(institution_id, course_id) -> courses(institution_id, id)
+    courses ||..o{ sections : "course_id"
+    %% enrollments(institution_id, section_id) -> sections(institution_id, id)
+    sections ||..o{ enrollments : "section_id"
+    %% enrollments(institution_id, user_id) -> institution_memberships(institution_id, user_id)
+    institution_memberships ||..o{ enrollments : "user_id"
+    %% audit_events(institution_id, actor_user_id) -> institution_memberships(institution_id, user_id)
+    institution_memberships |o..o{ audit_events : "actor_user_id"
+    %% audit_events(institution_id, course_id) -> courses(institution_id, id)
+    courses |o..o{ audit_events : "course_id"
+    %% audit_events(institution_id, section_id, course_id) -> sections(institution_id, id, course_id)
+    sections |o..o{ audit_events : "section_id"
+    %% course_modules(institution_id, course_id) -> courses(institution_id, id)
+    courses ||..o{ course_modules : "course_id"
+    %% materials(institution_id, created_by) -> institution_memberships(institution_id, user_id)
+    institution_memberships ||..o{ materials : "created_by"
+    %% materials(institution_id, module_id) -> course_modules(institution_id, id)
+    course_modules ||..o{ materials : "module_id"
+    %% materials(institution_id, module_id, quiz_course_id) -> course_modules(institution_id, id, course_id)
+    course_modules |o..o{ materials : "module_id"
+    %% materials(institution_id, quiz_id, quiz_course_id) -> quizzes(institution_id, id, course_id)
+    quizzes |o..o{ materials : "quiz_id"
+    %% quizzes(institution_id, course_id) -> courses(institution_id, id)
+    courses ||..o{ quizzes : "course_id"
+    %% quizzes(institution_id, course_id, group_id) -> grade_groups(institution_id, course_id, id)
+    grade_groups |o..o{ quizzes : "group_id"
+    %% quizzes(institution_id, created_by) -> institution_memberships(institution_id, user_id)
+    institution_memberships ||..o{ quizzes : "created_by"
+    %% quizzes(institution_id, section_id, course_id) -> sections(institution_id, id, course_id)
+    sections |o..o{ quizzes : "section_id"
+    %% grade_items(institution_id, course_id, assignment_id) -> assignments(institution_id, course_id, id)
+    assignments |o..o| grade_items : "assignment_id"
+    %% grade_items(institution_id, course_id) -> courses(institution_id, id)
+    courses ||..o{ grade_items : "course_id"
+    %% grade_items(institution_id, course_id, group_id) -> grade_groups(institution_id, course_id, id)
+    grade_groups ||..o{ grade_items : "group_id"
+    %% grade_items(institution_id, quiz_id, course_id) -> quizzes(institution_id, id, course_id)
+    quizzes |o..o| grade_items : "quiz_id"
+    %% quiz_attempts(institution_id, quiz_id, course_id) -> quizzes(institution_id, id, course_id)
+    quizzes ||..o{ quiz_attempts : "quiz_id"
+    %% quiz_attempts(institution_id, section_id, course_id) -> sections(institution_id, id, course_id)
+    sections ||..o{ quiz_attempts : "section_id"
+    %% quiz_attempts(institution_id, student_id) -> institution_memberships(institution_id, user_id)
+    institution_memberships ||..o{ quiz_attempts : "student_id"
+    %% grades(institution_id, assignment_attempt_id, assignment_id, student_id, section_id) -> assignment_attempts(institution_id, id, assignment_id, student_id, section_id)
+    assignment_attempts |o..o{ grades : "assignment_attempt_id"
+    %% grades(institution_id, attempt_id, quiz_id, student_id, section_id) -> quiz_attempts(institution_id, id, quiz_id, student_id, section_id)
+    quiz_attempts |o..o{ grades : "attempt_id"
+    %% grades(institution_id, grade_item_id, assignment_id) -> grade_items(institution_id, id, assignment_id)
+    grade_items |o..o{ grades : "grade_item_id"
+    %% grades(institution_id, grade_item_id, quiz_id) -> grade_items(institution_id, id, quiz_id)
+    grade_items |o..o{ grades : "grade_item_id"
+    %% grades(institution_id, student_id) -> institution_memberships(institution_id, user_id)
+    institution_memberships ||..o{ grades : "student_id"
+    %% grade_publications(institution_id, actor_user_id) -> institution_memberships(institution_id, user_id)
+    institution_memberships ||..o{ grade_publications : "actor_user_id"
+    %% grade_publications(institution_id, course_id) -> courses(institution_id, id)
+    courses ||..o{ grade_publications : "course_id"
+    %% account_security_events(actor_user_id) -> users(id)
+    users ||..o{ account_security_events : "actor_user_id"
+    %% account_security_events(user_id) -> users(id)
+    users ||..o{ account_security_events : "user_id"
+    %% account_invitations(accepted_user_id) -> users(id)
+    users |o..o{ account_invitations : "accepted_user_id"
+    %% account_invitations(institution_id, created_by) -> institution_memberships(institution_id, id)
+    institution_memberships ||..o{ account_invitations : "created_by"
+    %% account_invitations(institution_id) -> institutions(id)
+    institutions ||..o{ account_invitations : "institution_id"
+    %% user_imports(institution_id, created_by) -> institution_memberships(institution_id, id)
+    institution_memberships ||..o{ user_imports : "created_by"
+    %% user_imports(institution_id) -> institutions(id)
+    institutions ||..o{ user_imports : "institution_id"
+    %% user_import_rows(institution_id, import_id) -> user_imports(institution_id, id)
+    user_imports ||..o{ user_import_rows : "import_id"
+    %% user_import_rows(institution_id, invitation_id) -> account_invitations(institution_id, id)
+    account_invitations |o..o{ user_import_rows : "invitation_id"
+    %% grade_groups(institution_id, course_id) -> courses(institution_id, id)
+    courses ||..o{ grade_groups : "course_id"
+    %% grade_revisions(institution_id, actor_user_id) -> institution_memberships(institution_id, user_id)
+    institution_memberships ||..o{ grade_revisions : "actor_user_id"
+    %% grade_revisions(institution_id, assignment_attempt_id) -> assignment_attempts(institution_id, id)
+    assignment_attempts |o..o{ grade_revisions : "assignment_attempt_id"
+    %% grade_revisions(institution_id, grade_id) -> grades(institution_id, id)
+    grades ||..o{ grade_revisions : "grade_id"
+    %% grade_revisions(institution_id, grade_id, previous_revision_id) -> grade_revisions(institution_id, grade_id, id)
+    grade_revisions |o..o| grade_revisions : "previous_revision_id"
+    %% assignments(institution_id, course_id) -> courses(institution_id, id)
+    courses ||..o{ assignments : "course_id"
+    %% assignments(institution_id, created_by) -> institution_memberships(institution_id, user_id)
+    institution_memberships ||..o{ assignments : "created_by"
+    %% assignments(institution_id, section_id, course_id) -> sections(institution_id, id, course_id)
+    sections |o..o{ assignments : "section_id"
+    %% assignment_attempts(institution_id, course_id, assignment_id) -> assignments(institution_id, course_id, id)
+    assignments ||..o{ assignment_attempts : "assignment_id"
+    %% assignment_attempts(institution_id, section_id, course_id) -> sections(institution_id, id, course_id)
+    sections ||..o{ assignment_attempts : "section_id"
+    %% assignment_attempts(institution_id, student_id) -> institution_memberships(institution_id, user_id)
+    institution_memberships ||..o{ assignment_attempts : "student_id"
+    %% assignment_attempt_files(institution_id, attempt_id) -> assignment_attempts(institution_id, id)
+    assignment_attempts ||..o{ assignment_attempt_files : "attempt_id"

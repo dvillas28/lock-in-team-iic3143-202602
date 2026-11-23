@@ -1,0 +1,9 @@
+- E4: MOSTRAR que tanto ha mejorado SONARQCUBE
+- E4: MOSTRAR que tanto ha mejorado TRIVY
+- E4: MOSTRAR METRICAS DE LA PAGINA
+- E4: MOSTRAR PERFOMANCE EN EL FRONTEND
+- E4: METER FOTO LIGHTHOUSE
+- E4: SI LA DEMO SE CAE NOS PONEN 1, REPROBACIÓN AHÍ MISMO
+- OJO CON LOS proveedores, que no se caigan
+- NO DECIR "TRABAJAMOS BIEN COMO EQUIPO", "TRABAJAR A ULTIMO MOMENTO ES MALO" (cosas obvias por lo general) -> que hicimos bien a nivel de ingenieria, que no volveriamos a repetirm y errores y aciertos.
+- E4: FEEDBACK DE TOM: hacer los commits en un solo idioma. El repositorio establece español para mensajes de commit y títulos/descripciones de PR.

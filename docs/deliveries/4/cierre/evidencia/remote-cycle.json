@@ -1,0 +1,569 @@
+{
+  "observedAt": "2026-11-21T18:01:17.174Z",
+  "commit": "7d4b666",
+  "mode": "real API on isolated synthetic courses; browser login checked separately",
+  "results": [
+    {
+      "slug": "uc",
+      "code": "E4-VALID-20261121-UC",
+      "steps": [
+        "course, section and student enrollment created",
+        "module and Markdown published and read by student",
+        "quiz submitted, automatically graded 7.0, hidden before publication, published and read by student",
+        "academic changes recorded in audit",
+        "student book and rubric access denied"
+      ],
+      "courseId": "13d99c92-59a6-4545-b19a-9e966d6e3376",
+      "sectionId": "ea7a218e-493e-4f73-b47b-2fc7d8d2b0a6",
+      "moduleId": "d8bf439d-c76e-460b-aaf4-3d71da9f4f36",
+      "materialId": "862d22c4-1e45-4da7-ad74-a34b4355e271",
+      "quizId": "4558e38e-577e-4510-806b-8665fd7d0369",
+      "attemptId": "a7a6ce49-42fb-4466-b078-4b7b170f281e",
+      "grade": 7,
+      "gradeItemId": "2b941883-9188-469d-8a06-1c677d9df789",
+      "partialAverage": 7,
+      "auditActions": [
+        "enrollment.created",
+        "section.created",
+        "course.created",
+        "module.created",
+        "material.created",
+        "module.published",
+        "material.published",
+        "quiz.created",
+        "quiz.published",
+        "attempt.started",
+        "attempt.answersSaved",
+        "grade.created",
+        "attempt.graded",
+        "grade.published"
+      ],
+      "file": {
+        "uploadStatus": 201,
+        "bytes": 52,
+        "materialId": "3c0795fd-c3d8-47c5-a302-d730fac53aa4",
+        "downloadStatus": 200,
+        "sha256": "aaaf7502c1a4d428cd18281f9cf39e71b025ed6ee55fa3fce546da7f57741f27",
+        "exactBytes": true
+      },
+      "passed": true
+    },
+    {
+      "slug": "utfsm",
+      "code": "E4-VALID-20261121-UTFSM",
+      "steps": [
+        "course, section and student enrollment created",
+        "module and Markdown published and read by student",
+        "quiz submitted, automatically graded 7.0, hidden before publication, published and read by student",
+        "academic changes recorded in audit",
+        "student book and rubric access denied"
+      ],
+      "courseId": "964fec5a-b7fb-4c6c-85e5-d79c5d126bc0",
+      "sectionId": "a6b1998b-bdac-49f2-93e7-c8844aff9914",
+      "moduleId": "b0e4534a-5346-40dd-b236-b26de6efb809",
+      "materialId": "1cc88106-3a1c-4bc3-8eff-758f6c840147",
+      "quizId": "b2ebafe7-415e-4dd2-9773-1d7b5899979d",
+      "attemptId": "c87a3006-53f4-47dd-9f61-f76e56aea3cf",
+      "grade": 7,
+      "gradeItemId": "034d522a-35b8-4701-8e5c-edadb866e768",
+      "partialAverage": 7,
+      "auditActions": [
+        "course.created",
+        "section.created",
+        "enrollment.created",
+        "module.created",
+        "material.created",
+        "module.published",
+        "material.published",
+        "quiz.created",
+        "quiz.published",
+        "attempt.started",
+        "attempt.answersSaved",
+        "grade.created",
+        "attempt.graded",
+        "grade.published"
+      ],
+      "file": {
+        "uploadStatus": 201,
+        "bytes": 52,
+        "materialId": "9ee18cd0-4348-4e38-b651-a45ba5d8da2d",
+        "downloadStatus": 200,
+        "sha256": "aaaf7502c1a4d428cd18281f9cf39e71b025ed6ee55fa3fce546da7f57741f27",
+        "exactBytes": true
+      },
+      "passed": true
+    }
+  ],
+  "checks": [
+    {
+      "slug": "uc",
+      "role": "admin",
+      "endpoint": "courses",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 186
+    },
+    {
+      "slug": "uc",
+      "role": "admin",
+      "endpoint": "courses",
+      "method": "POST",
+      "status": 201,
+      "expected": 201,
+      "elapsedMs": 317
+    },
+    {
+      "slug": "uc",
+      "role": "admin",
+      "endpoint": "courses/13d99c92-59a6-4545-b19a-9e966d6e3376/sections",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 182
+    },
+    {
+      "slug": "uc",
+      "role": "admin",
+      "endpoint": "sections/ea7a218e-493e-4f73-b47b-2fc7d8d2b0a6/enrollments",
+      "method": "POST",
+      "status": 201,
+      "expected": 201,
+      "elapsedMs": 247
+    },
+    {
+      "slug": "uc",
+      "role": "admin",
+      "endpoint": "courses/13d99c92-59a6-4545-b19a-9e966d6e3376/modules",
+      "method": "POST",
+      "status": 201,
+      "expected": 201,
+      "elapsedMs": 292
+    },
+    {
+      "slug": "uc",
+      "role": "admin",
+      "endpoint": "modules/d8bf439d-c76e-460b-aaf4-3d71da9f4f36/materials",
+      "method": "POST",
+      "status": 201,
+      "expected": 201,
+      "elapsedMs": 250
+    },
+    {
+      "slug": "uc",
+      "role": "admin",
+      "endpoint": "modules/d8bf439d-c76e-460b-aaf4-3d71da9f4f36/publish",
+      "method": "POST",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 217
+    },
+    {
+      "slug": "uc",
+      "role": "admin",
+      "endpoint": "materials/862d22c4-1e45-4da7-ad74-a34b4355e271/publish",
+      "method": "POST",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 216
+    },
+    {
+      "slug": "uc",
+      "role": "student",
+      "endpoint": "materials/862d22c4-1e45-4da7-ad74-a34b4355e271",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 209
+    },
+    {
+      "slug": "uc",
+      "role": "admin",
+      "endpoint": "courses/13d99c92-59a6-4545-b19a-9e966d6e3376/quizzes",
+      "method": "POST",
+      "status": 201,
+      "expected": 201,
+      "elapsedMs": 247
+    },
+    {
+      "slug": "uc",
+      "role": "admin",
+      "endpoint": "quizzes/4558e38e-577e-4510-806b-8665fd7d0369/publish",
+      "method": "POST",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 232
+    },
+    {
+      "slug": "uc",
+      "role": "student",
+      "endpoint": "sections/ea7a218e-493e-4f73-b47b-2fc7d8d2b0a6/quizzes/4558e38e-577e-4510-806b-8665fd7d0369/attempts",
+      "method": "POST",
+      "status": 201,
+      "expected": 201,
+      "elapsedMs": 260
+    },
+    {
+      "slug": "uc",
+      "role": "student",
+      "endpoint": "quiz-attempts/a7a6ce49-42fb-4466-b078-4b7b170f281e/questions",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 206
+    },
+    {
+      "slug": "uc",
+      "role": "student",
+      "endpoint": "quiz-attempts/a7a6ce49-42fb-4466-b078-4b7b170f281e/answers",
+      "method": "PUT",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 223
+    },
+    {
+      "slug": "uc",
+      "role": "student",
+      "endpoint": "quiz-attempts/a7a6ce49-42fb-4466-b078-4b7b170f281e/submit",
+      "method": "POST",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 240
+    },
+    {
+      "slug": "uc",
+      "role": "admin",
+      "endpoint": "quiz-attempts/a7a6ce49-42fb-4466-b078-4b7b170f281e",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 206
+    },
+    {
+      "slug": "uc",
+      "role": "student",
+      "endpoint": "courses/13d99c92-59a6-4545-b19a-9e966d6e3376/my-grades",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 196
+    },
+    {
+      "slug": "uc",
+      "role": "admin",
+      "endpoint": "courses/13d99c92-59a6-4545-b19a-9e966d6e3376/grade-items",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 198
+    },
+    {
+      "slug": "uc",
+      "role": "admin",
+      "endpoint": "courses/13d99c92-59a6-4545-b19a-9e966d6e3376/gradebook/publications",
+      "method": "POST",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 223
+    },
+    {
+      "slug": "uc",
+      "role": "student",
+      "endpoint": "courses/13d99c92-59a6-4545-b19a-9e966d6e3376/my-grades",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 200
+    },
+    {
+      "slug": "uc",
+      "role": "admin",
+      "endpoint": "courses/13d99c92-59a6-4545-b19a-9e966d6e3376/audit-events",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 189
+    },
+    {
+      "slug": "uc",
+      "role": "student",
+      "endpoint": "courses/13d99c92-59a6-4545-b19a-9e966d6e3376/gradebook",
+      "method": "GET",
+      "status": 403,
+      "expected": 403,
+      "elapsedMs": 194
+    },
+    {
+      "slug": "uc",
+      "role": "student",
+      "endpoint": "quizzes/4558e38e-577e-4510-806b-8665fd7d0369/authoring",
+      "method": "GET",
+      "status": 403,
+      "expected": 403,
+      "elapsedMs": 471
+    },
+    {
+      "slug": "uc",
+      "role": "admin",
+      "endpoint": "materials/3c0795fd-c3d8-47c5-a302-d730fac53aa4/file/publish",
+      "method": "POST",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 207
+    },
+    {
+      "slug": "utfsm",
+      "role": "admin",
+      "endpoint": "courses",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 220
+    },
+    {
+      "slug": "utfsm",
+      "role": "admin",
+      "endpoint": "courses",
+      "method": "POST",
+      "status": 201,
+      "expected": 201,
+      "elapsedMs": 204
+    },
+    {
+      "slug": "utfsm",
+      "role": "admin",
+      "endpoint": "courses/964fec5a-b7fb-4c6c-85e5-d79c5d126bc0/sections",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 185
+    },
+    {
+      "slug": "utfsm",
+      "role": "admin",
+      "endpoint": "sections/a6b1998b-bdac-49f2-93e7-c8844aff9914/enrollments",
+      "method": "POST",
+      "status": 201,
+      "expected": 201,
+      "elapsedMs": 216
+    },
+    {
+      "slug": "utfsm",
+      "role": "admin",
+      "endpoint": "courses/964fec5a-b7fb-4c6c-85e5-d79c5d126bc0/modules",
+      "method": "POST",
+      "status": 201,
+      "expected": 201,
+      "elapsedMs": 196
+    },
+    {
+      "slug": "utfsm",
+      "role": "admin",
+      "endpoint": "modules/b0e4534a-5346-40dd-b236-b26de6efb809/materials",
+      "method": "POST",
+      "status": 201,
+      "expected": 201,
+      "elapsedMs": 202
+    },
+    {
+      "slug": "utfsm",
+      "role": "admin",
+      "endpoint": "modules/b0e4534a-5346-40dd-b236-b26de6efb809/publish",
+      "method": "POST",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 204
+    },
+    {
+      "slug": "utfsm",
+      "role": "admin",
+      "endpoint": "materials/1cc88106-3a1c-4bc3-8eff-758f6c840147/publish",
+      "method": "POST",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 205
+    },
+    {
+      "slug": "utfsm",
+      "role": "student",
+      "endpoint": "materials/1cc88106-3a1c-4bc3-8eff-758f6c840147",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 205
+    },
+    {
+      "slug": "utfsm",
+      "role": "admin",
+      "endpoint": "courses/964fec5a-b7fb-4c6c-85e5-d79c5d126bc0/quizzes",
+      "method": "POST",
+      "status": 201,
+      "expected": 201,
+      "elapsedMs": 229
+    },
+    {
+      "slug": "utfsm",
+      "role": "admin",
+      "endpoint": "quizzes/b2ebafe7-415e-4dd2-9773-1d7b5899979d/publish",
+      "method": "POST",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 218
+    },
+    {
+      "slug": "utfsm",
+      "role": "student",
+      "endpoint": "sections/a6b1998b-bdac-49f2-93e7-c8844aff9914/quizzes/b2ebafe7-415e-4dd2-9773-1d7b5899979d/attempts",
+      "method": "POST",
+      "status": 201,
+      "expected": 201,
+      "elapsedMs": 238
+    },
+    {
+      "slug": "utfsm",
+      "role": "student",
+      "endpoint": "quiz-attempts/c87a3006-53f4-47dd-9f61-f76e56aea3cf/questions",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 202
+    },
+    {
+      "slug": "utfsm",
+      "role": "student",
+      "endpoint": "quiz-attempts/c87a3006-53f4-47dd-9f61-f76e56aea3cf/answers",
+      "method": "PUT",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 211
+    },
+    {
+      "slug": "utfsm",
+      "role": "student",
+      "endpoint": "quiz-attempts/c87a3006-53f4-47dd-9f61-f76e56aea3cf/submit",
+      "method": "POST",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 226
+    },
+    {
+      "slug": "utfsm",
+      "role": "admin",
+      "endpoint": "quiz-attempts/c87a3006-53f4-47dd-9f61-f76e56aea3cf",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 202
+    },
+    {
+      "slug": "utfsm",
+      "role": "student",
+      "endpoint": "courses/964fec5a-b7fb-4c6c-85e5-d79c5d126bc0/my-grades",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 196
+    },
+    {
+      "slug": "utfsm",
+      "role": "admin",
+      "endpoint": "courses/964fec5a-b7fb-4c6c-85e5-d79c5d126bc0/grade-items",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 197
+    },
+    {
+      "slug": "utfsm",
+      "role": "admin",
+      "endpoint": "courses/964fec5a-b7fb-4c6c-85e5-d79c5d126bc0/gradebook/publications",
+      "method": "POST",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 216
+    },
+    {
+      "slug": "utfsm",
+      "role": "student",
+      "endpoint": "courses/964fec5a-b7fb-4c6c-85e5-d79c5d126bc0/my-grades",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 198
+    },
+    {
+      "slug": "utfsm",
+      "role": "admin",
+      "endpoint": "courses/964fec5a-b7fb-4c6c-85e5-d79c5d126bc0/audit-events",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 184
+    },
+    {
+      "slug": "utfsm",
+      "role": "student",
+      "endpoint": "courses/964fec5a-b7fb-4c6c-85e5-d79c5d126bc0/gradebook",
+      "method": "GET",
+      "status": 403,
+      "expected": 403,
+      "elapsedMs": 179
+    },
+    {
+      "slug": "utfsm",
+      "role": "student",
+      "endpoint": "quizzes/b2ebafe7-415e-4dd2-9773-1d7b5899979d/authoring",
+      "method": "GET",
+      "status": 403,
+      "expected": 403,
+      "elapsedMs": 222
+    },
+    {
+      "slug": "utfsm",
+      "role": "admin",
+      "endpoint": "materials/9ee18cd0-4348-4e38-b651-a45ba5d8da2d/file/publish",
+      "method": "POST",
+      "status": 200,
+      "expected": 200,
+      "elapsedMs": 205
+    },
+    {
+      "slug": "uc",
+      "role": "student",
+      "endpoint": "courses/964fec5a-b7fb-4c6c-85e5-d79c5d126bc0",
+      "method": "GET",
+      "status": 404,
+      "expected": 404,
+      "elapsedMs": 175
+    },
+    {
+      "slug": "uc",
+      "role": "admin",
+      "endpoint": "materials/1cc88106-3a1c-4bc3-8eff-758f6c840147",
+      "method": "GET",
+      "status": 404,
+      "expected": 404,
+      "elapsedMs": 196
+    },
+    {
+      "slug": "utfsm",
+      "role": "student",
+      "endpoint": "courses/13d99c92-59a6-4545-b19a-9e966d6e3376",
+      "method": "GET",
+      "status": 404,
+      "expected": 404,
+      "elapsedMs": 166
+    },
+    {
+      "slug": "utfsm",
+      "role": "admin",
+      "endpoint": "materials/862d22c4-1e45-4da7-ad74-a34b4355e271",
+      "method": "GET",
+      "status": 404,
+      "expected": 404,
+      "elapsedMs": 189
+    }
+  ],
+  "passed": true,
+  "finishedAt": "2026-11-21T18:01:31.499Z"
+}

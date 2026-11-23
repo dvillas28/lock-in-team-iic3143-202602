@@ -1,0 +1,18 @@
+[
+  {
+    "entorno": "main - academix-frontend",
+    "sha": "7d4b666e379aedaec86eb6fd3d4e7a9d518a184a",
+    "fecha": "2026-11-15T23:45:46Z",
+    "estado": "success",
+    "origen": "dvillas28",
+    "evidencia": "https://api.github.com/repos/dvillas28/lock-in-team-iic3143-202602/deployments/7811941056/statuses/22273281406"
+  },
+  {
+    "entorno": "main - academix-backend",
+    "sha": "7d4b666e379aedaec86eb6fd3d4e7a9d518a184a",
+    "fecha": "2026-11-15T23:56:09Z",
+    "estado": "success",
+    "origen": "dvillas28",
+    "evidencia": "https://api.github.com/repos/dvillas28/lock-in-team-iic3143-202602/deployments/7812070170/statuses/22273674874"
+  }
+]

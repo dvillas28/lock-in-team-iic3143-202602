@@ -1,11 +1,18 @@
 # Entrega 4 — Diagnóstico de brechas
 
-Corte documental: **16/11/2026**, commit `7d4b666`. Base: [E3](../3/ppt/guion.md), avances locales E4 y [checklist de la pauta](checklist-entrega-4.md).
+Corte histórico del diagnóstico: **16/11/2026**, commit `7d4b666`. Base: [E3](../3/ppt/guion.md), avances locales E4 y [checklist de la pauta](checklist-entrega-4.md).
 
 **Diagnóstico:** existe una base funcional y evidencia de calidad; el cierre E4 todavía no está acreditado. Priorizar demo completa y retrospectiva: concentran **5 de los 6 puntos evaluables**.
 «Parcial» indica evidencia reutilizable; «pendiente», entregable no localizado; «por verificar», operación sin confirmación suficiente.
 
-## Brechas y condición de cierre
+## Actualización comprobada del 21/11
+
+- [Paquete de cierre](cierre/README.md): matriz de alcance, operación real y Lighthouse con capturas.
+- v0.13.1/7d4b666 confirmado por health; ready 200. Ciclo académico y archivos TXT pasaron en ambos tenants.
+- E2E extended sobre main, run [43852844221](https://github.com/dvillas28/lock-in-team-iic3143-202602/actions/runs/43852844221), terminó aprobado el 16/11: 527 instancias, tres navegadores. Actualiza el resultado parcial citado abajo; no prueba ausencia permanente de flakiness.
+- [PDF y guion](ppt/README.md), [ensayo remoto](cierre/ensayo-remoto.md), [respaldo probado](cierre/respaldo-local.md) y [esfuerzo estimado por responsable](cierre/gestion.md) incorporados. El equipo aceptó el ensayo técnico (#209) y la revisión de riesgos (#206). El [checklist vigente](checklist-entrega-4.md) distingue el material preparado de los actos que aún deben ocurrir.
+
+## Brechas históricas al 16/11 y condición de cierre
 
 | Frente | Evidencia disponible | Brecha concreta para cerrar |
 | --- | --- | --- |

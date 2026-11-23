@@ -1,6 +1,6 @@
 # Arquitectura final de AcademiX
 
-Corte: **16/11/2026**, commit `7d4b666`. Describe implementación y configuración versionadas; operación remota pendiente de acreditar.
+Corte de implementación: **16/11/2026**, commit `7d4b666`. Verificación remota adicional **21/11**: [operación y límites](cierre/operacion-demo.md).
 Sustituye la referencia arquitectónica de E2 para E4. [Modelo de datos](modelo-datos.md).
 
 ## Diagrama para la presentación
@@ -58,10 +58,10 @@ Identidad, perfil y su auditoría son globales por usuario; no se les asigna un 
 
 | Aspecto | Estado al corte |
 | --- | --- |
-| Base | Blueprint ya no crea PostgreSQL en Render; configura Neon. El ADR conserva «migración pendiente» y la guía declara Neon: falta conciliar con evidencia operativa. |
-| Archivos y correo | S3 y Resend tienen implementación/configuración. Resend cuenta con aceptación manual reportada; S3 real sigue pendiente en los registros revisados. |
+| Base | Blueprint ya no crea PostgreSQL en Render; configura Neon. El ADR conserva «migración pendiente» y la guía declara Neon: el equipo confirmó el uso efectivo de Neon. |
+| Archivos y correo | S3 y Resend tienen implementación/configuración. Resend cuenta con aceptación manual reportada; el 21/11 se acreditó carga/publicación/descarga de TXT por el backend productivo en UC/UTFSM. No se inspeccionó el proveedor físico ni se probó persistencia tras redeploy. |
 | Dominio | Se incorporaron perfiles/altas, archivos, tareas/entregas, grupos/revisiones de notas y calendario. |
 | Límites | Dos servicios web; sin colas, caché distribuida, réplicas o HA configuradas. El throttling reside en memoria por instancia. |
 
 Fuentes operativas: [Neon](../../adr/neon-database.md), [guía Render](../../guides/render-deploy.md), [aceptación Resend](../../planning/perfiles/evidencia.md), [S3](../../planning/academic-files/s3.md).
-Para cerrar E4: acreditar versión desplegada, base efectiva y recorridos externos. El diagrama representa configuración, no certifica disponibilidad.
+El 21/11 health confirmó v0.13.1/7d4b666 y ready respondió 200; pasó el ciclo académico remoto en UC/UTFSM. El [respaldo local](cierre/respaldo-local.md) y el [ensayo remoto](cierre/ensayo-remoto.md) registran los recorridos por navegador. El equipo confirmó Neon; los [despliegues registrados](cierre/evidencia/deploys-render.json) sitúan frontend y backend en 7d4b666. El diagrama representa configuración, no disponibilidad continua.
