@@ -1,6 +1,6 @@
 # ADR: PostgreSQL en Neon en lugar de Render Postgres
 
-Fecha: 2026-11-04. Estado: propuesta; migración de datos y cambio de variables pendientes del operador.
+Fecha de propuesta: 2026-11-04. Estado al 2026-11-21: adoptada. El equipo confirmó PostgreSQL en Neon y servicios web en Render durante el [cierre operativo de E4](../deliveries/4/cierre/operacion-demo.md).
 Reemplaza solo la parte de base de datos de [Desplegar en Render](deploy-on-render.md).
 
 ## Contexto

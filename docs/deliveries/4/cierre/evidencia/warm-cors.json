@@ -1,0 +1,39 @@
+[
+  {
+    "url": "https://academix-backend-lr8x.onrender.com/health",
+    "observedAt": "2026-11-21T18:01:57Z",
+    "status": 200,
+    "elapsedMs": 171,
+    "body": {
+      "status": "ok",
+      "version": "0.13.1",
+      "commit": "7d4b666e379aedaec86eb6fd3d4e7a9d518a184a",
+      "deployedAt": "2026-11-21T17:57:16.325Z",
+      "timestamp": "2026-11-21T18:01:57.332Z"
+    }
+  },
+  {
+    "url": "https://academix-backend-lr8x.onrender.com/ready",
+    "observedAt": "2026-11-21T18:01:57Z",
+    "status": 200,
+    "elapsedMs": 199,
+    "body": {
+      "status": "ok"
+    }
+  },
+  {
+    "origin": "https://uc.academix.dvillasc.me",
+    "status": 204,
+    "allowOrigin": "https://uc.academix.dvillasc.me"
+  },
+  {
+    "origin": "https://utfsm.academix.dvillasc.me",
+    "status": 204,
+    "allowOrigin": "https://utfsm.academix.dvillasc.me"
+  },
+  {
+    "origin": "https://example.invalid",
+    "status": 204,
+    "allowOrigin": null
+  }
+]

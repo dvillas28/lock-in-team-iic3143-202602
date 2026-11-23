@@ -1,0 +1,58 @@
+[
+  {
+    "origin": "https://uc.academix.dvillasc.me",
+    "observedAt": "2026-11-21T17:57:40.071Z",
+    "errors": [],
+    "status": 200,
+    "elapsedMs": 1884,
+    "finalUrl": "https://uc.academix.dvillasc.me/login",
+    "title": "AcademiX",
+    "headings": [
+      "Iniciar sesión"
+    ],
+    "inputs": [
+      {
+        "type": "email",
+        "name": "email",
+        "placeholder": ""
+      },
+      {
+        "type": "password",
+        "name": "password",
+        "placeholder": ""
+      }
+    ],
+    "buttons": [
+      "",
+      "Continuar"
+    ]
+  },
+  {
+    "origin": "https://utfsm.academix.dvillasc.me",
+    "observedAt": "2026-11-21T17:57:42.127Z",
+    "errors": [],
+    "status": 200,
+    "elapsedMs": 2103,
+    "finalUrl": "https://utfsm.academix.dvillasc.me/login",
+    "title": "AcademiX",
+    "headings": [
+      "Iniciar sesión"
+    ],
+    "inputs": [
+      {
+        "type": "email",
+        "name": "email",
+        "placeholder": ""
+      },
+      {
+        "type": "password",
+        "name": "password",
+        "placeholder": ""
+      }
+    ],
+    "buttons": [
+      "",
+      "Continuar"
+    ]
+  }
+]

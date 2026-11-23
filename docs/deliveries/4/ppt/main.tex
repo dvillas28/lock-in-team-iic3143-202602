@@ -1,0 +1,335 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+\usetheme{Boadilla}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage{lmodern,graphicx,tikz}
+\usetikzlibrary{arrows.meta,calc}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{}
+\definecolor{navy}{HTML}{18324F}
+\definecolor{blue}{HTML}{2563EB}
+\definecolor{teal}{HTML}{0F766E}
+\definecolor{amber}{HTML}{875700}
+\definecolor{red}{HTML}{A33137}
+\definecolor{slate}{HTML}{475569}
+\definecolor{line}{HTML}{CBD5E1}
+\definecolor{sky}{HTML}{EFF6FF}
+\definecolor{sea}{HTML}{EAF6F3}
+\definecolor{sand}{HTML}{FBF1D8}
+\definecolor{rose}{HTML}{F8EAEB}
+\definecolor{paper}{HTML}{F6F8FA}
+\newcommand{\ev}{../cierre/evidencia/}
+\tikzset{edge/.style={-{Stealth[length=2mm]},slate,line width=.7pt},box/.style={draw=line,rounded corners=3pt,fill=white,align=center,minimum height=.7cm,inner sep=4pt,text=navy,font=\small},hint/.style={font=\scriptsize,text=slate,fill=white,inner sep=2pt}}
+\newenvironment{sheet}{\begin{tikzpicture}[remember picture,overlay,shift={(current page.north west)},x=1cm,y=-1cm]}{\end{tikzpicture}}
+\newcommand{\txt}[5]{\node[anchor=north west,inner sep=0pt,align=left,text=#4,font=#3] at (#1,#2) {#5};}
+\newcommand{\panel}[5]{\fill[#5,rounded corners=4pt] (#1,#2) rectangle (#3,#4);}
+\newcommand{\head}[2]{\txt{.65}{.38}{\scriptsize\bfseries}{teal}{#1}\txt{.61}{.88}{\LARGE\bfseries}{navy}{#2}}
+\newcommand{\shot}[4]{\node[anchor=north west,inner sep=0] at (#1,#2){\includegraphics[width=#3cm]{#4}};}
+\newcommand{\crop}[6]{\begin{scope}\clip (#1,#2) rectangle ++(#3,#4);\node[anchor=north west,inner sep=0] at (#1,#2){\includegraphics[width=#5cm]{#6}};\end{scope}}
+\newcommand{\blk}[5]{\node[anchor=north west,inner sep=0pt,align=left,text width=#3cm,text=navy,font=#4] at (#1,#2) {#5};}
+\newcommand{\bpt}{\textcolor{teal}{\textbullet}~}
+\tikzset{tbl/.style={box,font=\ttfamily\fontsize{7}{8}\selectfont,minimum height=.48cm,inner sep=3pt}}
+\begin{document}
+\lefthyphenmin=62 \righthyphenmin=62 \hyphenpenalty=10000 \exhyphenpenalty=10000
+\begin{frame}[plain]\begin{sheet}
+\fill[navy] (0,0) rectangle (16,9);
+\txt{.78}{.68}{\small\bfseries}{white}{IIC3143 \enspace / \enspace ENTREGA 4}
+\txt{.7}{2.32}{\fontsize{34}{38}\selectfont\bfseries}{white}{AcademiX}
+\txt{.78}{4.05}{\Large}{white}{De una evaluación\\a una nota publicada}
+\txt{.79}{7.80}{\small}{white}{Equipo Lock In \enspace · \enspace 21 noviembre 2026}
+\panel{8.15}{1.54}{15.48}{7.06}{white}
+\crop{8.35}{1.76}{6.93}{5.00}{6.93}{\ev uc-ensayo-nota.png}
+\txt{8.39}{6.55}{\scriptsize\bfseries}{teal}{VISTA DEL ESTUDIANTE \enspace / \enspace UC}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ARQUITECTURA}{Render, Neon y servicios externos}
+\begin{scope}[yshift=.22cm]
+\panel{4.26}{2.88}{9.60}{7.82}{sky}
+\txt{4.56}{3.10}{\scriptsize\bfseries}{blue}{RENDER \enspace / \enspace DOS SERVICIOS DOCKER}
+\node[box,text width=2.5cm] (web) at (2.02,4.15){\textbf{Navegador}\\UC / UTFSM};
+\node[box,text width=3.6cm] (fe) at (6.96,4.15){\textbf{Frontend · Next.js}\\Dominios institucionales};
+\node[box,text width=3.6cm] (api) at (6.96,6.66){\textbf{API modular · NestJS}\\JWT, rol y sección};
+\node[box,fill=sea,text width=3.12cm] (db) at (13.60,3.77){\textbf{Neon · PostgreSQL}\\RLS y claves compuestas};
+\node[box,fill=sea,text width=3.12cm] (s3) at (13.60,5.53){\textbf{S3 privado}\\Fotos, material, entregas};
+\node[box,fill=sea,text width=3.12cm] (mail) at (13.60,7.30){\textbf{Resend}\\Invitaciones};
+\draw[edge] (web)--node[above,hint]{HTTPS}(fe);
+\draw[edge] (web.south)|-node[pos=.71,above,hint]{REST / JWT}(api.west);
+\draw[edge] (fe)--node[right,hint]{Cliente API en servidor}(api);
+\draw[edge] (api.east)--(10.14,6.66)|-(db.west);
+\draw[edge] (10.14,6.66)|-(s3.west);
+\draw[edge] (10.14,6.66)|-(mail.west);
+\txt{10.26}{3.37}{\scriptsize}{slate}{SQL / TLS}
+\txt{10.26}{5.15}{\scriptsize}{slate}{SDK}
+\txt{10.26}{6.91}{\scriptsize}{slate}{HTTPS}
+\end{scope}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{MODELO DE DATOS}{De la pertenencia institucional al historial de notas}
+\begin{scope}[yshift=.50cm]
+\node[box,fill=sky] (im) at (2.20,3.98){Par usuario / institución};
+\node[box,fill=sky] (m) at (2.20,5.19){Pertenencia};
+\node[box] (c) at (5.4,5.19){Curso};
+\node[box] (s) at (5.4,3.98){Sección};
+\node[box] (e) at (8.65,3.98){Matrícula + rol};
+\node[box] (m1) at (5.4,6.48){Módulo};
+\node[box] (mt) at (5.4,7.56){Material};
+\node[box,fill=sea] (q) at (8.65,5.19){Quiz o tarea};
+\node[box,fill=sea] (i) at (11.56,5.19){Ítem};
+\node[box,fill=sea] (g) at (11.56,6.48){Grupo};
+\node[box,fill=sand] (n) at (14.3,5.19){Nota};
+\node[box,fill=sand] (r) at (14.3,6.48){Revisión};
+\foreach \a/\b in {m/c,c/s,s/e,c/m1,m1/mt,c/q,g/i,i/n,n/r}{\draw[edge](\a)--node[pos=.50,hint]{1:N}(\b);}
+\draw[edge] (im)--node[hint]{único}(m);\draw[edge] (q)--node[hint]{0..1}(i);
+\draw[edge] (m.south)--(2.20,5.84)--(.36,5.84)--(.36,3.43)--(8.65,3.43)--(e.north);
+\end{scope}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{PRÁCTICAS Y ESTADO DEL CÓDIGO}{Qué mejoramos en E4: auditar, corregir y separar}
+\panel{.65}{1.85}{5.24}{8.10}{sea}\panel{5.52}{1.85}{10.20}{8.10}{sky}\panel{10.48}{1.85}{15.35}{8.10}{paper}
+\txt{.93}{2.28}{\small\bfseries}{teal}{SonarQube}\txt{.93}{2.98}{\Huge\bfseries}{navy}{25 $\to$ 0}
+\txt{.94}{4.04}{\footnotesize}{slate}{code smells · cobertura 91,7\%}
+\blk{.94}{4.85}{4.05}{\footnotesize}{\bpt\texttt{ScrollRegion}: 13 regiones con scroll, accesibles por teclado\\[7pt]\bpt Regex lineales y foco explícito\\[7pt]\bpt Réplica local del workflow}
+\txt{5.80}{2.28}{\small\bfseries}{blue}{Trivy}\txt{5.80}{2.98}{\Huge\bfseries}{navy}{10 $\to$ 0}
+\txt{5.81}{4.04}{\footnotesize}{slate}{Repositorio e imágenes\\Sin hallazgos de severidad alta}
+\blk{5.81}{4.85}{4.10}{\footnotesize}{\bpt Overrides de \texttt{qs} y \texttt{glob}: 3 CVE de DoS\\[7pt]\bpt \texttt{apk upgrade} de \texttt{zlib} en la imagen base\\[7pt]\bpt \texttt{HEALTHCHECK} en ambos Dockerfile}
+\txt{10.76}{2.28}{\small\bfseries}{navy}{Integración continua}\txt{10.76}{3.14}{\Large\bfseries}{navy}{Gates separados}
+\txt{10.77}{4.04}{\footnotesize}{slate}{visibles, no bloqueantes}
+\blk{10.77}{4.85}{4.30}{\footnotesize}{\bpt Trivy en un job propio por app\\[7pt]\bpt Sonar y Trivy fuera de \texttt{CI result}\\[7pt]\bpt Workflows manuales para auditar antes de la demo}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{RENDIMIENTO FRONTEND}{Login público y navegación dentro de la sesión}
+\panel{.65}{1.87}{9.30}{7.72}{paper}\panel{9.58}{1.87}{15.35}{7.72}{sea}
+\txt{.97}{2.19}{\small\bfseries}{navy}{UC · LOGIN MÓVIL}\txt{4.23}{2.19}{\small}{slate}{Mediana de 3 mediciones}
+\shot{.99}{2.92}{7.95}{lh.png}
+\txt{.99}{5.02}{\Huge\bfseries}{navy}{1,05 s}
+\txt{.99}{6.09}{\normalsize}{navy}{hasta que apareció el contenido principal (LCP)}
+\txt{.99}{7.00}{\small}{slate}{Bloqueo total: 47 ms \quad Cambio de diseño (CLS): 0}
+\txt{9.93}{2.19}{\small\bfseries}{teal}{UC · CURSOS $\to$ MÓDULOS}
+\txt{9.93}{2.86}{\small}{slate}{Sesión de estudiante en escritorio}
+\txt{9.92}{3.68}{\Huge\bfseries}{navy}{1,63 s}
+\txt{9.93}{4.96}{\normalsize}{navy}{desde el clic hasta que la red\\quedó inactiva}
+\txt{9.93}{6.53}{\small}{slate}{Bloqueo total: 0 ms\\Cambio de diseño (CLS): 0}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{CORE WEB VITALS}{Carga, respuesta y estabilidad en AcademiX}
+\panel{.65}{1.87}{5.45}{5.92}{paper}\panel{5.60}{1.87}{10.40}{5.92}{paper}\panel{10.55}{1.87}{15.35}{5.92}{paper}
+\txt{.97}{2.22}{\small\bfseries}{teal}{LCP \enspace · \enspace CARGA}
+\txt{.97}{2.86}{\Huge\bfseries}{navy}{1,06 s}
+\txt{.97}{4.02}{\small\bfseries}{teal}{BUENO · $\le$ 2,5 s}
+\blk{.97}{4.70}{4.20}{\footnotesize}{Login UC en móvil. Página de inicio (\texttt{/}): 3,2 s, \textcolor{amber}{\textbf{mejorable}}.}
+\txt{5.92}{2.22}{\small\bfseries}{teal}{INP \enspace · \enspace RESPUESTA}
+\txt{5.92}{2.86}{\Huge\bfseries}{navy}{44 ms}
+\txt{5.92}{4.02}{\small\bfseries}{teal}{BUENO · $\le$ 200 ms}
+\blk{5.92}{4.70}{4.20}{\footnotesize}{Interacciones reales en el login móvil. En sesión de estudiante: 32 ms.}
+\txt{10.87}{2.22}{\small\bfseries}{teal}{CLS \enspace · \enspace ESTABILIDAD}
+\txt{10.87}{2.86}{\Huge\bfseries}{navy}{0,022}
+\txt{10.87}{4.02}{\small\bfseries}{teal}{BUENO · $\le$ 0,1}
+\blk{10.87}{4.70}{4.20}{\footnotesize}{Login UC en móvil. Leve desplazamiento del aviso inferior.}
+\panel{.65}{6.17}{7.92}{8.13}{sea}\panel{8.07}{6.17}{15.35}{8.13}{sand}
+\txt{.97}{6.47}{\small\bfseries}{teal}{CÓMO MEDIMOS}
+\blk{.97}{6.95}{6.70}{\footnotesize}{LCP y CLS: Lighthouse 13.6, emulación móvil, mediana de 5 cargas. INP: interacciones reales, mediana de 5 recorridos. Resultados de laboratorio.}
+\txt{8.39}{6.47}{\small\bfseries}{amber}{REPORTE AUTOMÁTICO POR PR}
+\blk{8.39}{6.95}{6.70}{\footnotesize}{GitHub Actions compara cada PR con \texttt{dev}: rendimiento, tamaño del JavaScript y accesibilidad, con Lighthouse, web-vitals, size-limit y axe-core.}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{PLAN FINAL}{Cumplimos el plan en la UC y la UTFSM}
+\panel{.65}{1.82}{7.13}{7.34}{paper}
+\panel{7.36}{1.82}{15.35}{3.49}{navy}
+\panel{7.36}{3.68}{15.35}{7.34}{sea}
+\panel{.65}{7.59}{15.35}{8.48}{sand}
+\txt{.98}{2.18}{\small\bfseries}{slate}{PLAN DE TRABAJO · SEMANAS 5--7}
+\txt{.98}{2.70}{\LARGE\bfseries}{navy}{77 h}\txt{3.00}{2.94}{\small}{navy}{estimadas en 26 tareas}
+\txt{.98}{3.67}{\small\bfseries}{navy}{Horas previstas por semana}
+\fill[blue] (.98,4.22) rectangle (2.09,4.51);
+\fill[teal] (2.14,4.22) rectangle (3.33,4.51);
+\fill[navy] (3.38,4.22) rectangle (6.87,4.51);
+\txt{.98}{4.72}{\small}{navy}{S5 · 14 h}\txt{2.77}{4.72}{\small}{navy}{S6 · 15 h}\txt{5.36}{4.72}{\small}{navy}{S7 · 48 h}
+\txt{.98}{5.55}{\small\bfseries}{teal}{Decisión sobre archivos}
+\blk{.98}{6.01}{5.85}{\small}{Mantuvimos la carga y descarga de archivos en los módulos.}
+\txt{.98}{7.88}{\small\bfseries}{amber}{Fuera del plan}
+\txt{3.52}{7.88}{\small}{slate}{Chat con IA, evaluaciones en vivo e integración con calendarios externos.}
+\txt{7.71}{2.02}{\large\bfseries}{white}{Compromiso cumplido}
+\txt{7.71}{2.66}{\small}{white}{Acceder al curso, consultar material, rendir quizzes\\y publicar o consultar notas.}
+\txt{7.71}{3.95}{\normalsize\bfseries}{teal}{Funciones adicionales}
+\txt{7.71}{4.59}{\small}{navy}{\bpt Calendario de plazos}
+\txt{11.68}{4.59}{\small}{navy}{\bpt Notas ponderadas}
+\txt{7.71}{5.13}{\small}{navy}{\bpt Quizzes en módulos}
+\txt{11.68}{5.13}{\small}{navy}{\bpt Notas revisadas}
+\txt{7.71}{5.67}{\small}{navy}{\bpt Entregas con archivos}
+\txt{11.68}{5.67}{\small}{navy}{\bpt Edición de perfiles}
+\txt{7.71}{6.21}{\small}{navy}{\bpt Calificación de tareas}
+\txt{11.68}{6.21}{\small}{navy}{\bpt Altas por CSV}
+\txt{7.71}{6.75}{\small}{navy}{\bpt Historial de auditoría}
+\txt{11.68}{6.75}{\small}{navy}{\bpt Indicadores de carga}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ANÁLISIS DEL PROCESO · 1/2}{Decisiones que funcionaron}
+\panel{.65}{1.85}{15.35}{3.75}{sea}\panel{.65}{3.95}{15.35}{5.85}{sky}\panel{.65}{6.05}{15.35}{7.95}{sky}
+\txt{.99}{2.12}{\scriptsize\bfseries}{teal}{LO QUE HICIMOS BIEN}
+\blk{.99}{2.48}{4.70}{\normalsize\bfseries}{Recortar el alcance al flujo docente--estudiante}
+\blk{6.10}{2.18}{8.90}{\small}{Roles y administración quedaron en lo mínimo; el esfuerzo fue a lo que usan docente y estudiante: quiz, corrección automática y notas.}
+\txt{.99}{4.22}{\scriptsize\bfseries}{blue}{ACIERTO}
+\blk{.99}{4.58}{4.70}{\normalsize\bfseries}{Una vertical end-to-end antes que lo derivado}
+\blk{6.10}{4.28}{8.90}{\small}{En E3 ya funcionaba curso $\to$ quiz $\to$ nota publicada. Tareas, grupos de notas, calendario y perfiles se montaron después sobre ese flujo, sin rehacerlo.}
+\txt{.99}{6.32}{\scriptsize\bfseries}{blue}{ACIERTO}
+\blk{.99}{6.68}{4.70}{\normalsize\bfseries}{Revertir el sharding a esquema compartido con RLS}
+\blk{6.10}{6.38}{8.90}{\small}{Base por universidad, registry y \texttt{x-tenant} se reemplazaron en 3 días (26/09 $\to$ 29/09), antes de construir encima. Aislamiento probado desde la semana 3.}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ANÁLISIS DEL PROCESO · 2/2}{Lo que cambiaríamos}
+\txt{.99}{1.68}{\scriptsize\bfseries}{slate}{DECISIÓN}\txt{5.55}{1.68}{\scriptsize\bfseries}{slate}{QUÉ PASÓ}\txt{10.55}{1.68}{\scriptsize\bfseries}{slate}{LO HARÍAMOS DISTINTO}
+\panel{.65}{2.00}{15.35}{3.40}{rose}\panel{.65}{3.55}{15.35}{4.95}{rose}\panel{.65}{5.10}{15.35}{6.50}{sand}\panel{.65}{6.65}{15.35}{8.05}{sand}
+\txt{.99}{2.18}{\scriptsize\bfseries}{red}{NO REPETIR}
+\blk{.99}{2.48}{4.30}{\small\bfseries}{Un solo proveedor, sin respaldo de datos}
+\blk{5.55}{2.22}{4.75}{\footnotesize}{Railway cayó con la base (22/10); después venció la de Render. Dos migraciones en dos semanas.}
+\blk{10.55}{2.22}{4.55}{\footnotesize}{Respaldo y migración ensayada desde el inicio, como en el ensayo con una rama de Neon.}
+\txt{.99}{3.73}{\scriptsize\bfseries}{red}{NO REPETIR}
+\blk{.99}{4.03}{4.30}{\small\bfseries}{Bloqueo de CI acoplado a la UI y al modelo}
+\blk{5.55}{3.77}{4.75}{\footnotesize}{Cambios de UI y del modelo rompieron E2E: cinco reparaciones entre el 10 y el 15/11.}
+\blk{10.55}{3.77}{4.55}{\footnotesize}{Bloquear con unitarias, integración y contrato; E2E amplio antes del release.}
+\txt{.99}{5.28}{\scriptsize\bfseries}{amber}{ERROR}
+\blk{.99}{5.58}{4.30}{\small\bfseries}{Postergar la administración y el onboarding}
+\blk{5.55}{5.32}{4.75}{\footnotesize}{Altas y cuentas se especificaron el 06/11; la demo dependía de seeds.}
+\blk{10.55}{5.32}{4.55}{\footnotesize}{Diseñar desde el inicio cómo entra la universidad y quién concede acceso.}
+\txt{.99}{6.83}{\scriptsize\bfseries}{amber}{ERROR}
+\blk{.99}{7.13}{4.30}{\small\bfseries}{Bot revisor con reglas escritas a mano}
+\blk{5.55}{6.87}{4.75}{\footnotesize}{Reglas desactualizadas: 3 de 3 alertas calibradas eran falsas, y sus fallas quedaban en verde.}
+\blk{10.55}{6.87}{4.55}{\footnotesize}{Reglas desde OpenAPI y ADR, fallas visibles y medición desde el primer sprint.}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{DEMO EN VIVO}{Del módulo al promedio, por rol}
+\panel{.65}{1.82}{8.49}{7.78}{paper}
+\crop{.86}{2.05}{7.40}{5.20}{7.40}{\ev lighthouse-authenticated-page.png}
+\txt{.92}{7.28}{\scriptsize\bfseries}{teal}{MÓDULOS Y MATERIAL · SESIÓN UC}
+\txt{8.96}{2.07}{\small\bfseries}{blue}{ADMINISTRACIÓN}\txt{8.96}{2.57}{\large}{navy}{Alta · curso · sección · roles}
+\txt{8.96}{3.48}{\small\bfseries}{blue}{DOCENCIA}\txt{8.96}{3.98}{\large}{navy}{Material · quiz · tarea}
+\txt{8.96}{4.89}{\small\bfseries}{blue}{ESTUDIANTE Y AYUDANTE}\txt{8.96}{5.39}{\large}{navy}{Cancelar · entregar · consultar}
+\txt{8.96}{6.30}{\small\bfseries}{blue}{PUBLICACIÓN}\txt{8.96}{6.80}{\large}{navy}{Nota · promedio · auditoría}
+\end{sheet}\end{frame}
+\appendix
+\begin{frame}[plain]\begin{sheet}
+\head{ANEXO · SONARQUBE COMMUNITY}{Avisos del análisis manual, antes y después}
+\txt{.84}{2.05}{\large\bfseries}{navy}{Antes}
+\txt{8.32}{2.05}{\large\bfseries}{teal}{Después}
+\shot{.84}{2.88}{6.78}{s1.png}\shot{8.34}{2.88}{6.78}{s2.png}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ANEXO · TRIVY}{Dependencias del repositorio, antes y después}
+\txt{.84}{2.05}{\large\bfseries}{navy}{Antes}
+\txt{8.32}{2.05}{\large\bfseries}{teal}{Después}
+\shot{.84}{2.85}{6.72}{t1.png}\shot{8.34}{2.85}{6.72}{t2.png}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ANEXO · RESULTADO DEL ENSAYO}{Dos evaluaciones publicadas en UC y UTFSM}
+\shot{.75}{1.91}{9.29}{\ev uc-ensayo-nota.png}
+\panel{10.52}{1.95}{15.34}{7.79}{sand}
+\txt{10.96}{2.38}{\small\bfseries}{amber}{PROMEDIO PARCIAL}\txt{10.90}{3.26}{\Huge\bfseries}{navy}{6,3}
+\txt{10.96}{5.07}{\large}{navy}{Quiz \enspace 7,0} \txt{10.96}{5.87}{\large}{navy}{Tarea \enspace 5,5}
+\txt{10.96}{6.97}{\small}{slate}{Peso de cada grupo: 50\%}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ANEXO · PROCESO REVISADO}{¿Cuándo puede ver la nota el estudiante?}
+\panel{.65}{2.06}{15.35}{4.60}{sky}\panel{.65}{4.78}{15.35}{7.53}{sea}
+\txt{.90}{2.30}{\scriptsize\bfseries}{blue}{ESTUDIANTE}\txt{.90}{5.02}{\scriptsize\bfseries}{teal}{SISTEMA Y DOCENTE}
+\node[box](a) at (2.0,3.44){Inicia intento};\node[box](b) at (5.03,3.44){Guarda};\node[box](c) at (8.10,2.88){Cancela};\node[box](d) at (11.88,2.88){Fin sin nota};
+\node[box](e) at (8.10,4.00){Envía};\node[box](f) at (8.10,6.04){Corrección automática};\node[box](g) at (11.88,6.04){Publica selección};\node[box,fill=sand](h) at (13.56,4.00){Ve nota y promedio};
+\foreach \a/\b in {a/b,b/c,c/d,b/e,e/f,f/g}{\draw[edge](\a)--(\b);}
+\draw[edge](g.east)-|(h.south);
+\txt{8.00}{6.80}{\scriptsize}{slate}{Nota oculta}\txt{11.20}{6.80}{\scriptsize}{slate}{Evento de auditoría}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ANEXO · ACCESO Y ROLES}{¿Qué puede hacer cada persona en un curso?}
+\panel{.65}{1.88}{15.35}{3.32}{paper}
+\node[box,fill=sky] (actor) at (2.13,2.60){Sesión válida};
+\node[box,fill=sky] (miembro) at (6.03,2.60){Pertenencia activa};
+\node[box,fill=sea] (permiso) at (10.13,2.60){Permiso sobre el recurso};
+\node[box,fill=sand] (acceso) at (13.91,2.60){Acceso};
+\foreach \a/\b in {actor/miembro,miembro/permiso,permiso/acceso}{\draw[edge](\a)--(\b);}
+\txt{.90}{3.93}{\small\bfseries}{teal}{ADMINISTRACIÓN}\txt{5.02}{3.88}{\large}{navy}{Crea cursos y asigna participantes.}
+\draw[line] (.88,4.61)--(15.03,4.61);
+\txt{.90}{4.97}{\small\bfseries}{teal}{DOCENTE}\txt{5.02}{4.92}{\large}{navy}{Corrige y publica en su sección.}
+\draw[line] (.88,5.65)--(15.03,5.65);
+\txt{.90}{6.01}{\small\bfseries}{teal}{AYUDANTE}\txt{5.02}{5.96}{\large}{navy}{Consulta el libro de la sección.}
+\draw[line] (.88,6.69)--(15.03,6.69);
+\txt{.90}{7.05}{\small\bfseries}{teal}{ESTUDIANTE}\txt{5.02}{7.00}{\large}{navy}{Consulta sus resultados publicados.}
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ANEXO · TAREAS Y ENTREGAS}{De la entrega escrita a la nota publicada}
+\panel{.65}{1.85}{15.36}{3.76}{sky}
+\panel{.65}{3.98}{15.36}{5.96}{sea}
+\panel{.65}{6.18}{15.36}{7.98}{sand}
+\txt{.92}{2.08}{\scriptsize\bfseries}{blue}{DOCENTE}\txt{.92}{4.21}{\scriptsize\bfseries}{teal}{ESTUDIANTE}\txt{.92}{6.40}{\scriptsize\bfseries}{amber}{LIBRO DE NOTAS}
+\node[box] (t) at (2.6,3.05){Publica tarea};
+\node[box] (z) at (4.32,5.18){Entrega respuesta};
+\node[box] (cal) at (7.48,3.02){Califica · 8/10};
+\node[box] (sel) at (11.64,3.02){Publica selección};
+\node[box] (bor) at (7.48,7.14){Borrador};
+\node[box] (pub) at (11.64,7.14){Nota publicada};
+\node[box] (vis) at (13.42,5.17){Ve la nota · 5,5};
+\draw[edge](t.south)|-(z.west);\draw[edge](z.east)--(5.91,5.18)|-(cal.west);
+\draw[edge](cal.south)--(bor.north);\draw[edge](bor.east)--(9.56,7.14)|-(sel.west);
+\draw[edge](sel.south)--(pub.north);\draw[edge](pub.east)-|(vis.south);
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ANEXO · MODELO DE DATOS COMPLETO}{24 tablas agrupadas por dominio}
+\panel{.65}{1.62}{4.21}{7.75}{sky}\panel{4.36}{1.62}{7.92}{7.75}{paper}\panel{8.07}{1.62}{11.63}{7.75}{sea}\panel{11.78}{1.62}{15.34}{5.92}{sand}\panel{11.78}{6.07}{15.34}{7.75}{rose}
+\txt{.85}{1.78}{\scriptsize\bfseries}{blue}{IDENTIDAD Y ALTAS}\txt{4.56}{1.78}{\scriptsize\bfseries}{navy}{CURSOS Y CONTENIDO}
+\txt{8.27}{1.78}{\scriptsize\bfseries}{teal}{EVALUACIONES}\txt{11.98}{1.78}{\scriptsize\bfseries}{amber}{LIBRO DE NOTAS}
+\txt{11.98}{6.22}{\tiny\bfseries}{red}{AUDITORÍA Y OPERACIÓN}
+\node[tbl] (us) at (2.43,2.45){users};
+\node[tbl] (me) at (2.43,3.25){institution\_memberships};
+\node[tbl] (in) at (2.43,4.05){institutions};
+\node[tbl] (ai) at (2.43,4.85){account\_invitations};
+\node[tbl] (ui) at (2.43,5.65){user\_imports};
+\node[tbl] (ur) at (2.43,6.45){user\_import\_rows};
+\node[tbl] (as) at (2.43,7.25){account\_security\_events};
+\node[tbl] (co) at (6.14,3.25){courses};
+\node[tbl] (se) at (6.14,4.05){sections};
+\node[tbl] (en) at (6.14,4.85){enrollments};
+\node[tbl] (cm) at (6.14,5.65){course\_modules};
+\node[tbl] (ma) at (6.14,6.45){materials};
+\node[tbl] (qz) at (9.85,3.25){quizzes};
+\node[tbl] (qa) at (9.85,4.05){quiz\_attempts};
+\node[tbl] (ag) at (9.85,5.65){assignments};
+\node[tbl] (aa) at (9.85,6.45){assignment\_attempts};
+\node[tbl] (af) at (9.85,7.25){assignment\_attempt\_files};
+\node[tbl] (gg) at (13.56,2.45){grade\_groups};
+\node[tbl] (gi) at (13.56,3.25){grade\_items};
+\node[tbl] (gr) at (13.56,4.05){grades};
+\node[tbl] (rv) at (13.56,4.85){grade\_revisions};
+\node[tbl] (gp) at (13.56,5.50){grade\_publications};
+\node[tbl] (ae) at (13.56,6.72){audit\_events};
+\node[tbl] (dd) at (13.56,7.32){demo\_data\_runs};
+\foreach \a/\b in {us/me,in/me,in/ai,ui/ur,co/se,se/en,cm/ma,qz/qa,ag/aa,aa/af,gg/gi,gi/gr,gr/rv}{\draw[edge](\a)--(\b);}
+\draw[edge] (us.west)-|(.80,7.25)--(as.west);
+\draw[edge] (me.east)--(4.08,3.25)|-(ui.east);
+\draw[edge] (me.east)--(co.west);
+\draw[edge] (me.east)--(en.west);
+\draw[edge] (co.east)--(7.80,3.25)|-(cm.east);
+\draw[edge] (7.80,3.25)--(qz.west);
+\draw[edge] (7.80,5.65)--(ag.west);
+\draw[edge] (7.80,3.25)|-(gg.west);
+\draw[edge] (qz.east|-0,3.14)--node[hint,pos=.42]{0..1}(gi.west|-0,3.14);
+\draw[edge] (ag.east)-|(11.92,3.38)--(gi.west|-0,3.38);
+\draw[edge] (qa.east)--(gr.west);
+\end{sheet}\end{frame}
+\begin{frame}[plain]\begin{sheet}
+\head{ANEXO · MODELO DE DATOS}{Diagrama entidad-relación completo}
+\node[inner sep=0] at (8,5.12){\includegraphics[width=15.15cm,height=7.2cm,keepaspectratio]{modelo-er-completo.pdf}};
+\end{sheet}\end{frame}
+\newcommand{\relaciones}[2]{
+\begin{frame}[plain]\begin{sheet}
+\head{ANEXO · RELACIONES DEL MODELO}{#2}
+\node[inner sep=0] at (8,5.12){\includegraphics[page=#1,width=15.15cm,height=7.2cm,keepaspectratio]{modelo-datos-final.pdf}};
+\end{sheet}\end{frame}}
+\relaciones{1}{Usuarios y pertenencias}
+\relaciones{2}{Invitaciones e importaciones}
+\relaciones{3}{Cursos, secciones y matrículas}
+\relaciones{4}{Módulos y materiales}
+\relaciones{5}{Quizzes e intentos}
+\relaciones{6}{Tareas, entregas y archivos}
+\relaciones{7}{Grupos e ítems del libro}
+\relaciones{8}{Notas y revisiones}
+\relaciones{9}{Publicación, auditoría y operación}
+\end{document}
